@@ -1,0 +1,36 @@
+# --- Bulk data & the canonical store (SPECS: data/ is gitignored) ------------
+# Everything under data/ is generated or downloaded and must never be committed
+# (OAI/IIIF caches, images, models, GT, data/inventory.sqlite). Only the two
+# committed markers below survive — see data/README.md.
+data/*
+!data/.gitkeep
+!data/README.md
+
+# --- Secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# --- Tooling caches ----------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.cache/
+
+# --- OS / editor -------------------------------------------------------------
+.DS_Store
+*.swp
+.idea/
+.vscode/
