@@ -21,6 +21,9 @@ dist/
 .venv/
 venv/
 
+# --- Local scratch (session temp; the canonical scratchpad is outside the repo) -
+scratchpad/
+
 # --- Tooling caches ----------------------------------------------------------
 .pytest_cache/
 .ruff_cache/

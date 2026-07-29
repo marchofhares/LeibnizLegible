@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:mets="http://www.loc.gov/METS/"
+         xmlns:mods="http://www.loc.gov/mods/v3"
+         xmlns:dv="http://dfg-viewer.de/"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <responseDate>2026-07-28T00:00:05Z</responseDate>
+  <request verb="ListRecords" resumptionToken="TOKEN_PAGE_2">https://digitale-sammlungen.gwlb.de/oai2</request>
+  <ListRecords>
+
+    <!-- E: 9-digit VD17 Marginalien id (annotated printed book), 1 page.
+         License via dv:license instead of mods:accessCondition. -->
+    <record>
+      <header>
+        <identifier>733600001</identifier>
+        <datestamp>2022-05-05T00:00:00Z</datestamp>
+        <setSpec>Drucke</setSpec>
+        <setSpec>VD17</setSpec>
+        <setSpec>LeibnizMarginalien</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000">
+            <mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+              <mods:mods>
+                <mods:location>
+                  <mods:shelfLocator>Leibn. Marg. 5</mods:shelfLocator>
+                  <mods:shelfLocator>ZEN Leibn. Marg. 5</mods:shelfLocator>
+                </mods:location>
+                <mods:titleInfo><mods:title>Optica Promota (annotiert)</mods:title></mods:titleInfo>
+                <mods:extension><dv:dv><dv:license>Public Domain Mark 1.0</dv:license></dv:dv></mods:extension>
+              </mods:mods>
+            </mets:xmlData></mets:mdWrap>
+          </mets:dmdSec>
+          <mets:structMap TYPE="LOGICAL">
+            <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Monograph"/>
+          </mets:structMap>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence">
+              <mets:div ID="PHYS_0001" ORDER="1" ORDERLABEL="[1]" TYPE="page"/>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+    <!-- Final page: empty resumptionToken signals end of list -->
+    <resumptionToken cursor="5" completeListSize="5"/>
+  </ListRecords>
+</OAI-PMH>

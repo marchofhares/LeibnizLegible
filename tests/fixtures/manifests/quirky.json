@@ -1,0 +1,43 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://digitale-sammlungen.gwlb.de/content/00099001/manifest.json",
+  "@type": "sc:Manifest",
+  "label": "Quirky fixture — one full canvas, one missing dims/service",
+  "sequences": [
+    {
+      "@id": "https://digitale-sammlungen.gwlb.de/content/00099001/sequence/1",
+      "@type": "sc:Sequence",
+      "canvases": [
+        {
+          "@id": "https://digitale-sammlungen.gwlb.de/content/00099001/canvas/00000001",
+          "@type": "sc:Canvas",
+          "label": "1r",
+          "width": 2000,
+          "height": 2500,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "https://digitale-sammlungen.gwlb.de/content/00099001/00000001.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://digitale-sammlungen.gwlb.de/iiif/00099001/ptif/00000001.ptif",
+                  "profile": "http://iiif.io/api/image/2/level1.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://digitale-sammlungen.gwlb.de/content/00099001/canvas/00000002",
+          "@type": "sc:Canvas",
+          "label": "1v",
+          "images": []
+        }
+      ]
+    }
+  ]
+}

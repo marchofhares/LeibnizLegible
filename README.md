@@ -29,6 +29,21 @@ uv run ruff format --check . # style
 uv run pytest              # tests (all offline)
 ```
 
+### Harvest (Phase A1)
+
+```bash
+# Set a contact for the polite crawler (SPECS §7.4); copy .env.example → .env.
+export LEIBNIZ_CONTACT_EMAIL="you@example.org"
+
+uv run leibniz harvest oai            # OAI-PMH → works (all 5 Leibniz sets; ~15 min, ≤1 req/s)
+uv run leibniz harvest census         # write reports/census.md (the first real page count)
+uv run leibniz harvest manifests --set leibniz-rekonstruktionen  # IIIF manifests → pages (a slice)
+```
+
+Both harvest commands are **cache-first and resumable** (raw XML/JSON under
+`data/oai/`, `data/manifests/`); re-running re-parses from cache without
+re-fetching. See `reports/crawl-posture.md` for the crawl-etiquette baseline.
+
 ## Where things live
 
 | Path | What |
@@ -36,15 +51,20 @@ uv run pytest              # tests (all offline)
 | `src/leibniz/` | the package: one CLI (`leibniz`), one subpackage per pipeline stage |
 | `src/leibniz/db.py` | canonical SQLite schema (SPECS §4.3) + typed helpers |
 | `src/leibniz/legal.py` | §70/§71 copyright-expiry registry for AA reading text |
+| `src/leibniz/net.py` | polite HTTP client — UA, ≤1 req/s per host, backoff (SPECS §7.4) |
+| `src/leibniz/harvest/` | OAI-PMH + IIIF harvest → `works`/`pages`, and the corpus census |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
 | `reports/` | committed reports (census, benchmarks, alignment yield) |
 
 ## Status
 
-Phase **A0 (repo scaffold)** is complete: installable package, runnable CLI, the
-database schema, and the legal registry, all with green lint + tests. Next up is
-**A1** (OAI/IIIF harvest → the first real corpus page count). See `STATUS.md`.
+Phase **A1 (OAI/IIIF harvest)** is complete. The harvest stage produced the
+project's first real artifact — a corpus census of **2,225 works / 236,795 page
+images** (`reports/census.md`), within the expected band, so the gate is **GO**.
+A notable finding: only ~⅓ of pages are IIIF-served; the rest are static JPEG
+only (revises SPECS §1.1 — see `STATUS.md`). Next up is **A2** (image cache) and
+**A3** (katalog crosswalk); **B1** (benchmark) can run in parallel. See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

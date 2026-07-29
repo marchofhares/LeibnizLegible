@@ -54,6 +54,11 @@ select = [
     "B",   # flake8-bugbear
 ]
 
+[tool.ruff.lint.flake8-bugbear]
+# Typer's public API *requires* `typer.Option(...)` / `typer.Argument(...)` as
+# parameter defaults; the call result is immutable, so B008 doesn't apply.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
