@@ -48,11 +48,17 @@ class SegLine:
 
 @dataclass(slots=True)
 class SegmentedPage:
-    """The lines of one page, in reading order, plus the page dimensions."""
+    """The lines of one page, in reading order, plus the page dimensions.
+
+    ``n_regions`` is the count of Segmonto layout zones the segmenter found (text
+    / graphic / formula …), kept for the C1 segmentation-stats bag; ``0`` when the
+    model/segmenter does not report regions.
+    """
 
     lines: list[SegLine]
     width: int
     height: int
+    n_regions: int = 0
 
     @property
     def n_lines(self) -> int:
@@ -128,7 +134,59 @@ class PageSegmenter:
                     boundary=[tuple(p) for p in (getattr(line, "boundary", None) or [])],
                 )
             )
-        return SegmentedPage(lines=lines, width=im.width, height=im.height)
+        # Segmonto zones (dict of {region_type: [regions]}); count them for the
+        # C1 segmentation-stats bag. Absent on some model outputs → 0.
+        regions = getattr(seg, "regions", None) or {}
+        n_regions = sum(len(v) for v in regions.values()) if isinstance(regions, dict) else 0
+        return SegmentedPage(lines=lines, width=im.width, height=im.height, n_regions=n_regions)
+
+    def crop_lines(
+        self, image: bytes | object, page: SegmentedPage, *, fmt: str = "PNG"
+    ) -> list[bytes]:
+        """Extract dewarped line images from an *already-computed* segmentation.
+
+        The recognition stage stores line geometry at segmentation time and must
+        later crop those exact lines *without re-running the neural segmenter* (so
+        the two-stage pipeline is deterministic and cheap on the second pass). This
+        reconstructs a Kraken ``Segmentation`` from the stored baselines/boundaries
+        and runs the same pure-geometry ``extract_polygons`` the recogniser was
+        trained against. Pure geometry — it does **not** load the segmentation
+        model. If the container reconstruction is unavailable (kraken API drift),
+        it falls back to :meth:`line_images` (a re-segmentation) so an operator run
+        still succeeds.
+        """
+        from kraken.lib import segmentation
+
+        im = self._open(image)
+        try:  # pragma: no cover - kraken container API, exercised only on real runs
+            from kraken import containers
+
+            klines = [
+                containers.BaselineLine(
+                    id=f"l{ln.index:04d}",
+                    baseline=[list(p) for p in ln.baseline],
+                    boundary=[list(p) for p in ln.boundary],
+                )
+                for ln in page.lines
+            ]
+            seg = containers.Segmentation(
+                type="baselines",
+                imagename="",
+                text_direction="horizontal-lr",
+                script_detection=False,
+                lines=klines,
+                regions={},
+                line_orders=[],
+            )
+        except Exception:  # pragma: no cover - reconstruction unsupported → re-seg
+            return self.line_images(image, fmt=fmt)
+
+        out: list[bytes] = []
+        for line_im, _rec in segmentation.extract_polygons(im, seg):  # pragma: no cover
+            buf = io.BytesIO()
+            line_im.convert("RGB").save(buf, format=fmt)
+            out.append(buf.getvalue())
+        return out
 
     def line_images(
         self, image: bytes | object, page: SegmentedPage | None = None, *, fmt: str = "PNG"

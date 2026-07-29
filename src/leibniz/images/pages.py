@@ -60,6 +60,7 @@ class PageImage:
             image_url=self.image_url,
             thumb_url=self.thumb_url,
             delivery=self.delivery,
+            label=self.order_label,  # METS ORDERLABEL = folio label (C2 resolver)
             status="pending",
         )
 

@@ -17,6 +17,7 @@ from leibniz.catalog.cli import app as catalog_app
 from leibniz.harvest.cli import app as harvest_app
 from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
+from leibniz.pipeline.cli import app as pipeline_app
 
 app = typer.Typer(
     name="leibniz",
@@ -32,6 +33,7 @@ app.add_typer(images_app, name="images")
 app.add_typer(catalog_app, name="catalog")
 app.add_typer(bench_app, name="bench")
 app.add_typer(align_app, name="align")
+app.add_typer(pipeline_app, name="pipeline")
 
 _console = Console()
 

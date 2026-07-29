@@ -1,0 +1,40 @@
+{
+ "note": "Live extraction-QA demonstration (Phase C2). Source: Gerhardt, Die philosophischen Schriften von G. W. Leibniz, Bd. II (1875, public domain; archive.org diephilosophisc02gerhgoog), Leibniz-Arnauld correspondence. Validates the reading-text extraction + apparatus separation + assess_extraction() QA on real Leibniz edition print. (The production open-bucket source is 70-expired AA text; a PD edition is used here purely to exercise the extraction machinery.)",
+ "leaves": [
+  90,
+  110
+ ],
+ "models": {
+  "production": "gpt-4o",
+  "control": "gpt-4o-mini"
+ },
+ "qa": {
+  "n_sampled": 2,
+  "n_flagged": 1,
+  "mean_disagreement_cer": 0.32995454287884857,
+  "mean_agreement": 0.6700454571211514
+ },
+ "per_leaf_chars": [
+  {
+   "leaf": 90,
+   "gpt4o": 2349,
+   "gpt4o_mini": 883
+  },
+  {
+   "leaf": 110,
+   "gpt4o": 2717,
+   "gpt4o_mini": 2631
+  }
+ ],
+ "sample_extraction_gpt4o_leaf110_head": "frigere: terram, id est vitrum, basin seu vasa omnibus praebere: sulphur  \net nitrum sibi quod ignem et aquam esse, id est acida et alcalia proportionata.  \nQuod enim alia alcalia aliis acidis solvendis, irritandis, prae",
+ "tokens": {
+  "prod": [
+   2634,
+   1410
+  ],
+  "ctrl": [
+   74094,
+   961
+  ]
+ }
+}

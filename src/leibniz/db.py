@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS pages (
     image_url           TEXT,                    -- delivery JPEG (METS DEFAULT); A2 caches it
     thumb_url           TEXT,                    -- thumbnail URL (METS THUMBS jpg)
     delivery            TEXT,                    -- 'iiif' | 'static': how images are served (D2)
+    label               TEXT,                    -- folio label (METS ORDERLABEL / canvas label; C2)
     width               INTEGER,
     height              INTEGER,
     status              TEXT NOT NULL DEFAULT 'pending'
@@ -169,13 +170,36 @@ CREATE TABLE IF NOT EXISTS gt_lines (
     license_bucket  TEXT NOT NULL CHECK (license_bucket IN ('open','nc'))
 );
 
+-- Per-page segmentation statistics (C1). Not in the SPECS §4.3 canonical list —
+-- a C1 extension (recorded in STATUS): the layout metrics the corpus segmenter
+-- computes per page, kept queryable because the C4 stratum heuristic (and the C2
+-- per-piece one) reads them across the corpus. One row per page, keyed to the
+-- segmentation run that produced it. ``stratum_heuristic`` is left NULL by C1 and
+-- filled by C2/C4 (honest field name: it is a heuristic, not a judgement).
+CREATE TABLE IF NOT EXISTS page_stats (
+    page_id             TEXT PRIMARY KEY REFERENCES pages(page_id),
+    run_id              INTEGER REFERENCES runs(run_id),
+    n_lines             INTEGER NOT NULL,
+    n_regions           INTEGER,
+    region_coverage     REAL,       -- Σ line-polygon area ÷ page area (0..1)
+    mean_line_height    REAL,
+    median_line_height  REAL,
+    line_height_cv      REAL,       -- stdev/mean of line heights (revision-layer signal)
+    n_overlaps          INTEGER,    -- line pairs whose boxes overlap (marginalia/layers)
+    n_short_lines       INTEGER,    -- unusually short lines (interlinear/snippet signal)
+    stratum_heuristic   TEXT,       -- filled by C2/C4; NULL under C1
+    metrics             TEXT        -- JSON: full metric bag (forward-compat)
+);
+
 CREATE INDEX IF NOT EXISTS ix_pages_work    ON pages (work_id);
 CREATE INDEX IF NOT EXISTS ix_pages_status  ON pages (status);
 CREATE INDEX IF NOT EXISTS ix_lines_page    ON lines (page_id);
 CREATE INDEX IF NOT EXISTS ix_lines_run     ON lines (run_id);
+CREATE INDEX IF NOT EXISTS ix_lines_status  ON lines (status);
 CREATE INDEX IF NOT EXISTS ix_cross_work    ON crosswalk (work_id);
 CREATE INDEX IF NOT EXISTS ix_cross_record  ON crosswalk (katalog_record_id);
 CREATE INDEX IF NOT EXISTS ix_gt_bucket     ON gt_lines (license_bucket);
+CREATE INDEX IF NOT EXISTS ix_pstats_run    ON page_stats (run_id);
 """
 
 
@@ -220,6 +244,7 @@ _PAGES_ADDED_COLUMNS: tuple[tuple[str, str], ...] = (
     ("image_url", "TEXT"),
     ("thumb_url", "TEXT"),
     ("delivery", "TEXT"),
+    ("label", "TEXT"),  # folio label (C2 piece→canvas resolver)
     ("local_path", "TEXT"),
     ("n_bytes", "INTEGER"),
     ("sha256", "TEXT"),
@@ -300,6 +325,7 @@ class Page:
     image_url: str | None = None
     thumb_url: str | None = None
     delivery: str | None = None
+    label: str | None = None
     width: int | None = None
     height: int | None = None
     status: str = "pending"
@@ -341,6 +367,7 @@ def _page_from_row(row: sqlite3.Row) -> Page:
         image_url=row["image_url"],
         thumb_url=row["thumb_url"],
         delivery=row["delivery"],
+        label=row["label"],
         width=row["width"],
         height=row["height"],
         status=row["status"],
@@ -423,10 +450,10 @@ def upsert_page(conn: sqlite3.Connection, page: Page) -> None:
         """
         INSERT INTO pages
             (page_id, work_id, seq, canvas_id, image_service_url, image_url,
-             thumb_url, delivery, width, height, status, skip_reason,
+             thumb_url, delivery, label, width, height, status, skip_reason,
              local_path, n_bytes, sha256, fetched_at)
         VALUES (:page_id, :work_id, :seq, :canvas_id, :image_service_url, :image_url,
-                :thumb_url, :delivery, :width, :height, :status, :skip_reason,
+                :thumb_url, :delivery, :label, :width, :height, :status, :skip_reason,
                 :local_path, :n_bytes, :sha256, :fetched_at)
         ON CONFLICT(page_id) DO UPDATE SET
             canvas_id         = COALESCE(excluded.canvas_id, pages.canvas_id),
@@ -434,6 +461,7 @@ def upsert_page(conn: sqlite3.Connection, page: Page) -> None:
             image_url         = COALESCE(excluded.image_url, pages.image_url),
             thumb_url         = COALESCE(excluded.thumb_url, pages.thumb_url),
             delivery          = COALESCE(excluded.delivery, pages.delivery),
+            label             = COALESCE(excluded.label, pages.label),
             width             = COALESCE(excluded.width, pages.width),
             height            = COALESCE(excluded.height, pages.height)
         """,
@@ -446,6 +474,7 @@ def upsert_page(conn: sqlite3.Connection, page: Page) -> None:
             "image_url": page.image_url,
             "thumb_url": page.thumb_url,
             "delivery": page.delivery,
+            "label": page.label,
             "width": page.width,
             "height": page.height,
             "status": page.status,
@@ -633,6 +662,318 @@ def finish_run(
 
 
 # --------------------------------------------------------------------------- #
+# Pipeline: page status, lines, and per-page segmentation stats (C1)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(slots=True)
+class Line:
+    """One segmented+recognised manuscript line (SPECS §4.3 ``lines``).
+
+    Filled in two stages by the C1 pipeline: segmentation writes the geometry
+    (``baseline``/``polygon``) with ``text``/``conf`` still ``None``; recognition
+    fills ``text``/``conf`` and repoints ``run_id``/``model`` at the recognition
+    run (the text's provenance, SPECS §4.5). The segmentation run is retained in
+    ``source`` and in :class:`PageStats`.
+    """
+
+    page_id: str
+    line_seq: int
+    baseline: list | None = None
+    polygon: list | None = None
+    text: str | None = None
+    conf: float | None = None
+    model: str | None = None
+    run_id: int | None = None
+    status: str = "machine"
+    lang: str | None = None
+    source: dict | None = None
+
+    @property
+    def id(self) -> str:
+        """Canonical line id (``{page_id}:{line_seq:03d}``)."""
+        return line_id(self.page_id, self.line_seq)
+
+
+def _line_from_row(row: sqlite3.Row) -> Line:
+    return Line(
+        page_id=row["page_id"],
+        line_seq=row["line_seq"],
+        baseline=json.loads(row["baseline"]) if row["baseline"] else None,
+        polygon=json.loads(row["polygon"]) if row["polygon"] else None,
+        text=row["text"],
+        conf=row["conf"],
+        model=row["model"],
+        run_id=row["run_id"],
+        status=row["status"],
+        lang=row["lang"],
+        source=json.loads(row["source"]) if row["source"] else None,
+    )
+
+
+def iter_pages_by_status(
+    conn: sqlite3.Connection,
+    status: str,
+    *,
+    set_name: str | None = None,
+    work_ids: Sequence[str] | None = None,
+    require_cached: bool = False,
+    limit: int | None = None,
+) -> Iterator[Page]:
+    """Iterate pages in a pipeline ``status``, the resumable work list.
+
+    ``require_cached`` restricts to pages whose delivery image is downloaded
+    (``sha256`` present) — the segment/recognise stages need the local image.
+    Ordered ``(work_id, seq)`` so a slice reads as contiguous folios.
+    """
+    sql = ["SELECT p.* FROM pages p"]
+    params: list[object] = []
+    where = ["p.status = ?"]
+    params.append(status)
+    if set_name is not None:
+        sql.append("JOIN works w ON w.gwlb_object_id = p.work_id")
+        where.append("w.set_name = ?")
+        params.append(set_name)
+    if work_ids:
+        placeholders = ",".join("?" * len(work_ids))
+        where.append(f"p.work_id IN ({placeholders})")
+        params.extend(work_ids)
+    if require_cached:
+        where.append("p.sha256 IS NOT NULL")
+    sql.append("WHERE " + " AND ".join(where))
+    sql.append("ORDER BY p.work_id, p.seq")
+    if limit is not None:
+        sql.append("LIMIT ?")
+        params.append(limit)
+    for row in conn.execute(" ".join(sql), params):
+        yield _page_from_row(row)
+
+
+def count_pages_by_status(
+    conn: sqlite3.Connection, status: str, *, set_name: str | None = None
+) -> int:
+    """Number of pages in a given pipeline ``status``."""
+    if set_name is None:
+        return conn.execute("SELECT COUNT(*) FROM pages WHERE status = ?", (status,)).fetchone()[0]
+    return conn.execute(
+        "SELECT COUNT(*) FROM pages p JOIN works w ON w.gwlb_object_id = p.work_id "
+        "WHERE p.status = ? AND w.set_name = ?",
+        (status, set_name),
+    ).fetchone()[0]
+
+
+def status_histogram(conn: sqlite3.Connection) -> dict[str, int]:
+    """``status -> page count`` across the corpus (pipeline coverage view)."""
+    return {
+        row[0]: row[1] for row in conn.execute("SELECT status, COUNT(*) FROM pages GROUP BY status")
+    }
+
+
+def set_page_status(
+    conn: sqlite3.Connection, page_id_: str, status: str, *, skip_reason: str | None = None
+) -> None:
+    """Advance (or fail) a page's pipeline status. ``skip_reason`` for skips."""
+    conn.execute(
+        "UPDATE pages SET status = ?, skip_reason = ? WHERE page_id = ?",
+        (status, skip_reason, page_id_),
+    )
+
+
+def insert_line(conn: sqlite3.Connection, line: Line) -> None:
+    """Insert (or replace on the same run) a line row, geometry + optional text.
+
+    Keyed by ``(page_id, line_seq, run_id)``; re-inserting the same physical line
+    under the same run refreshes it. Segmentation writes geometry-only rows;
+    :func:`set_line_recognition` later fills the text.
+    """
+    conn.execute(
+        """
+        INSERT INTO lines
+            (line_id, page_id, line_seq, baseline, polygon, text, conf, model,
+             run_id, status, lang, source)
+        VALUES (:line_id, :page_id, :line_seq, :baseline, :polygon, :text, :conf,
+                :model, :run_id, :status, :lang, :source)
+        ON CONFLICT(page_id, line_seq, run_id) DO UPDATE SET
+            baseline = excluded.baseline,
+            polygon  = excluded.polygon,
+            text     = excluded.text,
+            conf     = excluded.conf,
+            model    = excluded.model,
+            status   = excluded.status,
+            lang     = excluded.lang,
+            source   = excluded.source
+        """,
+        {
+            "line_id": line.id,
+            "page_id": line.page_id,
+            "line_seq": line.line_seq,
+            "baseline": json.dumps(line.baseline) if line.baseline is not None else None,
+            "polygon": json.dumps(line.polygon) if line.polygon is not None else None,
+            "text": line.text,
+            "conf": line.conf,
+            "model": line.model,
+            "run_id": line.run_id,
+            "status": line.status,
+            "lang": line.lang,
+            "source": json.dumps(line.source, ensure_ascii=False) if line.source else None,
+        },
+    )
+
+
+def set_line_recognition(
+    conn: sqlite3.Connection,
+    page_id_: str,
+    line_seq: int,
+    *,
+    text: str,
+    conf: float | None,
+    model: str,
+    run_id: int,
+    lang: str | None = None,
+    source: dict | None = None,
+) -> None:
+    """Fill a segmented line's transcription, repointing provenance at the run.
+
+    ``run_id``/``model`` become the recognition run's (the text's provenance);
+    the whole page's lines migrate together, so the ``(page_id, line_seq,
+    run_id)`` key stays unique.
+    """
+    conn.execute(
+        """
+        UPDATE lines
+           SET text = ?, conf = ?, model = ?, run_id = ?,
+               lang = COALESCE(?, lang),
+               source = COALESCE(?, source)
+         WHERE page_id = ? AND line_seq = ?
+        """,
+        (
+            text,
+            conf,
+            model,
+            run_id,
+            lang,
+            json.dumps(source, ensure_ascii=False) if source else None,
+            page_id_,
+            line_seq,
+        ),
+    )
+
+
+def delete_lines_for_page(conn: sqlite3.Connection, page_id_: str) -> None:
+    """Remove a page's line rows (``--redo`` re-segmentation)."""
+    conn.execute("DELETE FROM lines WHERE page_id = ?", (page_id_,))
+
+
+def iter_lines_for_page(conn: sqlite3.Connection, page_id_: str) -> list[Line]:
+    """A page's lines in reading order (``line_seq``)."""
+    cur = conn.execute("SELECT * FROM lines WHERE page_id = ? ORDER BY line_seq", (page_id_,))
+    return [_line_from_row(row) for row in cur]
+
+
+def count_lines(conn: sqlite3.Connection, *, recognized: bool | None = None) -> int:
+    """Total line rows; ``recognized=True`` counts only those with text."""
+    if recognized is None:
+        return conn.execute("SELECT COUNT(*) FROM lines").fetchone()[0]
+    op = "IS NOT NULL" if recognized else "IS NULL"
+    return conn.execute(f"SELECT COUNT(*) FROM lines WHERE text {op}").fetchone()[0]
+
+
+@dataclass(slots=True)
+class PageStats:
+    """Per-page segmentation statistics (C1; feeds the C2/C4 stratum heuristic)."""
+
+    page_id: str
+    n_lines: int
+    run_id: int | None = None
+    n_regions: int | None = None
+    region_coverage: float | None = None
+    mean_line_height: float | None = None
+    median_line_height: float | None = None
+    line_height_cv: float | None = None
+    n_overlaps: int | None = None
+    n_short_lines: int | None = None
+    stratum_heuristic: str | None = None
+    metrics: dict = field(default_factory=dict)
+
+
+def _page_stats_from_row(row: sqlite3.Row) -> PageStats:
+    return PageStats(
+        page_id=row["page_id"],
+        n_lines=row["n_lines"],
+        run_id=row["run_id"],
+        n_regions=row["n_regions"],
+        region_coverage=row["region_coverage"],
+        mean_line_height=row["mean_line_height"],
+        median_line_height=row["median_line_height"],
+        line_height_cv=row["line_height_cv"],
+        n_overlaps=row["n_overlaps"],
+        n_short_lines=row["n_short_lines"],
+        stratum_heuristic=row["stratum_heuristic"],
+        metrics=json.loads(row["metrics"]) if row["metrics"] else {},
+    )
+
+
+def upsert_page_stats(conn: sqlite3.Connection, ps: PageStats) -> None:
+    """Insert/replace a page's segmentation stats (idempotent re-segmentation)."""
+    conn.execute(
+        """
+        INSERT INTO page_stats
+            (page_id, run_id, n_lines, n_regions, region_coverage, mean_line_height,
+             median_line_height, line_height_cv, n_overlaps, n_short_lines,
+             stratum_heuristic, metrics)
+        VALUES (:page_id, :run_id, :n_lines, :n_regions, :region_coverage,
+                :mean_line_height, :median_line_height, :line_height_cv, :n_overlaps,
+                :n_short_lines, :stratum_heuristic, :metrics)
+        ON CONFLICT(page_id) DO UPDATE SET
+            run_id             = excluded.run_id,
+            n_lines            = excluded.n_lines,
+            n_regions          = excluded.n_regions,
+            region_coverage    = excluded.region_coverage,
+            mean_line_height   = excluded.mean_line_height,
+            median_line_height = excluded.median_line_height,
+            line_height_cv     = excluded.line_height_cv,
+            n_overlaps         = excluded.n_overlaps,
+            n_short_lines      = excluded.n_short_lines,
+            stratum_heuristic  = COALESCE(excluded.stratum_heuristic, page_stats.stratum_heuristic),
+            metrics            = excluded.metrics
+        """,
+        {
+            "page_id": ps.page_id,
+            "run_id": ps.run_id,
+            "n_lines": ps.n_lines,
+            "n_regions": ps.n_regions,
+            "region_coverage": ps.region_coverage,
+            "mean_line_height": ps.mean_line_height,
+            "median_line_height": ps.median_line_height,
+            "line_height_cv": ps.line_height_cv,
+            "n_overlaps": ps.n_overlaps,
+            "n_short_lines": ps.n_short_lines,
+            "stratum_heuristic": ps.stratum_heuristic,
+            "metrics": json.dumps(ps.metrics, ensure_ascii=False) if ps.metrics else None,
+        },
+    )
+
+
+def get_page_stats(conn: sqlite3.Connection, page_id_: str) -> PageStats | None:
+    """Fetch a page's segmentation stats, or ``None``."""
+    row = conn.execute("SELECT * FROM page_stats WHERE page_id = ?", (page_id_,)).fetchone()
+    return _page_stats_from_row(row) if row is not None else None
+
+
+def iter_page_stats(conn: sqlite3.Connection) -> Iterator[PageStats]:
+    """Iterate all per-page segmentation stats, ordered by page id."""
+    for row in conn.execute("SELECT * FROM page_stats ORDER BY page_id"):
+        yield _page_stats_from_row(row)
+
+
+def set_page_stratum(conn: sqlite3.Connection, page_id_: str, stratum: str) -> None:
+    """Record a page's heuristic stratum label (C2/C4)."""
+    conn.execute(
+        "UPDATE page_stats SET stratum_heuristic = ? WHERE page_id = ?", (stratum, page_id_)
+    )
+
+
+# --------------------------------------------------------------------------- #
 # Katalog records + crosswalk (A3)
 # --------------------------------------------------------------------------- #
 
@@ -774,3 +1115,18 @@ def count_crosswalk(conn: sqlite3.Connection) -> int:
 def matched_work_ids(conn: sqlite3.Connection) -> set[str]:
     """The set of work ids that have at least one crosswalk link."""
     return {row[0] for row in conn.execute("SELECT DISTINCT work_id FROM crosswalk")}
+
+
+def best_crosswalk_by_record(conn: sqlite3.Connection) -> dict[str, CrosswalkMatch]:
+    """Map each katalog record to its highest-confidence work link (C2 factory).
+
+    A record can link to several works and by several methods; the GT factory
+    wants the single most trustworthy work per piece, so this keeps the max-conf
+    (ties broken by ``gwlb_link`` over ``shelfmark``) link per record.
+    """
+    best: dict[str, CrosswalkMatch] = {}
+    for m in iter_crosswalk(conn):
+        cur = best.get(m.katalog_record_id)
+        if cur is None or m.match_conf > cur.match_conf:
+            best[m.katalog_record_id] = m
+    return best

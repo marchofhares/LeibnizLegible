@@ -122,22 +122,61 @@ class KrakenEngine:
         preds, _olens = self._model._rec_predict(seqs, lens)
         return ["".join(tok[0] for tok in pred) for pred in preds]
 
+    def _transcribe_batch_conf(self, tensors: list) -> list[tuple[str, float | None]]:
+        """Like :meth:`_transcribe_batch` but also mean per-line CTC confidence."""
+        torch = self._torch
+        max_len = max(t.shape[2] for t in tensors)
+        seqs = torch.stack([torch.nn.functional.pad(t, (0, max_len - t.shape[2])) for t in tensors])
+        lens = torch.LongTensor([t.shape[2] for t in tensors])
+        preds, _olens = self._model._rec_predict(seqs, lens)
+        out: list[tuple[str, float | None]] = []
+        for pred in preds:
+            text = "".join(tok[0] for tok in pred)
+            # kraken's greedy decode yields per-char records whose numeric field is
+            # the posterior; average it for a line confidence. Shapes vary across
+            # kraken versions, so read defensively and fall back to None.
+            confs = [
+                float(tok[1]) for tok in pred if len(tok) > 1 and isinstance(tok[1], (int, float))
+            ]
+            out.append((text, sum(confs) / len(confs) if confs else None))
+        return out
+
     def transcribe(self, images: Sequence[bytes]) -> list[str]:
         """Transcribe pre-extracted line images (raw bytes) to text, in order."""
+        return [t for t, _ in self._run(images, with_conf=False)]
+
+    def transcribe_conf(self, images: Sequence[bytes]) -> list[tuple[str, float | None]]:
+        """Transcribe line images to ``(text, mean_confidence)`` pairs, in order.
+
+        The corpus pipeline (:mod:`leibniz.pipeline.recognize`) stores the
+        per-line confidence (SPECS §4.5); ``None`` when the model build does not
+        expose posteriors.
+        """
+        return self._run(images, with_conf=True)
+
+    def _run(self, images: Sequence[bytes], *, with_conf: bool) -> list[tuple[str, float | None]]:
         from PIL import Image
 
         self._ensure_loaded()
-        out: list[str] = []
+        out: list[tuple[str, float | None]] = []
         buf: list = []
+
+        def flush() -> None:
+            if not buf:
+                return
+            if with_conf:
+                out.extend(self._transcribe_batch_conf(buf))
+            else:
+                out.extend((t, None) for t in self._transcribe_batch(buf))
+            buf.clear()
+
         for data in images:
             im = Image.open(io.BytesIO(data))
             im.load()
             buf.append(self._transforms(im))
             if len(buf) >= self.batch_size:
-                out.extend(self._transcribe_batch(buf))
-                buf.clear()
-        if buf:
-            out.extend(self._transcribe_batch(buf))
+                flush()
+        flush()
         return out
 
 

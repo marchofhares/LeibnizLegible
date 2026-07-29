@@ -168,7 +168,7 @@ def align_piece(
         ]
         return AlignmentResult(lines, threshold, norm.name, 0, len(edition_text))
 
-    alignment = dp.align(spine, ed_folded, free_a_ends=free_htr_ends, free_b_ends=free_edition_ends)
+    alignment = _align_spine(spine, ed_folded, free_a=free_htr_ends, free_b=free_edition_ends)
 
     # 4. Projection: every edition char inherits the line of the HTR char it hit;
     #    edition-only insertions inherit the current line context.
@@ -229,6 +229,19 @@ def align_piece(
         global_distance=alignment.distance,
         edition_chars=len(edition_text),
     )
+
+
+def _align_spine(a: str, b: str, *, free_a: bool, free_b: bool) -> dp.Alignment:
+    """Align the HTR spine to the folded edition, banded when the piece is large.
+
+    Small pieces use the exact full-matrix DP; once the table would exceed the
+    ``dp`` cell guard (long multi-page pieces — the case B2 flagged as blocking
+    C2), fall back to the banded aligner, which is O(len·band) and exact for these
+    near-parallel strings. The switch is transparent to the projection logic.
+    """
+    if (len(a) + 1) * (len(b) + 1) <= dp.DEFAULT_MAX_CELLS:
+        return dp.align(a, b, free_a_ends=free_a, free_b_ends=free_b)
+    return dp.align_banded(a, b, free_a_ends=free_a, free_b_ends=free_b)
 
 
 def _assign(first: list[int | None], last: list[int], li: int, orig_idx: int) -> None:
