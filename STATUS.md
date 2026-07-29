@@ -3,13 +3,38 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-29 (end of Phase B1)._
+_Last updated: 2026-07-29 (end of Phase B2)._
 
 ---
 
 ## Current state
 
-**Phase B1 (benchmark harness + PHILIUMM reproduction) — complete. Gate: ✅ GO.**
+**Phase B2 (retro-alignment prototype) — complete. Gate: ✅ GO — green-light C2.**
+The retro-alignment engine (`src/leibniz/align/`, the C2/C3 GT-factory core) is
+built and measured. On the one ground truth we have — the PHILIUMM val split
+(real Leibniz line images + gold text) under **real HTR** — the aligner mints
+**98.8% of lines at 97.5% precision** (diplomatic; 98%+/97% across divergence
+conditions), clearing the ≥60% yield / ≥95% precision gate with wide margin. The
+decisive precision result: across every *omission* condition the aligner minted
+**zero** edition-omitted lines (`false_pos = 0`) — confidence withholds exactly
+the lines with no edition counterpart, so a real edition dropping material costs
+*yield, not polluted GT*. The whole pipeline was run **live on real data**: GWLB
+IIIF → segment (PHILIUMM seg model, 44 lines on a real page) → HTR (readable
+Latin) → §70-expired edition-text extraction (GPT-4o on real AA VI,4 print,
+apparatus-separated) → align. **Verdict: build the C2 factory.** Full deliverable:
+`reports/alignment-prototype.md`.
+
+Key sub-findings (feed C2): (1) the biggest scaling obstacle is **localizing a
+piece's canvases inside GWLB convolutes** (16–414 canvases; katalog links the
+convolute, §70-volume OCR is too garbled to text-search) — but GWLB IIIF canvas
+labels **are folio numbers** (`164r`…), so the katalog's `Bl.` range maps to exact
+canvases (this is the resolver C2 must wire in); (2) **drafts** (heavy revision)
+align worse than fair copies exactly as the omission conditions predict — hold
+them to a higher threshold; (3) the normalizer folds orthographic
+edition/diplomatic divergence away, so u/v, i/j, long-s, ligatures and struck-out
+runs cost the alignment nothing.
+
+### Prior gate (retained): Phase B1 (benchmark harness + PHILIUMM reproduction) — ✅ GO.
 The engine-agnostic HTR evaluation harness (deliverable **D5**) is built and, run
 against the PHILIUMM model on its own 1,878-line val split, **reproduces the
 claimed CER**: measured **7.95%** (95% CI 7.49–8.46) vs the self-reported
@@ -144,6 +169,50 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
+### B2 — Retro-alignment prototype (2026-07-29) ✅ Gate: GO — green-light C2
+
+Built the retro-alignment engine (`src/leibniz/align/*` + `src/leibniz/layout/segment.py`)
+and measured it end-to-end. **Aligner yield 98.8% at 97.5% precision on favorable
+material under real HTR; false-mints 0 under omission ⇒ build the C2 GT factory.**
+
+- **The engine** (`src/leibniz/align/`, pure + offline-tested):
+  - `normalize.py` — the lossy *alignment* comparison alphabet (casefold, u≡v,
+    i≡j, long-s, ligatures, a small Latin-brevigraph list, struck `xx` elision,
+    punctuation) **with a folded→original offset map** so the minted GT is a slice
+    of the *original* edition (accents/capitals intact), not the folded form.
+  - `dp.py` — Needleman–Wunsch with full traceback + semi-global (free-end) option
+    (the path `metrics.edit_distance` doesn't give). Documents the both-free
+    degeneracy the aligner avoids.
+  - `align.py` — the **boundary-projection** retro-aligner: HTR spine ↔ edition
+    text → per-line projected slice + confidence; hyphenation-rejoin across line
+    breaks; free edition overhang.
+  - `evaluate.py` — the quantitative harness (real HTR on the val split; exact
+    per-line grading; divergence + omission conditions; threshold sweep).
+  - `pairs.py` — mint `gt_lines` with provenance + the **license-bucket gate**
+    (`open` only for §70; `nc` never in CC BY) enforced at write time.
+  - `pdftext.py` — §70 reading-text extraction (GPT-4o vision on scanned print,
+    apparatus excluded per §7.2; text-layer fallback; skips without a key).
+  - `prototype.py` — GWLB IIIF → segment → HTR → align orchestration (no rehosting).
+  - `cli.py`, `report.py` — `leibniz align {eval,extract,run,report}`; the report.
+  - `layout/segment.py` — PHILIUMM baseline segmentation (kraken-5→7 metadata shim).
+- **Quantitative gate (real HTR on the PHILIUMM val split, `data/bench/` cached):**
+  diplomatic 98.8%/97.5% (yield/precision) · divergence 3% 98.5%/96.7% · divergence
+  6% 98.2%/97.2% · omits-15% 94.2%/95.5% · divergence 3%+omits-15% 84.2%/92.0%.
+  **`false_pos = 0` in every condition** — the confidence signal never mints an
+  edition-omitted line, so precision loss is lost yield, not polluted GT.
+- **Live pipeline, run on real data this session:** GWLB IIIF `/full/full/0/default.jpg`
+  (2008×2561 quarto) → PHILIUMM seg (**44 lines** on `00068642` c0, LH 4,6,18) → HTR
+  (readable Latin) → GPT-4o extracts clean §70 AA VI,4 reading text (apparatus
+  excluded). Katalog-verified pair: `00068642` c0 = **AA VI,4 N.109**.
+- **Localization finding (for C2):** GWLB IIIF canvas labels *are* folio numbers
+  (`164r`…), so the katalog `Bl.` range → exact canvases (Bl.164–169 → 322–333).
+  This is the piece→canvas resolver C2 needs; the §70-volume OCR is too garbled to
+  text-search, and scans are convolutes of 16–414 canvases.
+- Tests **+43** (→ **274 passing**, 1 skipped); ruff clean. Kraken/torch/pyarrow
+  used live but remain the optional `bench` extra (the align engine + its tests
+  run without them; the 1 skip is the absent-stack path, now unexercisable).
+  Deliverable `reports/alignment-prototype.md` (+ `alignment-eval.json`).
+
 ### B1 — Benchmark harness + PHILIUMM reproduction (2026-07-29) ✅ Gate: GO
 
 Built `src/leibniz/htr/*` (deliverable D5) and reproduced the PHILIUMM CER on the
@@ -241,7 +310,12 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **236** (+1 skipped: pyarrow) |
+| Tests passing | **274** (+1 skipped) |
+| **B2 aligner yield · precision (favorable, real HTR)** | **98.8% · 97.5%** → **GO** |
+| B2 yield · precision by condition | div3% 98.5/96.7 · div6% 98.2/97.2 · omit15% 94.2/95.5 · div3%+omit15% 84.2/92.0 |
+| **B2 false-mints of edition-omitted lines** | **0** (every omission condition) |
+| B2 live pipeline | GWLB IIIF → seg **44 lines** → HTR → GPT-4o §70 extract (all run) |
+| B2 verified §70 ↔ scan pair | `00068642` c0 = AA VI,4 N.109 (katalog) |
 | **HTR CER (B1): measured vs claimed** | **7.95%** (CI 7.49–8.46) vs 8.33% → **GO** |
 | HTR WER (B1) | 27.04% (CI 25.95–28.19) vs claimed 28.56% |
 | Val lines · char-perfect | 1,878 · 464 (24.7%) |
@@ -299,24 +373,42 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    model. The `anthropic` adapter is equally ready for a Claude comparison. Finding
    worth following up: the *smallest* VLM scored best — the larger models modernise
    archaic spelling more (a prompt-engineering lever, not pursued in Tier 1).
+10. **(B2) Piece→canvas localization is C2's first build.** The aligner works; the
+    integration gap is finding *which canvases* transcribe an edition piece. GWLB
+    scans are convolutes (16–414 canvases), the katalog links the convolute (with a
+    `Bl.` folio range), and older §70-volume OCR is too garbled to text-search. The
+    solve is demonstrated: **IIIF canvas labels are folio numbers** (`164r`…), so
+    `Bl.` range → canvas indices directly. C2 wires this + a folio-range parser.
+11. **(B2) Draft strata need a higher threshold.** Fair copies clear the gate; drafts
+    (heavy revision — edition drops deletions, resolves corrections, inlines marginal
+    insertions) lose yield exactly as the omission conditions predict. The C4 stratum
+    heuristic should set the mint threshold per piece (precision held, yield traded).
+12. **(B2) Edition-text extraction QA at scale.** GPT-4o reads clean §70 *print*
+    reliably (apparatus excluded), but C2 needs a per-page reading-text/apparatus
+    error estimate (spot-check sample) and should prefer volumes with a real text
+    layer where they exist. No API key ⇒ this step skips gracefully.
 
 ---
 
 ## Next
 
-**B1 is done and green (GO).** Per SPECS §5 sequencing (A1→A2→A3 and B1→B2
-interleave; C sequential; D after C4), with A0–A3 + B1 all green:
+**A0–A3 + B1 + B2 all green.** Per SPECS §5 sequencing (C sequential; D after C4).
+B2's GO unblocks C2; C1 was already unblocked by A2 + B1.
 
-- **Recommended: Phase B2 — Retro-alignment prototype (gate).** Now fully
-  unblocked: it needs the **A2 dev image slice** (have it: `00067974` LH 35,1,13 +
-  `DE-611-HS-854976` LBr. 464) **and a working B1 model** (have it, reproduced).
-  Pick a §70-expired Reihe I volume (`legal.py` → 32 free today) + a fair-copy
-  letter in the dev slice with a confident crosswalk match (A3 gives these). The
-  B1 `KrakenEngine` / segmentation model (DOI `21537859`, cached) are the inputs.
-- **Then Phase C1 — Corpus segmentation + HTR v1.** Needs the full image pull
-  (operator) + this reproduced model. The B1 harness is the eval backbone for C3.
-- **Operator (SPECS §8):** email PHILIUMM (Rabouin/Bumba) the reproduction result
-  — CER 7.95% confirms 8.33%; the model loads cleanly and is usable — and note the
-  once-404'd GT DOI is now live on HF. A partnership opener.
+- **Phase C1 — Corpus segmentation + HTR v1 (batch).** Independent of B2. Needs the
+  full image pull (operator command, ~365 GB) + the reproduced model. Reuse
+  `layout/segment.py` (built in B2, kraken-5→7 shim) and `htr/engines.KrakenEngine`;
+  record per-page segmentation stats for the C4 stratum heuristic. B1 harness = the
+  eval backbone.
+- **Phase C2 — GT factory at scale.** Now green-lit. Scale `src/leibniz/align/`
+  across the §70-expired volumes (`legal.py` → 32 free). **Build first:** the
+  piece→canvas resolver (IIIF folio labels + katalog `Bl.` ranges — Open Q #10),
+  volume reading-text extraction with QA (#12), and stratum-aware thresholds (#11).
+  Emit `gt_lines` (`license_bucket='open'`; Transkriptionspool → `nc`). Target ≥50k
+  new open-bucket lines; the aligner is ready (98.8%/97.5% on favorable material).
+- **Operator (SPECS §8):** email PHILIUMM (Rabouin/Bumba) the B1 reproduction +
+  the B2 result (their seg + HTR models drive a working alignment pipeline). Request
+  a TELOTA katalog dump — it would give piece↔scan page anchors and moot most of the
+  C2 localization build.
 
-No blockers. The dev image slice + the crosswalk are exactly the inputs B2 wants.
+No blockers for C1 or C2.

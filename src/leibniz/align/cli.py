@@ -1,0 +1,203 @@
+"""``leibniz align`` — the retro-alignment stage CLI (Phase B2).
+
+Subcommands:
+
+* ``eval``    — measure aligner yield/precision on the PHILIUMM val split under
+                real HTR (the §1 quantitative table); caches HTR, writes JSON.
+* ``report``  — render ``reports/alignment-prototype.md`` from the eval JSON
+                (and the live-run JSON, if present).
+* ``extract`` — vision-LLM extraction of §70-expired edition reading text from an
+                Internet Archive volume scan (apparatus excluded).
+* ``run``     — the full end-to-end prototype on one piece: GWLB IIIF → segment →
+                recognise → align to an edition-text file → mint ``gt_lines``.
+
+Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
+skip gracefully when a key/model is absent, per COMMON CONTEXT.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import typer
+from rich.console import Console
+
+from leibniz.align.report import GATE_PRECISION
+
+app = typer.Typer(help="Retro-alignment: edition reading text → manuscript lines (Phase B2).")
+_console = Console()
+
+DEFAULT_HTR = "data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors"
+DEFAULT_SEG = "data/models/philiumm-seg/blla_ft_leibniz_v1_0.4750.safetensors"
+DEFAULT_VAL = "data/gt/philiumm-val/val-00000-of-00001.parquet"
+EVAL_JSON = Path("reports/alignment-eval.json")
+RUN_JSON = Path("reports/alignment-run.json")
+
+# The evaluation conditions (frozen so the number is reproducible).
+_CONDITIONS = [
+    ("diplomatic (HTR noise only)", 0.00, 0.00),
+    ("edition-like divergence 3%", 0.03, 0.00),
+    ("edition-like divergence 6%", 0.06, 0.00),
+    ("edition omits 15% of lines", 0.00, 0.15),
+    ("divergence 3% + omits 15%", 0.03, 0.15),
+]
+
+
+@app.command()
+def eval(
+    val: str = typer.Option(DEFAULT_VAL, help="PHILIUMM val parquet."),
+    htr_model: str = typer.Option(DEFAULT_HTR, help="PHILIUMM HTR safetensors."),
+    max_lines: int = typer.Option(400, help="Cap lines for a fast run."),
+    lines_per_piece: int = typer.Option(25, help="Lines per synthetic piece."),
+    threshold: float = typer.Option(0.60, help="Confidence threshold to mint."),
+    out: Path = typer.Option(EVAL_JSON, help="Where to write the summaries JSON."),
+) -> None:
+    """Measure aligner yield/precision on the val split under real HTR."""
+    from leibniz.align import evaluate as E
+    from leibniz.htr.data import load_parquet_pairs
+
+    pairs = load_parquet_pairs(val, limit=max_lines)
+    pieces = E.build_pieces(pairs, lines_per_piece=lines_per_piece)
+    _console.print(f"{len(pieces)} pieces, {sum(len(p.lines) for p in pieces)} lines; running HTR…")
+    htr = E.run_htr_cached(pieces, htr_model, cache=Path("data/bench/b2_htr_cache.json"))
+
+    summaries = []
+    for label, perturb, drop in _CONDITIONS:
+        cfg = E.EvalConfig(
+            label=label, ref_char_perturb=perturb, ref_drop_rate=drop, threshold=threshold
+        )
+        lines = [ln for pc in pieces for ln in E.evaluate_piece(pc, htr, cfg)]
+        s = E.summarize(lines, cfg, precision_target=GATE_PRECISION)
+        summaries.append(s.as_report_dict())
+        _console.print(
+            f"  [bold]{label}[/bold]: yield {s.yield_rate:.1%}  precision {s.precision:.1%}  "
+            f"false-mints {s.n_false_positive}"
+        )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(summaries, ensure_ascii=False, indent=1), encoding="utf-8")
+    _console.print(f"wrote {out}")
+
+
+@app.command()
+def extract(
+    ia_id: str = typer.Argument(..., help="Internet Archive item id of a §70-expired volume."),
+    leaves: str = typer.Argument(..., help="Leaf range, e.g. '76-89'."),
+    model: str = typer.Option("gpt-4o", help="Vision model."),
+    width: int = typer.Option(1700, help="Page image width."),
+    out: Path = typer.Option(None, help="Write the reading text here (else stdout)."),
+) -> None:
+    """Vision-LLM extraction of edition reading text (apparatus excluded)."""
+    from leibniz.align.pdftext import VisionEditionExtractor, fetch_ia_page_image
+    from leibniz.htr.engines import MissingKeyError
+    from leibniz.net import PoliteClient
+
+    lo, _, hi = leaves.partition("-")
+    rng = range(int(lo), int(hi) + 1 if hi else int(lo) + 1)
+    try:
+        with PoliteClient() as c, VisionEditionExtractor(model=model) as ex:
+            parts = []
+            for leaf in rng:
+                img = fetch_ia_page_image(ia_id, leaf, client=c, width=width)
+                parts.append(ex.extract_page(img))
+            cost = ex.usage_input, ex.usage_output
+        text = "\n".join(p for p in parts if p.strip())
+    except MissingKeyError as exc:
+        _console.print(f"[yellow]skipped: {exc}[/yellow]")
+        raise typer.Exit(code=0) from None
+    _console.print(f"[dim]extracted {len(text)} chars; tokens in/out={cost}[/dim]")
+    if out:
+        out.write_text(text, encoding="utf-8")
+        _console.print(f"wrote {out}")
+    else:
+        typer.echo(text)
+
+
+@app.command()
+def run(
+    work: str = typer.Argument(..., help="GWLB object id."),
+    canvases: str = typer.Argument(..., help="Canvas indices, e.g. '322-333' or '0,2,4'."),
+    edition_text: Path = typer.Argument(..., help="File with the piece's reading text."),
+    source: str = typer.Option(..., help="Provenance string for the minted GT."),
+    stratum: str = typer.Option("unknown", help="fair_copy/light_revision/…"),
+    license_bucket: str = typer.Option("open", help="open | nc"),
+    htr_model: str = typer.Option(DEFAULT_HTR),
+    seg_model: str = typer.Option(DEFAULT_SEG),
+    threshold: float = typer.Option(0.60),
+    db_path: str = typer.Option(None, help="If set, insert minted pairs into gt_lines here."),
+    out: Path = typer.Option(RUN_JSON, help="Where to write the run JSON."),
+) -> None:
+    """Full prototype: fetch → segment → recognise → align → mint gt_lines."""
+    from leibniz.align import prototype as P
+    from leibniz.align.pairs import insert_gt_pairs, result_to_pairs
+
+    idxs = _parse_indices(canvases)
+    text = edition_text.read_text(encoding="utf-8")
+    run = P.run_prototype(
+        work_id=work,
+        canvas_indices=idxs,
+        edition_text=text,
+        seg_model_path=seg_model,
+        htr_model_path=htr_model,
+        edition_source=source,
+        threshold=threshold,
+    )
+    res = run.result
+    _console.print(
+        f"seg lines={run.n_seg_lines}  yield={res.yield_rate:.1%}  "
+        f"minted={res.n_aligned}/{res.n_lines}"
+    )
+    pairs = result_to_pairs(res, source=source, stratum=stratum, license_bucket=license_bucket)
+    if db_path:
+        from leibniz.db import open_db
+
+        with open_db(db_path) as conn:
+            n = insert_gt_pairs(conn, pairs)
+        _console.print(f"inserted {n} pairs into gt_lines ({db_path})")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(
+            {
+                "work": work,
+                "canvas_indices": idxs,
+                "n_seg_lines": run.n_seg_lines,
+                "per_page_line_counts": run.per_page_line_counts,
+                "yield": res.yield_rate,
+                "n_aligned": res.n_aligned,
+                "n_lines": res.n_lines,
+                "edition_source": source,
+                "edition_chars": run.edition_chars,
+                "samples": [
+                    {
+                        "ref": ln.ref,
+                        "conf": round(ln.align_conf, 3),
+                        "aligned": ln.aligned,
+                        "htr": ln.htr_text,
+                        "edition": ln.edition_text.strip(),
+                    }
+                    for ln in res.lines
+                ],
+            },
+            ensure_ascii=False,
+            indent=1,
+        ),
+        encoding="utf-8",
+    )
+    _console.print(f"wrote {out}")
+
+
+# NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the
+# ``eval`` output (its §1 numbers) plus this session's live-run facts, using the
+# renderers in ``leibniz.align.report``; it is a curated report (like census.md /
+# crosswalk.md), not a single-command regeneration, so there is no ``report``
+# subcommand that could clobber it with a numbers-only skeleton.
+
+
+def _parse_indices(spec: str) -> list[int]:
+    if "-" in spec and "," not in spec:
+        lo, hi = spec.split("-")
+        return list(range(int(lo), int(hi) + 1))
+    return [int(x) for x in spec.split(",") if x.strip()]
+
+
+__all__ = ["app"]
