@@ -98,7 +98,7 @@ def test_crop_count_drift_is_partial_not_fatal(tmp_path) -> None:
     result = recognize_pages(conn, ShortCropper(), FakeRecognizer(), images_root=images)
     assert result.recognized == 1
     assert result.n_lines == 3  # one line unrecognised
-    assert any("partial" in r for _pid, r in result.failures)
+    assert any("not transcribed" in r for _pid, r in result.failures)
     lines = db.iter_lines_for_page(conn, "W1:0001")
     assert lines[3].text is None  # last line left untranscribed
 
@@ -117,3 +117,50 @@ def test_full_state_machine_histogram(tmp_path) -> None:
     recognize_pages(conn, FakeSegmenter(), FakeRecognizer(), images_root=images)
     assert db.status_histogram(conn) == {"recognized": 3}
     assert db.count_lines(conn, recognized=True) == 9
+
+
+def test_degenerate_baseline_skips_line_not_whole_page(tmp_path) -> None:
+    # One sub-5px baseline (what makes kraken raise "Baseline length below minimum
+    # 5px") must cost that line only — the page's other lines still recognise.
+    images = tmp_path / "images"
+    conn = db.init_db(":memory:")
+    db.upsert_work(conn, db.Work("W1", "LeibnizHandschriften"))
+    rel = "W1/0001.jpg"
+    p = images / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(b"JPEG")
+    db.upsert_page(
+        conn,
+        db.Page(
+            work_id="W1",
+            seq=1,
+            image_url="u",
+            width=2000,
+            height=2500,
+            local_path=rel,
+            sha256="s",
+            status="segmented",
+        ),
+    )
+    rid = db.start_run(conn, "segment", model="seg")
+    for seq, baseline in (
+        (0, [[50, 140], [1950, 140]]),  # good
+        (1, [[50, 260], [51, 261]]),  # ~1.4px — degenerate
+        (2, [[50, 380], [1950, 380]]),  # good
+    ):
+        db.insert_line(
+            conn,
+            db.Line(
+                page_id="W1:0001", line_seq=seq, baseline=baseline, run_id=rid, status="machine"
+            ),
+        )
+    conn.commit()
+
+    result = recognize_pages(conn, FakeSegmenter(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 1  # page recognised, NOT skipped
+    assert result.n_lines == 2  # only the two good lines transcribed
+    lines = db.iter_lines_for_page(conn, "W1:0001")
+    assert lines[0].text is not None
+    assert lines[1].text is None  # degenerate line left untranscribed
+    assert lines[2].text is not None
+    assert db.get_page(conn, "W1:0001").status == "recognized"

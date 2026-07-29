@@ -38,6 +38,29 @@ KRAKEN_PADDING = 16
 KRAKEN_VALID_NORM = False  # baseline models normalise height without box-centering
 
 
+def _tok_conf(tok: object) -> float | None:
+    """Pull the per-character confidence (a probability in ``[0, 1]``) from a token.
+
+    kraken's decoded tokens are ``(grapheme, …)`` where the trailing fields vary by
+    version — a cut position (pixels, ≫1), a ``(start, end)`` span, and/or the
+    posterior. We take the first scalar field in ``[0, 1]`` as the confidence
+    (pixel positions are > 1, so they can't be mistaken for it) and return ``None``
+    when there is none, rather than a meaningless number. The original code averaged
+    ``tok[1]``, which is the cut position — the source of the nonsensical ~150
+    "confidences" seen on the first real run (STATUS Open Q #15).
+    """
+    try:
+        fields = list(tok)[1:]
+    except TypeError:
+        return None
+    for v in fields:
+        if isinstance(v, bool):
+            continue
+        if isinstance(v, (int, float)) and 0.0 <= float(v) <= 1.0:
+            return float(v)
+    return None
+
+
 def _accel_device(device: str) -> tuple[str, object]:
     """Map a torch-style device string to kraken's ``(accelerator, device)`` pair.
 
@@ -164,12 +187,7 @@ class KrakenEngine:
         out: list[tuple[str, float | None]] = []
         for pred in preds:
             text = "".join(tok[0] for tok in pred)
-            # kraken's greedy decode yields per-char records whose numeric field is
-            # the posterior; average it for a line confidence. Shapes vary across
-            # kraken versions, so read defensively and fall back to None.
-            confs = [
-                float(tok[1]) for tok in pred if len(tok) > 1 and isinstance(tok[1], (int, float))
-            ]
+            confs = [c for tok in pred if (c := _tok_conf(tok)) is not None]
             out.append((text, sum(confs) / len(confs) if confs else None))
         return out
 
