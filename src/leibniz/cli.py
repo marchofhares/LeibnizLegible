@@ -14,6 +14,7 @@ from rich.console import Console
 from leibniz import __version__
 from leibniz.catalog.cli import app as catalog_app
 from leibniz.harvest.cli import app as harvest_app
+from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
 
 app = typer.Typer(
@@ -28,6 +29,7 @@ app = typer.Typer(
 app.add_typer(harvest_app, name="harvest")
 app.add_typer(images_app, name="images")
 app.add_typer(catalog_app, name="catalog")
+app.add_typer(bench_app, name="bench")
 
 _console = Console()
 

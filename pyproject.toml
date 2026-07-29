@@ -29,6 +29,16 @@ dev = [
     "pytest>=8.0",
 ]
 
+# Optional heavy stack for the HTR benchmark harness (Phase B1, deliverable D5).
+# Imported lazily by leibniz.htr.engines / .data; the harness, its metrics, and
+# its tests all run WITHOUT these. Install for a live reproduction:
+#   uv pip install --group bench   (or: uv pip install kraken pyarrow)
+[project.optional-dependencies]
+bench = [
+    "kraken>=7.0",   # Kraken HTR: loads the PHILIUMM safetensors model + inference
+    "pyarrow>=15",   # read the HuggingFace parquet ground-truth splits
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
