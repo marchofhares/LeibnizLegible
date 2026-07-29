@@ -135,3 +135,35 @@ How many works carry a parseable Leibniz signature (LH / LBr / Leibn. Marg. / LK
 - **Page count = physical structMap `page` divisions.** Cross-checked equal to IIIF canvas count on sampled objects; a per-work re-check runs during `leibniz harvest manifests` and any drift is reported there.
 - **Overlap is real, not double counting:** the same object appears under several sets; we dedup by object id. Marginalien are annotated *printed books* (hence high page counts), not autograph manuscripts — counted as page images all the same.
 - **Scope:** Hannover GWLB holdings only. Non-Hannover Leibniz materials and transmitted-light fragment scans are out of Tier-1 scope (SPECS §1.1).
+
+
+<!-- images-stats -->
+
+## Image cache (Phase A2)
+
+_Generated 2026-07-29T01:23:46Z. Local delivery-derivative cache for the segmentation/HTR pipeline; images are never rehosted (the public viewer loads GWLB IIIF directly, SPECS §3/§4)._
+
+- **Cached:** 80 / 236,795 pages (0.0%), 126.3 MB on disk.
+- **Mean page size:** 1.6 MB.
+- **Projected full-corpus pull:** ≈ 365.2 GB for all 236,795 pages at the observed mean.
+- **Dimensions (of 80 measured):** 1098×1793 … 4921×4394 px.
+
+| Primary set | Cached | Target | % |
+| --- | ---: | ---: | ---: |
+| Leibnitiana | 0 | 1,768 | 0.0% |
+| LeibnizBriefwechsel | 40 | 72,284 | 0.1% |
+| LeibnizHandschriften | 40 | 58,828 | 0.1% |
+| LeibnizMarginalien | 0 | 103,887 | 0.0% |
+| leibniz-rekonstruktionen | 0 | 28 | 0.0% |
+
+| Dimensions | Cached pages |
+| --- | ---: |
+| < 1 MP | 0 |
+| 1–3 MP | 2 |
+| 3–5 MP | 6 |
+| 5–8 MP | 16 |
+| 8–12 MP | 16 |
+| ≥ 12 MP | 40 |
+
+Delivery mode of cached pages — iiif: 40, static: 40.
+

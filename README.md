@@ -44,6 +44,32 @@ Both harvest commands are **cache-first and resumable** (raw XML/JSON under
 `data/oai/`, `data/manifests/`); re-running re-parses from cache without
 re-fetching. See `reports/crawl-posture.md` for the crawl-etiquette baseline.
 
+### Image cache (Phase A2)
+
+```bash
+uv run leibniz images pages          # derive all pages' delivery URLs from cached METS (offline)
+uv run leibniz images fetch --work 00067974 --work DE-611-HS-854976  # pull a dev slice
+uv run leibniz images verify --deep  # re-checksum the cache, report gaps
+uv run leibniz images stats          # counts/bytes/dimensions → reports/census.md
+```
+
+Caches one JPEG delivery derivative per page under `data/images/` — resumable,
+checksummed, integrity-retried. The full-corpus pull (~365 GB) is an operator
+command; a `--set`/`--work`/`--limit` slice pulls a dev corpus. Images are
+**never rehosted** — this is an internal working store for the HTR pipeline.
+
+### Katalog crosswalk (Phase A3)
+
+```bash
+uv run leibniz catalog scrape --sample   # scrape a cross-set sample of Ritter-Katalog records
+uv run leibniz catalog crosswalk         # match records → works (GWLB link + shelfmark)
+uv run leibniz catalog report            # write reports/crosswalk.md
+```
+
+Joins the BBAW Ritter-Katalog (CC BY 4.0) to our works so every scan links to its
+scholarly record. No public API; the site caps results at 5000 rows, so the full
+scrape partitions into sub-cap slices (an operator job).
+
 ## Where things live
 
 | Path | What |
@@ -53,18 +79,23 @@ re-fetching. See `reports/crawl-posture.md` for the crawl-etiquette baseline.
 | `src/leibniz/legal.py` | §70/§71 copyright-expiry registry for AA reading text |
 | `src/leibniz/net.py` | polite HTTP client — UA, ≤1 req/s per host, backoff (SPECS §7.4) |
 | `src/leibniz/harvest/` | OAI-PMH + IIIF harvest → `works`/`pages`, and the corpus census |
+| `src/leibniz/images/` | local delivery-derivative image cache (fetch/verify/stats) |
+| `src/leibniz/catalog/` | Ritter-Katalog scraper + works crosswalk (shelfmark normaliser) |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
 | `reports/` | committed reports (census, benchmarks, alignment yield) |
 
 ## Status
 
-Phase **A1 (OAI/IIIF harvest)** is complete. The harvest stage produced the
-project's first real artifact — a corpus census of **2,225 works / 236,795 page
-images** (`reports/census.md`), within the expected band, so the gate is **GO**.
-A notable finding: only ~⅓ of pages are IIIF-served; the rest are static JPEG
-only (revises SPECS §1.1 — see `STATUS.md`). Next up is **A2** (image cache) and
-**A3** (katalog crosswalk); **B1** (benchmark) can run in parallel. See `STATUS.md`.
+Phases **A0–A3** are complete (`STATUS.md` has the detail). A1's census found
+**2,225 works / 236,795 page images**; A2 populated the full `pages` table
+offline and now caches JPEG delivery derivatives (dev slice pulled, full pull
+~365 GB left as an operator command); A3's katalog crosswalk already links
+**1,094 / 2,225 works (49.2%)** from a 6-query sample, with 99.96% GWLB-link
+resolution (`reports/crosswalk.md`). A notable finding: only ~⅓ of pages are
+IIIF-served, but the METS `fileSec` yields a uniform static-JPEG delivery URL for
+all of them. Next up is **B1** (benchmark harness + PHILIUMM reproduction, a
+gate), then **B2** (retro-alignment). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

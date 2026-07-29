@@ -25,7 +25,8 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections.abc import Iterator
+import subprocess
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -37,12 +38,24 @@ def utcnow_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def git_sha() -> str | None:
+    """The current ``git HEAD`` sha, or ``None`` outside a repo — for run provenance."""
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+        )
+        return out.stdout.strip() or None
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return None
+
+
 # Default location of the canonical store (gitignored; see data/README.md).
 DEFAULT_DB_PATH = Path("data/inventory.sqlite")
 
 # Controlled vocabularies, mirrored by the CHECK constraints below. Exposed so
 # callers and tests can reference them instead of hard-coding string literals.
 PAGE_STATUSES = ("pending", "segmented", "recognized", "skipped")
+DELIVERY_MODES = ("iiif", "static")  # how a work's page images are served (SPECS §1.1 drift)
 LINE_STATUSES = ("machine", "aligned", "corrected", "verified")
 LINE_LANGS = ("la", "fr", "de", "mixed", "unknown")
 GT_STRATA = ("fair_copy", "light_revision", "heavy_revision", "scrap", "unknown")
@@ -78,12 +91,21 @@ CREATE TABLE IF NOT EXISTS pages (
     work_id             TEXT NOT NULL REFERENCES works(gwlb_object_id),
     seq                 INTEGER NOT NULL,        -- canvas_seq (1-based)
     canvas_id           TEXT,
-    image_service_url   TEXT,                    -- IIIF Image API service base
+    image_service_url   TEXT,                    -- IIIF Image API base (IIIF works; D2)
+    image_url           TEXT,                    -- delivery JPEG (METS DEFAULT); A2 caches it
+    thumb_url           TEXT,                    -- thumbnail URL (METS THUMBS jpg)
+    delivery            TEXT,                    -- 'iiif' | 'static': how images are served (D2)
     width               INTEGER,
     height              INTEGER,
     status              TEXT NOT NULL DEFAULT 'pending'
                             CHECK (status IN ('pending','segmented','recognized','skipped')),
     skip_reason         TEXT,                    -- set when status='skipped'
+    -- Image-cache manifest (A2), written by `leibniz images fetch`; kept orthogonal
+    -- to the pipeline `status` (a page can be cached while still 'pending' HTR).
+    local_path          TEXT,                    -- cached file, relative to the images root
+    n_bytes             INTEGER,                 -- size on disk
+    sha256              TEXT,                    -- content checksum (integrity + resume key)
+    fetched_at          TEXT,                    -- ISO-8601 timestamp the file was cached
     UNIQUE (work_id, seq)
 );
 
@@ -191,14 +213,43 @@ def connect(path: str | Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
     return conn
 
 
-def init_db(path: str | Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
-    """Create the schema if absent and return an open connection.
+# Columns added to ``pages`` after A0 (the image-cache manifest, A2). Fresh DBs
+# get them from SCHEMA_SQL; DBs created by an earlier phase are upgraded in place
+# by :func:`_migrate` (SQLite ``CREATE TABLE IF NOT EXISTS`` never alters columns).
+_PAGES_ADDED_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("image_url", "TEXT"),
+    ("thumb_url", "TEXT"),
+    ("delivery", "TEXT"),
+    ("local_path", "TEXT"),
+    ("n_bytes", "INTEGER"),
+    ("sha256", "TEXT"),
+    ("fetched_at", "TEXT"),
+)
 
-    Idempotent: every statement is ``IF NOT EXISTS``, so calling it on an
-    existing store is a no-op that just hands back a connection.
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Additively bring an existing store up to the current schema (idempotent).
+
+    Only ``ADD COLUMN`` migrations, so it never rewrites or drops data: a DB
+    harvested under the A1 schema keeps its ``works``/``pages`` rows and simply
+    gains the A2 image-cache columns (all nullable, defaulting to NULL).
+    """
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(pages)")}
+    for name, decl in _PAGES_ADDED_COLUMNS:
+        if name not in existing:
+            conn.execute(f"ALTER TABLE pages ADD COLUMN {name} {decl}")
+
+
+def init_db(path: str | Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
+    """Create the schema if absent, migrate it forward, and return a connection.
+
+    Idempotent: the DDL is all ``IF NOT EXISTS`` and :func:`_migrate` only adds
+    missing columns, so calling it on a fresh, an A1-era, or an already-current
+    store all converge on the same schema without data loss.
     """
     conn = connect(path)
     conn.executescript(SCHEMA_SQL)
+    _migrate(conn)
     conn.commit()
     return conn
 
@@ -234,21 +285,39 @@ class Work:
 
 @dataclass(slots=True)
 class Page:
-    """One canvas of a work. ``id`` is derived from ``work_id`` + ``seq``."""
+    """One canvas of a work. ``id`` is derived from ``work_id`` + ``seq``.
+
+    Carries three groups of fields: identity (``work_id``/``seq``), image
+    delivery (``image_service_url`` for IIIF deep-zoom; ``image_url``/``thumb_url``
+    the delivery derivatives A2 caches; ``delivery`` the mode), and the A2 cache
+    manifest (``local_path``/``n_bytes``/``sha256``/``fetched_at``).
+    """
 
     work_id: str
     seq: int
     canvas_id: str | None = None
     image_service_url: str | None = None
+    image_url: str | None = None
+    thumb_url: str | None = None
+    delivery: str | None = None
     width: int | None = None
     height: int | None = None
     status: str = "pending"
     skip_reason: str | None = None
+    local_path: str | None = None
+    n_bytes: int | None = None
+    sha256: str | None = None
+    fetched_at: str | None = None
 
     @property
     def id(self) -> str:
         """Canonical page id."""
         return page_id(self.work_id, self.seq)
+
+    @property
+    def is_cached(self) -> bool:
+        """True once the delivery derivative is downloaded and checksummed."""
+        return self.sha256 is not None
 
 
 def _work_from_row(row: sqlite3.Row) -> Work:
@@ -269,10 +338,17 @@ def _page_from_row(row: sqlite3.Row) -> Page:
         seq=row["seq"],
         canvas_id=row["canvas_id"],
         image_service_url=row["image_service_url"],
+        image_url=row["image_url"],
+        thumb_url=row["thumb_url"],
+        delivery=row["delivery"],
         width=row["width"],
         height=row["height"],
         status=row["status"],
         skip_reason=row["skip_reason"],
+        local_path=row["local_path"],
+        n_bytes=row["n_bytes"],
+        sha256=row["sha256"],
+        fetched_at=row["fetched_at"],
     )
 
 
@@ -333,21 +409,33 @@ def count_works(conn: sqlite3.Connection) -> int:
 
 
 def upsert_page(conn: sqlite3.Connection, page: Page) -> None:
-    """Insert a page, or update it in place if ``(work_id, seq)`` already exists."""
+    """Insert a page, or update its *derivation* fields if it already exists.
+
+    This is the write path for page *derivation* (from manifests or the METS
+    ``fileSec``). On conflict it refreshes the image-delivery fields but, by
+    design, **preserves** the A2 cache manifest (``local_path``/``n_bytes``/
+    ``sha256``/``fetched_at``) and the pipeline ``status``/``skip_reason``, and
+    uses ``COALESCE`` so a re-derivation that lacks a value never nulls out one
+    already stored. Re-running ``harvest``/``images pages`` is therefore safe
+    against a populated store — a downloaded image stays recorded.
+    """
     conn.execute(
         """
         INSERT INTO pages
-            (page_id, work_id, seq, canvas_id, image_service_url, width, height,
-             status, skip_reason)
-        VALUES (:page_id, :work_id, :seq, :canvas_id, :image_service_url, :width,
-                :height, :status, :skip_reason)
+            (page_id, work_id, seq, canvas_id, image_service_url, image_url,
+             thumb_url, delivery, width, height, status, skip_reason,
+             local_path, n_bytes, sha256, fetched_at)
+        VALUES (:page_id, :work_id, :seq, :canvas_id, :image_service_url, :image_url,
+                :thumb_url, :delivery, :width, :height, :status, :skip_reason,
+                :local_path, :n_bytes, :sha256, :fetched_at)
         ON CONFLICT(page_id) DO UPDATE SET
-            canvas_id         = excluded.canvas_id,
-            image_service_url = excluded.image_service_url,
-            width             = excluded.width,
-            height            = excluded.height,
-            status            = excluded.status,
-            skip_reason       = excluded.skip_reason
+            canvas_id         = COALESCE(excluded.canvas_id, pages.canvas_id),
+            image_service_url = COALESCE(excluded.image_service_url, pages.image_service_url),
+            image_url         = COALESCE(excluded.image_url, pages.image_url),
+            thumb_url         = COALESCE(excluded.thumb_url, pages.thumb_url),
+            delivery          = COALESCE(excluded.delivery, pages.delivery),
+            width             = COALESCE(excluded.width, pages.width),
+            height            = COALESCE(excluded.height, pages.height)
         """,
         {
             "page_id": page.id,
@@ -355,10 +443,17 @@ def upsert_page(conn: sqlite3.Connection, page: Page) -> None:
             "seq": page.seq,
             "canvas_id": page.canvas_id,
             "image_service_url": page.image_service_url,
+            "image_url": page.image_url,
+            "thumb_url": page.thumb_url,
+            "delivery": page.delivery,
             "width": page.width,
             "height": page.height,
             "status": page.status,
             "skip_reason": page.skip_reason,
+            "local_path": page.local_path,
+            "n_bytes": page.n_bytes,
+            "sha256": page.sha256,
+            "fetched_at": page.fetched_at,
         },
     )
 
@@ -378,6 +473,113 @@ def get_pages(conn: sqlite3.Connection, work_id: str) -> list[Page]:
 def count_pages(conn: sqlite3.Connection) -> int:
     """Total number of pages."""
     return conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0]
+
+
+# --------------------------------------------------------------------------- #
+# Image cache manifest (A2)
+# --------------------------------------------------------------------------- #
+
+
+def iter_fetch_pages(
+    conn: sqlite3.Connection,
+    *,
+    set_name: str | None = None,
+    work_ids: Sequence[str] | None = None,
+    only_unfetched: bool = True,
+) -> Iterator[Page]:
+    """Iterate pages that have a delivery URL, for the image fetcher.
+
+    Filters to a primary set (joins ``works``) and/or a list of works, and — by
+    default — to pages **not yet cached** (``sha256 IS NULL``), the resumable
+    work list. Pass ``only_unfetched=False`` to walk every target (e.g. for
+    ``images verify``). Ordered by ``(work_id, seq)`` so a slice reads as
+    contiguous folios.
+    """
+    sql = ["SELECT p.* FROM pages p"]
+    params: list[object] = []
+    where = ["p.image_url IS NOT NULL"]
+    if set_name is not None:
+        sql.append("JOIN works w ON w.gwlb_object_id = p.work_id")
+        where.append("w.set_name = ?")
+        params.append(set_name)
+    if work_ids:
+        placeholders = ",".join("?" * len(work_ids))
+        where.append(f"p.work_id IN ({placeholders})")
+        params.extend(work_ids)
+    if only_unfetched:
+        where.append("p.sha256 IS NULL")
+    sql.append("WHERE " + " AND ".join(where))
+    sql.append("ORDER BY p.work_id, p.seq")
+    for row in conn.execute(" ".join(sql), params):
+        yield _page_from_row(row)
+
+
+def mark_page_fetched(
+    conn: sqlite3.Connection,
+    page_id_: str,
+    *,
+    local_path: str,
+    n_bytes: int,
+    sha256: str,
+    width: int | None = None,
+    height: int | None = None,
+    fetched_at: str | None = None,
+) -> None:
+    """Record a downloaded delivery derivative in the ``pages`` manifest.
+
+    ``width``/``height`` are backfilled only when provided (static-JPEG works
+    have no dimensions in the METS, so the fetcher reads them from the file);
+    ``COALESCE`` keeps any dimension already known from an IIIF manifest.
+    """
+    conn.execute(
+        """
+        UPDATE pages
+           SET local_path = ?, n_bytes = ?, sha256 = ?, fetched_at = ?,
+               width  = COALESCE(?, width),
+               height = COALESCE(?, height)
+         WHERE page_id = ?
+        """,
+        (local_path, n_bytes, sha256, fetched_at or utcnow_iso(), width, height, page_id_),
+    )
+
+
+def clear_page_fetch(conn: sqlite3.Connection, page_id_: str) -> None:
+    """Forget a cached image (``--redo`` / a failed integrity check)."""
+    conn.execute(
+        "UPDATE pages SET local_path=NULL, n_bytes=NULL, sha256=NULL, fetched_at=NULL "
+        "WHERE page_id = ?",
+        (page_id_,),
+    )
+
+
+def count_fetch_targets(conn: sqlite3.Connection, *, set_name: str | None = None) -> int:
+    """Pages that have a delivery URL (the denominator for cache coverage)."""
+    if set_name is None:
+        return conn.execute("SELECT COUNT(*) FROM pages WHERE image_url IS NOT NULL").fetchone()[0]
+    return conn.execute(
+        "SELECT COUNT(*) FROM pages p JOIN works w ON w.gwlb_object_id = p.work_id "
+        "WHERE p.image_url IS NOT NULL AND w.set_name = ?",
+        (set_name,),
+    ).fetchone()[0]
+
+
+def count_pages_fetched(conn: sqlite3.Connection, *, set_name: str | None = None) -> int:
+    """Pages whose delivery derivative is cached (``sha256`` present)."""
+    if set_name is None:
+        return conn.execute("SELECT COUNT(*) FROM pages WHERE sha256 IS NOT NULL").fetchone()[0]
+    return conn.execute(
+        "SELECT COUNT(*) FROM pages p JOIN works w ON w.gwlb_object_id = p.work_id "
+        "WHERE p.sha256 IS NOT NULL AND w.set_name = ?",
+        (set_name,),
+    ).fetchone()[0]
+
+
+def sum_page_bytes(conn: sqlite3.Connection) -> int:
+    """Total bytes of cached delivery derivatives."""
+    row = conn.execute(
+        "SELECT COALESCE(SUM(n_bytes), 0) FROM pages WHERE sha256 IS NOT NULL"
+    ).fetchone()
+    return int(row[0])
 
 
 # --------------------------------------------------------------------------- #
@@ -428,3 +630,147 @@ def finish_run(
         (utcnow_iso(), n_input, n_ok, n_failed, run_id),
     )
     conn.commit()
+
+
+# --------------------------------------------------------------------------- #
+# Katalog records + crosswalk (A3)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(slots=True)
+class KatalogRecord:
+    """One BBAW Ritter-Katalog record (SPECS §4.3 ``katalog_records``).
+
+    ``metadata`` holds the full parsed row (title, incipit, dating, correspondent,
+    place, extent, and the GWLB object ids extracted from its outbound links —
+    ``metadata["gwlb_ids"]`` — which the crosswalk joins on). ``shelfmark_refs``
+    is the record's signature string(s); ``aa_refs`` a list of
+    ``{series, volume, piece, ...}`` Akademie-Ausgabe references.
+    """
+
+    record_id: str
+    metadata: dict = field(default_factory=dict)
+    shelfmark_refs: list[str] = field(default_factory=list)
+    aa_refs: list[dict] = field(default_factory=list)
+    transcription_snippet: str | None = None
+
+    @property
+    def gwlb_ids(self) -> list[str]:
+        """GWLB object ids this record links to (the primary crosswalk key)."""
+        return list(self.metadata.get("gwlb_ids") or [])
+
+
+@dataclass(slots=True)
+class CrosswalkMatch:
+    """A katalog-record ↔ work link with its method and confidence (§4.3)."""
+
+    katalog_record_id: str
+    work_id: str
+    match_method: str  # 'gwlb_link' | 'shelfmark' | 'manual' | ...
+    match_conf: float
+    page_range: str | None = None
+
+
+def _katalog_from_row(row: sqlite3.Row) -> KatalogRecord:
+    return KatalogRecord(
+        record_id=row["record_id"],
+        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+        shelfmark_refs=json.loads(row["shelfmark_refs"]) if row["shelfmark_refs"] else [],
+        aa_refs=json.loads(row["aa_refs"]) if row["aa_refs"] else [],
+        transcription_snippet=row["transcription_snippet"],
+    )
+
+
+def upsert_katalog_record(conn: sqlite3.Connection, rec: KatalogRecord) -> None:
+    """Insert/replace a katalog record (idempotent re-scrape by ``record_id``)."""
+    conn.execute(
+        """
+        INSERT INTO katalog_records
+            (record_id, metadata, shelfmark_refs, aa_refs, transcription_snippet)
+        VALUES (:record_id, :metadata, :shelfmark_refs, :aa_refs, :transcription_snippet)
+        ON CONFLICT(record_id) DO UPDATE SET
+            metadata              = excluded.metadata,
+            shelfmark_refs        = excluded.shelfmark_refs,
+            aa_refs               = excluded.aa_refs,
+            transcription_snippet = excluded.transcription_snippet
+        """,
+        {
+            "record_id": rec.record_id,
+            "metadata": json.dumps(rec.metadata, ensure_ascii=False) if rec.metadata else None,
+            "shelfmark_refs": json.dumps(rec.shelfmark_refs, ensure_ascii=False)
+            if rec.shelfmark_refs
+            else None,
+            "aa_refs": json.dumps(rec.aa_refs, ensure_ascii=False) if rec.aa_refs else None,
+            "transcription_snippet": rec.transcription_snippet,
+        },
+    )
+
+
+def get_katalog_record(conn: sqlite3.Connection, record_id: str) -> KatalogRecord | None:
+    """Fetch a katalog record by id, or ``None``."""
+    row = conn.execute("SELECT * FROM katalog_records WHERE record_id = ?", (record_id,)).fetchone()
+    return _katalog_from_row(row) if row is not None else None
+
+
+def iter_katalog_records(conn: sqlite3.Connection) -> Iterator[KatalogRecord]:
+    """Iterate all katalog records, ordered by id."""
+    for row in conn.execute("SELECT * FROM katalog_records ORDER BY record_id"):
+        yield _katalog_from_row(row)
+
+
+def count_katalog_records(conn: sqlite3.Connection) -> int:
+    """Total number of katalog records."""
+    return conn.execute("SELECT COUNT(*) FROM katalog_records").fetchone()[0]
+
+
+def upsert_crosswalk(conn: sqlite3.Connection, match: CrosswalkMatch) -> None:
+    """Record a crosswalk link, keeping the **higher-confidence** method on conflict.
+
+    A record and a work can be linked by more than one method (an explicit GWLB
+    link *and* a matching shelfmark); the pair is unique, so we retain the most
+    trustworthy one (``gwlb_link`` at conf 1.0 always wins over a shelfmark guess).
+    """
+    conn.execute(
+        """
+        INSERT INTO crosswalk
+            (katalog_record_id, work_id, page_range, match_method, match_conf)
+        VALUES (:rid, :wid, :page_range, :method, :conf)
+        ON CONFLICT(katalog_record_id, work_id) DO UPDATE SET
+            match_method = excluded.match_method,
+            match_conf   = excluded.match_conf,
+            page_range   = excluded.page_range
+        WHERE excluded.match_conf > crosswalk.match_conf
+        """,
+        {
+            "rid": match.katalog_record_id,
+            "wid": match.work_id,
+            "page_range": match.page_range,
+            "method": match.match_method,
+            "conf": match.match_conf,
+        },
+    )
+
+
+def iter_crosswalk(conn: sqlite3.Connection) -> Iterator[CrosswalkMatch]:
+    """Iterate all crosswalk links."""
+    for row in conn.execute(
+        "SELECT katalog_record_id, work_id, page_range, match_method, match_conf "
+        "FROM crosswalk ORDER BY work_id, katalog_record_id"
+    ):
+        yield CrosswalkMatch(
+            katalog_record_id=row["katalog_record_id"],
+            work_id=row["work_id"],
+            match_method=row["match_method"],
+            match_conf=row["match_conf"],
+            page_range=row["page_range"],
+        )
+
+
+def count_crosswalk(conn: sqlite3.Connection) -> int:
+    """Total number of crosswalk links."""
+    return conn.execute("SELECT COUNT(*) FROM crosswalk").fetchone()[0]
+
+
+def matched_work_ids(conn: sqlite3.Connection) -> set[str]:
+    """The set of work ids that have at least one crosswalk link."""
+    return {row[0] for row in conn.execute("SELECT DISTINCT work_id FROM crosswalk")}

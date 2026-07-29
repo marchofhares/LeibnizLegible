@@ -3,136 +3,140 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-29 (end of Phase A1)._
+_Last updated: 2026-07-29 (end of Phase A2 + A3)._
 
 ---
 
 ## Current state
 
-**Phase A1 (OAI/IIIF harvest → inventory + corpus census) — complete. Gate: GO.**
+**Phases A2 (image cache) and A3 (katalog crosswalk) — complete.** Both depend
+only on A1 (done); built and run this session. A0→A1→A2→A3 are all green.
 
-The harvest stage is built, tested, and run live against the GWLB. The project's
-first genuinely new artifact — the real page count of the digitized Leibniz
-Nachlass — exists in `reports/census.md`:
-
-- **2,225 unique works · 236,795 page images** — **within** the SPECS §1
-  expected band (150–250k), close to the folkloric "~200,000" estimate. The
-  gate stop-condition is **not** triggered; **A2 is green-lit.**
-- All endpoint facts in SPECS §1 verified live (OAI set counts match exactly).
-- **No machine-readable §44b TDM reservation** on either host
-  (`reports/crawl-posture.md`) — harvest proceeds under the SPECS §7.4 rails.
+- **A2** gives us a resumable, checksummed local image cache and — as a bonus —
+  the **full `pages` table** (236,795 rows), derived **offline** from the METS
+  we already cached. A live dev slice of **80 images** was pulled and verified.
+- **A3** joins the BBAW Ritter-Katalog to our works. A 6-query live sample
+  already crosswalks **1,094 / 2,225 works (49.2%)** with **99.96% GWLB-link
+  resolution**; the full scrape (an operator job) is documented.
 
 Everything is green and offline-testable:
 
-- `uv run ruff check .` / `ruff format --check .` — clean.
-- `uv run pytest` — **91 passed** (was 27; +64 for harvest/net/census).
+- `uv run ruff check .` / `ruff format --check .` — clean (57 files).
+- `uv run pytest` — **171 passed** (was 91; +80 for images + catalog).
 
-The A1 gate deliverable is the census; the `pages` table is populated for the
-IIIF-served works touched by the manifest validation slice, with the full pull
-left as a documented operator action (see Phase log). Nothing bulk beyond the
-OAI XML cache (`data/oai/`, ~200 MB, gitignored) was fetched.
+Bulk artifacts (the SQLite store, `data/images/`, `data/katalog/`, `data/oai/`)
+are gitignored. The committed deliverables are `reports/census.md` (now with an
+image-cache section) and **`reports/crosswalk.md`** (new).
 
-### What was built (A1)
+### ⚙️ Delivery-model correction (revises the A2 prompt; see Divergences)
+
+The A2 prompt assumed the IIIF Image API for every page. Per the A1 "Major
+drift", only ~1/3 of works are IIIF-served. **Resolution:** the GWLB METS
+`fileSec` — already inside the cached OAI ListRecords XML — carries an
+authoritative `DEFAULT` JPEG URL (`…/content/{id}/jpgs/default/{seq:08d}.jpg`)
+for **every** page, IIIF and static alike. A2 caches that uniform derivative
+across all 236,795 pages; the IIIF Image API service URL is still stored per
+page (`pages.image_service_url`) for D2 deep-zoom, but is not the cache source.
+This makes A2 uniform, offline-derivable, and free of URL guessing.
+
+### What was built (A2 + A3)
 
 ```
-src/leibniz/net.py           polite HTTP client (UA+contact, ≤1 req/s/host, backoff,
-                             follow_redirects toggle) — the SPECS §7.4 rails as code
-src/leibniz/harvest/
-  oai.py                     OAI-PMH ListRecords → works; defensive METS/MODS parse;
-                             cache-first, resumable (resumptionToken + expiry restart)
-  manifests.py               IIIF manifests → pages; cache-first; categorises
-                             no_manifest (static-JPEG-only works) vs failures
-  shelfmarks.py              coarse LH/LBr/Marg/LK family classifier (census coverage)
-  census.py                  compute + render reports/census.md
-  cli.py                     leibniz harvest {oai,manifests,census}
-src/leibniz/db.py            + runs bookkeeping (start_run/finish_run, utcnow_iso)
-reports/crawl-posture.md     robots/TDM baseline for GWLB + BBAW hosts
-reports/census.md            THE first real page count (publishable artifact)
-tests/                       test_{net,harvest_oai,harvest_manifests,shelfmarks,
-                             census,harvest_cli,runs}.py + fixtures/{oai,manifests}
+src/leibniz/images/            IMAGE CACHE (A2)
+  pages.py     derive pages (delivery URLs) from cached METS fileSec — offline
+  jpeg.py      dependency-free JPEG dimension + truncation reader (SOF/EOI walk)
+  fetch.py     fetch (resumable, integrity-retry) / verify / stats(+census)
+  cli.py       leibniz images {pages,fetch,verify,stats}
+src/leibniz/catalog/           KATALOG CROSSWALK (A3)
+  shelfmarks.py  robust LH/LBr/Marg/LK normaliser (Roman↔Arabic, Bl./S., Stück)
+  scrape.py      23-column result-table parser + polite enumeration (5000-cap aware)
+  crosswalk.py   gwlb_link (1.0) primary + shelfmark (0.7) secondary matcher
+  report.py      reports/crosswalk.md
+  cli.py         leibniz catalog {scrape,crosswalk,report}
+  __init__.py    KATALOG_ATTRIBUTION (CC BY 4.0)
+src/leibniz/db.py              + pages image-cache columns & migration; katalog_records
+                               + crosswalk typed helpers; git_sha()
+reports/crosswalk.md           A3 deliverable (match-rate by set/method, honest)
+reports/census.md              + "Image cache (Phase A2)" section
+tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
+                               mets/listrecords_filesec.xml, katalog/results_sample.html}
 ```
 
-### Decisions & divergences (repo wins; recorded per protocol)
+### A2 in numbers
 
-- **Object id is not always the 8-digit id SPECS §4.4 assumes.** Handschriften /
-  Leibnitiana use `00068642`-style ids; Briefwechsel + Rekonstruktionen use
-  Kalliope `DE-611-HS-…`; Marginalien use VD17 numeric ids (`733605036`,
-  `1016728174`). The `{id}:{seq:04d}` page-id scheme still holds (string id). We
-  store the OAI `<identifier>` verbatim — it is exactly what the content URLs use.
-- **Manifest URL is constructed** (`…/content/{id}/manifest.json`) when the METS
-  lacks a `mods:identifier[@type='iiif']` (the common case). See the IIIF drift
-  below for the crucial consequence.
-- **Set overlap is massive** (81.4% of works are in ≥2 Leibniz sets; nearly all
-  are also in `Leibnitiana`). A work's *primary* set is assigned deterministically
-  by priority (Handschriften → Briefwechsel → Marginalien → Rekonstruktionen →
-  Leibnitiana) from its own `setSpec` list, and the census dedups by object id.
-  The naive sum of set sizes (4,037) is ~1.8× the real 2,225 objects.
-- **Page count from the OAI METS alone.** The physical-structMap `page`-division
-  count equals the IIIF canvas count (checked 00068642: 4 == 4), so the gate
-  number needs no image/manifest fetch. `harvest manifests` cross-checks per-work.
-- **ruff:** added `flake8-bugbear.extend-immutable-calls` for `typer.Option`/
-  `typer.Argument` (idiomatic Typer defaults, not B008 violations).
-- **Repo-local `scratchpad/` gitignored** (session temp; the canonical scratchpad
-  is outside the repo).
+- **`pages` fully populated: 236,795 rows** (static 159,162 · iiif 77,633; 27
+  zero-page works) — matches the A1 census exactly. Derived offline in ~34 s from
+  `data/oai/`; **resolves Open Q #2.**
+- **Dev slice pulled live:** `00067974` (LH 35, 1, 13 — IIIF, 40 pp) +
+  `DE-611-HS-854976` (LBr. 464 — static, 40 pp) = **80 images, 126.3 MB**;
+  `images verify --deep` → 80/80 OK, 0 corruption.
+- **Mean page ≈ 1.6 MB → projected full pull ≈ 365 GB** (within SPECS' 200–400 GB).
+  Measured dimensions 1098×1793 … 4921×4394 px.
+- Fetch is **sequential**: with one GWLB host at ≤1 req/s (SPECS §7.4), per-host
+  concurrency is a no-op, so throughput is set by `--min-interval`, not threads.
 
-### ⚠️ Major drift: IIIF vs. static-JPEG delivery (revises SPECS §1.1)
+### A3 in numbers (live 6-query sample)
 
-SPECS §1.1 assumed IIIF Image API tiles from pyramid TIFFs for the *whole*
-Nachlass. Reality, measured this phase:
-
-- **~812 works / 77,633 pages (33%) are IIIF-served** (manifest + `iiif/{id}/ptif/…`
-  Image API). Almost all of Handschriften.
-- **~1,413 works / 159,162 pages (67%) are static-JPEG-only** — no manifest
-  (`…/manifest.json` 302-redirects to a viewer page), no Image API
-  (`iiif/{id}/ptif/…/info.json` → 404); images exist only at
-  `…/content/{id}/jpgs/{default,thumbs}/{seq:08d}.jpg`. **All** of Briefwechsel
-  and **most** of Marginalien.
-
-Signal: presence of `mods:identifier[@type='iiif']` in the METS (stored as
-`works.metadata.has_iiif_manifest`). Spot-checked (~9 works) and close but
-**imperfect** — one unflagged object (`DE-611-HS-4277399`) also served a
-manifest — so 812 is a **lower bound** on IIIF coverage; A2 must establish
-per-work delivery definitively. **Consequences for later phases:**
-
-- **A2** cannot use the IIIF Image API for the majority of pages; it must fall
-  back to the static JPEG derivative (`…/content/{id}/jpgs/default/…`, confirmed
-  200) and its prompt ("delivery via the IIIF Image API") needs this caveat.
-- **D2**'s OpenSeadragon deep-zoom only works for IIIF pages; static-JPEG pages
-  degrade to plain-image display.
+- **16,177 records scraped → 15,382 distinct**; **12,582 crosswalk links**.
+- **Records matched: 12,535 / 15,382 (81.5%).**
+- **Works matched: 1,094 / 2,225 = 49.2%** — from *six* queries.
+- By method: **gwlb_link 12,384 (+5 unresolved) · shelfmark 198.** Link→work
+  resolution = **99.96%** (the join is essentially exact).
+- **3 of 6 queries hit the 5000-row cap** (Reihe I,1 / I,2 / `sign_ol=LH 35`) —
+  flagged, not silently truncated. Full ≥80% coverage needs the full scrape.
 
 ---
 
 ## Phase log
 
+### A3 — Katalog crosswalk (2026-07-29) ✅
+
+Built `src/leibniz/catalog/*` and ran a live sample against `leibniz-katalog.bbaw.de`.
+
+- **Site structure (inspected live, documented in `scrape.py`):** server-rendered
+  Laravel app, **no API**; GET `/de/global-search?q=…` and `/de/extended-search?…`
+  (fields incl. `sign_ol`, `reihe`/`bd`/`nr` = AA series/vol/piece,
+  `absender_oder_adressat`, `datum_ab/bis`, and **`id_hannover`**); results are one
+  23-column HTML `<table>`; the **Signatur** cell links the scan as
+  `…/resolve?id={object_id}` = our works PK. **5000-row result cap**, no pagination.
+- **Normaliser** (`shelfmarks.py`): canonicalises LH/LBr/Marg/LK signatures —
+  Roman↔Arabic (`LH XXXV,3,5` ≡ `LH 35,3,5`), spacing/punctuation, `Bl.` leaf
+  capture, `S.` (Seite) + parenthetical drop, `Stück` kept (a distinct work).
+  Tested against messy real strings.
+- **Crosswalk**: GWLB link primary (conf 1.0), normalized-shelfmark secondary
+  (0.7); method + conf per link; higher-confidence-wins upsert.
+- **Deliverable** `reports/crosswalk.md`: coverage by set/method, unmatched
+  samples with reasons, operator command for the full scrape. CC BY attribution
+  recorded in `catalog.KATALOG_ATTRIBUTION`.
+- Raw HTML cached under `data/katalog/` (gitignored). ruff clean; catalog tests green.
+
+### A2 — Image cache (2026-07-29) ✅
+
+Built `src/leibniz/images/*` + extended the `pages` schema/manifest.
+
+- **Schema**: added `image_url,thumb_url,delivery,local_path,n_bytes,sha256,`
+  `fetched_at` to `pages` with an idempotent `ALTER TABLE` migration (A1-era DBs
+  upgrade in place, no data loss). `upsert_page` preserves the download manifest
+  + status on re-derivation (COALESCE).
+- **`images pages`**: parses the METS `fileSec`+physical structMap from the OAI
+  cache → per-page `DEFAULT` JPEG URL + thumb + delivery mode, offline. Populated
+  all 236,795 pages.
+- **`images fetch`**: downloads to `data/images/{oid}/{seq:04d}.jpg`, records
+  size/sha256/dims (dims read off the JPEG via a dependency-free SOF walk),
+  cache-first resume, JPEG-EOI integrity retry, `--set`/`--work`/`--limit`/`--redo`.
+- **`images verify`** (existence/size/`--deep` re-hash, gap count) + **`images
+  stats`** (counts/bytes/MP-histogram → appended to `census.md`, idempotently).
+- Ran the dev slice + `images stats`. Full corpus pull left as an operator command.
+
 ### A1 — OAI/IIIF harvest → inventory + corpus census (2026-07-29) ✅ Gate: GO
 
 Built `src/leibniz/net.py` + `src/leibniz/harvest/*` and ran the harvest live.
-
-- **Crawl posture** (`reports/crawl-posture.md`): probed `robots.txt`, headers,
-  and every §44b TDM mechanism (`/.well-known/tdmrep.json`, `TDM-Reservation`/
-  `X-Robots-Tag` headers, `tdm-reservation` meta) on both `digitale-sammlungen.gwlb.de`
-  and `leibniz-katalog.bbaw.de`. **No reservation exists**; neither host serves a
-  `robots.txt` with rules (GWLB 302s into the TYPO3 app; BBAW 404s). Verdict: proceed.
-- **`harvest oai`**: paged `ListRecords` (`metadataPrefix=mets`, 5 records/page)
-  over all five sets, ~810 requests at ≤1 req/s (~14 min), raw XML cached under
-  `data/oai/`. Parsed METS/MODS → 2,225 works. Cache-first re-runs re-parse offline.
-- **`harvest manifests`**: validated on a 13-work stratified slice — 3 IIIF works
-  → 302 pages populated; 6 correctly categorised `no_manifest`; fail-fast via
-  `follow_redirects=False`. The full manifest pull (and full `pages` population,
-  incl. the static-JPEG path) is left as an operator action for A2's slice.
-- **`reports/census.md`**: the first real page count, written as a publishable
-  artifact (per-set, overlap cross-check, IIIF/static split, pages-per-work
-  distribution, shelfmark coverage 98.2%, anomalies).
-- Tooling: ruff clean, **91** pytest green, all offline (fixtures trimmed from real
-  GWLB responses).
+2,225 works · 236,795 page images (within the 150–250k gate band). No §44b TDM
+reservation. `reports/census.md` published. (Full detail retained in git history.)
 
 ### A0 — Repo scaffold (2026-07-28) ✅
 
-Scaffold per PROMPTS.md A0: `pyproject.toml` + `leibniz` entry point; the
-`src/leibniz/` skeleton; `tests/`; `.gitignore`, `.env.example`, `data/`.
-`legal.py` (§70/§71 expiry registry, years verified against leibnizedition.de)
-and `db.py` (seven SPECS §4.3 tables, idempotent `init_db`, typed works/pages
-helpers). 27 tests green.
+Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 ---
 
@@ -140,75 +144,61 @@ helpers). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | 91 (offline) |
-| **Unique works** | **2,225** |
-| **Unique page images** | **236,795** — within the 150–250k gate band ✅ |
-| OAI records (with overlap) | 4,037; 1,811 works (81.4%) in ≥2 Leibniz sets |
-| IIIF-served | 812 works / 77,633 pages (33%) |
-| Static-JPEG-only | 1,413 works / 159,162 pages (67%) |
-| Pages/work | mean 106.4 · median 26 · max 3,572 (`DE-611-HS-3618673`, LBr. F 20) |
-| Shelfmark coverage (parseable LH/LBr/Marg) | 98.2% |
-| Anomalies | 27 zero-canvas · 24 no-shelfmark · 56 shared-shelfmark strings |
+| Tests passing | **171** (offline) |
+| Unique works · page images | 2,225 · **236,795** |
+| **`pages` rows populated** | **236,795** (static 159,162 · iiif 77,633) |
+| Images cached (dev slice) | 80 · 126.3 MB · verify 80/80 OK |
+| Mean page size · full-pull estimate | ~1.6 MB · **≈ 365 GB** |
+| Katalog records scraped (sample) | 15,382 (12,384 GWLB-linked) |
+| **Crosswalk: works matched** | **1,094 / 2,225 (49.2%)** from 6 queries |
+| Crosswalk link→work resolution | 99.96% (5 unresolved of 12,389) |
+| Katalog result cap (per query) | 5,000 rows (no pagination) |
 
-**Page images per primary set** (disjoint; sums to the unique total):
+Per-set crosswalk coverage (sample): Handschriften 401/756 (53.0%) ·
+Briefwechsel 545/1,059 (51.5%) · Marginalien 146/396 (36.9%).
 
-| Set | Works | Pages |
-| --- | ---: | ---: |
-| LeibnizMarginalien | 396 | 103,887 |
-| LeibnizBriefwechsel | 1,059 | 72,284 |
-| LeibnizHandschriften | 756 | 58,828 |
-| Leibnitiana (residual) | 12 | 1,768 |
-| leibniz-rekonstruktionen | 2 | 28 |
-
-(Marginalien lead in *pages* because they are annotated **printed books**, not
-autograph manuscripts — high page counts, but Leibniz's marginalia are the point.)
-
-Legal registry (from A0, unchanged): 42 entries; 32 free today; upcoming
-expiries I,17 · IV,4 (2027), III,5 · VII,3 (2029), … VII,8 (2050).
+Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ---
 
 ## Open questions
 
-1. **IIIF vs static-JPEG delivery (A2/D2 design).** ~67% of pages are static-JPEG
-   only. A2 must fetch those from `…/content/{id}/jpgs/…` (not the Image API) and
-   populate their `pages` rows (dimensions unavailable without downloading; the
-   METS has none). The `has_iiif_manifest` flag is a *lower bound* — verify
-   per-work in A2 (at least one unflagged object had a manifest).
-2. **`pages` population is partial.** Only the IIIF works in the A1 validation
-   slice have `pages` rows. Full population (IIIF via manifests, static via
-   METS structMap / static-JPEG enumeration) folds into A2, where image delivery
-   is handled anyway. Decide there whether to derive static-work pages from the
-   cached METS `fileSec`/`structMap` (offline, already have it) or on download.
-3. **Marginalien scope.** 396 annotated printed books, 103,887 pages (44% of the
-   corpus by pages). In scope per SPECS (LeibnizMarginalien set), but the HTR
-   target is Leibniz's *marginal annotations*, not the printed body text — a
-   segmentation/stratum concern for C1/C4, flagged early.
-4. **Shared-shelfmark strings (56).** Mostly multi-volume printed Marginalien
-   where each part is a separate work under one `Leibn. Marg. N` base signature
-   (e.g. `ZEN Leibn. Marg. 41` → 29 works). Legitimate, but the A3 shelfmark
-   normaliser + crosswalk must handle part suffixes (`:1`, `, Stück 1`).
-5. **`leibnizcentral.de` dead links in METS.** DVLINKS `dv:reference` points to
-   the defunct LeibnizCentral (SPECS §1 already notes it dead) — harmless, ignored.
-6. _(A0, still open)_ §71 editio-princeps assumption; re-edition term restarts
-   (II,1 2006, Reihe VI 1990 reprints) — for the lawyer memo (SPECS §7.5).
+1. ~~IIIF vs static delivery (A2).~~ **Resolved for A2:** cache the uniform METS
+   `DEFAULT` JPEG for every page. **D2 still** must degrade to a plain image where
+   no IIIF Image API exists (only the ~33% IIIF works get deep-zoom).
+2. ~~`pages` population is partial.~~ **Resolved:** all 236,795 pages derived
+   offline from the METS `fileSec` via `images pages`.
+3. **Katalog full scrape is an operator job.** The 5000-row cap means enumeration
+   must partition into sub-cap slices (by AA volume / signature prefix, deepened
+   on a cap warning). The `id_hannover` field could enumerate the *digitized*
+   subset directly — worth trying at scale. A TELOTA dump (SPECS §8) would moot it.
+4. **Shelfmark-secondary limits (A3).** The normaliser matches LH/LBr cleanly, but
+   some Marginalien records carry page/prose signatures (`Leibn. Marg. 10, 1, S.
+   154-166`; relocated `(jetzt LK-MOW …)` notes) that don't match a work key —
+   because the *work's* shelfmark form differs (`ZEN Leibn. Marg. N` vs the
+   record's part/page form) or the work isn't in the sample. Impact is small
+   (shelfmark is 198 of 12,582 links); the GWLB link carries the crosswalk. Ties
+   into the multi-volume Marginalien part-suffix issue below.
+5. **Marginalien scope** (from A1). 396 annotated printed books, 103,887 pages
+   (44% of pages). HTR target is the *marginal annotations*, not the printed body —
+   a C1/C4 segmentation/stratum concern, flagged early.
+6. _(A0)_ §71 editio-princeps assumption; re-edition term restarts — for the
+   lawyer memo (SPECS §7.5).
 
 ---
 
 ## Next
 
-**Recommended: Phase A2 — Image cache**, now green-lit by the A1 gate. But read
-Open question #1 first: A2's prompt assumes the IIIF Image API for every page;
-**that holds for only ~1/3 of pages**. A2 must add a static-JPEG delivery path
-(`…/content/{id}/jpgs/default/{seq:08d}.jpg`) and can derive per-page rows from
-the already-cached METS. Keep the full pull as an operator command (~200–400 GB).
+**A2 and A3 are done.** Per SPECS §5 sequencing (A1→A2→A3 and B1→B2 interleave; C
+sequential; D after C4), the B track is now the critical path:
 
-**Also ready:**
-- **A3 (katalog crosswalk)** — depends on A1 (done). The 98.2% shelfmark coverage
-  and the parsed LH/LBr/Marg signatures are a strong basis; note the multi-volume
-  part-suffix issue (Open question #4).
-- **B1 (benchmark harness + PHILIUMM reproduction)** — independent of A1–A3
-  (depends only on A0); a good parallel track.
+- **Recommended: Phase B1 — Benchmark harness + PHILIUMM reproduction (gate).**
+  Independent of A1–A3 (needs only A0). Reproduces the PHILIUMM CER (~8.3%) before
+  anything is built on it; its verdict gates the C phases. A standalone publishable
+  artifact.
+- **Then Phase B2 — Retro-alignment prototype (gate).** Now unblocked: it needs
+  the A2 dev image slice (have it) **and** a working model from B1. Pick a
+  §70-expired Reihe I volume (`legal.py`) + a fair-copy letter in the dev slice
+  with a confident crosswalk match (A3 gives these).
 
-Sequencing per SPECS §5: A1→A2→A3 and B1→B2 can interleave; C sequential; D
-follows C4.
+No blockers. The dev image slice + the crosswalk are exactly the inputs B2 wants.
