@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:mets="http://www.loc.gov/METS/"
+         xmlns:mods="http://www.loc.gov/mods/v3"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <responseDate>2026-07-29T00:00:00Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="mets" set="LeibnizHandschriften">https://digitale-sammlungen.gwlb.de/oai2</request>
+  <ListRecords>
+
+    <!-- IIIF record: mods:identifier[@type='iiif'] present; 2 pages, each with a
+         DEFAULT + THUMBS jpg and a DOWNLOAD pdf. delivery must be 'iiif' and a
+         ptif service url must be constructed. -->
+    <record>
+      <header>
+        <identifier>IIIF-001</identifier>
+        <datestamp>2022-01-01T00:00:00Z</datestamp>
+        <setSpec>LeibnizHandschriften</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000"><mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+            <mods:mods>
+              <mods:location><mods:shelfLocator>LH 1, 1, 1</mods:shelfLocator></mods:location>
+              <mods:identifier type="iiif">https://digitale-sammlungen.gwlb.de/content/IIIF-001/manifest.json</mods:identifier>
+              <mods:titleInfo><mods:title>An IIIF-served manuscript</mods:title></mods:titleInfo>
+            </mods:mods>
+          </mets:xmlData></mets:mdWrap></mets:dmdSec>
+          <mets:fileSec>
+            <mets:fileGrp USE="THUMBS">
+              <mets:file ID="FILE_0001_THUMBS" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/IIIF-001/jpgs/thumbs/00000001.jpg"/></mets:file>
+              <mets:file ID="FILE_0002_THUMBS" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/IIIF-001/jpgs/thumbs/00000002.jpg"/></mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp USE="DEFAULT">
+              <mets:file ID="FILE_0001_DEFAULT" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/IIIF-001/jpgs/default/00000001.jpg"/></mets:file>
+              <mets:file ID="FILE_0002_DEFAULT" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/IIIF-001/jpgs/default/00000002.jpg"/></mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp USE="DOWNLOAD">
+              <mets:file ID="FILE_0001_DOWNLOAD" MIMETYPE="application/pdf"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/IIIF-001/pdf/00000001.pdf"/></mets:file>
+            </mets:fileGrp>
+          </mets:fileSec>
+          <mets:structMap TYPE="LOGICAL">
+            <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Manuscript"/>
+          </mets:structMap>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence">
+              <mets:div ID="PHYS_0001" ORDER="1" ORDERLABEL="1r" TYPE="page">
+                <mets:fptr FILEID="FILE_0001_THUMBS"/>
+                <mets:fptr FILEID="FILE_0001_DEFAULT"/>
+                <mets:fptr FILEID="FILE_0001_DOWNLOAD"/>
+              </mets:div>
+              <mets:div ID="PHYS_0002" ORDER="2" ORDERLABEL="1v" TYPE="page">
+                <mets:fptr FILEID="FILE_0002_THUMBS"/>
+                <mets:fptr FILEID="FILE_0002_DEFAULT"/>
+              </mets:div>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+    <!-- Static record: no iiif identifier. Page 1 has a MAX jpg but no DEFAULT
+         (image_url must fall back to MAX); page 2 has only a THUMBS entry (both
+         image_url and — well, thumb present; image_url must be reconstructed from
+         the GWLB convention). delivery must be 'static', service url None. -->
+    <record>
+      <header>
+        <identifier>STATIC-002</identifier>
+        <datestamp>2022-02-02T00:00:00Z</datestamp>
+        <setSpec>LeibnizBriefwechsel</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000"><mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+            <mods:mods>
+              <mods:location><mods:shelfLocator>LBr. 42</mods:shelfLocator></mods:location>
+              <mods:titleInfo><mods:title>A static-JPEG-only letter bundle</mods:title></mods:titleInfo>
+            </mods:mods>
+          </mets:xmlData></mets:mdWrap></mets:dmdSec>
+          <mets:fileSec>
+            <mets:fileGrp USE="MAX">
+              <mets:file ID="FILE_0001_MAX" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/STATIC-002/jpgs/max/00000001.jpg"/></mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp USE="THUMBS">
+              <mets:file ID="FILE_0001_THUMBS" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/STATIC-002/jpgs/thumbs/00000001.jpg"/></mets:file>
+              <mets:file ID="FILE_0002_THUMBS" MIMETYPE="image/jpeg"><mets:FLocat LOCTYPE="URL" xlink:href="https://digitale-sammlungen.gwlb.de/content/STATIC-002/jpgs/thumbs/00000002.jpg"/></mets:file>
+            </mets:fileGrp>
+          </mets:fileSec>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence">
+              <mets:div ID="PHYS_0001" ORDER="1" ORDERLABEL="1r" TYPE="page">
+                <mets:fptr FILEID="FILE_0001_MAX"/>
+                <mets:fptr FILEID="FILE_0001_THUMBS"/>
+              </mets:div>
+              <mets:div ID="PHYS_0002" ORDER="2" ORDERLABEL="1v" TYPE="page">
+                <mets:fptr FILEID="FILE_0002_THUMBS"/>
+              </mets:div>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+  </ListRecords>
+</OAI-PMH>
