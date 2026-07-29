@@ -61,6 +61,7 @@ class WorkRow:
     title: str | None
     shelfmarks: list[str]
     leibniz_sets: list[str]
+    has_iiif: bool = False
 
 
 @dataclass(slots=True)
@@ -70,6 +71,8 @@ class SetStats:
     membership_works: int  # counted in every set it belongs to (overlapping)
     primary_works: int  # counted once, under its primary set (dedup)
     primary_pages: int
+    iiif_works: int = 0  # of the primary works, how many have an IIIF manifest
+    iiif_pages: int = 0
 
 
 @dataclass(slots=True)
@@ -87,6 +90,8 @@ class CensusData:
     no_shelfmark: int
     duplicate_shelfmarks: list[tuple[str, list[str]]]
     multi_set_works: int
+    iiif_works: int
+    iiif_pages: int
 
     @property
     def in_gate_band(self) -> bool:
@@ -105,6 +110,7 @@ def _load_works(conn) -> list[WorkRow]:
                 title=w.title,
                 shelfmarks=list(w.shelfmarks or []),
                 leibniz_sets=list(meta.get("leibniz_sets") or []),
+                has_iiif=bool(meta.get("has_iiif_manifest")),
             )
         )
     return rows
@@ -138,6 +144,7 @@ def compute_census(conn, *, generated_at: str) -> CensusData:
     for s in LEIBNIZ_SETS:
         members = [r for r in rows if s in r.leibniz_sets]
         primary = [r for r in rows if r.primary_set == s]
+        iiif = [r for r in primary if r.has_iiif]
         set_stats.append(
             SetStats(
                 set_name=s,
@@ -145,6 +152,8 @@ def compute_census(conn, *, generated_at: str) -> CensusData:
                 membership_works=len(members),
                 primary_works=len(primary),
                 primary_pages=sum(r.n_canvases for r in primary),
+                iiif_works=len(iiif),
+                iiif_pages=sum(r.n_canvases for r in iiif),
             )
         )
 
@@ -179,6 +188,8 @@ def compute_census(conn, *, generated_at: str) -> CensusData:
         no_shelfmark=sum(1 for r in rows if not r.shelfmarks),
         duplicate_shelfmarks=duplicate_shelfmarks,
         multi_set_works=sum(1 for r in rows if len(r.leibniz_sets) > 1),
+        iiif_works=sum(1 for r in rows if r.has_iiif),
+        iiif_pages=sum(r.n_canvases for r in rows if r.has_iiif),
     )
 
 
@@ -193,6 +204,14 @@ def _pct(part: int, whole: int) -> str:
 
 def _fmt(n: int) -> str:
     return f"{n:,}"
+
+
+def _oneline(text: str | None, limit: int = 80) -> str:
+    """Collapse MODS whitespace (titles carry embedded tabs/newlines) + truncate."""
+    if not text:
+        return "untitled"
+    clean = " ".join(text.split())
+    return clean if len(clean) <= limit else clean[: limit - 1] + "…"
 
 
 def render_census(d: CensusData) -> str:
@@ -286,6 +305,47 @@ def render_census(d: CensusData) -> str:
     )
     add("")
 
+    # -- Image delivery ----------------------------------------------------- #
+    static_works = d.n_works - d.iiif_works
+    static_pages = d.n_pages - d.iiif_pages
+    add("## Image delivery: IIIF vs. static JPEG")
+    add("")
+    add(
+        "A finding that revises SPECS §1.1 (which assumed IIIF Image API tiles from "
+        "pyramid TIFFs for the whole Nachlass): **only part of the corpus is served "
+        "via IIIF.** Works whose METS carries a `mods:identifier[@type='iiif']` have a "
+        "Presentation manifest and an Image API service (`…/iiif/{id}/ptif/…`); the "
+        "rest 302-redirect `…/manifest.json` to a viewer page and expose only static "
+        "JPEG derivatives at `…/content/{id}/jpgs/…`. Spot-checks (~9 works) confirm "
+        "the flag tracks real availability closely, though not perfectly (one "
+        "unflagged object also served a manifest), so treat this as the lower bound on "
+        "IIIF coverage; A2 establishes per-work delivery definitively."
+    )
+    add("")
+    add(
+        f"- **IIIF-served works:** {_fmt(d.iiif_works)} ({_pct(d.iiif_works, d.n_works)}), "
+        f"{_fmt(d.iiif_pages)} pages ({_pct(d.iiif_pages, d.n_pages)})."
+    )
+    add(
+        f"- **Static-JPEG-only works:** {_fmt(static_works)} ({_pct(static_works, d.n_works)}), "
+        f"{_fmt(static_pages)} pages ({_pct(static_pages, d.n_pages)})."
+    )
+    add("")
+    add("| Primary set | IIIF works | Static-only works | IIIF pages | Static pages |")
+    add("| --- | ---: | ---: | ---: | ---: |")
+    for s in d.set_stats:
+        add(
+            f"| {s.set_name} | {_fmt(s.iiif_works)} | {_fmt(s.primary_works - s.iiif_works)} "
+            f"| {_fmt(s.iiif_pages)} | {_fmt(s.primary_pages - s.iiif_pages)} |"
+        )
+    add("")
+    add(
+        "Implication: A2's image cache cannot use the IIIF Image API for the majority "
+        "of pages — it must fall back to the static JPEG derivative; D2's deep-zoom "
+        "viewer likewise degrades to plain images where no Image API exists."
+    )
+    add("")
+
     # -- Distribution ------------------------------------------------------- #
     add("## Pages per work")
     add("")
@@ -345,7 +405,7 @@ def render_census(d: CensusData) -> str:
         "with no physical pages (e.g. multi-part parents)."
     )
     for r in d.zero_canvas[:8]:
-        add(f"  - `{r.object_id}` ({r.primary_set}) — {r.title or 'untitled'}")
+        add(f"  - `{r.object_id}` ({r.primary_set}) — {_oneline(r.title)}")
     add(
         f"- **Works with no shelfmark:** {_fmt(d.no_shelfmark)} "
         f"({_pct(d.no_shelfmark, d.n_works)})."

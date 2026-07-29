@@ -119,16 +119,32 @@ def test_harvest_manifests_flags_count_mismatch(tmp_path) -> None:
     conn.close()
 
 
-def test_harvest_manifests_collects_failures(tmp_path) -> None:
+def test_harvest_manifests_categorises_no_manifest(tmp_path) -> None:
+    # A non-JSON body (what a 302-to-viewer redirect yields) is "no manifest",
+    # not a hard failure — the static-JPEG-only majority of the corpus.
     conn = db.init_db(":memory:")
     _seed(conn, "good", "https://gwlb/m/good.json", 4)
-    _seed(conn, "bad", "https://gwlb/m/bad.json", 1)
+    _seed(conn, "static", "https://gwlb/m/static.json", 1)
     client = FakeManifestClient(
-        {"https://gwlb/m/good.json": REAL, "https://gwlb/m/bad.json": b"not json{"}
+        {"https://gwlb/m/good.json": REAL, "https://gwlb/m/static.json": b""}
     )
     stats = manifests.harvest_manifests(conn, client=client, cache_dir=tmp_path / "m")
     assert stats.pages == 4  # only the good work's canvases
-    assert [oid for oid, _ in stats.failures] == ["bad"]
+    assert stats.no_manifest == ["static"]
+    assert stats.failures == []
+    # The non-manifest body must not be cached.
+    assert not (tmp_path / "m" / "static.json").exists()
+    conn.close()
+
+
+def test_harvest_manifests_reports_hard_failure(tmp_path) -> None:
+    conn = db.init_db(":memory:")
+    db.upsert_work(conn, db.Work(gwlb_object_id="nomurl", set_name="LeibnizHandschriften"))
+    stats = manifests.harvest_manifests(
+        conn, client=FakeManifestClient({}), cache_dir=tmp_path / "m"
+    )
+    assert [oid for oid, _ in stats.failures] == ["nomurl"]  # no manifest_url → failure
+    assert stats.no_manifest == []
     conn.close()
 
 

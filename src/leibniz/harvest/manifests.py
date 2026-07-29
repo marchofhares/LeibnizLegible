@@ -166,6 +166,7 @@ class ManifestStats:
     fetched: int = 0
     cached: int = 0
     pages: int = 0
+    no_manifest: list[str] = field(default_factory=list)  # no IIIF manifest (redirect/HTML/empty)
     failures: list[tuple[str, str]] = field(default_factory=list)
     count_mismatches: list[tuple[str, int, int]] = field(default_factory=list)
 
@@ -190,8 +191,17 @@ def harvest_manifests(
     """Fetch/parse each work's IIIF manifest into ``pages`` (cache-first).
 
     ``works`` restricts the pull to a slice (e.g. one set, or a dev sample); the
-    default is every work in the store. Per-work failures are collected, not
-    raised, so one bad manifest never sinks a corpus run.
+    default is every work in the store. Outcomes are categorised, never raised:
+
+    * ``no_manifest`` — the object has no IIIF manifest. A large share of the
+      corpus (all Briefwechsel, most Marginalien; ~1,400 works) is delivered as
+      static JPEGs only, and ``…/content/{id}/manifest.json`` 302-redirects to a
+      viewer page. Give this client ``follow_redirects=False`` so such a work
+      costs one request, not a redirect chase; the non-JSON body lands here.
+    * ``failures`` — a genuine error (network, missing ``manifest_url``).
+
+    Only a successfully parsed manifest is written to the cache, so redirect/HTML
+    bodies never pollute it.
     """
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -201,31 +211,40 @@ def harvest_manifests(
     stats = ManifestStats()
     for work in works:
         stats.works += 1
-        path = _cache_path(cache_dir, work.gwlb_object_id)
+        oid = work.gwlb_object_id
+        path = _cache_path(cache_dir, oid)
         try:
             if path.exists() and not force:
-                raw = path.read_bytes()
-                stats.cached += 1
+                raw, from_cache = path.read_bytes(), True
             else:
                 if not work.manifest_url:
                     raise ValueError("work has no manifest_url")
-                raw = client.get_bytes(work.manifest_url)
-                path.write_bytes(raw)
-                stats.fetched += 1
-            manifest = json.loads(raw)
-            canvases = parse_manifest(manifest)
+                raw, from_cache = client.get_bytes(work.manifest_url), False
         except Exception as exc:  # noqa: BLE001 — collect, don't abort the corpus
-            stats.failures.append((work.gwlb_object_id, f"{type(exc).__name__}: {exc}"))
+            stats.failures.append((oid, f"{type(exc).__name__}: {exc}"))
             continue
 
+        try:
+            canvases = parse_manifest(json.loads(raw))
+        except (json.JSONDecodeError, ValueError, TypeError):
+            # Redirected to a viewer page / empty body → no IIIF manifest exists.
+            stats.no_manifest.append(oid)
+            continue
+
+        if from_cache:
+            stats.cached += 1
+        else:
+            path.write_bytes(raw)  # cache only valid manifests
+            stats.fetched += 1
+
         for canvas in canvases:
-            db.upsert_page(conn, to_page(work.gwlb_object_id, canvas))
+            db.upsert_page(conn, to_page(oid, canvas))
         stats.pages += len(canvases)
         if work.n_canvases is not None and work.n_canvases != len(canvases):
-            stats.count_mismatches.append((work.gwlb_object_id, work.n_canvases, len(canvases)))
+            stats.count_mismatches.append((oid, work.n_canvases, len(canvases)))
         conn.commit()
         if progress is not None:
-            progress(work.gwlb_object_id, len(canvases))
+            progress(oid, len(canvases))
     return stats
 
 

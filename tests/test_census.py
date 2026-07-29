@@ -6,14 +6,14 @@ from leibniz import db
 from leibniz.harvest import census
 
 
-def _work(conn, oid, primary, sets, pages, shelfmarks) -> None:
+def _work(conn, oid, primary, sets, pages, shelfmarks, has_iiif=False) -> None:
     db.upsert_work(
         conn,
         db.Work(
             gwlb_object_id=oid,
             set_name=primary,
             shelfmarks=shelfmarks,
-            metadata={"leibniz_sets": sets},
+            metadata={"leibniz_sets": sets, "has_iiif_manifest": has_iiif},
             n_canvases=pages,
         ),
     )
@@ -79,6 +79,20 @@ def test_shelfmark_coverage() -> None:
     cov = d.coverage_overall
     assert cov["LH"] == 2 and cov["LBr"] == 1 and cov["Marg"] == 1
     assert cov["other"] == 1 and cov["none"] == 1 and cov["LK"] == 0
+    conn.close()
+
+
+def test_image_delivery_split() -> None:
+    conn = db.init_db(":memory:")
+    _work(conn, "I", "LeibnizHandschriften", ["LeibnizHandschriften"], 40, ["LH 1"], has_iiif=True)
+    _work(conn, "S", "LeibnizBriefwechsel", ["LeibnizBriefwechsel"], 60, ["LBr. 1"], has_iiif=False)
+    d = census.compute_census(conn, generated_at="x")
+    assert d.iiif_works == 1 and d.iiif_pages == 40
+    by = {s.set_name: s for s in d.set_stats}
+    assert by["LeibnizHandschriften"].iiif_works == 1
+    assert by["LeibnizBriefwechsel"].iiif_works == 0
+    md = census.render_census(d)
+    assert "## Image delivery" in md
     conn.close()
 
 

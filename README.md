@@ -59,9 +59,12 @@ re-fetching. See `reports/crawl-posture.md` for the crawl-etiquette baseline.
 
 ## Status
 
-Phase **A0 (repo scaffold)** is complete: installable package, runnable CLI, the
-database schema, and the legal registry, all with green lint + tests. Next up is
-**A1** (OAI/IIIF harvest → the first real corpus page count). See `STATUS.md`.
+Phase **A1 (OAI/IIIF harvest)** is complete. The harvest stage produced the
+project's first real artifact — a corpus census of **2,225 works / 236,795 page
+images** (`reports/census.md`), within the expected band, so the gate is **GO**.
+A notable finding: only ~⅓ of pages are IIIF-served; the rest are static JPEG
+only (revises SPECS §1.1 — see `STATUS.md`). Next up is **A2** (image cache) and
+**A3** (katalog crosswalk); **B1** (benchmark) can run in parallel. See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

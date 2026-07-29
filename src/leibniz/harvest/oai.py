@@ -94,6 +94,7 @@ class ParsedRecord:
     shelfmarks: list[str]
     manifest_url: str
     n_canvases: int
+    has_iiif: bool = False  # METS carries mods:identifier[@type='iiif'] (has a manifest)
     datestamp: str | None = None
     dating: str | None = None
     extent: str | None = None
@@ -228,6 +229,7 @@ def parse_record(rec_el: etree._Element) -> ParsedRecord | None:
         shelfmarks=shelfmarks,
         manifest_url=iiif or manifest_fallback,
         n_canvases=n_canvases,
+        has_iiif=iiif is not None,
         datestamp=datestamp,
         dating=dating,
         extent=extent,
@@ -275,6 +277,7 @@ def to_work(rec: ParsedRecord, harvest_set: str) -> db.Work:
             "leibniz_sets": rec.leibniz_sets,
             "setspecs": rec.setspecs,
             "harvest_set": harvest_set,
+            "has_iiif_manifest": rec.has_iiif,
             "datestamp": rec.datestamp,
             "dating": rec.dating,
             "extent": rec.extent,

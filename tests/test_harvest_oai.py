@@ -59,8 +59,9 @@ def test_parse_record_8digit_with_iiif_and_dual_shelfmark() -> None:
     assert rec.n_canvases == 2
     # Dual normalisation kept as distinct strings (A3 reconciles them).
     assert rec.shelfmarks == ["LH XXXV, 3, 5", "LH 35, 3, 5"]
-    # iiif identifier present → used verbatim.
+    # iiif identifier present → used verbatim, and flagged as IIIF-served.
     assert rec.manifest_url.endswith("/content/00099001/manifest.json")
+    assert rec.has_iiif is True
     assert rec.primary_set == "LeibnizHandschriften"
     assert rec.leibniz_sets == ["LeibnizHandschriften", "Leibnitiana"]
     assert rec.dating == "1680"
@@ -73,8 +74,9 @@ def test_parse_record_de611_constructs_manifest_url() -> None:
     assert rec.object_id == "DE-611-HS-900001"
     assert rec.n_canvases == 3
     assert rec.shelfmarks == ["LBr. 57"]
-    # No iiif identifier → manifest URL constructed from the id.
+    # No iiif identifier → manifest URL constructed from the id, flagged non-IIIF.
     assert rec.manifest_url == f"{oai.CONTENT_BASE}/DE-611-HS-900001/manifest.json"
+    assert rec.has_iiif is False
     assert rec.primary_set == "LeibnizBriefwechsel"
 
 
@@ -117,6 +119,7 @@ def test_to_work_maps_fields() -> None:
     assert work.n_canvases == 2
     assert work.metadata["leibniz_sets"] == ["LeibnizHandschriften", "Leibnitiana"]
     assert work.metadata["harvest_set"] == "LeibnizHandschriften"
+    assert work.metadata["has_iiif_manifest"] is True
 
 
 # -- Orchestration ---------------------------------------------------------- #

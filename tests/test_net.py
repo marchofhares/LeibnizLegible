@@ -136,6 +136,19 @@ def test_non_retryable_404_propagates() -> None:
         pc.get("https://host.example/missing")
 
 
+def test_unfollowed_redirect_is_returned_not_raised() -> None:
+    # With follow_redirects off (the injected client's default), a 3xx is a valid
+    # response callers use to detect "no resource here" — it must not raise.
+    clock = FakeClock()
+
+    def handler(_req: httpx.Request) -> httpx.Response:
+        return httpx.Response(302, headers={"location": "index.php"})
+
+    pc = _client(handler, clock, min_interval=0)
+    resp = pc.get("https://host.example/content/x/manifest.json")
+    assert resp.status_code == 302
+
+
 def test_transport_error_is_retried_then_raises() -> None:
     clock = FakeClock()
 

@@ -72,6 +72,7 @@ class PoliteClient:
         max_retries: int = 4,
         backoff_base: float = 2.0,
         timeout: float = 60.0,
+        follow_redirects: bool = True,
         client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
         monotonic: Callable[[], float] = time.monotonic,
@@ -85,7 +86,7 @@ class PoliteClient:
         self._owns_client = client is None
         self._client = client or httpx.Client(
             timeout=timeout,
-            follow_redirects=True,
+            follow_redirects=follow_redirects,
             headers={"User-Agent": self.user_agent},
         )
         # host -> monotonic timestamp of the last request to that host.
@@ -146,7 +147,11 @@ class PoliteClient:
                 self._sleep(self.backoff_base**attempt)
                 continue
 
-            resp.raise_for_status()
+            # Raise only for genuine client/server errors. A 3xx returned here
+            # means follow_redirects was off; that is a valid response (callers
+            # use it to detect "no resource at this URL"), not an error.
+            if resp.status_code >= 400:
+                resp.raise_for_status()
             return resp
 
     def get_text(self, url: str, params: Mapping[str, Any] | None = None) -> str:

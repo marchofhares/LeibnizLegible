@@ -161,7 +161,9 @@ def manifests(
     )
     console.print(f"[bold]harvest manifests[/bold] → {len(works):,} works")
     with (
-        PoliteClient(min_interval=min_interval) as client,
+        # follow_redirects=False: a manifest-less object 302-redirects to a viewer
+        # page; without this we'd chase the redirect chain (SPECS §7.4 politeness).
+        PoliteClient(min_interval=min_interval, follow_redirects=False) as client,
         Progress(
             TextColumn("manifests"), BarColumn(), MofNCompleteColumn(), console=console
         ) as progress,
@@ -179,13 +181,18 @@ def manifests(
         conn,
         run_id,
         n_input=stats.works,
-        n_ok=stats.works - len(stats.failures),
+        n_ok=stats.works - len(stats.failures) - len(stats.no_manifest),
         n_failed=len(stats.failures),
     )
     console.print(
         f"\n[bold green]pages: {stats.pages:,}[/bold green] from {stats.works:,} works "
         f"(fetched {stats.fetched}, cached {stats.cached})"
     )
+    if stats.no_manifest:
+        console.print(
+            f"[yellow]{len(stats.no_manifest):,} works have no IIIF manifest "
+            "(static-JPEG-only; images via A2).[/yellow]"
+        )
     if stats.count_mismatches:
         console.print(
             f"[yellow]{len(stats.count_mismatches)} works: manifest canvas count "
