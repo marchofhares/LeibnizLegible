@@ -81,21 +81,28 @@ scrape partitions into sub-cap slices (an operator job).
 | `src/leibniz/harvest/` | OAI-PMH + IIIF harvest → `works`/`pages`, and the corpus census |
 | `src/leibniz/images/` | local delivery-derivative image cache (fetch/verify/stats) |
 | `src/leibniz/catalog/` | Ritter-Katalog scraper + works crosswalk (shelfmark normaliser) |
+| `src/leibniz/htr/` | benchmark harness (D5) + engine adapters (Kraken / VLM) — B1 |
+| `src/leibniz/layout/` | Kraken baseline segmentation of a page into line images |
+| `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, banded DP, strata, volumes) |
+| `src/leibniz/pipeline/` | corpus segment/recognize batch pipeline + per-page seg-stats — C1 |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
 | `reports/` | committed reports (census, benchmarks, alignment yield) |
 
 ## Status
 
-Phases **A0–A3** are complete (`STATUS.md` has the detail). A1's census found
-**2,225 works / 236,795 page images**; A2 populated the full `pages` table
-offline and now caches JPEG delivery derivatives (dev slice pulled, full pull
-~365 GB left as an operator command); A3's katalog crosswalk already links
-**1,094 / 2,225 works (49.2%)** from a 6-query sample, with 99.96% GWLB-link
-resolution (`reports/crosswalk.md`). A notable finding: only ~⅓ of pages are
-IIIF-served, but the METS `fileSec` yields a uniform static-JPEG delivery URL for
-all of them. Next up is **B1** (benchmark harness + PHILIUMM reproduction, a
-gate), then **B2** (retro-alignment). See `STATUS.md`.
+Phases **A0–A3, B1–B2, C1–C2** are complete (`STATUS.md` has the detail). A1's
+census found **2,225 works / 236,795 page images**; A2/A3 built the image cache
+and katalog crosswalk. **B1** reproduced the PHILIUMM HTR CER (**7.95 %** vs
+claimed 8.33 %) and **B2** green-lit the retro-aligner (**98.8 % yield / 97.5 %
+precision** on favourable material). **C1** built the resumable corpus
+segment/recognize pipeline (`leibniz pipeline`) with per-page segmentation stats;
+**C2** built the GT factory (`leibniz align factory`) — piece→canvas folio
+resolver, banded aligner, stratum-aware mint thresholds, and license-gated
+`gt_lines`, with the vision extraction + QA validated live on real Leibniz print.
+The corpus segment/recognize passes and the volume extraction are documented
+operator commands (they need the kraken stack, the ~365 GB image pull, and an API
+key). Next is **C3** (fine-tune v2 + per-stratum eval, a gate). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

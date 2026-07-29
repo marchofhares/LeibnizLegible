@@ -31,6 +31,7 @@ _console = Console()
 DEFAULT_HTR = "data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors"
 DEFAULT_SEG = "data/models/philiumm-seg/blla_ft_leibniz_v1_0.4750.safetensors"
 DEFAULT_VAL = "data/gt/philiumm-val/val-00000-of-00001.parquet"
+DEFAULT_DB = "data/inventory.sqlite"
 EVAL_JSON = Path("reports/alignment-eval.json")
 RUN_JSON = Path("reports/alignment-run.json")
 
@@ -184,6 +185,86 @@ def run(
         encoding="utf-8",
     )
     _console.print(f"wrote {out}")
+
+
+@app.command()
+def pieces(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    series: int = typer.Option(None, "--series", help="Restrict to one AA series."),
+) -> None:
+    """Enumerate the §70-expired, localizable pieces from the katalog × crosswalk."""
+    from datetime import date
+
+    from leibniz.align.volumes import enumerate_pieces
+    from leibniz.db import open_db
+
+    t = date.fromisoformat(today) if today else date.today()
+    with open_db(db_path) as conn:
+        _pcs, stats = enumerate_pieces(conn, today=t, series=series)
+    _console.print(
+        f"[bold]§70 pieces[/bold] {stats.pieces:,} · with work {stats.with_work:,} · "
+        f"with folio range {stats.with_folio_range:,} · "
+        f"[green]localizable {stats.localizable:,}[/green]"
+    )
+    for vol, n in sorted(stats.by_volume.items()):
+        _console.print(f"  {vol:<8} {n:,}")
+
+
+@app.command()
+def factory(
+    edition_cache: Path = typer.Argument(..., help="JSON {record_id: reading_text} cache."),
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    license_bucket: str = typer.Option("open", help="open | nc."),
+    series: int = typer.Option(None, "--series", help="Restrict to one AA series."),
+    volume: int = typer.Option(None, "--volume", help="Restrict to one volume."),
+) -> None:
+    """Mint gt_lines across the §70 pieces from a pre-extracted edition-text cache."""
+    from datetime import date
+
+    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory
+    from leibniz.db import open_db
+
+    cache = json.loads(Path(edition_cache).read_text(encoding="utf-8"))
+    t = date.fromisoformat(today) if today else date.today()
+    cfg = FactoryConfig(today=t, license_bucket=license_bucket)
+    with open_db(db_path) as conn:
+        stats = run_factory(
+            conn,
+            config=cfg,
+            edition_text_for=dict_provider(cache),
+            series=series,
+            volume=volume,
+        )
+    _console.print(
+        f"[bold green]minted {stats.lines_minted:,} lines[/bold green] from "
+        f"{stats.pieces_minted:,}/{stats.pieces_seen:,} pieces "
+        f"({license_bucket} bucket)"
+    )
+    if stats.skips:
+        _console.print(f"[yellow]skips:[/yellow] {dict(stats.skips)}")
+    _console.print("Run [cyan]leibniz align gt-report[/cyan] to update reports/gt-factory.md.")
+
+
+@app.command(name="gt-report")
+def gt_report(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    out: Path = typer.Option(Path("reports/gt-factory.md"), "--out", help="Report path."),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+) -> None:
+    """(Re)write reports/gt-factory.md from the minted gt_lines + piece enumeration."""
+    from datetime import date
+
+    from leibniz.align.report_gt import gather_gt, render_gt
+    from leibniz.db import open_db
+
+    t = date.fromisoformat(today) if today else date.today()
+    with open_db(db_path) as conn:
+        rep = gather_gt(conn, today=t)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_gt(rep), encoding="utf-8")
+    _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")
 
 
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the

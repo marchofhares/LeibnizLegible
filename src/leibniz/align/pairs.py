@@ -107,9 +107,34 @@ def count_open_bucket(pairs: Sequence[GtPair]) -> int:
     return sum(1 for p in pairs if p.license_bucket == "open")
 
 
+def delete_gt_for_refs(conn: sqlite3.Connection, refs: Iterable[str]) -> int:
+    """Remove any ``gt_lines`` rows for these line image refs; return the count.
+
+    Makes re-minting a piece idempotent (the C2 factory delete-then-inserts per
+    piece), since ``gt_lines`` carries no natural key. The caller commits.
+    """
+    refs = list(refs)
+    n = 0
+    for ref in refs:
+        cur = conn.execute("DELETE FROM gt_lines WHERE line_image_ref = ?", (ref,))
+        n += cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
+    return n
+
+
+def count_gt_lines(conn: sqlite3.Connection, *, license_bucket: str | None = None) -> int:
+    """Total ``gt_lines`` rows, optionally within one license bucket."""
+    if license_bucket is None:
+        return conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+    return conn.execute(
+        "SELECT COUNT(*) FROM gt_lines WHERE license_bucket = ?", (license_bucket,)
+    ).fetchone()[0]
+
+
 __all__ = [
     "GtPair",
+    "count_gt_lines",
     "count_open_bucket",
+    "delete_gt_for_refs",
     "insert_gt_pairs",
     "result_to_pairs",
 ]

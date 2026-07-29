@@ -1115,3 +1115,18 @@ def count_crosswalk(conn: sqlite3.Connection) -> int:
 def matched_work_ids(conn: sqlite3.Connection) -> set[str]:
     """The set of work ids that have at least one crosswalk link."""
     return {row[0] for row in conn.execute("SELECT DISTINCT work_id FROM crosswalk")}
+
+
+def best_crosswalk_by_record(conn: sqlite3.Connection) -> dict[str, CrosswalkMatch]:
+    """Map each katalog record to its highest-confidence work link (C2 factory).
+
+    A record can link to several works and by several methods; the GT factory
+    wants the single most trustworthy work per piece, so this keeps the max-conf
+    (ties broken by ``gwlb_link`` over ``shelfmark``) link per record.
+    """
+    best: dict[str, CrosswalkMatch] = {}
+    for m in iter_crosswalk(conn):
+        cur = best.get(m.katalog_record_id)
+        if cur is None or m.match_conf > cur.match_conf:
+            best[m.katalog_record_id] = m
+    return best

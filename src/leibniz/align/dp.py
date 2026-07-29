@@ -216,6 +216,157 @@ def _traceback(
     return ops
 
 
+# Default half-bandwidth for banded alignment. A few hundred cells of slack about
+# the length-ratio diagonal is ample for HTR-spine ↔ edition-text (the same text
+# under ~8% CER + minor edition divergence — the path never wanders far).
+DEFAULT_BAND = 256
+
+
+def align_banded(
+    a: str,
+    b: str,
+    *,
+    band: int = DEFAULT_BAND,
+    free_a_ends: bool = False,
+    free_b_ends: bool = False,
+) -> Alignment:
+    """Banded Needleman–Wunsch — O(len·band) time and memory, with traceback.
+
+    Computes the alignment only within a diagonal band of half-width ``band``
+    about the *length-ratio* diagonal (column ``j ≈ i·m/n``), so it scales to
+    piece-length inputs the full matrix (:func:`align`) would refuse. It is
+    **exact iff the optimal path stays in-band** — true for near-parallel strings
+    (the same text under HTR noise + minor edition divergence), which is exactly
+    the retro-alignment regime (B2 report §4). The band is widened to at least
+    cover the two strings' length difference, so a systematic length gap never
+    pushes the path out of the band.
+
+    Same end-gap policy and op-stream contract as :func:`align`.
+    """
+    n, m = len(a), len(b)
+    if n == 0 or m == 0:  # degenerate; the full DP is trivially cheap here
+        return align(a, b, free_a_ends=free_a_ends, free_b_ends=free_b_ends)
+    half = max(band, abs(n - m) + 8)
+
+    lo = [0] * (n + 1)
+    hi = [0] * (n + 1)
+    dist: list[array] = [array("i") for _ in range(n + 1)]
+    move: list[bytearray] = [bytearray() for _ in range(n + 1)]
+    for i in range(n + 1):
+        center = round(i * m / n)
+        lo[i] = max(0, center - half)
+        hi[i] = min(m, center + half)
+        width = hi[i] - lo[i] + 1
+        dist[i] = array("i", bytes(4 * width))
+        move[i] = bytearray(width)
+
+    def gd(i: int, j: int) -> int:
+        if i < 0 or j < 0 or j < lo[i] or j > hi[i]:
+            return _INF
+        return dist[i][j - lo[i]]
+
+    for i in range(n + 1):
+        ai = a[i - 1] if i > 0 else ""
+        row_lo = lo[i]
+        for j in range(row_lo, hi[i] + 1):
+            k = j - row_lo
+            if i == 0 and j == 0:
+                dist[i][k] = 0
+                move[i][k] = 0
+            elif i == 0:
+                dist[i][k] = 0 if free_b_ends else j
+                move[i][k] = 2
+            elif j == 0:
+                dist[i][k] = 0 if free_a_ends else i
+                move[i][k] = 1
+            else:
+                cost = 0 if ai == b[j - 1] else 1
+                diag = gd(i - 1, j - 1) + cost
+                up = gd(i - 1, j) + 1
+                left = gd(i, j - 1) + 1
+                best, mv = diag, 0
+                if up < best:
+                    best, mv = up, 1
+                if left < best:
+                    best, mv = left, 2
+                dist[i][k] = best
+                move[i][k] = mv
+
+    end_i, end_j = n, m
+    best = gd(n, m)
+    if free_b_ends:
+        for j in range(lo[n], hi[n] + 1):
+            v = dist[n][j - lo[n]]
+            if v < best:
+                best, end_i, end_j = v, n, j
+    if free_a_ends:
+        for i in range(n + 1):
+            if lo[i] <= m <= hi[i] and dist[i][m - lo[i]] < best:
+                best, end_i, end_j = dist[i][m - lo[i]], i, m
+
+    ops = _traceback_banded(a, b, move, lo, hi, end_i, end_j, free_a_ends, free_b_ends)
+    return Alignment(ops=ops, distance=best, len_a=n, len_b=m)
+
+
+def _traceback_banded(
+    a: str,
+    b: str,
+    move: list[bytearray],
+    lo: list[int],
+    hi: list[int],
+    i: int,
+    j: int,
+    free_a_ends: bool,
+    free_b_ends: bool,
+) -> list[tuple[str, int, int]]:
+    """Walk the banded move table back to an origin (mirrors :func:`_traceback`)."""
+    ops: list[tuple[str, int, int]] = []
+    for jj in range(len(b) - 1, j - 1, -1):
+        ops.append((INS, -1, jj))
+    for ii in range(len(a) - 1, i - 1, -1):
+        ops.append((DEL, ii, -1))
+
+    def mget(i: int, j: int) -> int:
+        if lo[i] <= j <= hi[i]:
+            return move[i][j - lo[i]]
+        return 0  # off-band on the optimal path shouldn't happen; prefer diag
+
+    while i > 0 or j > 0:
+        if i == 0:
+            ops.append((INS, -1, j - 1))
+            j -= 1
+            continue
+        if j == 0:
+            ops.append((DEL, i - 1, -1))
+            i -= 1
+            continue
+        mv = mget(i, j)
+        if mv == 0:
+            kind = MATCH if a[i - 1] == b[j - 1] else SUB
+            ops.append((kind, i - 1, j - 1))
+            i -= 1
+            j -= 1
+        elif mv == 1:
+            ops.append((DEL, i - 1, -1))
+            i -= 1
+        else:
+            ops.append((INS, -1, j - 1))
+            j -= 1
+        if free_b_ends and i == 0:
+            while j > 0:
+                ops.append((INS, -1, j - 1))
+                j -= 1
+            break
+        if free_a_ends and j == 0:
+            while i > 0:
+                ops.append((DEL, i - 1, -1))
+                i -= 1
+            break
+
+    ops.reverse()
+    return ops
+
+
 def similarity(a: str, b: str, **kw: object) -> float:
     """Normalized similarity in ``[0, 1]``: ``1 - distance / max(len)``.
 
@@ -231,11 +382,13 @@ def similarity(a: str, b: str, **kw: object) -> float:
 
 
 __all__ = [
+    "DEFAULT_BAND",
     "DEL",
     "INS",
     "MATCH",
     "SUB",
     "Alignment",
     "align",
+    "align_banded",
     "similarity",
 ]
