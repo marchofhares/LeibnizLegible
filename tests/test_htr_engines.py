@@ -24,10 +24,19 @@ def test_kraken_engine_constructs_without_kraken() -> None:
 
 
 def test_kraken_engine_transcribe_errors_without_stack() -> None:
-    eng = KrakenEngine("nonexistent.safetensors")
-    # The project test env has no kraken/torch: a clear ModuleNotFoundError.
-    with pytest.raises(ModuleNotFoundError):
-        eng.transcribe([b"\xff\xd8\xff"])
+    # This checks the graceful-degradation path when the optional kraken/torch
+    # stack is absent — so it only applies when the stack is NOT installed. With
+    # the `bench` extra present (e.g. a live-run env) there is no import error to
+    # test, so skip rather than assert an env the run has deliberately changed.
+    try:
+        import kraken  # noqa: F401
+        import torch  # noqa: F401
+    except ModuleNotFoundError:
+        eng = KrakenEngine("nonexistent.safetensors")
+        with pytest.raises(ModuleNotFoundError):
+            eng.transcribe([b"\xff\xd8\xff"])
+    else:
+        pytest.skip("kraken stack installed (bench extra); absent-stack path not exercisable")
 
 
 # -- Anthropic (graceful skip + injected transport) ------------------------- #
