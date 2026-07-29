@@ -53,6 +53,20 @@ def gate_verdict(
 
 
 @dataclass(slots=True)
+class LLMComparison:
+    """One frontier-VLM result on the subsample, with its token usage / cost."""
+
+    result: EvalResult  # scored under the default policy on the subsample
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float | None = None
+
+    @property
+    def label(self) -> str:
+        return self.result.engine_version or self.result.engine
+
+
+@dataclass(slots=True)
 class ReproReport:
     """Everything the repro report renders (assembled by the CLI)."""
 
@@ -62,7 +76,7 @@ class ReproReport:
     dataset_splits: dict = field(default_factory=dict)
     n_val: int = 0
     default_policy: str = "philiumm"
-    anthropic: EvalResult | None = None
+    llm_results: list[LLMComparison] = field(default_factory=list)
     kraken_on_subsample: EvalResult | None = None
     subsample_n: int = 0
     key_present: bool = False
@@ -246,37 +260,51 @@ def render_repro_report(r: ReproReport) -> str:
     add("")
 
     # -- LLM comparison --------------------------------------------------- #
-    add("## Frontier-LLM comparison (Claude vision, zero-shot)")
+    add("## Frontier-LLM comparison (zero-shot vision)")
     add("")
-    if r.anthropic is not None and r.kraken_on_subsample is not None:
-        a = r.anthropic
+    if r.llm_results and r.kraken_on_subsample is not None:
         k = r.kraken_on_subsample
         add(
-            f"On a seeded random **{a.n_lines}-line** subsample, both engines scored "
-            "under the identical protocol — the first published LLM-on-Leibniz numbers:"
+            f"On a seeded random **{k.n_lines}-line** subsample, the specialised HTR "
+            "model and one or more frontier vision-language models were scored under "
+            "the **identical protocol** — the first published LLM-on-Leibniz numbers:"
         )
         add("")
         add("| Engine | CER | WER |")
         add("| --- | ---: | ---: |")
-        add(f"| Kraken (PHILIUMM) | {_ci(k, 'cer')} | {_pct(k.wer.point)} |")
-        add(f"| {a.engine_version} (zero-shot) | {_ci(a, 'cer')} | {_pct(a.wer.point)} |")
+        add(f"| **Kraken (PHILIUMM, fine-tuned)** | {_ci(k, 'cer')} | {_pct(k.wer.point)} |")
+        for c in r.llm_results:
+            add(f"| {c.label} (zero-shot) | {_ci(c.result, 'cer')} | {_pct(c.result.wer.point)} |")
         add("")
+        # Token usage / cost, when the adapter captured it.
+        priced = [c for c in r.llm_results if c.cost_usd is not None or c.input_tokens]
+        if priced:
+            add("**Token usage & estimated cost** (from each API's `usage`; prices are")
+            add("approximate list rates, easily re-derived against current pricing):")
+            add("")
+            add("| Engine | Input tok | Output tok | Est. cost |")
+            add("| --- | ---: | ---: | ---: |")
+            for c in priced:
+                cost = f"${c.cost_usd:.3f}" if c.cost_usd is not None else "—"
+                add(f"| {c.label} | {c.input_tokens:,} | {c.output_tokens:,} | {cost} |")
+            add("")
         add(
-            "Zero-shot vision LLMs have no exposure to Leibniz's hand; the specialised "
-            "HTR model is expected to win decisively on secretary-hand Latin/French. "
-            "The gap is the point — it quantifies how far a general model is from a "
-            "fine-tuned one on this material."
+            "Zero-shot vision LLMs have never seen Leibniz's hand; the fine-tuned HTR "
+            "model is expected to win decisively on secretary-hand Latin/French. The "
+            "gap is the point — it quantifies how far a general model sits from a "
+            "specialised one on this material, and it is far larger than the 8% CER "
+            "the HTR model achieves."
         )
     elif r.key_present:
         add("_Configured to run but produced no result this session (see STATUS.md)._")
     else:
         add(
-            "**Not run** — no `ANTHROPIC_API_KEY` in this environment, and the harness "
-            "runs fully without one (COMMON CONTEXT). The `anthropic` adapter is "
-            "implemented and tested; supply a key and re-run "
-            "`leibniz bench repro --with-llm` for the comparison. It sends each line "
-            "image with a terse diplomatic-transcription prompt and scores the reply "
-            "under the same protocol."
+            "**Not run** — no LLM API key in this environment, and the harness runs "
+            "fully without one (COMMON CONTEXT). The `anthropic` and `openai` vision "
+            "adapters are implemented and tested; supply a key and re-run "
+            "`leibniz bench repro --with-llm [--llm-engine openai --llm-model …]` for "
+            "the comparison. Each sends the line image with a terse diplomatic-"
+            "transcription prompt and scores the reply under the same protocol."
         )
     add("")
 
@@ -368,6 +396,7 @@ __all__ = [
     "CLAIMED_CER",
     "CLAIMED_WER",
     "GATE_TOLERANCE_PCT",
+    "LLMComparison",
     "ReproReport",
     "gate_verdict",
     "render_repro_report",

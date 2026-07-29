@@ -124,9 +124,12 @@ def repro(
     db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store (run record)."),
     limit: int | None = typer.Option(None, "--limit", help="Cap val lines (dev; default all)."),
     batch_size: int = typer.Option(8, "--batch-size", help="Kraken batch size."),
-    with_llm: bool = typer.Option(False, "--with-llm", help="Also run Claude on a subsample."),
+    with_llm: bool = typer.Option(False, "--with-llm", help="Also run a VLM on a subsample."),
     llm_n: int = typer.Option(150, "--llm-n", help="Subsample size for the LLM comparison."),
-    llm_model: str | None = typer.Option(None, "--llm-model", help="Override the Claude model id."),
+    llm_engine: str = typer.Option("anthropic", "--llm-engine", help="anthropic | openai."),
+    llm_model: list[str] | None = typer.Option(
+        None, "--llm-model", help="VLM model id(s); repeatable for a panel. Default per engine."
+    ),
     reuse_hyps: bool = typer.Option(
         False, "--reuse-hyps", help="Skip inference; re-score cached raw hypotheses."
     ),
@@ -175,12 +178,12 @@ def repro(
         kraken_by_policy[name] = res
         console.print(f"  [{name}] {res.summary()}")
 
-    anthropic_res = None
+    llm_results: list = []
     kraken_sub = None
-    key_present = _anthropic_key_present()
+    key_present = _llm_key_present(llm_engine)
     if with_llm:
-        anthropic_res, kraken_sub = _run_llm_comparison(
-            pairs, hyps, llm_n=llm_n, llm_model=llm_model
+        llm_results, kraken_sub = _run_llm_comparison(
+            pairs, hyps, llm_n=llm_n, engine_name=llm_engine, models=llm_model or None
         )
 
     rep = ReproReport(
@@ -189,9 +192,9 @@ def repro(
         model_meta=model_meta,
         dataset_splits=dataset_splits,
         n_val=len(pairs),
-        anthropic=anthropic_res,
+        llm_results=llm_results,
         kraken_on_subsample=kraken_sub,
-        subsample_n=llm_n if anthropic_res else 0,
+        subsample_n=llm_n if llm_results else 0,
         key_present=key_present,
     )
     markdown = report.render_repro_report(rep)
@@ -258,12 +261,35 @@ def _build_engine(name: str, model: Path | None):
         from leibniz.htr.engines import AnthropicEngine
 
         return AnthropicEngine()
-    raise typer.BadParameter(f"unknown engine {name!r} (kraken | anthropic)")
+    if name == "openai":
+        from leibniz.htr.engines import OpenAIEngine
+
+        return OpenAIEngine()
+    raise typer.BadParameter(f"unknown engine {name!r} (kraken | anthropic | openai)")
 
 
-def _run_llm_comparison(pairs, hyps, *, llm_n: int, llm_model: str | None):
-    """Run Claude on a seeded subsample; score it and kraken on the same lines."""
-    from leibniz.htr.engines import AnthropicEngine, MissingKeyError
+def _make_llm_engine(engine_name: str, model: str | None):
+    """Construct a VLM engine (anthropic|openai), optionally for a specific model."""
+    if engine_name == "anthropic":
+        from leibniz.htr.engines import AnthropicEngine
+
+        return AnthropicEngine(model=model) if model else AnthropicEngine()
+    if engine_name == "openai":
+        from leibniz.htr.engines import OpenAIEngine
+
+        return OpenAIEngine(model=model) if model else OpenAIEngine()
+    raise typer.BadParameter(f"unknown --llm-engine {engine_name!r} (anthropic | openai)")
+
+
+def _run_llm_comparison(pairs, hyps, *, llm_n: int, engine_name: str, models: list[str] | None):
+    """Run one or more VLMs on a seeded subsample; score them + kraken on the same lines.
+
+    Returns ``(list[LLMComparison], kraken_subsample_result)``. Each model is a
+    row; token usage/cost is captured from the engine where available. A missing
+    key or a per-model failure is logged and skipped, never fatal.
+    """
+    from leibniz.htr.engines import MissingKeyError
+    from leibniz.htr.report import LLMComparison
 
     subset = data.subsample(pairs, llm_n)
     idx = {p.line_id: i for i, p in enumerate(pairs)}
@@ -276,30 +302,46 @@ def _run_llm_comparison(pairs, hyps, *, llm_n: int, llm_model: str | None):
         policy=metrics.PHILIUMM_POLICY,
         dataset="val-subsample",
     )
-    try:
-        kwargs = {"model": llm_model} if llm_model else {}
-        with AnthropicEngine(**kwargs) as eng:
-            console.print(f"  Claude ({eng.version}) on {len(subset)} lines …")
-            llm_hyps, secs = bench.transcribe_pairs(subset, eng)
-        anthropic_res = bench.score_hypotheses(
-            subset,
-            llm_hyps,
-            engine_name="anthropic",
-            engine_version=eng.version,
-            policy=metrics.PHILIUMM_POLICY,
-            seconds=secs,
-            dataset="val-subsample",
-        )
-        return anthropic_res, kraken_sub
-    except MissingKeyError as exc:
-        console.print(f"  [yellow]LLM comparison skipped: {exc}[/yellow]")
-        return None, kraken_sub
+
+    results: list = []
+    for model in models or [None]:
+        try:
+            eng = _make_llm_engine(engine_name, model)
+        except MissingKeyError as exc:
+            console.print(f"  [yellow]LLM comparison skipped: {exc}[/yellow]")
+            break  # no key ⇒ none of the models will run
+        try:
+            with eng:
+                console.print(f"  {engine_name} ({eng.version}) on {len(subset)} lines …")
+                llm_hyps, secs = bench.transcribe_pairs(subset, eng)
+            res = bench.score_hypotheses(
+                subset,
+                llm_hyps,
+                engine_name=engine_name,
+                engine_version=eng.version,
+                policy=metrics.PHILIUMM_POLICY,
+                seconds=secs,
+                dataset="val-subsample",
+            )
+            results.append(
+                LLMComparison(
+                    result=res,
+                    input_tokens=getattr(eng, "usage_input", 0),
+                    output_tokens=getattr(eng, "usage_output", 0),
+                    cost_usd=getattr(eng, "cost", None),
+                )
+            )
+            console.print(f"    → {res.summary()}")
+        except Exception as exc:  # noqa: BLE001 — one bad model can't sink the panel
+            console.print(f"  [red]{engine_name}:{model or 'default'} failed: {exc}[/red]")
+    return results, kraken_sub
 
 
-def _anthropic_key_present() -> bool:
+def _llm_key_present(engine_name: str) -> bool:
     import os
 
-    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+    var = "OPENAI_API_KEY" if engine_name == "openai" else "ANTHROPIC_API_KEY"
+    return bool(os.environ.get(var))
 
 
 def _read_model_meta(models_dir: Path) -> dict:

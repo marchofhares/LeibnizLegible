@@ -67,19 +67,24 @@ def test_render_report_no_language_labels_branch() -> None:
 
 
 def test_render_report_with_language_and_llm() -> None:
+    from leibniz.htr.report import LLMComparison
+
     pairs = [
         LinePair(line_id="a", reference="alpha beta", image_bytes_=b"A", lang="la"),
         LinePair(line_id="b", reference="gamma delta", image_bytes_=b"B", lang="fr"),
     ]
     kbp = _kraken_by_policy(pairs, {b"A": "alpha beta", b"B": "gXmma delta"})
     llm = bench.evaluate(pairs, EchoEngine({b"A": "alpha", b"B": "gamma delta"}), n_resamples=20)
-    llm.engine = "anthropic"
+    llm.engine = "openai"
+    llm.engine_version = "gpt-4o"
     kraken_sub = kbp["philiumm"]
     rep = ReproReport(
         generated_at="t",
         kraken_by_policy=kbp,
         n_val=2,
-        anthropic=llm,
+        llm_results=[
+            LLMComparison(result=llm, input_tokens=1234, output_tokens=56, cost_usd=0.0031)
+        ],
         kraken_on_subsample=kraken_sub,
         subsample_n=2,
         key_present=True,
@@ -89,6 +94,9 @@ def test_render_report_with_language_and_llm() -> None:
     assert "| la |" in md and "| fr |" in md
     assert "Frontier-LLM comparison" in md
     assert "zero-shot" in md.lower()
+    assert "gpt-4o" in md  # engine label rendered
+    assert "$0.003" in md  # cost table rendered
+    assert "1,234" in md  # input token count
 
 
 def test_render_report_llm_not_run_branch() -> None:
@@ -96,4 +104,4 @@ def test_render_report_llm_not_run_branch() -> None:
     kbp = _kraken_by_policy(pairs, {b"A": "x y"})
     rep = ReproReport(generated_at="t", kraken_by_policy=kbp, n_val=1, key_present=False)
     md = report.render_repro_report(rep)
-    assert "Not run" in md and "ANTHROPIC_API_KEY" in md
+    assert "Not run" in md and "openai" in md  # both adapters mentioned

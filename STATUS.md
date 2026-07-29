@@ -29,8 +29,13 @@ complete. Both depend only on A1 (done). A0→A1→A2→A3 are all green.
   marginal-fragment lines carry the tail, which is why the headline is micro-averaged).
 - **Normalization sensitivity:** philiumm 7.95% · lenient 7.61% · strict 7.95% —
   normalization moves the number <0.4 pt, so it is **not** the source of any gap.
-- **LLM comparison:** adapter built + tested, **not run** (no `ANTHROPIC_API_KEY`
-  here). `leibniz bench repro --with-llm` produces the first LLM-on-Leibniz numbers.
+- **Frontier-VLM comparison (RAN, OpenAI key supplied):** on a seeded 150-line
+  subsample, zero-shot vision LLMs are **4–6× worse** than the fine-tuned HTR
+  model (Kraken 8.19% on the same lines): **gpt-4o 45.87%**, **gpt-4.1 38.62%**,
+  **gpt-4.1-mini 34.79%** CER. Counterintuitively the *smallest* model won among
+  the three — the flagships more often "modernize"/normalise the archaic spelling.
+  Total API cost **$0.49** (450 calls; usage captured from each response). First
+  published LLM-on-Leibniz numbers.
 - **Throughput:** ~1,878 lines in ~160 s on CPU (batch 8), no GPU.
 
 ### What was built (B1) — deliverable D5
@@ -44,11 +49,13 @@ src/leibniz/htr/
                 the frozen protocol `b1-2026-07` · EchoEngine (tests)
   engines.py    KrakenEngine (safetensors via kraken.models.loaders.load_models;
                 pre-extracted-line inference, valid_norm=False) + AnthropicEngine
-                (Claude vision over httpx; raises/​skips without a key)
+                + OpenAIEngine (Claude/GPT vision over httpx; skip without a key;
+                capture token usage + $ cost)
   data.py       loaders: HF parquet val split · image+.gt.txt dir · seeded subsample
   artifacts.py  cache-first streaming fetch of the Zenodo model + HF val split
-  report.py     render reports/philiumm-repro.md + the gate verdict
-  cli.py        leibniz bench {fetch, protocol, run, repro}  (+ --reuse-hyps)
+  report.py     render reports/philiumm-repro.md + gate verdict + VLM-panel table
+  cli.py        leibniz bench {fetch, protocol, run, repro}  (+ --reuse-hyps,
+                --with-llm --llm-engine {anthropic,openai} --llm-model … [panel])
 reports/philiumm-repro.md          B1 deliverable (measured vs claimed, honest)
 reports/philiumm-repro.lines.jsonl per-line error-analysis dump (1,878 rows)
 pyproject.toml   optional `bench` extra (kraken, pyarrow) — lazily imported
@@ -68,7 +75,7 @@ CC BY 4.0, cached under `data/models/`, `data/gt/` (gitignored).
 Everything is green and offline-testable:
 
 - `uv run ruff check .` / `ruff format --check .` — clean (72 files).
-- `uv run pytest` — **229 passed, 1 skipped** (was 171; +58 for the HTR harness).
+- `uv run pytest` — **236 passed, 1 skipped** (was 171; +65 for the HTR harness).
   The one skip is the parquet-loader test, which needs the optional `pyarrow`.
 
 Bulk artifacts (the SQLite store, `data/images/`, `data/katalog/`, `data/oai/`,
@@ -148,11 +155,17 @@ model's own val split. **Measured CER 7.95% (95% CI 7.49–8.46) vs claimed 8.33
   graphemes), val GT (HF `DenisaB/htr_leibniz_dataset_v1` val split, 1,878
   pre-extracted line/text pairs, 303 MB parquet), segmentation model DOI
   `21537859` (recorded; not needed to score pre-segmented lines).
-- **Harness:** engine-agnostic; `Engine` protocol + `KrakenEngine` (local) and
-  `AnthropicEngine` (Claude vision, skips without a key). CER/WER via unicode-aware
-  Levenshtein under a **named, published normalization policy** (`philiumm` mirrors
-  the model's training NFD + whitespace-collapse), micro-averaged, with seeded
-  **bootstrap CIs**; per-line JSONL dumps; a **frozen protocol** `b1-2026-07`.
+- **Harness:** engine-agnostic; `Engine` protocol + `KrakenEngine` (local),
+  `AnthropicEngine` and `OpenAIEngine` (Claude/GPT vision, skip without a key).
+  CER/WER via unicode-aware Levenshtein under a **named, published normalization
+  policy** (`philiumm` mirrors the model's training NFD + whitespace-collapse),
+  micro-averaged, with seeded **bootstrap CIs**; per-line JSONL dumps; a **frozen
+  protocol** `b1-2026-07`.
+- **Frontier-VLM comparison (ran with a supplied OpenAI key):** 3-model panel on a
+  seeded 150-line subsample — gpt-4o 45.87% / gpt-4.1 38.62% / gpt-4.1-mini 34.79%
+  CER, all 4–6× the fine-tuned model's 8.19% on the same lines; total cost $0.49,
+  token usage captured per response. The `--llm-model` flag is repeatable for a
+  panel; each VLM row carries its input/output tokens + estimated $ in the report.
 - **Key technical finding (a divergence worth remembering):** the model is a
   kraken-5-era **safetensors** container. kraken 7.0.3's `load_any` /
   `TorchVGSLModel.load_model` only parse CoreML and **fail** on it — load it via
@@ -228,11 +241,13 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **229** (+1 skipped: pyarrow) |
+| Tests passing | **236** (+1 skipped: pyarrow) |
 | **HTR CER (B1): measured vs claimed** | **7.95%** (CI 7.49–8.46) vs 8.33% → **GO** |
 | HTR WER (B1) | 27.04% (CI 25.95–28.19) vs claimed 28.56% |
 | Val lines · char-perfect | 1,878 · 464 (24.7%) |
 | CER by policy (philiumm/lenient/strict) | 7.95% / 7.61% / 7.95% |
+| **VLM vs HTR (150-line subsample) CER** | Kraken 8.19% · gpt-4o 45.87% · gpt-4.1 38.62% · gpt-4.1-mini 34.79% |
+| VLM comparison API cost | **$0.49** (450 calls, usage-metered) |
 | Unique works · page images | 2,225 · **236,795** |
 | **`pages` rows populated** | **236,795** (static 159,162 · iiif 77,633) |
 | Images cached (dev slice) | 80 · 126.3 MB · verify 80/80 OK |
@@ -279,9 +294,11 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 8. **No per-line language labels in the PHILIUMM GT** (features are `text`+`image`
    only). The 7.95% is a Latin+French number by construction; a real per-language
    split waits for the C4 language-ID pass. German/Kurrent remains unmeasured here.
-9. **LLM-on-Leibniz numbers pending a key.** The `anthropic` adapter is built and
-   tested; `leibniz bench repro --with-llm` yields the first such numbers. No key
-   in this environment, so it was skipped (by design).
+9. ~~**LLM-on-Leibniz numbers pending a key.**~~ **Done** — a supplied OpenAI key
+   ran the 3-model VLM panel (gpt-4o/4.1/4.1-mini): 35–46% CER, 4–6× the fine-tuned
+   model. The `anthropic` adapter is equally ready for a Claude comparison. Finding
+   worth following up: the *smallest* VLM scored best — the larger models modernise
+   archaic spelling more (a prompt-engineering lever, not pursued in Tier 1).
 
 ---
 

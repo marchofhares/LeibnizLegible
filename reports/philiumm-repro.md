@@ -1,6 +1,6 @@
 # PHILIUMM reproduction — HTR benchmark on the Leibniz val split (Phase B1)
 
-_Leibniz Legible, Phase B1 (gate). Generated 2026-07-29T12:16:27Z. The first independent reproduction of the PHILIUMM HTR model's character error rate, measured with a frozen, documented protocol before anything is built on it._
+_Leibniz Legible, Phase B1 (gate). Generated 2026-07-29T12:50:55Z. The first independent reproduction of the PHILIUMM HTR model's character error rate, measured with a frozen, documented protocol before anything is built on it._
 
 > HTR model, segmentation model and ground truth © ERC PHILIUMM project (Denisa-Florina Bumba, Laboratoire SPHERE, Université Paris Cité – CNRS; ERC grant 101020985), CC BY 4.0. Model: doi:10.5281/zenodo.21457538; segmentation: doi:10.5281/zenodo.21537859; ground truth: huggingface.co/datasets/DenisaB/htr_leibniz_dataset_v1.
 
@@ -13,7 +13,7 @@ _Leibniz Legible, Phase B1 (gate). Generated 2026-07-29T12:16:27Z. The first ind
 | CER | 8.33% | 7.95% (95% CI 7.49–8.46) | -0.38 |
 | WER | 28.56% | 27.04% (95% CI 25.95–28.19) | -1.52 |
 
-Measured on **1,878 lines** of the PHILIUMM `val` split with the model's own recognition network (greedy CTC), under the **`philiumm`** normalization policy — the policy that mirrors how the model was *trained* (`normalization: NFD`, whitespace-collapsed), so this is an apples-to-apples comparison. Wall time 160s on CPU.
+Measured on **1,878 lines** of the PHILIUMM `val` split with the model's own recognition network (greedy CTC), under the **`philiumm`** normalization policy — the policy that mirrors how the model was *trained* (`normalization: NFD`, whitespace-collapsed), so this is an apples-to-apples comparison. Wall time 164s on CPU.
 
 ## Discrepancy analysis
 
@@ -52,9 +52,27 @@ The worst lines are the diagnostic. Very short isolated lines (a single abbrevia
 
 **464 of 1,878 lines (24.7%) are character-perfect** under the `philiumm` policy; macro-averaged CER (per-line mean) is 9.16%.
 
-## Frontier-LLM comparison (Claude vision, zero-shot)
+## Frontier-LLM comparison (zero-shot vision)
 
-**Not run** — no `ANTHROPIC_API_KEY` in this environment, and the harness runs fully without one (COMMON CONTEXT). The `anthropic` adapter is implemented and tested; supply a key and re-run `leibniz bench repro --with-llm` for the comparison. It sends each line image with a terse diplomatic-transcription prompt and scores the reply under the same protocol.
+On a seeded random **150-line** subsample, the specialised HTR model and one or more frontier vision-language models were scored under the **identical protocol** — the first published LLM-on-Leibniz numbers:
+
+| Engine | CER | WER |
+| --- | ---: | ---: |
+| **Kraken (PHILIUMM, fine-tuned)** | 8.19% (95% CI 6.55–9.97) | 26.86% |
+| gpt-4o (zero-shot) | 45.87% (95% CI 40.97–50.91) | 78.81% |
+| gpt-4.1 (zero-shot) | 38.62% (95% CI 34.55–42.79) | 70.82% |
+| gpt-4.1-mini (zero-shot) | 34.79% (95% CI 31.10–38.76) | 71.28% |
+
+**Token usage & estimated cost** (from each API's `usage`; prices are
+approximate list rates, easily re-derived against current pricing):
+
+| Engine | Input tok | Output tok | Est. cost |
+| --- | ---: | ---: | ---: |
+| gpt-4o | 95,630 | 2,183 | $0.261 |
+| gpt-4.1 | 95,630 | 2,171 | $0.209 |
+| gpt-4.1-mini | 48,241 | 2,270 | $0.023 |
+
+Zero-shot vision LLMs have never seen Leibniz's hand; the fine-tuned HTR model is expected to win decisively on secretary-hand Latin/French. The gap is the point — it quantifies how far a general model sits from a specialised one on this material, and it is far larger than the 8% CER the HTR model achieves.
 
 ## What the artifacts contain
 

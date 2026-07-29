@@ -299,11 +299,178 @@ def _extract_text(payload: dict) -> str:
     return "".join(parts).strip()
 
 
+# --------------------------------------------------------------------------- #
+# OpenAI (GPT vision, remote)
+# --------------------------------------------------------------------------- #
+
+DEFAULT_OPENAI_MODEL = "gpt-4o"
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+
+# Approximate list prices, USD per 1M tokens (input, output), for cost *estimates*
+# only — OpenAI's prices and lineup change; the run reports EXACT token usage from
+# each response, so the dollar figure is `usage × the rate below` and easy to
+# re-derive against current pricing. Verify before quoting.
+OPENAI_PRICES: dict[str, tuple[float, float]] = {
+    "gpt-4o": (2.50, 10.00),
+    "gpt-4o-mini": (0.15, 0.60),
+    "gpt-4.1": (2.00, 8.00),
+    "gpt-4.1-mini": (0.40, 1.60),
+    "gpt-4.1-nano": (0.10, 0.40),
+    "gpt-5": (1.25, 10.00),
+    "gpt-5-mini": (0.25, 2.00),
+    "gpt-5.1": (1.25, 10.00),
+}
+
+
+def estimate_openai_cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
+    """USD cost estimate from token usage, or ``None`` if the model isn't priced.
+
+    Matches ``model`` against the price table by longest known prefix (so
+    ``gpt-4o-2024-08-06`` prices as ``gpt-4o``). Estimate only — see
+    :data:`OPENAI_PRICES`.
+    """
+    rate = OPENAI_PRICES.get(model)
+    if rate is None:
+        keys = sorted((k for k in OPENAI_PRICES if model.startswith(k)), key=len, reverse=True)
+        if not keys:
+            return None
+        rate = OPENAI_PRICES[keys[0]]
+    return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
+
+
+class OpenAIEngine:
+    """OpenAI GPT vision zero-shot line transcription (Chat Completions, httpx).
+
+    Mirrors :class:`AnthropicEngine`: same terse diplomatic prompt, same graceful
+    skip (:class:`MissingKeyError`) when no ``OPENAI_API_KEY`` is available. Sends
+    each line image as a high-detail ``data:`` image URL and accumulates token
+    ``usage`` across the batch (``usage_input`` / ``usage_output``) so the run can
+    report exact cost. ``name`` is ``openai``; ``version`` is the model id.
+    """
+
+    name = "openai"
+
+    def __init__(
+        self,
+        *,
+        model: str = DEFAULT_OPENAI_MODEL,
+        api_key: str | None = None,
+        prompt: str = DEFAULT_PROMPT,
+        max_tokens: int = 256,
+        detail: str = "high",
+        temperature: float | None = 0.0,
+        min_interval: float = 0.2,
+        max_retries: int = 4,
+        timeout: float = 120.0,
+        client=None,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        key = api_key or os.environ.get("OPENAI_API_KEY")
+        if not key:
+            raise MissingKeyError(
+                "OPENAI_API_KEY not set — the OpenAI comparison is skipped "
+                "(the harness runs fully without it)."
+            )
+        self._key = key
+        self.version = model
+        self.model = model
+        self.prompt = prompt
+        self.max_tokens = max_tokens
+        self.detail = detail
+        self.temperature = temperature
+        self.min_interval = min_interval
+        self.max_retries = max_retries
+        self._sleep = sleep
+        self.usage_input = 0
+        self.usage_output = 0
+        self._owns_client = client is None
+        if client is None:
+            import httpx
+
+            self._client = httpx.Client(timeout=timeout)
+        else:
+            self._client = client
+
+    def close(self) -> None:
+        if self._owns_client:
+            self._client.close()
+
+    def __enter__(self) -> OpenAIEngine:
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        self.close()
+
+    @property
+    def cost(self) -> float | None:
+        """Estimated USD cost of everything transcribed so far (or ``None``)."""
+        return estimate_openai_cost(self.model, self.usage_input, self.usage_output)
+
+    def _headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {self._key}", "content-type": "application/json"}
+
+    def _one(self, data: bytes) -> str:
+        media_type = _sniff_media_type(data)
+        b64 = base64.standard_b64encode(data).decode("ascii")
+        body: dict = {
+            "model": self.model,
+            # `max_completion_tokens` is the current field (superseding max_tokens)
+            # and is accepted across the GPT-4o/4.1/5 vision models.
+            "max_completion_tokens": self.max_tokens,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": self.prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{media_type};base64,{b64}",
+                                "detail": self.detail,
+                            },
+                        },
+                    ],
+                }
+            ],
+        }
+        if self.temperature is not None:
+            body["temperature"] = self.temperature
+        attempt = 0
+        while True:
+            resp = self._client.post(OPENAI_URL, headers=self._headers(), json=body)
+            if resp.status_code in (429, 500, 502, 503, 529) and attempt < self.max_retries:
+                attempt += 1
+                self._sleep(2.0**attempt)
+                continue
+            resp.raise_for_status()
+            return self._parse(resp.json())
+
+    def _parse(self, payload: dict) -> str:
+        usage = payload.get("usage") or {}
+        self.usage_input += int(usage.get("prompt_tokens", 0))
+        self.usage_output += int(usage.get("completion_tokens", 0))
+        choices = payload.get("choices") or [{}]
+        return (choices[0].get("message", {}).get("content") or "").strip()
+
+    def transcribe(self, images: Sequence[bytes]) -> list[str]:
+        out: list[str] = []
+        for i, data in enumerate(images):
+            if i and self.min_interval:
+                self._sleep(self.min_interval)
+            out.append(self._one(data))
+        return out
+
+
 __all__ = [
     "ANTHROPIC_URL",
     "DEFAULT_ANTHROPIC_MODEL",
+    "DEFAULT_OPENAI_MODEL",
     "DEFAULT_PROMPT",
+    "OPENAI_PRICES",
+    "OPENAI_URL",
     "AnthropicEngine",
     "KrakenEngine",
     "MissingKeyError",
+    "OpenAIEngine",
+    "estimate_openai_cost",
 ]

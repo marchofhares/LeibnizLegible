@@ -107,6 +107,36 @@ def test_build_engine_unknown() -> None:
         bench_cli._build_engine("bogus", Path("x"))
 
 
+def test_make_llm_engine_unknown() -> None:
+    import pytest
+    import typer
+
+    with pytest.raises(typer.BadParameter):
+        bench_cli._make_llm_engine("bogus", None)
+
+
+def test_llm_key_present(monkeypatch) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert bench_cli._llm_key_present("openai") is False
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-x")
+    assert bench_cli._llm_key_present("openai") is True
+    assert bench_cli._llm_key_present("anthropic") is False  # checks the right var
+
+
+def test_run_llm_comparison_skips_without_key(monkeypatch) -> None:
+    from leibniz.htr.bench import LinePair
+
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    pairs = [LinePair(line_id=str(i), reference="x y", image_bytes_=b"I") for i in range(3)]
+    hyps = ["x y", "x y", "x y"]
+    results, kraken_sub = bench_cli._run_llm_comparison(
+        pairs, hyps, llm_n=3, engine_name="openai", models=["gpt-4o"]
+    )
+    assert results == []  # no key -> no LLM rows
+    assert kraken_sub is not None  # kraken subsample still scored
+
+
 def test_raw_hyps_cache_roundtrip(tmp_path) -> None:
     from leibniz.htr.bench import LinePair
 
