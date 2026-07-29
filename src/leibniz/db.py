@@ -28,7 +28,14 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
+
+
+def utcnow_iso() -> str:
+    """Current UTC time as an ISO-8601 string (second granularity, ``Z``)."""
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
 
 # Default location of the canonical store (gitignored; see data/README.md).
 DEFAULT_DB_PATH = Path("data/inventory.sqlite")
@@ -371,3 +378,53 @@ def get_pages(conn: sqlite3.Connection, work_id: str) -> list[Page]:
 def count_pages(conn: sqlite3.Connection) -> int:
     """Total number of pages."""
     return conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0]
+
+
+# --------------------------------------------------------------------------- #
+# Run bookkeeping (SPECS §4.3 `runs`; provenance §4.5)
+# --------------------------------------------------------------------------- #
+
+
+def start_run(
+    conn: sqlite3.Connection,
+    stage: str,
+    *,
+    model: str | None = None,
+    params: dict | None = None,
+    git_sha: str | None = None,
+) -> int:
+    """Open a ``runs`` row for a pipeline invocation and return its id.
+
+    Every stage that mutates the store records a run so counts, parameters, and
+    the git SHA that produced them are auditable (the anti-contamination guarantee
+    depends on this). Call :func:`finish_run` when the work completes.
+    """
+    cur = conn.execute(
+        """
+        INSERT INTO runs (stage, model, params, started_at, git_sha)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (stage, model, json.dumps(params) if params else None, utcnow_iso(), git_sha),
+    )
+    conn.commit()
+    return int(cur.lastrowid)
+
+
+def finish_run(
+    conn: sqlite3.Connection,
+    run_id: int,
+    *,
+    n_input: int | None = None,
+    n_ok: int | None = None,
+    n_failed: int | None = None,
+) -> None:
+    """Stamp a ``runs`` row finished, with input/ok/failed counts."""
+    conn.execute(
+        """
+        UPDATE runs
+           SET finished_at = ?, n_input = ?, n_ok = ?, n_failed = ?
+         WHERE run_id = ?
+        """,
+        (utcnow_iso(), n_input, n_ok, n_failed, run_id),
+    )
+    conn.commit()

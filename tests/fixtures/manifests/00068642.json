@@ -1,0 +1,183 @@
+{
+ "@context": "http://iiif.io/api/presentation/2/context.json",
+ "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/manifest.json",
+ "@type": "sc:Manifest",
+ "label": "Leibniz-Handschriften zur Philosophie LH 4, 6, 18",
+ "license": "https://creativecommons.org/publicdomain/mark/1.0/",
+ "attribution": "Provided by Gottfried Wilhelm Leibniz Bibliothek<br/>No Copyright - Public Domain Marked",
+ "logo": "http://digitale-sammlungen.gwlb.de/fileadmin/template/img/gwlb_logo.jpg",
+ "related": [
+  "https://digitale-sammlungen.gwlb.de/resolve?docid=00068642",
+  "https://digitale-sammlungen.gwlb.de/content/00068642/manifest.json"
+ ],
+ "metadata": [
+  {
+   "label": "Kitodo",
+   "value": ""
+  },
+  {
+   "label": "URN",
+   "value": ""
+  },
+  {
+   "label": "Source PPN (SWB)",
+   "value": ""
+  },
+  {
+   "label": "Collection",
+   "value": "Leibniz-Handschriften zur Philosophie LH 4, 6, 18"
+  },
+  {
+   "label": "Call number",
+   "value": "LH 4, 6, 18"
+  },
+  {
+   "label": "Owner",
+   "value": "Gottfried Wilhelm Leibniz Bibliothek"
+  },
+  {
+   "label": "Author",
+   "value": "Leibniz, Gottfried Wilhelm"
+  },
+  {
+   "label": "Place of publication",
+   "value": ""
+  },
+  {
+   "label": "Date of publication",
+   "value": ""
+  },
+  {
+   "label": "Publisher",
+   "value": ""
+  },
+  {
+   "label": "Physical description",
+   "value": "2 Bl."
+  },
+  {
+   "label": "Manifest Type",
+   "value": "Manuscript"
+  }
+ ],
+ "sequences": [
+  {
+   "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/sequence/1",
+   "@type": "sc:Sequence",
+   "canvases": [
+    {
+     "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000001",
+     "@type": "sc:Canvas",
+     "label": "1r",
+     "height": 2561,
+     "width": 2008,
+     "images": [
+      {
+       "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/anno/3a62f4b3-6aae-44cb-b7d5-dc443f3c7a96",
+       "@type": "oa:Annotation",
+       "motivation": "sc:painting",
+       "resource": {
+        "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/00000001.jpg",
+        "@type": "dctypes:Image",
+        "label": "1r",
+        "format": "image/jpeg",
+        "height": 2561,
+        "width": 2008,
+        "service": {
+         "@context": "http://iiif.io/api/image/2/context.json",
+         "@id": "https://digitale-sammlungen.gwlb.de/iiif/00068642/ptif/00000001.ptif",
+         "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+       },
+       "on": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000001"
+      }
+     ]
+    },
+    {
+     "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000002",
+     "@type": "sc:Canvas",
+     "label": "1v",
+     "height": 2563,
+     "width": 2011,
+     "images": [
+      {
+       "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/anno/21b2aaba-66c2-4edc-bcf1-8db1223c3f25",
+       "@type": "oa:Annotation",
+       "motivation": "sc:painting",
+       "resource": {
+        "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/00000002.jpg",
+        "@type": "dctypes:Image",
+        "label": "1v",
+        "format": "image/jpeg",
+        "height": 2563,
+        "width": 2011,
+        "service": {
+         "@context": "http://iiif.io/api/image/2/context.json",
+         "@id": "https://digitale-sammlungen.gwlb.de/iiif/00068642/ptif/00000002.ptif",
+         "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+       },
+       "on": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000002"
+      }
+     ]
+    },
+    {
+     "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000003",
+     "@type": "sc:Canvas",
+     "label": "2r",
+     "height": 2076,
+     "width": 1217,
+     "images": [
+      {
+       "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/anno/be7c3e5b-efc1-4bdf-a9d2-26994cf44047",
+       "@type": "oa:Annotation",
+       "motivation": "sc:painting",
+       "resource": {
+        "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/00000003.jpg",
+        "@type": "dctypes:Image",
+        "label": "2r",
+        "format": "image/jpeg",
+        "height": 2076,
+        "width": 1217,
+        "service": {
+         "@context": "http://iiif.io/api/image/2/context.json",
+         "@id": "https://digitale-sammlungen.gwlb.de/iiif/00068642/ptif/00000003.ptif",
+         "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+       },
+       "on": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000003"
+      }
+     ]
+    },
+    {
+     "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000004",
+     "@type": "sc:Canvas",
+     "label": "2v",
+     "height": 2075,
+     "width": 1218,
+     "images": [
+      {
+       "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/anno/569d5f01-4600-48da-b1fb-941926f12f08",
+       "@type": "oa:Annotation",
+       "motivation": "sc:painting",
+       "resource": {
+        "@id": "https://digitale-sammlungen.gwlb.de/content/00068642/00000004.jpg",
+        "@type": "dctypes:Image",
+        "label": "2v",
+        "format": "image/jpeg",
+        "height": 2075,
+        "width": 1218,
+        "service": {
+         "@context": "http://iiif.io/api/image/2/context.json",
+         "@id": "https://digitale-sammlungen.gwlb.de/iiif/00068642/ptif/00000004.ptif",
+         "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+       },
+       "on": "https://digitale-sammlungen.gwlb.de/content/00068642/canvas/00000004"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

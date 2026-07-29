@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:mets="http://www.loc.gov/METS/"
+         xmlns:mods="http://www.loc.gov/mods/v3"
+         xmlns:dv="http://dfg-viewer.de/"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <responseDate>2026-07-28T00:00:00Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="mets" set="LeibnizHandschriften">https://digitale-sammlungen.gwlb.de/oai2</request>
+  <ListRecords>
+
+    <!-- A: 8-digit id, iiif identifier present, dual Roman/Arabic shelfmark, 2 pages -->
+    <record>
+      <header>
+        <identifier>00099001</identifier>
+        <datestamp>2022-01-01T00:00:00Z</datestamp>
+        <setSpec>Handschriften</setSpec>
+        <setSpec>Leibnitiana</setSpec>
+        <setSpec>LeibnizHandschriften</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000">
+            <mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+              <mods:mods>
+                <mods:location>
+                  <mods:physicalLocation>DE-35</mods:physicalLocation>
+                  <mods:shelfLocator>LH XXXV, 3, 5</mods:shelfLocator>
+                  <mods:shelfLocator>LH 35, 3, 5</mods:shelfLocator>
+                </mods:location>
+                <mods:identifier type="kitodo-project">LH</mods:identifier>
+                <mods:identifier type="iiif">https://digitale-sammlungen.gwlb.de/content/00099001/manifest.json</mods:identifier>
+                <mods:titleInfo><mods:title>Leibniz-Handschriften Beispiel LH XXXV, 3, 5</mods:title></mods:titleInfo>
+                <mods:originInfo><mods:dateCreated>1680</mods:dateCreated></mods:originInfo>
+                <mods:physicalDescription><mods:extent>2 Bl.</mods:extent></mods:physicalDescription>
+                <mods:accessCondition type="use and reproduction">Public Domain Mark 1.0</mods:accessCondition>
+              </mods:mods>
+            </mets:xmlData></mets:mdWrap>
+          </mets:dmdSec>
+          <mets:structMap TYPE="LOGICAL">
+            <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Manuscript"/>
+          </mets:structMap>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence">
+              <mets:div ID="PHYS_0001" ORDER="1" ORDERLABEL="1r" TYPE="page"/>
+              <mets:div ID="PHYS_0002" ORDER="2" ORDERLABEL="1v" TYPE="page"/>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+    <!-- B: DE-611 id, NO iiif identifier (manifest URL must be constructed),
+         generic title, LBr shelfmark, belongs to Briefwechsel + Leibnitiana, 3 pages -->
+    <record>
+      <header>
+        <identifier>DE-611-HS-900001</identifier>
+        <datestamp>2022-02-02T00:00:00Z</datestamp>
+        <setSpec>Handschriften</setSpec>
+        <setSpec>Leibnitiana</setSpec>
+        <setSpec>LeibnizBriefwechsel</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000">
+            <mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+              <mods:mods>
+                <mods:location><mods:shelfLocator>LBr. 57</mods:shelfLocator></mods:location>
+                <mods:identifier type="kitodo-project">LeibnizBriefwechsel</mods:identifier>
+                <mods:titleInfo><mods:title>Nachlass Gottfried Wilhelm Leibniz</mods:title></mods:titleInfo>
+              </mods:mods>
+            </mets:xmlData></mets:mdWrap>
+          </mets:dmdSec>
+          <mets:structMap TYPE="LOGICAL">
+            <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Inventory"/>
+          </mets:structMap>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence">
+              <mets:div ID="PHYS_0001" ORDER="1" ORDERLABEL="1r" TYPE="page"/>
+              <mets:div ID="PHYS_0002" ORDER="2" ORDERLABEL="1v" TYPE="page"/>
+              <mets:div ID="PHYS_0003" ORDER="3" ORDERLABEL="2r" TYPE="page"/>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+    <!-- C: deleted record — must be skipped entirely -->
+    <record>
+      <header status="deleted">
+        <identifier>00099099</identifier>
+        <datestamp>2023-03-03T00:00:00Z</datestamp>
+        <setSpec>LeibnizHandschriften</setSpec>
+      </header>
+    </record>
+
+    <!-- D: zero-canvas anchor — container record, no physical page divs -->
+    <record>
+      <header>
+        <identifier>DE-611-BF-900002</identifier>
+        <datestamp>2024-04-04T00:00:00Z</datestamp>
+        <setSpec>Handschriften</setSpec>
+        <setSpec>Leibnitiana</setSpec>
+        <setSpec>leibniz-rekonstruktionen</setSpec>
+      </header>
+      <metadata>
+        <mets:mets>
+          <mets:dmdSec ID="DMDLOG_0000">
+            <mets:mdWrap MDTYPE="MODS"><mets:xmlData>
+              <mods:mods>
+                <mods:titleInfo><mods:title>Rekonstruktionen</mods:title></mods:titleInfo>
+              </mods:mods>
+            </mets:xmlData></mets:mdWrap>
+          </mets:dmdSec>
+          <mets:structMap TYPE="LOGICAL">
+            <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="MultipleManuscriptsCollection"/>
+          </mets:structMap>
+          <mets:structMap TYPE="PHYSICAL">
+            <mets:div ID="PHYS_0000" TYPE="physSequence"/>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+
+    <resumptionToken cursor="4" completeListSize="5" expirationDate="2026-07-29T00:00:00Z">TOKEN_PAGE_2</resumptionToken>
+  </ListRecords>
+</OAI-PMH>

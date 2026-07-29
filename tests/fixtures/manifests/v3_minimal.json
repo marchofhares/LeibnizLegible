@@ -1,0 +1,40 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://example.org/iiif/v3work/manifest.json",
+  "type": "Manifest",
+  "label": { "en": ["A v3 manifest"] },
+  "items": [
+    {
+      "id": "https://example.org/iiif/v3work/canvas/1",
+      "type": "Canvas",
+      "label": { "none": ["1r"] },
+      "width": 1500,
+      "height": 2000,
+      "items": [
+        {
+          "id": "https://example.org/iiif/v3work/page/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://example.org/iiif/v3work/anno/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://example.org/iiif/v3work/full/1.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "service": [
+                  {
+                    "@id": "https://example.org/iiif/v3work/image/1",
+                    "@type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level1.json"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">
+  <responseDate>2026-07-28T00:10:00Z</responseDate>
+  <request verb="ListRecords">https://digitale-sammlungen.gwlb.de/oai2</request>
+  <error code="badResumptionToken">The resumptionToken is invalid or has expired.</error>
+</OAI-PMH>

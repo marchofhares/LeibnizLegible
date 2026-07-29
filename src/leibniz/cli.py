@@ -12,6 +12,7 @@ import typer
 from rich.console import Console
 
 from leibniz import __version__
+from leibniz.harvest.cli import app as harvest_app
 
 app = typer.Typer(
     name="leibniz",
@@ -20,6 +21,9 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+
+# Stage sub-apps attach here, one per pipeline stage (SPECS §4.2).
+app.add_typer(harvest_app, name="harvest")
 
 _console = Console()
 
