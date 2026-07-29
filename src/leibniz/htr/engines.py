@@ -38,6 +38,38 @@ KRAKEN_PADDING = 16
 KRAKEN_VALID_NORM = False  # baseline models normalise height without box-centering
 
 
+def _accel_device(device: str) -> tuple[str, object]:
+    """Map a torch-style device string to kraken's ``(accelerator, device)`` pair.
+
+    kraken's ``RecognitionInferenceConfig`` follows PyTorch-Lightning: ``accelerator``
+    selects the hardware and ``device`` is a device **count** (int) or a list of
+    device **indices** — never a bare ``"cuda"`` string. The original GPU branch
+    passed the string through, so kraken's ``int("cuda")`` blew up on the first
+    real CUDA run (there was no GPU in any build/CI environment to catch it). This
+    pure mapping is unit-tested; the exact accelerator token ("cuda" vs "gpu") is
+    what a live CUDA run confirms.
+
+    ``"cpu"`` → ``("cpu", 1)`` · ``"cuda"``/``"gpu"`` → ``("cuda", 1)`` (one GPU) ·
+    ``"cuda:2"`` → ``("cuda", [2])`` (index 2) · ``"mps"`` → ``("mps", 1)`` ·
+    anything else → ``("auto", 1)``.
+    """
+    d = (device or "cpu").strip().lower()
+    if d in ("cpu", ""):
+        return "cpu", 1
+    if ":" in d:  # e.g. "cuda:0" — a specific device index
+        head, _, idx = d.rpartition(":")
+        accel = "cuda" if head in ("cuda", "gpu", "") else head
+        try:
+            return accel, [int(idx)]
+        except ValueError:
+            return accel, 1
+    if d in ("cuda", "gpu"):
+        return "cuda", 1
+    if d == "mps":
+        return "mps", 1
+    return "auto", 1
+
+
 class KrakenEngine:
     """Local Kraken recognition over pre-extracted line images.
 
@@ -88,9 +120,9 @@ class KrakenEngine:
         if not models:
             raise ValueError(f"no recognition model found in {self.model_path}")
         model = models[0]
-        # accelerator='cpu' wants an int device count, not a device string.
-        accelerator = "cpu" if self.device == "cpu" else "auto"
-        dev = 1 if self.device == "cpu" else self.device
+        # Map our device string to kraken's (accelerator, device count/index) — a
+        # bare "cuda" here would make kraken int() a non-number and crash.
+        accelerator, dev = _accel_device(self.device)
         cfg = RecognitionInferenceConfig(
             device=dev,
             accelerator=accelerator,
