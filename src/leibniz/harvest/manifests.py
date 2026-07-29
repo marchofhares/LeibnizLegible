@@ -147,6 +147,7 @@ def to_page(object_id: str, canvas: ParsedCanvas) -> db.Page:
         seq=canvas.seq,
         canvas_id=canvas.canvas_id,
         image_service_url=canvas.image_service_url,
+        label=canvas.label,  # IIIF canvas label = folio label (C2 resolver)
         width=canvas.width,
         height=canvas.height,
         status="pending",
