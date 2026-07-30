@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import time
+import warnings
 from pathlib import Path
 
+import pytest
+
 from leibniz import db
-from leibniz.layout.segment import SegLine, SegmentedPage
-from leibniz.pipeline.recognize import recognize_pages
+from leibniz.layout.segment import SegLine, SegmentedPage, _pil_transform_warnings_as_errors
+from leibniz.pipeline.recognize import _dedupe_pts, audit_page, recognize_pages
 from leibniz.pipeline.segment import segment_pages
 
 
@@ -164,3 +168,221 @@ def test_degenerate_baseline_skips_line_not_whole_page(tmp_path) -> None:
     assert lines[1].text is None  # degenerate line left untranscribed
     assert lines[2].text is not None
     assert db.get_page(conn, "W1:0001").status == "recognized"
+
+
+def _seed_one_page(
+    tmp_path: Path,
+    baselines: list[list[list[float]]],
+    polygons: list[list[list[float]] | None] | None = None,
+):
+    """One segmented page with hand-built line geometry (no FakeSegmenter pass)."""
+    images = tmp_path / "images"
+    conn = db.init_db(":memory:")
+    db.upsert_work(conn, db.Work("W1", "LeibnizHandschriften"))
+    rel = "W1/0001.jpg"
+    p = images / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(b"JPEG")
+    db.upsert_page(
+        conn,
+        db.Page(
+            work_id="W1",
+            seq=1,
+            image_url="u",
+            width=2000,
+            height=2500,
+            local_path=rel,
+            sha256="s",
+            status="segmented",
+        ),
+    )
+    rid = db.start_run(conn, "segment", model="seg")
+    for seq, baseline in enumerate(baselines):
+        db.insert_line(
+            conn,
+            db.Line(
+                page_id="W1:0001",
+                line_seq=seq,
+                baseline=baseline,
+                polygon=polygons[seq] if polygons else None,
+                run_id=rid,
+                status="machine",
+            ),
+        )
+    conn.commit()
+    return conn, images
+
+
+def test_dedupe_pts_collapses_same_pixel_points() -> None:
+    # A zero-length segment (exact or sub-pixel duplicate) is what becomes the
+    # zero-width dewarping quad PIL NaNs out on; total length can't see it.
+    assert _dedupe_pts([[50, 140], [50, 140], [1950, 140]]) == [(50.0, 140.0), (1950.0, 140.0)]
+    assert _dedupe_pts([[50, 140], [50.4, 140.2], [1950, 140]]) == [(50.0, 140.0), (1950.0, 140.0)]
+    assert _dedupe_pts(None) == []
+
+
+class RecordingCropper(FakeSegmenter):
+    """Captures the SegmentedPage the pipeline hands to crop_lines."""
+
+    def __init__(self) -> None:
+        self.pages: list[SegmentedPage] = []
+
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        self.pages.append(page)
+        return super().crop_lines(image, page)
+
+
+def test_duplicate_baseline_points_sanitized_before_cropping(tmp_path) -> None:
+    conn, images = _seed_one_page(
+        tmp_path,
+        [[[50, 140], [50.4, 140.2], [1950, 140]]],  # sub-pixel duplicate
+    )
+    cropper = RecordingCropper()
+    result = recognize_pages(conn, cropper, FakeRecognizer(), images_root=images)
+    assert result.recognized == 1 and result.n_lines == 1
+    assert cropper.pages[0].lines[0].baseline == [(50.0, 140.0), (1950.0, 140.0)]
+    assert db.iter_lines_for_page(conn, "W1:0001")[0].text is not None
+
+
+class PoisonLineCropper(FakeSegmenter):
+    """Raises whenever the crop batch contains line index 1 (the poison line).
+
+    Mimics the live failure: kraken's ``extract_polygons`` dying on one line's
+    degenerate quad geometry, whether cropped with the page or alone.
+    """
+
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        if any(ln.index == 1 for ln in page.lines):
+            raise RuntimeError("zero-width quad")
+        return super().crop_lines(image, page)
+
+
+def test_poison_line_costs_the_line_not_the_page(tmp_path) -> None:
+    good = [[50, 140], [1950, 140]]
+    conn, images = _seed_one_page(tmp_path, [good, [[50, 260], [1950, 260]], good])
+    result = recognize_pages(conn, PoisonLineCropper(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 1 and result.skipped == 0
+    assert result.n_lines == 2  # poison line dropped by the per-line fallback
+    lines = db.iter_lines_for_page(conn, "W1:0001")
+    assert lines[0].text is not None
+    assert lines[1].text is None  # the poison line, left untranscribed
+    assert lines[2].text is not None
+    assert db.get_page(conn, "W1:0001").status == "recognized"
+    assert any("not transcribed" in r for _pid, r in result.failures)
+
+
+class AlwaysPoisonCropper(FakeSegmenter):
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        raise RuntimeError("zero-width quad")
+
+
+def test_all_lines_poison_skips_page_with_reason(tmp_path) -> None:
+    conn, images = _seed_one_page(tmp_path, [[[50, 140], [1950, 140]]])
+    result = recognize_pages(conn, AlwaysPoisonCropper(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 0 and result.skipped == 1
+    page = db.get_page(conn, "W1:0001")
+    assert page.status == "skipped"
+    assert "no line survived polygon extraction" in page.skip_reason
+
+
+def test_pil_transform_warning_guard_escalates_only_pil() -> None:
+    # The PIL-attributed RuntimeWarning must raise (a NaN'd transform never
+    # yields a usable crop; unraised it can hang the C rasterizer)…
+    with pytest.raises(RuntimeWarning), _pil_transform_warnings_as_errors():
+        warnings.warn_explicit(
+            "divide by zero encountered in divide",
+            RuntimeWarning,
+            "PIL/Image.py",
+            3045,
+            module="PIL.Image",
+        )
+    # …while the same warning from anywhere else stays a warning.
+    with warnings.catch_warnings(record=True) as rec:
+        warnings.simplefilter("always")
+        with _pil_transform_warnings_as_errors():
+            warnings.warn_explicit(
+                "benign elsewhere", RuntimeWarning, "numpy/core.py", 1, module="numpy.core"
+            )
+    assert len(rec) == 1
+
+
+# Geometry whose rectified extents kraken would turn into a giant allocation
+# (the OOM-kill class): axially deep inside a segment, far perpendicular.
+_POISON_BL = [[0, 0], [1900, 0], [1900, 1]]
+_POISON_POLY = [[5, -9000], [1800, 9000], [30, 10]]
+
+
+def test_oversize_geometry_costs_the_line_not_the_page(tmp_path) -> None:
+    sane = [[50, 140], [1950, 140]]
+    conn, images = _seed_one_page(tmp_path, [sane, _POISON_BL], polygons=[None, _POISON_POLY])
+    result = recognize_pages(conn, FakeSegmenter(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 1 and result.skipped == 0
+    assert result.n_lines == 1  # the oversize line was guarded out before cropping
+    lines = db.iter_lines_for_page(conn, "W1:0001")
+    assert lines[0].text is not None
+    assert lines[1].text is None
+    assert any("oversize_crop" in r for _pid, r in result.failures)
+
+
+class HangingCropper(FakeSegmenter):
+    """Stalls in crop_lines, standing in for an in-process kraken/PIL freeze."""
+
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        time.sleep(5)
+        return super().crop_lines(image, page)
+
+
+def test_crop_deadline_converts_stall_to_skip(tmp_path, monkeypatch) -> None:
+    from leibniz.pipeline import recognize as rec_mod
+
+    monkeypatch.setattr(rec_mod, "CROP_PAGE_DEADLINE_S", 0.05)
+    monkeypatch.setattr(rec_mod, "CROP_LINE_DEADLINE_S", 0.05)
+    conn, images = _seed_one_page(tmp_path, [[[50, 140], [1950, 140]]])
+    result = recognize_pages(conn, HangingCropper(), FakeRecognizer(), images_root=images)
+    assert result.skipped == 1 and result.recognized == 0
+    page = db.get_page(conn, "W1:0001")
+    assert page.status == "skipped"
+    assert "no line survived polygon extraction" in page.skip_reason
+
+
+def test_audit_page_names_the_poison_line(tmp_path) -> None:
+    sane = [[50, 140], [1950, 140]]
+    conn, images = _seed_one_page(tmp_path, [sane, _POISON_BL], polygons=[None, _POISON_POLY])
+    rows = audit_page(conn, db.get_page(conn, "W1:0001"))
+    assert rows[0]["verdict"] == "ok"
+    assert rows[1]["verdict"].startswith("oversize_crop")
+    assert rows[1]["est_mpx"] > 24  # would dwarf the 24 MPx floor / 20 MPx page cap
+
+
+def _png(w: int, h: int) -> bytes:
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + (13).to_bytes(4, "big")
+        + b"IHDR"
+        + w.to_bytes(4, "big")
+        + h.to_bytes(4, "big")
+        + b"\x00" * 5
+    )
+
+
+class SliverCropper(FakeSegmenter):
+    """Emits a real-header PNG sliver for line 1, normal fake crops otherwise.
+
+    Mimics the live killer: geometry looked sane, but the dewarped crop was a
+    ~900×1 mask stripe that would explode the recogniser's conv allocation.
+    """
+
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        return [_png(900, 1) if ln.index == 1 else f"crop{ln.index}".encode() for ln in page.lines]
+
+
+def test_sliver_crop_dropped_before_recognition(tmp_path) -> None:
+    conn, images = _seed_segmented(tmp_path, [("W1", 3)])
+    result = recognize_pages(conn, SliverCropper(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 1 and result.skipped == 0
+    assert result.n_lines == 2  # the sliver never reached the recogniser
+    lines = db.iter_lines_for_page(conn, "W1:0001")
+    assert lines[0].text is not None
+    assert lines[1].text is None
+    assert lines[2].text is not None
+    assert any("sliver_crop:900x1" in r for _pid, r in result.failures)

@@ -1,6 +1,6 @@
 # HTR v1 — corpus segmentation + recognition pipeline (Phase C1)
 
-_Leibniz Legible, Phase C1. Generated 2026-07-29T00:00:00Z. Deliverable of PROMPTS C1 (SPECS §3, §4.5, §6, §9). Numeric sections are queried from the store by `leibniz pipeline report`; prose is templated._
+_Leibniz Legible, Phase C1. Generated 2026-07-30T14:58:37Z. Deliverable of PROMPTS C1 (SPECS §3, §4.5, §6, §9). Numeric sections are queried from the store by `leibniz pipeline report`; prose is templated._
 
 ## What the pipeline does
 
@@ -13,38 +13,79 @@ Both stages are status-driven & resumable (commit per page), idempotent (`--redo
 
 ## Pipeline coverage
 
-- **Pages in scope:** 0
-- **pending:** 0 (0.0%)
+- **Pages in scope:** 236,795
+- **pending:** 236,297 (99.8%)
 - **segmented:** 0 (0.0%)
-- **recognized:** 0 (0.0%)
+- **recognized:** 498 (0.2%)
 - **skipped:** 0 (0.0%)
-- **Lines:** 0 segmented · 0 recognised (text + confidence).
+- **Lines:** 26,902 segmented · 26,504 recognised (text + confidence).
+
+## Throughput
+
+| Run | Stage | Model | Input | OK | Failed |
+| ---: | --- | --- | ---: | ---: | ---: |
+| 4 | segment | blla_ft_leibniz_v1_0.4750 | 500 | 498 | 2 |
+| 5 | recognize | FoNDUE-GD_v2_ft_Leibniz | 498 | 0 | 498 |
+| 6 | recognize | FoNDUE-GD_v2_ft_Leibniz | 498 | 413 | 85 |
+| 7 | recognize | FoNDUE-GD_v2_ft_Leibniz | 498 | 0 | 498 |
+| 8 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 9 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 10 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 11 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 12 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 13 | recognize | FoNDUE-GD_v2_ft_Leibniz | 0 | 0 | 0 |
+| 14 | recognize | FoNDUE-GD_v2_ft_Leibniz | 431 | 55 | 376 |
+| 15 | recognize | FoNDUE-GD_v2_ft_Leibniz | 374 | 374 | 0 |
 
 ## Per-line confidence
 
-_No recognised lines with confidence yet (run `leibniz pipeline recognize`)._
+Mean 0.771 · median 0.805 over recognised lines.
+
+| Confidence | Lines |
+| --- | ---: |
+| < 0.50 | 2,479 |
+| 0.50–0.70 | 3,996 |
+| 0.70–0.80 | 4,771 |
+| 0.80–0.90 | 4,094 |
+| ≥ 0.90 | 7,831 |
 
 ## Per set
 
-_No pages processed yet._
+| Set | Pages | Segmented | Recognized | Skipped | Mean lines/pg |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Leibnitiana | 1,768 | 0 | 0 | 0 | 0.0 |
+| LeibnizBriefwechsel | 72,284 | 0 | 0 | 0 | 0.0 |
+| LeibnizHandschriften | 58,828 | 0 | 498 | 0 | 53.8 |
+| LeibnizMarginalien | 103,887 | 0 | 0 | 0 | 0.0 |
+| leibniz-rekonstruktionen | 28 | 0 | 0 | 0 | 0.0 |
 
 ## Segmentation quality — measured, because it is the known risk
 
 Segmentation is the unsolved half of the corpus (SPECS §9: layered revisions, marginalia, snippets). C1 measures it per page rather than fixing it blindly: `page_stats` records `n_lines`/`n_regions`, `region_coverage`, line-height mean/median/CV (irregular spacing = revised-draft signature), `n_overlaps` (boxes overlapping ≥30 % — layered revisions / marginalia), and `n_short_lines` (< 40 % of median width — interlinear insertions / snippets). These are the raw signal the stratum heuristic reads in C2 (per piece) and C4 (per page).
 
-_No segmentation stats yet (run `leibniz pipeline segment`)._
+Over 500 segmented pages: mean **53.8 lines/page**, mean region coverage **32.7%**, mean line-height CV **0.28**. **81.2%** of pages have overlapping line boxes; **92.4%** have short lines.
+
+Worst-overlap pages (segmentation-risk candidates for inspection):
+
+| Page | Lines | Overlaps |
+| --- | ---: | ---: |
+| `00051016:0021` | 141 | 305 |
+| `00051016:0024` | 141 | 305 |
+| `00051016:0022` | 156 | 278 |
+| `00051016:0023` | 156 | 278 |
+| `00051016:0008` | 169 | 233 |
+| `00051016:0005` | 168 | 233 |
+| `00051016:0006` | 140 | 220 |
+| `00051016:0007` | 140 | 220 |
+| `00051012:0161` | 144 | 193 |
+| `00051012:0164` | 143 | 193 |
+
 
 ## Skip / failure taxonomy
 
 _No skips recorded._
 
 Anticipated per-set difficulty (quantified once the run completes): **Marginalien** (44 % of pages) is the hard case — annotated printed books whose HTR target is the marginal hand, not the printed body (needs zone separation, STATUS Open Q #5); **Handschriften** carries the layered-revision drafts (high line-height CV / overlaps / short lines); **Briefwechsel** fair copies are the clean stratum; German/Kurrent (~15 % of the corpus) is transcribed but at far higher CER (Latin+French model) — a C4 per-language honesty item, not a skip.
-
-## Status of the live run
-
-The numeric sections above read zero because the segment/recognize stages need the optional kraken+torch stack (a multi-GB install plus the PHILIUMM model files) **and** the local image cache (the A2 full pull is ~365 GB and, like all `data/`, is gitignored, so it does not travel between sessions); no GPU is attached in this build environment. Rather than fabricate throughput and confidence numbers, the pipeline was **built and fully offline-tested** here, and the sample + corpus runs are the operator commands below — `leibniz pipeline report` refreshes every number the moment they run.
-
-**Machinery verification (this session).** The complete state machine was exercised end-to-end against fake segmenter/recogniser objects and synthetic page images: `pending → segmented → recognized` with geometry + text + confidence + provenance stored, per-page segmentation stats computed, blank pages skipped with a reason, a raising segmenter isolated to its page, crop/line-count drift handled as a logged partial, `--redo` without duplicating lines, `--sample`/`--set` scoping, and `runs` bookkeeping — plus unit tests of the segmentation-stats geometry on hand-built fair-copy / overlapping / interlinear / blank pages. All pipeline tests pass; the kraken-absent CLI guard exits cleanly with an install hint.
 
 ## Operator runbook
 

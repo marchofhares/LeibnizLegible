@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-29 (end of Phase C2)._
+_Last updated: 2026-07-30 (C1 corpus-run robustness, from the first live GPU/CPU runs)._
 
 ---
 
@@ -198,6 +198,69 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### C1 — corpus-run robustness, from the first live runs (2026-07-29/30)
+
+The operator's first real 500-page runs (GPU + WSL/CPU) surfaced four defects the
+offline fakes could not; all are fixed with offline regression tests:
+
+1. **Confidence was a pixel cut position** (`_tok_conf` now picks the [0,1]
+   posterior field, else `None`) — Open Q #15's exact worry.
+2. **`--device cuda` crashed both stages** (kraken wants `(accelerator, device
+   count)`, not a device string) and **segmentation ignored its device**.
+3. **A sub-5px baseline sank its whole page** (17 % of the sample); such lines
+   are now filtered up front and just left untranscribed.
+4. **A "poison page" killed recognition entirely, four runs in a row** — the
+   process died (`Terminated`, no traceback) at the same page each time, once
+   with PIL `1.0 / w` divide-by-zero warnings, once silently. Reading kraken
+   7.0.3's `extract_polygons`: it rectifies each line's boundary into
+   along-baseline × perpendicular coordinates and sizes the output crop from
+   their **raw, unclamped extents** — degenerate stored geometry (zero-length
+   segments → NaN mesh quads; far-flung rectified points → an OOM-scale
+   allocation the OS kills mid-way). Five layers now prevent the whole class:
+   (a) same-pixel consecutive points are collapsed before cropping;
+   (b) `pipeline/geometry.py` **replicates kraken's `output_shape` arithmetic**
+   (pure Python, offline-tested) and drops any line whose implied crop exceeds
+   `max(4× page area, 24 MPx)` — the OOM class caught *before* allocation;
+   (c) PIL-attributed `RuntimeWarning`s are escalated to errors inside
+   `crop_lines` (a NaN'd transform never yields a usable crop);
+   (d) a failed page-crop falls back to per-line cropping, so a poison line
+   costs *the line*, not the page; and (e) a SIGALRM **crop deadline**
+   (120 s/page, 30 s/line) converts any residual in-process stall into the
+   normal skip path. `leibniz pipeline audit [--page ID]` prints any page's
+   per-line geometry verdicts from the store alone (no kraken) — the operator's
+   first tool when a page skips or dies.
+
+**Root cause, finally caught live** (rlimit'd probe on the operator box, page
+`00051012:0070` — a small scrap page segmented into 21 speck "lines"): the
+killer was never the crop — it was **recognition**. One line's dewarped crop is
+a ~900×1 px empty mask sliver; `ImageInputTransforms` resizes crops to model
+input height *preserving aspect ratio*, so the sliver becomes >100k px wide,
+the whole batch pads to it, and a single `F.conv2d` allocates **5.3 GB**
+(`DefaultCPUAllocator` enforce-fail under the probe's rlimit; under normal
+Linux overcommit it "succeeds" and the OS kills the machine — invisible to
+every in-process handler, which is why layers a–e couldn't catch it). Fixes:
+the pipeline now judges the **actual crop raster** before recognition (PNG
+header peek, no imaging dep: `min side < 4 px` or `aspect > 100:1` →
+`sliver_crop:{w}x{h}`, line dropped); `KrakenEngine` refuses transformed lines
+wider than 10k px (`("", None)` placeholder — backstop for any caller); and
+`pipeline segment/recognize --mem-limit-gb N` caps the process address space so
+any residual runaway allocation fails one page instead of the box.
+
+**Operator validation (2026-07-30): the crash class is closed.** A full 431-page
+CPU pass completed with zero crashes; the poison page recognised with its sliver
+enumerated (`sliver_crop:900x5`), and the original gate finally reports
+**`conf > 1` count = 0** (Open Q #15's field shape confirmed live at scale).
+Two calibrations from that run: an address-space cap must clear torch's
+*virtual* arena — 6 GB starved it after ~55 pages (alloc-fail skips); use
+**`--mem-limit-gb 12`+** (virtual ≠ resident). And a batch padded to its widest
+line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flushes
+on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
+on CPU and GPU alike.
+
+(1–3 landed as `140d58d`; 4 across this entry's commits.) Live evidence: real
+posteriors ≈0.6–0.9 populate at scale. Remaining operator gate: re-run the
+alloc-failed skips, then the CUDA 500 smoke, then the corpus pass.
 
 ### C2 — GT factory at scale (2026-07-29) ✅
 
@@ -399,7 +462,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **334** (+1 skipped) |
+| Tests passing | **366** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |
@@ -499,6 +562,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     posteriors defensively; the exact field shape is unverified against a live
     kraken run (no stack here), so it falls back to `None` if absent. Confirm on the
     operator run that real per-line confidences populate (they gate search + the UI).
+    _2026-07-30: the original field was a pixel cut position (fixed, `140d58d`); the
+    first ~69 live pages now show in-range posteriors (≈0.6–0.9). Close once the
+    500-page validation reports zero `conf > 1` lines._
 
 ---
 
