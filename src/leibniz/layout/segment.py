@@ -124,7 +124,15 @@ class PageSegmenter:
 
         self._ensure_loaded()
         im = self._open(image)
-        seg = blla.segment(im, text_direction=text_direction, model=self._model)
+        # Run segmentation on the requested device (GPU when available). Older
+        # kraken builds lack a ``device`` kwarg on ``blla.segment`` → fall back to
+        # the default (CPU) so segmentation never breaks over this.
+        try:
+            seg = blla.segment(
+                im, text_direction=text_direction, model=self._model, device=self.device
+            )
+        except TypeError:
+            seg = blla.segment(im, text_direction=text_direction, model=self._model)
         lines: list[SegLine] = []
         for i, line in enumerate(seg.lines):
             lines.append(

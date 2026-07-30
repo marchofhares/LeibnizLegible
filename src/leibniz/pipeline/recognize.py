@@ -172,9 +172,20 @@ def _recognize_one(
         result.failures.append((page.id, "no_geometry"))
         return "no_geometry"
 
+    # Drop degenerate lines (sub-5px baselines) *before* cropping: kraken's polygon
+    # extractor raises `Baseline length below minimum 5px` on them, which would
+    # otherwise sink the whole page. Order is preserved, so the surviving crops
+    # still map 1:1 to their line_seq; dropped lines are simply left untranscribed.
+    croppable = [ln for ln in lines if _croppable(ln)]
+    if not croppable:
+        db.set_page_status(conn, page.id, "skipped", skip_reason="no_croppable_lines")
+        result.skipped += 1
+        result.failures.append((page.id, "no_croppable_lines"))
+        return "no_croppable_lines"
+
     try:
         image = target.read_bytes()
-        seg_page = _page_to_segmentation(page, lines)
+        seg_page = _page_to_segmentation(page, croppable)
         crops = cropper.crop_lines(image, seg_page)
         preds = recognizer.transcribe_conf(crops)
     except Exception as exc:  # noqa: BLE001 — tolerate & log per-page failures
@@ -184,10 +195,9 @@ def _recognize_one(
         result.failures.append((page.id, reason[:300]))
         return "error"
 
-    # Crop/line-count drift is possible if geometry and cropper disagree; align on
-    # the shorter list and record the shortfall rather than mis-pairing text.
-    n = min(len(lines), len(preds))
-    for ln, (text, conf) in zip(lines[:n], preds[:n], strict=True):
+    # Align on the shorter list and record the shortfall rather than mis-pairing.
+    n = min(len(croppable), len(preds))
+    for ln, (text, conf) in zip(croppable[:n], preds[:n], strict=True):
         db.set_line_recognition(
             conn,
             page.id,
@@ -199,11 +209,35 @@ def _recognize_one(
             source={"stage": "recognize", "htr_model": version, "htr_run": run_id},
         )
     result.n_lines += n
-    if n < len(lines):
-        result.failures.append((page.id, f"partial: {n}/{len(lines)} lines recognised"))
+    n_untranscribed = len(lines) - n
+    if n_untranscribed:
+        result.failures.append(
+            (page.id, f"{n_untranscribed}/{len(lines)} line(s) not transcribed (degenerate/crop)")
+        )
     db.set_page_status(conn, page.id, "recognized")
     result.recognized += 1
     return "recognized"
+
+
+# Minimum baseline length (px) kraken's polygon extractor accepts; shorter lines
+# raise and are skipped rather than allowed to fail the whole page.
+MIN_BASELINE_PX = 5.0
+
+
+def _baseline_length(baseline: object) -> float:
+    """Total polyline length of a baseline (0.0 if absent or a single point)."""
+    if not baseline or len(baseline) < 2:  # type: ignore[arg-type]
+        return 0.0
+    total = 0.0
+    pts = list(baseline)  # type: ignore[arg-type]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:], strict=False):
+        total += ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
+    return total
+
+
+def _croppable(line: db.Line) -> bool:
+    """True if a line's baseline is long enough for kraken to extract a polygon."""
+    return _baseline_length(line.baseline) >= MIN_BASELINE_PX
 
 
 __all__ = ["Cropper", "ProgressFn", "RecognizeResult", "Recognizer", "recognize_pages"]
