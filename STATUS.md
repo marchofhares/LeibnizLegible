@@ -258,9 +258,24 @@ line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flush
 on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
 on CPU and GPU alike.
 
+**CUDA smoke (100 fresh pages): segmentation ran (7,496 lines, 75/pg —
+Marginalien-dense), recognition failed 100/100** with `Input type
+(torch.FloatTensor) and weight type (torch.cuda.FloatTensor)`: kraken's
+`_rec_predict` never moves inputs — after `prepare_for_inference` puts the net
+on the accelerator, the caller owns the transfer. `KrakenEngine` now records
+the net's parameter device at load and moves each batch onto it (`lens` stays
+on CPU for sequence packing). Same smoke exposed the kraken-7 token layout
+`(grapheme, start, end, conf)`: front-to-back `[0,1]`-scanning misread
+`start == 0` (every line's first token) as confidence 0.0 — `_tok_conf` now
+scans from the end, where the posterior always lives. **Open calibration:**
+GPU segmentation measured 18.8 s/page on the dense dev slice — verify GPU
+engagement (`nvidia-smi` during a run) and re-estimate the corpus segment pass
+on mixed sets; the ≈260 GPU-h estimate assumed 3–6 s/page combined.
+
 (1–3 landed as `140d58d`; 4 across this entry's commits.) Live evidence: real
-posteriors ≈0.6–0.9 populate at scale. Remaining operator gate: re-run the
-alloc-failed skips, then the CUDA 500 smoke, then the corpus pass.
+posteriors ≈0.6–0.9 populate at scale (CPU: 498/500 pages, 23k lines, mean
+conf 0.771, `conf>1` = 0 — the C1 validation gate is **passed**). Remaining
+operator gate: the CUDA recognition re-run, then the corpus pass.
 
 ### C2 — GT factory at scale (2026-07-29) ✅
 
@@ -462,7 +477,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **366** (+1 skipped) |
+| Tests passing | **368** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

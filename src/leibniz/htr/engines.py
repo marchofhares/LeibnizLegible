@@ -63,24 +63,41 @@ def _should_flush_before(
 def _tok_conf(tok: object) -> float | None:
     """Pull the per-character confidence (a probability in ``[0, 1]``) from a token.
 
-    kraken's decoded tokens are ``(grapheme, …)`` where the trailing fields vary by
-    version — a cut position (pixels, ≫1), a ``(start, end)`` span, and/or the
-    posterior. We take the first scalar field in ``[0, 1]`` as the confidence
-    (pixel positions are > 1, so they can't be mistaken for it) and return ``None``
-    when there is none, rather than a meaningless number. The original code averaged
-    ``tok[1]``, which is the cut position — the source of the nonsensical ~150
-    "confidences" seen on the first real run (STATUS Open Q #15).
+    kraken's decoded tokens are ``(grapheme, …)`` where the trailing fields vary
+    by version — kraken 7 emits ``(grapheme, start, end, confidence)``, older
+    layouts a cut position or a span before the posterior. The posterior is
+    always the *last* field, so scan from the end for the first scalar in
+    ``[0, 1]`` (front-to-back scanning misread ``start == 0`` — the first token
+    of every line — as a confidence of 0.0). Position fields other than an
+    initial 0/1 are ≫ 1 and can't be mistaken for it; return ``None`` when no
+    field qualifies, rather than a meaningless number. The original code
+    averaged ``tok[1]``, the cut position — the ~150 "confidences" of the first
+    real run (STATUS Open Q #15).
     """
     try:
         fields = list(tok)[1:]
     except TypeError:
         return None
-    for v in fields:
+    for v in reversed(fields):
         if isinstance(v, bool):
             continue
         if isinstance(v, (int, float)) and 0.0 <= float(v) <= 1.0:
             return float(v)
     return None
+
+
+def _module_device(model: object):
+    """Device of the model's first network parameter (``None`` if unknowable).
+
+    kraken's ``_rec_predict`` runs ``model.nn`` on whatever tensors it is
+    handed — it never moves them. After ``prepare_for_inference`` places the
+    net on an accelerator, the caller must put its input batches on the same
+    device (the live CUDA smoke failed every page on exactly this mismatch).
+    """
+    try:
+        return next(model.nn.parameters()).device  # type: ignore[attr-defined]
+    except (AttributeError, StopIteration, TypeError):
+        return None
 
 
 def _accel_device(device: str) -> tuple[str, object]:
@@ -142,6 +159,7 @@ class KrakenEngine:
         self._model = None
         self._transforms = None
         self._torch = None
+        self._input_device = None  # where batches must live (set at model load)
 
     # -- lazy heavy setup --------------------------------------------------- #
 
@@ -177,6 +195,7 @@ class KrakenEngine:
             bidi_reordering=False,
         )
         model.prepare_for_inference(cfg)
+        self._input_device = _module_device(model)
         batch, channels, height, width = model.input
         self._transforms = ImageInputTransforms(
             batch,
@@ -191,20 +210,28 @@ class KrakenEngine:
 
     # -- inference ---------------------------------------------------------- #
 
-    def _transcribe_batch(self, tensors: list) -> list[str]:
+    def _batch_tensors(self, tensors: list) -> tuple:
+        """Pad to the widest, stack, and move the batch to the model's device.
+
+        ``lens`` stays on CPU (sequence-packing wants CPU lengths); only the
+        image batch follows the net onto its accelerator.
+        """
         torch = self._torch
         max_len = max(t.shape[2] for t in tensors)
         seqs = torch.stack([torch.nn.functional.pad(t, (0, max_len - t.shape[2])) for t in tensors])
+        if self._input_device is not None:
+            seqs = seqs.to(self._input_device)
         lens = torch.LongTensor([t.shape[2] for t in tensors])
+        return seqs, lens
+
+    def _transcribe_batch(self, tensors: list) -> list[str]:
+        seqs, lens = self._batch_tensors(tensors)
         preds, _olens = self._model._rec_predict(seqs, lens)
         return ["".join(tok[0] for tok in pred) for pred in preds]
 
     def _transcribe_batch_conf(self, tensors: list) -> list[tuple[str, float | None]]:
         """Like :meth:`_transcribe_batch` but also mean per-line CTC confidence."""
-        torch = self._torch
-        max_len = max(t.shape[2] for t in tensors)
-        seqs = torch.stack([torch.nn.functional.pad(t, (0, max_len - t.shape[2])) for t in tensors])
-        lens = torch.LongTensor([t.shape[2] for t in tensors])
+        seqs, lens = self._batch_tensors(tensors)
         preds, _olens = self._model._rec_predict(seqs, lens)
         out: list[tuple[str, float | None]] = []
         for pred in preds:
