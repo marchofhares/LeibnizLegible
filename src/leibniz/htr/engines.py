@@ -45,6 +45,20 @@ KRAKEN_VALID_NORM = False  # baseline models normalise height without box-center
 # cap yield ("", None) instead of entering the net.
 MAX_TRANSFORMED_WIDTH = 10_000
 
+# Bound on a batch's *padded* area, as ``n_lines × widest line`` width-units:
+# every line in a batch is padded to the widest, so one wide line times a full
+# batch multiplies conv memory (a 722 MB single alloc on the live validation
+# run). 64k units ≈ a full batch of 16 × 4k-px lines; a wider line simply gets
+# a smaller batch. Bounds peak memory on CPU and GPU alike.
+MAX_BATCH_PADDED_WIDTH = 64_000
+
+
+def _should_flush_before(
+    n_buffered: int, max_w: int, next_w: int, cap: int = MAX_BATCH_PADDED_WIDTH
+) -> bool:
+    """True if adding a ``next_w``-wide line would blow the padded-batch budget."""
+    return n_buffered > 0 and (n_buffered + 1) * max(max_w, next_w) > cap
+
 
 def _tok_conf(tok: object) -> float | None:
     """Pull the per-character confidence (a probability in ``[0, 1]``) from a token.
@@ -218,8 +232,10 @@ class KrakenEngine:
         self._ensure_loaded()
         out: list[tuple[str, float | None]] = []
         buf: list = []
+        max_w = 0
 
         def flush() -> None:
+            nonlocal max_w
             if not buf:
                 return
             if with_conf:
@@ -227,16 +243,21 @@ class KrakenEngine:
             else:
                 out.extend((t, None) for t in self._transcribe_batch(buf))
             buf.clear()
+            max_w = 0
 
         for data in images:
             im = Image.open(io.BytesIO(data))
             im.load()
             t = self._transforms(im)
-            if t.shape[2] > MAX_TRANSFORMED_WIDTH:
+            w = int(t.shape[2])
+            if w > MAX_TRANSFORMED_WIDTH:
                 flush()  # keep output order around the placeholder
                 out.append(("", None))
                 continue
+            if _should_flush_before(len(buf), max_w, w):
+                flush()
             buf.append(t)
+            max_w = max(max_w, w)
             if len(buf) >= self.batch_size:
                 flush()
         flush()

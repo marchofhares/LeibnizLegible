@@ -247,10 +247,20 @@ wider than 10k px (`("", None)` placeholder — backstop for any caller); and
 `pipeline segment/recognize --mem-limit-gb N` caps the process address space so
 any residual runaway allocation fails one page instead of the box.
 
-(1–3 landed as `140d58d`; 4 across this entry's commits.) Live evidence so far:
-the first ~69 pages recognised post-fix carry real posteriors (≈0.6–0.9). The
-500-page validation (recognize → `conf > 1` count must be 0) is the operator's
-gate before the full corpus pass.
+**Operator validation (2026-07-30): the crash class is closed.** A full 431-page
+CPU pass completed with zero crashes; the poison page recognised with its sliver
+enumerated (`sliver_crop:900x5`), and the original gate finally reports
+**`conf > 1` count = 0** (Open Q #15's field shape confirmed live at scale).
+Two calibrations from that run: an address-space cap must clear torch's
+*virtual* arena — 6 GB starved it after ~55 pages (alloc-fail skips); use
+**`--mem-limit-gb 12`+** (virtual ≠ resident). And a batch padded to its widest
+line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flushes
+on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
+on CPU and GPU alike.
+
+(1–3 landed as `140d58d`; 4 across this entry's commits.) Live evidence: real
+posteriors ≈0.6–0.9 populate at scale. Remaining operator gate: re-run the
+alloc-failed skips, then the CUDA 500 smoke, then the corpus pass.
 
 ### C2 — GT factory at scale (2026-07-29) ✅
 
@@ -452,7 +462,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **365** (+1 skipped) |
+| Tests passing | **366** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

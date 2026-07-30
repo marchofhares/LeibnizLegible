@@ -194,3 +194,14 @@ def test_estimate_openai_cost_prefix_match() -> None:
     dated = estimate_openai_cost("gpt-4o-2024-08-06", 1_000_000, 0)
     assert exact == dated == pytest.approx(2.50)
     assert estimate_openai_cost("some-unknown-model", 1000, 1000) is None
+
+
+def test_should_flush_before_bounds_padded_batch_area() -> None:
+    # Normal lines: a full batch of 16 × 2k px stays under the 64k budget.
+    assert not engines._should_flush_before(15, 2000, 2000)
+    # A wide line shrinks the batch: at 9k px wide, the 8th line would push the
+    # padded area over budget (8 × 9000 = 72k) — flush first.
+    assert engines._should_flush_before(7, 9000, 2000)
+    assert engines._should_flush_before(7, 2000, 9000)  # incoming line is the wide one
+    # An empty buffer never flushes (the single line still gets transcribed).
+    assert not engines._should_flush_before(0, 0, 9000)
