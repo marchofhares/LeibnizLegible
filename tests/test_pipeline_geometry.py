@@ -58,3 +58,34 @@ def test_short_baseline_dropped_and_boundaryless_passes() -> None:
 def test_max_crop_area_floor_and_factor() -> None:
     assert geometry.max_crop_area(None, None) == geometry.MAX_CROP_AREA_FLOOR
     assert geometry.max_crop_area(4000, 4000) == geometry.PAGE_AREA_FACTOR * 16_000_000
+
+
+def _png(w: int, h: int) -> bytes:
+    """A minimal PNG header (IHDR only) — enough for the byte-peeking parser."""
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + (13).to_bytes(4, "big")
+        + b"IHDR"
+        + w.to_bytes(4, "big")
+        + h.to_bytes(4, "big")
+        + b"\x00" * 5
+    )
+
+
+def test_png_dimensions_parses_header_only() -> None:
+    assert geometry.png_dimensions(_png(900, 1)) == (900, 1)
+    assert geometry.png_dimensions(_png(11, 11)) == (11, 11)
+    assert geometry.png_dimensions(b"crop0") is None
+    assert geometry.png_dimensions(b"") is None
+
+
+def test_sliver_crops_are_refused_real_thin_lines_kept() -> None:
+    # The live killer: a ~900×1 mask stripe that the recogniser's
+    # aspect-preserving resize would blow up to >100k px wide (5.3 GB conv2d).
+    assert geometry.crop_drop_reason(_png(900, 1)) == "sliver_crop:900x1"
+    assert geometry.crop_drop_reason(_png(2, 500)) == "sliver_crop:2x500"
+    # Real content stays: specks, and genuinely thin low-res lines (~90:1).
+    assert geometry.crop_drop_reason(_png(11, 11)) is None
+    assert geometry.crop_drop_reason(_png(898, 10)) is None
+    # Non-PNG bytes are not judged here (engine's transformed-width cap covers).
+    assert geometry.crop_drop_reason(b"not-a-png") is None

@@ -59,6 +59,25 @@ def _require_kraken() -> None:
         raise typer.Exit(code=1) from None
 
 
+def _set_mem_limit(gb: float) -> None:
+    """Cap the process address space (POSIX ``RLIMIT_AS``).
+
+    Under Linux overcommit a runaway allocation "succeeds" and then OOM-kills
+    the machine when touched — no in-process handler ever fires (the live
+    corpus run died this way). With a cap, the same allocation raises a normal
+    error inside one page, which the pipeline's fault tolerance turns into a
+    skip; the run itself survives.
+    """
+    try:
+        import resource
+    except ImportError:  # pragma: no cover - non-POSIX platform
+        console.print("[yellow]--mem-limit-gb is unsupported on this platform; ignored.[/yellow]")
+        return
+    limit = int(gb * 1024**3)
+    resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+    console.print(f"[dim]address-space cap: {gb:g} GB[/dim]")
+
+
 @app.command()
 def segment(
     db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
@@ -72,9 +91,16 @@ def segment(
     redo: bool = typer.Option(False, "--redo", help="Re-segment pages already done."),
     device: str = typer.Option("cpu", "--device", help="cpu | cuda | auto (GPU-aware)."),
     min_lines: int = typer.Option(1, "--min-lines", help="Below this, a page is 'blank'/skipped."),
+    mem_limit_gb: float | None = typer.Option(
+        None,
+        "--mem-limit-gb",
+        help="Cap address space (GB): runaway allocs fail a page, not the box.",
+    ),
 ) -> None:
     """Segment cached pages into line geometry + per-page segmentation stats."""
     _require_kraken()
+    if mem_limit_gb:
+        _set_mem_limit(mem_limit_gb)
     from leibniz.layout.segment import PageSegmenter
 
     conn = db.init_db(db_path)
@@ -124,9 +150,16 @@ def recognize(
     redo: bool = typer.Option(False, "--redo", help="Re-recognise pages already done."),
     device: str = typer.Option("cpu", "--device", help="cpu | cuda | auto (GPU-aware)."),
     batch_size: int = typer.Option(16, "--batch-size", help="HTR batch size."),
+    mem_limit_gb: float | None = typer.Option(
+        None,
+        "--mem-limit-gb",
+        help="Cap address space (GB): runaway allocs fail a page, not the box.",
+    ),
 ) -> None:
     """Recognise segmented pages: crop each stored line, HTR, store text + conf."""
     _require_kraken()
+    if mem_limit_gb:
+        _set_mem_limit(mem_limit_gb)
     from leibniz.htr.engines import KrakenEngine
     from leibniz.layout.segment import PageSegmenter
 

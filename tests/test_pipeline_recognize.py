@@ -352,3 +352,37 @@ def test_audit_page_names_the_poison_line(tmp_path) -> None:
     assert rows[0]["verdict"] == "ok"
     assert rows[1]["verdict"].startswith("oversize_crop")
     assert rows[1]["est_mpx"] > 24  # would dwarf the 24 MPx floor / 20 MPx page cap
+
+
+def _png(w: int, h: int) -> bytes:
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + (13).to_bytes(4, "big")
+        + b"IHDR"
+        + w.to_bytes(4, "big")
+        + h.to_bytes(4, "big")
+        + b"\x00" * 5
+    )
+
+
+class SliverCropper(FakeSegmenter):
+    """Emits a real-header PNG sliver for line 1, normal fake crops otherwise.
+
+    Mimics the live killer: geometry looked sane, but the dewarped crop was a
+    ~900×1 mask stripe that would explode the recogniser's conv allocation.
+    """
+
+    def crop_lines(self, image: bytes, page: SegmentedPage) -> list[bytes]:
+        return [_png(900, 1) if ln.index == 1 else f"crop{ln.index}".encode() for ln in page.lines]
+
+
+def test_sliver_crop_dropped_before_recognition(tmp_path) -> None:
+    conn, images = _seed_segmented(tmp_path, [("W1", 3)])
+    result = recognize_pages(conn, SliverCropper(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 1 and result.skipped == 0
+    assert result.n_lines == 2  # the sliver never reached the recogniser
+    lines = db.iter_lines_for_page(conn, "W1:0001")
+    assert lines[0].text is not None
+    assert lines[1].text is None
+    assert lines[2].text is not None
+    assert any("sliver_crop:900x1" in r for _pid, r in result.failures)

@@ -231,10 +231,26 @@ offline fakes could not; all are fixed with offline regression tests:
    per-line geometry verdicts from the store alone (no kraken) — the operator's
    first tool when a page skips or dies.
 
-(1–3 landed as `140d58d`; 4 in this entry's commits.) Live evidence so far: the
-first ~69 pages recognised post-fix carry real posteriors (≈0.6–0.9). The 500-page
-validation (recognize → `conf > 1` count must be 0) is the operator's gate before
-the full corpus pass.
+**Root cause, finally caught live** (rlimit'd probe on the operator box, page
+`00051012:0070` — a small scrap page segmented into 21 speck "lines"): the
+killer was never the crop — it was **recognition**. One line's dewarped crop is
+a ~900×1 px empty mask sliver; `ImageInputTransforms` resizes crops to model
+input height *preserving aspect ratio*, so the sliver becomes >100k px wide,
+the whole batch pads to it, and a single `F.conv2d` allocates **5.3 GB**
+(`DefaultCPUAllocator` enforce-fail under the probe's rlimit; under normal
+Linux overcommit it "succeeds" and the OS kills the machine — invisible to
+every in-process handler, which is why layers a–e couldn't catch it). Fixes:
+the pipeline now judges the **actual crop raster** before recognition (PNG
+header peek, no imaging dep: `min side < 4 px` or `aspect > 100:1` →
+`sliver_crop:{w}x{h}`, line dropped); `KrakenEngine` refuses transformed lines
+wider than 10k px (`("", None)` placeholder — backstop for any caller); and
+`pipeline segment/recognize --mem-limit-gb N` caps the process address space so
+any residual runaway allocation fails one page instead of the box.
+
+(1–3 landed as `140d58d`; 4 across this entry's commits.) Live evidence so far:
+the first ~69 pages recognised post-fix carry real posteriors (≈0.6–0.9). The
+500-page validation (recognize → `conf > 1` count must be 0) is the operator's
+gate before the full corpus pass.
 
 ### C2 — GT factory at scale (2026-07-29) ✅
 
@@ -436,7 +452,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **362** (+1 skipped) |
+| Tests passing | **365** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

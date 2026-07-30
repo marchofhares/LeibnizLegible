@@ -37,6 +37,14 @@ from collections.abc import Callable, Sequence
 KRAKEN_PADDING = 16
 KRAKEN_VALID_NORM = False  # baseline models normalise height without box-centering
 
+# Widest transformed line accepted into the net, in px at the model's input
+# height. The input transform preserves aspect ratio, so a degenerate ~900×1
+# sliver crop resizes to >100k px wide — on the live corpus run a single conv2d
+# then allocated 5.3 GB, which under Linux overcommit killed the machine rather
+# than raising. Real text lines land around 1–3k px here; slivers beyond the
+# cap yield ("", None) instead of entering the net.
+MAX_TRANSFORMED_WIDTH = 10_000
+
 
 def _tok_conf(tok: object) -> float | None:
     """Pull the per-character confidence (a probability in ``[0, 1]``) from a token.
@@ -223,7 +231,12 @@ class KrakenEngine:
         for data in images:
             im = Image.open(io.BytesIO(data))
             im.load()
-            buf.append(self._transforms(im))
+            t = self._transforms(im)
+            if t.shape[2] > MAX_TRANSFORMED_WIDTH:
+                flush()  # keep output order around the placeholder
+                out.append(("", None))
+                continue
+            buf.append(t)
             if len(buf) >= self.batch_size:
                 flush()
         flush()

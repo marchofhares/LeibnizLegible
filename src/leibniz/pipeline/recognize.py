@@ -271,6 +271,22 @@ def _recognize_one(
     try:
         image = target.read_bytes()
         crops, kept = _crop_lines_tolerant(cropper, image, page, croppable)
+        # A crop can be degenerate even when its stored geometry looked sane —
+        # the live killer was a ~900×1 sliver whose aspect-preserving resize to
+        # model height made one conv2d allocate 5.3 GB. Judge the actual crop
+        # raster before the recogniser sees it.
+        sane_crops: list[bytes] = []
+        sane_kept: list[db.Line] = []
+        # Not strict: crop-count drift (fewer crops than lines) is an accepted
+        # condition — unpaired lines simply stay untranscribed, as before.
+        for crop, ln in zip(crops, kept, strict=False):
+            crop_reason = geometry.crop_drop_reason(crop)
+            if crop_reason is None:
+                sane_crops.append(crop)
+                sane_kept.append(ln)
+            else:
+                guard_dropped.append((ln.line_seq, crop_reason))
+        crops, kept = sane_crops, sane_kept
         if not crops:
             raise ValueError("no line survived polygon extraction")
         preds = recognizer.transcribe_conf(crops)

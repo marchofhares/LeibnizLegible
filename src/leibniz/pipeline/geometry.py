@@ -168,14 +168,54 @@ def drop_reason(
     return None
 
 
+# A dewarped crop can be degenerate even when its stored geometry looks sane.
+# The live corpus run produced a ~900×1 px sliver crop (an empty mask stripe):
+# the recogniser's aspect-preserving resize to model input height multiplied
+# its width by >100, and a single conv2d then allocated 5.3 GB — under Linux
+# overcommit that OOM-kills the *machine*, not the process, so no in-process
+# handler ever fires. Bounds on the actual crop raster:
+MIN_CROP_SIDE_PX = 4  # nothing readable below this
+MAX_CROP_ASPECT = 100.0  # real text lines observed up to ~90:1 on small scans
+
+
+def png_dimensions(data: bytes) -> tuple[int, int] | None:
+    """``(width, height)`` from a PNG header, or ``None`` if not a PNG.
+
+    Pure byte-peeking (IHDR is always the first chunk) — no imaging dependency,
+    so the pipeline can judge crops without PIL.
+    """
+    if len(data) >= 24 and data[:8] == b"\x89PNG\r\n\x1a\n" and data[12:16] == b"IHDR":
+        return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+    return None
+
+
+def crop_drop_reason(data: bytes) -> str | None:
+    """Why a dewarped crop must not reach the recogniser (``None`` = fine).
+
+    Only PNG crops are judged (the pipeline's cropper emits PNG); anything else
+    passes through to the engine's own transformed-width cap.
+    """
+    dims = png_dimensions(data)
+    if dims is None:
+        return None
+    w, h = dims
+    if min(w, h) < MIN_CROP_SIDE_PX or max(w, h) > MAX_CROP_ASPECT * min(w, h):
+        return f"sliver_crop:{w}x{h}"
+    return None
+
+
 __all__ = [
     "MAX_CROP_AREA_FLOOR",
+    "MAX_CROP_ASPECT",
     "MIN_BASELINE_PX",
+    "MIN_CROP_SIDE_PX",
     "PAGE_AREA_FACTOR",
     "Point",
+    "crop_drop_reason",
     "dedupe_points",
     "drop_reason",
     "estimate_crop_size",
     "max_crop_area",
+    "png_dimensions",
     "polyline_length",
 ]
