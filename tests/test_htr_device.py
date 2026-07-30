@@ -76,3 +76,35 @@ def test_tok_conf_span_then_conf() -> None:
 
 def test_tok_conf_no_numeric_fields() -> None:
     assert _tok_conf(("a",)) is None
+
+
+def test_tok_conf_kraken7_layout_start_zero_not_mistaken() -> None:
+    # kraken 7 tokens are (grapheme, start, end, conf); the first token of a
+    # line has start == 0, which front-to-back scanning misread as conf 0.0.
+    assert _tok_conf(("a", 0, 57, 0.93)) == 0.93
+    assert _tok_conf(("b", 1, 96, 0.88)) == 0.88
+
+
+class _Param:
+    def __init__(self, device: str) -> None:
+        self.device = device
+
+
+class _Net:
+    def __init__(self, device: str) -> None:
+        self._device = device
+
+    def parameters(self):
+        yield _Param(self._device)
+
+
+class _Model:
+    def __init__(self, device: str) -> None:
+        self.nn = _Net(device)
+
+
+def test_module_device_reads_first_parameter() -> None:
+    from leibniz.htr.engines import _module_device
+
+    assert _module_device(_Model("cuda:0")) == "cuda:0"
+    assert _module_device(object()) is None
