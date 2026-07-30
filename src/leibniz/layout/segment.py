@@ -20,7 +20,26 @@ module costs nothing without them, matching :mod:`leibniz.htr.engines`.
 from __future__ import annotations
 
 import io
+import warnings
+from contextlib import contextmanager
 from dataclasses import dataclass, field
+
+
+@contextmanager
+def _pil_transform_warnings_as_errors():
+    """Escalate PIL's quad-transform numeric warnings to errors while cropping.
+
+    Degenerate line geometry (a zero-width mesh quad) makes PIL's transform
+    emit numpy ``RuntimeWarning``s (``1.0 / w`` divide-by-zero, then NaN
+    coefficient multiplies) and hand the NaNs to the C rasterizer — observed
+    live to hang or blow up memory instead of failing. A warning from that code
+    path never precedes a usable crop, so raising it converts an un-catchable
+    hang into an exception the pipeline's per-line/per-page fault tolerance
+    already handles. Scoped to warnings attributed to PIL modules only.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", category=RuntimeWarning, module=r"PIL\..*")
+        yield
 
 
 @dataclass(slots=True)
@@ -190,10 +209,11 @@ class PageSegmenter:
             return self.line_images(image, fmt=fmt)
 
         out: list[bytes] = []
-        for line_im, _rec in segmentation.extract_polygons(im, seg):  # pragma: no cover
-            buf = io.BytesIO()
-            line_im.convert("RGB").save(buf, format=fmt)
-            out.append(buf.getvalue())
+        with _pil_transform_warnings_as_errors():
+            for line_im, _rec in segmentation.extract_polygons(im, seg):  # pragma: no cover
+                buf = io.BytesIO()
+                line_im.convert("RGB").save(buf, format=fmt)
+                out.append(buf.getvalue())
         return out
 
     def line_images(
@@ -212,10 +232,11 @@ class PageSegmenter:
         im = self._open(image)
         seg = blla.segment(im, model=self._model)
         out: list[bytes] = []
-        for line_im, _rec in segmentation.extract_polygons(im, seg):
-            buf = io.BytesIO()
-            line_im.convert("RGB").save(buf, format=fmt)
-            out.append(buf.getvalue())
+        with _pil_transform_warnings_as_errors():
+            for line_im, _rec in segmentation.extract_polygons(im, seg):
+                buf = io.BytesIO()
+                line_im.convert("RGB").save(buf, format=fmt)
+                out.append(buf.getvalue())
         return out
 
 

@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-29 (end of Phase C2)._
+_Last updated: 2026-07-30 (C1 corpus-run robustness, from the first live GPU/CPU runs)._
 
 ---
 
@@ -198,6 +198,32 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### C1 — corpus-run robustness, from the first live runs (2026-07-29/30)
+
+The operator's first real 500-page runs (GPU + WSL/CPU) surfaced four defects the
+offline fakes could not; all are fixed with offline regression tests:
+
+1. **Confidence was a pixel cut position** (`_tok_conf` now picks the [0,1]
+   posterior field, else `None`) — Open Q #15's exact worry.
+2. **`--device cuda` crashed both stages** (kraken wants `(accelerator, device
+   count)`, not a device string) and **segmentation ignored its device**.
+3. **A sub-5px baseline sank its whole page** (17 % of the sample); such lines
+   are now filtered up front and just left untranscribed.
+4. **A degenerate-quad "poison line" hung recognition entirely** (reproduced 3×:
+   a zero-width dewarping mesh quad → PIL `1.0 / w` divide-by-zero → NaN
+   coefficients → the C rasterizer hangs/blows up; the run died with the
+   progress bar at 0). Three layers now prevent it: same-pixel consecutive
+   baseline/boundary points are collapsed before cropping (the total-length
+   check can't see a zero-length segment); PIL-attributed `RuntimeWarning`s are
+   escalated to errors inside `crop_lines` (a NaN'd transform never yields a
+   usable crop, so raising beats hanging); and a failed page-crop falls back to
+   per-line cropping so a poison line costs *the line*, not the page.
+
+(1–3 landed as `140d58d`; 4 in this entry's commit.) Live evidence so far: the
+first ~69 pages recognised post-fix carry real posteriors (≈0.6–0.9). The 500-page
+validation (recognize → `conf > 1` count must be 0) is the operator's gate before
+the full corpus pass.
 
 ### C2 — GT factory at scale (2026-07-29) ✅
 
@@ -399,7 +425,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **334** (+1 skipped) |
+| Tests passing | **353** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |
@@ -499,6 +525,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     posteriors defensively; the exact field shape is unverified against a live
     kraken run (no stack here), so it falls back to `None` if absent. Confirm on the
     operator run that real per-line confidences populate (they gate search + the UI).
+    _2026-07-30: the original field was a pixel cut position (fixed, `140d58d`); the
+    first ~69 live pages now show in-range posteriors (≈0.6–0.9). Close once the
+    500-page validation reports zero `conf > 1` lines._
 
 ---
 

@@ -57,17 +57,63 @@ class RecognizeResult:
 ProgressFn = Callable[[str, str], None]
 
 
+def _dedupe_pts(pts: object) -> list[tuple[float, float]]:
+    """Drop consecutive points that collapse onto the same integer pixel.
+
+    kraken's polygon extractor slices its dewarping mesh per baseline segment; a
+    (sub-)pixel-length segment becomes a zero-width transform quad, which PIL
+    turns into NaN coefficients (``1.0 / w`` divide-by-zero) and can then hang
+    the C rasterizer — observed live as a page that stalls the whole run. The
+    overall polyline *length* check can't catch this (a zero-length segment adds
+    nothing to the total), so collapse the points themselves; at raster
+    resolution this is loss-free.
+    """
+    out: list[tuple[float, float]] = []
+    for p in pts or []:  # type: ignore[union-attr]
+        q = (float(p[0]), float(p[1]))
+        if not out or (int(out[-1][0]), int(out[-1][1])) != (int(q[0]), int(q[1])):
+            out.append(q)
+    return out
+
+
 def _page_to_segmentation(page: db.Page, lines: Sequence[db.Line]) -> SegmentedPage:
     """Rebuild a :class:`SegmentedPage` from stored line geometry, for cropping."""
     seg_lines = [
         SegLine(
             index=ln.line_seq,
-            baseline=[tuple(p) for p in (ln.baseline or [])],
-            boundary=[tuple(p) for p in (ln.polygon or [])],
+            baseline=_dedupe_pts(ln.baseline),
+            boundary=_dedupe_pts(ln.polygon),
         )
         for ln in lines
     ]
     return SegmentedPage(lines=seg_lines, width=page.width or 0, height=page.height or 0)
+
+
+def _crop_lines_tolerant(
+    cropper: Cropper, image: bytes, page: db.Page, croppable: Sequence[db.Line]
+) -> tuple[list[bytes], list[db.Line]]:
+    """Crop all lines at once; on failure retry line-by-line, dropping poison lines.
+
+    Geometry the sanitizers don't anticipate must cost the *line*, not the page
+    (and never the run): if the whole-page crop raises, each line is re-cropped
+    alone and only the ones that still raise (or yield no crop) are dropped —
+    they stay untranscribed, like degenerate baselines. Returns the crops and
+    the lines they correspond to, in order.
+    """
+    try:
+        return cropper.crop_lines(image, _page_to_segmentation(page, croppable)), list(croppable)
+    except Exception:  # noqa: BLE001 — isolate the poison line(s) below
+        crops: list[bytes] = []
+        kept: list[db.Line] = []
+        for ln in croppable:
+            try:
+                out = cropper.crop_lines(image, _page_to_segmentation(page, [ln]))
+            except Exception:  # noqa: BLE001 — this line is the poison; drop it
+                continue
+            if len(out) == 1:
+                crops.append(out[0])
+                kept.append(ln)
+        return crops, kept
 
 
 def _work_pages(
@@ -185,8 +231,9 @@ def _recognize_one(
 
     try:
         image = target.read_bytes()
-        seg_page = _page_to_segmentation(page, croppable)
-        crops = cropper.crop_lines(image, seg_page)
+        crops, kept = _crop_lines_tolerant(cropper, image, page, croppable)
+        if not crops:
+            raise ValueError("no line survived polygon extraction")
         preds = recognizer.transcribe_conf(crops)
     except Exception as exc:  # noqa: BLE001 — tolerate & log per-page failures
         reason = f"recognize_error: {type(exc).__name__}: {exc}"
@@ -196,8 +243,8 @@ def _recognize_one(
         return "error"
 
     # Align on the shorter list and record the shortfall rather than mis-pairing.
-    n = min(len(croppable), len(preds))
-    for ln, (text, conf) in zip(croppable[:n], preds[:n], strict=True):
+    n = min(len(kept), len(preds))
+    for ln, (text, conf) in zip(kept[:n], preds[:n], strict=True):
         db.set_line_recognition(
             conn,
             page.id,
@@ -236,8 +283,8 @@ def _baseline_length(baseline: object) -> float:
 
 
 def _croppable(line: db.Line) -> bool:
-    """True if a line's baseline is long enough for kraken to extract a polygon."""
-    return _baseline_length(line.baseline) >= MIN_BASELINE_PX
+    """True if a line's *sanitized* baseline is long enough for kraken to crop it."""
+    return _baseline_length(_dedupe_pts(line.baseline)) >= MIN_BASELINE_PX
 
 
 __all__ = ["Cropper", "ProgressFn", "RecognizeResult", "Recognizer", "recognize_pages"]
