@@ -23,11 +23,13 @@ from pathlib import Path
 import typer
 from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
+from rich.table import Table
 
 from leibniz import db
 from leibniz.images.fetch import DEFAULT_IMAGES_ROOT
+from leibniz.pipeline import geometry
 from leibniz.pipeline import report as report_mod
-from leibniz.pipeline.recognize import recognize_pages
+from leibniz.pipeline.recognize import audit_page, recognize_pages
 from leibniz.pipeline.segment import segment_pages
 
 app = typer.Typer(
@@ -179,6 +181,56 @@ def status(
         f"  lines: {db.count_lines(conn):,} ({db.count_lines(conn, recognized=True):,} recognised)"
     )
     conn.close()
+
+
+@app.command()
+def audit(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    page: str | None = typer.Option(
+        None, "--page", help="Page id (default: the next page recognize would attempt)."
+    ),
+) -> None:
+    """Audit a page's stored line geometry against the crop guards (no kraken needed)."""
+    conn = db.init_db(db_path)
+    if page is None:
+        target = next(
+            iter(db.iter_pages_by_status(conn, "segmented", require_cached=True, limit=1)), None
+        )
+        if target is None:
+            console.print("[yellow]No segmented+cached pages to audit.[/yellow]")
+            conn.close()
+            raise typer.Exit(code=0)
+    else:
+        target = db.get_page(conn, page)
+        if target is None:
+            console.print(f"[red]Unknown page id {page!r}.[/red]")
+            conn.close()
+            raise typer.Exit(code=1)
+    rows = audit_page(conn, target)
+    conn.close()
+    cap = geometry.max_crop_area(target.width, target.height) / 1e6
+    console.print(
+        f"[bold]pipeline audit[/bold] — {target.id} "
+        f"({target.width or '?'}×{target.height or '?'} px, {len(rows)} lines, "
+        f"crop cap {cap:.0f} MPx)"
+    )
+    table = Table("line", "bl pts", "bl px", "poly pts", "est crop", "MPx", "verdict")
+    for r in rows:
+        bad = r["verdict"] != "ok"
+        table.add_row(
+            str(r["line_seq"]),
+            str(r["n_baseline_pts"]),
+            str(r["baseline_px"]),
+            str(r["n_boundary_pts"]),
+            r["est_crop"] or "—",
+            str(r["est_mpx"]) if r["est_mpx"] is not None else "—",
+            r["verdict"],
+            style="red" if bad else None,
+        )
+    console.print(table)
+    n_bad = sum(1 for r in rows if r["verdict"] != "ok")
+    colour = "red" if n_bad else "green"
+    console.print(f"{len(rows) - n_bad} croppable · [{colour}]{n_bad} guarded[/{colour}]")
 
 
 @app.command()

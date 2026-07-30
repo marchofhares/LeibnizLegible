@@ -210,17 +210,28 @@ offline fakes could not; all are fixed with offline regression tests:
    count)`, not a device string) and **segmentation ignored its device**.
 3. **A sub-5px baseline sank its whole page** (17 % of the sample); such lines
    are now filtered up front and just left untranscribed.
-4. **A degenerate-quad "poison line" hung recognition entirely** (reproduced 3×:
-   a zero-width dewarping mesh quad → PIL `1.0 / w` divide-by-zero → NaN
-   coefficients → the C rasterizer hangs/blows up; the run died with the
-   progress bar at 0). Three layers now prevent it: same-pixel consecutive
-   baseline/boundary points are collapsed before cropping (the total-length
-   check can't see a zero-length segment); PIL-attributed `RuntimeWarning`s are
-   escalated to errors inside `crop_lines` (a NaN'd transform never yields a
-   usable crop, so raising beats hanging); and a failed page-crop falls back to
-   per-line cropping so a poison line costs *the line*, not the page.
+4. **A "poison page" killed recognition entirely, four runs in a row** — the
+   process died (`Terminated`, no traceback) at the same page each time, once
+   with PIL `1.0 / w` divide-by-zero warnings, once silently. Reading kraken
+   7.0.3's `extract_polygons`: it rectifies each line's boundary into
+   along-baseline × perpendicular coordinates and sizes the output crop from
+   their **raw, unclamped extents** — degenerate stored geometry (zero-length
+   segments → NaN mesh quads; far-flung rectified points → an OOM-scale
+   allocation the OS kills mid-way). Five layers now prevent the whole class:
+   (a) same-pixel consecutive points are collapsed before cropping;
+   (b) `pipeline/geometry.py` **replicates kraken's `output_shape` arithmetic**
+   (pure Python, offline-tested) and drops any line whose implied crop exceeds
+   `max(4× page area, 24 MPx)` — the OOM class caught *before* allocation;
+   (c) PIL-attributed `RuntimeWarning`s are escalated to errors inside
+   `crop_lines` (a NaN'd transform never yields a usable crop);
+   (d) a failed page-crop falls back to per-line cropping, so a poison line
+   costs *the line*, not the page; and (e) a SIGALRM **crop deadline**
+   (120 s/page, 30 s/line) converts any residual in-process stall into the
+   normal skip path. `leibniz pipeline audit [--page ID]` prints any page's
+   per-line geometry verdicts from the store alone (no kraken) — the operator's
+   first tool when a page skips or dies.
 
-(1–3 landed as `140d58d`; 4 in this entry's commit.) Live evidence so far: the
+(1–3 landed as `140d58d`; 4 in this entry's commits.) Live evidence so far: the
 first ~69 pages recognised post-fix carry real posteriors (≈0.6–0.9). The 500-page
 validation (recognize → `conf > 1` count must be 0) is the operator's gate before
 the full corpus pass.
@@ -425,7 +436,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **353** (+1 skipped) |
+| Tests passing | **362** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

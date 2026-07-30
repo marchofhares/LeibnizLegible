@@ -14,8 +14,11 @@ pass fakes for both, so the module imports and runs without kraken/torch.
 
 from __future__ import annotations
 
+import signal
+import threading
 import time
 from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
@@ -23,8 +26,15 @@ from typing import Protocol
 from leibniz import db
 from leibniz.images.fetch import DEFAULT_IMAGES_ROOT, local_relpath
 from leibniz.layout.segment import SegLine, SegmentedPage
+from leibniz.pipeline import geometry
 
 _REDO_STATUSES = ("segmented", "recognized")
+
+# Wall-clock caps on the crop calls — the final backstop: geometry the guards
+# don't anticipate must cost a line (or at worst a page), never stall the run.
+# Cropping is pure geometry and normally takes well under a second per line.
+CROP_PAGE_DEADLINE_S = 120.0
+CROP_LINE_DEADLINE_S = 30.0
 
 
 class Cropper(Protocol):
@@ -57,23 +67,39 @@ class RecognizeResult:
 ProgressFn = Callable[[str, str], None]
 
 
-def _dedupe_pts(pts: object) -> list[tuple[float, float]]:
-    """Drop consecutive points that collapse onto the same integer pixel.
+# Point sanitizer shared with the geometry guards (also imported by tests).
+_dedupe_pts = geometry.dedupe_points
 
-    kraken's polygon extractor slices its dewarping mesh per baseline segment; a
-    (sub-)pixel-length segment becomes a zero-width transform quad, which PIL
-    turns into NaN coefficients (``1.0 / w`` divide-by-zero) and can then hang
-    the C rasterizer — observed live as a page that stalls the whole run. The
-    overall polyline *length* check can't catch this (a zero-length segment adds
-    nothing to the total), so collapse the points themselves; at raster
-    resolution this is loss-free.
+
+@contextmanager
+def _crop_deadline(seconds: float):
+    """Raise ``TimeoutError`` if the wrapped crop outlives ``seconds`` (SIGALRM).
+
+    The live corpus run was killed twice by the OS while kraken/PIL chewed on
+    one page's pathological geometry — an in-process stall no exception handler
+    can see. A wall-clock alarm converts any residual stall into an exception
+    the per-line/per-page fault tolerance already handles. No-op off the main
+    thread or where SIGALRM is unavailable; the pipeline is single-threaded on
+    POSIX, where this is exact.
     """
-    out: list[tuple[float, float]] = []
-    for p in pts or []:  # type: ignore[union-attr]
-        q = (float(p[0]), float(p[1]))
-        if not out or (int(out[-1][0]), int(out[-1][1])) != (int(q[0]), int(q[1])):
-            out.append(q)
-    return out
+    if (
+        seconds <= 0
+        or not hasattr(signal, "SIGALRM")
+        or threading.current_thread() is not threading.main_thread()
+    ):
+        yield
+        return
+
+    def _timeout(_signum: int, _frame: object) -> None:
+        raise TimeoutError(f"crop exceeded {seconds:.0f}s deadline")
+
+    old = signal.signal(signal.SIGALRM, _timeout)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        signal.signal(signal.SIGALRM, old)
 
 
 def _page_to_segmentation(page: db.Page, lines: Sequence[db.Line]) -> SegmentedPage:
@@ -101,13 +127,18 @@ def _crop_lines_tolerant(
     the lines they correspond to, in order.
     """
     try:
-        return cropper.crop_lines(image, _page_to_segmentation(page, croppable)), list(croppable)
+        with _crop_deadline(CROP_PAGE_DEADLINE_S):
+            return (
+                cropper.crop_lines(image, _page_to_segmentation(page, croppable)),
+                list(croppable),
+            )
     except Exception:  # noqa: BLE001 — isolate the poison line(s) below
         crops: list[bytes] = []
         kept: list[db.Line] = []
         for ln in croppable:
             try:
-                out = cropper.crop_lines(image, _page_to_segmentation(page, [ln]))
+                with _crop_deadline(CROP_LINE_DEADLINE_S):
+                    out = cropper.crop_lines(image, _page_to_segmentation(page, [ln]))
             except Exception:  # noqa: BLE001 — this line is the poison; drop it
                 continue
             if len(out) == 1:
@@ -218,11 +249,19 @@ def _recognize_one(
         result.failures.append((page.id, "no_geometry"))
         return "no_geometry"
 
-    # Drop degenerate lines (sub-5px baselines) *before* cropping: kraken's polygon
-    # extractor raises `Baseline length below minimum 5px` on them, which would
-    # otherwise sink the whole page. Order is preserved, so the surviving crops
-    # still map 1:1 to their line_seq; dropped lines are simply left untranscribed.
-    croppable = [ln for ln in lines if _croppable(ln)]
+    # Drop lines whose stored geometry would sink kraken's extractor — raise
+    # (sub-5px baseline), NaN (zero-length segment), or an OOM-scale rectified
+    # allocation (see :mod:`leibniz.pipeline.geometry`) — *before* cropping.
+    # Order is preserved, so the surviving crops still map 1:1 to their
+    # line_seq; dropped lines are left untranscribed, with per-line reasons.
+    croppable: list[db.Line] = []
+    guard_dropped: list[tuple[int, str]] = []
+    for ln in lines:
+        reason = _line_drop_reason(ln, page)
+        if reason is None:
+            croppable.append(ln)
+        else:
+            guard_dropped.append((ln.line_seq, reason))
     if not croppable:
         db.set_page_status(conn, page.id, "skipped", skip_reason="no_croppable_lines")
         result.skipped += 1
@@ -258,33 +297,58 @@ def _recognize_one(
     result.n_lines += n
     n_untranscribed = len(lines) - n
     if n_untranscribed:
-        result.failures.append(
-            (page.id, f"{n_untranscribed}/{len(lines)} line(s) not transcribed (degenerate/crop)")
-        )
+        note = f"{n_untranscribed}/{len(lines)} line(s) not transcribed"
+        if guard_dropped:
+            detail = "; ".join(f"line {seq}: {r}" for seq, r in guard_dropped[:4])
+            note += f" ({detail})"
+        result.failures.append((page.id, note))
     db.set_page_status(conn, page.id, "recognized")
     result.recognized += 1
     return "recognized"
 
 
-# Minimum baseline length (px) kraken's polygon extractor accepts; shorter lines
-# raise and are skipped rather than allowed to fail the whole page.
-MIN_BASELINE_PX = 5.0
+# Re-exported for existing callers/tests; the implementation lives in geometry.
+MIN_BASELINE_PX = geometry.MIN_BASELINE_PX
 
 
-def _baseline_length(baseline: object) -> float:
-    """Total polyline length of a baseline (0.0 if absent or a single point)."""
-    if not baseline or len(baseline) < 2:  # type: ignore[arg-type]
-        return 0.0
-    total = 0.0
-    pts = list(baseline)  # type: ignore[arg-type]
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:], strict=False):
-        total += ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
-    return total
+def _line_drop_reason(line: db.Line, page: db.Page) -> str | None:
+    """Why the crop guards refuse this stored line (``None`` = handed to the cropper)."""
+    return geometry.drop_reason(
+        line.baseline, line.polygon, page_width=page.width, page_height=page.height
+    )
 
 
-def _croppable(line: db.Line) -> bool:
-    """True if a line's *sanitized* baseline is long enough for kraken to crop it."""
-    return _baseline_length(_dedupe_pts(line.baseline)) >= MIN_BASELINE_PX
+def audit_page(conn, page: db.Page) -> list[dict]:
+    """Per-line geometry audit of a page: exactly what the crop guards will do.
+
+    Pure DB reads + arithmetic (no kraken/PIL) — the operator's first tool when
+    a page skips, stalls, or dies: it names the poison line and the crop size
+    kraken would have tried to allocate for it.
+    """
+    rows: list[dict] = []
+    for ln in db.iter_lines_for_page(conn, page.id):
+        bl = geometry.dedupe_points(ln.baseline)
+        poly = geometry.dedupe_points(ln.polygon)
+        est = geometry.estimate_crop_size(bl, poly) if len(poly) >= 3 else None
+        rows.append(
+            {
+                "line_seq": ln.line_seq,
+                "n_baseline_pts": len(bl),
+                "baseline_px": round(geometry.polyline_length(bl), 1),
+                "n_boundary_pts": len(poly),
+                "est_crop": f"{est[0]}×{est[1]}" if est else None,
+                "est_mpx": round(est[0] * est[1] / 1e6, 2) if est else None,
+                "verdict": _line_drop_reason(ln, page) or "ok",
+            }
+        )
+    return rows
 
 
-__all__ = ["Cropper", "ProgressFn", "RecognizeResult", "Recognizer", "recognize_pages"]
+__all__ = [
+    "Cropper",
+    "ProgressFn",
+    "RecognizeResult",
+    "Recognizer",
+    "audit_page",
+    "recognize_pages",
+]
