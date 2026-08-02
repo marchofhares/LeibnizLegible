@@ -258,6 +258,21 @@ line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flush
 on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
 on CPU and GPU alike.
 
+**Corpus-run incident (2026-08-02): a stale command block without `--images`
+mass-skipped the corpus in the DB.** The full ~395 GB pull had completed
+(236,779/236,795 verified, 16 redirect-loop failures) with the cache moved to a
+second drive; a re-run of an older snippet then pointed segment/recognize at
+the default (deleted) root and marked ~236k cached pages `image_missing` in one
+pass. No data was harmed — images, manifest (sha256/local_path), geometry, and
+recognitions all intact — and statuses were restored from the manifest
+(`skip_reason='image_missing' AND sha256 IS NOT NULL` → back to
+segmented/pending). Two guards now prevent recurrence: a **preflight** on both
+stages aborts (marking nothing) when ≥5 sampled cached pages all lack files
+under the given root ("wrong --images root?"), and segment skips **oversize
+images** (> 80 MPx; ~120 MPx foldouts observed) with a reason instead of
+risking an OOM — the suspected killer of the first corpus segment attempt,
+which died ~1,550 pages in.
+
 **CUDA smoke (100 fresh pages): segmentation ran (7,496 lines, 75/pg —
 Marginalien-dense), recognition failed 100/100** with `Input type
 (torch.FloatTensor) and weight type (torch.cuda.FloatTensor)`: kraken's
@@ -477,7 +492,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **368** (+1 skipped) |
+| Tests passing | **371** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

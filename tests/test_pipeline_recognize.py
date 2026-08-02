@@ -345,6 +345,51 @@ def test_crop_deadline_converts_stall_to_skip(tmp_path, monkeypatch) -> None:
     assert "no line survived polygon extraction" in page.skip_reason
 
 
+def test_wrong_images_root_aborts_before_marking(tmp_path) -> None:
+    # An omitted/mistyped --images once mass-marked 235k cached pages as
+    # image_missing; with ≥5 cached pages and zero files present, abort instead.
+    conn, images = _seed_segmented(tmp_path, [(f"W{i}", 2) for i in range(1, 7)])
+    with pytest.raises(FileNotFoundError, match="wrong --images root"):
+        recognize_pages(conn, FakeSegmenter(), FakeRecognizer(), images_root=tmp_path / "nowhere")
+    assert db.count_pages_by_status(conn, "segmented") == 6  # statuses untouched
+
+
+def _seed_pending_cached(tmp_path, n: int = 6):
+    images = tmp_path / "images"
+    conn = db.init_db(":memory:")
+    for i in range(1, n + 1):
+        wid = f"W{i}"
+        db.upsert_work(conn, db.Work(wid, "LeibnizHandschriften"))
+        rel = f"{wid}/0001.jpg"
+        p = images / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(b"JPEG\x02")
+        db.upsert_page(
+            conn, db.Page(work_id=wid, seq=1, image_url="u", local_path=rel, sha256=f"s{i}")
+        )
+    conn.commit()
+    return conn, images
+
+
+def test_segment_wrong_images_root_aborts(tmp_path) -> None:
+    conn, images = _seed_pending_cached(tmp_path)
+    with pytest.raises(FileNotFoundError, match="wrong --images root"):
+        segment_pages(conn, FakeSegmenter(), images_root=tmp_path / "nowhere")
+    assert db.count_pages_by_status(conn, "pending") == 6  # statuses untouched
+
+
+def test_oversize_image_skipped_with_reason(tmp_path, monkeypatch) -> None:
+    from leibniz.pipeline import segment as segment_mod
+
+    conn, images = _seed_pending_cached(tmp_path, n=1)
+    monkeypatch.setattr(segment_mod, "jpeg_dimensions", lambda data: (12000, 11000))  # 132 MPx
+    result = segment_pages(conn, FakeSegmenter(), images_root=images)
+    assert result.segmented == 0 and result.skipped == 1
+    page = db.get_page(conn, "W1:0001")
+    assert page.status == "skipped"
+    assert page.skip_reason == "oversize_image:12000x11000"
+
+
 def test_audit_page_names_the_poison_line(tmp_path) -> None:
     sane = [[50, 140], [1950, 140]]
     conn, images = _seed_one_page(tmp_path, [sane, _POISON_BL], polygons=[None, _POISON_POLY])

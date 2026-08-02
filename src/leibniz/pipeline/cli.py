@@ -110,22 +110,27 @@ def segment(
     )
     segmenter = PageSegmenter(seg_model, device=device)
     total = sample or pending
-    with Progress(
-        TextColumn("[cyan]segmenting"), BarColumn(), MofNCompleteColumn(), console=console
-    ) as progress:
-        task = progress.add_task("seg", total=total or None)
-        result = segment_pages(
-            conn,
-            segmenter,
-            model_version=Path(seg_model).stem,
-            images_root=images_root,
-            set_name=set_,
-            work_ids=work or None,
-            redo=redo,
-            sample=sample,
-            min_lines=min_lines,
-            progress=lambda _pid, _o: progress.advance(task),
-        )
+    try:
+        with Progress(
+            TextColumn("[cyan]segmenting"), BarColumn(), MofNCompleteColumn(), console=console
+        ) as progress:
+            task = progress.add_task("seg", total=total or None)
+            result = segment_pages(
+                conn,
+                segmenter,
+                model_version=Path(seg_model).stem,
+                images_root=images_root,
+                set_name=set_,
+                work_ids=work or None,
+                redo=redo,
+                sample=sample,
+                min_lines=min_lines,
+                progress=lambda _pid, _o: progress.advance(task),
+            )
+    except FileNotFoundError as exc:  # images-root preflight: abort, mark nothing
+        console.print(f"[red]{exc}[/red]")
+        conn.close()
+        raise typer.Exit(code=2) from None
     console.print(
         f"\n[bold green]segmented {result.segmented:,}[/bold green] pages "
         f"({result.n_lines:,} lines, {result.mean_lines:.1f}/pg) · "
@@ -171,22 +176,27 @@ def recognize(
     cropper = PageSegmenter(seg_model, device=device)
     recognizer = KrakenEngine(htr_model, device=device, batch_size=batch_size)
     total = sample or segmented
-    with Progress(
-        TextColumn("[cyan]recognising"), BarColumn(), MofNCompleteColumn(), console=console
-    ) as progress:
-        task = progress.add_task("rec", total=total or None)
-        result = recognize_pages(
-            conn,
-            cropper,
-            recognizer,
-            model_version=recognizer.version,
-            images_root=images_root,
-            set_name=set_,
-            work_ids=work or None,
-            redo=redo,
-            sample=sample,
-            progress=lambda _pid, _o: progress.advance(task),
-        )
+    try:
+        with Progress(
+            TextColumn("[cyan]recognising"), BarColumn(), MofNCompleteColumn(), console=console
+        ) as progress:
+            task = progress.add_task("rec", total=total or None)
+            result = recognize_pages(
+                conn,
+                cropper,
+                recognizer,
+                model_version=recognizer.version,
+                images_root=images_root,
+                set_name=set_,
+                work_ids=work or None,
+                redo=redo,
+                sample=sample,
+                progress=lambda _pid, _o: progress.advance(task),
+            )
+    except FileNotFoundError as exc:  # images-root preflight: abort, mark nothing
+        console.print(f"[red]{exc}[/red]")
+        conn.close()
+        raise typer.Exit(code=2) from None
     console.print(
         f"\n[bold green]recognised {result.recognized:,}[/bold green] pages "
         f"({result.n_lines:,} lines) · skipped {result.skipped:,} · {result.seconds:.0f}s"
