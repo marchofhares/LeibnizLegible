@@ -183,6 +183,9 @@ def recognize_pages(
 ) -> RecognizeResult:
     """Recognise segmented pages, filling line text + confidence (one run)."""
     images_root = Path(images_root)
+    from leibniz.pipeline.segment import preflight_images_root
+
+    preflight_images_root(conn, images_root, status=_REDO_STATUSES[0] if redo else "segmented")
     version = model_version or getattr(recognizer, "version", "philiumm-htr")
     run_id = db.start_run(
         conn,
