@@ -22,6 +22,7 @@ production, a trivial fake in tests), so this module imports without kraken.
 from __future__ import annotations
 
 import time
+import zlib
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -91,6 +92,20 @@ class SegmentResult:
 ProgressFn = Callable[[str, str], None]  # (page_id, outcome)
 
 
+def in_shard(work_id: str, shard: tuple[int, int] | None) -> bool:
+    """True if ``work_id`` belongs to shard ``(index, count)`` (``None`` = all).
+
+    Stable across processes and runs (crc32, not Python's salted ``hash``), and
+    keyed on the *work* so one work's folios never split across workers. N
+    shards are disjoint and cover everything — parallel operators each pass
+    ``--shard i/N`` and the union is exactly one full pass.
+    """
+    if shard is None:
+        return True
+    index, count = shard
+    return zlib.crc32(work_id.encode("utf-8")) % count == index
+
+
 def _work_pages(
     conn,
     *,
@@ -98,6 +113,7 @@ def _work_pages(
     work_ids: Sequence[str] | None,
     redo: bool,
     sample: int | None,
+    shard: tuple[int, int] | None = None,
 ) -> Iterator[db.Page]:
     """The resumable segmentation work list (cached pages awaiting segmentation)."""
     statuses = _REDO_STATUSES if redo else ("pending",)
@@ -106,6 +122,8 @@ def _work_pages(
         for page in db.iter_pages_by_status(
             conn, status, set_name=set_name, work_ids=work_ids, require_cached=True
         ):
+            if not in_shard(page.work_id, shard):
+                continue
             yield page
             yielded += 1
             if sample is not None and yielded >= sample:
@@ -122,6 +140,7 @@ def segment_pages(
     work_ids: Sequence[str] | None = None,
     redo: bool = False,
     sample: int | None = None,
+    shard: tuple[int, int] | None = None,
     min_lines: int = 1,
     progress: ProgressFn | None = None,
     monotonic: Callable[[], float] = time.monotonic,
@@ -144,12 +163,15 @@ def segment_pages(
             "work_ids": list(work_ids) if work_ids else None,
             "redo": redo,
             "sample": sample,
+            "shard": list(shard) if shard else None,
         },
         git_sha=db.git_sha(),
     )
     result = SegmentResult(run_id=run_id)
     t0 = monotonic()
-    for page in _work_pages(conn, set_name=set_name, work_ids=work_ids, redo=redo, sample=sample):
+    for page in _work_pages(
+        conn, set_name=set_name, work_ids=work_ids, redo=redo, sample=sample, shard=shard
+    ):
         result.considered += 1
         outcome = _segment_one(
             conn,

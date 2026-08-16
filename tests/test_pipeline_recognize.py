@@ -390,6 +390,33 @@ def test_oversize_image_skipped_with_reason(tmp_path, monkeypatch) -> None:
     assert page.skip_reason == "oversize_image:12000x11000"
 
 
+def test_shards_are_disjoint_and_complete(tmp_path) -> None:
+    # 3 workers each running their shard must together make exactly one full
+    # pass: every page done once, none twice, none missed.
+    conn, images = _seed_pending_cached(tmp_path, n=12)
+    total = 0
+    for i in range(3):
+        r = segment_pages(conn, FakeSegmenter(), images_root=images, shard=(i, 3))
+        total += r.considered
+    assert total == 12
+    assert db.count_pages_by_status(conn, "segmented") == 12
+    # A re-run of any shard finds nothing left.
+    again = segment_pages(conn, FakeSegmenter(), images_root=images, shard=(0, 3))
+    assert again.considered == 0
+
+
+def test_recognize_shard_matches_segment_shard(tmp_path) -> None:
+    conn, images = _seed_segmented(tmp_path, [(f"W{i}", 2) for i in range(1, 7)])
+    done = 0
+    for i in range(2):
+        r = recognize_pages(
+            conn, FakeSegmenter(), FakeRecognizer(), images_root=images, shard=(i, 2)
+        )
+        done += r.recognized
+    assert done == 6
+    assert db.count_pages_by_status(conn, "recognized") == 6
+
+
 def test_audit_page_names_the_poison_line(tmp_path) -> None:
     sane = [[50, 140], [1950, 140]]
     conn, images = _seed_one_page(tmp_path, [sane, _POISON_BL], polygons=[None, _POISON_POLY])

@@ -258,6 +258,18 @@ line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flush
 on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
 on CPU and GPU alike.
 
+**Corpus throughput, measured (2026-08-16): segmentation is CPU-bound at
+~140 pages/hour** — 47,448 pages (20%) segmented in ~12 days; `nvidia-smi`
+shows the GPU loaded but ~idle (9%), because kraken's per-page cost is
+dominated by single-threaded CPU vectorization, not the neural pass. On the
+operator's 16-core box that left 15 cores idle and implied 56 more days.
+Answer: **sharded parallel workers.** `segment`/`recognize` now take
+`--shard i/N` (stable crc32 over `work_id`; shards are disjoint, complete, and
+keep a work's folios together), and `db.connect` enables WAL + a 30 s busy
+timeout so N per-page-committing processes coexist safely. The operator
+runbook runs 1 CUDA + 3 CPU segment workers (~3–4×, ≈2–2.5 weeks for the
+remainder); recognition stays a single GPU worker (~3.5 s/page measured).
+
 **Corpus-run incident (2026-08-02): a stale command block without `--images`
 mass-skipped the corpus in the DB.** The full ~395 GB pull had completed
 (236,779/236,795 verified, 16 redirect-loop failures) with the cache moved to a
@@ -492,7 +504,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **371** (+1 skipped) |
+| Tests passing | **373** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |
