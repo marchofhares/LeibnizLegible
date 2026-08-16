@@ -59,6 +59,24 @@ def _require_kraken() -> None:
         raise typer.Exit(code=1) from None
 
 
+def _parse_shard(spec: str | None) -> tuple[int, int] | None:
+    """Parse ``--shard i/N`` (1-based, e.g. ``2/4``) into a 0-based ``(index, count)``.
+
+    N parallel operators each pass a distinct ``i/N``; the work-id hash makes
+    the shards disjoint and complete, so their union is exactly one full pass.
+    """
+    if not spec:
+        return None
+    try:
+        i_s, n_s = spec.split("/", 1)
+        i, n = int(i_s), int(n_s)
+    except ValueError:
+        raise typer.BadParameter(f"--shard wants 'i/N' (e.g. 2/4), got {spec!r}") from None
+    if n < 1 or not (1 <= i <= n):
+        raise typer.BadParameter(f"--shard index must be between 1 and N, got {spec!r}")
+    return (i - 1, n)
+
+
 def _set_mem_limit(gb: float) -> None:
     """Cap the process address space (POSIX ``RLIMIT_AS``).
 
@@ -90,6 +108,9 @@ def segment(
     sample: int | None = typer.Option(None, "--sample", help="Cap pages processed this run."),
     redo: bool = typer.Option(False, "--redo", help="Re-segment pages already done."),
     device: str = typer.Option("cpu", "--device", help="cpu | cuda | auto (GPU-aware)."),
+    shard: str | None = typer.Option(
+        None, "--shard", help="Process shard i/N of the works (e.g. 2/4) — parallel workers."
+    ),
     min_lines: int = typer.Option(1, "--min-lines", help="Below this, a page is 'blank'/skipped."),
     mem_limit_gb: float | None = typer.Option(
         None,
@@ -124,6 +145,7 @@ def segment(
                 work_ids=work or None,
                 redo=redo,
                 sample=sample,
+                shard=_parse_shard(shard),
                 min_lines=min_lines,
                 progress=lambda _pid, _o: progress.advance(task),
             )
@@ -154,6 +176,9 @@ def recognize(
     sample: int | None = typer.Option(None, "--sample", help="Cap pages processed this run."),
     redo: bool = typer.Option(False, "--redo", help="Re-recognise pages already done."),
     device: str = typer.Option("cpu", "--device", help="cpu | cuda | auto (GPU-aware)."),
+    shard: str | None = typer.Option(
+        None, "--shard", help="Process shard i/N of the works (e.g. 2/4) — parallel workers."
+    ),
     batch_size: int = typer.Option(16, "--batch-size", help="HTR batch size."),
     mem_limit_gb: float | None = typer.Option(
         None,
@@ -191,6 +216,7 @@ def recognize(
                 work_ids=work or None,
                 redo=redo,
                 sample=sample,
+                shard=_parse_shard(shard),
                 progress=lambda _pid, _o: progress.advance(task),
             )
     except FileNotFoundError as exc:  # images-root preflight: abort, mark nothing

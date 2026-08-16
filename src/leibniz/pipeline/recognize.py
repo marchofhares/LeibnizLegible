@@ -27,6 +27,7 @@ from leibniz import db
 from leibniz.images.fetch import DEFAULT_IMAGES_ROOT, local_relpath
 from leibniz.layout.segment import SegLine, SegmentedPage
 from leibniz.pipeline import geometry
+from leibniz.pipeline.segment import in_shard
 
 _REDO_STATUSES = ("segmented", "recognized")
 
@@ -154,6 +155,7 @@ def _work_pages(
     work_ids: Sequence[str] | None,
     redo: bool,
     sample: int | None,
+    shard: tuple[int, int] | None = None,
 ) -> Iterator[db.Page]:
     statuses = _REDO_STATUSES if redo else ("segmented",)
     yielded = 0
@@ -161,6 +163,8 @@ def _work_pages(
         for page in db.iter_pages_by_status(
             conn, status, set_name=set_name, work_ids=work_ids, require_cached=True
         ):
+            if not in_shard(page.work_id, shard):
+                continue
             yield page
             yielded += 1
             if sample is not None and yielded >= sample:
@@ -178,6 +182,7 @@ def recognize_pages(
     work_ids: Sequence[str] | None = None,
     redo: bool = False,
     sample: int | None = None,
+    shard: tuple[int, int] | None = None,
     progress: ProgressFn | None = None,
     monotonic: Callable[[], float] = time.monotonic,
 ) -> RecognizeResult:
@@ -196,12 +201,15 @@ def recognize_pages(
             "work_ids": list(work_ids) if work_ids else None,
             "redo": redo,
             "sample": sample,
+            "shard": list(shard) if shard else None,
         },
         git_sha=db.git_sha(),
     )
     result = RecognizeResult(run_id=run_id)
     t0 = monotonic()
-    for page in _work_pages(conn, set_name=set_name, work_ids=work_ids, redo=redo, sample=sample):
+    for page in _work_pages(
+        conn, set_name=set_name, work_ids=work_ids, redo=redo, sample=sample, shard=shard
+    ):
         result.considered += 1
         outcome = _recognize_one(
             conn,
