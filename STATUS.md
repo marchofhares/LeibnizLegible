@@ -258,6 +258,20 @@ line multiplied conv memory (a 722 MB single alloc) — `KrakenEngine` now flush
 on a padded-area budget (`n × widest ≤ 64k` width-units), bounding peak memory
 on CPU and GPU alike.
 
+**Concurrency root cause found and fixed (2026-08-27).** The first genuinely
+concurrent run (shard workers + recogniser) died with `database is locked`
+despite WAL + a 30 s busy timeout: each stage walked its work list with one
+**long-lived read cursor on the same connection it writes with**, pinning a WAL
+snapshot; the first write after any *other* worker commits then fails with an
+un-retryable snapshot-upgrade BUSY (the timeout cannot help). Single-writer
+runs never trip it — true concurrency always will. Both stages now page their
+work lists in small **closed keyset batches** (`WORK_CHUNK`,
+`iter_pages_by_status(after=…)`): no open cursor survives into a write, and the
+keyset advances over raw batches so sparse shards terminate. Along the way an
+orphaned Aug-19 worker (never killed by an incomplete cleanup) was found to
+have quietly segmented 46,857 pages over 8.3 days before exiting — enumerated
+in `runs`, and the reason corpus progress outpaced the single-worker estimate.
+
 **Corpus throughput, measured (2026-08-16): segmentation is CPU-bound at
 ~140 pages/hour** — 47,448 pages (20%) segmented in ~12 days; `nvidia-smi`
 shows the GPU loaded but ~idle (9%), because kraken's per-page cost is
@@ -504,7 +518,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **373** (+1 skipped) |
+| Tests passing | **376** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |

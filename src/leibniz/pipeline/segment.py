@@ -106,6 +106,15 @@ def in_shard(work_id: str, shard: tuple[int, int] | None) -> bool:
     return zlib.crc32(work_id.encode("utf-8")) % count == index
 
 
+# Work-list batch size. Batches are fully materialised and their cursor closed
+# BEFORE any page is processed: an open read cursor on the writing connection
+# pins a WAL snapshot, and the first write after any *other* worker commits
+# then fails instantly with "database is locked" (snapshot upgrade — the busy
+# timeout can't help). Small closed batches are what make --shard workers and
+# a concurrent recogniser able to write side by side.
+WORK_CHUNK = 400
+
+
 def _work_pages(
     conn,
     *,
@@ -119,15 +128,31 @@ def _work_pages(
     statuses = _REDO_STATUSES if redo else ("pending",)
     yielded = 0
     for status in statuses:
-        for page in db.iter_pages_by_status(
-            conn, status, set_name=set_name, work_ids=work_ids, require_cached=True
-        ):
-            if not in_shard(page.work_id, shard):
-                continue
-            yield page
-            yielded += 1
-            if sample is not None and yielded >= sample:
-                return
+        after: tuple[str, int] | None = None
+        while True:
+            batch = list(
+                db.iter_pages_by_status(
+                    conn,
+                    status,
+                    set_name=set_name,
+                    work_ids=work_ids,
+                    require_cached=True,
+                    limit=WORK_CHUNK,
+                    after=after,
+                )
+            )
+            if not batch:
+                break
+            # Keyset cursor advances over the raw batch (pre-shard-filter), so a
+            # worker whose shard is sparse here still terminates.
+            after = (batch[-1].work_id, batch[-1].seq)
+            for page in batch:
+                if not in_shard(page.work_id, shard):
+                    continue
+                yield page
+                yielded += 1
+                if sample is not None and yielded >= sample:
+                    return
 
 
 def segment_pages(

@@ -148,6 +148,11 @@ def _crop_lines_tolerant(
         return crops, kept
 
 
+# Work-list batch size; see segment.WORK_CHUNK — closed batches prevent the
+# WAL snapshot-upgrade "database is locked" failure under concurrent workers.
+WORK_CHUNK = 400
+
+
 def _work_pages(
     conn,
     *,
@@ -160,15 +165,29 @@ def _work_pages(
     statuses = _REDO_STATUSES if redo else ("segmented",)
     yielded = 0
     for status in statuses:
-        for page in db.iter_pages_by_status(
-            conn, status, set_name=set_name, work_ids=work_ids, require_cached=True
-        ):
-            if not in_shard(page.work_id, shard):
-                continue
-            yield page
-            yielded += 1
-            if sample is not None and yielded >= sample:
-                return
+        after: tuple[str, int] | None = None
+        while True:
+            batch = list(
+                db.iter_pages_by_status(
+                    conn,
+                    status,
+                    set_name=set_name,
+                    work_ids=work_ids,
+                    require_cached=True,
+                    limit=WORK_CHUNK,
+                    after=after,
+                )
+            )
+            if not batch:
+                break
+            after = (batch[-1].work_id, batch[-1].seq)
+            for page in batch:
+                if not in_shard(page.work_id, shard):
+                    continue
+                yield page
+                yielded += 1
+                if sample is not None and yielded >= sample:
+                    return
 
 
 def recognize_pages(
