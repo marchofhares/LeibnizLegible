@@ -725,12 +725,21 @@ def iter_pages_by_status(
     work_ids: Sequence[str] | None = None,
     require_cached: bool = False,
     limit: int | None = None,
+    after: tuple[str, int] | None = None,
 ) -> Iterator[Page]:
     """Iterate pages in a pipeline ``status``, the resumable work list.
 
     ``require_cached`` restricts to pages whose delivery image is downloaded
     (``sha256`` present) — the segment/recognise stages need the local image.
     Ordered ``(work_id, seq)`` so a slice reads as contiguous folios.
+
+    ``after`` is a keyset cursor: only pages strictly beyond ``(work_id, seq)``
+    are returned. The pipeline stages page through the work list in small,
+    *closed* batches (``limit`` + ``after``) instead of holding one cursor open
+    for the whole run: a long-lived read snapshot on a writing connection makes
+    every write fail instantly with "database is locked" the moment any *other*
+    worker commits (WAL snapshot upgrade — the busy timeout cannot help), which
+    is exactly how the first concurrent corpus run died.
     """
     sql = ["SELECT p.* FROM pages p"]
     params: list[object] = []
@@ -746,6 +755,9 @@ def iter_pages_by_status(
         params.extend(work_ids)
     if require_cached:
         where.append("p.sha256 IS NOT NULL")
+    if after is not None:
+        where.append("(p.work_id > ? OR (p.work_id = ? AND p.seq > ?))")
+        params.extend([after[0], after[0], after[1]])
     sql.append("WHERE " + " AND ".join(where))
     sql.append("ORDER BY p.work_id, p.seq")
     if limit is not None:

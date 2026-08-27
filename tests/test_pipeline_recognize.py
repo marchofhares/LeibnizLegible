@@ -390,6 +390,43 @@ def test_oversize_image_skipped_with_reason(tmp_path, monkeypatch) -> None:
     assert page.skip_reason == "oversize_image:12000x11000"
 
 
+def test_chunked_work_list_processes_everything(tmp_path, monkeypatch) -> None:
+    # The work list is paged in small closed batches (keyset cursor) so writes
+    # never share a connection with a long-lived read snapshot; with a chunk of
+    # 2 the batching itself is exercised: every page done exactly once.
+    from leibniz.pipeline import segment as seg_mod
+
+    monkeypatch.setattr(seg_mod, "WORK_CHUNK", 2)
+    conn, images = _seed_pending_cached(tmp_path, n=7)
+    result = segment_pages(conn, FakeSegmenter(), images_root=images)
+    assert result.considered == 7 and result.segmented == 7
+
+
+def test_chunked_and_sharded_work_list_terminates(tmp_path, monkeypatch) -> None:
+    # A sparse shard must not respin on other shards' rows: the keyset cursor
+    # advances over the raw batch, so each shard terminates and the union is
+    # exactly one full pass.
+    from leibniz.pipeline import segment as seg_mod
+
+    monkeypatch.setattr(seg_mod, "WORK_CHUNK", 2)
+    conn, images = _seed_pending_cached(tmp_path, n=9)
+    total = sum(
+        segment_pages(conn, FakeSegmenter(), images_root=images, shard=(i, 3)).considered
+        for i in range(3)
+    )
+    assert total == 9
+    assert db.count_pages_by_status(conn, "segmented") == 9
+
+
+def test_recognize_chunked_work_list(tmp_path, monkeypatch) -> None:
+    from leibniz.pipeline import recognize as rec_mod
+
+    monkeypatch.setattr(rec_mod, "WORK_CHUNK", 2)
+    conn, images = _seed_segmented(tmp_path, [(f"W{i}", 1) for i in range(1, 6)])
+    result = recognize_pages(conn, FakeSegmenter(), FakeRecognizer(), images_root=images)
+    assert result.recognized == 5
+
+
 def test_shards_are_disjoint_and_complete(tmp_path) -> None:
     # 3 workers each running their shard must together make exactly one full
     # pass: every page done once, none twice, none missed.
