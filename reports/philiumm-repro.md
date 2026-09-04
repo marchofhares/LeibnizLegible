@@ -128,3 +128,4 @@ The kraken + torch stack is an **optional** dependency (`uv pip install kraken`)
 ## Gate
 
 **REPRODUCED: measured CER 7.95% is within 1.0 point of the claimed 8.33% (Δ -0.38). Build on the PHILIUMM model.**
+
