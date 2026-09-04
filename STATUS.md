@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-30 (C1 corpus-run robustness, from the first live GPU/CPU runs)._
+_Last updated: 2026-09-04 (B1 panel refresh with current VLMs + C2 extraction bake-off)._
 
 ---
 
@@ -198,6 +198,74 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### B1 panel refresh + C2 extraction bake-off — current models (2026-09-04)
+
+Re-ran the frozen B1 protocol (`b1-2026-07`, same seeded 150-line subsample,
+kraken hypotheses reused) against the September-2026 frontier (operator keys:
+OpenAI + Gemini), and ran a 4-model × 2-page extraction bake-off for the C2
+production decision. Harness additions (committed on this branch): a
+`GeminiEngine` over Google's OpenAI-compatible endpoint; mixed-lab panels
+(`--llm-model engine:model`); `--llm-max-tokens` (thinking models spend
+reasoning tokens *inside* the completion cap); `align extract --engine
+gemini --max-tokens`; and a per-call SIGALRM deadline + transport-error
+retries — the first panel attempt hung 30+ minutes inside `ssl read` when a
+proxied connection died without FIN/RST and httpx's configured read timeout
+never fired (py-spy-diagnosed; the same in-process-stall class as C1's
+poison pages, given the same `_crop_deadline` medicine).
+
+**Panel (uniform cap 2048):** Kraken **8.19%** · gpt-4.1 **36.60%** · gpt-4o
+**43.82%** · gemini-3.8-flash **55.11%** (cap-inflated — see #2) ·
+gpt-5.6-sol **74.17%** · -luna **76.24%** · -terra **78.66%** ·
+gpt-4.1-mini **167.88%** (cap artifact — see #2). Full table + token/cost
+rows regenerated into `reports/philiumm-repro.md`; panel cost $8.8.
+
+1. **Two more model generations *widened* the gap.** July's best zero-shot
+   was 34.8% vs the fine-tune's ~8%; the new reasoning tier (gpt-5.6 —
+   sol/terra/luna, $0.20–$4.00/M input) clusters at **74–79%**, and per-line
+   forensics rule out truncation (finish=stop, ~1.5k reasoning tokens/line,
+   answers intact): the models deliberate at length and then **confabulate
+   plausible Latin** instead of reading the hand. July's "flagships
+   modernize the spelling" failure mode has become confabulation, July's
+   "smallest model wins" inverted, and price is orthogonal to accuracy
+   within the tier. The 4o/4.1 generation, still served, improved ~2 points
+   in six months (4o 45.87→43.82, 4.1 38.62→36.60).
+2. **Completion caps are part of the protocol, in both directions.**
+   gpt-4.1-mini at July's cap 256 reproduces July (36.53% vs 34.79%); at
+   cap 2048 it rambles into repetition loops on hard lines → 167.88%
+   (CI 31–404), so July's tight cap was silently truncating that failure
+   mode. gemini-3.8-flash at cap 2048 has 9/30 sampled lines
+   length-truncated by thinking burn (+1 RECITATION-filtered) — yet
+   re-scored at cap 8192 it gets *worse* (112.18%, CI 47–190): given room
+   it rambles into unbounded repetition on hard lines, 4.1-mini's failure
+   mode from the other direction. Neither model has a cap-independent CER
+   on this material; future panels must report the cap per row.
+3. **Temperature is no longer choosable on the newest tier.** gpt-5.6
+   rejects any explicit temperature (400, param pinned to the default);
+   the engines now drop the field and retry, so 5.6 rows ran at default
+   temperature while the July models ran at 0 — an as-served caveat.
+4. **Implications.** C3 stays a Kraken fine-tune (nothing zero-shot is
+   within 4× of useful); the SPECS §6 LLM correction pass *on the hand* is
+   deprioritized; frontier models remain excellent exactly where C2 uses
+   them — clean print.
+
+**Extraction bake-off (C2 production decision; Gerhardt II leaves 90 + 110,
+gpt-4o / gpt-5.6-sol / gpt-5.6-luna / gemini-3.8-flash, pairwise
+`assess_extraction`):** the three new-generation extractors agree at
+**≥0.992** on the code-switched leaf 90 that broke July's QA pair
+(sol↔luna 0.995, sol↔gemini 0.997), while **gpt-4o is now the outlier
+there** (0.876 — it drops ~10% of the hard page, so July's production model
+was itself lossy on exactly the pages the QA flags). On clean leaf 110 the
+OpenAI models agree ≥0.989 — but **Gemini returns empty with
+finish=content_filter:RECITATION**: public-domain Gerhardt is indexed, and
+the recitation filter fires precisely when verbatim transcription succeeds.
+Gemini is therefore disqualified as a production extractor for well-indexed
+volumes and usable only as a cross-lab control on hard pages
+(`assess_extraction` already counts empty-disagreements separately).
+**Decision: production extractor gpt-5.6-luna (0.994 agreement with sol at
+~1/20th the price), control gpt-5.6-sol on the stratified QA sample** —
+code-switched and heavy-apparatus pages still carry the error estimate.
+Total spend for the refresh ≈ $10.
 
 ### C1 — corpus-run robustness, from the first live runs (2026-07-29/30)
 
@@ -504,7 +572,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **373** (+1 skipped) |
+| Tests passing | **382** (+1 skipped) |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
 | C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |
@@ -523,8 +591,9 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | HTR WER (B1) | 27.04% (CI 25.95–28.19) vs claimed 28.56% |
 | Val lines · char-perfect | 1,878 · 464 (24.7%) |
 | CER by policy (philiumm/lenient/strict) | 7.95% / 7.61% / 7.95% |
-| **VLM vs HTR (150-line subsample) CER** | Kraken 8.19% · gpt-4o 45.87% · gpt-4.1 38.62% · gpt-4.1-mini 34.79% |
-| VLM comparison API cost | **$0.49** (450 calls, usage-metered) |
+| **VLM vs HTR (150-line subsample) CER, 2026-07** | Kraken 8.19% · gpt-4o 45.87% · gpt-4.1 38.62% · gpt-4.1-mini 34.79% |
+| **VLM refresh, 2026-09 (cap 2048)** | gpt-4.1 36.60% · gpt-4o 43.82% · gemini-3.8-flash 55.11%* · gpt-5.6 74–79% (*cap-sensitive; phase log) |
+| VLM comparison API cost | 2026-07 **$0.49** · 2026-09 refresh **≈$10** (usage-metered) |
 | Unique works · page images | 2,225 · **236,795** |
 | **`pages` rows populated** | **236,795** (static 159,162 · iiif 77,633) |
 | Images cached (dev slice) | 80 · 126.3 MB · verify 80/80 OK |
@@ -576,6 +645,10 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    model. The `anthropic` adapter is equally ready for a Claude comparison. Finding
    worth following up: the *smallest* VLM scored best — the larger models modernise
    archaic spelling more (a prompt-engineering lever, not pursued in Tier 1).
+   _2026-09-04 refresh (phase log): the gap **widened** — the gpt-5.6 reasoning
+   tier confabulates at 74–79% CER (not truncation); "smallest wins" inverted;
+   completion caps and pinned temperature are now reported protocol parameters.
+   The Claude comparison still awaits an Anthropic key._
 10. ~~**(B2) Piece→canvas localization.**~~ **Resolved (C2):** `align/resolve.py`
     turns a katalog `Bl.` range into exact canvases via the IIIF folio labels C1
     now stores on `pages.label`. Offline-tested; the single biggest C2 gap, closed.
@@ -589,6 +662,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     text, head/page-no dropped; 1/2 flagged, agreement 0.67). At scale it must be
     **stratified** — code-switched Latin/German and heavy-apparatus pages carry the
     error. The vision pass still needs a key + per-piece page anchors (operator).
+    _2026-09-04: bake-off run — production extractor moves to gpt-5.6-luna with
+    gpt-5.6-sol control; gpt-4o measured lossy on the hard page; Gemini
+    RECITATION-blocks well-indexed print (phase log)._
 13. **(C2) Real GT minting awaits three operator inputs.** The factory is built +
     tested but mints nothing until: C1's corpus HTR lines exist (kraken + image
     pull), the full katalog scrape populates `aa_refs` + crosswalk over the §70

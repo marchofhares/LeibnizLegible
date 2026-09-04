@@ -154,3 +154,32 @@ def test_raw_hyps_cache_roundtrip(tmp_path) -> None:
     # Cache not covering all current pairs -> None (never scores a stale subset).
     more = [*pairs, LinePair(line_id="c", reference="r3", image_bytes_=b"")]
     assert bench_cli._load_raw_hyps(cache, more) is None
+
+
+def test_resolve_llm_spec_engine_prefixes() -> None:
+    # Bare ids ride the default engine.
+    assert bench_cli._resolve_llm_spec("openai", "gpt-4o") == ("openai", "gpt-4o")
+    assert bench_cli._resolve_llm_spec("anthropic", None) == ("anthropic", None)
+    # An engine prefix overrides the default (mixed panels).
+    assert bench_cli._resolve_llm_spec("openai", "gemini:gemini-3.8-flash") == (
+        "gemini",
+        "gemini-3.8-flash",
+    )
+    assert bench_cli._resolve_llm_spec("gemini", "openai:gpt-5.6-luna") == (
+        "openai",
+        "gpt-5.6-luna",
+    )
+    # A bare "engine:" selects that engine's default model.
+    assert bench_cli._resolve_llm_spec("openai", "anthropic:") == ("anthropic", None)
+    # Unknown prefixes are part of the model id, not an engine.
+    assert bench_cli._resolve_llm_spec("openai", "ft:gpt-4o:acme") == ("openai", "ft:gpt-4o:acme")
+
+
+def test_llm_key_present_gemini(monkeypatch) -> None:
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    assert not bench_cli._llm_key_present("gemini")
+    monkeypatch.setenv("GOOGLE_API_KEY", "g")
+    assert bench_cli._llm_key_present("gemini")
+    monkeypatch.setenv("GEMINI_API_KEY", "g2")
+    assert bench_cli._llm_key_present("gemini")
