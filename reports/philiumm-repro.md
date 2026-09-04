@@ -1,6 +1,6 @@
 # PHILIUMM reproduction — HTR benchmark on the Leibniz val split (Phase B1)
 
-_Leibniz Legible, Phase B1 (gate). Generated 2026-07-29T12:50:55Z. The first independent reproduction of the PHILIUMM HTR model's character error rate, measured with a frozen, documented protocol before anything is built on it._
+_Leibniz Legible, Phase B1 (gate). Generated 2026-09-04T20:49:31Z. The first independent reproduction of the PHILIUMM HTR model's character error rate, measured with a frozen, documented protocol before anything is built on it._
 
 > HTR model, segmentation model and ground truth © ERC PHILIUMM project (Denisa-Florina Bumba, Laboratoire SPHERE, Université Paris Cité – CNRS; ERC grant 101020985), CC BY 4.0. Model: doi:10.5281/zenodo.21457538; segmentation: doi:10.5281/zenodo.21537859; ground truth: huggingface.co/datasets/DenisaB/htr_leibniz_dataset_v1.
 
@@ -13,7 +13,7 @@ _Leibniz Legible, Phase B1 (gate). Generated 2026-07-29T12:50:55Z. The first ind
 | CER | 8.33% | 7.95% (95% CI 7.49–8.46) | -0.38 |
 | WER | 28.56% | 27.04% (95% CI 25.95–28.19) | -1.52 |
 
-Measured on **1,878 lines** of the PHILIUMM `val` split with the model's own recognition network (greedy CTC), under the **`philiumm`** normalization policy — the policy that mirrors how the model was *trained* (`normalization: NFD`, whitespace-collapsed), so this is an apples-to-apples comparison. Wall time 164s on CPU.
+Measured on **1,878 lines** of the PHILIUMM `val` split with the model's own recognition network (greedy CTC), under the **`philiumm`** normalization policy — the policy that mirrors how the model was *trained* (`normalization: NFD`, whitespace-collapsed), so this is an apples-to-apples comparison. (Re-scored from cached hypotheses; see the run record for inference time.)
 
 ## Discrepancy analysis
 
@@ -59,18 +59,26 @@ On a seeded random **150-line** subsample, the specialised HTR model and one or 
 | Engine | CER | WER |
 | --- | ---: | ---: |
 | **Kraken (PHILIUMM, fine-tuned)** | 8.19% (95% CI 6.55–9.97) | 26.86% |
-| gpt-4o (zero-shot) | 45.87% (95% CI 40.97–50.91) | 78.81% |
-| gpt-4.1 (zero-shot) | 38.62% (95% CI 34.55–42.79) | 70.82% |
-| gpt-4.1-mini (zero-shot) | 34.79% (95% CI 31.10–38.76) | 71.28% |
+| gpt-5.6-luna (zero-shot) | 76.24% (95% CI 69.89–81.48) | 90.89% |
+| gpt-5.6-terra (zero-shot) | 78.66% (95% CI 73.02–84.06) | 91.08% |
+| gpt-4o (zero-shot) | 43.82% (95% CI 39.24–48.43) | 76.58% |
+| gpt-4.1 (zero-shot) | 36.60% (95% CI 32.93–40.25) | 70.72% |
+| gpt-4.1-mini (zero-shot) | 167.88% (95% CI 31.18–404.29) | 262.55% |
+| gemini-3.8-flash (zero-shot) | 55.11% (95% CI 37.54–76.71) | 88.94% |
+| gpt-5.6-sol (zero-shot) | 74.17% (95% CI 66.89–80.66) | 84.39% |
 
 **Token usage & estimated cost** (from each API's `usage`; prices are
 approximate list rates, easily re-derived against current pricing):
 
 | Engine | Input tok | Output tok | Est. cost |
 | --- | ---: | ---: | ---: |
-| gpt-4o | 95,630 | 2,183 | $0.261 |
-| gpt-4.1 | 95,630 | 2,171 | $0.209 |
-| gpt-4.1-mini | 48,241 | 2,270 | $0.023 |
+| gpt-5.6-luna | 38,941 | 222,687 | $0.275 |
+| gpt-5.6-terra | 38,941 | 237,855 | $2.932 |
+| gpt-4o | 95,630 | 2,223 | $0.261 |
+| gpt-4.1 | 95,630 | 2,202 | $0.209 |
+| gpt-4.1-mini | 48,094 | 6,309 | $0.029 |
+| gemini-3.8-flash | 172,399 | 2,936 | $0.140 |
+| gpt-5.6-sol | 38,941 | 241,151 | $4.979 |
 
 Zero-shot vision LLMs have never seen Leibniz's hand; the fine-tuned HTR model is expected to win decisively on secretary-hand Latin/French. The gap is the point — it quantifies how far a general model sits from a specialised one on this material, and it is far larger than the 8% CER the HTR model achieves.
 
@@ -120,4 +128,3 @@ The kraken + torch stack is an **optional** dependency (`uv pip install kraken`)
 ## Gate
 
 **REPRODUCED: measured CER 7.95% is within 1.0 point of the claimed 8.33% (Δ -0.38). Build on the PHILIUMM model.**
-
