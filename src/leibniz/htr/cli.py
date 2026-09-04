@@ -126,9 +126,21 @@ def repro(
     batch_size: int = typer.Option(8, "--batch-size", help="Kraken batch size."),
     with_llm: bool = typer.Option(False, "--with-llm", help="Also run a VLM on a subsample."),
     llm_n: int = typer.Option(150, "--llm-n", help="Subsample size for the LLM comparison."),
-    llm_engine: str = typer.Option("anthropic", "--llm-engine", help="anthropic | openai."),
+    llm_engine: str = typer.Option(
+        "anthropic",
+        "--llm-engine",
+        help="anthropic | openai | gemini — the default engine for --llm-model entries.",
+    ),
     llm_model: list[str] | None = typer.Option(
-        None, "--llm-model", help="VLM model id(s); repeatable for a panel. Default per engine."
+        None,
+        "--llm-model",
+        help="VLM model id(s); repeatable for a panel; 'engine:model' mixes engines.",
+    ),
+    llm_max_tokens: int = typer.Option(
+        256,
+        "--llm-max-tokens",
+        help="VLM completion cap. Thinking models (gpt-5.x, gemini-3.x) spend "
+        "reasoning tokens inside it — raise it or their answers truncate.",
     ),
     reuse_hyps: bool = typer.Option(
         False, "--reuse-hyps", help="Skip inference; re-score cached raw hypotheses."
@@ -180,10 +192,16 @@ def repro(
 
     llm_results: list = []
     kraken_sub = None
-    key_present = _llm_key_present(llm_engine)
+    panel_engines = {_resolve_llm_spec(llm_engine, m)[0] for m in llm_model or [None]}
+    key_present = any(_llm_key_present(e) for e in panel_engines)
     if with_llm:
         llm_results, kraken_sub = _run_llm_comparison(
-            pairs, hyps, llm_n=llm_n, engine_name=llm_engine, models=llm_model or None
+            pairs,
+            hyps,
+            llm_n=llm_n,
+            engine_name=llm_engine,
+            models=llm_model or None,
+            max_tokens=llm_max_tokens,
         )
 
     rep = ReproReport(
@@ -268,20 +286,54 @@ def _build_engine(name: str, model: Path | None):
     raise typer.BadParameter(f"unknown engine {name!r} (kraken | anthropic | openai)")
 
 
-def _make_llm_engine(engine_name: str, model: str | None):
-    """Construct a VLM engine (anthropic|openai), optionally for a specific model."""
+_LLM_ENGINES = ("anthropic", "openai", "gemini")
+
+
+def _resolve_llm_spec(default_engine: str, spec: str | None) -> tuple[str, str | None]:
+    """Split an optional ``engine:`` prefix off a ``--llm-model`` value.
+
+    ``"gemini:gemini-3.8-flash"`` → ``("gemini", "gemini-3.8-flash")``; a bare id
+    (or an unknown prefix — model ids never collide with the engine names) rides
+    the default engine.
+    """
+    if spec:
+        prefix, sep, rest = spec.partition(":")
+        if sep and prefix in _LLM_ENGINES:
+            return prefix, rest or None
+    return default_engine, spec
+
+
+def _make_llm_engine(engine_name: str, model: str | None, *, max_tokens: int | None = None):
+    """Construct a VLM engine (anthropic|openai|gemini), optionally for a specific model."""
+    kwargs: dict = {}
+    if model:
+        kwargs["model"] = model
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
     if engine_name == "anthropic":
         from leibniz.htr.engines import AnthropicEngine
 
-        return AnthropicEngine(model=model) if model else AnthropicEngine()
+        return AnthropicEngine(**kwargs)
     if engine_name == "openai":
         from leibniz.htr.engines import OpenAIEngine
 
-        return OpenAIEngine(model=model) if model else OpenAIEngine()
-    raise typer.BadParameter(f"unknown --llm-engine {engine_name!r} (anthropic | openai)")
+        return OpenAIEngine(**kwargs)
+    if engine_name == "gemini":
+        from leibniz.htr.engines import GeminiEngine
+
+        return GeminiEngine(**kwargs)
+    raise typer.BadParameter(f"unknown --llm-engine {engine_name!r} (anthropic | openai | gemini)")
 
 
-def _run_llm_comparison(pairs, hyps, *, llm_n: int, engine_name: str, models: list[str] | None):
+def _run_llm_comparison(
+    pairs,
+    hyps,
+    *,
+    llm_n: int,
+    engine_name: str,
+    models: list[str] | None,
+    max_tokens: int | None = None,
+):
     """Run one or more VLMs on a seeded subsample; score them + kraken on the same lines.
 
     Returns ``(list[LLMComparison], kraken_subsample_result)``. Each model is a
@@ -304,20 +356,24 @@ def _run_llm_comparison(pairs, hyps, *, llm_n: int, engine_name: str, models: li
     )
 
     results: list = []
-    for model in models or [None]:
+    warned: set[str] = set()
+    for spec in models or [None]:
+        eng_name, model = _resolve_llm_spec(engine_name, spec)
         try:
-            eng = _make_llm_engine(engine_name, model)
+            eng = _make_llm_engine(eng_name, model, max_tokens=max_tokens)
         except MissingKeyError as exc:
-            console.print(f"  [yellow]LLM comparison skipped: {exc}[/yellow]")
-            break  # no key ⇒ none of the models will run
+            if eng_name not in warned:
+                warned.add(eng_name)
+                console.print(f"  [yellow]{eng_name} comparison skipped: {exc}[/yellow]")
+            continue
         try:
             with eng:
-                console.print(f"  {engine_name} ({eng.version}) on {len(subset)} lines …")
+                console.print(f"  {eng_name} ({eng.version}) on {len(subset)} lines …")
                 llm_hyps, secs = bench.transcribe_pairs(subset, eng)
             res = bench.score_hypotheses(
                 subset,
                 llm_hyps,
-                engine_name=engine_name,
+                engine_name=eng_name,
                 engine_version=eng.version,
                 policy=metrics.PHILIUMM_POLICY,
                 seconds=secs,
@@ -333,13 +389,15 @@ def _run_llm_comparison(pairs, hyps, *, llm_n: int, engine_name: str, models: li
             )
             console.print(f"    → {res.summary()}")
         except Exception as exc:  # noqa: BLE001 — one bad model can't sink the panel
-            console.print(f"  [red]{engine_name}:{model or 'default'} failed: {exc}[/red]")
+            console.print(f"  [red]{eng_name}:{model or 'default'} failed: {exc}[/red]")
     return results, kraken_sub
 
 
 def _llm_key_present(engine_name: str) -> bool:
     import os
 
+    if engine_name == "gemini":
+        return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
     var = "OPENAI_API_KEY" if engine_name == "openai" else "ANTHROPIC_API_KEY"
     return bool(os.environ.get(var))
 

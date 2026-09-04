@@ -34,7 +34,13 @@ import os
 import time
 from collections.abc import Callable, Sequence
 
-from leibniz.htr.engines import MissingKeyError, _sniff_media_type
+from leibniz.htr.engines import (
+    _TRANSIENT_CALL_ERRORS,
+    MissingKeyError,
+    _call_deadline,
+    _param_error,
+    _sniff_media_type,
+)
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
@@ -76,6 +82,7 @@ class VisionEditionExtractor:
         *,
         model: str = "gpt-4o",
         api_key: str | None = None,
+        url: str = OPENAI_URL,
         prompt: str = EDITION_READING_TEXT_PROMPT,
         max_tokens: int = 2000,
         detail: str = "high",
@@ -93,6 +100,7 @@ class VisionEditionExtractor:
                 "(the aligner and its evaluation run fully without it)."
             )
         self._key = key
+        self.url = url
         self.model = model
         self.prompt = prompt
         self.max_tokens = max_tokens
@@ -100,6 +108,7 @@ class VisionEditionExtractor:
         self.temperature = temperature
         self.min_interval = min_interval
         self.max_retries = max_retries
+        self._deadline_s = timeout + 30.0
         self._sleep = sleep
         self.usage_input = 0
         self.usage_output = 0
@@ -151,10 +160,27 @@ class VisionEditionExtractor:
             body["temperature"] = self.temperature
         attempt = 0
         while True:
-            resp = self._client.post(OPENAI_URL, headers=self._headers(), json=body)
+            try:
+                with _call_deadline(self._deadline_s):
+                    resp = self._client.post(self.url, headers=self._headers(), json=body)
+            except _TRANSIENT_CALL_ERRORS:
+                if attempt < self.max_retries:
+                    attempt += 1
+                    self._sleep(2.0**attempt)
+                    continue
+                raise
             if resp.status_code in (429, 500, 502, 503, 529) and attempt < self.max_retries:
                 attempt += 1
                 self._sleep(2.0**attempt)
+                continue
+            if (
+                resp.status_code == 400
+                and "temperature" in body
+                and _param_error(resp) == "temperature"
+            ):
+                # gpt-5.x-class models pin temperature to the default (see engines).
+                body.pop("temperature")
+                self.temperature = None
                 continue
             resp.raise_for_status()
             text = self._parse(resp.json())
