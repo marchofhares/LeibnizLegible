@@ -136,34 +136,33 @@ How many works carry a parseable Leibniz signature (LH / LBr / Leibn. Marg. / LK
 - **Overlap is real, not double counting:** the same object appears under several sets; we dedup by object id. Marginalien are annotated *printed books* (hence high page counts), not autograph manuscripts — counted as page images all the same.
 - **Scope:** Hannover GWLB holdings only. Non-Hannover Leibniz materials and transmitted-light fragment scans are out of Tier-1 scope (SPECS §1.1).
 
-
 <!-- images-stats -->
 
 ## Image cache (Phase A2)
 
-_Generated 2026-07-29T01:23:46Z. Local delivery-derivative cache for the segmentation/HTR pipeline; images are never rehosted (the public viewer loads GWLB IIIF directly, SPECS §3/§4)._
+_Generated 2026-09-11T15:01:49Z. Local delivery-derivative cache for the segmentation/HTR pipeline; images are never rehosted (the public viewer loads GWLB IIIF directly, SPECS §3/§4)._
 
-- **Cached:** 80 / 236,795 pages (0.0%), 126.3 MB on disk.
-- **Mean page size:** 1.6 MB.
-- **Projected full-corpus pull:** ≈ 365.2 GB for all 236,795 pages at the observed mean.
-- **Dimensions (of 80 measured):** 1098×1793 … 4921×4394 px.
+- **Cached:** 236,779 / 236,795 pages (100.0%), 395.6 GB on disk.
+- **Mean page size:** 1.7 MB.
+- **Projected full-corpus pull:** ≈ 395.7 GB for all 236,795 pages at the observed mean.
+- **Dimensions (of 236,779 measured):** 529×202 … 10593×15583 px.
 
 | Primary set | Cached | Target | % |
 | --- | ---: | ---: | ---: |
-| Leibnitiana | 0 | 1,768 | 0.0% |
-| LeibnizBriefwechsel | 40 | 72,284 | 0.1% |
-| LeibnizHandschriften | 40 | 58,828 | 0.1% |
-| LeibnizMarginalien | 0 | 103,887 | 0.0% |
-| leibniz-rekonstruktionen | 0 | 28 | 0.0% |
+| Leibnitiana | 1,768 | 1,768 | 100.0% |
+| LeibnizBriefwechsel | 72,284 | 72,284 | 100.0% |
+| LeibnizHandschriften | 58,812 | 58,828 | 100.0% |
+| LeibnizMarginalien | 103,887 | 103,887 | 100.0% |
+| leibniz-rekonstruktionen | 28 | 28 | 100.0% |
 
 | Dimensions | Cached pages |
 | --- | ---: |
-| < 1 MP | 0 |
-| 1–3 MP | 2 |
-| 3–5 MP | 6 |
-| 5–8 MP | 16 |
-| 8–12 MP | 16 |
-| ≥ 12 MP | 40 |
+| < 1 MP | 1,270 |
+| 1–3 MP | 15,835 |
+| 3–5 MP | 33,247 |
+| 5–8 MP | 38,437 |
+| 8–12 MP | 61,288 |
+| ≥ 12 MP | 86,702 |
 
-Delivery mode of cached pages — iiif: 40, static: 40.
+Delivery mode of cached pages — iiif: 77,624, static: 159,155.
 
