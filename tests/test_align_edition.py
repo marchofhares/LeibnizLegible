@@ -208,3 +208,33 @@ def test_iter_hocr_pages_reads_lines_and_sizes(tmp_path: Path) -> None:
     assert (pg.index, pg.width, pg.height) == (58, 2419.0, 3347.0)
     assert [ln.text for ln in pg.lines] == ["12", "10. LEIBNIZ"]
     assert pg.lines[1].size == 41.2 and pg.lines[1].x0 == 301.0
+
+
+def test_headless_layout_continues_piece_across_bare_page_numbers() -> None:
+    """A volume set without running heads (only page numbers) still assembles."""
+    sizes = E.TypeSizes(BODY, SMALL, 37.0)
+    p1 = _page(
+        10,
+        [
+            _ln("41", 130, x0=2100, x1=2160),
+            _ln("2. URSACHEN WARUM CANNSTATT USW.", 500, x0=275),
+            _ln("Demnach Ihre hochfürstl. Durchl. von Würtenberg löblichste gedancken", 700),
+        ],
+    )
+    p2 = _page(
+        11,
+        [
+            _ln("42", 130, x0=2100, x1=2160),  # bare page number, no "N." head
+            _ln("schläge führet, wie dero von Gott ohne das mit allen guthen überschüttetes", 400),
+        ],
+    )
+    index = _page(
+        12,
+        [
+            _ln("SACHVERZEICHNIS", 130, x0=900, size=37),
+            _ln("aphorismus: A S. 262.6 544.11 und weiter im text", 400),
+        ],
+    )
+    vol = E.assemble_pieces(E.classify_page(p, sizes=sizes) for p in (p1, p2, index))
+    assert list(vol.pieces) == ["2"]
+    assert vol.pieces["2"].pages == [10, 11]  # the index page is not swept in

@@ -678,6 +678,7 @@ def assemble_pieces(pages: Iterable[PageReading], *, max_jump: int = 3) -> Volum
     vol = VolumeText()
     current: str | None = None
     prev_head: str | None = None  # the previous page's head, for re-synchronisation
+    prev_eligible = False  # the previous page was a piece page
     for pr in pages:
         vol.n_pages += 1
         vol.n_apparatus_lines += pr.n_apparatus
@@ -692,7 +693,15 @@ def assemble_pieces(pages: Iterable[PageReading], *, max_jump: int = 3) -> Volum
         if not pr.head_pieces and not any(
             _step_ok(h, cp if cp is not None else 0) for h in headings
         ):
-            continue  # front/back matter
+            # No numbered head, no plausible heading: front/back matter — unless
+            # the volume is set without running heads (a bare page number, or
+            # nothing, up top) and we are mid-piece: then the page continues it.
+            bare = pr.head_text is None or bool(
+                re.fullmatch(r"[\divxlcIVXLC .]+", pr.head_text.strip())
+            )
+            if current is None or not prev_eligible or not bare:
+                prev_eligible = False
+                continue
         vol.n_eligible_pages += 1
         piece = current
         skip_lines = False
@@ -750,6 +759,7 @@ def assemble_pieces(pages: Iterable[PageReading], *, max_jump: int = 3) -> Volum
             contributed = True
         if contributed:
             vol.n_reading_pages += 1
+        prev_eligible = True
         # The newest piece the head names is where the next page continues.
         current = unplaced[-1] if unplaced else piece
         prev_head = pr.head_pieces[-1] if pr.head_pieces else None
