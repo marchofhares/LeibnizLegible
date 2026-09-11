@@ -227,17 +227,27 @@ def build_edition_cache(
 
 
 def cross_source_qa(
-    a: dict[str, str], b: dict[str, str], *, flag_cer: float = 0.10
+    a: dict[str, str],
+    b: dict[str, str],
+    *,
+    flag_cer: float = 0.10,
+    max_pieces: int = 40,
+    max_chars: int = 600,
 ) -> tuple[ExtractionQA, int]:
     """Two independent extractions of one volume, compared piece by piece.
 
-    Returns the :class:`ExtractionQA` over the pieces both sources found, plus
-    the number of pieces only one of them found (a boundary-detection miss on
-    one side — counted separately from text disagreement).
+    Returns the :class:`ExtractionQA` over a deterministic sample of the pieces
+    both sources found (every ``n/max_pieces``-th piece, the first ``max_chars``
+    characters of each — the CER is a quadratic DP, so whole volumes are not
+    compared verbatim), plus the number of pieces only one source found (a
+    boundary-detection miss on one side, counted separately from text
+    disagreement).
     """
     common = sorted(set(a) & set(b), key=lambda k: (E._piece_num(k) or 0, k))
     only_one = len(set(a) ^ set(b))
-    pairs = [(a[k], b[k]) for k in common]
+    step = max(1, len(common) // max_pieces)
+    sample = common[::step][:max_pieces]
+    pairs = [(a[k][:max_chars], b[k][:max_chars]) for k in sample]
     return assess_extraction(pairs, flag_cer=flag_cer), only_one
 
 

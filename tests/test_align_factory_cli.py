@@ -69,7 +69,20 @@ def test_factory_and_gt_report_commands(tmp_path) -> None:
     out = tmp_path / "gt-factory.md"
     res2 = runner.invoke(
         app,
-        ["align", "gt-report", "--db", str(db_path), "--out", str(out), "--today", "2026-07-29"],
+        [
+            "align",
+            "gt-report",
+            "--db",
+            str(db_path),
+            "--out",
+            str(out),
+            "--today",
+            "2026-07-29",
+            "--editions",
+            str(tmp_path / "editions"),  # never the real data/editions (slow, stateful)
+            "--edition-cache",
+            str(cache),
+        ],
     )
     assert res2.exit_code == 0
     text = out.read_text(encoding="utf-8")

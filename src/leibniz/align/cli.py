@@ -369,6 +369,12 @@ def gt_report(
     db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
     out: Path = typer.Option(Path("reports/gt-factory.md"), "--out", help="Report path."),
     today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    editions_dir: Path = typer.Option(
+        Path("data/editions"), "--editions", help="Extracted volume texts (ingest output)."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.json"), "--edition-cache", help="{record_id: text} cache."
+    ),
 ) -> None:
     """(Re)write reports/gt-factory.md from the minted gt_lines + piece enumeration."""
     from datetime import date
@@ -378,7 +384,7 @@ def gt_report(
 
     t = date.fromisoformat(today) if today else date.today()
     with open_db(db_path) as conn:
-        rep = gather_gt(conn, today=t, edition_cache=Path("data/gt/edition_cache.json"))
+        rep = gather_gt(conn, today=t, editions_dir=editions_dir, edition_cache=edition_cache)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_gt(rep), encoding="utf-8")
     _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")

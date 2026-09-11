@@ -128,7 +128,7 @@ EDITION_SOURCES: dict[tuple[int, int], tuple[EditionSource, ...]] = {
     (6, 3): (_ia(6, 3, "samtlicheschrift0003leib", 794),),
     (6, 4): (
         _ia(6, 4, "samtlicheschrift0004leib_a8x0", 1106, part="A"),
-        _ia(6, 4, "samtlicheschrift0000leib_e8w3", 510, part="B?"),
+        _ia(6, 4, "samtlicheschrift0000leib_e8w3", 510, part="D (indices)"),
         _ia(6, 4, "samtlicheschrift0000leib_x5q7", 1026, part="C"),
         EditionSource(6, 4, "muenster", part="A–D", note="Internetausgabe; permission ask"),
     ),

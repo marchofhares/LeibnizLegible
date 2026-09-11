@@ -68,6 +68,7 @@ class PageText:
     width: float
     height: float
     lines: list[TextLine] = field(default_factory=list)
+    exact_sizes: bool = False  # PDF text layer (exact points) vs OCR estimate (jittered)
 
 
 # --------------------------------------------------------------------------- #
@@ -115,6 +116,15 @@ def iter_hocr_pages(path: str | Path) -> Iterator[PageText]:
             del div.getparent()[0]
 
 
+def _pdf_stream(path: str | Path):
+    """The PDF bytes from ``%PDF`` on — some servers prepend a CMS header block."""
+    import io
+
+    data = Path(path).read_bytes()
+    start = data.find(b"%PDF")
+    return io.BytesIO(data[start:] if start > 0 else data)
+
+
 def iter_pdf_pages(path: str | Path, *, x_tolerance: float = 2.0) -> Iterator[PageText]:
     """Stream a PDF's text layer as :class:`PageText` (needs ``pdfplumber``).
 
@@ -128,7 +138,7 @@ def iter_pdf_pages(path: str | Path, *, x_tolerance: float = 2.0) -> Iterator[Pa
         raise ModuleNotFoundError(
             "iter_pdf_pages needs pdfplumber (`uv sync --extra gt`)."
         ) from exc
-    with pdfplumber.open(str(path)) as pdf:
+    with pdfplumber.open(_pdf_stream(path)) as pdf:
         for i, page in enumerate(pdf.pages):
             lines: list[TextLine] = []
             for ln in page.extract_text_lines(x_tolerance=x_tolerance, return_chars=True):
@@ -140,7 +150,13 @@ def iter_pdf_pages(path: str | Path, *, x_tolerance: float = 2.0) -> Iterator[Pa
                 lines.append(
                     TextLine(text, ln["x0"], ln["x1"], ln["top"], ln["bottom"], float(size))
                 )
-            yield PageText(index=i, width=float(page.width), height=float(page.height), lines=lines)
+            yield PageText(
+                index=i,
+                width=float(page.width),
+                height=float(page.height),
+                lines=lines,
+                exact_sizes=True,
+            )
 
 
 # --------------------------------------------------------------------------- #
@@ -150,8 +166,8 @@ def iter_pdf_pages(path: str | Path, *, x_tolerance: float = 2.0) -> Iterator[Pa
 # "N. 20" / "N. 13. 14" in the running head: the head lists the pieces that
 # START on the page (or the one continuing, if none starts). OCR may split
 # digits ("N. 1 1"), read 1 as I/l, or glue the section title on.
-HEAD_PIECE_RE = re.compile(r"\bN\s*[.,]?\s*((?:[\dIl]{1,3}\s*[.,]?\s*)+)")
-_HEAD_TOKEN_RE = re.compile(r"[\dIl]{1,3}")
+HEAD_PIECE_RE = re.compile(r"\bN\s*[.,]?\s*((?:[\dIil]{1,3}\s*[.,]?\s*)+)")
+_HEAD_TOKEN_RE = re.compile(r"[\dIil]{1,3}")
 # "20. LEIBNIZ AN FRANZ KUCKUCK" — number, dot/comma, then a title set in caps.
 # OCR renders "1." as "i."/"l." often enough to allow it in the number, and an
 # ABBYY layer renders small-caps surnames in lowercase ("5. CHILIAN Schrader AN
@@ -192,15 +208,18 @@ _MARGIN_TOKENS = frozenset(
     | {"io", "1o", "i5", "ij", "2o", "3o", "4o", "zo", "jo", "ro", "IO", "so"}
 )
 _MARGIN_LINE_RE = re.compile(r"^[\dilIjoOzZsS ]{1,3}$")
-_UEBERLIEFERUNG_RE = re.compile(r"^(Ü|Ue|U)berlieferung\b", re.IGNORECASE)
 # The vocabulary of the editorial *Überlieferung* block (witness descriptions:
 # sigla, shelfmarks, leaves, seals, prints) — used only while a piece's body has
 # not started yet, where such a line is a continuation of that block.
 _WITNESS_VOCAB_RE = re.compile(
     r"\b(Bl\.|Bog\.|Gedr\.|Teildr\.|Teildruck|Druckvorlage|Aufschrift|Siegel|Postverm|"
     r"Bibl\.\s*verm|Konzept|Abfertigung|Abschrift|Reinschrift|Eigh\.|eigh\.|LBr\.?|LH\b|"
-    r"Auszug|Nachdruck|Erstdruck|Handexemplar|Überlieferung|Ueberlieferung)"
+    r"Auszug|Nachdruck|Erstdruck|Handexemplar|Überlieferung|Ueberlieferung|Druck nach|"
+    r"Handschriften:|Drucke:)"
 )
+# Editorial lines that are dropped wherever they occur: a whole line in
+# brackets (dateline, editor's note) or a witness statement.
+_EDITORIAL_LINE_RE = re.compile(r"^\[.*\]\.?$|^(Druck nach|Überlieferung|Ueberlieferung)\b")
 
 # Fallback fraction of the body size below which a line counts as "small type"
 # (used only when a volume shows no second type-size cluster).
@@ -267,25 +286,39 @@ class TypeSizes:
     indent: float | None = None  # paragraph indent as a fraction of page width
 
 
-def size_threshold(pages: Sequence[PageText], *, min_share: float = 0.08) -> TypeSizes:
+def size_threshold(
+    pages: Sequence[PageText], *, min_share: float = 0.08, min_gap: float | None = None
+) -> TypeSizes:
     """Learn body vs apparatus type size from a whole volume's size histogram.
 
     The two dominant, char-weighted size clusters are the reading text (largest
     weight) and the apparatus/commentary (the next cluster clearly below it, at
     least ``min_share`` of the body's weight). The cut is their midpoint — which
     is what makes an ABBYY layer at 10 pt / 9.5 pt separable as reliably as
-    Tesseract's 41 px / 33 px. Without a second cluster the cut falls back to
-    ``SMALL_RATIO × body``.
+    Tesseract's 41 px / 33 px. "Clearly below" depends on the source: a PDF
+    text layer carries exact sizes (a 3 % gap is real), an OCR ``x_size`` is an
+    estimate that jitters by a pixel or two (a neighbouring bin is the body
+    itself, so a 10 % gap is required). Without a second cluster the cut falls
+    back to ``SMALL_RATIO × body``.
     """
     hist: Counter = Counter()
+    exact = all(pg.exact_sizes for pg in pages) if pages else False
+    if min_gap is None:
+        min_gap = 0.03 if exact else 0.10
     for pg in pages:
         for ln in pg.lines:
             if ln.size > 0 and len(ln.text) >= 4:
                 hist[round(ln.size * 2) / 2] += len(ln.text)
     if not hist:
         return TypeSizes(0.0, None, 0.0)
-    body, body_w = hist.most_common(1)[0]
-    below = [(sz, w) for sz, w in hist.items() if sz < 0.97 * body and w >= min_share * body_w]
+    # The reading text is the *larger* type among the heavy clusters: a volume
+    # with as much commentary as text (Reihe III) must not elect the small one.
+    top_w = hist.most_common(1)[0][1]
+    body = max(sz for sz, w in hist.items() if w >= 0.5 * top_w)
+    body_w = hist[body]
+    below = [
+        (sz, w) for sz, w in hist.items() if sz < (1 - min_gap) * body and w >= min_share * body_w
+    ]
     if not below:
         return TypeSizes(float(body), None, SMALL_RATIO * body)
     apparatus = max(below, key=lambda t: t[1])[0]
@@ -368,7 +401,7 @@ def _printed_page_of(fragments: Sequence[str]) -> int | None:
         if re.fullmatch(r"\d{1,4}", t) and int(t) < 1500:
             return int(t)
     for f in fragments:
-        t = re.sub(r"N\s*[.,]?\s*(?:[\dIl]{1,3}\s*[.,]?\s*)+", " ", f)
+        t = re.sub(r"N\s*[.,]?\s*(?:[\dIil]{1,3}\s*[.,]?\s*)+", " ", f)
         for m in (re.match(r"\s*(\d{1,4})\b", t), re.search(r"\b(\d{1,4})\s*$", t)):
             if m and int(m.group(1)) < 1500:
                 return int(m.group(1))
@@ -493,8 +526,9 @@ def classify_page(
     reading, apparatus = keep[:cut], keep[cut:]
     n_apparatus = len(apparatus)
 
-    # 3. Inside the reading zone.
-    body_x0, indent_x0 = _margins(reading, W)
+    # 3. Inside the reading zone (margins learned from body-size lines only, so
+    #    a long editorial block cannot pose as the text margin).
+    body_x0, indent_x0 = _margins([ln for ln in reading if not small(ln)] or reading, W)
     if sizes is not None and sizes.indent is not None:
         indent_x0 = body_x0 + sizes.indent * W
     tol = 0.015 * W
@@ -516,7 +550,13 @@ def classify_page(
                 awaiting_body = True
                 continue
         # A glued margin number wrecks the OCR size estimate; trust the position.
-        if (small(ln) and not glued_margin_no) or _UEBERLIEFERUNG_RE.match(t):
+        # A line with no lowercase letter is a title, sub-heading or bare number —
+        # never a line of running reading text.
+        if (
+            (small(ln) and not glued_margin_no)
+            or _EDITORIAL_LINE_RE.match(t)
+            or not re.search(r"[a-zäöüéèàß]", t)
+        ):
             n_editorial += 1
             continue
         if awaiting_body:
