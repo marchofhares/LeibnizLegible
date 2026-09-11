@@ -91,18 +91,20 @@ scrape partitions into sub-cap slices (an operator job).
 
 ## Status
 
-Phases **A0–A3, B1–B2, C1–C2** are complete (`STATUS.md` has the detail). A1's
-census found **2,225 works / 236,795 page images**; A2/A3 built the image cache
-and katalog crosswalk. **B1** reproduced the PHILIUMM HTR CER (**7.95 %** vs
-claimed 8.33 %) and **B2** green-lit the retro-aligner (**98.8 % yield / 97.5 %
-precision** on favourable material). **C1** built the resumable corpus
-segment/recognize pipeline (`leibniz pipeline`) with per-page segmentation stats;
-**C2** built the GT factory (`leibniz align factory`) — piece→canvas folio
-resolver, banded aligner, stratum-aware mint thresholds, and license-gated
-`gt_lines`, with the vision extraction + QA validated live on real Leibniz print.
-The corpus segment/recognize passes and the volume extraction are documented
-operator commands (they need the kraken stack, the ~365 GB image pull, and an API
-key). Next is **C3** (fine-tune v2 + per-stratum eval, a gate). See `STATUS.md`.
+**The v1 corpus run is complete (2026-09-11): 236,210 of 236,795 pages —
+99.75% of the digitized Nachlass — are machine-recognised, 13.5M lines with
+per-line confidence and provenance.** The remainder is enumerated (569 skips
+with reasons; 16 pages behind broken GWLB redirects). Phases **A0–A3, B1–B2,
+C1** are complete (`STATUS.md` has the detail). A1's census found **2,225 works
+/ 236,795 page images**; A2/A3 built the image cache (395.6 GB) and katalog
+crosswalk. **B1** reproduced the PHILIUMM HTR CER (**7.95 %** vs claimed
+8.33 %) and **B2** green-lit the retro-aligner (**98.8 % yield / 97.5 %
+precision** on favourable material). **C1** built — and has now run at corpus
+scale — the resumable segment/recognize pipeline (`leibniz pipeline`, sharded
+parallel workers + concurrent GPU recognition); **C2** built the GT factory
+(`leibniz align factory`), which now awaits only the full katalog scrape and
+the §70 page anchors to mint GT. Next is **C2 minting → C3** (fine-tune v2, a
+gate). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 
