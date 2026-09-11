@@ -263,6 +263,107 @@ def factory(
     _console.print("Run [cyan]leibniz align gt-report[/cyan] to update reports/gt-factory.md.")
 
 
+@app.command()
+def ingest(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    editions_dir: Path = typer.Option(
+        Path("data/editions"), "--editions", help="Raw text layers + extracted piece JSON."
+    ),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    volume: list[str] = typer.Option(
+        None, "--volume", help="Restrict to 'SERIES,VOLUME' (repeatable)."
+    ),
+    all_sources: bool = typer.Option(
+        False, "--all-sources", help="Ingest every readable source (for cross-source QA)."
+    ),
+    force: bool = typer.Option(False, "--force", help="Re-extract even if cached."),
+    no_fetch: bool = typer.Option(False, "--no-fetch", help="Only use already-downloaded files."),
+) -> None:
+    """Fetch + extract every §70-expired volume's reading text (cache-first)."""
+    from datetime import date
+
+    from leibniz.align.ingest import ingest_volume, volume_label
+    from leibniz.align.volumes_sources import readable_sources
+    from leibniz.legal import expired_volumes
+    from leibniz.net import PoliteClient
+
+    t = date.fromisoformat(today) if today else date.today()
+    wanted = {tuple(int(x) for x in v.split(",")) for v in (volume or [])}
+    targets = [
+        (v.series, v.volume)
+        for v in expired_volumes(t)
+        if isinstance(v.volume, int) and (not wanted or (v.series, v.volume) in wanted)
+    ]
+    seen: set[tuple[int, int]] = set()
+    with PoliteClient() as client:
+        for series, vol in targets:
+            if (series, vol) in seen:
+                continue
+            seen.add((series, vol))
+            sources = readable_sources(series, vol)
+            if not sources:
+                _console.print(f"  {volume_label(series, vol):<7} [yellow]no readable source")
+                continue
+            for src in sources if all_sources else sources[:1]:
+                try:
+                    res = ingest_volume(
+                        src,
+                        client=None if no_fetch else client,
+                        editions_dir=editions_dir,
+                        force=force,
+                    )
+                except FileNotFoundError:
+                    _console.print(f"  {volume_label(series, vol):<7} {src.kind}: not downloaded")
+                    continue
+                _console.print(
+                    f"  {volume_label(series, vol):<7} {src.kind:<8} {res.status:<10} "
+                    f"pieces {res.n_pieces:>4} · chars {res.n_chars:>9,} · "
+                    f"reading pages {res.n_reading_pages}/{res.n_pages} · "
+                    f"anomalies {res.n_anomalies}"
+                )
+
+
+@app.command(name="edition-cache")
+def edition_cache(
+    out: Path = typer.Argument(Path("data/gt/edition_cache.json"), help="{record_id: text} JSON."),
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    editions_dir: Path = typer.Option(Path("data/editions"), "--editions"),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+) -> None:
+    """Join the extracted volume texts to the katalog → the factory's edition cache."""
+    from datetime import date
+
+    from leibniz.align.ingest import build_edition_cache, load_volume_texts, text_path
+    from leibniz.align.volumes_sources import readable_sources
+    from leibniz.db import open_db
+    from leibniz.legal import expired_volumes
+
+    t = date.fromisoformat(today) if today else date.today()
+    texts: dict[tuple[int, int], dict[str, str]] = {}
+    for v in expired_volumes(t):
+        if not isinstance(v.volume, int):
+            continue
+        for src in readable_sources(v.series, v.volume):
+            path = text_path(src, editions_dir)
+            if path.exists():
+                merged = texts.setdefault((v.series, v.volume), {})
+                for piece, text in load_volume_texts(path).items():
+                    merged.setdefault(piece, text)  # preferred source first
+    with open_db(db_path) as conn:
+        cache, stats = build_edition_cache(conn, texts)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    _console.print(
+        f"[bold green]{stats.records_with_text:,} records with reading text[/bold green] "
+        f"({sum(len(v) for v in cache.values()):,} chars) → {out}; "
+        f"{stats.records_cited_no_text:,} cite an ingested volume but no text was found"
+    )
+    for vol, n in sorted(stats.by_volume.items()):
+        _console.print(f"  {vol:<7} {n:,}")
+    if stats.volumes_without_source:
+        _console.print(f"[yellow]no ingested source:[/yellow] {stats.volumes_without_source}")
+
+
 @app.command(name="gt-report")
 def gt_report(
     db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
@@ -277,7 +378,7 @@ def gt_report(
 
     t = date.fromisoformat(today) if today else date.today()
     with open_db(db_path) as conn:
-        rep = gather_gt(conn, today=t)
+        rep = gather_gt(conn, today=t, edition_cache=Path("data/gt/edition_cache.json"))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_gt(rep), encoding="utf-8")
     _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")

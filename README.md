@@ -70,6 +70,27 @@ Joins the BBAW Ritter-Katalog (CC BY 4.0) to our works so every scan links to it
 scholarly record. No public API; the site caps results at 5000 rows, so the full
 scrape partitions into sub-cap slices (an operator job).
 
+### GT factory (Phase C2)
+
+```bash
+uv sync --extra gt                              # + pdfplumber (PDF text layers)
+uv run leibniz catalog scrape --expired-volumes # every §70-expired volume's katalog records (~8 min)
+uv run leibniz catalog crosswalk                # records → works
+uv run leibniz align pieces                     # enumerate the §70 pieces localizable to canvases
+uv run leibniz align ingest                     # fetch + extract each volume's reading text (cache-first)
+uv run leibniz align edition-cache              # join to the katalog → data/gt/edition_cache.json
+uv run leibniz align factory data/gt/edition_cache.json   # mint gt_lines (needs the C1 HTR lines)
+uv run leibniz align gt-report                  # writes reports/gt-factory.md
+```
+
+The reading text of each §70-expired Akademie-Ausgabe volume is read from a
+free digital copy of the print (archive.org scans with their OCR layer, the
+GWLB repositorium PDFs, Potsdam's born-digital PDFs — `align/volumes_sources.py`
+records the channel and its terms per volume) by a layout-aware extractor
+(`align/edition.py`: running head, body vs. apparatus type, piece headings,
+margin numbers) — apparatus, commentary and introductions never enter it
+(SPECS §7.2). Minting itself runs where the C1 corpus store lives.
+
 ## Where things live
 
 | Path | What |
@@ -83,7 +104,7 @@ scrape partitions into sub-cap slices (an operator job).
 | `src/leibniz/catalog/` | Ritter-Katalog scraper + works crosswalk (shelfmark normaliser) |
 | `src/leibniz/htr/` | benchmark harness (D5) + engine adapters (Kraken / VLM) — B1 |
 | `src/leibniz/layout/` | Kraken baseline segmentation of a page into line images |
-| `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, banded DP, strata, volumes) |
+| `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, banded DP, strata, volume sources, reading-text extractor, ingestion) |
 | `src/leibniz/pipeline/` | corpus segment/recognize batch pipeline + per-page seg-stats — C1 |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |

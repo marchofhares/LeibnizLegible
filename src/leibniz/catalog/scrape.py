@@ -67,7 +67,11 @@ _HEADER_FIELDS: dict[str, str] = {
 }
 
 # AA reference in the "Akademie Ausgabe" column: "2 | 1.130 / a …" → II,1 N.130a.
-_AA_COLUMN_RE = re.compile(r"(\d+)\s*\|\s*(\d+)\.(\d+)(?:\s*/\s*([a-z]))?")
+# The optional "/ …" tail is the katalog's *Unternummer* field: a single letter is
+# a sub-piece (N.130a); "tlw." (teilweise) marks a witness carrying only PART of
+# the piece (an excerpt/fragment — the aligner must expect the edition text to
+# overhang); "S.551,Z.1-6" pins the witness to a printed page/line locus.
+_AA_COLUMN_RE = re.compile(r"(\d+)\s*\|\s*(\d+)\.(\d+)(?:\s*/\s*([^\s|]+))?")
 # AA reference in the "Bezüge" column: "II,1 N.130a = III,1 N.89".
 _AA_BEZUEGE_RE = re.compile(r"\b([IVX]+),\s*(\d+)\s*N\.?\s*(\d+[a-z]?)")
 _ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8}
@@ -90,8 +94,13 @@ def parse_aa_refs(aa_column: str, bezuege: str) -> list[dict]:
 
     for m in _AA_COLUMN_RE.finditer(aa_column or ""):
         series, volume, num = int(m.group(1)), int(m.group(2)), m.group(3)
-        piece = f"{num}{m.group(4)}" if m.group(4) else num
+        tail = (m.group(4) or "").strip()
+        piece = f"{num}{tail}" if re.fullmatch(r"[a-z]", tail) else num
         _add(series, volume, piece, "aa_column")
+        if tail.startswith("tlw"):
+            refs[-1]["partial"] = True
+        elif tail and not re.fullmatch(r"[a-z]", tail):
+            refs[-1]["note"] = tail
     for m in _AA_BEZUEGE_RE.finditer(bezuege or ""):
         series = _ROMAN.get(m.group(1))
         if series is not None:
@@ -191,9 +200,101 @@ class ScrapeStats:
     with_gwlb_link: int = 0
     capped_queries: list[str] = field(default_factory=list)
     failures: list[tuple[str, str]] = field(default_factory=list)
+    deepened: bool = False  # a capped volume slice was re-run by year
+    volume_records: int = 0  # rows citing the requested volume (scrape_volume)
 
 
 ProgressFn = Callable[[str, int], None]
+
+
+# --------------------------------------------------------------------------- #
+# Volume slices (Phase C2: every §70-expired volume's records, sub-cap)
+# --------------------------------------------------------------------------- #
+
+# The extended search matches ``reihe``/``bd`` as SUBSTRINGS (measured live
+# 2026-09-11: ``bd=1`` also returns volumes 10–19 and 21; the form's ``*_exact``
+# checkboxes are ignored server-side), so a volume whose number is a substring of
+# other volume numbers in the same series overflows the 5000-row cap. The fix is
+# to slice such a query by year (``datum_ab``/``datum_bis`` honour a bare year)
+# and filter client-side by the parsed AA column — a slice may be *wider* than
+# the volume, never wrong. Leibniz's life bounds the years.
+YEAR_MIN, YEAR_MAX = 1646, 1716
+
+
+def volume_query(series: int, volume: int) -> dict[str, str]:
+    """The base (unsliced) query for one AA volume's records."""
+    return {"reihe": str(series), "bd": str(volume)}
+
+
+def year_slice_queries(
+    base: Mapping[str, str], *, years: range = range(YEAR_MIN, YEAR_MAX + 1)
+) -> list[dict[str, str]]:
+    """One query per year for a capped base query (the sub-cap deepening).
+
+    A bare year in ``datum_bis`` is treated as *exclusive* by the katalog
+    (``1670``–``1670`` returns nothing; measured 2026-09-11), so the upper bound
+    is spelled out as ``YYYY1231``; a bare-year ``datum_ab`` still catches
+    records dated only to a year or month.
+    """
+    return [dict(base, datum_ab=str(y), datum_bis=f"{y}1231") for y in years]
+
+
+def records_citing(records: Sequence[db.KatalogRecord], series: int, volume: int) -> int:
+    """How many of ``records`` cite AA ``series,volume`` in their AA column."""
+
+    def _cites(ref: dict) -> bool:
+        return (
+            ref.get("source") == "aa_column"
+            and ref.get("series") == series
+            and ref.get("volume") == volume
+        )
+
+    return sum(1 for r in records if any(_cites(a) for a in r.aa_refs))
+
+
+def scrape_volume(
+    conn,
+    *,
+    client,
+    series: int,
+    volume: int,
+    cache_dir: Path = DEFAULT_CACHE_DIR,
+    force: bool = False,
+    progress: ProgressFn | None = None,
+) -> ScrapeStats:
+    """Scrape one AA volume's katalog records, deepening by year on a cap.
+
+    Runs :func:`volume_query`; if that slice comes back capped it is discarded as
+    incomplete and re-run as :func:`year_slice_queries` (each year well under the
+    cap even where volume numbers collide). Records from neighbouring volumes that
+    a substring match drags in are stored too (they are valid katalog records —
+    more crosswalk coverage), so ``stats.records`` counts everything upserted;
+    ``stats.volume_records`` counts the rows that actually cite this volume.
+    """
+    base = volume_query(series, volume)
+    stats = scrape(
+        conn, client=client, queries=[base], cache_dir=cache_dir, force=force, progress=progress
+    )
+    if stats.capped_queries:
+        deep = scrape(
+            conn,
+            client=client,
+            queries=year_slice_queries(base),
+            cache_dir=cache_dir,
+            force=force,
+            progress=progress,
+        )
+        deep.queries += stats.queries
+        deep.fetched += stats.fetched
+        deep.cached += stats.cached
+        deep.deepened = True
+        stats = deep
+    stats.volume_records = _count_volume_records(conn, series, volume)
+    return stats
+
+
+def _count_volume_records(conn, series: int, volume: int) -> int:
+    return records_citing(list(db.iter_katalog_records(conn)), series, volume)
 
 
 def query_endpoint(params: Mapping[str, str]) -> str:
@@ -282,12 +383,18 @@ __all__ = [
     "GWLB_RESOLVE_RE",
     "KATALOG_BASE",
     "RESULT_CAP",
+    "YEAR_MAX",
+    "YEAR_MIN",
     "ScrapeStats",
     "default_sample_queries",
     "parse_aa_refs",
     "parse_result_table",
     "query_endpoint",
     "query_slug",
+    "records_citing",
     "result_count_hint",
     "scrape",
+    "scrape_volume",
+    "volume_query",
+    "year_slice_queries",
 ]
