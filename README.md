@@ -123,9 +123,13 @@ crosswalk. **B1** reproduced the PHILIUMM HTR CER (**7.95 %** vs claimed
 precision** on favourable material). **C1** built — and has now run at corpus
 scale — the resumable segment/recognize pipeline (`leibniz pipeline`, sharded
 parallel workers + concurrent GPU recognition); **C2** built the GT factory
-(`leibniz align factory`), which now awaits only the full katalog scrape and
-the §70 page anchors to mint GT. Next is **C2 minting → C3** (fine-tune v2, a
-gate). See `STATUS.md`.
+(`leibniz align factory`) and has now run its inputs at full scale: the §70
+katalog sweep (17,162 piece citations, 11,595 localizable)
+and the reading-text extraction of 21 of 31 expired volumes from
+their free digital copies (6,188 pieces, 26.2M
+characters, 10,029 witnesses with text). Minting is one operator
+run on the machine holding the corpus store. Next is **C2 minting → C3**
+(fine-tune v2, a gate). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

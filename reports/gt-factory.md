@@ -32,7 +32,7 @@ Each §70-expired volume's reading text is read from a **free digital copy of th
 | I,12 | ia | 694/954 | 446 | 679 | 1,101k chars | 61 | 74.4% (6/40 flagged) |
 | I,13 | — | — | — | 615 | _1987; not online at GWLB, not on IA_ | — | — |
 | I,14 | gwlb | 865/1,081 | 490 | 688 | 1,428k chars | 58 | — |
-| I,15 | gwlb | 839/1,033 | 549 | 784 | 1,352k chars | 1 | — |
+| I,15 | gwlb | 848/1,033 | 550 | 784 | 1,370k chars | 1 | — |
 | I,16 | ia | 741/954 | 451 | 679 | 1,185k chars | 47 | 88.3% (8/40 flagged) |
 | II,1 | — | — | — | 698 | _1926 print; HathiTrust (US-PD) / TELOTA ask_ | — | — |
 | III,1 | ia | 655/956 | 81 | 411 | 777k chars | 13 | — |
@@ -40,8 +40,8 @@ Each §70-expired volume's reading text is read from a **free digital copy of th
 | III,3 | ia | 785/966 | 353 | 734 | 1,131k chars | 67 | — |
 | III,4 | ia | 661/826 | 281 | 453 | 1,016k chars | 42 | — |
 | IV,1 | potsdam | 583/793 | 51 | 154 | 1,437k chars | 3 | 71.9% (19/40 flagged) |
-| IV,2 | potsdam | 22/692 | 20 | 161 | 23k chars | 0 | — |
-| IV,3 | potsdam | 839/999 | 141 | 266 | 1,581k chars | 5 | — |
+| IV,2 | potsdam | 575/692 | 28 | 161 | 1,133k chars | 0 | — |
+| IV,3 | potsdam | 888/999 | 141 | 266 | 1,679k chars | 5 | — |
 | VI,1 | ia | 484/616 | 26 | 41 | 1,084k chars | 106 | — |
 | VI,2 | — | — | — | 92 | _1966; no free digital copy found_ | — | — |
 | VI,3 | ia | 628/794 | 90 | 234 | 1,207k chars | 69 | — |
@@ -50,9 +50,9 @@ Each §70-expired volume's reading text is read from a **free digital copy of th
 | VII,1 | — | — | — | 303 | _1990; not online at GWLB, not on IA_ | — | — |
 | VII,2 | — | — | — | 147 | _1996; not online at GWLB, not on IA_ | — | — |
 
-**21 of 31 §70 volumes have a readable free digital copy** → **6,179 printed pieces / 24.94M characters of reading text extracted**; 10 volumes have no free digital copy at all (1923–1927 prints are US-public-domain on HathiTrust; a TELOTA/Göttingen ask covers the rest — operator). Terms per channel: **ia** — public-domain scan, no access restriction; **gwlb** — CC BY-NC 4.0 channel (text §70-free; flag for the lawyer memo); **potsdam** — no terms stated (edition's own site); **muenster** — written permission required (operator ask; not auto-fetched).
+**21 of 31 §70 volumes have a readable free digital copy** → **6,188 printed pieces / 26.16M characters of reading text extracted**; 10 volumes have no free digital copy at all (1923–1927 prints are US-public-domain on HathiTrust; a TELOTA/Göttingen ask covers the rest — operator). Terms per channel: **ia** — public-domain scan, no access restriction; **gwlb** — CC BY-NC 4.0 channel (text §70-free; flag for the lawyer memo); **potsdam** — no terms stated (edition's own site); **muenster** — written permission required (operator ask; not auto-fetched).
 
-**Edition cache:** 9,917 katalog records (manuscript witnesses citing an ingested volume) carry their piece's reading text in `data/gt/edition_cache.json` — the factory's input.
+**Edition cache:** 10,029 katalog records (manuscript witnesses citing an ingested volume) carry their piece's reading text in `data/gt/edition_cache.json` — the factory's input.
 
 ## Extraction path — validated live on real Leibniz print
 
@@ -118,12 +118,12 @@ Of the factory's three inputs, **two are now in hand and one is on the operator'
 
 ## What the extraction costs — and the optional vision upgrade
 
-The text-layer path above costs **nothing but crawl time** (~1 GB of hOCR/PDF, polite ≤1 req/s). Its labels carry the OCR layer's residual error (Tesseract on the IA scans, ABBYY on the GWLB PDFs, none on the born-digital Potsdam volumes); the cross-source agreement column measures it where two layers exist. A cleaner label comes from a **vision-LLM pass over the 12,948 OCR'd reading-text pages** (of 14,392 reading pages total), the B2 extractor (`align/pdftext.py`, validated live on Leibniz print) — priced from the measured ~2,000 tokens/page (≈1,500 in / ≈500 out at the observed page sizes):
+The text-layer path above costs **nothing but crawl time** (~1 GB of hOCR/PDF, polite ≤1 req/s). Its labels carry the OCR layer's residual error (Tesseract on the IA scans, ABBYY on the GWLB PDFs, none on the born-digital Potsdam volumes); the cross-source agreement column measures it where two layers exist. A cleaner label comes from a **vision-LLM pass over the 12,957 OCR'd reading-text pages** (of 15,003 reading pages total), the B2 extractor (`align/pdftext.py`, validated live on Leibniz print) — priced from the measured ~2,000 tokens/page (≈1,500 in / ≈500 out at the observed page sizes):
 
 | Model | $/M in · out | Per page | All OCR'd pages | Batch API (−50 %) |
 | --- | --- | ---: | ---: | ---: |
 | Claude Sonnet 5 | $2.00 · $10.00 | $0.0080 | $104 | $52 |
-| Claude Opus 5 | $5.00 · $25.00 | $0.0200 | $259 | $129 |
+| Claude Opus 5 | $5.00 · $25.00 | $0.0200 | $259 | $130 |
 | gpt-4o-class (B1/B2 adapter) | $2.50 · $10.00 | $0.0088 | $113 | $57 |
 
 So the whole-corpus vision pass is a **two-figure to low-three-figure dollar item** (SPECS §10 budgets $500–3,000 for all LLM passes), and it need not run on every page: mint from the free OCR text first, then re-extract only the pieces that actually minted lines (a fraction of the pages) and re-mint — the factory is idempotent. A two-model QA sample (`assess_extraction`, ~200 pages × 2 models) adds a few dollars. No GPU is involved in C2; alignment is CPU work.
