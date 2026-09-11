@@ -3,22 +3,35 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-07-30 (C1 corpus-run robustness, from the first live GPU/CPU runs)._
+_Last updated: 2026-09-11 (**the C1 corpus run is COMPLETE**)._
 
 ---
 
 ## Current state
 
-**Phases C1 (corpus segmentation + HTR v1) and C2 (GT factory at scale) —
-complete; both machinery built and offline-tested end-to-end.** The whole C
-pipeline is now wired: pages flow `pending → segmented → recognized` (C1), and
-§70-expired edition text is retro-aligned onto those recognized lines to mint
-`gt_lines` (C2). What could be validated *live* this session was: the aligner
-(B2's 98.8%/97.5%, retained) and — new — the **vision extraction + QA on real
-Leibniz edition print** (see C2 below). What needs an operator with the kraken
-stack + the ~365 GB image pull + an API key — the corpus segment/recognize passes
-and volume-scale extraction — is left as documented commands, with each report
-regenerating its numbers from the store once run.
+**🏁 C1 corpus run COMPLETE (2026-09-11): the full Nachlass is machine-read.**
+**236,210 of 236,795 pages recognised (99.75%)** — **13,508,625 lines** with
+text, per-line confidence and full provenance in the store. The remainder is
+enumerated, not lost: 569 pages skipped with recorded reasons (blanks, specks,
+oversize foldouts, degenerate geometry) and **16 pages permanently unfetchable**
+(GWLB delivery URLs in a redirect loop — works `00068368`/`00068744` a.o.; worth
+reporting upstream). Image cache: 236,779 pages / **395.6 GB**.
+`reports/htr-v1-sample.md` and `reports/census.md` are regenerated from the
+store with the real numbers. The run took ~6 weeks wall clock on one 16-core
+GTX-1660-Ti desktop (WSL2), the last week in the final architecture: **4
+sharded CPU segmentation workers + 1 concurrent GPU recogniser** (~515 and ~940
+pages/hour respectively), all stages resumable and re-runnable via one operator
+script. Every robustness fix that made this survivable is logged in the Phase
+log below. **C2 GT minting is now unblocked on the HTR side** — its remaining
+inputs are the katalog full scrape (Open Q #3) and the §70 page anchors (Open
+Q #13).
+
+**Phases C1 (corpus segmentation + HTR v1) and C2 (GT factory at scale)
+machinery — built, offline-tested, and (C1) now proven at corpus scale.** The
+whole C pipeline is wired: pages flow `pending → segmented → recognized` (C1),
+and §70-expired edition text is retro-aligned onto those recognized lines to
+mint `gt_lines` (C2). Volume-scale extraction (C2) still needs an operator with
+an API key and the piece anchors.
 
 **Phase C1 — corpus segmentation + HTR v1 batch pipeline.** Built `leibniz
 pipeline segment` / `recognize`: a status-driven, resumable, idempotent state
@@ -519,9 +532,12 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | Metric | Value |
 | --- | --- |
 | Tests passing | **376** (+1 skipped) |
+| **C1 corpus run (2026-09-11)** | **COMPLETE: 236,210/236,795 pages recognised (99.75%) · 13,508,625 lines** |
+| C1 corpus remainder | 569 skips (enumerated reasons) · 16 permanently unfetchable (GWLB redirect loops) |
+| C1 corpus cache | 236,779 pages · **395.6 GB** (drive-D image store) |
+| C1 final architecture | 4 sharded CPU seg workers (~515 pg/h) ∥ 1 GPU recogniser (~940 pg/h), WAL + keyset batches |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
-| C1 corpus run | operator command (needs kraken + ~365 GB pull); ≈120–330 GPU-h/pass est. |
 | **C2 GT factory** | enumerate §70 pieces → resolve canvases → banded align → stratum-threshold → mint; +33 tests |
 | C2 folio resolver (Open Q #10) | katalog `Bl.` range × IIIF folio labels → exact canvases (**solved**) |
 | C2 banded aligner | O(len·band) NW + traceback; **0 mismatches vs full DP** (exactness-tested) |
@@ -609,18 +625,19 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     volumes (Open Q #3), and the §70 volume page-anchors are known (the katalog
     gives the piece *number*, not its print-page range — a TELOTA dump or a
     per-volume TOC index would supply it; `VOLUME_SOURCES` is a starter registry).
-14. **(C1) Segmentation on Marginalien / drafts is unmeasured on real images.** The
-    `page_stats` metrics + stratum heuristic are built and unit-tested on synthetic
-    geometry, but the real distributions (and the worst failure modes — printed body
-    vs marginal hand, shredded layered drafts) only come from the operator's sample
-    run. The report auto-fills them; thresholds may need re-tuning against them.
-15. **(C1) Line-confidence source.** `KrakenEngine.transcribe_conf` reads the CTC
-    posteriors defensively; the exact field shape is unverified against a live
-    kraken run (no stack here), so it falls back to `None` if absent. Confirm on the
-    operator run that real per-line confidences populate (they gate search + the UI).
-    _2026-07-30: the original field was a pixel cut position (fixed, `140d58d`); the
-    first ~69 live pages now show in-range posteriors (≈0.6–0.9). Close once the
-    500-page validation reports zero `conf > 1` lines._
+14. ~~**(C1) Segmentation on Marginalien / drafts is unmeasured on real images.**~~
+    **Measured (2026-09-11):** the corpus run put a `page_stats` row on every
+    segmented page — line counts, region coverage, height-CV, overlap and
+    short-line anomalies across all sets and strata (`reports/htr-v1-sample.md`
+    carries the distributions). The observed failure modes (speck lines on scrap
+    pages, sliver crops, ~120 MP foldouts) are guarded and enumerated rather
+    than fatal; threshold re-tuning against these real distributions is now a
+    C4 calibration task with data in hand.
+15. ~~**(C1) Line-confidence source.**~~ **Resolved (2026-09-11):** real CTC
+    posteriors populate at corpus scale — 13.5M recognised lines carry
+    confidences (mean ≈0.77 on the validation slice; `conf > 1` count is 0
+    corpus-wide after the `140d58d`/token-layout fixes). They are ready to gate
+    search and the UI.
 
 ---
 
@@ -646,21 +663,23 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**A0–A3 + B1–B2 + C1–C2 all green** (334 tests, ruff clean). Per SPECS §5
-sequencing, C is sequential: **C3 is next**, then C4, then the D phases.
+**A0–A3 + B1–B2 + C1 (machinery *and* corpus run) + C2 (machinery) all green.**
+Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and
+the D phases.
 
+- **C2 — mint real GT.** The corpus HTR lines now exist (the hard C1 input is
+  done). Remaining inputs (Open Q #13): the **full katalog scrape** (Open Q #3,
+  partitioned sub-cap queries) and the **§70 piece→print-page anchors** (a
+  TELOTA dump or per-volume TOC index). Then `leibniz align factory` mints
+  `gt_lines` at scale (target ≥50k open-bucket lines).
 - **Phase C3 — Fine-tune v2 + per-stratum eval (gate).** Train `leibniz-htr-v2`
-  from the PHILIUMM checkpoint (ketos) on PHILIUMM GT + the C2 open-bucket GT
-  (+ NC as train-only if it helps; + external pools — Bullinger 165k, CATMuS/HTR-
-  United Kurrent — ablated). Hold out a page-disjoint test set stratified by
-  stratum + language; evaluate with the B1 harness. Gate: **CER ≤7% on la/fr**.
-  **Prerequisite:** C2 must actually mint GT first, which needs the three operator
-  inputs in Open Q #13 (corpus HTR + full katalog scrape + keyed extraction).
-- **Operator (SPECS §8), now higher-value:** a **TELOTA katalog dump** would both
-  complete the full scrape (Open Q #3) *and* supply the §70 piece→print-page
-  anchors the factory's extraction step still needs (Open Q #13) — it moots the
-  hardest remaining C2 input. Email PHILIUMM (Rabouin/Bumba) the B1/B2/C results;
-  their seg+HTR models now drive a working corpus pipeline + GT factory.
+  from the PHILIUMM checkpoint on PHILIUMM GT + the C2 open-bucket GT
+  (+ ablations). Hold out a page-disjoint test set stratified by stratum +
+  language; evaluate with the B1 harness. Gate: **CER ≤7% on la/fr**.
+- **Operator (SPECS §8), now higher-value than ever:** a **TELOTA katalog
+  dump** would complete the scrape *and* supply the §70 anchors in one move —
+  and with the corpus read, emailing PHILIUMM (Rabouin/Bumba) the B1/B2/C1
+  results carries real weight: their models just machine-read the entire
+  Nachlass. Report the 16 redirect-loop delivery URLs to GWLB while at it.
 
-No code blockers for C3; the blocker is data (run C1/C2 at scale in an env with
-the stack + pull + key, or land the TELOTA dump).
+No code blockers for C2 minting or C3; the blocker is data (scrape + anchors).
