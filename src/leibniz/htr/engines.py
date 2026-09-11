@@ -25,8 +25,13 @@ from __future__ import annotations
 import base64
 import io
 import os
+import signal
+import threading
 import time
 from collections.abc import Callable, Sequence
+from contextlib import contextmanager
+
+import httpx
 
 # --------------------------------------------------------------------------- #
 # Kraken (local inference)
@@ -360,6 +365,7 @@ class AnthropicEngine:
         self.max_tokens = max_tokens
         self.min_interval = min_interval
         self.max_retries = max_retries
+        self._deadline_s = timeout + 30.0
         self._sleep = sleep
         self._owns_client = client is None
         if client is None:
@@ -411,7 +417,15 @@ class AnthropicEngine:
         }
         attempt = 0
         while True:
-            resp = self._client.post(ANTHROPIC_URL, headers=self._headers(), json=body)
+            try:
+                with _call_deadline(self._deadline_s):
+                    resp = self._client.post(ANTHROPIC_URL, headers=self._headers(), json=body)
+            except _TRANSIENT_CALL_ERRORS:
+                if attempt < self.max_retries:
+                    attempt += 1
+                    self._sleep(2.0**attempt)
+                    continue
+                raise
             if resp.status_code in (429, 500, 502, 503, 529) and attempt < self.max_retries:
                 attempt += 1
                 self._sleep(2.0**attempt)
@@ -469,6 +483,9 @@ OPENAI_PRICES: dict[str, tuple[float, float]] = {
     "gpt-5": (1.25, 10.00),
     "gpt-5-mini": (0.25, 2.00),
     "gpt-5.1": (1.25, 10.00),
+    "gpt-5.6-luna": (0.20, 1.20),
+    "gpt-5.6-sol": (4.00, 20.00),
+    "gpt-5.6-terra": (2.00, 12.00),
 }
 
 
@@ -488,6 +505,50 @@ def estimate_openai_cost(model: str, input_tokens: int, output_tokens: int) -> f
     return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
 
 
+def _param_error(resp) -> str | None:
+    """The ``error.param`` of an API error response, if the body parses."""
+    try:
+        return (resp.json().get("error") or {}).get("param")
+    except Exception:
+        return None
+
+
+# Errors worth a backoff-and-retry inside one call: httpx's own timeouts and
+# transport failures, plus the TimeoutError our wall-clock deadline raises.
+_TRANSIENT_CALL_ERRORS = (TimeoutError, httpx.TransportError)
+
+
+@contextmanager
+def _call_deadline(seconds: float):
+    """Raise ``TimeoutError`` if one API call outlives ``seconds`` (SIGALRM).
+
+    A live panel run hung for 30+ minutes inside ``ssl read`` waiting for
+    response headers: the proxied connection died without FIN/RST and httpx's
+    configured read timeout never fired on the tunneled socket. A wall-clock
+    alarm converts any such stall into an exception the per-call retry loop
+    handles. Mirrors ``pipeline.recognize._crop_deadline``; no-op off the main
+    thread or where SIGALRM is unavailable.
+    """
+    if (
+        seconds <= 0
+        or not hasattr(signal, "SIGALRM")
+        or threading.current_thread() is not threading.main_thread()
+    ):
+        yield
+        return
+
+    def _timeout(_signum: int, _frame: object) -> None:
+        raise TimeoutError(f"API call exceeded {seconds:.0f}s deadline")
+
+    old = signal.signal(signal.SIGALRM, _timeout)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        signal.signal(signal.SIGALRM, old)
+
+
 class OpenAIEngine:
     """OpenAI GPT vision zero-shot line transcription (Chat Completions, httpx).
 
@@ -505,6 +566,7 @@ class OpenAIEngine:
         *,
         model: str = DEFAULT_OPENAI_MODEL,
         api_key: str | None = None,
+        url: str = OPENAI_URL,
         prompt: str = DEFAULT_PROMPT,
         max_tokens: int = 256,
         detail: str = "high",
@@ -522,6 +584,7 @@ class OpenAIEngine:
                 "(the harness runs fully without it)."
             )
         self._key = key
+        self.url = url
         self.version = model
         self.model = model
         self.prompt = prompt
@@ -530,6 +593,7 @@ class OpenAIEngine:
         self.temperature = temperature
         self.min_interval = min_interval
         self.max_retries = max_retries
+        self._deadline_s = timeout + 30.0
         self._sleep = sleep
         self.usage_input = 0
         self.usage_output = 0
@@ -587,10 +651,28 @@ class OpenAIEngine:
             body["temperature"] = self.temperature
         attempt = 0
         while True:
-            resp = self._client.post(OPENAI_URL, headers=self._headers(), json=body)
+            try:
+                with _call_deadline(self._deadline_s):
+                    resp = self._client.post(self.url, headers=self._headers(), json=body)
+            except _TRANSIENT_CALL_ERRORS:
+                if attempt < self.max_retries:
+                    attempt += 1
+                    self._sleep(2.0**attempt)
+                    continue
+                raise
             if resp.status_code in (429, 500, 502, 503, 529) and attempt < self.max_retries:
                 attempt += 1
                 self._sleep(2.0**attempt)
+                continue
+            if (
+                resp.status_code == 400
+                and "temperature" in body
+                and _param_error(resp) == "temperature"
+            ):
+                # gpt-5.x-class models pin temperature to the default and 400 on any
+                # explicit value (verified live) — drop the field and go again.
+                body.pop("temperature")
+                self.temperature = None
                 continue
             resp.raise_for_status()
             return self._parse(resp.json())
@@ -611,16 +693,84 @@ class OpenAIEngine:
         return out
 
 
+# --------------------------------------------------------------------------- #
+# Gemini (Google's OpenAI-compatible Chat Completions endpoint)
+
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+
+# Same caveat as OPENAI_PRICES: approximate list rates for estimates only.
+# gemini-3.8-flash is the introductory rate (through 2026-12-31; doubles
+# 2027-01-01); thinking tokens bill at the output rate and are included in
+# the API's reported completion_tokens.
+GEMINI_PRICES: dict[str, tuple[float, float]] = {
+    "gemini-3.8-flash": (0.75, 3.75),
+}
+
+
+def estimate_gemini_cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
+    """USD cost estimate from token usage (longest-prefix match, like OpenAI's)."""
+    rate = GEMINI_PRICES.get(model)
+    if rate is None:
+        keys = sorted((k for k in GEMINI_PRICES if model.startswith(k)), key=len, reverse=True)
+        if not keys:
+            return None
+        rate = GEMINI_PRICES[keys[0]]
+    return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
+
+
+class GeminiEngine(OpenAIEngine):
+    """Gemini vision zero-shot line transcription via Google's OpenAI-compat endpoint.
+
+    Verified live: the endpoint accepts the exact :class:`OpenAIEngine` request
+    shape (data-URL image blocks, ``max_completion_tokens``, ``temperature``) and
+    returns OpenAI-shaped ``usage``, so this is a thin subclass — Google's URL,
+    ``GEMINI_API_KEY`` (or ``GOOGLE_API_KEY``), Gemini pricing. Thinking models
+    spend reasoning tokens *inside* ``max_completion_tokens`` (they bill as
+    output), so give them a generous cap or the visible answer truncates
+    (observed on gemini-3.8-flash at the 256 default: finish_reason=length after
+    6 visible tokens).
+    """
+
+    name = "gemini"
+
+    def __init__(
+        self,
+        *,
+        model: str = DEFAULT_GEMINI_MODEL,
+        api_key: str | None = None,
+        url: str = GEMINI_URL,
+        **kwargs,
+    ) -> None:
+        key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not key:
+            raise MissingKeyError(
+                "GEMINI_API_KEY (or GOOGLE_API_KEY) not set — the Gemini comparison "
+                "is skipped (the harness runs fully without it)."
+            )
+        super().__init__(model=model, api_key=key, url=url, **kwargs)
+
+    @property
+    def cost(self) -> float | None:
+        """Estimated USD cost of everything transcribed so far (or ``None``)."""
+        return estimate_gemini_cost(self.model, self.usage_input, self.usage_output)
+
+
 __all__ = [
     "ANTHROPIC_URL",
     "DEFAULT_ANTHROPIC_MODEL",
+    "DEFAULT_GEMINI_MODEL",
     "DEFAULT_OPENAI_MODEL",
     "DEFAULT_PROMPT",
+    "GEMINI_PRICES",
+    "GEMINI_URL",
     "OPENAI_PRICES",
     "OPENAI_URL",
     "AnthropicEngine",
+    "GeminiEngine",
     "KrakenEngine",
     "MissingKeyError",
     "OpenAIEngine",
+    "estimate_gemini_cost",
     "estimate_openai_cost",
 ]

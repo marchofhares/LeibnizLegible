@@ -85,18 +85,34 @@ def extract(
     ia_id: str = typer.Argument(..., help="Internet Archive item id of a §70-expired volume."),
     leaves: str = typer.Argument(..., help="Leaf range, e.g. '76-89'."),
     model: str = typer.Option("gpt-4o", help="Vision model."),
+    engine: str = typer.Option("openai", help="openai | gemini (which vision endpoint)."),
+    max_tokens: int = typer.Option(
+        2000, help="Completion cap; thinking models spend reasoning tokens inside it."
+    ),
     width: int = typer.Option(1700, help="Page image width."),
     out: Path = typer.Option(None, help="Write the reading text here (else stdout)."),
 ) -> None:
     """Vision-LLM extraction of edition reading text (apparatus excluded)."""
+    import os
+
     from leibniz.align.pdftext import VisionEditionExtractor, fetch_ia_page_image
-    from leibniz.htr.engines import MissingKeyError
+    from leibniz.htr.engines import GEMINI_URL, MissingKeyError
     from leibniz.net import PoliteClient
+
+    kwargs: dict = {"model": model, "max_tokens": max_tokens}
+    if engine == "gemini":
+        key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not key:
+            _console.print("[yellow]skipped: GEMINI_API_KEY (or GOOGLE_API_KEY) not set[/yellow]")
+            raise typer.Exit(code=0)
+        kwargs |= {"url": GEMINI_URL, "api_key": key}
+    elif engine != "openai":
+        raise typer.BadParameter(f"unknown --engine {engine!r} (openai | gemini)")
 
     lo, _, hi = leaves.partition("-")
     rng = range(int(lo), int(hi) + 1 if hi else int(lo) + 1)
     try:
-        with PoliteClient() as c, VisionEditionExtractor(model=model) as ex:
+        with PoliteClient() as c, VisionEditionExtractor(**kwargs) as ex:
             parts = []
             for leaf in rng:
                 img = fetch_ia_page_image(ia_id, leaf, client=c, width=width)
