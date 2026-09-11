@@ -535,7 +535,10 @@ def _render_runbook(A) -> None:
     A("leibniz align pieces                      # enumerate §70 localizable pieces")
     A("leibniz align ingest                      # fetch + extract each volume's reading text")
     A("leibniz align edition-cache               # join to the katalog → the edition cache")
-    A("leibniz align factory data/gt/edition_cache.json   # mint gt_lines (open bucket)")
+    A("mkdir -p logs && for i in $(seq 1 12); do   # mint gt_lines: 12 parallel shards,")
+    A("  nohup uv run leibniz align factory data/gt/edition_cache.json \\")
+    A("    --shard $i/12 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~1–3 h on 16 cores")
+    A("done; tail -n 1 logs/factory-*.log     # progress: one line per 25 pieces per shard")
     A("leibniz align gt-report                   # writes reports/gt-factory.md with the yield")
     A("# Optional clean-label upgrade (needs a key): vision-extract the minted pieces' pages")
     A("#   with `leibniz align extract`, rebuild the cache, re-run the factory (idempotent).")
@@ -544,8 +547,11 @@ def _render_runbook(A) -> None:
     A(
         "Discard-below-threshold is automatic (the aligner mints only ≥-threshold lines, "
         "the threshold set per stratum). Re-running is idempotent (gt_lines for a piece's "
-        "line refs are replaced). NC-derived pairs are quarantined to `license_bucket='nc'` "
-        "and excluded from every CC BY export."
+        "line refs are replaced), `--resume` skips pieces already minted, and `--shard i/N` "
+        "splits the piece list disjointly across N workers (the aligner costs ~3–10 s per "
+        "piece, so ~11,600 pieces are a ~20 h single-core job and a ~2 h twelve-shard "
+        "one). NC-derived pairs are quarantined to `license_bucket='nc'` and excluded "
+        "from every CC BY export."
     )
     A("")
 

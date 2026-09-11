@@ -121,6 +121,20 @@ def delete_gt_for_refs(conn: sqlite3.Connection, refs: Iterable[str]) -> int:
     return n
 
 
+def has_gt_for_refs(conn: sqlite3.Connection, refs: Iterable[str]) -> bool:
+    """True if any ``gt_lines`` row exists for these line image refs (resume check)."""
+    refs = list(refs)
+    for i in range(0, len(refs), 500):
+        chunk = refs[i : i + 500]
+        marks = ",".join("?" * len(chunk))
+        row = conn.execute(
+            f"SELECT 1 FROM gt_lines WHERE line_image_ref IN ({marks}) LIMIT 1", chunk
+        ).fetchone()
+        if row is not None:
+            return True
+    return False
+
+
 def count_gt_lines(conn: sqlite3.Connection, *, license_bucket: str | None = None) -> int:
     """Total ``gt_lines`` rows, optionally within one license bucket."""
     if license_bucket is None:
@@ -135,6 +149,7 @@ __all__ = [
     "count_gt_lines",
     "count_open_bucket",
     "delete_gt_for_refs",
+    "has_gt_for_refs",
     "insert_gt_pairs",
     "result_to_pairs",
 ]

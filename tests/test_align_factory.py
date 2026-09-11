@@ -147,3 +147,25 @@ def test_nc_bucket_never_open() -> None:
     F.mint_piece(conn, pieces[0], _edition(), cfg)
     assert count_gt_lines(conn, license_bucket="open") == 0
     assert count_gt_lines(conn, license_bucket="nc") == 12
+
+
+def test_shard_pieces_is_a_disjoint_cover() -> None:
+    from leibniz.align.volumes import PieceRef
+
+    pieces = [PieceRef(str(i), 1, 1, str(i), None, None, None, None, None, None) for i in range(10)]
+    shards = [F.shard_pieces(pieces, (i, 3)) for i in range(3)]
+    assert sorted(p.record_id for s in shards for p in s) == sorted(p.record_id for p in pieces)
+    assert len(shards[0]) == 4 and len(shards[1]) == 3 and len(shards[2]) == 3
+    assert F.shard_pieces(pieces, None) is pieces
+
+
+def test_resume_skips_already_minted_piece() -> None:
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    cfg = F.FactoryConfig(today=TODAY)
+    prov = F.dict_provider({"REC1": _edition()})
+    first = F.run_factory(conn, config=cfg, edition_text_for=prov)
+    assert first.lines_minted == 12
+    again = F.run_factory(conn, config=cfg, edition_text_for=prov, resume=True)
+    assert again.lines_minted == 0 and again.skips == {"already_minted": 1}
+    assert count_gt_lines(conn) == 12

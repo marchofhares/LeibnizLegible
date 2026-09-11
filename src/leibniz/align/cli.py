@@ -235,24 +235,77 @@ def factory(
     license_bucket: str = typer.Option("open", help="open | nc."),
     series: int = typer.Option(None, "--series", help="Restrict to one AA series."),
     volume: int = typer.Option(None, "--volume", help="Restrict to one volume."),
+    shard: str = typer.Option(
+        None, "--shard", help="Mint shard i/N of the pieces (e.g. 3/12) — parallel workers."
+    ),
+    resume: bool = typer.Option(
+        False, "--resume", help="Skip pieces that already carry gt_lines (continue a run)."
+    ),
 ) -> None:
     """Mint gt_lines across the §70 pieces from a pre-extracted edition-text cache."""
+    import time
     from datetime import date
 
-    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory
+    from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
+
+    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory, shard_pieces
+    from leibniz.align.volumes import enumerate_pieces
     from leibniz.db import open_db
 
     cache = json.loads(Path(edition_cache).read_text(encoding="utf-8"))
     t = date.fromisoformat(today) if today else date.today()
     cfg = FactoryConfig(today=t, license_bucket=license_bucket)
+    shard_t = _parse_shard(shard)
     with open_db(db_path) as conn:
-        stats = run_factory(
-            conn,
-            config=cfg,
-            edition_text_for=dict_provider(cache),
-            series=series,
-            volume=volume,
+        pieces, _enum = enumerate_pieces(conn, today=t, series=series, volume=volume)
+        todo = shard_pieces(pieces, shard_t)
+        label = f"shard {shard}" if shard else "all pieces"
+        _console.print(
+            f"[bold]gt factory[/bold] → {len(todo):,} pieces ({label}; "
+            f"{len(cache):,} records in the edition cache)"
         )
+        minted = {"lines": 0, "done": 0}
+        started = time.monotonic()
+
+        def _log_line(force: bool = False) -> None:
+            # Plain one-line progress for log files (nohup / redirected output).
+            if force or minted["done"] % 25 == 0:
+                mins = (time.monotonic() - started) / 60.0
+                _console.print(
+                    f"{label}: {minted['done']:,}/{len(todo):,} pieces · "
+                    f"{minted['lines']:,} lines · {mins:,.1f} min"
+                )
+
+        with Progress(
+            TextColumn("[cyan]minting"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            TextColumn("{task.fields[lines]:,} lines"),
+            console=_console,
+            disable=not _console.is_terminal,
+        ) as bar:
+            task = bar.add_task("mint", total=len(todo), lines=0)
+
+            def _tick(result) -> None:
+                minted["lines"] += result.n_minted
+                minted["done"] += 1
+                bar.update(task, advance=1, lines=minted["lines"])
+                if not _console.is_terminal:
+                    _log_line()
+
+            stats = run_factory(
+                conn,
+                config=cfg,
+                edition_text_for=dict_provider(cache),
+                series=series,
+                volume=volume,
+                pieces=todo,
+                resume=resume,
+                progress=_tick,
+            )
+        if not _console.is_terminal:
+            _log_line(force=True)
     _console.print(
         f"[bold green]minted {stats.lines_minted:,} lines[/bold green] from "
         f"{stats.pieces_minted:,}/{stats.pieces_seen:,} pieces "
@@ -395,6 +448,20 @@ def gt_report(
 # renderers in ``leibniz.align.report``; it is a curated report (like census.md /
 # crosswalk.md), not a single-command regeneration, so there is no ``report``
 # subcommand that could clobber it with a numbers-only skeleton.
+
+
+def _parse_shard(spec: str | None) -> tuple[int, int] | None:
+    """Parse ``--shard i/N`` (1-based, e.g. ``3/12``) into a 0-based ``(index, count)``."""
+    if not spec:
+        return None
+    try:
+        i_s, n_s = spec.split("/", 1)
+        i, n = int(i_s), int(n_s)
+    except ValueError:
+        raise typer.BadParameter(f"--shard wants 'i/N' (e.g. 3/12), got {spec!r}") from None
+    if n < 1 or not (1 <= i <= n):
+        raise typer.BadParameter(f"--shard index must be between 1 and N, got {spec!r}")
+    return (i - 1, n)
 
 
 def _parse_indices(spec: str) -> list[int]:
