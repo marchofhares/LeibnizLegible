@@ -31,7 +31,12 @@ from datetime import date
 from leibniz import db
 from leibniz.align.align import DEFAULT_THRESHOLD, HtrLine, align_piece
 from leibniz.align.normalize import DEFAULT_NORM, AlignNorm
-from leibniz.align.pairs import delete_gt_for_refs, insert_gt_pairs, result_to_pairs
+from leibniz.align.pairs import (
+    delete_gt_for_refs,
+    has_gt_for_refs,
+    insert_gt_pairs,
+    result_to_pairs,
+)
 from leibniz.align.resolve import resolve_canvases
 from leibniz.align.stratum import classify_piece
 from leibniz.align.volumes import PieceRef, enumerate_pieces
@@ -131,13 +136,15 @@ def mint_piece(
     config: FactoryConfig,
     *,
     insert: bool = True,
+    resume: bool = False,
 ) -> PieceResult:
     """Resolve → gather HTR → align → stratum-threshold → mint one piece.
 
     Returns a :class:`PieceResult`; skips (with a reason) when the piece cannot be
     localized, has no recognised HTR lines, or no edition text. Idempotent when
     ``insert`` is set: existing ``gt_lines`` for this piece's line refs are cleared
-    before the fresh mint.
+    before the fresh mint. With ``resume``, a piece whose lines already carry
+    ``gt_lines`` is skipped instead (an interrupted run picks up where it stopped).
     """
     if not piece.localizable:
         return PieceResult(piece, "skipped:not_localizable")
@@ -150,6 +157,8 @@ def mint_piece(
         return PieceResult(piece, "skipped:no_htr_lines", n_canvases=len(res.pages))
     if not edition_text.strip():
         return PieceResult(piece, "skipped:no_edition_text", n_canvases=len(res.pages))
+    if resume and has_gt_for_refs(conn, (ln.ref for ln in htr)):
+        return PieceResult(piece, "skipped:already_minted", n_canvases=len(res.pages))
 
     stratum = classify_piece(page_stats_for_pages(conn, res.pages), textart=piece.textart).stratum
     threshold = config.threshold_for(stratum)
@@ -184,12 +193,18 @@ def run_factory(
     volume: int | None = None,
     insert: bool = True,
     progress: Callable[[PieceResult], None] | None = None,
+    pieces: Sequence[PieceRef] | None = None,
+    shard: tuple[int, int] | None = None,
+    resume: bool = False,
 ) -> FactoryStats:
     """Enumerate §70 pieces and mint each, recording one ``runs`` row.
 
     ``edition_text_for`` supplies each piece's reading text (production: extract
     from the volume PDF; tests: a dict). Aggregates minted-line counts by volume /
-    series / stratum for the GT-factory report.
+    series / stratum for the GT-factory report. ``pieces`` may be pre-enumerated
+    (the CLI does, to size its progress bar); ``shard=(i, n)`` keeps every
+    ``n``-th piece starting at ``i`` so parallel workers split one pass
+    disjointly; ``resume`` skips pieces already minted.
     """
     run_id = db.start_run(
         conn,
@@ -200,15 +215,19 @@ def run_factory(
             "volume": volume,
             "license_bucket": config.license_bucket,
             "stratum_thresholds": config.stratum_thresholds,
+            "shard": list(shard) if shard else None,
+            "resume": resume,
         },
         git_sha=db.git_sha(),
     )
-    pieces, _enum = enumerate_pieces(conn, today=config.today, series=series, volume=volume)
+    if pieces is None:
+        pieces, _enum = enumerate_pieces(conn, today=config.today, series=series, volume=volume)
+    pieces = shard_pieces(pieces, shard)
     stats = FactoryStats(run_id=run_id)
     for piece in pieces:
         stats.pieces_seen += 1
         text = edition_text_for(piece) or ""
-        result = mint_piece(conn, piece, text, config, insert=insert)
+        result = mint_piece(conn, piece, text, config, insert=insert, resume=resume)
         stats.results.append(result)
         if result.minted:
             stats.pieces_minted += 1
@@ -234,6 +253,18 @@ def run_factory(
         n_failed=stats.pieces_seen - stats.pieces_minted,
     )
     return stats
+
+
+def shard_pieces(pieces: Sequence[PieceRef], shard: tuple[int, int] | None) -> Sequence[PieceRef]:
+    """Every ``n``-th piece starting at ``i`` for ``shard=(i, n)``; all if ``None``.
+
+    Enumeration order is deterministic (katalog record order), so N workers
+    passing ``(0, N) … (N-1, N)`` cover the piece list exactly once.
+    """
+    if shard is None:
+        return pieces
+    index, count = shard
+    return [p for k, p in enumerate(pieces) if k % count == index]
 
 
 def _series_roman(series: int) -> str:
@@ -265,4 +296,5 @@ __all__ = [
     "mint_piece",
     "page_stats_for_pages",
     "run_factory",
+    "shard_pieces",
 ]

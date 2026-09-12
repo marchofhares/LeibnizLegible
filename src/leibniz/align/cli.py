@@ -235,24 +235,77 @@ def factory(
     license_bucket: str = typer.Option("open", help="open | nc."),
     series: int = typer.Option(None, "--series", help="Restrict to one AA series."),
     volume: int = typer.Option(None, "--volume", help="Restrict to one volume."),
+    shard: str = typer.Option(
+        None, "--shard", help="Mint shard i/N of the pieces (e.g. 3/12) — parallel workers."
+    ),
+    resume: bool = typer.Option(
+        False, "--resume", help="Skip pieces that already carry gt_lines (continue a run)."
+    ),
 ) -> None:
     """Mint gt_lines across the §70 pieces from a pre-extracted edition-text cache."""
+    import time
     from datetime import date
 
-    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory
+    from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
+
+    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory, shard_pieces
+    from leibniz.align.volumes import enumerate_pieces
     from leibniz.db import open_db
 
     cache = json.loads(Path(edition_cache).read_text(encoding="utf-8"))
     t = date.fromisoformat(today) if today else date.today()
     cfg = FactoryConfig(today=t, license_bucket=license_bucket)
+    shard_t = _parse_shard(shard)
     with open_db(db_path) as conn:
-        stats = run_factory(
-            conn,
-            config=cfg,
-            edition_text_for=dict_provider(cache),
-            series=series,
-            volume=volume,
+        pieces, _enum = enumerate_pieces(conn, today=t, series=series, volume=volume)
+        todo = shard_pieces(pieces, shard_t)
+        label = f"shard {shard}" if shard else "all pieces"
+        _console.print(
+            f"[bold]gt factory[/bold] → {len(todo):,} pieces ({label}; "
+            f"{len(cache):,} records in the edition cache)"
         )
+        minted = {"lines": 0, "done": 0}
+        started = time.monotonic()
+
+        def _log_line(force: bool = False) -> None:
+            # Plain one-line progress for log files (nohup / redirected output).
+            if force or minted["done"] % 25 == 0:
+                mins = (time.monotonic() - started) / 60.0
+                _console.print(
+                    f"{label}: {minted['done']:,}/{len(todo):,} pieces · "
+                    f"{minted['lines']:,} lines · {mins:,.1f} min"
+                )
+
+        with Progress(
+            TextColumn("[cyan]minting"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            TextColumn("{task.fields[lines]:,} lines"),
+            console=_console,
+            disable=not _console.is_terminal,
+        ) as bar:
+            task = bar.add_task("mint", total=len(todo), lines=0)
+
+            def _tick(result) -> None:
+                minted["lines"] += result.n_minted
+                minted["done"] += 1
+                bar.update(task, advance=1, lines=minted["lines"])
+                if not _console.is_terminal:
+                    _log_line()
+
+            stats = run_factory(
+                conn,
+                config=cfg,
+                edition_text_for=dict_provider(cache),
+                series=series,
+                volume=volume,
+                pieces=todo,
+                resume=resume,
+                progress=_tick,
+            )
+        if not _console.is_terminal:
+            _log_line(force=True)
     _console.print(
         f"[bold green]minted {stats.lines_minted:,} lines[/bold green] from "
         f"{stats.pieces_minted:,}/{stats.pieces_seen:,} pieces "
@@ -263,11 +316,118 @@ def factory(
     _console.print("Run [cyan]leibniz align gt-report[/cyan] to update reports/gt-factory.md.")
 
 
+@app.command()
+def ingest(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    editions_dir: Path = typer.Option(
+        Path("data/editions"), "--editions", help="Raw text layers + extracted piece JSON."
+    ),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    volume: list[str] = typer.Option(
+        None, "--volume", help="Restrict to 'SERIES,VOLUME' (repeatable)."
+    ),
+    all_sources: bool = typer.Option(
+        False, "--all-sources", help="Ingest every readable source (for cross-source QA)."
+    ),
+    force: bool = typer.Option(False, "--force", help="Re-extract even if cached."),
+    no_fetch: bool = typer.Option(False, "--no-fetch", help="Only use already-downloaded files."),
+) -> None:
+    """Fetch + extract every §70-expired volume's reading text (cache-first)."""
+    from datetime import date
+
+    from leibniz.align.ingest import ingest_volume, volume_label
+    from leibniz.align.volumes_sources import readable_sources
+    from leibniz.legal import expired_volumes
+    from leibniz.net import PoliteClient
+
+    t = date.fromisoformat(today) if today else date.today()
+    wanted = {tuple(int(x) for x in v.split(",")) for v in (volume or [])}
+    targets = [
+        (v.series, v.volume)
+        for v in expired_volumes(t)
+        if isinstance(v.volume, int) and (not wanted or (v.series, v.volume) in wanted)
+    ]
+    seen: set[tuple[int, int]] = set()
+    with PoliteClient() as client:
+        for series, vol in targets:
+            if (series, vol) in seen:
+                continue
+            seen.add((series, vol))
+            sources = readable_sources(series, vol)
+            if not sources:
+                _console.print(f"  {volume_label(series, vol):<7} [yellow]no readable source")
+                continue
+            for src in sources if all_sources else sources[:1]:
+                try:
+                    res = ingest_volume(
+                        src,
+                        client=None if no_fetch else client,
+                        editions_dir=editions_dir,
+                        force=force,
+                    )
+                except FileNotFoundError:
+                    _console.print(f"  {volume_label(series, vol):<7} {src.kind}: not downloaded")
+                    continue
+                _console.print(
+                    f"  {volume_label(series, vol):<7} {src.kind:<8} {res.status:<10} "
+                    f"pieces {res.n_pieces:>4} · chars {res.n_chars:>9,} · "
+                    f"reading pages {res.n_reading_pages}/{res.n_pages} · "
+                    f"anomalies {res.n_anomalies}"
+                )
+
+
+@app.command(name="edition-cache")
+def edition_cache(
+    out: Path = typer.Argument(Path("data/gt/edition_cache.json"), help="{record_id: text} JSON."),
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    editions_dir: Path = typer.Option(Path("data/editions"), "--editions"),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+) -> None:
+    """Join the extracted volume texts to the katalog → the factory's edition cache."""
+    from datetime import date
+
+    from leibniz.align.ingest import build_edition_cache, load_volume_texts, text_path
+    from leibniz.align.volumes_sources import readable_sources
+    from leibniz.db import open_db
+    from leibniz.legal import expired_volumes
+
+    t = date.fromisoformat(today) if today else date.today()
+    texts: dict[tuple[int, int], dict[str, str]] = {}
+    for v in expired_volumes(t):
+        if not isinstance(v.volume, int):
+            continue
+        for src in readable_sources(v.series, v.volume):
+            path = text_path(src, editions_dir)
+            if path.exists():
+                merged = texts.setdefault((v.series, v.volume), {})
+                for piece, text in load_volume_texts(path).items():
+                    merged.setdefault(piece, text)  # preferred source first
+    with open_db(db_path) as conn:
+        cache, stats = build_edition_cache(conn, texts)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    _console.print(
+        f"[bold green]{stats.records_with_text:,} records with reading text[/bold green] "
+        f"({sum(len(v) for v in cache.values()):,} chars) → {out}; "
+        f"{stats.records_cited_no_text:,} cite an ingested volume but no text was found"
+    )
+    for vol, n in sorted(stats.by_volume.items()):
+        _console.print(f"  {vol:<7} {n:,}")
+    if stats.volumes_without_source:
+        _console.print(f"[yellow]no ingested source:[/yellow] {stats.volumes_without_source}")
+
+
 @app.command(name="gt-report")
 def gt_report(
     db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
     out: Path = typer.Option(Path("reports/gt-factory.md"), "--out", help="Report path."),
     today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    editions_dir: Path = typer.Option(
+        Path("data/editions"), "--editions", help="Extracted volume texts (ingest output)."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.json"), "--edition-cache", help="{record_id: text} cache."
+    ),
 ) -> None:
     """(Re)write reports/gt-factory.md from the minted gt_lines + piece enumeration."""
     from datetime import date
@@ -277,7 +437,7 @@ def gt_report(
 
     t = date.fromisoformat(today) if today else date.today()
     with open_db(db_path) as conn:
-        rep = gather_gt(conn, today=t)
+        rep = gather_gt(conn, today=t, editions_dir=editions_dir, edition_cache=edition_cache)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_gt(rep), encoding="utf-8")
     _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")
@@ -288,6 +448,20 @@ def gt_report(
 # renderers in ``leibniz.align.report``; it is a curated report (like census.md /
 # crosswalk.md), not a single-command regeneration, so there is no ``report``
 # subcommand that could clobber it with a numbers-only skeleton.
+
+
+def _parse_shard(spec: str | None) -> tuple[int, int] | None:
+    """Parse ``--shard i/N`` (1-based, e.g. ``3/12``) into a 0-based ``(index, count)``."""
+    if not spec:
+        return None
+    try:
+        i_s, n_s = spec.split("/", 1)
+        i, n = int(i_s), int(n_s)
+    except ValueError:
+        raise typer.BadParameter(f"--shard wants 'i/N' (e.g. 3/12), got {spec!r}") from None
+    if n < 1 or not (1 <= i <= n):
+        raise typer.BadParameter(f"--shard index must be between 1 and N, got {spec!r}")
+    return (i - 1, n)
 
 
 def _parse_indices(spec: str) -> list[int]:

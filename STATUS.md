@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-11 (**the C1 corpus run is COMPLETE**)._
+_Last updated: 2026-09-11 (**C1 corpus run COMPLETE; C2 inputs built at scale — only the mint itself is left, on the operator's store**)._
 
 ---
 
@@ -26,12 +26,29 @@ log below. **C2 GT minting is now unblocked on the HTR side** — its remaining
 inputs are the katalog full scrape (Open Q #3) and the §70 page anchors (Open
 Q #13).
 
-**Phases C1 (corpus segmentation + HTR v1) and C2 (GT factory at scale)
-machinery — built, offline-tested, and (C1) now proven at corpus scale.** The
-whole C pipeline is wired: pages flow `pending → segmented → recognized` (C1),
-and §70-expired edition text is retro-aligned onto those recognized lines to
-mint `gt_lines` (C2). Volume-scale extraction (C2) still needs an operator with
-an API key and the piece anchors.
+**C2 — GT factory at scale: the two data inputs that blocked minting are now
+built and run at full scale (2026-09-11, this session).** (1) **Katalog:** every
+§70-expired volume's records are scraped (`leibniz catalog scrape
+--expired-volumes`: 31 volume slices, sub-cap by construction — the site
+matches `bd` as a *substring*, so colliding volume numbers are deepened by
+year; **24,916 records, 17,646 crosswalk links, 1,197
+works**), yielding **17,162 §70 piece citations, 11,595
+localizable to exact canvases** (crosswalk + folio resolver, 68 %).
+(2) **Reading text:** the §70 volumes' free digital copies were located and
+verified (archive.org public-domain scans with hOCR, the GWLB repositorium
+PDFs, Potsdam's born-digital PDFs — **21 of 31 volumes readable**),
+and a layout-aware extractor (`align/edition.py`) read **6,188
+printed pieces / 26.2M characters of reading text** with page
+anchors (Open Q #13's "page anchors" solved by the print's own running heads
+and headings), joined to the katalog into the edition cache
+(**10,029 manuscript witnesses with their piece's text**).
+Cross-source agreement between two independent OCR layers of the same volume
+(IA Tesseract vs GWLB ABBYY, 5 volumes) is the free extraction-QA
+estimate: **81.6% mean agreement**. (3) The C1 HTR lines live on
+the operator's machine, so `gt_lines` is still empty *here*: minting is one
+runbook away (`reports/gt-factory.md`). The whole C pipeline is wired: pages
+flow `pending → segmented → recognized` (C1), and §70-expired edition text is
+retro-aligned onto those recognized lines to mint `gt_lines` (C2).
 
 **Phase C1 — corpus segmentation + HTR v1 batch pipeline.** Built `leibniz
 pipeline segment` / `recognize`: a status-driven, resumable, idempotent state
@@ -331,6 +348,66 @@ posteriors ≈0.6–0.9 populate at scale (CPU: 498/500 pages, 23k lines, mean
 conf 0.771, `conf>1` = 0 — the C1 validation gate is **passed**). Remaining
 operator gate: the CUDA recognition re-run, then the corpus pass.
 
+### C2 — GT factory at scale, the inputs built and run (2026-09-11) ✅
+
+The 07-29 build (below) mints nothing without three inputs; this session
+built and ran two of them at full scale, so the factory now waits only for the
+store that holds the C1 HTR lines.
+
+- **Katalog sweep of every §70 volume** (`catalog/scrape.py` `scrape_volume`,
+  CLI `--volume S,V` / `--expired-volumes`). Measured live: the katalog matches
+  `reihe`/`bd` as **substrings** (`bd=1` returns volumes 10–19 too; the form's
+  `*_exact` flags are ignored), and a bare-year `datum_bis` is exclusive — so a
+  capped volume slice is re-run by year (`datum_ab=Y&datum_bis=Y1231`) and
+  filtered client-side by the parsed AA column. 31 slices, 173 + 144 queries,
+  ~10 min at ≤1 req/s: **24,916 records (17,562 with a GWLB
+  link) → 17,646 crosswalk links, 1,197 works** (crosswalk works
+  matched 1,197/2,225; the §70 volumes' records only — the full 70k scrape
+  remains an A3 operator job). `parse_aa_refs` now keeps the katalog's
+  *Unternummer*: `/ tlw.` (a partial witness) → `partial: true`, a page/line
+  locus → `note`; only a single letter is a sub-piece.
+- **Piece enumeration at scale:** **17,162 §70 piece citations · with
+  work 12,385 · with folio range 11,617 · localizable
+  11,595 (67.6 %)** — the folio resolver (Open Q #10)
+  holds on real data across all 31 volumes (`leibniz align pieces`).
+- **Volume sources** (`align/volumes_sources.py`, verified 2026-09-11):
+  archive.org holds Trent University's scans of ~30 AA volumes (no access
+  restriction, Tesseract hOCR + leaf images), the GWLB repositorium serves
+  I,3/9/11–27, III,5–9, VII,3–8 (ABBYY text layer, **CC BY-NC channel**),
+  Potsdam serves IV,1–10 born-digital, Münster's Internetausgaben (II, VI,4)
+  require written permission (operator ask; never auto-fetched). **21
+  of 31 expired volumes are readable**; 10 have no free digital copy (I,1, I,2,
+  I,4, I,5, I,13, II,1 (1926), III,2, VI,2, VII,1, VII,2 — HathiTrust holds the
+  1923–27 prints as US-PD; TELOTA/Göttingen ask for the rest). Preference:
+  IA (unencumbered) > GWLB (flag for the lawyer memo) > Münster (ask).
+- **Reading-text extractor** (`align/edition.py`, +11 tests): one
+  layout model over hOCR and PDF text layers (`pdfplumber`, optional `gt`
+  extra). Per volume it learns the body/apparatus type sizes (Tesseract 41/33
+  px, ABBYY 10/9.5 pt, Potsdam 10.5/9 pt) and the paragraph indent; per page it
+  peels the running head (which lists the pieces *starting* on the page — the
+  anchor), cuts the apparatus block at the bottom, drops margin line numbers
+  (also when OCR glues them to a line), detects piece headings (`13. GOTTFRIED
+  CHRISTIAN OTTO AN LEIBNIZ`, OCR'd `i.`, ABBYY's small-caps-as-lowercase),
+  skips the dateline/*Überlieferung* block until the body margin, and carries
+  the current piece across pages; a garbled head never re-synchronises the
+  piece, an unplaceable boundary drops the page's tail instead of
+  misattributing it (precision over recall). Validated on three source types:
+  I,6 hOCR 352/362 pieces, IV,1 Potsdam 52/52, I,11 GWLB 501/521; a leak
+  heuristic flags 0.1 % of extracted lines.
+- **Ingestion + edition cache** (`align/ingest.py`, CLI `leibniz align ingest` /
+  `edition-cache`): cache-first fetch → extract → per-volume JSON with piece
+  texts + page anchors; the cache join maps every katalog record citing an
+  ingested piece to its text (sub-piece → parent fallback). **Run here:**
+  6,188 pieces / 26.16M chars over 21
+  volumes; **10,029 records carry reading text.** Cross-source
+  QA on the 5 volumes with two independent OCR layers: mean
+  agreement 81.6% (54 of 200 pieces
+  flagged >10 % CER).
+- **Report** (`reports/gt-factory.md`, regenerated): sources/terms table per
+  volume, extraction + QA numbers, the priced vision upgrade (Sonnet 5 / Opus 5
+  / gpt-4o-class per page and for all OCR'd pages, Batch −50 %), the operator
+  runbook. Tests **+16** (401 total); ruff clean.
+
 ### C2 — GT factory at scale (2026-07-29) ✅
 
 Built the C2 GT factory on top of the B2 aligner (`src/leibniz/align/*` extended).
@@ -578,10 +655,11 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    no IIIF Image API exists (only the ~33% IIIF works get deep-zoom).
 2. ~~`pages` population is partial.~~ **Resolved:** all 236,795 pages derived
    offline from the METS `fileSec` via `images pages`.
-3. **Katalog full scrape is an operator job.** The 5000-row cap means enumeration
-   must partition into sub-cap slices (by AA volume / signature prefix, deepened
-   on a cap warning). The `id_hannover` field could enumerate the *digitized*
-   subset directly — worth trying at scale. A TELOTA dump (SPECS §8) would moot it.
+3. **Katalog full scrape — the §70 volumes are done; the rest is an operator
+   job.** `catalog scrape --expired-volumes` sweeps every expired volume in ~10
+   min (substring `bd` matching + year deepening, see the C2 log). The remaining
+   ~45k non-§70 records still need signature-prefix slices (or the `id_hannover`
+   enumeration) for A3's ≥80 % work coverage; a TELOTA dump would moot it.
 4. **Shelfmark-secondary limits (A3).** The normaliser matches LH/LBr cleanly, but
    some Marginalien records carry page/prose signatures (`Leibn. Marg. 10, 1, S.
    154-166`; relocated `(jetzt LK-MOW …)` notes) that don't match a work key —
@@ -613,18 +691,30 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     `align/stratum.py` + `factory.STRATUM_THRESHOLDS` set the mint threshold per
     piece (fair 0.55 → heavy 0.72) from the C1 seg-stats + katalog `textart`. C4
     calibrates the thresholds against the GT audit.
-12. ~~**(B2) Edition-text extraction QA at scale.**~~ **Addressed (C2):**
-    `volumes.assess_extraction` gives a per-volume error estimate from two-pass /
-    two-model agreement; **validated live** on real Leibniz print (`gpt-4o` reading
-    text, head/page-no dropped; 1/2 flagged, agreement 0.67). At scale it must be
-    **stratified** — code-switched Latin/German and heavy-apparatus pages carry the
-    error. The vision pass still needs a key + per-piece page anchors (operator).
-13. **(C2) Real GT minting awaits three operator inputs.** The factory is built +
-    tested but mints nothing until: C1's corpus HTR lines exist (kraken + image
-    pull), the full katalog scrape populates `aa_refs` + crosswalk over the §70
-    volumes (Open Q #3), and the §70 volume page-anchors are known (the katalog
-    gives the piece *number*, not its print-page range — a TELOTA dump or a
-    per-volume TOC index would supply it; `VOLUME_SOURCES` is a starter registry).
+12. ~~**(B2) Edition-text extraction QA at scale.**~~ **Addressed (C2), measured
+    at scale (2026-09-11):** `volumes.assess_extraction` runs for free between the
+    two independent OCR layers of the same volume (IA Tesseract vs GWLB ABBYY):
+    5 volumes, mean agreement 81.6%, 54/200
+    pieces flagged. The live vision QA (gpt-4o, 1/2 flagged, 0.67) stands as the
+    two-model variant. Residual OCR error in the labels is the known cost of the
+    free path; the priced vision upgrade is in `reports/gt-factory.md`.
+13. ~~**(C2) Real GT minting awaits three operator inputs.**~~ **Two of three
+    done (2026-09-11):** the §70 katalog sweep + crosswalk ran here, and the
+    page anchors come from the print itself — every AA page's running head
+    names the pieces starting on it, so `align/edition.py` derives piece →
+    page ranges from the volume's own text layer (no TELOTA dump needed). What
+    remains is only *where* to run the mint: the C1 HTR lines are in the
+    operator's `data/inventory.sqlite`, not in this environment. Runbook in
+    `reports/gt-factory.md`.
+16. **(C2) Ten §70 volumes have no free digital copy** (I,1, I,2, I,4, I,5,
+    I,13, II,1 (1926), III,2, VI,2, VII,1, VII,2 — 6,082 of the
+    17,162 piece citations). HathiTrust holds the ≤1928 prints as
+    US-public-domain (US-IP viewing), the Göttingen repository (bot-challenged
+    here) and a TELOTA/Leibniz-Archiv ask cover the rest; Münster's II/VI,4
+    Internetausgaben need written permission. Also for the lawyer memo: the GWLB
+    repositorium PDFs are a **CC BY-NC channel** for §70-free text — the
+    registry prefers the unencumbered archive.org scans and flags GWLB-only
+    volumes (I,3, I,14, I,15).
 14. ~~**(C1) Segmentation on Marginalien / drafts is unmeasured on real images.**~~
     **Measured (2026-09-11):** the corpus run put a `page_stats` row on every
     segmented page — line counts, region coverage, height-CV, overlap and
@@ -655,11 +745,14 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   version-rows decision (db.py docstring) is still deferred.
 - **C1/C2 live runs deferred to an operator env.** This build environment has no
   kraken/torch stack, no GPU, and no image cache (bulk `data/` is gitignored and
-  ephemeral), so the corpus segment/recognize and the volume-scale extraction were
-  **not** run here — the machinery is built + offline-tested and the reports carry
-  the operator runbook. The one live validation that *was* possible (a supplied
-  OpenAI key + reachable IA/OpenAI) — the C2 vision extraction + QA — was run on
-  real Leibniz print.
+  ephemeral), so the corpus segment/recognize was **not** run here. The 2026-09-11
+  session *did* run the C2 data inputs here at full scale (OAI harvest, §70
+  katalog sweep, crosswalk, volume ingestion + extraction) — all reproducible
+  with the CLI, cache-first; only the mint needs the operator's corpus store.
+- **Optional dependency `gt` (C2):** `pdfplumber` for PDF text layers
+  (`uv sync --extra gt`); imported lazily, tests run without it.
+- **`data/editions/` (C2):** raw §70 volume text layers + extracted piece JSON;
+  gitignored like the rest of `data/`.
 
 ## Next
 
@@ -667,11 +760,13 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and
 the D phases.
 
-- **C2 — mint real GT.** The corpus HTR lines now exist (the hard C1 input is
-  done). Remaining inputs (Open Q #13): the **full katalog scrape** (Open Q #3,
-  partitioned sub-cap queries) and the **§70 piece→print-page anchors** (a
-  TELOTA dump or per-volume TOC index). Then `leibniz align factory` mints
-  `gt_lines` at scale (target ≥50k open-bucket lines).
+- **C2 — mint real GT (one operator run).** Everything but the mint is done:
+  on the machine with the corpus store, run the runbook in
+  `reports/gt-factory.md` (scrape → crosswalk → ingest → edition-cache →
+  factory → gt-report; ~1 h wall clock, no key, no GPU). Then read the yield by
+  stratum against the ≥50k target and hand-audit ~200 lines. Optional
+  clean-label upgrade: vision re-extraction of the minted pieces' pages
+  (priced in the report; low three figures at most).
 - **Phase C3 — Fine-tune v2 + per-stratum eval (gate).** Train `leibniz-htr-v2`
   from the PHILIUMM checkpoint on PHILIUMM GT + the C2 open-bucket GT
   (+ ablations). Hold out a page-disjoint test set stratified by stratum +
@@ -682,4 +777,4 @@ the D phases.
   results carries real weight: their models just machine-read the entire
   Nachlass. Report the 16 redirect-loop delivery URLs to GWLB while at it.
 
-No code blockers for C2 minting or C3; the blocker is data (scrape + anchors).
+No code or data blockers for C2 minting; the only dependency is the corpus store's location.

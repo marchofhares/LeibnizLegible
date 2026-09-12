@@ -38,6 +38,11 @@ bench = [
     "kraken>=7.0",   # Kraken HTR: loads the PHILIUMM safetensors model + inference
     "pyarrow>=15",   # read the HuggingFace parquet ground-truth splits
 ]
+# Optional PDF text-layer reader for the C2 GT factory (`leibniz align ingest`
+# on the GWLB / Potsdam volume PDFs). The archive.org hOCR path needs only lxml.
+gt = [
+    "pdfplumber>=0.11",  # per-character font sizes → body vs apparatus type
+]
 
 [build-system]
 requires = ["hatchling"]

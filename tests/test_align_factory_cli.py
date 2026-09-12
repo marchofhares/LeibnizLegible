@@ -62,6 +62,23 @@ def test_factory_and_gt_report_commands(tmp_path) -> None:
     )
     assert res.exit_code == 0
     assert "minted" in res.stdout
+    # a second, resumed shard run skips the already-minted piece and keeps the rows
+    res_r = runner.invoke(
+        app,
+        [
+            "align",
+            "factory",
+            str(cache),
+            "--db",
+            str(db_path),
+            "--today",
+            "2026-07-29",
+            "--resume",
+            "--shard",
+            "1/1",
+        ],
+    )
+    assert res_r.exit_code == 0 and "already_minted" in res_r.stdout
     conn = db.connect(db_path)
     assert count_gt_lines(conn, license_bucket="open") == 9
     conn.close()
@@ -69,7 +86,20 @@ def test_factory_and_gt_report_commands(tmp_path) -> None:
     out = tmp_path / "gt-factory.md"
     res2 = runner.invoke(
         app,
-        ["align", "gt-report", "--db", str(db_path), "--out", str(out), "--today", "2026-07-29"],
+        [
+            "align",
+            "gt-report",
+            "--db",
+            str(db_path),
+            "--out",
+            str(out),
+            "--today",
+            "2026-07-29",
+            "--editions",
+            str(tmp_path / "editions"),  # never the real data/editions (slow, stateful)
+            "--edition-cache",
+            str(cache),
+        ],
     )
     assert res2.exit_code == 0
     text = out.read_text(encoding="utf-8")

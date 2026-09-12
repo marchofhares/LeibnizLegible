@@ -24,7 +24,8 @@ Why it's excluded (SPECS §7, §10):
 | `data/images/`           | A2         | Page image derivatives `{object_id}/{canvas_seq}.jpg`|
 | `data/katalog/`          | A3         | Cached BBAW Ritter-Katalog HTML / TELOTA dump        |
 | `data/models/`           | B1, C3     | HTR + segmentation model artifacts                   |
-| `data/gt/`               | B1, C2     | Ground-truth line/image pairs                        |
+| `data/editions/`         | C2         | §70 volume text layers (IA hOCR, GWLB/Potsdam PDFs) + extracted piece texts |
+| `data/gt/`               | B1, C2     | Ground-truth line/image pairs; `edition_cache.json` (record → reading text) |
 
 ## Rebuilding
 
