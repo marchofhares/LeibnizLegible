@@ -249,12 +249,14 @@ def write_edition_cache(path: Path, cache: dict[str, str]) -> None:
 def iter_edition_cache(path: Path) -> Iterator[tuple[str, str]]:
     """Stream ``(record_id, text)`` pairs from a ``.jsonl`` or a JSON-object cache."""
     path = Path(path)
-    with path.open("r", encoding="utf-8") as fh:
-        head = fh.read(1)
-        fh.seek(0)
-        if head == "{":  # the original single-object format
-            yield from json.load(fh).items()
+    if path.suffix != ".jsonl":
+        text = path.read_text(encoding="utf-8")
+        try:
+            yield from json.loads(text).items()  # the original single-object format
             return
+        except json.JSONDecodeError:
+            pass  # a .json-named file holding JSON Lines: fall through
+    with path.open("r", encoding="utf-8") as fh:
         for line in fh:
             if line.strip():
                 obj = json.loads(line)
