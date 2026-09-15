@@ -229,7 +229,9 @@ def pieces(
 
 @app.command()
 def factory(
-    edition_cache: Path = typer.Argument(..., help="JSON {record_id: reading_text} cache."),
+    edition_cache: Path = typer.Argument(
+        ..., help="The edition cache (.jsonl from `edition-cache`, or the older JSON object)."
+    ),
     db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
     today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
     license_bucket: str = typer.Option("open", help="open | nc."),
@@ -249,20 +251,19 @@ def factory(
     from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 
     from leibniz.align.factory import FactoryConfig, dict_provider, run_factory, shard_pieces
+    from leibniz.align.ingest import load_edition_cache
     from leibniz.align.volumes import enumerate_pieces
     from leibniz.db import open_db
 
-    cache = json.loads(Path(edition_cache).read_text(encoding="utf-8"))
     t = date.fromisoformat(today) if today else date.today()
     cfg = FactoryConfig(today=t, license_bucket=license_bucket)
     shard_t = _parse_shard(shard)
     with open_db(db_path) as conn:
         pieces, _enum = enumerate_pieces(conn, today=t, series=series, volume=volume)
         todo = shard_pieces(pieces, shard_t)
-        # Keep only this shard's texts: N parallel workers each holding the whole
-        # cache (hundreds of MB apiece) is what exhausts a WSL VM's memory.
-        needed = {p.record_id for p in todo}
-        cache = {k: v for k, v in cache.items() if k in needed}
+        # Stream the cache and keep only this shard's texts: N parallel workers
+        # each parsing the whole cache at once is what exhausts a WSL VM's memory.
+        cache = load_edition_cache(edition_cache, needed={p.record_id for p in todo})
         label = f"shard {shard}" if shard else "all pieces"
         _console.print(
             f"[bold]gt factory[/bold] → {len(todo):,} pieces ({label}; "
@@ -382,7 +383,10 @@ def ingest(
 
 @app.command(name="edition-cache")
 def edition_cache(
-    out: Path = typer.Argument(Path("data/gt/edition_cache.json"), help="{record_id: text} JSON."),
+    out: Path = typer.Argument(
+        Path("data/gt/edition_cache.jsonl"),
+        help="{record_id: text} cache; .jsonl = one record per line (streamable).",
+    ),
     db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
     editions_dir: Path = typer.Option(Path("data/editions"), "--editions"),
     today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
@@ -390,7 +394,12 @@ def edition_cache(
     """Join the extracted volume texts to the katalog → the factory's edition cache."""
     from datetime import date
 
-    from leibniz.align.ingest import build_edition_cache, load_volume_texts, text_path
+    from leibniz.align.ingest import (
+        build_edition_cache,
+        load_volume_texts,
+        text_path,
+        write_edition_cache,
+    )
     from leibniz.align.volumes_sources import readable_sources
     from leibniz.db import open_db
     from leibniz.legal import expired_volumes
@@ -408,8 +417,7 @@ def edition_cache(
                     merged.setdefault(piece, text)  # preferred source first
     with open_db(db_path) as conn:
         cache, stats = build_edition_cache(conn, texts)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    write_edition_cache(out, cache)
     _console.print(
         f"[bold green]{stats.records_with_text:,} records with reading text[/bold green] "
         f"({sum(len(v) for v in cache.values()):,} chars) → {out}; "
@@ -430,7 +438,7 @@ def gt_report(
         Path("data/editions"), "--editions", help="Extracted volume texts (ingest output)."
     ),
     edition_cache: Path = typer.Option(
-        Path("data/gt/edition_cache.json"), "--edition-cache", help="{record_id: text} cache."
+        Path("data/gt/edition_cache.jsonl"), "--edition-cache", help="{record_id: text} cache."
     ),
 ) -> None:
     """(Re)write reports/gt-factory.md from the minted gt_lines + piece enumeration."""

@@ -15,7 +15,7 @@ ABBYY layer) piece by piece with :func:`~leibniz.align.volumes.assess_extraction
 from __future__ import annotations
 
 import json
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -226,6 +226,47 @@ def build_edition_cache(
     return cache, stats
 
 
+def write_edition_cache(path: Path, cache: dict[str, str]) -> None:
+    """Write the ``{record_id: text}`` cache.
+
+    ``.jsonl`` (the default since the first operator run) holds one
+    ``{"record_id": …, "text": …}`` object per line so a shard worker can stream
+    it and keep only its own records — twelve workers each parsing the whole
+    100 MB object at once exhausted an 11 GB WSL VM. Any other suffix writes the
+    original single JSON object.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.suffix == ".jsonl":
+        with path.open("w", encoding="utf-8") as fh:
+            for rid, text in cache.items():
+                fh.write(json.dumps({"record_id": rid, "text": text}, ensure_ascii=False))
+                fh.write("\n")
+    else:
+        path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+
+
+def iter_edition_cache(path: Path) -> Iterator[tuple[str, str]]:
+    """Stream ``(record_id, text)`` pairs from a ``.jsonl`` or a JSON-object cache."""
+    path = Path(path)
+    with path.open("r", encoding="utf-8") as fh:
+        head = fh.read(1)
+        fh.seek(0)
+        if head == "{":  # the original single-object format
+            yield from json.load(fh).items()
+            return
+        for line in fh:
+            if line.strip():
+                obj = json.loads(line)
+                yield obj["record_id"], obj["text"]
+
+
+def load_edition_cache(path: Path, *, needed: Iterable[str] | None = None) -> dict[str, str]:
+    """Load the cache, optionally keeping only the ``needed`` record ids."""
+    keep = set(needed) if needed is not None else None
+    return {rid: text for rid, text in iter_edition_cache(path) if keep is None or rid in keep}
+
+
 def cross_source_qa(
     a: dict[str, str],
     b: dict[str, str],
@@ -262,10 +303,13 @@ __all__ = [
     "cross_source_qa",
     "fetch_raw",
     "ingest_volume",
+    "iter_edition_cache",
+    "load_edition_cache",
     "load_volume_texts",
     "piece_key",
     "raw_path",
     "text_path",
     "volume_label",
     "volume_to_dict",
+    "write_edition_cache",
 ]
