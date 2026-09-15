@@ -259,6 +259,10 @@ def factory(
     with open_db(db_path) as conn:
         pieces, _enum = enumerate_pieces(conn, today=t, series=series, volume=volume)
         todo = shard_pieces(pieces, shard_t)
+        # Keep only this shard's texts: N parallel workers each holding the whole
+        # cache (hundreds of MB apiece) is what exhausts a WSL VM's memory.
+        needed = {p.record_id for p in todo}
+        cache = {k: v for k, v in cache.items() if k in needed}
         label = f"shard {shard}" if shard else "all pieces"
         _console.print(
             f"[bold]gt factory[/bold] → {len(todo):,} pieces ({label}; "
