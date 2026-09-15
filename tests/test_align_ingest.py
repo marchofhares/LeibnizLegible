@@ -100,3 +100,17 @@ def test_cross_source_qa() -> None:
     b = {"1": "Monsieur je vous supplie de croire", "2": "totally different text here indeed"}
     qa, only_one = I.cross_source_qa(a, b)
     assert qa.n_sampled == 2 and qa.n_flagged == 1 and only_one == 1
+
+
+def test_edition_cache_jsonl_roundtrip_and_shard_filter(tmp_path: Path) -> None:
+    cache = {"R1": "Monsieur, je vous supplie", "R2": "zweiter Text", "R3": "tertius"}
+    path = tmp_path / "edition_cache.jsonl"
+    I.write_edition_cache(path, cache)
+    assert path.read_text(encoding="utf-8").count("\n") == 3
+    assert dict(I.iter_edition_cache(path)) == cache
+    assert I.load_edition_cache(path, needed={"R2", "R9"}) == {"R2": "zweiter Text"}
+    # the original single-object format still loads
+    legacy = tmp_path / "edition_cache.json"
+    I.write_edition_cache(legacy, cache)
+    assert legacy.read_text(encoding="utf-8").startswith("{")
+    assert I.load_edition_cache(legacy) == cache

@@ -52,7 +52,7 @@ Each §70-expired volume's reading text is read from a **free digital copy of th
 
 **21 of 31 §70 volumes have a readable free digital copy** → **6,188 printed pieces / 26.16M characters of reading text extracted**; 10 volumes have no free digital copy at all (1923–1927 prints are US-public-domain on HathiTrust; a TELOTA/Göttingen ask covers the rest — operator). Terms per channel: **ia** — public-domain scan, no access restriction; **gwlb** — CC BY-NC 4.0 channel (text §70-free; flag for the lawyer memo); **potsdam** — no terms stated (edition's own site); **muenster** — written permission required (operator ask; not auto-fetched).
 
-**Edition cache:** 10,029 katalog records (manuscript witnesses citing an ingested volume) carry their piece's reading text in `data/gt/edition_cache.json` — the factory's input.
+**Edition cache:** 10,029 katalog records (manuscript witnesses citing an ingested volume) carry their piece's reading text in `data/gt/edition_cache.jsonl` — the factory's input.
 
 ## Extraction path — validated live on real Leibniz print
 
@@ -136,11 +136,11 @@ leibniz catalog scrape --expired-volumes  # every §70 volume's katalog records 
 leibniz catalog crosswalk                 # records → works
 leibniz align pieces                      # enumerate §70 localizable pieces
 leibniz align ingest                      # fetch + extract each volume's reading text
-leibniz align edition-cache               # join to the katalog → the edition cache
-mkdir -p logs && for i in $(seq 1 8); do    # mint gt_lines: 8 parallel shards,
-  nohup uv run leibniz align factory data/gt/edition_cache.json \
-    --shard $i/8 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~2–3 h on 16 cores
-  sleep 5   # stagger the starts (each worker parses the cache once, ~0.5 GB peak)
+leibniz align edition-cache               # join to the katalog → edition_cache.jsonl
+mkdir -p logs && for i in $(seq 1 6); do    # mint gt_lines: 6 parallel shards,
+  nohup uv run leibniz align factory data/gt/edition_cache.jsonl \
+    --shard $i/6 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~3 h on 16 cores
+  sleep 5   # each worker streams the cache and keeps only its shard (~0.3 GB)
 done; tail -n 1 logs/factory-*.log     # progress: one line per 25 pieces per shard
 leibniz align gt-report                   # writes reports/gt-factory.md with the yield
 # Optional clean-label upgrade (needs a key): vision-extract the minted pieces' pages

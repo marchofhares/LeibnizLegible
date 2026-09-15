@@ -16,7 +16,13 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-from leibniz.align.ingest import DEFAULT_EDITIONS_DIR, cross_source_qa, text_path, volume_label
+from leibniz.align.ingest import (
+    DEFAULT_EDITIONS_DIR,
+    cross_source_qa,
+    iter_edition_cache,
+    text_path,
+    volume_label,
+)
 from leibniz.align.volumes import enumerate_pieces
 from leibniz.align.volumes_sources import CHANNEL_TERMS, readable_sources, sources_for
 from leibniz.legal import expired_volumes
@@ -215,8 +221,7 @@ def gather_extraction(
 def _edition_cache_stats(path: Path | None) -> tuple[int, dict[str, int]]:
     if path is None or not path.exists():
         return 0, {}
-    cache = json.loads(path.read_text(encoding="utf-8"))
-    return len(cache), {}
+    return sum(1 for _ in iter_edition_cache(path)), {}
 
 
 def render_gt(rep: GtReport) -> str:
@@ -309,7 +314,7 @@ def _render_sources(A, rep: GtReport) -> None:
         A(
             f"**Edition cache:** {rep.cache_records:,} katalog records (manuscript witnesses "
             "citing an ingested volume) carry their piece's reading text in "
-            "`data/gt/edition_cache.json` — the factory's input."
+            "`data/gt/edition_cache.jsonl` — the factory's input."
         )
         A("")
 
@@ -534,11 +539,11 @@ def _render_runbook(A) -> None:
     A("leibniz catalog crosswalk                 # records → works")
     A("leibniz align pieces                      # enumerate §70 localizable pieces")
     A("leibniz align ingest                      # fetch + extract each volume's reading text")
-    A("leibniz align edition-cache               # join to the katalog → the edition cache")
-    A("mkdir -p logs && for i in $(seq 1 8); do    # mint gt_lines: 8 parallel shards,")
-    A("  nohup uv run leibniz align factory data/gt/edition_cache.json \\")
-    A("    --shard $i/8 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~2–3 h on 16 cores")
-    A("  sleep 5   # stagger the starts (each worker parses the cache once, ~0.5 GB peak)")
+    A("leibniz align edition-cache               # join to the katalog → edition_cache.jsonl")
+    A("mkdir -p logs && for i in $(seq 1 6); do    # mint gt_lines: 6 parallel shards,")
+    A("  nohup uv run leibniz align factory data/gt/edition_cache.jsonl \\")
+    A("    --shard $i/6 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~3 h on 16 cores")
+    A("  sleep 5   # each worker streams the cache and keeps only its shard (~0.3 GB)")
     A("done; tail -n 1 logs/factory-*.log     # progress: one line per 25 pieces per shard")
     A("leibniz align gt-report                   # writes reports/gt-factory.md with the yield")
     A("# Optional clean-label upgrade (needs a key): vision-extract the minted pieces' pages")
