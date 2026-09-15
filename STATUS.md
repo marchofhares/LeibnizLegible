@@ -389,6 +389,15 @@ many. Root cause, confirmed in the code and reproduced here:
   gained `n_inserted`.
 - **Factory:** one bad piece can no longer end a shard — `run_factory` catches
   per-piece exceptions, rolls back, and records `skipped:error:<Type>`.
+- **Live, two hours into the fixed run (six shards, ~1 GB used, ~2,000
+  pieces and ~30k lines per shard):** three shards logged a piece
+  `failed: OperationalError: database is locked` — the C1 WAL
+  snapshot-upgrade failure again, now on the mint's per-piece commit: a
+  deferred write that waits for another worker's commit fails at once with a
+  stale snapshot (the busy timeout never runs). `factory.write_pairs` now
+  takes the write lock first (`BEGIN IMMEDIATE`, one transaction per piece)
+  and retries a lock collision with jittered backoff; the affected pieces
+  are re-minted by a `--resume` pass (they carry no `gt_lines`).
 - Tests **+13** (417 total: anchoring, localization both ways, chunk joins,
   the memory bound, the guards, projection); ruff clean. Also recorded: with
   unit costs and non-free HTR ends, the last ≤ `band` characters of a passage

@@ -25,6 +25,9 @@ production provider wires :mod:`leibniz.align.pdftext`.
 from __future__ import annotations
 
 import logging
+import random
+import sqlite3
+import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import date
@@ -33,6 +36,7 @@ from leibniz import db
 from leibniz.align.align import DEFAULT_THRESHOLD, HtrLine, align_piece
 from leibniz.align.normalize import DEFAULT_NORM, AlignNorm
 from leibniz.align.pairs import (
+    GtPair,
     delete_gt_for_refs,
     has_gt_for_refs,
     insert_gt_pairs,
@@ -57,6 +61,15 @@ STRATUM_THRESHOLDS: dict[str, float] = {
 EditionTextProvider = Callable[[PieceRef], str | None]
 
 log = logging.getLogger(__name__)
+
+# A piece's gt_lines are written in one IMMEDIATE transaction, retried on a
+# lock collision. Six shard workers commit a piece each every few seconds; a
+# deferred write that has to wait for another worker's commit then fails at
+# once with "database is locked" (its WAL snapshot is stale — the busy timeout
+# never gets a say). Taking the write lock first (BEGIN IMMEDIATE) lets the
+# busy timeout queue the collision instead; the retries cover a timeout.
+WRITE_RETRIES = 5
+WRITE_BACKOFF_S = 0.5
 
 
 @dataclass(slots=True)
@@ -172,9 +185,7 @@ def mint_piece(
         alignment, source=source, stratum=stratum, license_bucket=config.license_bucket
     )
     if insert:
-        delete_gt_for_refs(conn, [ln.ref for ln in alignment.lines])
-        insert_gt_pairs(conn, pairs)
-        conn.commit()
+        write_pairs(conn, [ln.ref for ln in alignment.lines], pairs)
     return PieceResult(
         piece=piece,
         status="minted",
@@ -185,6 +196,39 @@ def mint_piece(
         n_minted=len(pairs),
         yield_rate=alignment.yield_rate,
     )
+
+
+def write_pairs(
+    conn,
+    refs: Sequence[str],
+    pairs: Sequence[GtPair],
+    *,
+    retries: int = WRITE_RETRIES,
+    backoff_s: float = WRITE_BACKOFF_S,
+) -> None:
+    """Replace the ``gt_lines`` of these line refs with ``pairs``, atomically.
+
+    One ``BEGIN IMMEDIATE`` transaction per piece (see ``WRITE_RETRIES``);
+    a lock collision that outlives the busy timeout is retried with backoff,
+    and the last failure propagates (the factory records it as
+    ``skipped:error:OperationalError`` and moves on).
+    """
+    for attempt in range(1, retries + 1):
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            delete_gt_for_refs(conn, refs)
+            insert_gt_pairs(conn, pairs)
+            conn.commit()
+            return
+        except sqlite3.OperationalError as exc:
+            conn.rollback()
+            if "lock" not in str(exc).lower() or attempt == retries:
+                raise
+            pause = backoff_s * attempt * (1 + random.random())  # noqa: S311 — jitter, not crypto
+            log.warning(
+                "gt_lines write locked (attempt %d/%d): %s; retrying", attempt, retries, exc
+            )
+            time.sleep(pause)
 
 
 def run_factory(

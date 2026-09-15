@@ -187,3 +187,45 @@ def test_piece_error_is_recorded_and_run_continues(monkeypatch) -> None:
     assert count_gt_lines(conn) == 0
     row = conn.execute("SELECT n_failed FROM runs WHERE run_id = ?", (stats.run_id,)).fetchone()
     assert row["n_failed"] == 1
+
+
+def test_write_pairs_retries_a_lock_collision(monkeypatch) -> None:
+    import sqlite3
+
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    cfg = F.FactoryConfig(today=TODAY)
+    calls = {"n": 0}
+    real_delete = F.delete_gt_for_refs
+
+    def flaky_delete(c, refs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise sqlite3.OperationalError("database is locked")
+        return real_delete(c, refs)
+
+    monkeypatch.setattr(F, "delete_gt_for_refs", flaky_delete)
+    monkeypatch.setattr(F.time, "sleep", lambda _s: None)
+    stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
+    assert calls["n"] == 2
+    assert stats.pieces_minted == 1 and stats.lines_minted == 12
+    assert count_gt_lines(conn) == 12
+    assert not conn.in_transaction  # the failed attempt was rolled back cleanly
+
+
+def test_write_pairs_gives_up_after_retries(monkeypatch) -> None:
+    import sqlite3
+
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    cfg = F.FactoryConfig(today=TODAY)
+
+    def always_locked(c, refs):
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(F, "delete_gt_for_refs", always_locked)
+    monkeypatch.setattr(F.time, "sleep", lambda _s: None)
+    stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
+    assert stats.skips == {"error:OperationalError": 1}
+    assert count_gt_lines(conn) == 0
+    assert not conn.in_transaction
