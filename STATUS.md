@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-11 (**C1 corpus run COMPLETE; C2 inputs built at scale — only the mint itself is left, on the operator's store**)._
+_Last updated: 2026-09-15 (**C2 mint under way on the operator's store; its first live runs OOM-killed the workers — root cause found in the aligner and fixed (anchor-guided band), relaunch pending**)._
 
 ---
 
@@ -69,8 +69,9 @@ offline-tested (+27 tests) with the operator runbook + GPU/cost estimates in
 (katalog `aa_refs` × `legal.py`), localizes each scan (A3 crosswalk → work; **the
 folio resolver** turns the katalog `Bl.` range into exact canvases via the IIIF
 folio labels C1 stored — Open Q #10 **solved**), gathers the piece's C1 HTR lines,
-aligns the §70 reading text onto them (**banded aligner** for long multi-page
-pieces — B2's blocking gap, now built and exact-vs-full-DP tested), sets the mint
+aligns the §70 reading text onto them (**anchor-guided banded aligner** for
+long multi-page pieces and for edition texts far longer than the piece —
+B2's blocking gap, now built and exact-vs-full-DP tested), sets the mint
 threshold **per stratum** (fair copies 0.55 … heavy revision 0.72 — Open Q #11),
 and mints `gt_lines` with provenance + the license gate (§70 → `open`;
 Transkriptionspool → `nc`, never in a CC BY export). Below-threshold lines are
@@ -348,6 +349,51 @@ posteriors ≈0.6–0.9 populate at scale (CPU: 498/500 pages, 23k lines, mean
 conf 0.771, `conf>1` = 0 — the C1 validation gate is **passed**). Remaining
 operator gate: the CUDA recognition re-run, then the corpus pass.
 
+### C2 — the mint's first live runs: workers OOM-killed → aligner rebuilt (2026-09-15)
+
+The operator launched the mint on the WSL box (16 cores, an 11 GB VM) with 12,
+then 8, then 6 shard workers on the JSONL cache; every attempt took the VM
+down. `dmesg` finally named it: **one worker at 5.7 GB RSS**, not the sum of
+many. Root cause, confirmed in the code and reproduced here:
+
+- **`dp.align_banded` widened its band to the whole length difference**
+  (`half = max(band, |n−m| + 8)`), so a piece whose edition text is far longer
+  than its HTR spine got the *full matrix back*, at 5 bytes a cell. That shape
+  is the norm, not an edge case: **186 of the 10,029 cached records carry
+  >100k characters** (VI,6 N. 2, the Nouveaux Essais, is 753,788 characters
+  and is cited by 6 records; one 497,888-character piece by 63) — a 100-line
+  spine against one of those was ~15 GB.
+- **Fix — `align/anchored.py`**: localize first, align second. Shared 8-grams
+  of the folded texts (index the shorter side, scan the longer) → longest
+  monotone chain (patience LIS, isolated outliers dropped) → a fixed-width
+  band about the piecewise-linear path through the anchors → the DP in
+  ~8k-row **chunks cut at matched runs** (each chunk a few MB, whatever the
+  piece length). `dp.align_in_band` is the new core: per-row column windows,
+  two rolling distance rows, a one-byte move table, per-side/per-end free
+  gaps, and a hard `max_cells` guard; `align_banded` is reimplemented on it and
+  now *refuses* a runaway band instead of allocating it. Pieces that share
+  nothing with their text fall back to the null alignment (nothing minted)
+  rather than a worker death.
+- **Measured (synthetic, this box):** the crash shape (10k spine vs 120k
+  text) — **44 MB peak, 1.9 s** (was ~6 GB and killed); a 300k-character
+  treatise vs its 330k text — 112 MB, 46 s; real cache text (3k spine inside
+  the 753k Nouveaux Essais) — **yield 0.98, 3.6 s**; exact vs the full DP on
+  near-parallel pairs, chunk joins included.
+- **Two GT-quality guards the same failure exposed** (`align.py`): the free
+  edition overhang (insertions before the first / after the last HTR hit) no
+  longer lands in the first/last line's slice — with a parent record's text
+  served for a sub-piece it was the whole overhang; and a line is refused when
+  the alignment inserts more edition characters into it than
+  `max(12, its own length)` (an apparatus block or an omitted passage glued to
+  a well-matched line — the matched fraction cannot see it). `AlignedLine`
+  gained `n_inserted`.
+- **Factory:** one bad piece can no longer end a shard — `run_factory` catches
+  per-piece exceptions, rolls back, and records `skipped:error:<Type>`.
+- Tests **+13** (417 total: anchoring, localization both ways, chunk joins,
+  the memory bound, the guards, projection); ruff clean. Also recorded: with
+  unit costs and non-free HTR ends, the last ≤ `band` characters of a passage
+  can scatter as chance matches over uncovered manuscript (Open Q #17).
+
 ### C2 — GT factory at scale, the inputs built and run (2026-09-11) ✅
 
 The 07-29 build (below) mints nothing without three inputs; this session
@@ -615,9 +661,11 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C1 final architecture | 4 sharded CPU seg workers (~515 pg/h) ∥ 1 GPU recogniser (~940 pg/h), WAL + keyset batches |
 | **C1 pipeline** | `pending→segmented→recognized` state machine, resumable/idempotent; +27 tests |
 | C1 segmentation stats | per-page line count / coverage / height-CV / overlaps / short-lines → `page_stats` |
-| **C2 GT factory** | enumerate §70 pieces → resolve canvases → banded align → stratum-threshold → mint; +33 tests |
+| **C2 GT factory** | enumerate §70 pieces → resolve canvases → anchored align → stratum-threshold → mint; +33 tests |
 | C2 folio resolver (Open Q #10) | katalog `Bl.` range × IIIF folio labels → exact canvases (**solved**) |
 | C2 banded aligner | O(len·band) NW + traceback; **0 mismatches vs full DP** (exactness-tested) |
+| **C2 anchored aligner (2026-09-15)** | k-gram chain → chunked band; crash shape **44 MB / 1.9 s** (was ~6 GB, OOM-killed); 300k-char treatise 112 MB / 46 s |
+| C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
 | **C2 extraction QA (live, real Leibniz print)** | `gpt-4o` reading-text extract, head/page-no dropped; 2-model QA flagged **1/2**, agreement **0.67** |
 | C2 target | ≥50k new open-bucket lines (vs PHILIUMM ~63k) — awaits corpus HTR + keyed extraction |
@@ -729,6 +777,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     corpus-wide after the `140d58d`/token-layout fixes). They are ready to gate
     search and the UI.
 
+17. **(C2) Edge-of-passage scatter under unit costs.** With the HTR ends not
+    free (the piece's lines must all be consumed) and the edition ends free,
+    the DP is indifferent between matching the passage's last few characters
+    in place and scattering them as chance single-character matches over
+    uncovered manuscript further down (a tie; the leading side is even a local
+    win for the scatter). The band now caps it at ≤ `band` (256) characters
+    per end; the full DP scattered without bound. Effect: the last line(s)
+    before a stretch of uncovered manuscript can be minted missing their
+    final characters. Measure on the hand-audit sheet; candidate fixes are a
+    tie-break that prefers deletions past the last anchor, or freeing the HTR
+    ends *inside* the anchored band (no longer degenerate there).
+
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
@@ -760,13 +820,15 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and
 the D phases.
 
-- **C2 — mint real GT (one operator run).** Everything but the mint is done:
-  on the machine with the corpus store, run the runbook in
-  `reports/gt-factory.md` (scrape → crosswalk → ingest → edition-cache →
-  factory → gt-report; ~1 h wall clock, no key, no GPU). Then read the yield by
-  stratum against the ≥50k target and hand-audit ~200 lines. Optional
-  clean-label upgrade: vision re-extraction of the minted pieces' pages
-  (priced in the report; low three figures at most).
+- **C2 — mint real GT (one operator run, in progress).** The inputs are
+  built on the operator's store (scrape, crosswalk, ingest, edition cache all
+  reproduced there with identical counts); the first mint attempts died of
+  the aligner OOM fixed 2026-09-15. Remaining: pull, relaunch the six
+  `--shard i/6 --resume` workers on `data/gt/edition_cache.jsonl`, `gt-report`,
+  commit the report; then read the yield by stratum against the ≥50k target
+  and hand-audit ~200 lines (watch Open Q #17). Optional clean-label upgrade:
+  vision re-extraction of the minted pieces' pages (priced in the report; low
+  three figures at most).
 - **Phase C3 — Fine-tune v2 + per-stratum eval (gate).** Train `leibniz-htr-v2`
   from the PHILIUMM checkpoint on PHILIUMM GT + the C2 open-bucket GT
   (+ ablations). Hold out a page-disjoint test set stratified by stratum +

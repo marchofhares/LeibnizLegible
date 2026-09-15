@@ -420,7 +420,8 @@ def _render_method(A) -> None:
         "estimate (`assess_extraction`)."
     )
     A(
-        "4. **Align & mint** — the B2 aligner (banded for long multi-page pieces) projects "
+        "4. **Align & mint** — the B2 aligner (anchor-guided and banded for long pieces and "
+        "volume-length edition texts) projects "
         "the reading text onto the C1 HTR lines; the **stratum sets the mint threshold** "
         "(fair copies 0.55 … heavy revision 0.72 — drafts held to a higher bar), and "
         "below-threshold lines are discarded (SPECS §6)."

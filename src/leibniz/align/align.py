@@ -36,7 +36,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from leibniz.align import dp
+from leibniz.align import anchored, dp
 from leibniz.align.normalize import DEFAULT_NORM, AlignNorm, normalize_indexed
 
 # Characters that, at the end of an HTR line, signal a word split across the line
@@ -47,6 +47,13 @@ _HYPHENS = ("-", "¬", "=", "‐", "‑", "­")
 # Default: a line must have at least this fraction of its characters matched by
 # the alignment to be minted. Tuned on the B2 eval; overridable per call/run.
 DEFAULT_THRESHOLD = 0.60
+
+# A line is also refused when the alignment inserts more edition characters into
+# it than max(this floor, the line's own folded length): the matched fraction
+# cannot see an edition-only burst (an apparatus block the extractor left in,
+# a passage the scribe never wrote) glued to an otherwise well-matched line,
+# but its slice would carry that burst into the ground truth.
+MAX_INSERT_FLOOR = 12
 
 
 @dataclass(slots=True)
@@ -73,7 +80,8 @@ class AlignedLine:
     align_conf: float
     n_htr_chars: int  # folded HTR length (the confidence denominator)
     n_matched: int  # folded HTR chars matched exactly to the edition
-    aligned: bool  # align_conf >= threshold
+    aligned: bool  # align_conf >= threshold, and no edition-only burst
+    n_inserted: int = 0  # folded edition chars projected here with no HTR counterpart
 
     @property
     def edition_text_stripped(self) -> str:
@@ -171,18 +179,23 @@ def align_piece(
     alignment = _align_spine(spine, ed_folded, free_a=free_htr_ends, free_b=free_edition_ends)
 
     # 4. Projection: every edition char inherits the line of the HTR char it hit;
-    #    edition-only insertions inherit the current line context.
+    #    edition-only insertions inherit the current line context. Insertions
+    #    before the first / after the last HTR hit are the free edition overhang
+    #    (whatever the extractor put around the piece) and belong to no line.
     line_first_orig: list[int | None] = [None] * len(htr_lines)
     line_last_orig: list[int] = [-1] * len(htr_lines)
     n_matched = [0] * len(htr_lines)
+    n_inserted = [0] * len(htr_lines)
+    first_hit, last_hit = _hit_span(alignment.ops)
     cur_line = 0
-    for kind, i, j in alignment.ops:
+    for pos, (kind, i, j) in enumerate(alignment.ops):
         if kind in (dp.MATCH, dp.SUB):
             cur_line = line_of[i]
             if kind == dp.MATCH and not is_joiner[i]:
                 n_matched[cur_line] += 1
             _assign(line_first_orig, line_last_orig, cur_line, ed_src[j])
-        elif kind == dp.INS:  # edition char with no HTR counterpart
+        elif kind == dp.INS and first_hit < pos < last_hit:  # edition char, no HTR counterpart
+            n_inserted[cur_line] += 1
             _assign(line_first_orig, line_last_orig, cur_line, ed_src[j])
         # DEL (HTR char with no edition) contributes nothing to the projection.
 
@@ -211,6 +224,7 @@ def align_piece(
             ed_slice = ""
         denom = max(1, htr_folded_len[i])
         conf = n_matched[i] / denom
+        burst = n_inserted[i] > max(MAX_INSERT_FLOOR, htr_folded_len[i])
         lines.append(
             AlignedLine(
                 ref=ln.ref,
@@ -219,7 +233,8 @@ def align_piece(
                 align_conf=conf,
                 n_htr_chars=htr_folded_len[i],
                 n_matched=n_matched[i],
-                aligned=conf >= threshold and bool(ed_slice.strip()),
+                aligned=conf >= threshold and bool(ed_slice.strip()) and not burst,
+                n_inserted=n_inserted[i],
             )
         )
     return AlignmentResult(
@@ -232,16 +247,33 @@ def align_piece(
 
 
 def _align_spine(a: str, b: str, *, free_a: bool, free_b: bool) -> dp.Alignment:
-    """Align the HTR spine to the folded edition, banded when the piece is large.
+    """Align the HTR spine to the folded edition, anchored+banded when large.
 
     Small pieces use the exact full-matrix DP; once the table would exceed the
     ``dp`` cell guard (long multi-page pieces — the case B2 flagged as blocking
-    C2), fall back to the banded aligner, which is O(len·band) and exact for these
-    near-parallel strings. The switch is transparent to the projection logic.
+    C2), the anchor-guided chunked aligner takes over: it localizes the spine in
+    the edition text by shared k-grams first, so an edition passage far longer
+    than the spine costs a fixed band, not the whole matrix (the C2 OOM). The
+    switch is transparent to the projection logic.
     """
     if (len(a) + 1) * (len(b) + 1) <= dp.DEFAULT_MAX_CELLS:
         return dp.align(a, b, free_a_ends=free_a, free_b_ends=free_b)
-    return dp.align_banded(a, b, free_a_ends=free_a, free_b_ends=free_b)
+    return anchored.align_anchored(a, b, free_a_ends=free_a, free_b_ends=free_b)
+
+
+def _hit_span(ops: Sequence[tuple[str, int, int]]) -> tuple[int, int]:
+    """Op-stream positions of the first and last MATCH/SUB (``(-1, -1)`` if none).
+
+    Insertions outside this span are the edition's free overhang, not text that
+    belongs to any manuscript line.
+    """
+    first = last = -1
+    for pos, (kind, _i, _j) in enumerate(ops):
+        if kind in (dp.MATCH, dp.SUB):
+            if first < 0:
+                first = pos
+            last = pos
+    return first, last
 
 
 def _assign(first: list[int | None], last: list[int], li: int, orig_idx: int) -> None:
@@ -260,6 +292,7 @@ def _ends_hyphenated(text: str) -> bool:
 
 __all__ = [
     "DEFAULT_THRESHOLD",
+    "MAX_INSERT_FLOOR",
     "AlignedLine",
     "AlignmentResult",
     "HtrLine",

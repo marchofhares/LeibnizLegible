@@ -9,7 +9,7 @@ Scales the B2 retro-aligner (98.8 % yield / 97.5 % precision on favourable mater
 1. **Enumerate pieces** — a §70-expired volume's pieces *are* the katalog records whose AA reference cites it (`legal.py` × `katalog_records.aa_refs`).
 2. **Localize the scan** — the A3 crosswalk gives each piece's GWLB work; the folio resolver (Open Q #10: canvas labels are folio numbers) maps the katalog `Bl.` range to the exact canvases.
 3. **Reading text** — extracted from the expired volume's print, apparatus excluded (B2's `pdftext`, SPECS §7.2), with a spot-check extraction-error estimate (`assess_extraction`).
-4. **Align & mint** — the B2 aligner (banded for long multi-page pieces) projects the reading text onto the C1 HTR lines; the **stratum sets the mint threshold** (fair copies 0.55 … heavy revision 0.72 — drafts held to a higher bar), and below-threshold lines are discarded (SPECS §6).
+4. **Align & mint** — the B2 aligner (anchor-guided and banded for long pieces and volume-length edition texts) projects the reading text onto the C1 HTR lines; the **stratum sets the mint threshold** (fair copies 0.55 … heavy revision 0.72 — drafts held to a higher bar), and below-threshold lines are discarded (SPECS §6).
 5. **License gate** — §70 reading text → `license_bucket='open'`; any Transkriptionspool-derived pairs → `'nc'`, never in a CC BY export (SPECS §7.3), enforced at mint time by `GtPair`.
 
 ## §70 volumes: sources and extracted reading text
