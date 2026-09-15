@@ -79,7 +79,7 @@ uv run leibniz catalog crosswalk                # records → works
 uv run leibniz align pieces                     # enumerate the §70 pieces localizable to canvases
 uv run leibniz align ingest                     # fetch + extract each volume's reading text (cache-first)
 uv run leibniz align edition-cache              # join to the katalog → data/gt/edition_cache.json
-uv run leibniz align factory data/gt/edition_cache.json --shard 1/12 --resume  # ×12 workers (needs the C1 HTR lines)
+uv run leibniz align factory data/gt/edition_cache.json --shard 1/8 --resume   # ×8 workers (needs the C1 HTR lines)
 uv run leibniz align gt-report                  # writes reports/gt-factory.md
 ```
 

@@ -137,9 +137,10 @@ leibniz catalog crosswalk                 # records → works
 leibniz align pieces                      # enumerate §70 localizable pieces
 leibniz align ingest                      # fetch + extract each volume's reading text
 leibniz align edition-cache               # join to the katalog → the edition cache
-mkdir -p logs && for i in $(seq 1 12); do   # mint gt_lines: 12 parallel shards,
+mkdir -p logs && for i in $(seq 1 8); do    # mint gt_lines: 8 parallel shards,
   nohup uv run leibniz align factory data/gt/edition_cache.json \
-    --shard $i/12 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~1–3 h on 16 cores
+    --shard $i/8 --resume > logs/factory-$i.log 2>&1 &   # resumable, ~2–3 h on 16 cores
+  sleep 5   # stagger the starts (each worker parses the cache once, ~0.5 GB peak)
 done; tail -n 1 logs/factory-*.log     # progress: one line per 25 pieces per shard
 leibniz align gt-report                   # writes reports/gt-factory.md with the yield
 # Optional clean-label upgrade (needs a key): vision-extract the minted pieces' pages
