@@ -104,7 +104,7 @@ margin numbers) — apparatus, commentary and introductions never enter it
 | `src/leibniz/catalog/` | Ritter-Katalog scraper + works crosswalk (shelfmark normaliser) |
 | `src/leibniz/htr/` | benchmark harness (D5) + engine adapters (Kraken / VLM) — B1 |
 | `src/leibniz/layout/` | Kraken baseline segmentation of a page into line images |
-| `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, banded DP, strata, volume sources, reading-text extractor, ingestion) |
+| `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, anchor-guided banded DP, strata, volume sources, reading-text extractor, ingestion) |
 | `src/leibniz/pipeline/` | corpus segment/recognize batch pipeline + per-page seg-stats — C1 |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
@@ -128,7 +128,9 @@ katalog sweep (17,162 piece citations, 11,595 localizable)
 and the reading-text extraction of 21 of 31 expired volumes from
 their free digital copies (6,188 pieces, 26.2M
 characters, 10,029 witnesses with text). Minting is one operator
-run on the machine holding the corpus store. Next is **C2 minting → C3**
+run on the machine holding the corpus store — under way; its first runs
+surfaced an aligner memory blow-up on volume-length edition texts, fixed
+2026-09-15 by the anchor-guided aligner. Next is **C2 minting → C3**
 (fine-tune v2, a gate). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)

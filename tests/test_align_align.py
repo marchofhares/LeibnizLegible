@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import random
+
 from leibniz.align.align import HtrLine, align_piece
 
 
@@ -71,3 +73,43 @@ def test_yield_rate() -> None:
     edition = "alpha beta gamma delta epsilon zeta"
     res = align_piece(htr, edition, threshold=0.5)
     assert res.yield_rate == 1.0
+
+
+def test_edition_overhang_is_not_glued_to_the_edge_lines() -> None:
+    # A long over-extraction around the piece (the C2 case: a sub-piece served
+    # its parent record's whole text) must not end up in the first/last line's
+    # ground truth, even though those lines align perfectly.
+    htr = _htr("cognitio nihil aliud est", "quam perceptio distincta")
+    prologue = "PROLOGUS " * 40
+    epilogue = " EPILOGUS" * 40
+    edition = prologue + "cognitio nihil aliud est quam perceptio distincta" + epilogue
+    res = align_piece(htr, edition, threshold=0.5, free_edition_ends=True)
+    assert res.n_aligned == 2
+    assert "PROLOGUS" not in res.lines[0].edition_text
+    assert "EPILOGUS" not in res.lines[1].edition_text
+    assert res.lines[0].edition_text.strip() == "cognitio nihil aliud est"
+    assert res.lines[1].edition_text.strip() == "quam perceptio distincta"
+
+
+def test_edition_only_burst_is_not_minted() -> None:
+    # An apparatus block the extractor left in the middle of the reading text has
+    # no manuscript counterpart; it is projected onto the preceding line, which
+    # must then be refused (its matched fraction alone cannot see the burst).
+    # Distinct text on both sides keeps the burst interior: near an end, the free
+    # edition overhang would absorb it at the cost of the edge lines (which the
+    # confidence gate then refuses).
+    rng = random.Random(3)
+
+    def word() -> str:
+        return "".join(rng.choice("abcdefghilmnoprstuv") for _ in range(rng.randint(3, 8)))
+
+    lines = [" ".join(word() for _ in range(6)) for _ in range(16)]
+    htr = _htr(*lines)
+    burst = " ".join(f"varia lectio {k}" for k in range(12))
+    edition = " ".join(lines[:8]) + f" {burst} " + " ".join(lines[8:])
+    res = align_piece(htr, edition, threshold=0.6)
+    hit = res.lines[7]
+    assert hit.n_inserted > hit.n_htr_chars
+    assert hit.align_conf >= 0.6 and not hit.aligned  # only the burst rule refuses it
+    assert all(ln.aligned for ln in res.lines[:7] + res.lines[8:])
+    assert res.lines[8].edition_text.strip() == lines[8]

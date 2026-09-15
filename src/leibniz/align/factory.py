@@ -24,6 +24,7 @@ production provider wires :mod:`leibniz.align.pdftext`.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import date
@@ -54,6 +55,8 @@ STRATUM_THRESHOLDS: dict[str, float] = {
 # An edition-text provider returns a piece's constituted reading text, or None to
 # skip (no source / no key / no page anchor).
 EditionTextProvider = Callable[[PieceRef], str | None]
+
+log = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -227,7 +230,19 @@ def run_factory(
     for piece in pieces:
         stats.pieces_seen += 1
         text = edition_text_for(piece) or ""
-        result = mint_piece(conn, piece, text, config, insert=insert, resume=resume)
+        try:
+            result = mint_piece(conn, piece, text, config, insert=insert, resume=resume)
+        except Exception as exc:  # noqa: BLE001 — one bad piece must not end the shard
+            if insert:
+                conn.rollback()
+            log.warning(
+                "piece %s (%s) failed: %s: %s",
+                piece.record_id,
+                piece.aa_label,
+                type(exc).__name__,
+                exc,
+            )
+            result = PieceResult(piece, f"skipped:error:{type(exc).__name__}")
         stats.results.append(result)
         if result.minted:
             stats.pieces_minted += 1

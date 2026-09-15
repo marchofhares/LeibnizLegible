@@ -169,3 +169,21 @@ def test_resume_skips_already_minted_piece() -> None:
     again = F.run_factory(conn, config=cfg, edition_text_for=prov, resume=True)
     assert again.lines_minted == 0 and again.skips == {"already_minted": 1}
     assert count_gt_lines(conn) == 12
+
+
+def test_piece_error_is_recorded_and_run_continues(monkeypatch) -> None:
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    cfg = F.FactoryConfig(today=TODAY)
+
+    def boom(*_a, **_kw):
+        raise MemoryError("simulated aligner blow-up")
+
+    monkeypatch.setattr(F, "align_piece", boom)
+    stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
+    assert stats.pieces_seen == 1 and stats.pieces_minted == 0
+    assert stats.skips == {"error:MemoryError": 1}
+    assert stats.results[0].status == "skipped:error:MemoryError"
+    assert count_gt_lines(conn) == 0
+    row = conn.execute("SELECT n_failed FROM runs WHERE run_id = ?", (stats.run_id,)).fetchone()
+    assert row["n_failed"] == 1

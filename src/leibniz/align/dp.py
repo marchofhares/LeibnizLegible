@@ -19,9 +19,14 @@ Design choices, all justified by the retro-alignment use case:
 * **Full matrix, pure Python** using :mod:`array` for the DP table. At prototype
   scale (a page or a short letter — a few thousand characters a side) this is a
   few tens of MB and well under a second to a few seconds. A ``max_cells`` guard
-  refuses inputs that would blow memory, so :mod:`leibniz.align.align` can fall
-  back to windowed alignment instead of OOM-ing. Banding is a documented future
-  optimization, unnecessary at prototype scale.
+  refuses inputs that would blow memory, so :mod:`leibniz.align.align` falls
+  back to the banded aligner instead of OOM-ing.
+* **Banded variant** (:func:`align_in_band` / :func:`align_banded`): the DP
+  restricted to a caller-supplied column window per row. It keeps two rolling
+  distance rows and a one-byte-per-cell move table, so memory is the band area
+  (not the full matrix), and it too refuses to exceed ``max_cells``. The
+  anchor-guided, chunked driver on top of it lives in
+  :mod:`leibniz.align.anchored`.
 
 No dependencies; fully offline-testable.
 """
@@ -29,6 +34,7 @@ No dependencies; fully offline-testable.
 from __future__ import annotations
 
 from array import array
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 # Operation kinds in the returned stream.
@@ -108,7 +114,7 @@ def align(
     width = m + 1
 
     # DP distance table and a move table (0=diag, 1=up/del a, 2=left/ins b).
-    dist = array("i", bytes(4 * (n + 1) * width))
+    dist = array("i", [0]) * ((n + 1) * width)
     move = bytearray((n + 1) * width)
 
     # First row: aligning "" to b[:j] is j insertions — free if free_b_ends.
@@ -217,9 +223,135 @@ def _traceback(
 
 
 # Default half-bandwidth for banded alignment. A few hundred cells of slack about
-# the length-ratio diagonal is ample for HTR-spine ↔ edition-text (the same text
+# the expected diagonal is ample for HTR-spine ↔ edition-text (the same text
 # under ~8% CER + minor edition divergence — the path never wanders far).
 DEFAULT_BAND = 256
+
+# The banded tables cost one byte per cell (move) plus two rolling rows, so the
+# guard can be far more generous than the full matrix's; ~64M cells ≈ 64 MB.
+DEFAULT_MAX_BAND_CELLS = 64_000_000
+
+
+def align_in_band(
+    a: str,
+    b: str,
+    lo: Sequence[int],
+    hi: Sequence[int],
+    *,
+    free_a_start: bool = False,
+    free_a_end: bool = False,
+    free_b_start: bool = False,
+    free_b_end: bool = False,
+    max_cells: int = DEFAULT_MAX_BAND_CELLS,
+) -> Alignment:
+    """Needleman–Wunsch restricted to the cells ``lo[i] <= j <= hi[i]`` per row.
+
+    The workhorse under :func:`align_banded` and
+    :func:`leibniz.align.anchored.align_anchored`: the caller decides *where* the
+    band lies (about the length-ratio diagonal, or about a chain of k-gram
+    anchors); this computes the DP over exactly those cells with two rolling
+    distance rows and a one-byte move entry per cell, so memory is the band's
+    area, never the matrix's. The end-gap policy is split per side and per end
+    (``free_b_start`` frees leading insertions, ``free_b_end`` trailing ones,
+    likewise ``free_a_*`` for deletions) so a chunked driver can free only the
+    outer ends of the outer chunks.
+
+    Requirements on the band: ``len(lo) == len(hi) == len(a) + 1``,
+    ``0 <= lo[i] <= hi[i] <= len(b)``, and consecutive rows must touch
+    (``lo[i] <= hi[i-1] + 1``) so every row is reachable. When an end is not
+    free the band must contain the corresponding corner cell (row 0 always
+    prices leading insertions, so column 0 need not be in band). Cells outside
+    the band are treated as unreachable; the alignment is exact iff the optimal
+    path stays in-band. Raises :class:`ValueError` on a malformed band or when
+    the band has more than ``max_cells`` cells.
+    """
+    n, m = len(a), len(b)
+    if len(lo) != n + 1 or len(hi) != n + 1:
+        raise ValueError("band rows must be len(a) + 1 long")
+    cells = 0
+    for i in range(n + 1):
+        if not 0 <= lo[i] <= hi[i] <= m:
+            raise ValueError(f"malformed band row {i}: lo={lo[i]} hi={hi[i]} m={m}")
+        if i and lo[i] > hi[i - 1] + 1:
+            raise ValueError(f"band rows {i - 1} and {i} do not touch")
+        cells += hi[i] - lo[i] + 1
+    if cells > max_cells:
+        raise ValueError(f"banded alignment of {cells} cells exceeds max_cells={max_cells}")
+    if not free_b_end and not free_a_end and hi[n] != m:
+        raise ValueError("global end requires the band to contain the corner cell")
+
+    move: list[bytearray] = [bytearray(hi[i] - lo[i] + 1) for i in range(n + 1)]
+
+    # Row 0: aligning "" to b[:j] costs j insertions (free if free_b_start).
+    row_lo, row_hi = lo[0], hi[0]
+    prev: list[int] = [0 if free_b_start else j for j in range(row_lo, row_hi + 1)]
+    mrow = move[0]
+    for k in range(len(prev)):
+        mrow[k] = 0 if row_lo + k == 0 else 2
+    # Best cell in the last column, for a free a-end (trailing deletions free).
+    best_col = _INF
+    end_col_i = n
+    if free_a_end and row_lo <= m <= row_hi:
+        best_col = prev[m - row_lo]
+        end_col_i = 0
+
+    plo, phi = row_lo, row_hi
+    for i in range(1, n + 1):
+        ai = a[i - 1]
+        row_lo, row_hi = lo[i], hi[i]
+        width = row_hi - row_lo + 1
+        # ``pv[k]`` is the previous row's value at column ``row_lo - 1 + k``
+        # (INF outside the previous band), so diag = pv[k] and up = pv[k + 1].
+        need_lo, need_hi = row_lo - 1, row_hi
+        ov_lo, ov_hi = max(need_lo, plo), min(need_hi, phi)
+        if ov_lo > ov_hi:
+            pv = [_INF] * (need_hi - need_lo + 1)
+        else:
+            pv = (
+                [_INF] * (ov_lo - need_lo)
+                + prev[ov_lo - plo : ov_hi - plo + 1]
+                + [_INF] * (need_hi - ov_hi)
+            )
+        cur = [0] * width
+        mrow = move[i]
+        k0 = 0
+        left = _INF
+        if row_lo == 0:  # column 0: aligning a[:i] to "" is i deletions
+            left = 0 if free_a_start else i
+            cur[0] = left
+            mrow[0] = 1
+            k0 = 1
+        for k in range(k0, width):
+            best = pv[k] + (0 if ai == b[row_lo + k - 1] else 1)
+            mv = 0
+            up = pv[k + 1] + 1
+            if up < best:
+                best, mv = up, 1
+            left += 1
+            if left < best:
+                best, mv = left, 2
+            cur[k] = best
+            mrow[k] = mv
+            left = best
+        if free_a_end and row_lo <= m <= row_hi and cur[m - row_lo] < best_col:
+            best_col = cur[m - row_lo]
+            end_col_i = i
+        prev, plo, phi = cur, row_lo, row_hi
+
+    # Choose the traceback start under the end-gap policy (``prev`` is row n).
+    end_i, end_j = n, m
+    best = prev[m - plo] if plo <= m <= phi else _INF
+    if free_b_end:  # trailing b insertions free → best over the last row
+        for k, v in enumerate(prev):
+            if v < best:
+                best, end_j = v, plo + k
+    if free_a_end and best_col < best:  # trailing a deletions free → best over column m
+        best, end_i, end_j = best_col, end_col_i, m
+    if best >= _INF:  # unreachable end: no in-band path (a malformed band)
+        raise ValueError("no in-band alignment path reaches the end cell")
+
+    ops = _traceback_banded(a, b, move, lo, hi, end_i, end_j)
+    return Alignment(ops=ops, distance=best, len_a=n, len_b=m)
 
 
 def align_banded(
@@ -229,8 +361,9 @@ def align_banded(
     band: int = DEFAULT_BAND,
     free_a_ends: bool = False,
     free_b_ends: bool = False,
+    max_cells: int = DEFAULT_MAX_BAND_CELLS,
 ) -> Alignment:
-    """Banded Needleman–Wunsch — O(len·band) time and memory, with traceback.
+    """Banded Needleman–Wunsch about the length-ratio diagonal, with traceback.
 
     Computes the alignment only within a diagonal band of half-width ``band``
     about the *length-ratio* diagonal (column ``j ≈ i·m/n``), so it scales to
@@ -239,7 +372,11 @@ def align_banded(
     (the same text under HTR noise + minor edition divergence), which is exactly
     the retro-alignment regime (B2 report §4). The band is widened to at least
     cover the two strings' length difference, so a systematic length gap never
-    pushes the path out of the band.
+    pushes the path out of the band — which is why this is only safe for
+    near-equal lengths: when one side is far longer, the widened band is the
+    whole matrix again, and ``max_cells`` refuses it (the C2 OOM). For that case
+    use :func:`leibniz.align.anchored.align_anchored`, which localizes the
+    shorter side first.
 
     Same end-gap policy and op-stream contract as :func:`align`.
     """
@@ -247,89 +384,46 @@ def align_banded(
     if n == 0 or m == 0:  # degenerate; the full DP is trivially cheap here
         return align(a, b, free_a_ends=free_a_ends, free_b_ends=free_b_ends)
     half = max(band, abs(n - m) + 8)
-
     lo = [0] * (n + 1)
     hi = [0] * (n + 1)
-    dist: list[array] = [array("i") for _ in range(n + 1)]
-    move: list[bytearray] = [bytearray() for _ in range(n + 1)]
     for i in range(n + 1):
         center = round(i * m / n)
         lo[i] = max(0, center - half)
         hi[i] = min(m, center + half)
-        width = hi[i] - lo[i] + 1
-        dist[i] = array("i", bytes(4 * width))
-        move[i] = bytearray(width)
-
-    def gd(i: int, j: int) -> int:
-        if i < 0 or j < 0 or j < lo[i] or j > hi[i]:
-            return _INF
-        return dist[i][j - lo[i]]
-
-    for i in range(n + 1):
-        ai = a[i - 1] if i > 0 else ""
-        row_lo = lo[i]
-        for j in range(row_lo, hi[i] + 1):
-            k = j - row_lo
-            if i == 0 and j == 0:
-                dist[i][k] = 0
-                move[i][k] = 0
-            elif i == 0:
-                dist[i][k] = 0 if free_b_ends else j
-                move[i][k] = 2
-            elif j == 0:
-                dist[i][k] = 0 if free_a_ends else i
-                move[i][k] = 1
-            else:
-                cost = 0 if ai == b[j - 1] else 1
-                diag = gd(i - 1, j - 1) + cost
-                up = gd(i - 1, j) + 1
-                left = gd(i, j - 1) + 1
-                best, mv = diag, 0
-                if up < best:
-                    best, mv = up, 1
-                if left < best:
-                    best, mv = left, 2
-                dist[i][k] = best
-                move[i][k] = mv
-
-    end_i, end_j = n, m
-    best = gd(n, m)
-    if free_b_ends:
-        for j in range(lo[n], hi[n] + 1):
-            v = dist[n][j - lo[n]]
-            if v < best:
-                best, end_i, end_j = v, n, j
-    if free_a_ends:
-        for i in range(n + 1):
-            if lo[i] <= m <= hi[i] and dist[i][m - lo[i]] < best:
-                best, end_i, end_j = dist[i][m - lo[i]], i, m
-
-    ops = _traceback_banded(a, b, move, lo, hi, end_i, end_j, free_a_ends, free_b_ends)
-    return Alignment(ops=ops, distance=best, len_a=n, len_b=m)
+    return align_in_band(
+        a,
+        b,
+        lo,
+        hi,
+        free_a_start=free_a_ends,
+        free_a_end=free_a_ends,
+        free_b_start=free_b_ends,
+        free_b_end=free_b_ends,
+        max_cells=max_cells,
+    )
 
 
 def _traceback_banded(
     a: str,
     b: str,
     move: list[bytearray],
-    lo: list[int],
-    hi: list[int],
+    lo: Sequence[int],
+    hi: Sequence[int],
     i: int,
     j: int,
-    free_a_ends: bool,
-    free_b_ends: bool,
 ) -> list[tuple[str, int, int]]:
-    """Walk the banded move table back to an origin (mirrors :func:`_traceback`)."""
+    """Walk the banded move table back to the origin (mirrors :func:`_traceback`).
+
+    Free leading gaps need no special case: once ``i`` or ``j`` hits 0 the
+    remaining ops are gaps on the other side either way (their *cost* was decided
+    by the distance rows). Trailing gaps beyond the chosen end cell are emitted
+    first so the op stream spans both sequences.
+    """
     ops: list[tuple[str, int, int]] = []
     for jj in range(len(b) - 1, j - 1, -1):
         ops.append((INS, -1, jj))
     for ii in range(len(a) - 1, i - 1, -1):
         ops.append((DEL, ii, -1))
-
-    def mget(i: int, j: int) -> int:
-        if lo[i] <= j <= hi[i]:
-            return move[i][j - lo[i]]
-        return 0  # off-band on the optimal path shouldn't happen; prefer diag
 
     while i > 0 or j > 0:
         if i == 0:
@@ -340,7 +434,7 @@ def _traceback_banded(
             ops.append((DEL, i - 1, -1))
             i -= 1
             continue
-        mv = mget(i, j)
+        mv = move[i][j - lo[i]] if lo[i] <= j <= hi[i] else 0  # off-band: prefer diag
         if mv == 0:
             kind = MATCH if a[i - 1] == b[j - 1] else SUB
             ops.append((kind, i - 1, j - 1))
@@ -352,16 +446,6 @@ def _traceback_banded(
         else:
             ops.append((INS, -1, j - 1))
             j -= 1
-        if free_b_ends and i == 0:
-            while j > 0:
-                ops.append((INS, -1, j - 1))
-                j -= 1
-            break
-        if free_a_ends and j == 0:
-            while i > 0:
-                ops.append((DEL, i - 1, -1))
-                i -= 1
-            break
 
     ops.reverse()
     return ops
@@ -383,6 +467,8 @@ def similarity(a: str, b: str, **kw: object) -> float:
 
 __all__ = [
     "DEFAULT_BAND",
+    "DEFAULT_MAX_BAND_CELLS",
+    "DEFAULT_MAX_CELLS",
     "DEL",
     "INS",
     "MATCH",
@@ -390,5 +476,6 @@ __all__ = [
     "Alignment",
     "align",
     "align_banded",
+    "align_in_band",
     "similarity",
 ]
