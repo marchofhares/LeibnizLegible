@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 import httpx
 
 P95_CRITERION_MS = 500
+DEFAULT_RATE = 8.0  # launches per second — under the app's default per-client limit of 10/s
 
 DEFAULT_QUERIES: tuple[str, ...] = (
     "calculemus",
@@ -94,44 +95,60 @@ def bench_search(
     n: int = 200,
     limit: int = 20,
     concurrency: int = 1,
+    rate: float = DEFAULT_RATE,
 ) -> dict:
     """Run ``n`` searches (cycling through ``queries``) and report latency percentiles.
 
     ``client`` is any :class:`httpx.Client` whose base URL is the server (a
-    Starlette ``TestClient`` works too). Returns wall-clock and backend
-    percentiles in milliseconds, the error count, and ``pass`` against
-    :data:`P95_CRITERION_MS`.
+    Starlette ``TestClient`` works too). Launches are paced to ``rate`` per
+    second (``0`` = as fast as possible), because the app itself limits a
+    client to 10 requests/second by default and an unpaced run would mostly
+    measure its own ``429``s; those are counted apart as ``rate_limited`` and
+    never enter the percentiles. Returns wall-clock and backend percentiles in
+    milliseconds, the counts, and ``pass`` against :data:`P95_CRITERION_MS`
+    (no transport/server errors, p95 under the bar).
     """
     qs = [q.strip() for q in queries if q and q.strip()] or list(DEFAULT_QUERIES)
     n = max(1, int(n))
     concurrency = max(1, int(concurrency))
+    interval = 1.0 / rate if rate and rate > 0 else 0.0
+    start = time.perf_counter()
 
-    def one(i: int) -> tuple[float | None, int | None]:
+    def one(i: int) -> tuple[float | None, int | None, str]:
+        if interval:
+            delay = start + i * interval - time.perf_counter()
+            if delay > 0:
+                time.sleep(delay)
         t0 = time.perf_counter()
         try:
             r = client.get("/api/search", params={"q": qs[i % len(qs)], "limit": limit})
         except httpx.HTTPError:
-            return None, None
+            return None, None, "error"
         ms = (time.perf_counter() - t0) * 1000.0
+        if r.status_code == 429:
+            return None, None, "limited"
         if r.status_code != 200:
-            return None, None
+            return None, None, "error"
         try:
             took = int(r.json().get("took_ms") or 0)
         except (ValueError, AttributeError):
             took = 0
-        return ms, took
+        return ms, took, "ok"
 
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
         results = list(pool.map(one, range(n)))
-    wall = [w for w, _ in results if w is not None]
-    took = [t for _, t in results if t is not None]
-    errors = n - len(wall)
+    wall = [w for w, _, k in results if k == "ok" and w is not None]
+    took = [t for _, t, k in results if k == "ok" and t is not None]
+    limited = sum(1 for _, _, k in results if k == "limited")
+    errors = sum(1 for _, _, k in results if k == "error")
     p = percentiles(wall)
     return {
         "n": n,
         "ok": len(wall),
         "errors": errors,
+        "rate_limited": limited,
         "concurrency": concurrency,
+        "rate": rate,
         "queries": len(qs),
         "wall_ms": p,
         "backend_ms": percentiles(took),
@@ -140,4 +157,4 @@ def bench_search(
     }
 
 
-__all__ = ["DEFAULT_QUERIES", "P95_CRITERION_MS", "bench_search", "percentiles"]
+__all__ = ["DEFAULT_QUERIES", "DEFAULT_RATE", "P95_CRITERION_MS", "bench_search", "percentiles"]

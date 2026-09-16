@@ -14,6 +14,7 @@ BRANCH="${BRANCH:-main}"
 APP_DIR="${APP_DIR:-/opt/leibniz-legible}"
 DATA_DIR="${DATA_DIR:-/var/lib/leibniz-legible}"
 CONF_DIR="${CONF_DIR:-/etc/leibniz-legible}"
+MEILI_VERSION="${MEILI_VERSION:-v1.53.2}"   # the release this kit was verified against
 
 [[ $EUID -eq 0 ]] || { echo "run as root (sudo)" >&2; exit 1; }
 
@@ -22,40 +23,58 @@ say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 say "packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get install -y -q git curl ca-certificates gnupg openssl rsync
+apt-get install -y -q git curl ca-certificates gnupg openssl rsync sudo
 
 say "users and directories"
 id -u leibniz >/dev/null 2>&1 \
   || useradd --system --home-dir "$APP_DIR" --shell /usr/sbin/nologin leibniz
 id -u meilisearch >/dev/null 2>&1 \
   || useradd --system --home-dir /var/lib/meilisearch --shell /usr/sbin/nologin meilisearch
+install -d -o leibniz -g leibniz -m 0755 "$APP_DIR"
 install -d -o leibniz -g leibniz -m 0750 "$DATA_DIR"
 install -d -o meilisearch -g meilisearch -m 0750 /var/lib/meilisearch
 install -d -m 0750 "$CONF_DIR" /etc/meilisearch
 
 say "the app: $REPO_URL ($BRANCH) → $APP_DIR"
-if [[ ! -d "$APP_DIR/.git" ]]; then
-  git clone --quiet --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
-else
-  git -C "$APP_DIR" fetch --quiet origin "$BRANCH"
-  git -C "$APP_DIR" checkout --quiet "$BRANCH"
-  git -C "$APP_DIR" pull --ff-only --quiet origin "$BRANCH"
-fi
+# Everything under $APP_DIR is owned and operated by the service user: git
+# refuses to act as root on another user's checkout ("dubious ownership").
+as_leibniz() { sudo -u leibniz -H "$@"; }
 chown -R leibniz:leibniz "$APP_DIR"
+if [[ ! -d "$APP_DIR/.git" ]]; then
+  as_leibniz git clone --quiet --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+else
+  as_leibniz git -C "$APP_DIR" fetch --quiet origin "$BRANCH"
+  as_leibniz git -C "$APP_DIR" checkout --quiet "$BRANCH"
+  as_leibniz git -C "$APP_DIR" pull --ff-only --quiet origin "$BRANCH"
+fi
 if ! command -v uv >/dev/null 2>&1; then
   curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin INSTALLER_NO_MODIFY_PATH=1 sh
 fi
 # The venv belongs to the service user; uv fetches a managed CPython 3.12.
 # Its cache and interpreter live under the checkout's .uv/ (gitignored).
-sudo -u leibniz -H env UV_CACHE_DIR="$APP_DIR/.uv/cache" UV_PYTHON_INSTALL_DIR="$APP_DIR/.uv/python" \
+as_leibniz env UV_CACHE_DIR="$APP_DIR/.uv/cache" UV_PYTHON_INSTALL_DIR="$APP_DIR/.uv/python" \
   uv sync --project "$APP_DIR" --python 3.12 --frozen --no-dev --extra web
 "$APP_DIR/.venv/bin/leibniz" --version
 
-say "meilisearch"
+say "meilisearch $MEILI_VERSION"
+# Installed only when absent: a new Meilisearch version cannot read an index
+# built by an older one, so upgrading is a deliberate step (README §9), never
+# a side effect of re-running this script.
 if [[ ! -x /usr/local/bin/meilisearch ]]; then
-  (cd /usr/local/bin && curl -L https://install.meilisearch.com | sh)
+  case "$(uname -m)" in
+    x86_64) asset=meilisearch-linux-amd64 ;;
+    aarch64|arm64) asset=meilisearch-linux-aarch64 ;;
+    *) echo "no Meilisearch build for $(uname -m)" >&2; exit 1 ;;
+  esac
+  curl -fsSL -o /usr/local/bin/meilisearch.new \
+    "https://github.com/meilisearch/meilisearch/releases/download/$MEILI_VERSION/$asset"
+  chmod 0755 /usr/local/bin/meilisearch.new
+  mv /usr/local/bin/meilisearch.new /usr/local/bin/meilisearch
 fi
 /usr/local/bin/meilisearch --version
+if ! /usr/local/bin/meilisearch --version | grep -q "${MEILI_VERSION#v}"; then
+  echo "note: installed Meilisearch differs from the pinned $MEILI_VERSION; see deploy/README.md §9 before upgrading"
+fi
 if [[ ! -f /etc/meilisearch/env ]]; then
   install -m 0640 -o root -g meilisearch "$APP_DIR/deploy/meilisearch.env.example" /etc/meilisearch/env
   sed -i "s|^MEILI_MASTER_KEY=.*|MEILI_MASTER_KEY=$(openssl rand -hex 32)|" /etc/meilisearch/env
@@ -90,20 +109,23 @@ systemctl daemon-reload
 systemctl enable --now meilisearch
 systemctl enable leibniz-legible   # started once the store and the index exist
 systemctl enable caddy
-systemctl restart caddy
+if grep -q 'example.org' "$CONF_DIR/caddy.env"; then
+  echo "caddy: LEIBNIZ_DOMAIN in $CONF_DIR/caddy.env is still the placeholder — set it, then: systemctl restart caddy"
+else
+  systemctl restart caddy
+fi
 
 cat <<NEXT
 
-Done. What is left is yours (deploy/README.md has the detail):
+Done. What is left is yours — deploy/README.md walks through it:
 
-  1. Copy the serving store to $DATA_DIR/inventory.sqlite (deploy/prepare-store.sh
-     on the desktop, then rsync); chown leibniz:leibniz.
-  2. Edit $CONF_DIR/caddy.env (LEIBNIZ_DOMAIN) and $CONF_DIR/env
-     (LEIBNIZ_BASE_URL, MEILI_API_KEY from deploy/meili-search-key.sh).
-  3. Build the index as the service user:
-       sudo -u leibniz env \$(grep -v '^#' $CONF_DIR/env | xargs) \\
-         MEILI_MASTER_KEY=\$(sed -n 's/^MEILI_MASTER_KEY=//p' /etc/meilisearch/env) \\
-         $APP_DIR/.venv/bin/leibniz index build --backend meili
-  4. systemctl start leibniz-legible && systemctl reload caddy
-  5. curl -s https://\$LEIBNIZ_DOMAIN/healthz ; leibniz index bench --url https://\$LEIBNIZ_DOMAIN
+  1. Copy the serving store (deploy/prepare-store.sh on the desktop, then rsync)
+     to $DATA_DIR/inventory.sqlite and chown it leibniz:leibniz.
+  2. Edit $CONF_DIR/caddy.env (LEIBNIZ_DOMAIN), then: systemctl restart caddy
+  3. Create the search key: export MEILI_MASTER_KEY from /etc/meilisearch/env,
+     run $APP_DIR/deploy/meili-search-key.sh, put the key in $CONF_DIR/env
+     as MEILI_API_KEY; set LEIBNIZ_BASE_URL there too.
+  4. Build the index as the service user (README §5, a systemd-run one-liner).
+  5. systemctl start leibniz-legible; curl -s http://127.0.0.1:8000/healthz
+  6. $APP_DIR/.venv/bin/leibniz index bench --url https://YOUR-DOMAIN
 NEXT

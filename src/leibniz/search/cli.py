@@ -25,7 +25,7 @@ from rich.table import Table
 from leibniz import db
 from leibniz.search import open_backend
 from leibniz.search.backend import SearchQuery
-from leibniz.search.bench import DEFAULT_QUERIES, bench_search
+from leibniz.search.bench import DEFAULT_QUERIES, DEFAULT_RATE, bench_search
 from leibniz.search.documents import corpus_stats, iter_page_docs
 from leibniz.search.fts5 import DEFAULT_INDEX_PATH
 from leibniz.search.meili import DEFAULT_MEILI_URL
@@ -38,7 +38,7 @@ BACKEND_OPT = typer.Option("fts5", "--backend", help="fts5 (single file) or meil
 INDEX_OPT = typer.Option(DEFAULT_INDEX_PATH, "--index", help="FTS5 index file (fts5 backend).")
 MEILI_URL_OPT = typer.Option(None, "--meili-url", help="Meilisearch URL (env MEILI_URL).")
 MEILI_KEY_OPT = typer.Option(
-    None, "--meili-key", help="Meilisearch API key (env MEILI_MASTER_KEY)."
+    None, "--meili-key", help="Meilisearch API key (env MEILI_MASTER_KEY, else MEILI_API_KEY)."
 )
 
 
@@ -47,7 +47,9 @@ def _backend(backend: str, index: Path, meili_url: str | None, meili_key: str | 
         backend,
         path=str(index),
         meili_url=meili_url or os.environ.get("MEILI_URL") or DEFAULT_MEILI_URL,
-        meili_key=meili_key or os.environ.get("MEILI_MASTER_KEY"),
+        meili_key=meili_key
+        or os.environ.get("MEILI_MASTER_KEY")
+        or os.environ.get("MEILI_API_KEY"),
     )
 
 
@@ -143,6 +145,11 @@ def bench(
     ),
     n: int = typer.Option(200, "--n", help="Number of searches to run."),
     concurrency: int = typer.Option(1, "--concurrency", help="Parallel clients."),
+    rate: float = typer.Option(
+        DEFAULT_RATE,
+        "--rate",
+        help="Launches per second (0 = unpaced); the default stays under the app's own limit.",
+    ),
     queries: Path | None = typer.Option(
         None, "--queries", help="File with one query per line (default: a built-in list)."
     ),
@@ -154,14 +161,15 @@ def bench(
     if queries is not None:
         qs = tuple(queries.read_text(encoding="utf-8").splitlines())
     with httpx.Client(base_url=url, timeout=30.0) as client:
-        res = bench_search(client, qs, n=n, limit=limit, concurrency=concurrency)
+        res = bench_search(client, qs, n=n, limit=limit, concurrency=concurrency, rate=rate)
     if as_json:
         console.print_json(json.dumps(res))
     else:
         w, b = res["wall_ms"], res["backend_ms"]
         console.print(
             f"{res['ok']}/{res['n']} searches ok, {res['errors']} errors, "
-            f"concurrency {res['concurrency']}, {res['queries']} distinct queries"
+            f"{res['rate_limited']} rate-limited (429), concurrency {res['concurrency']}, "
+            f"{res['rate']:g}/s pacing, {res['queries']} distinct queries"
         )
         console.print(
             f"wall clock  p50 {w['p50']:.0f} ms · p95 {w['p95']:.0f} ms · max {w['max']:.0f} ms"

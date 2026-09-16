@@ -56,7 +56,8 @@ deployment; `rsync -P` resumes if it drops.
 
 ## 3. On the server: bootstrap
 
-As root, on a fresh Debian/Ubuntu host:
+As root, on a fresh Debian/Ubuntu host (the repository must be public by
+then, or the clone inside the script needs `REPO_URL` with a token):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/deploy/install.sh | bash
@@ -69,9 +70,11 @@ curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/de
    `/opt/leibniz-legible` (the checkout + venv), `/var/lib/leibniz-legible`
    (the store), `/var/lib/meilisearch` (the index), `/etc/leibniz-legible`,
    `/etc/meilisearch`;
-3. clones the repository, installs `uv`, and builds the venv as the `leibniz`
-   user (`uv sync --frozen --no-dev --extra web`, managed CPython 3.12);
-4. installs the Meilisearch binary (`install.meilisearch.com`), writes
+3. clones the repository and builds the venv **as the `leibniz` user** (git
+   and uv both run as that user; `uv sync --frozen --no-dev --extra web`,
+   managed CPython 3.12 under the checkout's `.uv/`);
+4. installs the Meilisearch binary (the pinned release the kit was verified
+   against, `MEILI_VERSION` in the script; only when absent), writes
    `/etc/meilisearch/env` with a **fresh random master key**, installs and
    starts `meilisearch.service` (bound to `127.0.0.1:7700`);
 5. installs Caddy from its apt repository, puts `deploy/Caddyfile` in place
@@ -79,7 +82,8 @@ curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/de
    feeds Caddy `/etc/leibniz-legible/caddy.env`;
 6. installs `/etc/leibniz-legible/env` from `env.example` (only if absent) and
    `leibniz-legible.service`, enabled but **not started** — it needs the store
-   and the index first.
+   and the index first. Caddy is restarted only once `caddy.env` names a real
+   domain, so a placeholder never hits Let's Encrypt.
 
 Doing it by hand is the same six steps; the script is short and commented.
 
@@ -170,7 +174,13 @@ meets it, through the whole path:
 It runs a built-in list of fifty Latin/French/German queries (names, terms,
 a few misspellings) and prints wall-clock and backend p50/p95/max; exit code
 1 means the criterion is missed. `--queries FILE` takes your own list, one
-per line. If p95 is over the bar:
+per line. Launches are paced to 8 per second by default, just under the
+app's own per-client limit, so the run measures the server and not its own
+`429`s (those are counted apart as "rate-limited" and never enter the
+percentiles). For a load test rather than a latency measurement, run it on
+the host against `http://127.0.0.1:8000` with `--rate 0 --concurrency 4`; the
+rate limiter will answer part of it with `429`, which is the point of the
+limiter. If p95 is over the bar:
 
 - `backend p95` far below `wall clock p95` → the time is outside Meilisearch:
   TLS/proxy, the app's snippet rendering, gzip. Check `LEIBNIZ_WORKERS`
@@ -181,9 +191,10 @@ per line. If p95 is over the bar:
 - Everything fine locally (`--url http://127.0.0.1:8000`) but slow from
   outside → the network, not the app.
 
-The bench also tells you the effect of the rate limit: at `--concurrency 4`
-from one address you will start to see errors once the burst is spent, which
-is the limiter doing its job (§8).
+`LEIBNIZ_WORKERS` above 1 is safe for latency: the multi-worker path binds
+its own listening socket so that `TCP_NODELAY` is set on every connection
+(uvicorn's own socket leaves Nagle's algorithm on there, which cost 40 ms per
+kept-alive request in testing).
 
 ## 8. Harden
 
@@ -235,9 +246,12 @@ What is already on, and where to turn the knobs:
 - **A new corpus run (C4).** Repeat §2 (new serving copy), §5 (rebuild the
   index; the app keeps serving the old one until the build swaps it in),
   then restart the app so `/api/stats` picks up the new build metadata.
-- **Upgrade Meilisearch.** Its on-disk format changes between minor versions;
-  after replacing the binary, rebuild the index (§5) rather than migrating a
-  dump. Pin the version you tested.
+- **Upgrade Meilisearch.** Its on-disk format changes between minor versions
+  and a newer binary refuses an older index. `install.sh` never replaces an
+  installed binary. To upgrade: stop the service, replace
+  `/usr/local/bin/meilisearch` (same download line as the script, new
+  version), delete `/var/lib/meilisearch/data.ms`, start it, rebuild the
+  index (§5). Keep `MEILI_VERSION` in `install.sh` in step with what runs.
 - **Backups.** None needed for the data: the store is a copy, the index is a
   rebuild. Back up `/etc/leibniz-legible`, `/etc/meilisearch` and
   `/etc/caddy` (a few KB) and you can rebuild the host from this file.

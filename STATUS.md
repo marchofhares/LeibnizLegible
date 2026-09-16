@@ -23,7 +23,7 @@ on every view). `leibniz release export` writes the three datasets as Parquet
 (or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
 provenance, licence, attribution, error rates and the anti-contamination note.
 `reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
-states the project against SPECS §3 criterion by criterion. **502 tests**, ruff
+states the project against SPECS §3 criterion by criterion. **504 tests**, ruff
 clean. The operator step: `leibniz index build && leibniz serve` on the corpus
 store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
 then measure search p95.
@@ -37,7 +37,7 @@ operator's runbook (`deploy/README.md`): a small VPS, the serving copy of the
 store, the Meilisearch build, the DNS record — and the courtesy note to the
 GWLB, whose servers carry the viewer's image traffic. `LICENSE` (Apache-2.0)
 and the issue form the viewer's "Report an error" link opens are in place for
-the repository going public. **502 tests**, ruff clean.
+the repository going public. **504 tests**, ruff clean.
 
 **Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
 statement (doi:10.5281/zenodo.22782813), the corpus census
@@ -339,11 +339,45 @@ offline-tested and documented so that going live is an operator runbook
   `.github/ISSUE_TEMPLATE/transcription-error.yml` (an issue form; the
   viewer's "Report an error" link now opens it with the page id and URL
   prefilled), Issues confirmed enabled on the repository.
-- **Verified**: 502 tests (+27), ruff clean; every viewer route driven under
+- **Verified**: 504 tests (+29), ruff clean; every viewer route driven under
   Playwright/Chromium against the real app with the CSP and the rate limit
   on (EN/DE, search, work, page with OpenSeadragon on a same-origin image,
   about, a 404): zero CSP violations, zero console errors; the limiter trips
   at the configured burst.
+- **Follow-up, same day — the kit against a real Meilisearch (v1.53.2 binary,
+  the version now pinned in `install.sh` and both compose files).** Two
+  things the fakes had hidden: (1) on current Meilisearch, deleting an index
+  that does not exist is a task that *fails* with `index_not_found` (a 404
+  was the pre-1.0 behaviour the fake copied), so the very first
+  `leibniz index build --backend meili` on a fresh server aborted — the
+  backend now ignores exactly that failure, and the fake fails like the
+  server; (2) Meilisearch creates `dumps/` in its working directory at
+  startup, which under the unit's `ProtectSystem=strict` is a
+  permission-denied crash — reproduced as an unprivileged user with a
+  read-only cwd, fixed with `WorkingDirectory=/var/lib/meilisearch` and
+  explicit `MEILI_DB_PATH`/`MEILI_DUMP_DIR`/`MEILI_SNAPSHOT_DIR`. Also:
+  `install.sh` runs git and uv as the service user (git refuses to act as
+  root on another user's checkout, which would have broken every re-run),
+  restarts Caddy only once a real domain is configured, and installs the
+  pinned Meilisearch release only when absent (an upgrade must be
+  deliberate: a newer binary refuses an older index); `leibniz index
+  status/query` accept `MEILI_API_KEY`. Then the full path end to end with
+  the real server: search-only key created and confined (document writes
+  and key listing 403), index built on a fresh server, `leibniz serve
+  --workers 2` healthy, the misspelt `calculemvs` finds *Calculemus*,
+  `/api/stats` served from the build metadata through the search key,
+  `leibniz index bench` 60/60, and with Meilisearch stopped: search 503,
+  pages 200, `/healthz` degraded. That bench also exposed a 40 ms stall on
+  every kept-alive request after the first when `--workers` > 1 (wall p95
+  52 ms against a 1 ms backend): uvicorn's own shared listening socket is
+  created with ``proto=0`` and asyncio sets ``TCP_NODELAY`` on accepted
+  connections only when the socket says IPPROTO_TCP, so Nagle's algorithm
+  met the peer's delayed ACK. `leibniz serve` now binds its own
+  IPPROTO_TCP socket for the multiprocess supervisor — 44 ms → 1–3 ms per
+  request, bench p95 3 ms with two workers. And the bench itself now paces
+  its launches (8/s, under the app's 10/s limit) and reports `429`s apart,
+  so on the production configuration it measures the server rather than
+  its own rate limiting.
 
 ### D1–D3 — search, viewer, IIIF, releases, built on v1 (2026-09-16) ✅
 

@@ -73,7 +73,11 @@ class MeiliBackend:
             self.client.headers["Authorization"] = f"Bearer {key}"
 
     # -- task helpers ------------------------------------------------------ #
-    def _wait(self, resp: httpx.Response, *, timeout: float = 600.0) -> dict:
+    def _wait(
+        self, resp: httpx.Response, *, timeout: float = 600.0, ignore: tuple[str, ...] = ()
+    ) -> dict:
+        """Await the task ``resp`` enqueued; raise unless it succeeded or failed
+        with an error code in ``ignore``."""
         resp.raise_for_status()
         body = resp.json()
         uid = body.get("taskUid", body.get("uid"))
@@ -84,6 +88,8 @@ class MeiliBackend:
             task = self.client.get(f"/tasks/{uid}").json()
             status = task.get("status")
             if status in ("succeeded", "failed", "canceled"):
+                if status == "failed" and (task.get("error") or {}).get("code") in ignore:
+                    return task
                 if status != "succeeded":
                     raise RuntimeError(f"Meilisearch task {uid} {status}: {task.get('error')}")
                 return task
@@ -100,9 +106,11 @@ class MeiliBackend:
         self, docs: Iterable[PageDoc], *, meta: dict | None = None, batch: int = 2000
     ) -> int:
         for uid in (self.index_uid, self._meta_uid):
+            # Deleting an index is a task; on a fresh server (first build) that
+            # task fails with index_not_found, which is exactly what we want.
             r = self.client.delete(f"/indexes/{uid}")
             if r.status_code != 404:
-                self._wait(r)
+                self._wait(r, ignore=("index_not_found",))
             self._wait(self.client.post("/indexes", json={"uid": uid, "primaryKey": "doc_id"}))
         self._wait(self.client.patch(f"/indexes/{self.index_uid}/settings", json=SETTINGS))
         n = 0

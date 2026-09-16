@@ -12,6 +12,8 @@ set -euo pipefail
 
 : "${MEILI_MASTER_KEY:?export MEILI_MASTER_KEY first (see /etc/meilisearch/env)}"
 MEILI_URL="${MEILI_URL:-http://127.0.0.1:7700}"
+PY="${PYTHON:-/opt/leibniz-legible/.venv/bin/python}"
+[[ -x "$PY" ]] || PY=python3
 
 curl -sS --fail -X POST "$MEILI_URL/keys" \
   -H "Authorization: Bearer $MEILI_MASTER_KEY" \
@@ -22,4 +24,4 @@ curl -sS --fail -X POST "$MEILI_URL/keys" \
     "actions": ["search", "documents.get", "stats.get", "indexes.get"],
     "indexes": ["leibniz_pages*"],
     "expiresAt": null
-  }' | python3 -c 'import json, sys; print(json.load(sys.stdin)["key"])'
+  }' | "$PY" -c 'import json, sys; print(json.load(sys.stdin)["key"])'
