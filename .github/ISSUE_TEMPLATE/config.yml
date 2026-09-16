@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Project status and documentation
+    url: https://github.com/marchofhares/leibnizlegible#readme
+    about: Read STATUS.md and SPECS.md before opening a design question; the reports are under reports/.

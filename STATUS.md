@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-16 (**Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3.**)._
+_Last updated: 2026-09-16 (**Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -23,10 +23,21 @@ on every view). `leibniz release export` writes the three datasets as Parquet
 (or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
 provenance, licence, attribution, error rates and the anti-contamination note.
 `reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
-states the project against SPECS §3 criterion by criterion. **475 tests**, ruff
+states the project against SPECS §3 criterion by criterion. **502 tests**, ruff
 clean. The operator step: `leibniz index build && leibniz serve` on the corpus
 store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
 then measure search p95.
+
+**Deployable (2026-09-16, later session).** The deployment kit is in `deploy/`
+(runbook, `install.sh`, systemd units, Caddyfile, container stack) and the app
+is hardened for public traffic (per-client rate limit, CSP + security headers,
+CORS for IIIF consumers, gzip, read-only store connections, `/healthz`,
+`robots.txt`, `leibniz index bench` for the p95 criterion). Going live is the
+operator's runbook (`deploy/README.md`): a small VPS, the serving copy of the
+store, the Meilisearch build, the DNS record — and the courtesy note to the
+GWLB, whose servers carry the viewer's image traffic. `LICENSE` (Apache-2.0)
+and the issue form the viewer's "Report an error" link opens are in place for
+the repository going public. **502 tests**, ruff clean.
 
 **Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
 statement (doi:10.5281/zenodo.22782813), the corpus census
@@ -269,6 +280,70 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### D — deployment kit, public-traffic hardening, public-repo prep (2026-09-16, later session) ✅
+
+The serving layer was finished but nothing existed to put it on a host. Built,
+offline-tested and documented so that going live is an operator runbook
+(`deploy/README.md`), not another coding session:
+
+- **`deploy/`**: `install.sh` (idempotent Debian/Ubuntu bootstrap: users,
+  directories, uv + venv as the service user, the Meilisearch binary with a
+  generated master key, Caddy from its apt repository, the units),
+  `leibniz-legible.service` + `meilisearch.service` (hardened sandboxes, the
+  app bound to localhost), `Caddyfile` (auto-TLS, zstd/gzip, HSTS, a JSON
+  access log kept seven days, an optional edge rate-limit block),
+  `env.example` / `meilisearch.env.example` / `caddy.env.example`,
+  `prepare-store.sh` (desktop: WAL checkpoint → `VACUUM INTO` → integrity
+  check → SHA-256; a compact rollback-journal copy the read-only app opens
+  without sidecars), `meili-search-key.sh` (a search/stats-only key, so the
+  master key never reaches the serving process), and
+  `docker-compose.prod.yml` + a root `Dockerfile` (uv multi-stage, non-root,
+  healthcheck on `/healthz`) as the all-container alternative. The compose
+  file validates (`docker compose config`, required variables enforced); the
+  image build itself is unverified here — no Docker daemon in this
+  environment.
+- **`leibniz serve`** takes every option from the environment
+  (`web/settings.py`: `LEIBNIZ_DB_PATH`, `LEIBNIZ_SEARCH_BACKEND`,
+  `LEIBNIZ_BASE_URL`, `LEIBNIZ_WORKERS`, `MEILI_API_KEY` …), runs
+  `--workers N` through an ASGI factory (`web/asgi.py`), and `LEIBNIZ_DB_PATH`
+  is now honoured by every command (`.env.example` documented it; nothing
+  read it).
+- **Hardening in the app** (`web/middleware.py`, so every way of running it
+  is covered): a per-client token-bucket rate limit on `/api`, `/manifests`,
+  `/annotations` (default 10/s, burst 40, `429` + `Retry-After`, bounded
+  memory), security headers with a CSP (`script-src 'self'`; the viewer's one
+  inline script moved to `static/boot.js`), CORS `*` on the JSON routes so
+  Mirador elsewhere can load the manifests (D7 needed it and lacked it),
+  gzip (a 3,500-page manifest: 2.5 MB → 62 KB), `no-cache` on the viewer
+  shell, `/robots.txt` closing the machine endpoints to crawlers (one walking
+  the manifests would pull every GWLB image), every store connection
+  `mode=ro` + `query_only`, Meilisearch outages answered with `503`
+  (`/api/stats` and `/healthz` degrade instead of raising), and
+  `GET /healthz` for the process manager and an uptime monitor.
+- **The giants** (works of 1,000–3,500 pages): the work and manifest
+  endpoints run one query per work (`line_summaries_by_page`, a `NOT EXISTS`
+  probe on the lines' covering unique index) instead of one per page.
+  Measured on a synthetic 3,500-page × 60-line work with a partial re-run:
+  180 ms against 228 ms for the per-page loop, the fastest of five plans
+  tried (`GROUP BY` and window forms were slower). So the loop was never the
+  problem the previous session guessed (SQLite answers a page-keyed query in
+  ~60 µs); the gain is ~20 % and the real cost was payload size, now gzipped
+  (`/api/works` for that giant: 238 ms end to end, 485 KB → 30 KB).
+- **`leibniz index bench`** (`search/bench.py`): p50/p95/max over HTTP for
+  a built-in list of fifty Nachlass queries (with misspellings for the typo
+  tolerance) or a file of real ones, `--concurrency`, exit 1 when p95 misses
+  SPECS §3.3's 500 ms — the measurement step of the runbook.
+- **Public-repo prep**: `LICENSE` (Apache-2.0 verbatim; declared in
+  `pyproject`/README, absent until now),
+  `.github/ISSUE_TEMPLATE/transcription-error.yml` (an issue form; the
+  viewer's "Report an error" link now opens it with the page id and URL
+  prefilled), Issues confirmed enabled on the repository.
+- **Verified**: 502 tests (+27), ruff clean; every viewer route driven under
+  Playwright/Chromium against the real app with the CSP and the rate limit
+  on (EN/DE, search, work, page with OpenSeadragon on a same-origin image,
+  about, a 404): zero CSP violations, zero console errors; the limiter trips
+  at the configured burst.
 
 ### D1–D3 — search, viewer, IIIF, releases, built on v1 (2026-09-16) ✅
 
@@ -1004,11 +1079,12 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**Phase D is built on v1 (2026-09-16); the operator runs it on the corpus store.**
-`leibniz index build` (one scan of 13.5M lines; FTS5 file a few GB, or
-Meilisearch via `docker compose up -d meilisearch`), `leibniz serve`, measure
-search p95 against the 500 ms criterion, deploy (small VPS), then `leibniz
-release export` + the checklist for the dataset uploads.
+**Phase D is built on v1 and deployable (2026-09-16); the operator runs the
+runbook.** `deploy/README.md`: `deploy/prepare-store.sh` on the desktop,
+`install.sh` on a small VPS, `leibniz index build --backend meili` (one pass,
+an hour or two), `leibniz index bench` against the 500 ms p95 criterion, the
+courtesy note to the GWLB before launch, then `leibniz release export` + the
+checklist for the dataset uploads.
 
 **A0–A3 + B1–B2 + C1 (machinery *and* corpus run) + C2 (machinery *and* mint) all green; C2's precision gate is deferred to C3's ablation (audit preliminary).**
 Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and

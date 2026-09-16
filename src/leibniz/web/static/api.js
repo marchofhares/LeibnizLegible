@@ -109,8 +109,18 @@ export function gwlbRecordUrl(workId) {
 
 export const REPO_URL = 'https://github.com/marchofhares/leibnizlegible';
 
-/** A prefilled "report an error" issue for one page. */
+/**
+ * A prefilled "report an error" issue for one page: the repository's issue
+ * form (`.github/ISSUE_TEMPLATE/transcription-error.yml`) with the page id and
+ * the page's URL already filled in. GitHub prefills form fields from query
+ * parameters named after the field ids.
+ */
 export function reportUrl(pageId) {
-  const title = `Transcription error on page ${pageId}`;
-  return `${REPO_URL}/issues/new?title=${encodeURIComponent(title)}`;
+  const params = new URLSearchParams({
+    template: 'transcription-error.yml',
+    title: `Transcription error on page ${pageId}`,
+    page_id: pageId,
+    page_url: `${window.location.origin}/page/${pathSeg(pageId)}`,
+  });
+  return `${REPO_URL}/issues/new?${params.toString()}`;
 }

@@ -50,6 +50,8 @@ def spa(...): return FileResponse(STATIC_DIR / "index.html")
 | File | What |
 | --- | --- |
 | `index.html` | the shell: header, nav, language switch, the **statically delivered search form**, footer, `<noscript>` |
+| `boot.js` | one line, loaded synchronously in `<head>`: drops the `no-js` class before first paint (a file, not inline, because of the CSP — see below) |
+| `robots.txt` | served at `/robots.txt`: human pages open, `/api/`, `/manifests/`, `/annotations/` closed to crawlers (their canvases would pull every GWLB image) |
 | `app.js` | boot, i18n over the static chrome, router (`pushState` + `popstate`), link and form interception |
 | `api.js` | `search` / `work` / `page` / `stats` wrappers, `ApiError`, URL builders |
 | `dom.js` | `esc()`, the snippet sanitiser, number/date formatting, confidence bands, chips and badges |
@@ -71,6 +73,14 @@ re-parses it in an inert `<template>` and rebuilds it keeping text and `<mark>`
 elements only. Any other element is dropped (its text is kept), so the API
 cannot inject markup even by accident — but it also means **only `<mark>`
 survives**: if the API ever wants another tag in a snippet, change `snippet()`.
+
+**Content Security Policy.** The server sends `script-src 'self'` (see
+`leibniz/web/middleware.py`), so **no inline `<script>` and no `onclick=`
+attributes** — put code in a file under `static/`. Inline `style="…"` is
+allowed (`style-src 'unsafe-inline'`; `about.js` uses it for the histogram
+bars), and images / `info.json` may come from any https origin because the
+store, not the code, says where a work's images live. Re-run the Playwright
+pass after touching this: a CSP violation is a console error, not an exception.
 
 **Adding a user-facing string.** Add the key to **both** `en` and `de` in
 `i18n.js`, in the matching section, then use `t('your.key')`. Never inline

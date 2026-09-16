@@ -1,0 +1,40 @@
+"""`leibniz index bench` — latency percentiles over HTTP (here: the TestClient)."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from leibniz import db
+from leibniz.search.bench import DEFAULT_QUERIES, P95_CRITERION_MS, bench_search, percentiles
+from leibniz.search.documents import iter_page_docs
+from leibniz.search.fts5 import Fts5Backend
+from leibniz.web.api import create_app
+
+
+def _client(store_path, tmp_path, *, search: bool = True) -> TestClient:
+    be = None
+    if search:
+        be = Fts5Backend(tmp_path / "search.sqlite")
+        conn = db.connect(store_path)
+        be.rebuild(iter_page_docs(conn))
+        conn.close()
+    return TestClient(create_app(store_path, search=be, static_dir=None))
+
+
+def test_percentiles_nearest_rank() -> None:
+    assert percentiles([]) == {"p50": 0.0, "p95": 0.0, "max": 0.0}
+    assert percentiles([float(i) for i in range(1, 11)]) == {"p50": 5.0, "p95": 10.0, "max": 10.0}
+    assert percentiles([3.0])["p95"] == 3.0
+
+
+def test_bench_reports_and_passes(store_path, tmp_path) -> None:
+    res = bench_search(_client(store_path, tmp_path), ["calculemus", "monade"], n=6, concurrency=2)
+    assert res["n"] == 6 and res["ok"] == 6 and res["errors"] == 0 and res["queries"] == 2
+    assert res["criterion_p95_ms"] == P95_CRITERION_MS and res["pass"] is True
+    assert res["wall_ms"]["p95"] >= res["wall_ms"]["p50"] >= 0.0
+    assert len(DEFAULT_QUERIES) >= 40 and all(q.strip() for q in DEFAULT_QUERIES)
+
+
+def test_bench_counts_errors(store_path, tmp_path) -> None:
+    res = bench_search(_client(store_path, tmp_path, search=False), n=3)  # 503: no index
+    assert res["ok"] == 0 and res["errors"] == 3 and res["pass"] is False

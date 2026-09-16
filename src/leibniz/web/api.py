@@ -1,6 +1,6 @@
 """The JSON API + viewer host (Phases D1/D2).
 
-Routes (all read-only; the store is opened per request):
+Routes (all read-only; the store is opened per request, read-only):
 
 * ``GET /api/search``          — typo-/orthography-tolerant page search (D1)
 * ``GET /api/works/{id}``      — a work: pages, katalog records, attribution
@@ -9,9 +9,14 @@ Routes (all read-only; the store is opened per request):
 * ``GET /api/stats``           — corpus counts for the About page
 * ``GET /manifests/{work}``    — IIIF Presentation 3 manifest (D7)
 * ``GET /annotations/{page}``  — W3C AnnotationPage with the page's lines (D7)
-* ``/``, ``/search``, ``/work/…``, ``/page/…``, ``/about`` — the static viewer
+* ``GET /healthz``             — liveness for the process manager / uptime monitor
+* ``/``, ``/search``, ``/work/…``, ``/page/…``, ``/about``, ``/robots.txt`` — the
+  static viewer
 
-Build it with :func:`create_app`; ``leibniz serve`` wraps it in uvicorn.
+Build it with :func:`create_app`; ``leibniz serve`` wraps it in uvicorn. The
+public-deployment middleware (gzip, CORS for the IIIF consumers, a per-client
+rate limit, security headers) is applied here so every way of running the app
+gets it, whatever sits in front.
 """
 
 from __future__ import annotations
@@ -20,26 +25,44 @@ import json
 import sqlite3
 from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 from leibniz import __version__, db
 from leibniz.search.backend import SearchBackend, SearchQuery
-from leibniz.search.documents import aa_ref_label, corpus_stats, latest_lines
+from leibniz.search.documents import (
+    aa_ref_label,
+    corpus_stats,
+    latest_lines,
+    line_summaries_by_page,
+)
 from leibniz.web import attribution as attr
 from leibniz.web import iiif
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
+from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
 STATIC_DIR = Path(__file__).parent / "static"
 INDEX_ROUTES = ("/", "/search", "/about", "/work/{work_id}", "/page/{page_id}")
 CACHE_HEADERS = {"Cache-Control": "public, max-age=300"}
+NO_STORE = {"Cache-Control": "no-store"}
 
 
 def _open(db_path: str | Path) -> sqlite3.Connection:
+    """A read-only connection to the store (``mode=ro`` + ``query_only``): the
+    serving process can never write, whatever a bug or a request does."""
+    if str(db_path) == ":memory:":
+        return db.connect(db_path)
     p = Path(db_path)
-    if str(db_path) != ":memory:" and not p.exists():
+    if not p.exists():
         raise HTTPException(503, f"store not found: {db_path}")
-    return db.connect(db_path)
+    conn = sqlite3.connect(f"{p.resolve().as_uri()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA query_only = ON")
+    conn.execute("PRAGMA busy_timeout = 5000")
+    return conn
 
 
 def _run_dates(conn: sqlite3.Connection, run_ids: set[int]) -> dict[int, str]:
@@ -104,13 +127,10 @@ def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
     return out
 
 
-def _page_summary(conn: sqlite3.Connection, page: db.Page) -> dict:
-    row = conn.execute(
-        "SELECT COUNT(*) AS n, AVG(conf) AS c FROM lines l WHERE l.page_id = ? "
-        "AND l.text IS NOT NULL AND l.text != '' AND l.run_id = "
-        "(SELECT MAX(run_id) FROM lines x WHERE x.page_id = l.page_id AND x.line_seq = l.line_seq)",
-        (page.id,),
-    ).fetchone()
+def _page_summary(page: db.Page, summary: tuple[int, float | None] | None) -> dict:
+    """One row of a work's page list; ``summary`` comes from
+    :func:`line_summaries_by_page` (one query for the whole work)."""
+    n_lines, mean_conf = summary if summary is not None else (0, None)
     return {
         "page_id": page.id,
         "seq": page.seq,
@@ -118,8 +138,8 @@ def _page_summary(conn: sqlite3.Connection, page: db.Page) -> dict:
         "thumb_url": page.thumb_url,
         "status": page.status,
         "skip_reason": page.skip_reason,
-        "n_lines": int(row["n"] or 0),
-        "mean_conf": round(row["c"], 4) if row["c"] is not None else None,
+        "n_lines": n_lines,
+        "mean_conf": mean_conf,
     }
 
 
@@ -147,8 +167,18 @@ def create_app(
     search: SearchBackend | None = None,
     static_dir: Path | None = STATIC_DIR,
     base_url: str | None = None,
+    rate_limit: float = 0.0,
+    rate_burst: int = 40,
+    security_headers: bool = True,
+    cors: bool = True,
 ) -> FastAPI:
-    """Build the FastAPI application over a store (+ optional search backend)."""
+    """Build the FastAPI application over a store (+ optional search backend).
+
+    ``rate_limit`` is requests/second per client on the API, manifest and
+    annotation routes (``0`` = off, the default for tests; ``leibniz serve``
+    turns it on). ``cors`` opens the read-only JSON routes to other origins so
+    IIIF viewers elsewhere can load the manifests (deliverable D7).
+    """
     app = FastAPI(
         title="Leibniz Legible API",
         version=__version__,
@@ -159,8 +189,40 @@ def create_app(
     )
     state: dict = {"stats": None}
 
+    # Middleware. The last one added is the outermost: headers on every response,
+    # then CORS (so a 429 still carries the CORS headers a browser needs to read
+    # it), then the rate limit, then gzip on the giants (a 3,500-page work is
+    # ~1 MB of JSON before compression).
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    if rate_limit and rate_limit > 0:
+        app.add_middleware(RateLimitMiddleware, rate=rate_limit, burst=rate_burst)
+    if cors:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["GET", "HEAD", "OPTIONS"],
+            allow_headers=["*"],
+            max_age=86400,
+        )
+    if security_headers:
+        app.add_middleware(SecurityHeadersMiddleware)
+
     def base(request: Request) -> str:
         return (base_url or str(request.base_url)).rstrip("/")
+
+    # ---- operations -------------------------------------------------------- #
+    @app.get("/healthz", include_in_schema=False)
+    def healthz() -> JSONResponse:
+        """Liveness: 200 while the store is present (search may be degraded)."""
+        store_ok = str(db_path) == ":memory:" or Path(db_path).exists()
+        search_ok = search.health() if search is not None else None
+        body = {
+            "status": "ok" if store_ok and search_ok is not False else "degraded",
+            "version": __version__,
+            "store": store_ok,
+            "search": {"backend": search.name, "ok": search_ok} if search is not None else None,
+        }
+        return JSONResponse(body, status_code=200 if store_ok else 503, headers=NO_STORE)
 
     # ---- API ------------------------------------------------------------- #
     @app.get("/api/stats")
@@ -195,18 +257,21 @@ def create_app(
     ) -> JSONResponse:
         if search is None:
             raise HTTPException(503, "search index not configured (run `leibniz index build`)")
-        res = search.search(
-            SearchQuery(
-                q=q,
-                set_name=set,
-                lang=lang,
-                stratum=stratum,
-                min_conf=min_conf,
-                work_id=work,
-                page=page,
-                limit=limit,
+        try:
+            res = search.search(
+                SearchQuery(
+                    q=q,
+                    set_name=set,
+                    lang=lang,
+                    stratum=stratum,
+                    min_conf=min_conf,
+                    work_id=work,
+                    page=page,
+                    limit=limit,
+                )
             )
-        )
+        except httpx.HTTPError as exc:  # Meilisearch down or restarting
+            raise HTTPException(503, "search backend unavailable; try again shortly") from exc
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
 
     @app.get("/api/works/{work_id}")
@@ -217,6 +282,7 @@ def create_app(
             if work is None:
                 raise HTTPException(404, f"work {work_id} not found")
             pages = db.get_pages(conn, work_id)
+            summaries = line_summaries_by_page(conn, work_id)
             body = {
                 "work_id": work.gwlb_object_id,
                 "set": work.set_name,
@@ -226,7 +292,7 @@ def create_app(
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id),
                 "n_canvases": work.n_canvases,
                 "iiif_manifest": f"/manifests/{work.gwlb_object_id}",
-                "pages": [_page_summary(conn, p) for p in pages],
+                "pages": [_page_summary(p, summaries.get(p.id)) for p in pages],
                 "katalog": _katalog_for_work(conn, work_id),
                 "attribution": attr.attribution(),
             }
@@ -296,16 +362,7 @@ def create_app(
             if work is None:
                 raise HTTPException(404, f"work {work_id} not found")
             pages = db.get_pages(conn, work_id)
-            counts = {
-                r["page_id"]: r["n"]
-                for r in conn.execute(
-                    "SELECT l.page_id, COUNT(*) AS n FROM lines l WHERE l.page_id IN "
-                    "(SELECT page_id FROM pages WHERE work_id = ?) AND l.text IS NOT NULL "
-                    "AND l.run_id = (SELECT MAX(run_id) FROM lines x WHERE x.page_id = l.page_id "
-                    "AND x.line_seq = l.line_seq) GROUP BY l.page_id",
-                    (work_id,),
-                )
-            }
+            counts = {pid: n for pid, (n, _) in line_summaries_by_page(conn, work_id).items()}
             body = iiif.build_manifest(work, pages, base_url=base(request), line_counts=counts)
         finally:
             conn.close()
@@ -332,8 +389,12 @@ def create_app(
 
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+        # The shell is revalidated on every load (ETag/Last-Modified) so a deploy
+        # shows up at once; /static/* may be cached by the proxy (see deploy/Caddyfile).
         def serve_index() -> FileResponse:
-            return FileResponse(index_html, media_type="text/html")
+            return FileResponse(
+                index_html, media_type="text/html", headers={"Cache-Control": "no-cache"}
+            )
 
         def serve_index_work(work_id: str) -> FileResponse:
             return serve_index()
@@ -346,6 +407,14 @@ def create_app(
             app.add_api_route(
                 route, handlers.get(route, serve_index), methods=["GET"], include_in_schema=False
             )
+
+        robots = static_dir / "robots.txt"
+        if robots.exists():
+
+            def serve_robots() -> FileResponse:
+                return FileResponse(robots, media_type="text/plain", headers=CACHE_HEADERS)
+
+            app.add_api_route("/robots.txt", serve_robots, methods=["GET"], include_in_schema=False)
 
     return app
 

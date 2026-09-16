@@ -1,5 +1,6 @@
-# Development services (SPECS §4.2). Only Meilisearch for now: the store is a
-# SQLite file and the API is `leibniz serve`; nothing else needs a server.
+# Development services (SPECS §4.2). Only Meilisearch: the store is a SQLite
+# file and the API is `leibniz serve`; nothing else needs a server. The
+# production stack (app + Meilisearch + Caddy) is deploy/docker-compose.prod.yml.
 #
 #   docker compose up -d meilisearch
 #   leibniz index build --backend meili --meili-url http://127.0.0.1:7700 --meili-key "$MEILI_MASTER_KEY"
