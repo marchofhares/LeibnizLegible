@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import socket
+
 import pytest
 from fastapi.testclient import TestClient
 
+from leibniz.web.cli import listening_socket
 from leibniz.web.settings import DEFAULT_RATE_BURST, DEFAULT_RATE_LIMIT, ServeSettings
 
 
@@ -58,3 +61,23 @@ def test_asgi_factory_builds_from_env(store_path, monkeypatch) -> None:
     assert c.get("/healthz").json()["store"] is True
     assert c.get("/api/search", params={"q": "x"}).status_code == 503
     assert c.get("/api/works/00068642").status_code == 200
+
+
+def test_listening_socket_is_tcp_bound_and_inheritable() -> None:
+    sock = listening_socket("127.0.0.1", 0)
+    try:
+        # proto must say TCP, or asyncio never sets TCP_NODELAY on accepted connections
+        assert sock.proto == socket.IPPROTO_TCP and sock.type == socket.SOCK_STREAM
+        assert sock.family == socket.AF_INET and sock.getsockname()[1] > 0
+        assert sock.get_inheritable()
+    finally:
+        sock.close()
+    if socket.has_ipv6:
+        try:
+            v6 = listening_socket("::1", 0)
+        except OSError:  # no IPv6 loopback in this environment
+            return
+        try:
+            assert v6.family == socket.AF_INET6 and v6.proto == socket.IPPROTO_TCP
+        finally:
+            v6.close()

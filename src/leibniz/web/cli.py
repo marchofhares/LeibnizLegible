@@ -6,7 +6,9 @@ the variables), which is how the systemd unit and the container configure it.
 
 from __future__ import annotations
 
+import inspect
 import os
+import socket
 from pathlib import Path
 
 import typer
@@ -24,6 +26,26 @@ from leibniz.web.settings import (
 )
 
 console = Console()
+
+
+def listening_socket(host: str, port: int) -> socket.socket:
+    """A bound, inheritable listening socket for the multi-worker path, created
+    with ``proto=IPPROTO_TCP`` on purpose.
+
+    uvicorn's own ``Config.bind_socket`` leaves ``proto`` at 0, and asyncio
+    enables ``TCP_NODELAY`` on accepted connections only when the listening
+    socket says IPPROTO_TCP. With ``--workers`` > 1 every response after the
+    first on a kept-alive connection (which is how Caddy talks to us) waited
+    ~40 ms for the peer's delayed ACK — Nagle's algorithm. Measured: 44 ms →
+    1 ms per request. Single-worker mode is unaffected because there uvicorn
+    lets asyncio create the socket itself.
+    """
+    family = socket.AF_INET6 if ":" in host else socket.AF_INET
+    sock = socket.socket(family, socket.SOCK_STREAM, socket.IPPROTO_TCP)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((host, port))
+    sock.set_inheritable(True)
+    return sock
 
 
 def serve(
@@ -119,8 +141,18 @@ def serve(
     }
     if settings.workers > 1:
         # Worker processes rebuild the app from the environment (leibniz.web.asgi).
+        # The socket is ours (see listening_socket) rather than uvicorn.run()'s.
+        from uvicorn.supervisors import Multiprocess
+
         os.environ.update(settings.to_env())
-        uvicorn.run("leibniz.web.asgi:app", factory=True, workers=settings.workers, **options)
+        config = uvicorn.Config(
+            "leibniz.web.asgi:app", factory=True, workers=settings.workers, **options
+        )
+        sockets = [listening_socket(settings.host, settings.port)]
+        if "target" in inspect.signature(Multiprocess.__init__).parameters:  # uvicorn < 0.31
+            Multiprocess(config, target=uvicorn.Server(config).run, sockets=sockets).run()
+        else:
+            Multiprocess(config, sockets=sockets).run()
     else:
         uvicorn.run(settings.build_app(), **options)
 

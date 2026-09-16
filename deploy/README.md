@@ -174,7 +174,13 @@ meets it, through the whole path:
 It runs a built-in list of fifty Latin/French/German queries (names, terms,
 a few misspellings) and prints wall-clock and backend p50/p95/max; exit code
 1 means the criterion is missed. `--queries FILE` takes your own list, one
-per line. If p95 is over the bar:
+per line. Launches are paced to 8 per second by default, just under the
+app's own per-client limit, so the run measures the server and not its own
+`429`s (those are counted apart as "rate-limited" and never enter the
+percentiles). For a load test rather than a latency measurement, run it on
+the host against `http://127.0.0.1:8000` with `--rate 0 --concurrency 4`; the
+rate limiter will answer part of it with `429`, which is the point of the
+limiter. If p95 is over the bar:
 
 - `backend p95` far below `wall clock p95` → the time is outside Meilisearch:
   TLS/proxy, the app's snippet rendering, gzip. Check `LEIBNIZ_WORKERS`
@@ -185,9 +191,10 @@ per line. If p95 is over the bar:
 - Everything fine locally (`--url http://127.0.0.1:8000`) but slow from
   outside → the network, not the app.
 
-The bench also tells you the effect of the rate limit: at `--concurrency 4`
-from one address you will start to see errors once the burst is spent, which
-is the limiter doing its job (§8).
+`LEIBNIZ_WORKERS` above 1 is safe for latency: the multi-worker path binds
+its own listening socket so that `TCP_NODELAY` is set on every connection
+(uvicorn's own socket leaves Nagle's algorithm on there, which cost 40 ms per
+kept-alive request in testing).
 
 ## 8. Harden
 
