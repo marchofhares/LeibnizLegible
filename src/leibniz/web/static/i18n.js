@@ -30,6 +30,8 @@ const STRINGS = {
     // ---- attribution (shown on every view) ------------------------------
     'attr.images':
       'Images: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Loaded directly from the GWLB; never rehosted.',
+    'attr.images.mirror':
+      'Images: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Served from this project’s copy of the GWLB’s delivery scans; the originals remain with the GWLB.',
     'attr.katalog':
       'Catalogue: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.',
     'attr.transcriptions':
@@ -139,7 +141,7 @@ const STRINGS = {
     'page.conf': 'confidence {c}',
     'page.confUnknown': 'confidence not recorded',
     'page.langOf': 'language: {lang}',
-    'page.viewerError': 'The page image could not be loaded from the GWLB.',
+    'page.viewerError': 'The page image could not be loaded.',
 
     // ---- statuses --------------------------------------------------------
     'status.machine': 'machine',
@@ -181,6 +183,8 @@ const STRINGS = {
       'This is machine output with honest labels. It is Vorausedition-grade at best, and it is explicitly subordinate to the Akademie-Ausgabe, which remains the scholarly edition of Leibniz. Nothing here is an edition, and nothing here should be quoted as one. Roughly three quarters of the Nachlass has never been printed in any form; making it legible and findable is the whole of the ambition.',
     'about.what.p3':
       'The page images are never rehosted. They are loaded in your browser directly from the GWLB’s own servers.',
+    'about.what.p3.mirror':
+      'The page images are the GWLB’s own delivery scans, Public Domain Mark 1.0, served from a copy this project keeps so that the viewer neither depends on nor loads the library’s servers. Every page links to its original at the GWLB.',
 
     'about.numbers.h': 'The corpus in numbers',
     'about.numbers.loading': 'Loading the current figures…',
@@ -218,6 +222,8 @@ const STRINGS = {
     'about.license.images.h': 'Page images',
     'about.license.images.p':
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. The scans carry no related rights; they are loaded into your browser directly from the GWLB and are never copied onto our servers.',
+    'about.license.images.p.mirror':
+      'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. The scans carry no related rights (§ 68 UrhG). The copies shown here are the GWLB’s delivery derivatives, unaltered except for the thumbnails, served from this project’s own storage; each page links to its original at the GWLB, whose master files remain the authoritative source.',
     'about.license.katalog.h': 'Catalogue data',
     'about.license.katalog.p':
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
@@ -259,6 +265,8 @@ const STRINGS = {
     // ---- attribution -----------------------------------------------------
     'attr.images':
       'Digitalisate: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Direkt von der GWLB geladen, niemals gespiegelt.',
+    'attr.images.mirror':
+      'Digitalisate: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Ausgeliefert aus der projekteigenen Kopie der GWLB-Auslieferungsscans; die Originale bleiben bei der GWLB.',
     'attr.katalog':
       'Katalogdaten: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.',
     'attr.transcriptions':
@@ -369,7 +377,7 @@ const STRINGS = {
     'page.conf': 'Konfidenz {c}',
     'page.confUnknown': 'Konfidenz nicht erfasst',
     'page.langOf': 'Sprache: {lang}',
-    'page.viewerError': 'Das Seitenbild konnte nicht von der GWLB geladen werden.',
+    'page.viewerError': 'Das Seitenbild konnte nicht geladen werden.',
 
     // ---- statuses --------------------------------------------------------
     'status.machine': 'maschinell',
@@ -411,6 +419,8 @@ const STRINGS = {
       'Das ist maschinelle Ausgabe mit ehrlicher Kennzeichnung. Sie hat bestenfalls den Rang einer Vorausedition und ist der Akademie-Ausgabe ausdrücklich nachgeordnet; diese bleibt die wissenschaftliche Edition der Schriften von Leibniz. Nichts hier ist eine Edition, und nichts hier sollte als solche zitiert werden. Etwa drei Viertel des Nachlasses sind nie gedruckt worden; ihn lesbar und auffindbar zu machen ist der ganze Anspruch dieses Projekts.',
     'about.what.p3':
       'Die Seitenbilder werden nicht gespiegelt. Sie werden in Ihrem Browser unmittelbar von den Servern der GWLB geladen.',
+    'about.what.p3.mirror':
+      'Die Seitenbilder sind die Auslieferungsscans der GWLB selbst, Public Domain Mark 1.0, ausgeliefert aus einer Kopie, die dieses Projekt vorhält, damit der Viewer weder von den Servern der Bibliothek abhängt noch sie belastet. Jede Seite verweist auf ihr Original bei der GWLB.',
 
     'about.numbers.h': 'Das Korpus in Zahlen',
     'about.numbers.loading': 'Aktuelle Zahlen werden geladen …',
@@ -448,6 +458,8 @@ const STRINGS = {
     'about.license.images.h': 'Seitenbilder',
     'about.license.images.p':
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. An den Digitalisaten bestehen keine Leistungsschutzrechte; sie werden unmittelbar von der GWLB in Ihren Browser geladen und niemals auf unsere Server kopiert.',
+    'about.license.images.p.mirror':
+      'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. An den Digitalisaten bestehen keine Leistungsschutzrechte (§ 68 UrhG). Die hier gezeigten Kopien sind die Auslieferungsderivate der GWLB, unverändert bis auf die Vorschaubilder, ausgeliefert aus dem eigenen Speicher dieses Projekts; jede Seite verweist auf ihr Original bei der GWLB, deren Masterdateien die maßgebliche Quelle bleiben.',
     'about.license.katalog.h': 'Katalogdaten',
     'about.license.katalog.p':
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',

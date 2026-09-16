@@ -2,9 +2,15 @@
 
 Vanilla HTML + CSS + ES modules. **No build step, no bundler, no framework, no
 analytics.** What is in this directory is what the browser gets. The only
-network traffic the app causes is our own JSON API on the same origin and
-**page images loaded directly from the GWLB** — images are never rehosted or
-proxied (SPECS §3.4, §7.1).
+network traffic the app causes is our own JSON API on the same origin and the
+page images: **from the GWLB directly** by default (SPECS §3.4, §7.1), or,
+when the operator sets `LEIBNIZ_IMAGE_BASE_URL`, from the project's own
+mirror of the GWLB delivery scans (`leibniz/web/images.py`; recorded as an
+operator decision in STATUS.md). The server stamps `<html data-image-origin>`
+with `gwlb` or `mirror`; `app.js`, `page.js` and `about.js` pick the matching
+attribution and About texts from it, and the page API says per page
+(`image_origin`) where its pixels come from while `source_image_url` always
+names the GWLB original.
 
 ## How it is served
 

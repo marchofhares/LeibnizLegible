@@ -15,10 +15,12 @@ variables. Every command below is meant to be pasted._
 | the store | one SQLite file, the serving copy of `data/inventory.sqlite` | copied from the machine that ran the pipeline |
 | Meilisearch | the search index (typo tolerance) | built **on the server** from the store, in an hour or two |
 | Caddy | TLS certificate, compression, headers, the reverse proxy, the access log | `deploy/Caddyfile` |
+| the images | the 395 GB image cache plus thumbnails, on object storage behind `images.leibnizlegible.com` | uploaded once from the desktop (§12) |
 
-**No images.** The viewer and the manifests point at the GWLB's own image
-services; the 395 GB image cache stays where it is. **Nothing on the server
-is precious**: the store is a copy and the index is rebuilt from it.
+**The VPS never touches image traffic.** The viewer and the manifests point at
+the image mirror (or, with `LEIBNIZ_IMAGE_BASE_URL` unset, at the GWLB's own
+endpoints). **Nothing on the server is precious**: the store is a copy, the
+index is rebuilt from it, and the mirror is the cache re-uploaded.
 
 ## 1. Sizing
 
@@ -287,17 +289,16 @@ only Caddy can reach the app's port.
 
 ## 11. Before going public
 
-- **The GWLB.** Public traffic on the viewer is image traffic on the GWLB's
-  servers (`digitale-sammlungen.gwlb.de`), one page image per page view, at
-  the resolution OpenSeadragon asks for. Nothing is rehosted, nothing is
-  bulk-pulled by the server, the manifests are closed to crawlers. Write to
-  `digitalisierung@gwlb.de` (cc the Leibniz-Archiv) before launch — a short
-  note saying what the site is, that page images load from their IIIF and
-  delivery endpoints as ordinary browser traffic (one image per page view,
-  no server-side fetching, no rehosting), the expected volume (modest; a
-  research audience), a contact address, and that you will throttle, cache
-  or take the viewer down on request. Their goodwill is worth
-  more than any position (SPECS §7.7).
+- **The GWLB.** The site shows their scans from its own mirror (§12), so
+  their servers see none of the viewer's traffic — but the copies are theirs
+  in origin, and the relationship matters more than the licence (SPECS
+  §7.7). Write to `digitalisierung@gwlb.de` (cc the Leibniz-Archiv) before
+  launch: what the site is, that it serves its own copy of the Public Domain
+  delivery derivatives with attribution and a link to the original on every
+  page, that nothing is fetched from them at serve time, that the project
+  competes with no edition and exists as a free open-access resource, a
+  contact address, and an open door for their wishes. Include the sixteen
+  looping delivery URLs as a courtesy.
 - **The repository.** Issues must be enabled (the "Report an error" link
   opens `.github/ISSUE_TEMPLATE/transcription-error.yml`); `LICENSE` is
   Apache-2.0 at the root; the About page names the licences of images,
@@ -309,3 +310,61 @@ only Caddy can reach the app's port.
   from one address and meets the rate limit. If one address is hammering
   image-heavy pages, Caddy can block it in a line (`@bad remote_ip …`,
   `respond @bad 403`).
+
+## 12. The image mirror
+
+The public site serves the GWLB's delivery scans from its own storage
+(STATUS.md, Divergences). The mirror is the A2 image cache uploaded **as it
+is** — `data/images/{work_id}/{seq:04d}.jpg`, 236,779 files, 395.6 GB —
+plus a `thumbs/` tree in the same layout. With `LEIBNIZ_IMAGE_BASE_URL` set,
+the app derives every image URL from that layout; the polygons were computed
+on exactly these files, so the overlay is pixel-exact by construction.
+
+**Where.** Cloudflare R2 is the natural home when the domain is on
+Cloudflare: object storage at about $0.015 per GB-month (≈ $6 a month for
+the corpus), no egress fees, and a custom domain bound to the bucket in the
+dashboard with Cloudflare's CDN caching in front. Any S3-compatible bucket
+behind a hostname works the same way.
+
+1. Cloudflare dashboard → R2 → *Create bucket* `leibniz-images` (location
+   hint: Europe). Bucket → *Settings* → *Custom Domains* → add
+   `images.leibnizlegible.com` (Cloudflare creates the DNS record). Same
+   page, *CORS policy*: allow origins `*`, methods `GET, HEAD`, so any IIIF
+   client may fetch the images.
+2. R2 → *Manage R2 API tokens* → a token with *Object Read & Write* on that
+   bucket; note the Access Key ID, the Secret Access Key and the endpoint
+   `https://<account-id>.r2.cloudflarestorage.com`.
+3. On the desktop, thumbnails first, then the upload with
+   [rclone](https://rclone.org/) (resumable, parallel, checksummed):
+
+```bash
+uv run leibniz images thumbs                       # data/thumbs/, all cores, resumable; ~half an hour
+rclone config                                      # new remote "r2": type s3, provider Cloudflare, the keys, the endpoint
+rclone sync data/images r2:leibniz-images --transfers 16 --checkers 16 --fast-list --progress
+rclone sync data/thumbs r2:leibniz-images/thumbs --transfers 32 --fast-list --progress
+rclone check data/images r2:leibniz-images --one-way   # MD5 of every object against the local file
+```
+
+   The upload is bound by your uplink: 400 GB is about 18 hours at 50 Mbit/s,
+   9 at 100. Keep the WSL2 window open for the duration (WSL stops when its
+   last window closes); `rclone sync` resumes where it left off if it is
+   interrupted. The R2 free tier covers the first 10 GB; the rest bills
+   monthly.
+4. Verify from anywhere, against the store's own cache manifest:
+
+```bash
+uv run leibniz images check-mirror --base-url https://images.leibnizlegible.com            # 500 random pages + thumbnails
+uv run leibniz images check-mirror --base-url https://images.leibnizlegible.com --sample 0  # every page (hours)
+```
+
+5. On the server, `LEIBNIZ_IMAGE_BASE_URL=https://images.leibnizlegible.com`
+   in `/etc/leibniz-legible/env`, then `systemctl restart leibniz-legible`.
+   `curl -s https://leibnizlegible.com/api/pages/00068642:0001 | grep -o
+   '"image_url":"[^"]*"'` must show the mirror; `/api/stats` says
+   `"images": {"origin": "mirror", …}`; the About page's image paragraphs
+   switch wording by themselves.
+
+Optional, in Cloudflare → Caching → *Cache Rules*: hostname
+`images.leibnizlegible.com`, cache eligible, edge TTL one month. The objects
+never change (a re-fetched derivative would replace the same key; purge the
+cache then). A new corpus run changes nothing here.

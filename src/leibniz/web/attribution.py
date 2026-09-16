@@ -27,6 +27,12 @@ IMAGES = (
     f"Images: {GWLB_NAME} ({GWLB_COLLECTIONS}). Manuscript scans carry the Public Domain "
     "Mark 1.0 and are loaded directly from the GWLB's own servers; nothing is rehosted."
 )
+IMAGES_MIRROR = (
+    f"Images: {GWLB_NAME} ({GWLB_COLLECTIONS}). Manuscript scans carry the Public Domain "
+    "Mark 1.0. The copies shown are the GWLB's own delivery derivatives, served from Leibniz "
+    "Legible's mirror; every page links to its original at the GWLB, whose master files remain "
+    "the authoritative source."
+)
 KATALOG = f"Catalogue: {KATALOG_NAME} ({KATALOG_URL}), {KATALOG_PUBLISHER}, CC BY 4.0."
 TRANSCRIPTIONS = (
     f"Transcriptions: {PROJECT_NAME}, machine output of the PHILIUMM HTR model "
@@ -39,9 +45,23 @@ HONESTY = (
 )
 
 
-def attribution() -> dict[str, str]:
-    """The three attribution lines, as the API and the manifests carry them."""
-    return {"images": IMAGES, "katalog": KATALOG, "transcriptions": TRANSCRIPTIONS}
+def images_line(mirrored: bool = False) -> str:
+    """The images line: where the pixels come from, honestly (see ``web/images.py``)."""
+    return IMAGES_MIRROR if mirrored else IMAGES
+
+
+def attribution(images_mirrored: bool = False) -> dict[str, str]:
+    """The three attribution lines, as the API and the manifests carry them.
+
+    The dataset cards always use :data:`IMAGES` — they reference the GWLB's
+    URIs and rehost nothing; the web surfaces pass ``images_mirrored`` per the
+    operator's configuration.
+    """
+    return {
+        "images": images_line(images_mirrored),
+        "katalog": KATALOG,
+        "transcriptions": TRANSCRIPTIONS,
+    }
 
 
 __all__ = [
@@ -52,6 +72,7 @@ __all__ = [
     "GWLB_RESOLVE",
     "HONESTY",
     "IMAGES",
+    "IMAGES_MIRROR",
     "KATALOG",
     "KATALOG_NAME",
     "KATALOG_PUBLISHER",
@@ -66,4 +87,5 @@ __all__ = [
     "PROJECT_URL",
     "TRANSCRIPTIONS",
     "attribution",
+    "images_line",
 ]

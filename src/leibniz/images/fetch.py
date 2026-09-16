@@ -47,14 +47,21 @@ ProgressFn = Callable[[str, bool], None]  # (page_id, fetched?)
 # --------------------------------------------------------------------------- #
 
 
-def local_relpath(page: db.Page) -> str:
+def cache_relpath(work_id: str, seq: int) -> str:
     """Cache path for a page, relative to the images root: ``{oid}/{seq:04d}.jpg``.
 
     Mirrors the canonical page-id scheme (``{object_id}:{seq:04d}``) so a file on
-    disk maps back to its row unambiguously.
+    disk maps back to its row unambiguously. The image mirror
+    (:mod:`leibniz.web.images`) uses the same layout, so the bucket is the
+    cache directory as it is.
     """
-    safe = page.work_id.replace("/", "_").replace(os.sep, "_")
-    return f"{safe}/{page.seq:04d}.jpg"
+    safe = work_id.replace("/", "_").replace(os.sep, "_")
+    return f"{safe}/{seq:04d}.jpg"
+
+
+def local_relpath(page: db.Page) -> str:
+    """:func:`cache_relpath` for a page row."""
+    return cache_relpath(page.work_id, page.seq)
 
 
 def sha256_hex(data: bytes) -> str:
@@ -400,6 +407,7 @@ def append_stats_to_census(census_path: Path, section: str) -> None:
 
 
 __all__ = [
+    "cache_relpath",
     "DEFAULT_IMAGES_ROOT",
     "MIN_IMAGE_BYTES",
     "FetchStats",

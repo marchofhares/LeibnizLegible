@@ -90,6 +90,12 @@ def serve(
     rate_burst: int = typer.Option(
         DEFAULT_RATE_BURST, "--rate-burst", envvar=ENV["rate_burst"], help="Per-client burst."
     ),
+    image_base_url: str | None = typer.Option(
+        None,
+        "--image-base-url",
+        envvar=ENV["image_base_url"],
+        help="Serve page images from this mirror of the image cache (unset: from the GWLB).",
+    ),
     forwarded_allow_ips: str | None = typer.Option(
         None,
         "--forwarded-allow-ips",
@@ -114,6 +120,7 @@ def serve(
             workers=workers,
             rate_limit=rate_limit,
             rate_burst=rate_burst,
+            image_base_url=image_base_url,
         )
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
@@ -127,10 +134,11 @@ def serve(
     import uvicorn
 
     limit = f"{settings.rate_limit:g}/s" if settings.rate_limit else "off"
+    images = settings.image_base_url or "the GWLB"
     console.print(
         f"Serving Leibniz Legible on http://{settings.host}:{settings.port}  "
         f"(store {settings.db_path}, {settings.backend}, {settings.workers} worker(s), "
-        f"rate limit {limit})"
+        f"rate limit {limit}, images from {images})"
     )
     options = {
         "host": settings.host,
