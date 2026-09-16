@@ -1,0 +1,13 @@
+5.0.1
+
+OpenSeadragon 5.0.1 — BSD-3-Clause (see LICENSE.txt).
+Source: https://registry.npmjs.org/openseadragon/-/openseadragon-5.0.1.tgz
+  npm dist.shasum    ad3aaccc6c0f733c3153131e9af05bc2e17a1952
+  npm dist.integrity sha512-a/hjouW9i3UfWxRADVYN2MyRhXMGnE7x9VVL7/4jXCcDLFyO4UM5o4RStYtqa5BfaHw/wMNAaD2WbxQF8f1pJg==
+Vendored from the tarball's build/openseadragon/ : openseadragon.min.js
+  (sha256 cd6e48562264cc518224380d745a620bcf7828235c232d94964e3c9d9e7bdb63)
+  plus images/ (40 control sprites) and LICENSE.txt. Nothing was modified.
+
+To update: download the tarball, copy build/openseadragon/{openseadragon.min.js,images}
+and LICENSE.txt over this directory, and rewrite this file. Keep it vendored —
+the app makes no third-party network requests.

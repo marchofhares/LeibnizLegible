@@ -93,6 +93,43 @@ records the channel and its terms per volume) by a layout-aware extractor
 margin numbers) — apparatus, commentary and introductions never enter it
 (SPECS §7.2). Minting itself runs where the C1 corpus store lives.
 
+### Search, viewer, IIIF (Phases D1/D2)
+
+```bash
+uv sync --extra web                        # fastapi + uvicorn
+uv run leibniz index build                 # page index → data/search.sqlite (SQLite FTS5)
+uv run leibniz index query "calculemus"    # try it from the shell
+uv run leibniz serve                       # http://127.0.0.1:8000 — search, /work/…, /page/…, /about
+# production: typo-tolerant Meilisearch
+docker compose up -d meilisearch
+uv run leibniz index build --backend meili --meili-key "$MEILI_MASTER_KEY"
+uv run leibniz serve --backend meili --host 0.0.0.0 --base-url https://your.host
+```
+
+The index folds text and query onto the aligner's early-modern comparison
+alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. The API
+(`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
+every line with its geometry, text, confidence, status and provenance; each
+work is also a IIIF Presentation 3 manifest (`/manifests/{id}`) whose canvases
+reference W3C annotation pages (`/annotations/{page_id}`) carrying the
+transcription — the interop deliverable D7. The viewer under
+`src/leibniz/web/static/` is plain ES modules (no build step): OpenSeadragon on
+the GWLB's own Image API (static JPEG where no service exists), a line-polygon
+overlay, status badges, confidence bands, provenance per line, EN/DE.
+
+### Releases (Phase D3)
+
+```bash
+uv sync --extra release                    # pyarrow
+uv run leibniz release export              # data/release/leibniz-{inventory,transcriptions,gt}/
+uv run leibniz release checklist           # the upload runbook (reports/release-checklist.md)
+```
+
+Each export ships Parquet (or `--format jsonl`), a `MANIFEST.json` with row
+counts and SHA-256s, and a dataset card with provenance, licence, attribution,
+error rates and the anti-contamination note. `reports/tier1-final.md` states
+the project against SPECS §3, criterion by criterion.
+
 ## Where things live
 
 | Path | What |
@@ -108,6 +145,9 @@ margin numbers) — apparatus, commentary and introductions never enter it
 | `src/leibniz/layout/` | Kraken baseline segmentation of a page into line images |
 | `src/leibniz/align/` | retro-alignment engine + the C2 GT factory (resolver, anchor-guided banded DP, strata, volume sources, reading-text extractor, ingestion) |
 | `src/leibniz/pipeline/` | corpus segment/recognize batch pipeline + per-page seg-stats — C1 |
+| `src/leibniz/search/` | page index: folding, snippets, SQLite FTS5 + Meilisearch backends — D1 |
+| `src/leibniz/web/` | FastAPI JSON API, IIIF v3 manifests + annotations, the static viewer — D1/D2 |
+| `src/leibniz/release/` | Parquet/JSONL dataset exports + cards — D3 |
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
 | `reports/` | committed reports (census, benchmarks, alignment yield) |
@@ -133,8 +173,17 @@ characters, 10,029 witnesses with text). **The mint has run (2026-09-16):
 297,424 open-bucket ground-truth lines**, 5.9× the 50k target, in about two
 hours on six workers. Its precision is only preliminarily audited (20 of
 200 sheet lines, `leibniz align audit-sheet` / `audit-score`; the gate is
-deferred to the C3 ablation). Next is **C3** (fine-tune v2, a gate). See
-`STATUS.md`.
+deferred to the C3 ablation). **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
+Presentation 3 manifests with W3C annotations, the viewer, and the dataset
+exports with cards** — the v1 public beta; the operator runs `leibniz index
+build` + `leibniz serve` on the corpus store. Next is **C3** (fine-tune v2, a
+gate; see the amended prompt), then C4 re-reads the corpus and swaps v2 in under
+a new run. Reports are on Zenodo: project statement
+[10.5281/zenodo.22782813](https://doi.org/10.5281/zenodo.22782813), census
+[10.5281/zenodo.22782815](https://doi.org/10.5281/zenodo.22782815), PHILIUMM
+reproduction [10.5281/zenodo.22782817](https://doi.org/10.5281/zenodo.22782817),
+retro-aligned GT [10.5281/zenodo.22782819](https://doi.org/10.5281/zenodo.22782819).
+See `STATUS.md`; `NOTES.md` holds the 2026-09-16 strategy review.
 
 ## Licensing (summary — see SPECS §7)
 

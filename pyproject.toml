@@ -27,6 +27,10 @@ Repository = "https://github.com/marchofhares/leibnizlegible"
 dev = [
     "ruff>=0.6",
     "pytest>=8.0",
+    # The web app + its tests (Phase D1/D2). Runtime users install the `web` extra;
+    # the dev group carries it so `uv run pytest` exercises the API without a server.
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 # Optional heavy stack for the HTR benchmark harness (Phase B1, deliverable D5).
@@ -43,6 +47,17 @@ bench = [
 gt = [
     "pdfplumber>=0.11",  # per-character font sizes → body vs apparatus type
     "pillow>=10",        # line-strip crops for the hand-audit sheet
+]
+# The serving layer (Phase D1/D2): `leibniz serve` — FastAPI JSON API + the static
+# viewer. The search index (`leibniz index build`) and the IIIF/annotation
+# builders need only the core deps; Meilisearch is spoken to over plain httpx.
+web = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+# Release exports (Phase D3): Parquet via pyarrow (JSONL needs nothing extra).
+release = [
+    "pyarrow>=15",
 ]
 
 [build-system]

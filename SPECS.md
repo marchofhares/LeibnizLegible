@@ -46,9 +46,10 @@ All from the ERC project **PHILIUMM** (Paris, PI David Rabouin; grant ended 2026
 
 ### 1.5 External ground-truth pools (for the German/Kurrent gap and general robustness)
 
-- **Bullinger HTR GT**: 165,673 aligned lines, ~80% Latin, 16th c. (github.com/pstroe/bullinger-htr) — the proof that alignment-minted GT works at scale (their fine-tune hit CER ~7%).
+- **Bullinger HTR GT**: 165,673 aligned lines, ~80% Latin, 16th c. (github.com/pstroe/bullinger-htr) — the proof that alignment-minted GT works at scale. _Corrected 2026-09-16:_ the published Bullinger model numbers are CER 9.13% (Jungo et al. 2023, ~110k aligned lines) and 9.1–9.2% (Peer et al. 2026, BullingerDB, ~377k aligned lines) — tripling the aligned data did not move CER; the 6.5% figure sometimes quoted is the error rate of their *refined ground truth itself* against manual annotation, not a model. Read the Bullinger lesson as "alignment scales; the label floor caps the gain" (see the C3 prompt).
 - **CATMuS** (Medieval + Modern), **HTR-United** registry (German Kurrent sets), **TRIDIS**. Pool per license terms; document provenance per line.
 - Published lesson (Bullinger): multilingual training data beats monolingual on mixed Latin/German corpora.
+- Second lesson (Bullinger, Jungo et al. 2023): filtering the noisy aligned lines made the model *worse* every time they tried — quantity beat quality at ~110k lines; but Peer et al. 2025 recover 0.4–1.1 CER points with CTC-confidence filtering + self-training. Both are C3 ablations.
 
 ### 1.6 What does not exist (opportunities, and honesty obligations)
 
