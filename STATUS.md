@@ -3,11 +3,43 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-16 (**C2 closed as: mint DONE — 297,424 open-bucket GT lines, 5.9× target; precision gate DEFERRED — the hand audit is preliminary (20/200, non-specialist, its five 'wrong' verdicts contradicted by the machine reading); C3's ablation is the real test**)._
+_Last updated: 2026-09-16 (**Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3.**)._
 
 ---
 
 ## Current state
+
+**🚀 Phase D built on the v1 transcription (2026-09-16): the corpus is
+searchable and browsable — the v1 public beta.** `leibniz index build` folds
+every recognised page onto the aligner's early-modern comparison alphabet and
+indexes it in SQLite FTS5 (single file) or Meilisearch (typo tolerance);
+`leibniz serve` runs a FastAPI JSON API (`/api/search`, `/api/works/{id}`,
+`/api/pages/{id}`, `/api/stats`), IIIF Presentation 3 manifests with W3C
+annotation pages carrying every line's text + provenance (deliverable D7), and
+the viewer: OpenSeadragon 5.0.1 on the GWLB's own Image API (static JPEG where
+no service exists), a line-polygon overlay, status badges, five confidence
+bands, a provenance disclosure per line, EN/DE, WCAG-clean (axe 0 violations
+on every view). `leibniz release export` writes the three datasets as Parquet
+(or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
+provenance, licence, attribution, error rates and the anti-contamination note.
+`reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
+states the project against SPECS §3 criterion by criterion. **475 tests**, ruff
+clean. The operator step: `leibniz index build && leibniz serve` on the corpus
+store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
+then measure search p95.
+
+**Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
+statement (doi:10.5281/zenodo.22782813), the corpus census
+(doi:10.5281/zenodo.22782815), the PHILIUMM reproduction + VLM benchmark
+(doi:10.5281/zenodo.22782817), and the retro-aligned ground-truth reports
+(doi:10.5281/zenodo.22782819); mirrored at evanatlas.com/research.
+
+**Strategy review (2026-09-16) — recorded, not built:** `NOTES.md` (accuracy
+levers, the Calculemus rescope, the four Academy seams, loose ends) and the
+**C3 amendment in `PROMPTS.md`** (expect ~1 CER point from v2; vision
+re-extraction, staged training, confidence filtering, n-gram LM decoding).
+SPECS §1.5's Bullinger claim corrected (their models are 9.1–9.2% CER; 6.5% is
+their GT's own error rate).
 
 **🏁 C1 corpus run COMPLETE (2026-09-11): the full Nachlass is machine-read.**
 **236,210 of 236,795 pages recognised (99.75%)** — **13,508,625 lines** with
@@ -237,6 +269,45 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### D1–D3 — search, viewer, IIIF, releases, built on v1 (2026-09-16) ✅
+
+Built the whole serving layer against the v1 store, offline-tested end to end
+(seeded store → index → API → viewer screenshot under Playwright):
+
+- **D1 search** (`src/leibniz/search/`): `documents.py` (one doc per recognised
+  page: latest run per line, majority language, `page_stats.stratum_heuristic`,
+  katalog records rendered as `AA I,3 N. 12` labels), `normalize.py` (the
+  aligner's fold minus struck-text elision, shared by index and query),
+  `snippet.py` (hits marked in the *original* text via the folded→original
+  offset map; the only HTML the API emits), `fts5.py` (contentless FTS5 over
+  the folded text + title/shelfmark/AA columns weighted ×3 in bm25; prefix
+  matching from 3 chars; filters as column predicates), `meili.py` (plain httpx;
+  drop → create → settings → batched documents, each awaited on the task queue;
+  doc ids with `:` → `_`), `cli.py` (`leibniz index build|status|query`). The
+  build records corpus statistics (counts + confidence histogram) in the index
+  for `/api/stats`.
+- **D2 API + viewer** (`src/leibniz/web/`): `api.py` (`create_app`; per-request
+  store connections; latest-run line selection; bbox from polygon; prev/next;
+  404s as `{"detail"}`; 503 when no index), `iiif.py` (Presentation 3 manifest
+  per work wrapping GWLB image services; annotation page per page with
+  `supplementing` TextualBody annotations targeting `#xywh`, provenance under
+  the `leibniz:` JSON-LD namespace), `attribution.py` (one source for the
+  three attribution lines), `geometry.py`, `cli.py` (`leibniz serve`,
+  `--check` lists routes). The viewer (`static/`, 15 files + vendored
+  OpenSeadragon 5.0.1, 624 KB) is plain ES modules served by the app at `/`,
+  `/search`, `/work/{id}`, `/page/{id}`, `/about`; 177 i18n keys EN + DE;
+  no-JS search form; dark mode; phone width; zero axe violations.
+- **D3 releases** (`src/leibniz/release/`): `export.py` (row generators for
+  inventory / transcriptions / gt; latest run per line; NC rows excluded;
+  chunked Parquet via pyarrow or gzip JSONL; `MANIFEST.json` with SHA-256s),
+  `cards.py` (the dataset cards), `cli.py` (`leibniz release export|checklist`);
+  `reports/release-checklist.md`, `reports/tier1-final.md`.
+- `docker-compose.yml` (Meilisearch), `.env.example` (`MEILI_*`), `pyproject`
+  extras `web` + `release` (fastapi/uvicorn in the dev group so tests run).
+- Tests **+47** (475 total): folding/snippets, documents, FTS5, Meilisearch
+  against a fake server, IIIF builders, the API over `TestClient`, exports
+  (JSONL always, Parquet when pyarrow is present), CLIs.
 
 ### C1 — corpus-run robustness, from the first live runs (2026-07-29/30)
 
@@ -744,7 +815,9 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **376** (+1 skipped) |
+| Tests passing | **475** |
+| **Phase D (2026-09-16)** | search index (FTS5/Meili) · API · IIIF v3 + annotations · viewer (EN/DE, axe-clean) · Parquet exports + cards |
+| Reports on Zenodo | statement 22782813 · census 22782815 · PHILIUMM repro 22782817 · retro-aligned GT 22782819 |
 | **C1 corpus run (2026-09-11)** | **COMPLETE: 236,210/236,795 pages recognised (99.75%) · 13,508,625 lines** |
 | C1 corpus remainder | 569 skips (enumerated reasons) · 16 permanently unfetchable (GWLB redirect loops) |
 | C1 corpus cache | 236,779 pages · **395.6 GB** (drive-D image store) |
@@ -790,6 +863,7 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Open questions
 
+0. **Strategy review 2026-09-16 → `NOTES.md`** (accuracy levers incl. the review-queue design and the LLM-as-detector pilot; the Calculemus rescope and the missing `leibniz pack` seam; the four Academy seams; loose ends). The C3 changes live in the amended C3 prompt.
 1. ~~IIIF vs static delivery (A2).~~ **Resolved for A2:** cache the uniform METS
    `DEFAULT` JPEG for every page. **D2 still** must degrade to a plain image where
    no IIIF Image API exists (only the ~33% IIIF works get deep-zoom).
@@ -895,6 +969,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **Viewer without a bundler (D2):** SPECS §4.2 says "vanilla TS/Vite"; the
+  viewer ships as plain ES modules + CSS with no build step (types via JSDoc,
+  OpenSeadragon vendored), so the repo's CI stays Python-only and `leibniz
+  serve` needs no Node toolchain. Same stack otherwise (OpenSeadragon on GWLB
+  IIIF, FastAPI serving it).
+- **D1 built before C4 (D):** SPECS §5 sequences D1 after C4; nothing in the
+  index or viewer depends on v2 — lines are versioned per `run_id` and the
+  API/index always show the latest run per line — so D shipped on v1 and C4
+  swaps v2 in with a re-index. `lang`/`stratum` filters exist and read
+  `unknown` until C4 fills them.
+- **Releases not gated on the §7.5 memo / §8 letters (operator decision,
+  2026-09-16):** recorded in `reports/release-checklist.md` §0.
 - **Schema extension (C1):** added a `page_stats` table (per-page segmentation
   metrics) and a `pages.label` column (folio label) beyond the SPECS §4.3 canonical
   list. `page_stats` is queried by the C2/C4 stratum heuristic; `pages.label` is the
@@ -917,6 +1003,12 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**Phase D is built on v1 (2026-09-16); the operator runs it on the corpus store.**
+`leibniz index build` (one scan of 13.5M lines; FTS5 file a few GB, or
+Meilisearch via `docker compose up -d meilisearch`), `leibniz serve`, measure
+search p95 against the 500 ms criterion, deploy (small VPS), then `leibniz
+release export` + the checklist for the dataset uploads.
 
 **A0–A3 + B1–B2 + C1 (machinery *and* corpus run) + C2 (machinery *and* mint) all green; C2's precision gate is deferred to C3's ablation (audit preliminary).**
 Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and

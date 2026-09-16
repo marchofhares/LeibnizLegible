@@ -1,12 +1,10 @@
-"""Web stage — FastAPI service, frontend, and IIIF v3 annotations.
+"""The serving layer (Phases D1/D2): a FastAPI JSON API, IIIF Presentation 3
+manifests + W3C annotation pages carrying the transcriptions (deliverable D7),
+and the static viewer under ``static/`` (vanilla ES modules, no build step).
 
-The thin serving layer (SPECS §4.1): a FastAPI app (``api.py``) exposing
-``/search``, ``/works/{id}``, ``/pages/{id}``, ``/manifests/{id}``, and a
-vanilla-TS/Vite frontend with an OpenSeadragon viewer that loads tiles
-**directly from GWLB's IIIF Image API** — images are never rehosted or proxied.
-``/manifests/{id}`` serves IIIF Presentation 3 manifests with W3C annotation
-pages carrying our per-line transcriptions (deliverable D7). NC-derived text is
-never displayed.
-
-API in Phase D1; viewer + IIIF annotations in D2.
+``leibniz serve`` runs it; :func:`leibniz.web.api.create_app` builds it for
+tests. Images are never proxied or rehosted — the viewer and the manifests
+point at the GWLB's own image services (SPECS §3.4).
 """
+
+from __future__ import annotations

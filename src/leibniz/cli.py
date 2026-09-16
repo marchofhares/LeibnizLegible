@@ -18,6 +18,9 @@ from leibniz.harvest.cli import app as harvest_app
 from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
 from leibniz.pipeline.cli import app as pipeline_app
+from leibniz.release.cli import app as release_app
+from leibniz.search.cli import app as index_app
+from leibniz.web.cli import serve as serve_command
 
 app = typer.Typer(
     name="leibniz",
@@ -34,6 +37,9 @@ app.add_typer(catalog_app, name="catalog")
 app.add_typer(bench_app, name="bench")
 app.add_typer(align_app, name="align")
 app.add_typer(pipeline_app, name="pipeline")
+app.add_typer(index_app, name="index")
+app.add_typer(release_app, name="release")
+app.command(name="serve")(serve_command)
 
 _console = Console()
 

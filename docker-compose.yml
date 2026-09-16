@@ -1,0 +1,19 @@
+# Development services (SPECS §4.2). Only Meilisearch for now: the store is a
+# SQLite file and the API is `leibniz serve`; nothing else needs a server.
+#
+#   docker compose up -d meilisearch
+#   leibniz index build --backend meili --meili-url http://127.0.0.1:7700 --meili-key "$MEILI_MASTER_KEY"
+#   leibniz serve --backend meili
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-}
+      MEILI_ENV: development
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meili_data:/meili_data
+volumes:
+  meili_data:

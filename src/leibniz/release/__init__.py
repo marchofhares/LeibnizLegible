@@ -1,11 +1,8 @@
-"""Release stage — Parquet dataset + model exports.
-
-Packages the deliverables (SPECS §2): D1 inventory (CC0), D2 transcriptions
-(CC BY, provenance columns mandatory, NC bucket excluded), D3 GT (CC BY, open
-bucket only), plus the v2 model bundle and dataset/model cards. Every export
-carries the full provenance schema per row (SPECS §4.5) and the
-anti-contamination note "machine output — do not ingest as verified text".
-Upload steps are operator actions gated on the lawyer memo (SPECS §7.5).
-
-Implemented in Phase D3.
+"""Dataset/model releases (Phase D3): Parquet (or JSONL) exports of the
+inventory, the transcriptions and the ground truth, each with a dataset card
+that carries provenance, licence, attribution and the anti-contamination note
+(SPECS §2, §4.5, §7). ``leibniz release export`` writes them; uploading is an
+operator step documented in ``reports/release-checklist.md``.
 """
+
+from __future__ import annotations

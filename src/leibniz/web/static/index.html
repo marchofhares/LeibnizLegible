@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Leibniz Legible</title>
+    <meta
+      name="description"
+      content="An access layer for the digitized Leibniz Nachlass: machine transcription with per-line confidence and provenance, searchable and browsable. Not an edition."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="icon" href="data:," />
+    <script>
+      // Flip the no-JS class before first paint so the fallback notice and the
+      // static layout never flash for JS users.
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="site.skip">Skip to main content</a>
+
+    <header class="site-header" data-ui-chrome>
+      <div class="wrap site-header__inner">
+        <div class="site-id">
+          <a class="site-id__name" href="/">Leibniz Legible</a>
+          <p class="site-id__tagline" data-i18n="site.tagline">
+            Machine transcription of the Leibniz Nachlass
+          </p>
+        </div>
+        <nav class="site-nav" data-i18n-label="nav.label" aria-label="Main">
+          <a href="/search" data-nav="search" data-i18n="nav.search">Search</a>
+          <a href="/about" data-nav="about" data-i18n="nav.about">About</a>
+        </nav>
+        <div class="lang-switch" role="group" data-i18n-label="lang.label" aria-label="Language">
+          <button type="button" data-lang="en" data-i18n-label="lang.en" aria-label="English" aria-pressed="true">
+            EN
+          </button>
+          <button type="button" data-lang="de" data-i18n-label="lang.de" aria-label="German" aria-pressed="false">
+            DE
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="wrap" tabindex="-1">
+      <!--
+        Everything below #view is replaced by the router. #search-panel is
+        delivered statically so that the search form exists — and submits — with
+        JavaScript switched off; app.js detaches it on boot and re-inserts it
+        into the search view.
+      -->
+      <div id="view">
+        <section id="search-panel" class="panel search-panel" aria-labelledby="search-heading">
+          <h1 id="search-heading" tabindex="-1" data-view-heading data-i18n="search.heading">
+            Search the Nachlass
+          </h1>
+          <form id="search-form" class="search-form" method="get" action="/search" role="search">
+            <div class="search-form__query">
+              <label class="field__label" for="q" data-i18n="search.label">Search the Nachlass</label>
+              <div class="search-form__row">
+                <input
+                  type="search"
+                  id="q"
+                  name="q"
+                  autocomplete="off"
+                  spellcheck="false"
+                  data-i18n-placeholder="search.placeholder"
+                  placeholder="e.g. calculemus"
+                  aria-describedby="search-hint"
+                />
+                <button type="submit" class="button button--primary" data-i18n="search.submit">
+                  Search
+                </button>
+              </div>
+              <p class="hint" id="search-hint" data-i18n="search.hint">
+                The index is typo-tolerant. Search is over machine transcriptions only.
+              </p>
+            </div>
+
+            <fieldset class="search-form__filters">
+              <legend data-i18n="search.filters">Filters</legend>
+
+              <p class="field">
+                <label class="field__label" for="set" data-i18n="search.set">Collection</label>
+                <select id="set" name="set">
+                  <option value="" data-i18n="search.set.any">All collections</option>
+                  <option value="LeibnizHandschriften" data-i18n="set.LeibnizHandschriften">
+                    Leibniz-Handschriften (LH)
+                  </option>
+                  <option value="LeibnizBriefwechsel" data-i18n="set.LeibnizBriefwechsel">
+                    Leibniz-Briefwechsel (LBr)
+                  </option>
+                  <option value="LeibnizMarginalien" data-i18n="set.LeibnizMarginalien">
+                    Leibniz-Marginalien
+                  </option>
+                  <option value="Leibnitiana" data-i18n="set.Leibnitiana">Leibnitiana</option>
+                  <option value="leibniz-rekonstruktionen" data-i18n="set.leibniz-rekonstruktionen">
+                    Leibniz-Rekonstruktionen
+                  </option>
+                </select>
+              </p>
+
+              <p class="field">
+                <label class="field__label" for="lang" data-i18n="search.lang">Language of the text</label>
+                <select id="lang" name="lang">
+                  <option value="" data-i18n="search.lang.any">Any language</option>
+                  <option value="la" data-i18n="lang.la">Latin</option>
+                  <option value="fr" data-i18n="lang.fr">French</option>
+                  <option value="de" data-i18n="lang.de.text">German</option>
+                  <option value="mixed" data-i18n="lang.mixed">Mixed</option>
+                  <option value="unknown" data-i18n="lang.unknown">Undetermined</option>
+                </select>
+              </p>
+
+              <p class="field">
+                <label class="field__label" for="stratum" data-i18n="search.stratum">Writing stage</label>
+                <select id="stratum" name="stratum">
+                  <option value="" data-i18n="search.stratum.any">Any stage</option>
+                  <option value="fair_copy" data-i18n="stratum.fair_copy">Fair copy</option>
+                  <option value="light_revision" data-i18n="stratum.light_revision">Lightly revised</option>
+                  <option value="heavy_revision" data-i18n="stratum.heavy_revision">Heavily revised</option>
+                  <option value="scrap" data-i18n="stratum.scrap">Scrap</option>
+                  <option value="unknown" data-i18n="stratum.unknown">Undetermined</option>
+                </select>
+              </p>
+
+              <p class="field field--range">
+                <label class="field__label" for="min_conf" data-i18n="search.minconf">
+                  Minimum mean confidence
+                </label>
+                <span class="field__range">
+                  <input
+                    type="range"
+                    id="min_conf"
+                    name="min_conf"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0"
+                  />
+                  <output id="min_conf_out" for="min_conf">0.00</output>
+                </span>
+              </p>
+            </fieldset>
+          </form>
+        </section>
+
+        <!--
+          Static and bilingual on purpose: i18n.js cannot run here, so both
+          languages are spelled out rather than keyed.
+        -->
+        <noscript>
+          <div class="panel notice">
+            <h2>JavaScript is switched off</h2>
+            <p lang="en">
+              The search form above still works and will take you to
+              <code>/search</code>. Rendering the results needs JavaScript. The
+              underlying data is available without it at <code>/api/search</code>.
+            </p>
+            <p lang="de">
+              Das Suchformular oben funktioniert weiterhin und führt nach
+              <code>/search</code>. Für die Darstellung der Treffer wird JavaScript
+              benötigt. Die zugrunde liegenden Daten stehen auch ohne JavaScript
+              unter <code>/api/search</code> bereit.
+            </p>
+          </div>
+        </noscript>
+      </div>
+    </main>
+
+    <footer class="site-footer" data-ui-chrome>
+      <div class="wrap">
+        <h2 class="sr-only" data-i18n="footer.label">Attribution and licensing</h2>
+        <p data-i18n="attr.images">
+          Images: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek,
+          Hannover. Public Domain Mark 1.0. Loaded directly from the GWLB; never rehosted.
+        </p>
+        <p data-i18n="attr.katalog">
+          Catalogue: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.
+        </p>
+        <p data-i18n="attr.transcriptions">
+          Transcriptions: Leibniz Legible, CC BY 4.0 — machine output, not an edition.
+        </p>
+        <p>
+          <span data-i18n="attr.code">Code: Apache-2.0.</span>
+          <a href="https://github.com/marchofhares/leibnizlegible" data-i18n="footer.repo"
+            >Source code and issue tracker</a
+          >
+        </p>
+      </div>
+    </footer>
+
+    <script src="/static/vendor/openseadragon/openseadragon.min.js"></script>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>
