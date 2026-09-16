@@ -114,7 +114,8 @@ work is also a IIIF Presentation 3 manifest (`/manifests/{id}`) whose canvases
 reference W3C annotation pages (`/annotations/{page_id}`) carrying the
 transcription — the interop deliverable D7. The viewer under
 `src/leibniz/web/static/` is plain ES modules (no build step): OpenSeadragon on
-the GWLB's own Image API (static JPEG where no service exists), a line-polygon
+the GWLB's own Image API (static JPEG where no service exists) or on the
+project's image mirror when `LEIBNIZ_IMAGE_BASE_URL` is set, a line-polygon
 overlay, status badges, confidence bands, provenance per line, EN/DE.
 
 ### Releases (Phase D3)
@@ -139,6 +140,12 @@ leibniz index build --backend meili                    # server: one pass over t
 leibniz index bench --url https://your.host            # search p95 against SPECS §3.3 (500 ms)
 ```
 
+```bash
+uv run leibniz images thumbs                              # desktop: thumbnails for the mirror (Pillow, all cores)
+rclone sync data/images r2:leibniz-images && rclone sync data/thumbs r2:leibniz-images/thumbs
+uv run leibniz images check-mirror --base-url https://images.leibnizlegible.com  # HEADs a sample
+```
+
 `deploy/README.md` is the runbook: sizing, the store copy, `install.sh`, the
 search-only Meilisearch key, the index build, verification, measurement, the
 hardening that is on by default (per-client rate limit, security headers,
@@ -158,7 +165,7 @@ store is a copy, the index a rebuild, and the images stay at the GWLB.
 | `src/leibniz/legal.py` | §70/§71 copyright-expiry registry for AA reading text |
 | `src/leibniz/net.py` | polite HTTP client — UA, ≤1 req/s per host, backoff (SPECS §7.4) |
 | `src/leibniz/harvest/` | OAI-PMH + IIIF harvest → `works`/`pages`, and the corpus census |
-| `src/leibniz/images/` | local delivery-derivative image cache (fetch/verify/stats) |
+| `src/leibniz/images/` | local delivery-derivative image cache (fetch/verify/stats), thumbnails + mirror check |
 | `src/leibniz/catalog/` | Ritter-Katalog scraper + works crosswalk (shelfmark normaliser) |
 | `src/leibniz/htr/` | benchmark harness (D5) + engine adapters (Kraken / VLM) — B1 |
 | `src/leibniz/layout/` | Kraken baseline segmentation of a page into line images |
@@ -212,8 +219,11 @@ See `STATUS.md`; `NOTES.md` holds the 2026-09-16 strategy review.
 
 ## Licensing (summary — see SPECS §7)
 
-Code is Apache-2.0. GWLB scans are Public Domain Mark 1.0 and are always loaded
-from GWLB's own IIIF endpoints — **never rehosted**. Only §70/§71-expired AA
-*reading text* is ever redistributed; NC-licensed sources stay in a quarantined
-bucket excluded from public releases and the UI. Provenance is mandatory on every
-stored and exported line.
+Code is Apache-2.0. GWLB scans are Public Domain Mark 1.0. By default the app
+loads them from the GWLB's own endpoints (SPECS §3.4); the public site serves
+its own mirror of the GWLB's delivery scans instead (`LEIBNIZ_IMAGE_BASE_URL`;
+an operator decision recorded in `STATUS.md`, Divergences), with every page
+linking to its original at the GWLB. Only §70/§71-expired AA *reading text* is
+ever redistributed; NC-licensed sources stay in a quarantined bucket excluded
+from public releases and the UI. Provenance is mandatory on every stored and
+exported line.

@@ -102,9 +102,15 @@ function legend() {
   return `<ul class="legend">${items.join('')}</ul>`;
 }
 
+/** Where the page images come from, stamped into the shell by the server. */
+function imageOrigin() {
+  return document.documentElement.dataset.imageOrigin === 'mirror' ? 'mirror' : 'gwlb';
+}
+
 function licensing() {
+  const images = imageOrigin() === 'mirror' ? 'about.license.images.p.mirror' : 'about.license.images.p';
   const blocks = [
-    ['about.license.images.h', 'about.license.images.p'],
+    ['about.license.images.h', images],
     ['about.license.katalog.h', 'about.license.katalog.p'],
     ['about.license.transcriptions.h', 'about.license.transcriptions.p'],
     ['about.license.code.h', 'about.license.code.p'],
@@ -132,7 +138,7 @@ export async function render(ctx) {
     `<h2 id="about-what">${esc(t('about.what.h'))}</h2>` +
     `<p>${esc(t('about.what.p1'))}</p>` +
     `<p>${esc(t('about.what.p2'))}</p>` +
-    `<p>${esc(t('about.what.p3'))}</p>` +
+    `<p>${esc(t(imageOrigin() === 'mirror' ? 'about.what.p3.mirror' : 'about.what.p3'))}</p>` +
     `</section>` +
 
     `<section class="panel" aria-labelledby="about-numbers">` +

@@ -23,7 +23,7 @@ on every view). `leibniz release export` writes the three datasets as Parquet
 (or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
 provenance, licence, attribution, error rates and the anti-contamination note.
 `reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
-states the project against SPECS §3 criterion by criterion. **504 tests**, ruff
+states the project against SPECS §3 criterion by criterion. **513 tests**, ruff
 clean. The operator step: `leibniz index build && leibniz serve` on the corpus
 store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
 then measure search p95.
@@ -34,10 +34,12 @@ is hardened for public traffic (per-client rate limit, CSP + security headers,
 CORS for IIIF consumers, gzip, read-only store connections, `/healthz`,
 `robots.txt`, `leibniz index bench` for the p95 criterion). Going live is the
 operator's runbook (`deploy/README.md`): a small VPS, the serving copy of the
-store, the Meilisearch build, the DNS record — and the courtesy note to the
-GWLB, whose servers carry the viewer's image traffic. `LICENSE` (Apache-2.0)
-and the issue form the viewer's "Report an error" link opens are in place for
-the repository going public. **504 tests**, ruff clean.
+store, the Meilisearch build, the DNS records, the image mirror on Cloudflare
+R2 (an operator decision that diverges from SPECS §3.4's "never rehosted" —
+recorded under Divergences; the code's default stays direct-from-GWLB) — and
+the note to the GWLB before launch. `LICENSE` (Apache-2.0) and the issue form
+the viewer's "Report an error" link opens are in place for the repository
+going public. **513 tests**, ruff clean.
 
 **Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
 statement (doi:10.5281/zenodo.22782813), the corpus census
@@ -280,6 +282,31 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### D — the image mirror (2026-09-16, operator decision; see Divergences) ✅
+
+The public site serves its own copy of the GWLB delivery scans. Built as a
+switch, default off:
+
+- **`web/images.py`** — `ImageSource`: with `LEIBNIZ_IMAGE_BASE_URL` set,
+  every cached page's display URLs become `{base}/{work_id}/{seq:04d}.jpg`
+  and `{base}/thumbs/…` (the cache's own layout, `images/fetch.cache_relpath`,
+  so the bucket is the cache directory uploaded as it is), delivered as a
+  static image (no IIIF service); pages never cached keep their GWLB URLs.
+  The page API adds `image_origin` and `source_image_url` (the GWLB URI,
+  always); search hits get mirror thumbnails; the manifests paint the mirror
+  copy and record the GWLB source per canvas; annotations keep `leibniz:imageUri`
+  on the GWLB; `attribution()` has a mirror wording for the web surfaces while
+  the dataset cards keep the original line. `/api/stats` reports
+  `images.origin`, and the server stamps `<html data-image-origin>` into the
+  shell (read once, ETag + 304) so the viewer's footer, page attribution and
+  About texts switch without another request (EN + DE strings added).
+- **`leibniz images thumbs`** (`images/thumbs.py`) — one thumbnail per cached
+  page, 320 px wide, Pillow decoding at reduced scale from the JPEG DCT, all
+  cores, resumable; **`leibniz images check-mirror`** HEADs a sample of the
+  mirror and compares sizes with the cache manifest (`rclone check` is the
+  full check). Runbook §12 covers the R2 bucket, the custom domain, rclone.
+- Caddyfile: `www.` → bare domain; env examples name the mirror.
 
 ### D — deployment kit, public-traffic hardening, public-repo prep (2026-09-16, later session) ✅
 
@@ -1077,6 +1104,25 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-09-16 — page images served from the project's own mirror, not from
+  the GWLB (operator decision).** SPECS §3.4 and §7.1 say the viewer loads
+  images from the GWLB's IIIF endpoints and that nothing is rehosted. The
+  public site (leibnizlegible.com) instead serves the A2 image cache — the
+  GWLB's own delivery derivatives, Public Domain Mark 1.0, no related rights
+  under §68 UrhG — from `images.leibnizlegible.com` (Cloudflare R2), plus
+  thumbnails derived from them. Reasons, in the operator's words: uptime,
+  control, engineering (the line polygons were computed on exactly these
+  files, so the overlay sits on the pixels the HTR read), and the framing
+  that a free open-access resource competes with no Leibniz project and
+  serves the same goals every Leibniz scholar has. What does not change:
+  every page links to its original at the GWLB; the page API, the
+  annotations and the dataset exports keep naming the GWLB URI as the
+  source image (§4.5 provenance); the attribution names the GWLB and the
+  Public Domain Mark on every view; the GWLB is told before launch. The
+  code keeps the direct-from-GWLB mode as its default —
+  `LEIBNIZ_IMAGE_BASE_URL` unset — so the divergence is a configuration,
+  not a fork (`web/images.py`).
 
 - **Viewer without a bundler (D2):** SPECS §4.2 says "vanilla TS/Vite"; the
   viewer ships as plain ES modules + CSS with no build step (types via JSDoc,

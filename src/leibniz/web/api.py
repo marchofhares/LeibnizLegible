@@ -21,6 +21,7 @@ gets it, whatever sits in front.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -29,7 +30,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from leibniz import __version__, db
 from leibniz.search.backend import SearchBackend, SearchQuery
@@ -42,6 +43,7 @@ from leibniz.search.documents import (
 from leibniz.web import attribution as attr
 from leibniz.web import iiif
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
+from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -171,6 +173,7 @@ def create_app(
     rate_burst: int = 40,
     security_headers: bool = True,
     cors: bool = True,
+    image_base_url: str | None = None,
 ) -> FastAPI:
     """Build the FastAPI application over a store (+ optional search backend).
 
@@ -178,6 +181,8 @@ def create_app(
     annotation routes (``0`` = off, the default for tests; ``leibniz serve``
     turns it on). ``cors`` opens the read-only JSON routes to other origins so
     IIIF viewers elsewhere can load the manifests (deliverable D7).
+    ``image_base_url`` switches page images to the operator's mirror of the
+    image cache (:mod:`leibniz.web.images`); unset, they come from the GWLB.
     """
     app = FastAPI(
         title="Leibniz Legible API",
@@ -188,6 +193,7 @@ def create_app(
         ),
     )
     state: dict = {"stats": None}
+    images = ImageSource(image_base_url)
 
     # Middleware. The last one added is the outermost: headers on every response,
     # then CORS (so a 429 still carries the CORS headers a browser needs to read
@@ -241,6 +247,7 @@ def create_app(
             stats["backend"] = search.name if search is not None else None
             stats["index_built_at"] = meta.get("built_at")
             stats.setdefault("model", None)
+            stats["images"] = {"origin": images.origin, "base_url": images.base_url}
             state["stats"] = stats
         return JSONResponse(state["stats"], headers=CACHE_HEADERS)
 
@@ -272,6 +279,9 @@ def create_app(
             )
         except httpx.HTTPError as exc:  # Meilisearch down or restarting
             raise HTTPException(503, "search backend unavailable; try again shortly") from exc
+        if images.mirrored:  # the index stored the GWLB thumbnails; the mirror has its own
+            for hit in res.hits:
+                hit.thumb_url = images.thumb_url_for(hit.work_id, hit.seq, hit.thumb_url)
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
 
     @app.get("/api/works/{work_id}")
@@ -292,9 +302,9 @@ def create_app(
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id),
                 "n_canvases": work.n_canvases,
                 "iiif_manifest": f"/manifests/{work.gwlb_object_id}",
-                "pages": [_page_summary(p, summaries.get(p.id)) for p in pages],
+                "pages": [_page_summary(images.resolve(p), summaries.get(p.id)) for p in pages],
                 "katalog": _katalog_for_work(conn, work_id),
-                "attribution": attr.attribution(),
+                "attribution": attr.attribution(images.mirrored),
             }
         finally:
             conn.close()
@@ -318,6 +328,7 @@ def create_app(
             next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
             confs = [ln.conf for ln in lines if ln.conf is not None and ln.text]
             run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
+            shown = images.resolve(page)  # display fields; ``page`` stays the provenance
             body = {
                 "page_id": page.id,
                 "work_id": page.work_id,
@@ -329,10 +340,12 @@ def create_app(
                 "canvas_id": page.canvas_id,
                 "width": page.width,
                 "height": page.height,
-                "delivery": page.delivery,
-                "image_service_url": page.image_service_url,
-                "image_url": page.image_url,
-                "thumb_url": page.thumb_url,
+                "delivery": shown.delivery,
+                "image_service_url": shown.image_service_url,
+                "image_url": shown.image_url,
+                "thumb_url": shown.thumb_url,
+                "image_origin": "mirror" if shown is not page else "gwlb",
+                "source_image_url": images.source_url(page),
                 "status": page.status,
                 "skip_reason": page.skip_reason,
                 "prev_page_id": prev_id,
@@ -347,7 +360,7 @@ def create_app(
                 },
                 "lines": [_line_dict(ln, page, run_dates) for ln in lines if ln.text],
                 "honesty": attr.HONESTY,
-                "attribution": attr.attribution(),
+                "attribution": attr.attribution(images.mirrored),
             }
         finally:
             conn.close()
@@ -363,7 +376,19 @@ def create_app(
                 raise HTTPException(404, f"work {work_id} not found")
             pages = db.get_pages(conn, work_id)
             counts = {pid: n for pid, (n, _) in line_summaries_by_page(conn, work_id).items()}
-            body = iiif.build_manifest(work, pages, base_url=base(request), line_counts=counts)
+            sources = (
+                {p.id: images.source_url(p) for p in pages if images.is_mirrored(p)}
+                if images.mirrored
+                else None
+            )
+            body = iiif.build_manifest(
+                work,
+                [images.resolve(p) for p in pages],
+                base_url=base(request),
+                line_counts=counts,
+                images_mirrored=images.mirrored,
+                sources=sources,
+            )
         finally:
             conn.close()
         return JSONResponse(body, media_type="application/ld+json", headers=CACHE_HEADERS)
@@ -377,7 +402,13 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             lines = latest_lines(conn, page_id)
             dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
-            body = iiif.build_annotation_page(page, lines, base_url=base(request), run_dates=dates)
+            body = iiif.build_annotation_page(
+                page,
+                lines,
+                base_url=base(request),
+                run_dates=dates,
+                images_mirrored=images.mirrored,
+            )
         finally:
             conn.close()
         return JSONResponse(body, media_type="application/ld+json", headers=CACHE_HEADERS)
@@ -389,18 +420,27 @@ def create_app(
 
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-        # The shell is revalidated on every load (ETag/Last-Modified) so a deploy
-        # shows up at once; /static/* may be cached by the proxy (see deploy/Caddyfile).
-        def serve_index() -> FileResponse:
-            return FileResponse(
-                index_html, media_type="text/html", headers={"Cache-Control": "no-cache"}
-            )
+        # The shell is read once and stamped with where images come from
+        # (``<html data-image-origin>``), so the viewer's attribution and About
+        # text need no extra request. It is revalidated on every load (ETag +
+        # 304, ``no-cache``) so a deploy shows at once; /static/* may be cached
+        # by the proxy (see deploy/Caddyfile).
+        shell = index_html.read_bytes().replace(
+            b'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'.encode()
+        )
+        shell_etag = f'"{hashlib.sha256(shell).hexdigest()[:20]}"'
+        shell_headers = {"Cache-Control": "no-cache", "ETag": shell_etag}
 
-        def serve_index_work(work_id: str) -> FileResponse:
-            return serve_index()
+        def serve_index(request: Request) -> Response:
+            if request.headers.get("if-none-match") == shell_etag:
+                return Response(status_code=304, headers=shell_headers)
+            return Response(shell, media_type="text/html", headers=shell_headers)
 
-        def serve_index_page(page_id: str) -> FileResponse:
-            return serve_index()
+        def serve_index_work(work_id: str, request: Request) -> Response:
+            return serve_index(request)
+
+        def serve_index_page(page_id: str, request: Request) -> Response:
+            return serve_index(request)
 
         handlers = {"/work/{work_id}": serve_index_work, "/page/{page_id}": serve_index_page}
         for route in INDEX_ROUTES:

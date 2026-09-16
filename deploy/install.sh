@@ -109,7 +109,7 @@ systemctl daemon-reload
 systemctl enable --now meilisearch
 systemctl enable leibniz-legible   # started once the store and the index exist
 systemctl enable caddy
-if grep -q 'example.org' "$CONF_DIR/caddy.env"; then
+if grep -qE 'example\.org|^LEIBNIZ_DOMAIN=$' "$CONF_DIR/caddy.env"; then
   echo "caddy: LEIBNIZ_DOMAIN in $CONF_DIR/caddy.env is still the placeholder — set it, then: systemctl restart caddy"
 else
   systemctl restart caddy

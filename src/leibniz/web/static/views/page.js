@@ -96,7 +96,8 @@ function provenance(line, run, data) {
     rows.push([t('page.prov.source'), esc(t('page.prov.none'))]);
   }
 
-  const imageUrl = data.image_service_url || data.image_url;
+  // provenance names the source image at the GWLB, whatever is displayed
+  const imageUrl = data.source_image_url || data.image_service_url || data.image_url;
   if (imageUrl) {
     rows.push([
       t('page.prov.image'),
@@ -228,10 +229,12 @@ function viewerPanel(data) {
     (hasImage
       ? `<div id="osd" class="osd"></div>`
       : `<p class="state state--error">${esc(t('page.viewerError'))}</p>`) +
-    (data.delivery === 'static'
+    (data.delivery === 'static' && data.image_origin !== 'mirror'
       ? `<p class="hint">${esc(t('page.viewer.noIiif'))}</p>`
       : '') +
-    `<p class="attribution__line">${esc(t('attr.images'))}</p>` +
+    `<p class="attribution__line">${esc(
+      t(data.image_origin === 'mirror' ? 'attr.images.mirror' : 'attr.images'),
+    )}</p>` +
     `</section>`
   );
 }

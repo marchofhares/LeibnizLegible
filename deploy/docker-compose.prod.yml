@@ -33,6 +33,7 @@ services:
       LEIBNIZ_WORKERS: ${LEIBNIZ_WORKERS:-2}
       LEIBNIZ_RATE_LIMIT: ${LEIBNIZ_RATE_LIMIT:-10}
       LEIBNIZ_RATE_BURST: ${LEIBNIZ_RATE_BURST:-40}
+      LEIBNIZ_IMAGE_BASE_URL: ${LEIBNIZ_IMAGE_BASE_URL:-}
       # Only Caddy can reach this port, so its X-Forwarded-For is trustworthy.
       FORWARDED_ALLOW_IPS: "*"
     volumes:

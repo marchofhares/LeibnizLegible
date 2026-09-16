@@ -55,7 +55,11 @@ def _image_body(page: db.Page) -> dict:
     }
 
 
-def build_canvas(page: db.Page, *, base_url: str, n_lines: int | None = None) -> dict:
+def build_canvas(
+    page: db.Page, *, base_url: str, n_lines: int | None = None, source_url: str | None = None
+) -> dict:
+    """A canvas painting ``page``'s image. ``source_url`` is the GWLB's URI when
+    the painted image is a mirror copy, recorded in the canvas metadata."""
     cid = canvas_id(base_url, page)
     label = page.label or str(page.seq)
     canvas: dict = {
@@ -88,6 +92,8 @@ def build_canvas(page: db.Page, *, base_url: str, n_lines: int | None = None) ->
         meta.append({"label": {"en": ["Skip reason"]}, "value": {"en": [page.skip_reason]}})
     if n_lines is not None:
         meta.append({"label": {"en": ["Transcribed lines"]}, "value": {"en": [str(n_lines)]}})
+    if source_url:
+        meta.append({"label": {"en": ["Source image (GWLB)"]}, "value": {"none": [source_url]}})
     canvas["metadata"] = meta
     return canvas
 
@@ -98,9 +104,14 @@ def build_manifest(
     *,
     base_url: str,
     line_counts: dict[str, int] | None = None,
+    images_mirrored: bool = False,
+    sources: dict[str, str | None] | None = None,
 ) -> dict:
-    """A Presentation 3 manifest for a work (images from GWLB, annotations ours)."""
+    """A Presentation 3 manifest for a work: the images as ``pages`` name them
+    (the GWLB's, or the mirror's when ``images_mirrored`` — then ``sources``
+    maps page ids to the GWLB URIs recorded per canvas), the annotations ours."""
     counts = line_counts or {}
+    srcs = sources or {}
     title = work.title or (work.shelfmarks[0] if work.shelfmarks else work.gwlb_object_id)
     manifest: dict = {
         "@context": CONTEXT,
@@ -121,7 +132,7 @@ def build_manifest(
         ],
         "requiredStatement": {
             "label": {"en": ["Attribution"]},
-            "value": {"en": [attr.IMAGES, attr.KATALOG]},
+            "value": {"en": [attr.images_line(images_mirrored), attr.KATALOG]},
         },
         "rights": attr.PDM_URL,
         "provider": [
@@ -147,7 +158,10 @@ def build_manifest(
                 "format": "text/html",
             }
         ],
-        "items": [build_canvas(p, base_url=base_url, n_lines=counts.get(p.id)) for p in pages],
+        "items": [
+            build_canvas(p, base_url=base_url, n_lines=counts.get(p.id), source_url=srcs.get(p.id))
+            for p in pages
+        ],
     }
     if work.manifest_url:
         manifest["seeAlso"] = [
@@ -168,8 +182,11 @@ def build_annotation_page(
     *,
     base_url: str,
     run_dates: dict[int, str] | None = None,
+    images_mirrored: bool = False,
 ) -> dict:
-    """The W3C AnnotationPage carrying a page's transcription lines."""
+    """The W3C AnnotationPage carrying a page's transcription lines. ``page`` is
+    the store's row: ``leibniz:imageUri`` names the GWLB source image whatever
+    the viewer displays."""
     dates = run_dates or {}
     cid = canvas_id(base_url, page)
     apid = annotation_page_id(base_url, page.id)
@@ -211,7 +228,7 @@ def build_annotation_page(
         "id": apid,
         "type": "AnnotationPage",
         "label": {"en": [f"Transcription of {page.id} (machine output, not an edition)"]},
-        "leibniz:attribution": attr.attribution(),
+        "leibniz:attribution": attr.attribution(images_mirrored),
         "items": items,
     }
 

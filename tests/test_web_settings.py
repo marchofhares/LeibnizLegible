@@ -37,6 +37,10 @@ def test_env_overrides_and_fallbacks(tmp_path) -> None:
     assert s.rate_limit == 0.0 and s.rate_burst == DEFAULT_RATE_BURST
     env["MEILI_API_KEY"] = "search-only"  # preferred over the master key
     assert ServeSettings.from_env(env).meili_key == "search-only"
+    env["LEIBNIZ_IMAGE_BASE_URL"] = "https://images.x.org/"
+    s = ServeSettings.from_env(env)
+    assert s.image_base_url == "https://images.x.org" and "LEIBNIZ_IMAGE_BASE_URL" in s.to_env()
+    assert ServeSettings.from_env({}).image_base_url is None
 
 
 def test_round_trip_through_env() -> None:

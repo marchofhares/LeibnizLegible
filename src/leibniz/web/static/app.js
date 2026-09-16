@@ -248,6 +248,13 @@ function wireSearchForm() {
 // ---------------------------------------------------------------------------
 
 function boot() {
+  // Where page images come from is stamped into the shell by the server
+  // (<html data-image-origin>): the footer's attribution line must say so.
+  if (document.documentElement.dataset.imageOrigin === 'mirror') {
+    for (const node of document.querySelectorAll('[data-i18n="attr.images"]')) {
+      node.setAttribute('data-i18n', 'attr.images.mirror');
+    }
+  }
   viewRoot = document.getElementById('view');
   searchPanel = document.getElementById('search-panel');
   detachSearchPanel();

@@ -20,6 +20,7 @@ application from scratch: the CLI exports its options with :meth:`to_env` and
 | ``LEIBNIZ_WORKERS``       | ``workers``    | ``1``                         |
 | ``LEIBNIZ_RATE_LIMIT``    | ``rate_limit`` | ``10`` requests/s per client  |
 | ``LEIBNIZ_RATE_BURST``    | ``rate_burst`` | ``40``                        |
+| ``LEIBNIZ_IMAGE_BASE_URL``| ``image_base_url`` | unset: images from the GWLB |
 """
 
 from __future__ import annotations
@@ -55,6 +56,7 @@ ENV: dict[str, str] = {
     "workers": "LEIBNIZ_WORKERS",
     "rate_limit": "LEIBNIZ_RATE_LIMIT",
     "rate_burst": "LEIBNIZ_RATE_BURST",
+    "image_base_url": "LEIBNIZ_IMAGE_BASE_URL",
 }
 MEILI_KEY_FALLBACK = "MEILI_MASTER_KEY"  # the dev name; production uses a search-only key
 
@@ -74,6 +76,7 @@ class ServeSettings:
     workers: int = 1
     rate_limit: float = DEFAULT_RATE_LIMIT
     rate_burst: int = DEFAULT_RATE_BURST
+    image_base_url: str | None = None  # the image mirror (web/images.py); unset = GWLB
 
     def __post_init__(self) -> None:
         self.backend = (self.backend or "fts5").lower()
@@ -87,6 +90,7 @@ class ServeSettings:
         self.rate_limit = max(0.0, float(self.rate_limit))
         self.rate_burst = max(1, int(self.rate_burst))
         self.base_url = (self.base_url or "").strip().rstrip("/") or None
+        self.image_base_url = (self.image_base_url or "").strip().rstrip("/") or None
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> ServeSettings:
@@ -109,6 +113,7 @@ class ServeSettings:
             workers=int(str(get("workers", 1))),
             rate_limit=float(str(get("rate_limit", DEFAULT_RATE_LIMIT))),
             rate_burst=int(str(get("rate_burst", DEFAULT_RATE_BURST))),
+            image_base_url=e.get(ENV["image_base_url"]) or None,
         )
 
     def to_env(self) -> dict[str, str]:
@@ -128,6 +133,8 @@ class ServeSettings:
             out[ENV["meili_key"]] = self.meili_key
         if self.base_url:
             out[ENV["base_url"]] = self.base_url
+        if self.image_base_url:
+            out[ENV["image_base_url"]] = self.image_base_url
         return out
 
     def open_search(self) -> SearchBackend | None:
@@ -149,6 +156,7 @@ class ServeSettings:
             base_url=self.base_url,
             rate_limit=self.rate_limit,
             rate_burst=self.rate_burst,
+            image_base_url=self.image_base_url,
         )
 
 

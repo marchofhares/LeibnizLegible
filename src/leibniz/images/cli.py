@@ -7,14 +7,20 @@ Four subcommands:
 * ``leibniz images fetch`` — download delivery derivatives (resumable, polite).
 * ``leibniz images verify`` — re-check the cache and report gaps.
 * ``leibniz images stats`` — roll up counts/bytes/dimensions into census.md.
+* ``leibniz images thumbs`` — derive thumbnails for the image mirror.
+* ``leibniz images check-mirror`` — sample the mirror after an upload.
 
-Every mutating run is recorded in ``runs`` with the git SHA (provenance, §4.5).
+Every mutating run on the store is recorded in ``runs`` with the git SHA
+(provenance, §4.5); thumbnails are derived files outside the store.
 """
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 
+import httpx
 import typer
 from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
@@ -23,6 +29,7 @@ from leibniz import db
 from leibniz.harvest.oai import DEFAULT_CACHE_DIR as OAI_CACHE_DIR
 from leibniz.images import fetch as fetch_mod
 from leibniz.images import pages as pages_mod
+from leibniz.images import thumbs as thumbs_mod
 from leibniz.net import PoliteClient
 
 app = typer.Typer(
@@ -205,3 +212,96 @@ def stats(
 
 
 __all__ = ["app"]
+
+
+@app.command()
+def thumbs(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    images_root: Path = typer.Option(
+        fetch_mod.DEFAULT_IMAGES_ROOT, "--images", help="Image cache root."
+    ),
+    out: Path = typer.Option(
+        thumbs_mod.DEFAULT_THUMBS_ROOT, "--out", help="Where the thumbnails go."
+    ),
+    width: int = typer.Option(thumbs_mod.DEFAULT_WIDTH, "--width", help="Thumbnail width (px)."),
+    workers: int = typer.Option(
+        os.cpu_count() or 1, "--workers", help="Parallel processes (default: the cores)."
+    ),
+    redo: bool = typer.Option(False, "--redo", help="Rebuild thumbnails that already exist."),
+) -> None:
+    """Derive one thumbnail per cached page, in the cache's layout (for the mirror)."""
+    conn = db.init_db(db_path)
+    try:
+        n = len(thumbs_mod.cached_pages(conn))
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=console,
+        ) as bar:
+            task = bar.add_task("thumbnails", total=n)
+            stats = thumbs_mod.build_thumbnails(
+                conn,
+                images_root,
+                out,
+                width=width,
+                workers=workers,
+                redo=redo,
+                progress=lambda _pid, _outcome: bar.advance(task),
+            )
+    finally:
+        conn.close()
+    console.print(
+        f"[green]{stats.made:,} made[/green], {stats.skipped:,} already there, "
+        f"{stats.missing:,} source files missing, {stats.failed:,} failed → {out}"
+    )
+    if stats.failures:
+        console.print("failed (first 50): " + ", ".join(stats.failures))
+    raise typer.Exit(1 if stats.failed else 0)
+
+
+@app.command("check-mirror")
+def check_mirror(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    base_url: str = typer.Option(
+        ..., "--base-url", envvar="LEIBNIZ_IMAGE_BASE_URL", help="The mirror's origin."
+    ),
+    sample: int = typer.Option(500, "--sample", help="Pages to check (0 = every cached page)."),
+    no_thumbs: bool = typer.Option(False, "--no-thumbs", help="Skip the thumbnails."),
+    as_json: bool = typer.Option(False, "--json", help="Print the report as JSON."),
+) -> None:
+    """HEAD a sample of cached pages on the mirror; compare sizes with the cache manifest."""
+    conn = db.init_db(db_path)
+    try:
+        with httpx.Client(timeout=20.0, follow_redirects=True) as client:
+            report = thumbs_mod.check_mirror(
+                conn, base_url, client=client, sample=sample, thumbs=not no_thumbs
+            )
+    finally:
+        conn.close()
+    if as_json:
+        console.print_json(json.dumps(report.to_dict()))
+    else:
+        console.print(
+            f"{report.ok:,}/{report.checked:,} images ok · {len(report.missing):,} missing · "
+            f"{len(report.size_mismatch):,} size mismatches · {len(report.errors):,} errors"
+        )
+        if not no_thumbs:
+            console.print(
+                f"{report.thumbs_checked - len(report.thumbs_missing):,}/{report.thumbs_checked:,} "
+                f"thumbnails ok · {len(report.thumbs_missing):,} missing"
+            )
+        for label, ids in (
+            ("missing", report.missing),
+            ("size mismatch", report.size_mismatch),
+            ("errors", report.errors),
+            ("thumbnails missing", report.thumbs_missing),
+        ):
+            if ids:
+                console.print(
+                    f"  {label}: " + ", ".join(ids[:20]) + (" …" if len(ids) > 20 else "")
+                )
+        console.print(
+            "[green]mirror complete[/green]" if report.complete else "[red]mirror incomplete[/red]"
+        )
+    raise typer.Exit(0 if report.complete else 1)

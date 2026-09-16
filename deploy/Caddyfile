@@ -45,3 +45,9 @@
 		format json
 	}
 }
+
+# www → the bare domain (needs a DNS record for www too, or Caddy keeps
+# retrying its certificate; harmless, but noisy in the journal).
+www.{$LEIBNIZ_DOMAIN:localhost} {
+	redir https://{$LEIBNIZ_DOMAIN:localhost}{uri} permanent
+}
