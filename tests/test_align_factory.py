@@ -229,3 +229,29 @@ def test_write_pairs_gives_up_after_retries(monkeypatch) -> None:
     assert stats.skips == {"error:OperationalError": 1}
     assert count_gt_lines(conn) == 0
     assert not conn.in_transaction
+
+
+def test_run_bookkeeping_retries_a_lock_collision(monkeypatch) -> None:
+    import sqlite3
+
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    cfg = F.FactoryConfig(today=TODAY)
+    real_finish = db.finish_run
+    calls = {"n": 0}
+
+    def flaky_finish(c, run_id, **kw):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise sqlite3.OperationalError("database is locked")
+        return real_finish(c, run_id, **kw)
+
+    monkeypatch.setattr(F.db, "finish_run", flaky_finish)
+    monkeypatch.setattr(F.time, "sleep", lambda _s: None)
+    stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
+    assert calls["n"] == 2 and stats.lines_minted == 12
+    row = conn.execute(
+        "SELECT n_ok, finished_at FROM runs WHERE run_id = ?", (stats.run_id,)
+    ).fetchone()
+    assert row["n_ok"] == 1 and row["finished_at"] is not None
+    assert not conn.in_transaction
