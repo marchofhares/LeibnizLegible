@@ -130,6 +130,25 @@ counts and SHA-256s, and a dataset card with provenance, licence, attribution,
 error rates and the anti-contamination note. `reports/tier1-final.md` states
 the project against SPECS §3, criterion by criterion.
 
+### Deploying (a public host)
+
+```bash
+deploy/prepare-store.sh                                # desktop: compact, verified serving copy of the store
+curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/deploy/install.sh | bash  # server: users, venv, Meilisearch, Caddy, units
+leibniz index build --backend meili                    # server: one pass over the store, an hour or two
+leibniz index bench --url https://your.host            # search p95 against SPECS §3.3 (500 ms)
+```
+
+`deploy/README.md` is the runbook: sizing, the store copy, `install.sh`, the
+search-only Meilisearch key, the index build, verification, measurement, the
+hardening that is on by default (per-client rate limit, security headers,
+CORS for IIIF consumers, read-only store, seven-day logs, `robots.txt`) and
+day-two operations. `Dockerfile` + `deploy/docker-compose.prod.yml` are the
+all-container alternative. `leibniz serve` takes every option from the
+environment too (`deploy/env.example`), runs `--workers N`, and answers
+`/healthz` for the process manager. Nothing on the server is precious: the
+store is a copy, the index a rebuild, and the images stay at the GWLB.
+
 ## Where things live
 
 | Path | What |
@@ -151,6 +170,8 @@ the project against SPECS §3, criterion by criterion.
 | `tests/` | offline tests mirroring the package |
 | `data/` | working store — **git-ignored, never committed** (see `data/README.md`) |
 | `reports/` | committed reports (census, benchmarks, alignment yield) |
+| `deploy/` | the deployment kit: runbook, `install.sh`, systemd units, Caddyfile, env files, production compose |
+| `.github/` | the issue form the viewer's "Report an error" link opens |
 
 ## Status
 
@@ -176,7 +197,11 @@ hours on six workers. Its precision is only preliminarily audited (20 of
 deferred to the C3 ablation). **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
 Presentation 3 manifests with W3C annotations, the viewer, and the dataset
 exports with cards** — the v1 public beta; the operator runs `leibniz index
-build` + `leibniz serve` on the corpus store. Next is **C3** (fine-tune v2, a
+build` + `leibniz serve` on the corpus store. **The deployment kit landed the
+same day** (`deploy/`: runbook, systemd + Caddy, container stack; the app
+hardened for public traffic — rate limit, security headers, CORS, read-only
+store, `/healthz`, `leibniz index bench`); going live is now the operator's
+runbook (`deploy/README.md`). Next is **C3** (fine-tune v2, a
 gate; see the amended prompt), then C4 re-reads the corpus and swaps v2 in under
 a new run. Reports are on Zenodo: project statement
 [10.5281/zenodo.22782813](https://doi.org/10.5281/zenodo.22782813), census

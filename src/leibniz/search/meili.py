@@ -195,7 +195,11 @@ class MeiliBackend:
 
     # -- introspection ----------------------------------------------------- #
     def meta(self) -> dict:
-        r = self.client.get(f"/indexes/{self._meta_uid}/documents/meta")
+        """Build metadata, or ``{}`` when the index is absent or the server unreachable."""
+        try:
+            r = self.client.get(f"/indexes/{self._meta_uid}/documents/meta")
+        except httpx.HTTPError:
+            return {}
         if r.status_code != 200:
             return {}
         d = r.json()
@@ -203,10 +207,24 @@ class MeiliBackend:
         return d
 
     def count(self) -> int:
-        r = self.client.get(f"/indexes/{self.index_uid}/stats")
+        try:
+            r = self.client.get(f"/indexes/{self.index_uid}/stats")
+        except httpx.HTTPError:
+            return 0
         if r.status_code != 200:
             return 0
         return int(r.json().get("numberOfDocuments", 0))
+
+    def health(self) -> bool:
+        """Meilisearch answers ``/health`` (no key needed) and the index exists."""
+        try:
+            if self.client.get("/health", timeout=3.0).status_code != 200:
+                return False
+            return (
+                self.client.get(f"/indexes/{self.index_uid}/stats", timeout=3.0).status_code == 200
+            )
+        except httpx.HTTPError:
+            return False
 
 
 __all__ = ["DEFAULT_INDEX_UID", "DEFAULT_MEILI_URL", "SETTINGS", "MeiliBackend", "doc_id"]

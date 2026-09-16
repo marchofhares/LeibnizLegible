@@ -1,0 +1,45 @@
+name: Transcription error
+description: A wrong line, a missing line, a wrong catalogue link or a wrong image on a page of the viewer.
+title: "Transcription error on page "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. The transcriptions are **machine output** (about 8 % character error rate on Latin and French lines, higher on German), so single wrong characters are expected everywhere. What helps most: lines that are badly wrong, failures that repeat across a page or a work, wrong catalogue records, and wrong or missing images. The "Report an error" link on a page view fills in the first two fields.
+  - type: input
+    id: page_id
+    attributes:
+      label: Page id
+      description: As shown under the page heading, e.g. `00068642:0007`.
+      placeholder: "00068642:0007"
+    validations:
+      required: true
+  - type: input
+    id: page_url
+    attributes:
+      label: Page URL
+      description: The viewer page you were looking at.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of error
+      options:
+        - A line is read wrongly
+        - A line is missing or split/merged (segmentation)
+        - The catalogue record or shelfmark is wrong
+        - The image is wrong or does not load
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: Which line(s), what the machine reads, and what it should read if you can tell. Line numbers are those shown in the line panel.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Optional — the hand, the language, a printed edition reference (e.g. `AA II,1 N. 12`), or how sure you are.

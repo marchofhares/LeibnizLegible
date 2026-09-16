@@ -1,0 +1,12 @@
+# Leibniz Legible — https://github.com/marchofhares/leibnizlegible
+#
+# The human pages are open to crawlers. The JSON API, the IIIF manifests and
+# the annotation pages are for viewers and scripts that ask for them, not for
+# blind crawling: a crawler walking /manifests/ would request the GWLB's page
+# images for every canvas of every work, and that traffic is theirs to bear.
+User-agent: *
+Disallow: /api/
+Disallow: /manifests/
+Disallow: /annotations/
+Disallow: /search?
+Crawl-delay: 5

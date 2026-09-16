@@ -33,6 +33,8 @@ class FakeMeili:
         path, method = request.url.path, request.method
         self.calls.append(f"{method} {path}")
         assert request.headers.get("Authorization") == "Bearer secret"
+        if path == "/health":
+            return httpx.Response(200, json={"status": "available"})
         if path.startswith("/tasks/"):
             return httpx.Response(
                 200, json={"uid": int(path.rsplit("/", 1)[1]), "status": "succeeded"}
@@ -80,7 +82,9 @@ class FakeMeili:
             return httpx.Response(200, json=doc) if doc else httpx.Response(404, json={})
         if method == "GET" and path.endswith("/stats"):
             uid = path.split("/")[2]
-            return httpx.Response(200, json={"numberOfDocuments": len(self.indexes.get(uid, {}))})
+            if uid not in self.indexes:
+                return httpx.Response(404, json={"code": "index_not_found"})
+            return httpx.Response(200, json={"numberOfDocuments": len(self.indexes[uid])})
         return httpx.Response(500, json={"unexpected": path})
 
 
@@ -114,6 +118,24 @@ def test_rebuild_search_meta_count(store_path, fake) -> None:
     assert be.search(SearchQuery(q="de", min_conf=0.85)).total == 1
     meta = be.meta()
     assert meta["n_docs"] == 3 and meta["stats"]["pages"] == 4 and "doc_id" not in meta
+    assert be.health() is True
+
+
+def test_unreachable_server_degrades_without_raising() -> None:
+    def refused(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("connection refused", request=request)
+
+    be = MeiliBackend(
+        "http://meili.test",
+        client=httpx.Client(base_url="http://meili.test", transport=httpx.MockTransport(refused)),
+    )
+    assert be.meta() == {} and be.count() == 0 and be.health() is False
+    with pytest.raises(httpx.HTTPError):  # search itself still raises; the API maps it to 503
+        be.search(SearchQuery(q="calculemus"))
+
+
+def test_health_false_when_index_missing(fake) -> None:
+    assert _backend(fake).health() is False  # server up, no index yet
 
 
 def test_task_failure_raises(store_path) -> None:

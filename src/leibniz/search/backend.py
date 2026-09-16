@@ -119,6 +119,9 @@ class SearchBackend(Protocol):
 
     def count(self) -> int: ...
 
+    def health(self) -> bool:
+        """Whether the index is present/reachable (``/healthz``). Never raises."""
+
 
 __all__ = [
     "DEFAULT_LIMIT",

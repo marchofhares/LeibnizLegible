@@ -1,0 +1,38 @@
+# systemd unit for a native Meilisearch binary (the non-Docker path).
+#   curl -L https://install.meilisearch.com | sh   # in /usr/local/bin
+#   install -m 0644 deploy/meilisearch.service /etc/systemd/system/
+# Configuration lives in /etc/meilisearch/env (deploy/meilisearch.env.example).
+[Unit]
+Description=Meilisearch — Leibniz Legible search index
+Documentation=https://www.meilisearch.com/docs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=meilisearch
+Group=meilisearch
+EnvironmentFile=/etc/meilisearch/env
+ExecStart=/usr/local/bin/meilisearch
+Restart=always
+RestartSec=3
+# Meilisearch memory-maps its index; let it open large files.
+LimitNOFILE=65536
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+SystemCallArchitectures=native
+ReadWritePaths=/var/lib/meilisearch
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

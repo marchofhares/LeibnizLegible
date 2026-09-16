@@ -12,11 +12,8 @@
     <meta name="referrer" content="no-referrer-when-downgrade" />
     <link rel="stylesheet" href="/static/style.css" />
     <link rel="icon" href="data:," />
-    <script>
-      // Flip the no-JS class before first paint so the fallback notice and the
-      // static layout never flash for JS users.
-      document.documentElement.classList.remove('no-js');
-    </script>
+    <!-- Flips the no-JS class before first paint; a file, not inline, for the CSP. -->
+    <script src="/static/boot.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="site.skip">Skip to main content</a>

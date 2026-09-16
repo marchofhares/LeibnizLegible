@@ -7,13 +7,17 @@ Subcommands:
   Meilisearch instance). Records corpus statistics for ``/api/stats``.
 * ``leibniz index status`` — build metadata + document count.
 * ``leibniz index query``  — run a query from the shell (a debugging aid).
+* ``leibniz index bench``  — search latency (p50/p95) against a running
+  ``leibniz serve``, judged against SPECS §3.3's p95 < 500 ms.
 """
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
+import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -21,6 +25,7 @@ from rich.table import Table
 from leibniz import db
 from leibniz.search import open_backend
 from leibniz.search.backend import SearchQuery
+from leibniz.search.bench import DEFAULT_QUERIES, bench_search
 from leibniz.search.documents import corpus_stats, iter_page_docs
 from leibniz.search.fts5 import DEFAULT_INDEX_PATH
 from leibniz.search.meili import DEFAULT_MEILI_URL
@@ -129,6 +134,44 @@ def query(
             h.snippet.replace("<mark>", "[bold]").replace("</mark>", "[/bold]"),
         )
     console.print(table)
+
+
+@app.command()
+def bench(
+    url: str = typer.Option(
+        "http://127.0.0.1:8000", "--url", help="Base URL of a running `leibniz serve`."
+    ),
+    n: int = typer.Option(200, "--n", help="Number of searches to run."),
+    concurrency: int = typer.Option(1, "--concurrency", help="Parallel clients."),
+    queries: Path | None = typer.Option(
+        None, "--queries", help="File with one query per line (default: a built-in list)."
+    ),
+    limit: int = typer.Option(20, "--limit", help="Hits per search (the viewer asks for 20)."),
+    as_json: bool = typer.Option(False, "--json", help="Print the result as JSON."),
+) -> None:
+    """Measure search latency over HTTP; exit 1 if p95 misses SPECS §3.3 (500 ms)."""
+    qs: tuple[str, ...] = DEFAULT_QUERIES
+    if queries is not None:
+        qs = tuple(queries.read_text(encoding="utf-8").splitlines())
+    with httpx.Client(base_url=url, timeout=30.0) as client:
+        res = bench_search(client, qs, n=n, limit=limit, concurrency=concurrency)
+    if as_json:
+        console.print_json(json.dumps(res))
+    else:
+        w, b = res["wall_ms"], res["backend_ms"]
+        console.print(
+            f"{res['ok']}/{res['n']} searches ok, {res['errors']} errors, "
+            f"concurrency {res['concurrency']}, {res['queries']} distinct queries"
+        )
+        console.print(
+            f"wall clock  p50 {w['p50']:.0f} ms · p95 {w['p95']:.0f} ms · max {w['max']:.0f} ms"
+        )
+        console.print(
+            f"backend     p50 {b['p50']:.0f} ms · p95 {b['p95']:.0f} ms · max {b['max']:.0f} ms"
+        )
+        verdict = "[green]PASS[/green]" if res["pass"] else "[red]FAIL[/red]"
+        console.print(f"criterion   p95 < {res['criterion_p95_ms']} ms → {verdict}")
+    raise typer.Exit(0 if res["pass"] else 1)
 
 
 __all__ = ["app"]

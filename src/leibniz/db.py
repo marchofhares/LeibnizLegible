@@ -24,6 +24,7 @@ helpers — the stages that own the other tables add theirs as they land.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import subprocess
 from collections.abc import Iterator, Sequence
@@ -50,7 +51,11 @@ def git_sha() -> str | None:
 
 
 # Default location of the canonical store (gitignored; see data/README.md).
-DEFAULT_DB_PATH = Path("data/inventory.sqlite")
+# The store's location. ``LEIBNIZ_DB_PATH`` (see ``.env.example``) overrides the
+# default for every command, so a deployment keeps its serving copy under
+# ``/var/lib`` without passing ``--db`` to each invocation (the systemd unit in
+# ``deploy/`` sets it). Read once, at import.
+DEFAULT_DB_PATH = Path(os.environ.get("LEIBNIZ_DB_PATH") or "data/inventory.sqlite")
 
 # Controlled vocabularies, mirrored by the CHECK constraints below. Exposed so
 # callers and tests can reference them instead of hard-coding string literals.

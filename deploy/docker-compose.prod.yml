@@ -1,0 +1,78 @@
+# The all-container alternative to the systemd path: the app, Meilisearch and
+# Caddy (TLS) on one host. Same environment variables as deploy/env.example.
+#
+#   cp deploy/env.example .env      # then set LEIBNIZ_DOMAIN, LEIBNIZ_BASE_URL,
+#                                   # MEILI_MASTER_KEY, MEILI_API_KEY, LEIBNIZ_DATA_DIR
+#   docker compose -f deploy/docker-compose.prod.yml up -d --build
+#   docker compose -f deploy/docker-compose.prod.yml run --rm app \
+#       leibniz index build --backend meili --meili-key "$MEILI_MASTER_KEY"
+#
+# The store directory is bind-mounted read-write: SQLite needs to create its
+# -shm side file next to a WAL-mode store even for readers. Nothing else in it
+# is written. Only Caddy is published; the app and Meilisearch stay on the
+# internal network.
+name: leibniz-legible
+
+services:
+  app:
+    build:
+      context: ..
+    image: leibniz-legible:latest
+    restart: unless-stopped
+    depends_on:
+      - meilisearch
+    environment:
+      LEIBNIZ_DB_PATH: /srv/leibniz/data/inventory.sqlite
+      LEIBNIZ_SEARCH_BACKEND: ${LEIBNIZ_SEARCH_BACKEND:-meili}
+      LEIBNIZ_INDEX_PATH: /srv/leibniz/data/search.sqlite
+      MEILI_URL: http://meilisearch:7700
+      MEILI_API_KEY: ${MEILI_API_KEY:?set MEILI_API_KEY (deploy/meili-search-key.sh)}
+      LEIBNIZ_HOST: 0.0.0.0
+      LEIBNIZ_PORT: "8000"
+      LEIBNIZ_BASE_URL: ${LEIBNIZ_BASE_URL:?set LEIBNIZ_BASE_URL, e.g. https://leibniz.example.org}
+      LEIBNIZ_WORKERS: ${LEIBNIZ_WORKERS:-2}
+      LEIBNIZ_RATE_LIMIT: ${LEIBNIZ_RATE_LIMIT:-10}
+      LEIBNIZ_RATE_BURST: ${LEIBNIZ_RATE_BURST:-40}
+      # Only Caddy can reach this port, so its X-Forwarded-For is trustworthy.
+      FORWARDED_ALLOW_IPS: "*"
+    volumes:
+      - ${LEIBNIZ_DATA_DIR:-../data}:/srv/leibniz/data
+    expose:
+      - "8000"
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?set MEILI_MASTER_KEY (openssl rand -hex 32)}
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MAX_INDEXING_MEMORY: ${MEILI_MAX_INDEXING_MEMORY:-4GiB}
+    volumes:
+      - meili_data:/meili_data
+    expose:
+      - "7700"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      LEIBNIZ_DOMAIN: ${LEIBNIZ_DOMAIN:?set LEIBNIZ_DOMAIN (the public host name)}
+      LEIBNIZ_UPSTREAM: app:8000
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+
+volumes:
+  meili_data:
+  caddy_data:
+  caddy_config:
+  caddy_logs:

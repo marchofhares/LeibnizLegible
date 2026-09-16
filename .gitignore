@@ -24,6 +24,9 @@ venv/
 # --- Local scratch (session temp; the canonical scratchpad is outside the repo) -
 scratchpad/
 
+# --- Deployment (deploy/install.sh keeps uv's cache + interpreter under the checkout) -
+.uv/
+
 # --- Tooling caches ----------------------------------------------------------
 .pytest_cache/
 .ruff_cache/

@@ -1,0 +1,22 @@
+# Only what the image build needs: pyproject, the lockfile, README (hatchling
+# reads it) and src/. Everything else stays out — above all data/.
+.git
+.github
+.venv
+data
+reports
+tests
+deploy
+scratchpad
+docs
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.env
+.env.*
+!.env.example
+docker-compose.yml
+*.md
+!README.md

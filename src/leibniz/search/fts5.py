@@ -261,5 +261,9 @@ class Fts5Backend:
         finally:
             conn.close()
 
+    def health(self) -> bool:
+        """The index file exists (``:memory:`` counts as present)."""
+        return str(self.path) == ":memory:" or self.path.exists()
+
 
 __all__ = ["DEFAULT_INDEX_PATH", "Fts5Backend", "match_expression"]

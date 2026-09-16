@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 
+import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from leibniz import db
 from leibniz.search.documents import corpus_stats, iter_page_docs
 from leibniz.search.fts5 import Fts5Backend
-from leibniz.web.api import INDEX_ROUTES, create_app
+from leibniz.web import api
+from leibniz.web.api import INDEX_ROUTES, STATIC_DIR, create_app
 
 W1 = "00068642"
 W2 = "DE-611-HS-854976"
@@ -128,3 +132,112 @@ def test_static_viewer_routes(store_path, tmp_path) -> None:
 def test_no_static_dir_means_api_only(store_path, tmp_path) -> None:
     c = _client(store_path, tmp_path, static=tmp_path / "missing")
     assert c.get("/").status_code == 404
+
+
+def test_healthz(store_path, tmp_path) -> None:
+    r = _client(store_path, tmp_path).get("/healthz")
+    assert r.status_code == 200 and r.headers["Cache-Control"] == "no-store"
+    assert r.json() == {
+        "status": "ok",
+        "version": r.json()["version"],
+        "store": True,
+        "search": {"backend": "fts5", "ok": True},
+    }
+    assert _client(store_path, tmp_path, search=False).get("/healthz").json()["search"] is None
+    missing = TestClient(create_app(tmp_path / "nope.sqlite", search=None, static_dir=None))
+    assert missing.get("/healthz").status_code == 503
+    assert missing.get(f"/api/works/{W1}").status_code == 503
+
+
+class _Down:
+    """A search backend whose server is unreachable."""
+
+    name = "meili"
+
+    def search(self, query):
+        raise httpx.ConnectError("connection refused")
+
+    def meta(self) -> dict:
+        return {}
+
+    def count(self) -> int:
+        return 0
+
+    def health(self) -> bool:
+        return False
+
+
+def test_search_backend_down_is_503_and_health_degraded(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=_Down(), static_dir=None))
+    r = c.get("/api/search", params={"q": "x"})
+    assert r.status_code == 503 and "unavailable" in r.json()["detail"]
+    h = c.get("/healthz")
+    assert h.status_code == 200 and h.json()["status"] == "degraded"
+    assert h.json()["search"] == {"backend": "meili", "ok": False}
+    # stats fall back to a live scan of the store when the index has none
+    assert c.get("/api/stats").json()["pages_recognized"] == 3
+
+
+def test_work_page_summaries_agree_with_page_endpoint(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    w = c.get(f"/api/works/{W1}").json()
+    assert [(p["n_lines"], p["mean_conf"]) for p in w["pages"]] == [
+        (3, round((0.95 + 0.72 + 0.55) / 3, 4)),  # the re-read line 0 counts once, at 0.95
+        (2, round((0.88 + 0.81) / 2, 4)),
+        (0, None),  # skipped page: no lines
+    ]
+    for p in w["pages"]:
+        stats = c.get(f"/api/pages/{p['page_id']}").json()["stats"]
+        assert (p["n_lines"], p["mean_conf"]) == (stats["n_lines"], stats["mean_conf"])
+    m = c.get(f"/manifests/{W1}").json()
+    counts = [
+        next(
+            (
+                x["value"]["en"][0]
+                for x in cv["metadata"]
+                if x["label"]["en"] == ["Transcribed lines"]
+            ),
+            None,
+        )
+        for cv in m["items"]
+    ]
+    assert counts == ["3", "2", None]
+
+
+def test_store_is_opened_read_only(store_path) -> None:
+    conn = api._open(store_path)
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM works").fetchone()[0] == 2
+        with pytest.raises(sqlite3.OperationalError):
+            conn.execute("INSERT INTO runs (stage) VALUES ('x')")
+    finally:
+        conn.close()
+
+
+def test_security_headers_cors_and_gzip(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get(f"/api/works/{W1}", headers={"Origin": "https://mirador.example"})
+    assert r.headers["Content-Security-Policy"].startswith("default-src 'self'")
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+    assert r.headers["access-control-allow-origin"] == "*"
+    m = c.get(f"/manifests/{W1}", headers={"Accept-Encoding": "gzip"})
+    assert m.headers.get("content-encoding") == "gzip" and m.json()["type"] == "Manifest"
+    plain = TestClient(create_app(store_path, search=None, static_dir=None, security_headers=False))
+    assert "Content-Security-Policy" not in plain.get(f"/api/works/{W1}").headers
+
+
+def test_rate_limit_wired_into_app(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=None, rate_limit=1, rate_burst=2))
+    assert [c.get(f"/api/works/{W1}").status_code for _ in range(3)] == [200, 200, 429]
+    assert c.get("/healthz").status_code == 200  # operations routes are never limited
+
+
+def test_real_static_dir_serves_shell_boot_script_and_robots(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    r = c.get("/")
+    assert r.status_code == 200 and r.headers["Cache-Control"] == "no-cache"
+    assert '<script src="/static/boot.js"></script>' in r.text and "<script>" not in r.text
+    assert "no-js" in c.get("/static/boot.js").text
+    robots = c.get("/robots.txt")
+    assert robots.status_code == 200 and robots.headers["content-type"].startswith("text/plain")
+    assert "Disallow: /manifests/" in robots.text

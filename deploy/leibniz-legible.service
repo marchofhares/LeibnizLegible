@@ -1,0 +1,49 @@
+# systemd unit for the Leibniz Legible serving layer.
+#   install -m 0644 deploy/leibniz-legible.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now leibniz-legible
+# Configuration lives in /etc/leibniz-legible/env (deploy/env.example).
+[Unit]
+Description=Leibniz Legible — JSON API, IIIF manifests and viewer
+Documentation=https://github.com/marchofhares/leibnizlegible
+After=network-online.target meilisearch.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=leibniz
+Group=leibniz
+WorkingDirectory=/opt/leibniz-legible
+EnvironmentFile=/etc/leibniz-legible/env
+ExecStart=/opt/leibniz-legible/.venv/bin/leibniz serve
+Restart=always
+RestartSec=3
+TimeoutStopSec=20
+
+# The process only reads the store; it needs nothing else from the system.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+CapabilityBoundingSet=
+AmbientCapabilities=
+# SQLite keeps its shared-memory/WAL side files next to the store.
+ReadWritePaths=/var/lib/leibniz-legible
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

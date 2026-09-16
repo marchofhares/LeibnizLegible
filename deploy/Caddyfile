@@ -1,0 +1,47 @@
+# Caddyfile for Leibniz Legible — TLS termination, compression, headers, the
+# reverse proxy, and the access log. Caddy obtains and renews the certificate
+# itself; the only inputs are two environment variables:
+#   LEIBNIZ_DOMAIN    the public host name (DNS must already point here)
+#   LEIBNIZ_UPSTREAM  where the app listens (127.0.0.1:8000; app:8000 in Docker)
+# Native install: /etc/leibniz-legible/caddy.env via the systemd drop-in that
+# deploy/install.sh writes. Container stack: the `caddy` service's environment.
+
+{$LEIBNIZ_DOMAIN:localhost} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	# The viewer's static files change only on deploy (index.html itself is
+	# `no-cache` from the app, so a deploy shows within the hour).
+	@static path /static/*
+	header @static Cache-Control "public, max-age=3600"
+
+	reverse_proxy {$LEIBNIZ_UPSTREAM:127.0.0.1:8000}
+
+	# Optional edge rate limit, in addition to the app's own per-client bucket.
+	# Needs a Caddy built with the plugin:
+	#   xcaddy build --with github.com/mholt/caddy-ratelimit
+	# rate_limit {
+	# 	zone api {
+	# 		match {
+	# 			path /api/* /manifests/* /annotations/*
+	# 		}
+	# 		key {remote_host}
+	# 		events 100
+	# 		window 10s
+	# 	}
+	# }
+
+	# The access log is the only record of traffic there is (SPECS: no
+	# analytics). It holds client addresses, so it is kept for seven days.
+	log {
+		output file /var/log/caddy/leibniz-legible.log {
+			roll_size 50MiB
+			roll_keep 5
+			roll_keep_for 168h
+		}
+		format json
+	}
+}
