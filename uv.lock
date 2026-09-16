@@ -831,6 +831,7 @@ bench = [
 ]
 gt = [
     { name = "pdfplumber" },
+    { name = "pillow" },
 ]
 
 [package.dev-dependencies]
@@ -845,6 +846,7 @@ requires-dist = [
     { name = "kraken", marker = "extra == 'bench'", specifier = ">=7.0" },
     { name = "lxml", specifier = ">=5.0" },
     { name = "pdfplumber", marker = "extra == 'gt'", specifier = ">=0.11" },
+    { name = "pillow", marker = "extra == 'gt'", specifier = ">=10" },
     { name = "pyarrow", marker = "extra == 'bench'", specifier = ">=15" },
     { name = "rich", specifier = ">=13.7" },
     { name = "typer", specifier = ">=0.12" },

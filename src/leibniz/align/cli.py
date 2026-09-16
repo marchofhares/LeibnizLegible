@@ -24,6 +24,7 @@ import typer
 from rich.console import Console
 
 from leibniz.align.report import GATE_PRECISION
+from leibniz.images.fetch import DEFAULT_IMAGES_ROOT
 
 app = typer.Typer(help="Retro-alignment: edition reading text → manuscript lines (Phase B2).")
 _console = Console()
@@ -453,6 +454,72 @@ def gt_report(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_gt(rep), encoding="utf-8")
     _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")
+
+
+@app.command(name="audit-sheet")
+def audit_sheet(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    images_root: Path = typer.Option(
+        DEFAULT_IMAGES_ROOT, "--images", help="Local image cache root (the C1 pipeline's --images)."
+    ),
+    out_dir: Path = typer.Option(
+        Path("reports/gt-audit"), "--out", help="Directory for gt-audit.html + gt-audit-lines.csv."
+    ),
+    n: int = typer.Option(200, "--n", help="Lines to sample (equal numbers per stratum)."),
+    seed: int = typer.Option(0, "--seed", help="Sampling seed (the draw is reproducible)."),
+) -> None:
+    """Write the hand-audit sheet: sampled minted lines with image strips + verdict buttons."""
+    from leibniz.align.audit import build_sheet
+    from leibniz.db import open_db
+
+    with open_db(db_path) as conn:
+        sheet = build_sheet(conn, images_root=images_root, out_dir=out_dir, n=n, seed=seed)
+    _console.print(
+        f"[bold]audit-sheet[/bold] → {sheet.html_path} ({len(sheet.lines)} lines, "
+        f"{sheet.n_with_crops} with image strips; per stratum {dict(sheet.by_stratum)})"
+    )
+    if sheet.n_with_crops < len(sheet.lines):
+        _console.print(
+            f"[yellow]{len(sheet.lines) - sheet.n_with_crops} lines have no image strip — "
+            f"check --images points at the C1 image cache ({images_root}).[/yellow]"
+        )
+
+
+@app.command(name="audit-score")
+def audit_score(
+    verdicts: Path = typer.Argument(..., help="The downloaded gt-audit-verdicts.csv."),
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (stratum weights)."
+    ),
+    out: Path = typer.Option(Path("reports/gt-audit.md"), "--out", help="Markdown report path."),
+) -> None:
+    """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
+    from leibniz.align.audit import read_verdicts, render_score, score_verdicts
+    from leibniz.db import open_db
+
+    rows = read_verdicts(verdicts)
+    with open_db(db_path) as conn:
+        weights = {
+            (r[0] or "unknown"): r[1]
+            for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+        }
+    score = score_verdicts(rows, weights)
+    note = (
+        f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); "
+        f"stratum weights from `{db_path}`."
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_score(score, sheet_note=note), encoding="utf-8")
+    wp = score.weighted_precision
+    if wp is None:
+        _console.print(f"[yellow]no scored lines in {verdicts}[/yellow] → {out}")
+    else:
+        colour = "green" if score.passes_gate else "red"
+        gate = f"{'PASS' if score.passes_gate else 'FAIL'} at ≥ {100 * score.gate:.0f} %"
+        _console.print(
+            f"[bold {colour}]weighted precision {100 * wp:.1f} % ({gate})[/bold {colour}] "
+            f"· {score.pooled.n_judged} judged, {score.n_unjudged} blank → {out}"
+        )
 
 
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the

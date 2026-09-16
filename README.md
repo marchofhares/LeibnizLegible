@@ -81,6 +81,8 @@ uv run leibniz align ingest                     # fetch + extract each volume's 
 uv run leibniz align edition-cache              # join to the katalog → data/gt/edition_cache.jsonl
 uv run leibniz align factory data/gt/edition_cache.jsonl --shard 1/6 --resume  # ×6 workers (needs the C1 HTR lines)
 uv run leibniz align gt-report                  # writes reports/gt-factory.md
+uv run leibniz align audit-sheet --images /path/to/image-cache   # 200 line strips → reports/gt-audit/gt-audit.html
+uv run leibniz align audit-score reports/gt-audit/gt-audit-verdicts.csv  # precision per stratum → reports/gt-audit.md
 ```
 
 The reading text of each §70-expired Akademie-Ausgabe volume is read from a
@@ -127,11 +129,11 @@ parallel workers + concurrent GPU recognition); **C2** built the GT factory
 katalog sweep (17,162 piece citations, 11,595 localizable)
 and the reading-text extraction of 21 of 31 expired volumes from
 their free digital copies (6,188 pieces, 26.2M
-characters, 10,029 witnesses with text). Minting is one operator
-run on the machine holding the corpus store — under way; its first runs
-surfaced an aligner memory blow-up on volume-length edition texts, fixed
-2026-09-15 by the anchor-guided aligner. Next is **C2 minting → C3**
-(fine-tune v2, a gate). See `STATUS.md`.
+characters, 10,029 witnesses with text). **The mint has run (2026-09-16):
+297,424 open-bucket ground-truth lines**, 5.9× the 50k target, in about two
+hours on six workers. The C2 gate is now the 200-line hand audit
+(`leibniz align audit-sheet` / `audit-score`, precision ≥ 95 % weighted by
+stratum). Then **C3** (fine-tune v2, a gate). See `STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 
