@@ -344,6 +344,30 @@ offline-tested and documented so that going live is an operator runbook
   on (EN/DE, search, work, page with OpenSeadragon on a same-origin image,
   about, a 404): zero CSP violations, zero console errors; the limiter trips
   at the configured burst.
+- **Follow-up, same day — the kit against a real Meilisearch (v1.53.2 binary,
+  the version now pinned in `install.sh` and both compose files).** Two
+  things the fakes had hidden: (1) on current Meilisearch, deleting an index
+  that does not exist is a task that *fails* with `index_not_found` (a 404
+  was the pre-1.0 behaviour the fake copied), so the very first
+  `leibniz index build --backend meili` on a fresh server aborted — the
+  backend now ignores exactly that failure, and the fake fails like the
+  server; (2) Meilisearch creates `dumps/` in its working directory at
+  startup, which under the unit's `ProtectSystem=strict` is a
+  permission-denied crash — reproduced as an unprivileged user with a
+  read-only cwd, fixed with `WorkingDirectory=/var/lib/meilisearch` and
+  explicit `MEILI_DB_PATH`/`MEILI_DUMP_DIR`/`MEILI_SNAPSHOT_DIR`. Also:
+  `install.sh` runs git and uv as the service user (git refuses to act as
+  root on another user's checkout, which would have broken every re-run),
+  restarts Caddy only once a real domain is configured, and installs the
+  pinned Meilisearch release only when absent (an upgrade must be
+  deliberate: a newer binary refuses an older index); `leibniz index
+  status/query` accept `MEILI_API_KEY`. Then the full path end to end with
+  the real server: search-only key created and confined (document writes
+  and key listing 403), index built on a fresh server, `leibniz serve
+  --workers 2` healthy, the misspelt `calculemvs` finds *Calculemus*,
+  `/api/stats` served from the build metadata through the search key,
+  `leibniz index bench` 60/60 with wall p95 52 ms, and with Meilisearch
+  stopped: search 503, pages 200, `/healthz` degraded.
 
 ### D1–D3 — search, viewer, IIIF, releases, built on v1 (2026-09-16) ✅
 

@@ -23,10 +23,12 @@ class FakeMeili:
         self.indexes: dict[str, dict[str, dict]] = {}
         self.settings: dict[str, dict] = {}
         self.tasks = 0
+        self.task_state: dict[int, dict] = {}
         self.calls: list[str] = []
 
-    def _task(self) -> httpx.Response:
+    def _task(self, status: str = "succeeded", error: dict | None = None) -> httpx.Response:
         self.tasks += 1
+        self.task_state[self.tasks] = {"uid": self.tasks, "status": status, "error": error}
         return httpx.Response(202, json={"taskUid": self.tasks, "status": "enqueued"})
 
     def handler(self, request: httpx.Request) -> httpx.Response:
@@ -36,13 +38,16 @@ class FakeMeili:
         if path == "/health":
             return httpx.Response(200, json={"status": "available"})
         if path.startswith("/tasks/"):
-            return httpx.Response(
-                200, json={"uid": int(path.rsplit("/", 1)[1]), "status": "succeeded"}
-            )
+            uid = int(path.rsplit("/", 1)[1])
+            return httpx.Response(200, json=self.task_state[uid])
         if method == "DELETE" and path.startswith("/indexes/"):
             uid = path.split("/")[2]
             if uid not in self.indexes:
-                return httpx.Response(404, json={"code": "index_not_found"})
+                # Meilisearch 1.x: the delete is a task, and it fails on a
+                # missing index (a 404 was the pre-1.0 behaviour).
+                return self._task(
+                    "failed", {"code": "index_not_found", "message": f"Index `{uid}` not found."}
+                )
             del self.indexes[uid]
             return self._task()
         if method == "POST" and path == "/indexes":
@@ -108,6 +113,13 @@ def test_rebuild_search_meta_count(store_path, fake) -> None:
     n = be.rebuild(iter_page_docs(conn), meta={"stats": {"pages": 4}})
     conn.close()
     assert n == 3 and be.count() == 3
+    # the first build on a fresh server: both deletes failed with index_not_found and were ignored
+    failed = [t for t in fake.task_state.values() if t["status"] == "failed"]
+    assert len(failed) == 2 and all(t["error"]["code"] == "index_not_found" for t in failed)
+    # a second build (indexes exist now) deletes them for real
+    conn = db.connect(store_path)
+    assert be.rebuild(iter_page_docs(conn), meta={"stats": {"pages": 4}}) == 3
+    conn.close()
     assert fake.settings["leibniz_pages"]["typoTolerance"]["enabled"] is True
     assert "POST /indexes" in fake.calls and "PATCH /indexes/leibniz_pages/settings" in fake.calls
 

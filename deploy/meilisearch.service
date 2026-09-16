@@ -13,6 +13,9 @@ Type=simple
 User=meilisearch
 Group=meilisearch
 EnvironmentFile=/etc/meilisearch/env
+# Meilisearch creates dumps/ and snapshots/ relative to its working directory
+# at startup; under ProtectSystem=strict that directory must be the writable one.
+WorkingDirectory=/var/lib/meilisearch
 ExecStart=/usr/local/bin/meilisearch
 Restart=always
 RestartSec=3

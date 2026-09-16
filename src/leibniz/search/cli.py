@@ -38,7 +38,7 @@ BACKEND_OPT = typer.Option("fts5", "--backend", help="fts5 (single file) or meil
 INDEX_OPT = typer.Option(DEFAULT_INDEX_PATH, "--index", help="FTS5 index file (fts5 backend).")
 MEILI_URL_OPT = typer.Option(None, "--meili-url", help="Meilisearch URL (env MEILI_URL).")
 MEILI_KEY_OPT = typer.Option(
-    None, "--meili-key", help="Meilisearch API key (env MEILI_MASTER_KEY)."
+    None, "--meili-key", help="Meilisearch API key (env MEILI_MASTER_KEY, else MEILI_API_KEY)."
 )
 
 
@@ -47,7 +47,9 @@ def _backend(backend: str, index: Path, meili_url: str | None, meili_key: str | 
         backend,
         path=str(index),
         meili_url=meili_url or os.environ.get("MEILI_URL") or DEFAULT_MEILI_URL,
-        meili_key=meili_key or os.environ.get("MEILI_MASTER_KEY"),
+        meili_key=meili_key
+        or os.environ.get("MEILI_MASTER_KEY")
+        or os.environ.get("MEILI_API_KEY"),
     )
 
 
