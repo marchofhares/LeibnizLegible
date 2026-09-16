@@ -1,6 +1,6 @@
 # GT factory — retro-aligned ground truth at scale (Phase C2)
 
-_Leibniz Legible, Phase C2. Generated 2026-09-11. Deliverable of PROMPTS C2 (SPECS §1.4, §6, §7). Counts are queried from the store by `leibniz align gt-report`; prose is templated._
+_Leibniz Legible, Phase C2. Generated 2026-09-15. Deliverable of PROMPTS C2 (SPECS §1.4, §6, §7). Counts are queried from the store by `leibniz align gt-report`; prose is templated._
 
 ## The factory
 
@@ -104,17 +104,48 @@ The one factory step that cannot be unit-tested offline — vision-LLM extractio
 
 ## Minted ground truth
 
-- **Open-bucket aligned lines (CC BY):** 0
+- **Open-bucket aligned lines (CC BY):** 297,424
 - **NC-bucket lines (internal only, never exported):** 0
-- **vs the ≥50k target:** 0% · **vs PHILIUMM's ~63k baseline:** 0%
+- **vs the ≥50k target:** 595% · **vs PHILIUMM's ~63k baseline:** 472%
+
+| Volume | Open lines |
+| --- | ---: |
+| I,10 | 14,714 |
+| I,11 | 14,247 |
+| I,12 | 13,888 |
+| I,14 | 18,063 |
+| I,15 | 15,284 |
+| I,16 | 14,408 |
+| I,2 | 15 |
+| I,3 | 10,313 |
+| I,4 | 9 |
+| I,5 | 103 |
+| I,6 | 14,276 |
+| I,7 | 12,894 |
+| I,8 | 14,955 |
+| I,9 | 15,401 |
+| II,1 | 600 |
+| III,1 | 5,483 |
+| III,3 | 9,060 |
+| III,4 | 9,362 |
+| IV,1 | 23,898 |
+| IV,2 | 4,630 |
+| IV,3 | 21,112 |
+| VI,1 | 2,215 |
+| VI,3 | 13,153 |
+| VI,4 | 47,095 |
+| VI,6 | 2,246 |
 
 ## By stratum
 
-_No minted lines yet._
+| Stratum | Open lines | Audited | Est. precision |
+| --- | ---: | ---: | ---: |
+| fair_copy | 9,913 | — | _pending hand-audit_ |
+| light_revision | 96,175 | — | _pending hand-audit_ |
+| heavy_revision | 190,162 | — | _pending hand-audit_ |
+| scrap | 1,174 | — | _pending hand-audit_ |
 
-## Status of the live run
-
-Of the factory's three inputs, **two are now in hand and one is on the operator's machine.** (1) The katalog is scraped for every §70 volume (17,162 piece citations, 11,595 localizable to exact canvases through the crosswalk + folio resolver — `leibniz catalog scrape --expired-volumes`, ~8 minutes of polite crawling, re-runnable anywhere). (2) The §70 reading text is extracted per piece from the volumes' free digital copies (table above; `leibniz align ingest`), joined to the katalog into the edition cache. (3) The C1 corpus HTR lines — 13.5M recognised lines — live in the operator's `data/inventory.sqlite`; this build environment has none, so `gt_lines` is still empty here. Minting is therefore one operator command away: run the three commands of the runbook below on the machine that holds the corpus store, then `leibniz align gt-report` fills the yield tables. The B2 prototype already proved the chain on one real piece (AA VI,4 N.109): GWLB IIIF → segment → HTR → §70 extraction → align.
+Estimated precision comes from a hand-audit of ~200 lines stratified by stratum (the operator step below); until then the B2 measurement stands as the expectation — **97.5 % on fair copies**, degrading on drafts exactly as the omission conditions predicted, which is why drafts carry a higher mint threshold.
 
 ## What the extraction costs — and the optional vision upgrade
 
