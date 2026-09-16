@@ -42,6 +42,7 @@ bench = [
 # on the GWLB / Potsdam volume PDFs). The archive.org hOCR path needs only lxml.
 gt = [
     "pdfplumber>=0.11",  # per-character font sizes → body vs apparatus type
+    "pillow>=10",        # line-strip crops for the hand-audit sheet
 ]
 
 [build-system]
