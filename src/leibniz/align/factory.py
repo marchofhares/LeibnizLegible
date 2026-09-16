@@ -198,37 +198,51 @@ def mint_piece(
     )
 
 
-def write_pairs(
+def with_write_lock[T](
     conn,
-    refs: Sequence[str],
-    pairs: Sequence[GtPair],
+    fn: Callable[[], T],
     *,
     retries: int = WRITE_RETRIES,
     backoff_s: float = WRITE_BACKOFF_S,
-) -> None:
-    """Replace the ``gt_lines`` of these line refs with ``pairs``, atomically.
+) -> T:
+    """Run ``fn()`` inside a ``BEGIN IMMEDIATE`` transaction, retrying lock collisions.
 
-    One ``BEGIN IMMEDIATE`` transaction per piece (see ``WRITE_RETRIES``);
-    a lock collision that outlives the busy timeout is retried with backoff,
-    and the last failure propagates (the factory records it as
-    ``skipped:error:OperationalError`` and moves on).
+    Every write the factory makes goes through here (see ``WRITE_RETRIES``): the
+    per-piece ``gt_lines`` replacement and the ``runs`` bookkeeping alike. ``fn``
+    may commit itself; otherwise the transaction is committed on return. A lock
+    collision that outlives the busy timeout is retried with jittered backoff;
+    the last failure propagates.
     """
     for attempt in range(1, retries + 1):
         try:
             conn.execute("BEGIN IMMEDIATE")
-            delete_gt_for_refs(conn, refs)
-            insert_gt_pairs(conn, pairs)
-            conn.commit()
-            return
+            result = fn()
+            if conn.in_transaction:
+                conn.commit()
+            return result
         except sqlite3.OperationalError as exc:
             conn.rollback()
             if "lock" not in str(exc).lower() or attempt == retries:
                 raise
             pause = backoff_s * attempt * (1 + random.random())  # noqa: S311 — jitter, not crypto
-            log.warning(
-                "gt_lines write locked (attempt %d/%d): %s; retrying", attempt, retries, exc
-            )
+            log.warning("store locked (attempt %d/%d): %s; retrying", attempt, retries, exc)
             time.sleep(pause)
+    raise AssertionError("unreachable")  # pragma: no cover
+
+
+def write_pairs(conn, refs: Sequence[str], pairs: Sequence[GtPair]) -> None:
+    """Replace the ``gt_lines`` of these line refs with ``pairs``, atomically.
+
+    One transaction per piece via :func:`with_write_lock`; a persistent lock
+    failure propagates and the factory records the piece as
+    ``skipped:error:OperationalError`` and moves on.
+    """
+
+    def _replace() -> None:
+        delete_gt_for_refs(conn, refs)
+        insert_gt_pairs(conn, pairs)
+
+    with_write_lock(conn, _replace)
 
 
 def run_factory(
@@ -253,19 +267,23 @@ def run_factory(
     ``n``-th piece starting at ``i`` so parallel workers split one pass
     disjointly; ``resume`` skips pieces already minted.
     """
-    run_id = db.start_run(
+    params = {
+        "series": series,
+        "volume": volume,
+        "license_bucket": config.license_bucket,
+        "stratum_thresholds": config.stratum_thresholds,
+        "shard": list(shard) if shard else None,
+        "resume": resume,
+    }
+    # The run bookkeeping is written under the same lock discipline as the
+    # pieces: six shard workers start seconds apart and finish while the others
+    # are still committing, and the C2 cleanup pass lost two shards' summaries
+    # to a plain deferred write here.
+    run_id = with_write_lock(
         conn,
-        "gt_factory",
-        model="retro-aligner",
-        params={
-            "series": series,
-            "volume": volume,
-            "license_bucket": config.license_bucket,
-            "stratum_thresholds": config.stratum_thresholds,
-            "shard": list(shard) if shard else None,
-            "resume": resume,
-        },
-        git_sha=db.git_sha(),
+        lambda: db.start_run(
+            conn, "gt_factory", model="retro-aligner", params=params, git_sha=db.git_sha()
+        ),
     )
     if pieces is None:
         pieces, _enum = enumerate_pieces(conn, today=config.today, series=series, volume=volume)
@@ -304,12 +322,15 @@ def run_factory(
             stats.skips[reason] = stats.skips.get(reason, 0) + 1
         if progress is not None:
             progress(result)
-    db.finish_run(
+    with_write_lock(
         conn,
-        run_id,
-        n_input=stats.pieces_seen,
-        n_ok=stats.pieces_minted,
-        n_failed=stats.pieces_seen - stats.pieces_minted,
+        lambda: db.finish_run(
+            conn,
+            run_id,
+            n_input=stats.pieces_seen,
+            n_ok=stats.pieces_minted,
+            n_failed=stats.pieces_seen - stats.pieces_minted,
+        ),
     )
     return stats
 
