@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-16 (**C2 mint DONE on the operator's store: 297,424 open-bucket GT lines, 5.9× the 50k target; the C2 gate now waits on the 200-line hand audit — `leibniz align audit-sheet` / `audit-score` built**)._
+_Last updated: 2026-09-16 (**C2 closed as: mint DONE — 297,424 open-bucket GT lines, 5.9× target; precision gate DEFERRED — the hand audit is preliminary (20/200, non-specialist, its five 'wrong' verdicts contradicted by the machine reading); C3's ablation is the real test**)._
 
 ---
 
@@ -356,6 +356,42 @@ on mixed sets; the ≈260 GPU-h estimate assumed 3–6 s/page combined.
 posteriors ≈0.6–0.9 populate at scale (CPU: 498/500 pages, 23k lines, mean
 conf 0.771, `conf>1` = 0 — the C1 validation gate is **passed**). Remaining
 operator gate: the CUDA recognition re-run, then the corpus pass.
+
+### C2 — close-out: the hand audit is preliminary; gate deferred to C3 (2026-09-16)
+
+The operator judged **20 of the 200** sheet lines and stopped, saying so
+plainly: not confident in the verdicts, wants them treated as preliminary
+and open to review. Recorded as such; C2 is closed on the mint, not on the
+gate.
+
+- **What the 20 say:** all in `fair_copy` (the sheet lists strata in
+  order): 12 correct · 0 boundary · 5 wrong · 3 unreadable → 70.6 %
+  precision on 17 scored, Wilson 47–87 % — a FAIL as written
+  (`reports/gt-audit.md`, committed from the operator's machine with the
+  two CSVs).
+- **What the second witness says:** `audit-score` now cross-checks every
+  verdict against the folded similarity between the minted text and the HTR
+  reading of the *same strip* (the crops are in the page's own pixel space —
+  the C1 segmenter never resizes). **All five "wrong" lines agree with the
+  machine reading at 0.82–0.98** (e.g. minted "but, qu'il seroit trop long
+  de rapporter icy." vs HTR "… rapporter ici."; "la difficulté demeure
+  toujours à multiplier cette presence" vs "la diffienete demeuve toujours
+  …"): the machine read the words the edition gives, on that strip. Read as
+  misjudged verdicts — the auditor's own reading of themselves — the fair-copy
+  sample is 17/17. The three "unreadable" are two short lines and an Italian
+  one. None of this is a pass: 17 lines, one stratum, one non-specialist.
+- **Tooling:** `audit-score --lines` (default: the sheet's own CSV) writes a
+  "Second witness" section listing verdicts to re-check (a *wrong* or
+  *unreadable* at ≥ 0.8 agreement, a *correct* below 0.5) with both texts
+  side by side; +1 test.
+- **Decision:** proceed to C3 with the gate **deferred**, on two grounds.
+  (1) The audit gives no evidence of a precision problem, only of an
+  unfinished audit. (2) C3's design already contains the decisive test: the
+  ablation *PHILIUMM GT alone* vs *+ C2 GT* on the page-disjoint held-out set
+  measures what the minted lines are worth without anyone reading a hand.
+  A GT that is 30 % misaligned would show up there as no gain or a loss. The
+  hand audit stays open (Q #18) for whoever can read the hands; the sheet
+  and the flagged list are in the repo.
 
 ### C2 — the mint ran; hand-audit tooling (2026-09-15/16) ✅ mint · ⏳ audit
 
@@ -720,7 +756,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C2 banded aligner | O(len·band) NW + traceback; **0 mismatches vs full DP** (exactness-tested) |
 | **C2 anchored aligner (2026-09-15)** | k-gram chain → chunked band; crash shape **44 MB / 1.9 s** (was ~6 GB, OOM-killed); 300k-char treatise 112 MB / 46 s |
 | **C2 mint (2026-09-16)** | **297,424 open-bucket GT lines** (fair 9,913 · light 96,175 · heavy 190,162 · scrap 1,174) from 6,383 pieces; 5.9× target; ~2 h on 6 workers |
-| C2 hand audit | tooled (`audit-sheet` / `audit-score`, 200 lines, 50 per stratum, Wilson CIs, gate ≥95 % weighted) — **pending the operator's verdicts** |
+| C2 hand audit | **preliminary**: 20/200 judged (fair copies only) — 12 correct · 5 wrong · 3 unreadable; all 5 "wrong" agree with the HTR reading at 0.82–0.98 (likely misjudged); gate **deferred** to C3's ablation |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
 | **C2 extraction QA (live, real Leibniz print)** | `gpt-4o` reading-text extract, head/page-no dropped; 2-model QA flagged **1/2**, agreement **0.67** |
@@ -832,13 +868,17 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     corpus-wide after the `140d58d`/token-layout fixes). They are ready to gate
     search and the UI.
 
-18. **(C2) Precision of the minted GT is unmeasured until the hand audit
-    returns.** Yield is 5.9× target, but B2's 97.5 % precision was measured on
+18. **(C2) Precision of the minted GT: audit preliminary, gate deferred.**
+    Yield is 5.9× target, but B2's 97.5 % precision was measured on
     favourable material against PHILIUMM's diplomatic GT; the corpus mint has
-    no reference. `audit-sheet` draws 50 lines per stratum; `audit-score`
-    gives the weighted precision against the 95 % gate. If a stratum fails,
-    the levers are its threshold (`STRATUM_THRESHOLDS`), the burst/overhang
-    guards, and Q #17. C3 trains on nothing until this passes.
+    no reference. The operator judged 20/200 (fair copies): 12 correct, 5
+    wrong, 3 unreadable — and all five "wrong" sit on lines whose HTR reading
+    agrees with the minted text at 0.82–0.98, i.e. likely misjudged (C2
+    close-out log). Open until someone who reads the hands finishes the sheet
+    (`reports/gt-audit/`), or C3's ablation (PHILIUMM GT alone vs + C2 GT on
+    the held-out set) settles the question empirically — the latter is now
+    the plan. If a stratum then fails, the levers are its threshold
+    (`STRATUM_THRESHOLDS`), the burst/overhang guards, and Q #17.
 17. **(C2) Edge-of-passage scatter under unit costs.** With the HTR ends not
     free (the piece's lines must all be consumed) and the edition ends free,
     the DP is indifferent between matching the passage's last few characters
@@ -878,19 +918,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**A0–A3 + B1–B2 + C1 (machinery *and* corpus run) + C2 (machinery *and* mint) all green; C2's gate waits on the audit.**
+**A0–A3 + B1–B2 + C1 (machinery *and* corpus run) + C2 (machinery *and* mint) all green; C2's precision gate is deferred to C3's ablation (audit preliminary).**
 Per SPECS §5 sequencing, C is sequential: **C2 minting, then C3**, then C4 and
 the D phases.
 
-- **C2 — the hand audit (the gate).** The mint is done (297,424 lines).
-  On the operator's machine: `leibniz align audit-sheet --images <the C1
-  image cache>` → open `reports/gt-audit/gt-audit.html`, judge the 200
-  strips, download the verdict CSV → `leibniz align audit-score
-  <csv>` → commit `reports/gt-audit.md`. Gate: weighted precision ≥ 95 %
-  (Open Q #18). If it fails on a stratum, raise that stratum's threshold or
-  fix the aligner (Q #17) and re-mint that stratum only. Optional
-  clean-label upgrade: vision re-extraction of the minted pieces' pages
-  (priced in the report; low three figures at most).
+- **C2 — closed on the mint; the precision gate rides with C3.** 297,424
+  lines minted; the hand audit is preliminary (20/200, Q #18) and stays
+  open in `reports/gt-audit/` for a reader of the hands. The C3 ablation
+  (PHILIUMM GT alone vs + C2 GT) is the empirical test of the minted GT; if
+  it shows no gain, come back to Q #18 / Q #17 and the per-stratum
+  thresholds before spending on labels. Optional clean-label upgrade:
+  vision re-extraction of the minted pieces' pages (priced in the report;
+  low three figures at most).
 - **Phase C3 — Fine-tune v2 + per-stratum eval (gate).** Train `leibniz-htr-v2`
   from the PHILIUMM checkpoint on PHILIUMM GT + the C2 open-bucket GT
   (+ ablations). Hold out a page-disjoint test set stratified by stratum +

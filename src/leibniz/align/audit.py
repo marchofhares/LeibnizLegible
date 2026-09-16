@@ -19,6 +19,12 @@ lines before any training).
 * :func:`score_verdicts` reads that CSV back: per-stratum precision with a
   Wilson 95 % interval, plus the corpus-weighted precision (each stratum
   weighted by its share of ``gt_lines``), rendered as ``reports/gt-audit.md``.
+* :func:`text_evidence` cross-checks every verdict against the one witness
+  the sheet carries besides the auditor's eye: the folded similarity between
+  the minted text and the HTR machine reading of the same strip. A *wrong*
+  on a line whose machine reading agrees with the minted text at ≥ 0.8, or a
+  *correct* on one that agrees below 0.5, is listed for re-checking — the
+  first audit was a non-specialist's, and its own author asked for review.
 
 Nothing here needs a model or the network; the crops need the A2 image cache
 (``--images``), and a line whose page is not cached is listed without an image.
@@ -39,6 +45,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from leibniz import db
+from leibniz.align import dp
+from leibniz.align.normalize import normalize_indexed
 from leibniz.align.report import GATE_PRECISION
 from leibniz.images.fetch import local_relpath
 
@@ -512,7 +520,61 @@ def score_verdicts(
     return AuditScore(by_stratum=by, n_rows=len(rows), n_unjudged=unjudged)
 
 
-def render_score(score: AuditScore, *, sheet_note: str = "") -> str:
+# Folded minted↔HTR similarity above which a "wrong"/"unreadable" verdict, or
+# below which (RECHECK_LOW) a "correct" one, is flagged for a second look.
+RECHECK_HIGH = 0.8
+RECHECK_LOW = 0.5
+
+
+@dataclass(slots=True)
+class Evidence:
+    """One judged line with the machine reading's agreement as a second witness."""
+
+    ref: str
+    stratum: str
+    verdict: str
+    similarity: float
+    gt_text: str
+    htr_text: str
+
+    @property
+    def recheck(self) -> str | None:
+        if self.verdict in ("wrong", "unreadable") and self.similarity >= RECHECK_HIGH:
+            return f"machine reading agrees at {self.similarity:.2f}: likely the same line"
+        if self.verdict == "correct" and self.similarity < RECHECK_LOW:
+            return f"machine reading agrees only at {self.similarity:.2f}"
+        return None
+
+
+def text_evidence(rows: Sequence[dict[str, str]], lines_csv: Path) -> list[Evidence]:
+    """Folded similarity of minted vs HTR text for every judged verdict row."""
+    with Path(lines_csv).open(newline="", encoding="utf-8-sig") as fh:
+        lines = {r["ref"]: r for r in csv.DictReader(fh)}
+    out: list[Evidence] = []
+    for r in rows:
+        verdict = (r.get("verdict") or "").strip().lower()
+        ln = lines.get(r.get("ref", ""))
+        if verdict not in VERDICTS or ln is None:
+            continue
+        g, _ = normalize_indexed(ln.get("gt_text") or "")
+        h, _ = normalize_indexed(ln.get("htr_text") or "")
+        sim = dp.similarity(g, h) if g and h else 0.0
+        out.append(
+            Evidence(
+                ref=r["ref"],
+                stratum=(r.get("stratum") or ln.get("stratum") or "unknown").strip(),
+                verdict=verdict,
+                similarity=sim,
+                gt_text=ln.get("gt_text") or "",
+                htr_text=ln.get("htr_text") or "",
+            )
+        )
+    return out
+
+
+def render_score(
+    score: AuditScore, *, sheet_note: str = "", evidence: Sequence[Evidence] | None = None
+) -> str:
     """``reports/gt-audit.md``."""
     out: list[str] = []
     A = out.append
@@ -568,7 +630,42 @@ def render_score(score: AuditScore, *, sheet_note: str = "") -> str:
         "are Wilson 95 %. Equal numbers were drawn per stratum, so the pooled row "
         "over-represents the rare strata; the weighted figure is the one to read."
     )
+    if evidence:
+        flagged = [e for e in evidence if e.recheck]
+        not_ok = [e for e in evidence if e.verdict != "correct"]
+        agree = sum(1 for e in not_ok if e.similarity >= RECHECK_HIGH)
+        A("")
+        A("## Second witness: the machine reading")
+        A("")
+        A(
+            f"For every judged line the folded similarity between the minted text and "
+            f"the HTR reading of the same strip was computed. {agree} of the "
+            f"{len(not_ok)} non-*correct* verdicts sit on lines where the two agree at "
+            f"≥ {RECHECK_HIGH:.1f}, i.e. the machine read the same words the edition "
+            f"gives; **{len(flagged)} verdicts are listed for re-checking.** The "
+            f"machine reading is not ground truth, but it is an independent reader of "
+            f"the strip, and a *wrong* it contradicts this strongly is more often a "
+            f"misjudged verdict than a misaligned line."
+        )
+        if flagged:
+            A("")
+            A(
+                "| # | ref | stratum | verdict | agreement | minted text | HTR reading "
+                "| why re-check |"
+            )
+            A("|---|---|---|---|---:|---|---|---|")
+            for k, e in enumerate(flagged, start=1):
+                A(
+                    f"| {k} | `{e.ref}` | {e.stratum} | {e.verdict} | {e.similarity:.2f} | "
+                    f"{_cell(e.gt_text)} | {_cell(e.htr_text)} | {e.recheck} |"
+                )
     return "\n".join(out) + "\n"
+
+
+def _cell(text: str, limit: int = 70) -> str:
+    """A markdown table cell: pipes escaped, long text shortened."""
+    t = text.replace("|", "\\|").replace("\n", " ")
+    return t if len(t) <= limit else t[: limit - 1] + "…"
 
 
 __all__ = [
@@ -578,6 +675,7 @@ __all__ = [
     "AuditLine",
     "AuditScore",
     "AuditSheet",
+    "Evidence",
     "StratumScore",
     "allocate",
     "build_sheet",
@@ -587,5 +685,6 @@ __all__ = [
     "render_sheet",
     "sample_lines",
     "score_verdicts",
+    "text_evidence",
     "wilson",
 ]
