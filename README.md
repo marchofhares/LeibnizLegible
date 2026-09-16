@@ -131,9 +131,10 @@ and the reading-text extraction of 21 of 31 expired volumes from
 their free digital copies (6,188 pieces, 26.2M
 characters, 10,029 witnesses with text). **The mint has run (2026-09-16):
 297,424 open-bucket ground-truth lines**, 5.9× the 50k target, in about two
-hours on six workers. The C2 gate is now the 200-line hand audit
-(`leibniz align audit-sheet` / `audit-score`, precision ≥ 95 % weighted by
-stratum). Then **C3** (fine-tune v2, a gate). See `STATUS.md`.
+hours on six workers. Its precision is only preliminarily audited (20 of
+200 sheet lines, `leibniz align audit-sheet` / `audit-score`; the gate is
+deferred to the C3 ablation). Next is **C3** (fine-tune v2, a gate). See
+`STATUS.md`.
 
 ## Licensing (summary — see SPECS §7)
 

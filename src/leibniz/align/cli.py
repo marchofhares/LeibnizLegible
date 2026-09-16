@@ -492,12 +492,21 @@ def audit_score(
         str(DEFAULT_DB), "--db", help="SQLite store path (stratum weights)."
     ),
     out: Path = typer.Option(Path("reports/gt-audit.md"), "--out", help="Markdown report path."),
+    lines_csv: Path = typer.Option(
+        None,
+        "--lines",
+        help="The sheet's gt-audit-lines.csv (default: next to the verdicts) — "
+        "cross-checks every verdict against the HTR reading of the strip.",
+    ),
 ) -> None:
     """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
-    from leibniz.align.audit import read_verdicts, render_score, score_verdicts
+    from leibniz.align.audit import read_verdicts, render_score, score_verdicts, text_evidence
     from leibniz.db import open_db
 
     rows = read_verdicts(verdicts)
+    if lines_csv is None and (verdicts.parent / "gt-audit-lines.csv").exists():
+        lines_csv = verdicts.parent / "gt-audit-lines.csv"
+    evidence = text_evidence(rows, lines_csv) if lines_csv is not None else []
     with open_db(db_path) as conn:
         weights = {
             (r[0] or "unknown"): r[1]
@@ -509,7 +518,12 @@ def audit_score(
         f"stratum weights from `{db_path}`."
     )
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_score(score, sheet_note=note), encoding="utf-8")
+    out.write_text(render_score(score, sheet_note=note, evidence=evidence), encoding="utf-8")
+    flagged = sum(1 for e in evidence if e.recheck)
+    if flagged:
+        _console.print(
+            f"[yellow]{flagged} verdicts contradict the machine reading — see {out}[/yellow]"
+        )
     wp = score.weighted_precision
     if wp is None:
         _console.print(f"[yellow]no scored lines in {verdicts}[/yellow] → {out}")

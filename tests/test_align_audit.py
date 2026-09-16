@@ -174,8 +174,8 @@ def test_audit_cli_roundtrip(tmp_path: Path) -> None:
     )
     assert res.exit_code == 0, res.stdout
     assert "4 with image strips" in res.stdout
-    # the auditor's download: every line judged correct
-    verdicts = tmp_path / "gt-audit-verdicts.csv"
+    # the auditor's download, copied next to the sheet's CSV (as the runbook says)
+    verdicts = out_dir / "gt-audit-verdicts.csv"
     with (out_dir / "gt-audit-lines.csv").open(encoding="utf-8") as fh:
         lines = list(csv.DictReader(fh))
     with verdicts.open("w", newline="", encoding="utf-8") as fh:
@@ -190,3 +190,42 @@ def test_audit_cli_roundtrip(tmp_path: Path) -> None:
     assert res2.exit_code == 0, res2.stdout
     assert "PASS" in res2.stdout
     assert "100.0 %" in md.read_text(encoding="utf-8")
+    assert "contradict" not in res2.stdout
+
+    # a "wrong" on a line whose HTR reading agrees with the minted text (0.8 here:
+    # "gt text k" vs "htr text k") is flagged for a second look
+    with verdicts.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["ref", "stratum", "verdict", "note"])
+        for k, r in enumerate(lines):
+            w.writerow([r["ref"], r["stratum"], "wrong" if k == 0 else "correct", ""])
+    res3 = runner.invoke(
+        app, ["align", "audit-score", str(verdicts), "--db", str(db_path), "--out", str(md)]
+    )
+    assert res3.exit_code == 0, res3.stdout
+    assert "1 verdicts contradict" in res3.stdout
+    text = md.read_text(encoding="utf-8")
+    assert "Second witness" in text and lines[0]["ref"] in text and "likely the same line" in text
+
+
+def test_text_evidence_flags_only_contradictions(tmp_path: Path) -> None:
+    lines_csv = tmp_path / "gt-audit-lines.csv"
+    with lines_csv.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image"])
+        w.writerow(
+            ["a", "fair_copy", "0.9", "", "la difficulté demeure", "la diffienete demeuve", "yes"]
+        )
+        w.writerow(["b", "fair_copy", "0.9", "", "prier de vouloir bien", "sur", "yes"])
+        w.writerow(["c", "fair_copy", "0.9", "", "gran spina al quore", "granspina alouore", "yes"])
+    rows = [
+        {"ref": "a", "stratum": "fair_copy", "verdict": "wrong"},  # agrees → re-check
+        {"ref": "b", "stratum": "fair_copy", "verdict": "correct"},  # disagrees → re-check
+        {"ref": "c", "stratum": "fair_copy", "verdict": "correct"},  # agrees → fine
+        {"ref": "zzz", "stratum": "fair_copy", "verdict": "correct"},  # not on the sheet
+    ]
+    ev = audit.text_evidence(rows, lines_csv)
+    assert [e.ref for e in ev] == ["a", "b", "c"]
+    assert ev[0].recheck and "same line" in ev[0].recheck
+    assert ev[1].recheck and "only" in ev[1].recheck
+    assert ev[2].recheck is None
