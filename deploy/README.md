@@ -31,7 +31,7 @@ index is rebuilt from it, and the mirror is the cache re-uploaded.
 | CPU | 2 vCPU; `LEIBNIZ_WORKERS=2`. |
 | Network | inbound 80/443 only; outbound to Let's Encrypt, GitHub and PyPI during install. Nothing here calls the GWLB — the visitor's browser does. |
 | OS | Debian 12 or Ubuntu 24.04 (what `install.sh` targets). |
-| DNS | an A (and AAAA) record for the host name, in place before Caddy starts so it can obtain its certificate. |
+| DNS | an A (and AAAA) record for the host name, and one for `www`, in place **before** Caddy starts so it can obtain its certificate. On Cloudflare set both to **DNS only** (grey cloud): the orange cloud terminates TLS at the edge and Caddy's certificate challenge fails behind it. Turn the proxy on later if you want it, and then set SSL/TLS to *Full (strict)* and `LEIBNIZ_RATE_LIMIT=0` (§8). The `images.` record R2 created stays proxied. |
 
 ## 2. On the desktop: the serving copy of the store
 
@@ -326,20 +326,65 @@ the corpus), no egress fees, and a custom domain bound to the bucket in the
 dashboard with Cloudflare's CDN caching in front. Any S3-compatible bucket
 behind a hostname works the same way.
 
-1. Cloudflare dashboard → R2 → *Create bucket* `leibniz-images` (location
-   hint: Europe). Bucket → *Settings* → *Custom Domains* → add
-   `images.leibnizlegible.com` (Cloudflare creates the DNS record). Same
-   page, *CORS policy*: allow origins `*`, methods `GET, HEAD`, so any IIIF
-   client may fetch the images.
-2. R2 → *Manage R2 API tokens* → a token with *Object Read & Write* on that
-   bucket; note the Access Key ID, the Secret Access Key and the endpoint
-   `https://<account-id>.r2.cloudflarestorage.com`.
+1. Cloudflare dashboard → R2 → *Create bucket* `leibniz-images`. A
+   **location hint** only places the data; a **jurisdiction** (European
+   Union) is a residency guarantee and *changes the S3 endpoint* — see step
+   2. Either is fine here. Bucket → *Settings* → *Custom Domains* → add
+   `images.leibnizlegible.com` (Cloudflare creates the DNS record, proxied;
+   leave it that way — that is the CDN cache). Same page, *CORS Policy* →
+   *Edit*:
+
+```json
+[
+  {
+    "AllowedOrigins": ["*"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "MaxAgeSeconds": 86400
+  }
+]
+```
+
+   The viewer does not need this (OpenSeadragon runs with
+   `crossOriginPolicy: false` and never sends a preflight); it is so that
+   *other people's* browser tools can read the pixels, which is the point of
+   a public-domain mirror.
+2. The token lives **outside** the bucket: left sidebar → *R2 Object
+   Storage* → the `{} API` button on the overview page → *Manage API
+   tokens*, or go straight to
+   `https://dash.cloudflare.com/?to=/:account/r2/api-tokens`. Create one
+   with *Object Read & Write*, scoped to this bucket only. Copy the Access
+   Key ID and the Secret Access Key — the secret is shown once.
+   The **endpoint** is the *S3 API* value on the bucket's Settings page,
+   **with the trailing `/leibniz-images` removed** (rclone wants the bare
+   origin; the bucket name comes from the command). An EU-jurisdiction
+   bucket carries an extra `.eu.`:
+
+   | Bucket | Endpoint |
+   | --- | --- |
+   | default | `https://<account-id>.r2.cloudflarestorage.com` |
+   | EU jurisdiction | `https://<account-id>.eu.r2.cloudflarestorage.com` |
+
 3. On the desktop, thumbnails first, then the upload with
-   [rclone](https://rclone.org/) (resumable, parallel, checksummed):
+   [rclone](https://rclone.org/) (resumable, parallel, checksummed).
+   Writing the config file beats the interactive wizard:
 
 ```bash
+curl -fsSL https://rclone.org/install.sh | sudo bash   # the distro package is often too old for `provider = Cloudflare`
+mkdir -p ~/.config/rclone
+cat > ~/.config/rclone/rclone.conf <<'EOF'
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = PASTE_ACCESS_KEY_ID
+secret_access_key = PASTE_SECRET_ACCESS_KEY
+endpoint = https://<account-id>.eu.r2.cloudflarestorage.com
+acl = private
+EOF
+chmod 600 ~/.config/rclone/rclone.conf
+
+rclone lsd r2:                                     # must list leibniz-images — prove the token before a transfer measured in hours
 uv run leibniz images thumbs                       # data/thumbs/, all cores, resumable; ~half an hour
-rclone config                                      # new remote "r2": type s3, provider Cloudflare, the keys, the endpoint
 rclone sync data/images r2:leibniz-images --transfers 16 --checkers 16 --fast-list --progress
 rclone sync data/thumbs r2:leibniz-images/thumbs --transfers 32 --fast-list --progress
 rclone check data/images r2:leibniz-images --one-way   # MD5 of every object against the local file
