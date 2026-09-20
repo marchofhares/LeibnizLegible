@@ -126,8 +126,10 @@ def test_cli_thumbs_and_check_mirror(tmp_path, monkeypatch) -> None:
             "1",
         ],
     )
-    assert r.exit_code == 0, r.stdout
+    # one source present, one recorded-but-absent → exit 1, and it says so
+    assert r.exit_code == 1, r.stdout
     assert "1 made" in r.stdout and "1 source files missing" in r.stdout
+    assert "have no file under" in r.stdout
 
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, headers={"content-length": str(FIX.stat().st_size)})
@@ -167,3 +169,53 @@ def test_cli_thumbs_and_check_mirror(tmp_path, monkeypatch) -> None:
         ],
     )
     assert r.exit_code == 1 and '"complete": false' in r.stdout
+
+
+def test_preflight_rejects_a_wrong_images_root(tmp_path) -> None:
+    """A root holding none of the cached pages is the root's fault, not the cache's."""
+    import pytest
+
+    from leibniz.images.thumbs import build_thumbnails, preflight_images_root
+
+    db_path = tmp_path / "inv.sqlite"
+    conn = db.init_db(db_path)
+    db.upsert_work(conn, db.Work("00000001", "LeibnizHandschriften", n_canvases=10))
+    for seq in range(1, 11):
+        db.upsert_page(conn, db.Page(work_id="00000001", seq=seq))
+        db.mark_page_fetched(
+            conn,
+            f"00000001:{seq:04d}",
+            local_path=f"00000001/{seq:04d}.jpg",
+            n_bytes=1,
+            sha256="x",
+            width=1,
+            height=1,
+        )
+    conn.commit()
+    empty = tmp_path / "nowhere"
+    empty.mkdir()
+    with pytest.raises(FileNotFoundError, match="wrong --images root"):
+        preflight_images_root(conn, empty)
+    with pytest.raises(FileNotFoundError):
+        build_thumbnails(conn, empty, tmp_path / "t")
+    # the CLI turns it into a clean message and exit 2, not a traceback
+    r = runner.invoke(
+        app,
+        [
+            "images",
+            "thumbs",
+            "--db",
+            str(db_path),
+            "--images",
+            str(empty),
+            "--out",
+            str(tmp_path / "t"),
+        ],
+    )
+    flat = " ".join(r.stdout.split())  # rich wraps the message across lines
+    assert r.exit_code == 2 and "wrong --images root" in flat
+    # fewer than five cached pages cannot distinguish the two cases: stay quiet
+    conn.execute("UPDATE pages SET local_path = NULL WHERE seq > 3")
+    conn.commit()
+    preflight_images_root(conn, empty)
+    conn.close()
