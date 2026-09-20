@@ -221,6 +221,7 @@ def recognize_pages(
             "redo": redo,
             "sample": sample,
             "shard": list(shard) if shard else None,
+            "images_root": str(images_root),  # see segment.py: the store's only record of it
         },
         git_sha=db.git_sha(),
     )

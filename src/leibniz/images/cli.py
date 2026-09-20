@@ -117,7 +117,13 @@ def fetch(
     run_id = db.start_run(
         conn,
         "images_fetch",
-        params={"set": set_, "work": work, "limit": limit, "redo": redo},
+        params={
+            "set": set_,
+            "work": work,
+            "limit": limit,
+            "redo": redo,
+            "images_root": str(images_root),  # the store's only record of where the cache is
+        },
         git_sha=db.git_sha(),
     )
     console.print(f"[bold]images fetch[/bold] → up to {target:,} target pages")

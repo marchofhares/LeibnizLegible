@@ -189,6 +189,12 @@ def segment_pages(
             "redo": redo,
             "sample": sample,
             "shard": list(shard) if shard else None,
+            # Where the pixels were read from. The cache is far too big to sit
+            # beside the store, so it is usually on another disk entirely, and
+            # nothing else in the store remembers where (`pages.local_path` is
+            # relative to it). Recorded so a later pass — thumbnails, a mirror,
+            # a re-run — can find the images without the operator guessing.
+            "images_root": str(images_root),
         },
         git_sha=db.git_sha(),
     )
