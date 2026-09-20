@@ -26,11 +26,12 @@ index is rebuilt from it, and the mirror is the cache re-uploaded.
 
 | | |
 | --- | --- |
-| RAM | **8 GB.** Meilisearch memory-maps its index and wants it in the page cache; the app itself is small. 4 GB works with `MEILI_MAX_INDEXING_MEMORY=2GiB` and a slower build. |
+| RAM | **8 GB comfortable, 4 GB probably enough — measure before you buy.** The whole corpus is only about **0.59 GB of transcription text** (13.5 M lines × 43.9 chars mean, measured from `reports/philiumm-repro.lines.jsonl`), roughly 2.5 KB per page document. Meilisearch's index runs a few times that, so it is single-digit GB, not tens. Build it once on the desktop (`docker compose up -d meilisearch && leibniz index build --backend meili`, then `docker system df -v \| grep meili_data`) and buy for the number you see plus the OS. 4 GB also wants `MEILI_MAX_INDEXING_MEMORY=2GiB`. |
 | Disk | the store (`prepare-store.sh` prints its real size; expect single-digit GB for 13.5 M lines with polygons) + the Meilisearch index (budget 2–3× the text, ~15 GB) + OS → **40–60 GB** SSD. |
-| CPU | 2 vCPU; `LEIBNIZ_WORKERS=2`. |
+| CPU | 2 vCPU; `LEIBNIZ_WORKERS=2`. **Arm64 is fully supported and usually the cheapest way to buy RAM** (Hetzner CAX, Oracle Ampere, Scaleway COPARM): `install.sh` fetches the `meilisearch-linux-aarch64` build, the lockfile carries Arm wheels, uv ships an Arm CPython, Caddy has Arm packages. Nothing else changes. Note that Hetzner offers Ampere only in its EU locations. |
 | Network | inbound 80/443 only; outbound to Let's Encrypt, GitHub and PyPI during install. Nothing here calls the GWLB — the visitor's browser does. |
 | OS | Debian 12 or Ubuntu 24.04 (what `install.sh` targets). |
+| Provider | Anything with the above. Hetzner's US locations cost two to three times its German ones for the same plan, so check the location before reading the price. The public base URL is the project's domain, not the host, so **moving provider later costs nothing** — no IIIF identifier changes. |
 | DNS | an A (and AAAA) record for the host name, and one for `www`, in place **before** Caddy starts so it can obtain its certificate. On Cloudflare set both to **DNS only** (grey cloud): the orange cloud terminates TLS at the edge and Caddy's certificate challenge fails behind it. Turn the proxy on later if you want it, and then set SSL/TLS to *Full (strict)* and `LEIBNIZ_RATE_LIMIT=0` (§8). The `images.` record R2 created stays proxied. |
 
 ## 2. On the desktop: the serving copy of the store
