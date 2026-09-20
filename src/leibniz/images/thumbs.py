@@ -52,13 +52,39 @@ def make_thumbnail(
         return im.size
 
 
-def cached_pages(conn: sqlite3.Connection) -> list[tuple[str, str, int | None]]:
+def cached_pages(
+    conn: sqlite3.Connection, limit: int | None = None
+) -> list[tuple[str, str, int | None]]:
     """``(page_id, local_path, n_bytes)`` for every page the cache holds."""
-    rows = conn.execute(
+    sql = (
         "SELECT page_id, local_path, n_bytes FROM pages WHERE local_path IS NOT NULL "
         "ORDER BY page_id"
-    ).fetchall()
-    return [(r[0], r[1], r[2]) for r in rows]
+    )
+    if limit is not None:
+        sql += f" LIMIT {int(limit)}"
+    return [(r[0], r[1], r[2]) for r in conn.execute(sql).fetchall()]
+
+
+def preflight_images_root(conn: sqlite3.Connection, images_root: Path, *, sample: int = 25) -> None:
+    """Abort when the images root looks wrong, before statting a quarter-million files.
+
+    The same guard as :func:`leibniz.pipeline.segment.preflight_images_root`, and
+    for the same reason: a page carrying a ``local_path`` is *recorded* as
+    downloaded, so if not one of a sample exists under the root, the root — not
+    the cache — is what is missing. This bites easily, because a 395 GB image
+    cache usually lives on a different disk from the 15 GB store, and the
+    default root (``data/images``) sits next to the store.
+    """
+    rows = cached_pages(conn, limit=sample)
+    if len(rows) < 5:
+        return  # too few to tell a wrong root from a genuinely missing file
+    if any((Path(images_root) / local_path).exists() for _pid, local_path, _n in rows):
+        return
+    raise FileNotFoundError(
+        f"none of the first {len(rows)} cached pages exist under {images_root} — "
+        "wrong --images root? The store says these pages were downloaded, so the "
+        "cache is somewhere else (check your other disks; it is ~400 GB)."
+    )
 
 
 @dataclass(slots=True)
@@ -96,7 +122,12 @@ def build_thumbnails(
     redo: bool = False,
     progress: Callable[[str, str], None] | None = None,
 ) -> ThumbStats:
-    """Derive thumbnails for every cached page (skipping existing ones unless ``redo``)."""
+    """Derive thumbnails for every cached page (skipping existing ones unless ``redo``).
+
+    Raises :class:`FileNotFoundError` when ``images_root`` holds none of the
+    cached pages (see :func:`preflight_images_root`).
+    """
+    preflight_images_root(conn, images_root)
     stats = ThumbStats()
     jobs: list[tuple[str, str, str, int]] = []
     for page_id, local_path, _ in cached_pages(conn):
@@ -232,6 +263,7 @@ def check_mirror(
 
 __all__ = [
     "DEFAULT_THUMBS_ROOT",
+    "preflight_images_root",
     "DEFAULT_WIDTH",
     "THUMBS_PREFIX",
     "MirrorReport",

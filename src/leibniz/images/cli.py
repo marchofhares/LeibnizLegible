@@ -117,7 +117,13 @@ def fetch(
     run_id = db.start_run(
         conn,
         "images_fetch",
-        params={"set": set_, "work": work, "limit": limit, "redo": redo},
+        params={
+            "set": set_,
+            "work": work,
+            "limit": limit,
+            "redo": redo,
+            "images_root": str(images_root),  # the store's only record of where the cache is
+        },
         git_sha=db.git_sha(),
     )
     console.print(f"[bold]images fetch[/bold] → up to {target:,} target pages")
@@ -232,6 +238,11 @@ def thumbs(
     """Derive one thumbnail per cached page, in the cache's layout (for the mirror)."""
     conn = db.init_db(db_path)
     try:
+        try:
+            thumbs_mod.preflight_images_root(conn, images_root)
+        except FileNotFoundError as exc:
+            console.print(f"[red]{exc}[/red]")
+            raise typer.Exit(2) from exc
         n = len(thumbs_mod.cached_pages(conn))
         with Progress(
             TextColumn("[progress.description]{task.description}"),
@@ -257,7 +268,13 @@ def thumbs(
     )
     if stats.failures:
         console.print("failed (first 50): " + ", ".join(stats.failures))
-    raise typer.Exit(1 if stats.failed else 0)
+    if stats.missing:
+        console.print(
+            f"[yellow]{stats.missing:,} pages the store records as cached have no file "
+            f"under {images_root}[/yellow] — run `leibniz images verify` to see what the "
+            "cache is missing."
+        )
+    raise typer.Exit(1 if (stats.failed or stats.missing) else 0)
 
 
 @app.command("check-mirror")

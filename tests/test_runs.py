@@ -32,3 +32,24 @@ def test_start_and_finish_run_roundtrip() -> None:
     assert (row["n_input"], row["n_ok"], row["n_failed"]) == (756, 755, 1)
     assert row["finished_at"] is not None
     conn.close()
+
+
+def test_stage_runs_record_the_images_root(tmp_path) -> None:
+    """The store is the only thing that remembers where the image cache lives.
+
+    `pages.local_path` is relative to a root nothing else records, and the cache
+    is too large to sit beside the store, so without this a later pass has to
+    guess which disk holds 400 GB of JPEGs.
+    """
+    import json
+
+    from leibniz import db
+
+    conn = db.init_db(tmp_path / "inv.sqlite")
+    for stage in ("segment", "recognize", "images_fetch"):
+        db.start_run(conn, stage, params={"images_root": "/mnt/d/leibniz/images"})
+    rows = conn.execute("SELECT stage, params FROM runs ORDER BY run_id").fetchall()
+    assert {r["stage"] for r in rows} == {"segment", "recognize", "images_fetch"}
+    for r in rows:
+        assert json.loads(r["params"])["images_root"] == "/mnt/d/leibniz/images"
+    conn.close()
