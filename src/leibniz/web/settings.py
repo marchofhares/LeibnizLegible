@@ -41,6 +41,10 @@ if TYPE_CHECKING:  # pragma: no cover
     from fastapi import FastAPI
 
 BACKENDS = ("fts5", "meili", "none")
+# Hosts that mean "nobody set this yet". The base URL is embedded in every IIIF
+# manifest and annotation id, so serving with one of these mints permanent
+# identifiers pointing at a domain the project does not own.
+PLACEHOLDER_HOSTS = ("example.org", "example.com", "example.net", "your.host")
 DEFAULT_RATE_LIMIT = 10.0  # requests per second, per client address
 DEFAULT_RATE_BURST = 40
 
@@ -137,6 +141,12 @@ class ServeSettings:
             out[ENV["image_base_url"]] = self.image_base_url
         return out
 
+    @property
+    def base_url_is_placeholder(self) -> bool:
+        """Whether ``base_url`` still points at an example domain (:data:`PLACEHOLDER_HOSTS`)."""
+        url = (self.base_url or "").lower()
+        return bool(url) and any(host in url for host in PLACEHOLDER_HOSTS)
+
     def open_search(self) -> SearchBackend | None:
         if self.backend == "none":
             return None
@@ -162,6 +172,7 @@ class ServeSettings:
 
 __all__ = [
     "BACKENDS",
+    "PLACEHOLDER_HOSTS",
     "DEFAULT_RATE_BURST",
     "DEFAULT_RATE_LIMIT",
     "ENV",

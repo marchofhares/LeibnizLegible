@@ -124,6 +124,13 @@ def serve(
         )
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
+    if settings.base_url_is_placeholder:
+        console.print(
+            f"[yellow]warning:[/yellow] LEIBNIZ_BASE_URL is still a placeholder "
+            f"({settings.base_url}). It is embedded in every IIIF manifest and "
+            "annotation id, which are meant to be permanent — set it to the real "
+            "public origin before anyone fetches a manifest."
+        )
     if check:
         app = settings.build_app()
         for route in app.routes:
