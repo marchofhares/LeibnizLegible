@@ -56,6 +56,23 @@ as_leibniz env UV_CACHE_DIR="$APP_DIR/.uv/cache" UV_PYTHON_INSTALL_DIR="$APP_DIR
   uv sync --project "$APP_DIR" --python 3.12 --frozen --no-dev --extra web
 "$APP_DIR/.venv/bin/leibniz" --version
 
+say "swap"
+# Insurance for the index build on a small box: Meilisearch's peak is bursty,
+# and an OOM kill mid-build means starting over. Skipped when the image
+# already has swap, or when / is too tight to spare the space.
+if [[ -n "$(swapon --show --noheadings 2>/dev/null)" ]]; then
+  echo "swap already present; leaving it alone"
+elif (( $(df --output=avail -m / | tail -1) < 12000 )); then
+  echo "skipped: less than 12 GB free on /"
+else
+  fallocate -l 4G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
+  chmod 600 /swapfile
+  mkswap -q /swapfile
+  swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  echo "created a 4 GB swap file"
+fi
+
 say "meilisearch $MEILI_VERSION"
 # Installed only when absent: a new Meilisearch version cannot read an index
 # built by an older one, so upgrading is a deliberate step (README §9), never
@@ -78,7 +95,15 @@ fi
 if [[ ! -f /etc/meilisearch/env ]]; then
   install -m 0640 -o root -g meilisearch "$APP_DIR/deploy/meilisearch.env.example" /etc/meilisearch/env
   sed -i "s|^MEILI_MASTER_KEY=.*|MEILI_MASTER_KEY=$(openssl rand -hex 32)|" /etc/meilisearch/env
-  echo "wrote /etc/meilisearch/env with a fresh master key"
+  # Size the indexing cap to THIS box. Meilisearch's own default is two thirds
+  # of RAM, which is right for a machine that runs nothing else; here the app,
+  # Caddy and the page cache need room too, and an over-large cap makes the
+  # index build swap instead of finishing. Half of RAM is the safe rule.
+  mem_mb=$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo)
+  cap_mb=$(( mem_mb / 2 ))
+  (( cap_mb < 512 )) && cap_mb=512
+  sed -i "s|^MEILI_MAX_INDEXING_MEMORY=.*|MEILI_MAX_INDEXING_MEMORY=${cap_mb}MiB|" /etc/meilisearch/env
+  echo "wrote /etc/meilisearch/env (fresh master key; indexing capped at ${cap_mb} MiB of ${mem_mb} MiB RAM)"
 fi
 install -m 0644 "$APP_DIR/deploy/meilisearch.service" /etc/systemd/system/meilisearch.service
 

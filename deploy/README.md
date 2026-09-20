@@ -83,7 +83,10 @@ curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/de
 5. installs Caddy from its apt repository, puts `deploy/Caddyfile` in place
    (the stock one is kept as `Caddyfile.dist`), and a systemd drop-in that
    feeds Caddy `/etc/leibniz-legible/caddy.env`;
-6. installs `/etc/leibniz-legible/env` from `env.example` (only if absent) and
+6. adds a 4 GB swap file if the image has none (insurance against an OOM kill
+   part-way through the index build) and sizes
+   `MEILI_MAX_INDEXING_MEMORY` to half of the box's RAM;
+7. installs `/etc/leibniz-legible/env` from `env.example` (only if absent) and
    `leibniz-legible.service`, enabled but **not started** — it needs the store
    and the index first. Caddy is restarted only once `caddy.env` names a real
    domain, so a placeholder never hits Let's Encrypt.
