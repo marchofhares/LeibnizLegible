@@ -403,11 +403,23 @@ rclone sync data/thumbs r2:leibniz-images/thumbs --transfers 32 --fast-list --pr
 rclone check data/images r2:leibniz-images --one-way   # MD5 of every object against the local file
 ```
 
-   The upload is bound by your uplink: 400 GB is about 18 hours at 50 Mbit/s,
-   9 at 100. Keep the WSL2 window open for the duration (WSL stops when its
-   last window closes); `rclone sync` resumes where it left off if it is
-   interrupted. The R2 free tier covers the first 10 GB; the rest bills
-   monthly.
+   The upload is bound by your uplink, and home uplinks are usually slower
+   than advertised. **Measure rather than hope:** the store transfer in §2
+   prints its real rate, and the image upload takes the same route. At
+   2.8 MB/s — a measured figure from the first deployment — 400 GB is about
+   **40 hours**, against 9 hours at 100 Mbit/s. Thumbnails are perhaps 7 GB
+   and land in an hour. Keep the WSL2 window open for the duration (WSL stops
+   when its last window closes); `rclone sync` resumes where it left off if
+   it is interrupted. The R2 free tier covers the first 10 GB; the rest
+   bills monthly.
+
+   **Do not wait for it.** The mirror is a switch, so the sensible order is:
+   leave `LEIBNIZ_IMAGE_BASE_URL` unset and launch with images coming from
+   the GWLB (the code's default), which makes the viewer fully testable on
+   day one; run the upload over the following days; then set the variable,
+   restart, and confirm with `check-mirror`. Announcing and writing to the
+   GWLB (§11) belongs after the flip, so the note describes the steady state
+   rather than a transition.
 4. Verify from anywhere, against the store's own cache manifest:
 
 ```bash
