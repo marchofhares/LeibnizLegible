@@ -85,3 +85,45 @@ def test_listening_socket_is_tcp_bound_and_inheritable() -> None:
             assert v6.family == socket.AF_INET6 and v6.proto == socket.IPPROTO_TCP
         finally:
             v6.close()
+
+
+def test_placeholder_base_url_is_detected() -> None:
+    for url in ("https://leibniz.example.org", "http://EXAMPLE.COM/x", "https://your.host"):
+        assert ServeSettings(base_url=url).base_url_is_placeholder, url
+    for url in ("https://leibnizlegible.com", "http://127.0.0.1:8000", None):
+        assert not ServeSettings(base_url=url).base_url_is_placeholder, url
+
+
+def test_serve_check_warns_about_a_placeholder_base_url(store_path) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    r = CliRunner().invoke(
+        app,
+        [
+            "serve",
+            "--db",
+            str(store_path),
+            "--backend",
+            "none",
+            "--check",
+            "--base-url",
+            "https://leibniz.example.org",
+        ],
+    )
+    assert r.exit_code == 0 and "placeholder" in r.stdout
+    r = CliRunner().invoke(
+        app,
+        [
+            "serve",
+            "--db",
+            str(store_path),
+            "--backend",
+            "none",
+            "--check",
+            "--base-url",
+            "https://leibnizlegible.com",
+        ],
+    )
+    assert r.exit_code == 0 and "placeholder" not in r.stdout
