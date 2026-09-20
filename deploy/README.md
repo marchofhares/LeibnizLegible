@@ -27,7 +27,7 @@ index is rebuilt from it, and the mirror is the cache re-uploaded.
 | | |
 | --- | --- |
 | RAM | **8 GB comfortable, 4 GB probably enough — measure before you buy.** The whole corpus is only about **0.59 GB of transcription text** (13.5 M lines × 43.9 chars mean, measured from `reports/philiumm-repro.lines.jsonl`), roughly 2.5 KB per page document. Meilisearch's index runs a few times that, so it is single-digit GB, not tens. Build it once on the desktop (`docker compose up -d meilisearch && leibniz index build --backend meili`, then `docker system df -v \| grep meili_data`) and buy for the number you see plus the OS. 4 GB also wants `MEILI_MAX_INDEXING_MEMORY=2GiB`. |
-| Disk | the store (`prepare-store.sh` prints its real size; expect single-digit GB for 13.5 M lines with polygons) + the Meilisearch index (budget 2–3× the text, ~15 GB) + OS → **40–60 GB** SSD. |
+| Disk | **80 GB SSD.** The v1 serving store measures **15 GB** (measured 2026-09-20, not estimated: 13.5 M line rows whose baseline and polygon JSON dwarf the 0.59 GB of text). Add the Meilisearch index, the OS, a 4 GB swap file and the venv, and about 30 GB is in use with comfortable headroom for a rebuild alongside the old index. 40 GB would work but leaves no room to hold two index generations at once. |
 | CPU | 2 vCPU; `LEIBNIZ_WORKERS=2`. **Arm64 is fully supported and usually the cheapest way to buy RAM** (Hetzner CAX, Oracle Ampere, Scaleway COPARM): `install.sh` fetches the `meilisearch-linux-aarch64` build, the lockfile carries Arm wheels, uv ships an Arm CPython, Caddy has Arm packages. Nothing else changes. Note that Hetzner offers Ampere only in its EU locations. |
 | Network | inbound 80/443 only; outbound to Let's Encrypt, GitHub and PyPI during install. Nothing here calls the GWLB — the visitor's browser does. |
 | OS | Debian 12 or Ubuntu 24.04 (what `install.sh` targets). |
@@ -46,7 +46,16 @@ deploy/prepare-store.sh data/inventory.sqlite inventory-serving.sqlite
 This checkpoints the WAL, writes a compact single-file copy with `VACUUM INTO`
 (rollback-journal mode: no `-wal` sidecar to ship, and the app's read-only
 connections are happy), runs `integrity_check`, prints the row counts, the
-size and the SHA-256. Then, once §3 has created the directory on the server:
+size and the SHA-256. Budget about **35 seconds per gigabyte**, so roughly ten
+minutes for the v1 store; most of it is the `VACUUM INTO`, which prints
+nothing at all while it runs.
+
+Its `lines` count is every row in the table, which is slightly higher than the
+"lines transcribed" figure in `STATUS.md`: segmentation writes a row per
+detected line and recognition fills in the text afterwards, so the handful
+that never got text (about 13 k of 13.5 M for v1) are counted here and not
+there. Both numbers being a little apart is correct; the recognised count is
+what `/api/stats` reports once the index is built. Then, once §3 has created the directory on the server:
 
 ```bash
 rsync -avP inventory-serving.sqlite root@HOST:/var/lib/leibniz-legible/inventory.sqlite
@@ -394,11 +403,23 @@ rclone sync data/thumbs r2:leibniz-images/thumbs --transfers 32 --fast-list --pr
 rclone check data/images r2:leibniz-images --one-way   # MD5 of every object against the local file
 ```
 
-   The upload is bound by your uplink: 400 GB is about 18 hours at 50 Mbit/s,
-   9 at 100. Keep the WSL2 window open for the duration (WSL stops when its
-   last window closes); `rclone sync` resumes where it left off if it is
-   interrupted. The R2 free tier covers the first 10 GB; the rest bills
-   monthly.
+   The upload is bound by your uplink, and home uplinks are usually slower
+   than advertised. **Measure rather than hope:** the store transfer in §2
+   prints its real rate, and the image upload takes the same route. At
+   2.8 MB/s — a measured figure from the first deployment — 400 GB is about
+   **40 hours**, against 9 hours at 100 Mbit/s. Thumbnails are perhaps 7 GB
+   and land in an hour. Keep the WSL2 window open for the duration (WSL stops
+   when its last window closes); `rclone sync` resumes where it left off if
+   it is interrupted. The R2 free tier covers the first 10 GB; the rest
+   bills monthly.
+
+   **Do not wait for it.** The mirror is a switch, so the sensible order is:
+   leave `LEIBNIZ_IMAGE_BASE_URL` unset and launch with images coming from
+   the GWLB (the code's default), which makes the viewer fully testable on
+   day one; run the upload over the following days; then set the variable,
+   restart, and confirm with `check-mirror`. Announcing and writing to the
+   GWLB (§11) belongs after the flip, so the note describes the steady state
+   rather than a transition.
 4. Verify from anywhere, against the store's own cache manifest:
 
 ```bash
