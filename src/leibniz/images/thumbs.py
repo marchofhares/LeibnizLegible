@@ -18,6 +18,7 @@ from __future__ import annotations
 import multiprocessing
 import random
 import sqlite3
+import warnings
 from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -39,6 +40,18 @@ def make_thumbnail(
         from PIL import Image
     except ModuleNotFoundError as exc:  # pragma: no cover — environment-dependent
         raise ModuleNotFoundError("Pillow is required: uv sync --extra gt") from exc
+    with warnings.catch_warnings():
+        # The corpus holds ~120-165 MP foldout scans, over Pillow's 89.5 MP
+        # decompression-bomb threshold. That heuristic guards against hostile
+        # uploads; these are our own cache, fetched from the library, and the
+        # warning fires a few thousand times and buries the progress bar. The
+        # limit itself stays on (Pillow still raises above 2x), so a genuinely
+        # absurd file is still refused.
+        warnings.simplefilter("ignore", Image.DecompressionBombWarning)
+        return _resize(Image, src, dst, width, quality)
+
+
+def _resize(Image, src: Path, dst: Path, width: int, quality: int) -> tuple[int, int]:
     with Image.open(src) as im:
         im.draft("RGB", (width, width * 4))  # decode at a reduced scale, cheaply
         im = im.convert("RGB")

@@ -23,10 +23,23 @@ on every view). `leibniz release export` writes the three datasets as Parquet
 (or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
 provenance, licence, attribution, error rates and the anti-contamination note.
 `reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
-states the project against SPECS §3 criterion by criterion. **517 tests**, ruff
+states the project against SPECS §3 criterion by criterion. **518 tests**, ruff
 clean. The operator step: `leibniz index build && leibniz serve` on the corpus
 store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
 then measure search p95.
+
+**🌐 LIVE (2026-09-21): https://leibnizlegible.com.** The v1 corpus is public
+and searchable. A 2 vCPU / 4 GB Hetzner VPS in Falkenstein runs `leibniz
+serve` behind Caddy (automatic TLS) with Meilisearch; the 15 GB serving store
+and the 235,723-page index live on the box; page images come from the GWLB's
+own endpoints while the image mirror uploads. **SPECS §3.3's search criterion
+is met and measured:** 200 queries over HTTPS gave wall-clock p50 108 ms,
+**p95 210 ms**, max 368 ms against the 500 ms bar (Meilisearch itself p50
+8 ms, p95 60 ms). Typo tolerance and the early-modern fold both confirmed
+live. What the deployment cost in wall clock, for the next operator: the
+serving copy 10 min, its transfer 1 h 36 m at a measured 2.8 MB/s, the index
+build **5 h 33 m** (disk-bound; only 32 min of CPU). `reports/tier1-final.md`
+row 3 is updated from "to be measured" to met.
 
 **Deployable (2026-09-16, later session).** The deployment kit is in `deploy/`
 (runbook, `install.sh`, systemd units, Caddyfile, container stack) and the app
@@ -39,7 +52,7 @@ R2 (an operator decision that diverges from SPECS §3.4's "never rehosted" —
 recorded under Divergences; the code's default stays direct-from-GWLB) — and
 the note to the GWLB before launch. `LICENSE` (Apache-2.0) and the issue form
 the viewer's "Report an error" link opens are in place for the repository
-going public. **517 tests**, ruff clean.
+going public. **518 tests**, ruff clean.
 
 **Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
 statement (doi:10.5281/zenodo.22782813), the corpus census

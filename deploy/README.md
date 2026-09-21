@@ -139,11 +139,35 @@ systemd-run --unit=leibniz-index --uid=leibniz --gid=leibniz \
 journalctl -fu leibniz-index
 ```
 
-What to expect: the corpus statistics first (five scans of the `lines`
-table, a minute or so), then documents in batches of 2,000, each awaited on
-Meilisearch's task queue. Roughly an hour or two for 236 k pages; the
-`MEILI_MAX_INDEXING_MEMORY` cap in `/etc/meilisearch/env` is what keeps the
-box responsive meanwhile. The build **replaces** the index wholesale (drop →
+What to expect, measured on the first deployment (2 vCPU, 4 GB, the 15 GB
+v1 store): the corpus statistics first — five scans of the `lines` table,
+about **five minutes** — then documents in batches of 2,000, each awaited on
+Meilisearch's task queue. The whole build took **5 h 33 m** wall clock for
+just under 236 k pages, of which only 32 minutes was CPU: it is bound by
+reading 13.5 M line rows off disk, not by Meilisearch. Budget an evening,
+not an afternoon, and leave it alone — it is a systemd unit, so closing the
+SSH session does not touch it. The `MEILI_MAX_INDEXING_MEMORY` cap in
+`/etc/meilisearch/env` keeps the box responsive meanwhile; a 4 GB box dips
+a few hundred MB into swap, which is what the swap file `install.sh` creates
+is for.
+
+**The document count is lower than the recognised-page count, and that is
+correct.** v1 indexed 235,723 of 236,210 recognised pages. A page is
+indexable only if at least one of its lines carries text, and a few hundred
+pages came out of recognition with every line empty. Confirm the difference
+on any store with:
+
+```bash
+sudo -u leibniz /opt/leibniz-legible/.venv/bin/python -c "
+import sqlite3
+c = sqlite3.connect('file:/var/lib/leibniz-legible/inventory.sqlite?mode=ro', uri=True)
+r = c.execute(\"SELECT COUNT(*) FROM pages WHERE status='recognized'\").fetchone()[0]
+t = c.execute(\"SELECT COUNT(DISTINCT page_id) FROM lines WHERE text IS NOT NULL AND text != ''\").fetchone()[0]
+print('recognised', r, '| with text', t, '| difference', r - t)
+"
+```
+
+The build **replaces** the index wholesale (drop →
 create → settings → documents), so re-running it is safe and is how a new
 corpus run (C4) goes live. Check the result:
 
