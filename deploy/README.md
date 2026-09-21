@@ -421,11 +421,27 @@ EOF
 chmod 600 ~/.config/rclone/rclone.conf
 
 rclone lsd r2:                                     # must list leibniz-images — prove the token before a transfer measured in hours
-uv run leibniz images thumbs                       # data/thumbs/, all cores, resumable; ~half an hour
-rclone sync data/images r2:leibniz-images --transfers 16 --checkers 16 --fast-list --progress
+uv run leibniz images thumbs --images /path/to/cache   # data/thumbs/, all cores, resumable
+
+# Thumbnails first: 7 GB proves the whole path in an hour instead of finding
+# a broken token 40 hours in.
 rclone sync data/thumbs r2:leibniz-images/thumbs --transfers 32 --fast-list --progress
+
+# `--exclude` is load-bearing. `sync` makes the destination identical to the
+# source, and data/images has no thumbs/ directory, so without it this DELETES
+# the thumbnails you just uploaded — silently, and again on every later re-sync.
+rclone sync data/images r2:leibniz-images --exclude "thumbs/**" \
+  --transfers 16 --checkers 16 --fast-list --progress
+
 rclone check data/images r2:leibniz-images --one-way   # MD5 of every object against the local file
 ```
+
+   **Make it survive.** Forty hours is longer than a terminal window lives.
+   Run it inside `tmux` (`tmux new -s upload`, detach with Ctrl-B then D,
+   return with `tmux attach -t upload`) so closing the window does not send
+   the job a hangup. On Windows, also set the machine never to sleep while
+   plugged in: WSL stops with the host, and a sleeping laptop is the most
+   common way these transfers die overnight.
 
    The upload is bound by your uplink, and home uplinks are usually slower
    than advertised. **Measure rather than hope:** the store transfer in §2
