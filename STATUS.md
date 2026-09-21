@@ -23,7 +23,7 @@ on every view). `leibniz release export` writes the three datasets as Parquet
 (or JSONL) with `MANIFEST.json` checksums and dataset cards carrying
 provenance, licence, attribution, error rates and the anti-contamination note.
 `reports/release-checklist.md` is the upload runbook; `reports/tier1-final.md`
-states the project against SPECS §3 criterion by criterion. **517 tests**, ruff
+states the project against SPECS §3 criterion by criterion. **518 tests**, ruff
 clean. The operator step: `leibniz index build && leibniz serve` on the corpus
 store (the index build scans 13.5M lines once; the FTS5 file will be a few GB),
 then measure search p95.
@@ -39,7 +39,7 @@ R2 (an operator decision that diverges from SPECS §3.4's "never rehosted" —
 recorded under Divergences; the code's default stays direct-from-GWLB) — and
 the note to the GWLB before launch. `LICENSE` (Apache-2.0) and the issue form
 the viewer's "Report an error" link opens are in place for the repository
-going public. **517 tests**, ruff clean.
+going public. **518 tests**, ruff clean.
 
 **Published (2026-09-16), CC BY 4.0, Zenodo community `leibniz`:** the project
 statement (doi:10.5281/zenodo.22782813), the corpus census

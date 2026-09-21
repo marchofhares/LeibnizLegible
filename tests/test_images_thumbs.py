@@ -219,3 +219,24 @@ def test_preflight_rejects_a_wrong_images_root(tmp_path) -> None:
     conn.commit()
     preflight_images_root(conn, empty)
     conn.close()
+
+
+def test_oversize_scans_do_not_warn(tmp_path, recwarn) -> None:
+    """The corpus's foldouts exceed Pillow's decompression-bomb threshold.
+
+    They are our own cached scans, so the warning is noise that buried the
+    progress bar across thousands of pages; the limit itself stays enabled.
+    """
+    from PIL import Image
+
+    big = tmp_path / "big.jpg"
+    Image.new("RGB", (1200, 900), "white").save(big, "JPEG")
+    original = Image.MAX_IMAGE_PIXELS
+    # Pillow warns above MAX_IMAGE_PIXELS and raises above twice it; sit between,
+    # which is where the real 120-165 MP foldouts sit against the 89.5 MP default.
+    Image.MAX_IMAGE_PIXELS = 700_000  # the fixture is 1,080,000 px
+    try:
+        assert make_thumbnail(big, tmp_path / "out.jpg", width=60) == (60, 45)
+    finally:
+        Image.MAX_IMAGE_PIXELS = original
+    assert not [w for w in recwarn if issubclass(w.category, Image.DecompressionBombWarning)]
