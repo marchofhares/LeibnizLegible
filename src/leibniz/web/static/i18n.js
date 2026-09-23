@@ -40,7 +40,7 @@ const STRINGS = {
 
     // ---- the honesty banner ---------------------------------------------
     'honesty.banner':
-      'Machine transcription. Not an edition. Errors are expected (character error rate about 8% on Latin and French, higher on German).',
+      'Machine transcription. Not an edition. Errors are expected (character error rate about 8% on Latin and French; German is unmeasured and worse).',
 
     // ---- search ----------------------------------------------------------
     'search.heading': 'Search the Nachlass',
@@ -92,6 +92,8 @@ const STRINGS = {
     'work.katalog.date': 'Date',
     'work.katalog.correspondent': 'Correspondent',
     'work.katalog.aa': 'Akademie-Ausgabe',
+    'work.katalog.aa.planned': 'Akademie-Ausgabe (assigned, not yet published)',
+    'work.katalog.drucke': 'Other printings',
     'work.katalog.match': 'Link: {method}, confidence {conf}',
     'work.katalog.record': 'Record in the Leibniz-Katalog',
     'work.katalog.attr':
@@ -180,7 +182,7 @@ const STRINGS = {
     'about.what.p1':
       'Leibniz Legible is an access layer for the digitized Leibniz Nachlass held by the Gottfried Wilhelm Leibniz Bibliothek (GWLB) in Hannover. Every page image the library has published is run through handwritten-text recognition, and the result is made searchable and readable line by line, each line carrying its own confidence score and its full provenance.',
     'about.what.p2':
-      'This is machine output with honest labels. It is Vorausedition-grade at best, and it is explicitly subordinate to the Akademie-Ausgabe, which remains the scholarly edition of Leibniz. Nothing here is an edition, and nothing here should be quoted as one. Roughly three quarters of the Nachlass has never been printed in any form; making it legible and findable is the whole of the ambition.',
+      'This is machine output with honest labels. It is Vorausedition-grade at best, and it is explicitly subordinate to the Akademie-Ausgabe, which remains the scholarly edition of Leibniz. Nothing here is an edition, and nothing here should be quoted as one. By its own count the Akademie-Ausgabe is about half way through the volumes it plans, and one of its editors estimates that three quarters of Leibniz’s papers have never been published anywhere (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); making all of it legible and findable is the whole of the ambition.',
     'about.what.p3':
       'The page images are never rehosted. They are loaded in your browser directly from the GWLB’s own servers.',
     'about.what.p3.mirror':
@@ -194,7 +196,9 @@ const STRINGS = {
     'about.numbers.recognized': 'Pages recognised',
     'about.numbers.skipped': 'Pages skipped',
     'about.numbers.lines': 'Lines',
-    'about.numbers.version': 'Data version',
+    'about.numbers.version': 'Software version',
+    'about.numbers.caveat':
+      'The page and line figures follow the library’s own page records. In the GWLB’s static-JPEG delivery a scan is one side of an unfolded sheet, two folio pages side by side, registered under both folio numbers, so many sheet-sides were read twice and the line total counts them twice. A de-duplicated count is in preparation (see the project repository, `leibniz images duplicates`).',
     'about.numbers.backend': 'Search backend',
     'about.numbers.model': 'Recognition model',
     'about.hist.h': 'Distribution of line confidence',
@@ -235,6 +239,47 @@ const STRINGS = {
 
     'about.repo.h': 'The project',
     'about.repo.p': 'Source code, datasets, reports and the issue tracker:',
+    'about.repo.reports':
+      'Reports on Zenodo (CC BY 4.0): the project statement doi:10.5281/zenodo.22782813, the corpus census doi:10.5281/zenodo.22782815, the PHILIUMM reproduction and vision-model benchmark doi:10.5281/zenodo.22782817, and the retro-aligned ground truth doi:10.5281/zenodo.22782819.',
+
+    'about.who.h': 'Who made this',
+    'about.who.p1':
+      'Leibniz Legible is a one-person open project by Evan Tabak Atlas, an independent writer and researcher in New York (evanatlas.com, ORCID 0009-0007-7374-2338). It is not affiliated with the Gottfried Wilhelm Leibniz Bibliothek or with the Leibniz-Edition, and it claims nothing they have not claimed first.',
+    'about.who.p2':
+      'Corrections, questions from editors and offers of help are welcome through the issue tracker linked below.',
+
+    'about.credits.h': 'Built on',
+    'about.credits.images':
+      'The scans of the Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover (Public Domain Mark 1.0), digitized 2016–2019.',
+    'about.credits.katalog':
+      'The Arbeitskatalog der Leibniz-Edition (“Ritter-Katalog”), Berlin-Brandenburgische Akademie der Wissenschaften, Leibniz-Edition Potsdam I / TELOTA, CC BY 4.0: more than 70,000 records that tie each scan to its date, title and edition citation.',
+    'about.credits.model':
+      'The Leibniz handwriting model of the ERC project PHILIUMM (Denisa-Florina Bumba, Laboratoire SPHERE, Université Paris Cité – CNRS, ERC grant 101020985; doi:10.5281/zenodo.21457538, CC BY 4.0), fine-tuned from FoNDUE-GD v2 (Simon Gabay, Geneva) and running on Kraken (Benjamin Kiessling). Leibniz Legible reproduced its published figures before building on it.',
+    'about.credits.edition':
+      'The reading text of Akademie-Ausgabe volumes whose 25-year edition term (§ 70 UrhG) has expired, used only to train and evaluate; editors’ introductions, apparatus and commentary never enter the pipeline.',
+    'about.credits.precedents':
+      'The example of Bullinger Digital (Zurich), GLOBALISE (Huygens Institute) and Transcribe Bentham (UCL), which put machine transcription over a whole archive before an edition could, and said so honestly.',
+
+    'about.edition.h': 'Where the real work happens',
+    'about.edition.p1':
+      'The Akademie-Ausgabe, Gottfried Wilhelm Leibniz: Sämtliche Schriften und Briefe, has been edited since 1923 in Hannover (Leibniz-Archiv / Leibniz-Forschungsstelle at the GWLB), Münster (Leibniz-Forschungsstelle) and Potsdam (Leibniz-Edition Potsdam I and II) for the Berlin-Brandenburgische Akademie der Wissenschaften and the Akademie der Wissenschaften zu Göttingen, within the Akademienprogramm: 68 volumes by 2023, about half of the roughly 130 planned, with completion expected around 2055.',
+    'about.edition.p2':
+      'For the established text, dating and commentary go to leibnizedition.de, the Arbeitskatalog, and the Leibniz-Archiv’s transcriptions and advance editions; for English translations, Lloyd Strickland’s Leibniz Translations. Every catalogue record linked from a work page here is a link to their work.',
+
+    'about.timeline.h': 'A short timeline',
+    'about.timeline.1716': '1716 — Leibniz dies in Hannover; the court seals his papers.',
+    'about.timeline.1889': '1889 / 1895 — Bodemann’s catalogues give the letters (LBr) and manuscripts (LH) the shelfmarks still used today.',
+    'about.timeline.1901': '1901 — The academies plan the edition; Ritter’s catalogue begins.',
+    'about.timeline.1923': '1923 — The first volume of the Akademie-Ausgabe appears.',
+    'about.timeline.2007': '2007 — UNESCO inscribes the correspondence in the Memory of the World register.',
+    'about.timeline.2016': '2016–2019 — The GWLB digitizes the whole Hannover Nachlass and publishes it under open licences.',
+    'about.timeline.2026a': 'July 2026 — PHILIUMM releases its open Leibniz handwriting model and ground truth.',
+    'about.timeline.2026b': '21 September 2026 — Leibniz Legible goes live.',
+    'about.timeline.2055': 'about 2055 — Planned completion of the Akademie-Ausgabe.',
+
+    'about.cite.h': 'How to cite',
+    'about.cite.p':
+      'Leibniz Legible (2026), machine transcription of the digitized Leibniz Nachlass, https://leibnizlegible.com, CC BY 4.0; project statement doi:10.5281/zenodo.22782813. Please quote lines as “the machine reads it as …”, with the page link and, ideally, the line id and its confidence.',
     'about.lang.p': 'This page is available in English and German.',
 
     // ---- errors ----------------------------------------------------------
@@ -275,7 +320,7 @@ const STRINGS = {
 
     // ---- honesty banner --------------------------------------------------
     'honesty.banner':
-      'Maschinelle Transkription. Keine Edition. Fehler sind zu erwarten (Zeichenfehlerrate rund 8 % bei Latein und Französisch, bei Deutsch höher).',
+      'Maschinelle Transkription. Keine Edition. Fehler sind zu erwarten (Zeichenfehlerrate rund 8 % bei Latein und Französisch; Deutsch ist nicht gemessen und schlechter).',
 
     // ---- search ----------------------------------------------------------
     'search.heading': 'Den Nachlass durchsuchen',
@@ -328,6 +373,8 @@ const STRINGS = {
     'work.katalog.date': 'Datierung',
     'work.katalog.correspondent': 'Korrespondent',
     'work.katalog.aa': 'Akademie-Ausgabe',
+    'work.katalog.aa.planned': 'Akademie-Ausgabe (vorgesehen, noch nicht erschienen)',
+    'work.katalog.drucke': 'Weitere Drucke',
     'work.katalog.match': 'Zuordnung: {method}, Konfidenz {conf}',
     'work.katalog.record': 'Datensatz im Leibniz-Katalog',
     'work.katalog.attr':
@@ -416,7 +463,7 @@ const STRINGS = {
     'about.what.p1':
       'Leibniz Legible ist eine Zugangsschicht zum digitalisierten Leibniz-Nachlass der Gottfried Wilhelm Leibniz Bibliothek (GWLB) in Hannover. Jedes von der Bibliothek veröffentlichte Seitenbild wird durch eine Handschriftenerkennung geführt; das Ergebnis wird Zeile für Zeile lesbar und durchsuchbar gemacht, wobei jede Zeile ihren eigenen Konfidenzwert und ihre vollständige Provenienz mitführt.',
     'about.what.p2':
-      'Das ist maschinelle Ausgabe mit ehrlicher Kennzeichnung. Sie hat bestenfalls den Rang einer Vorausedition und ist der Akademie-Ausgabe ausdrücklich nachgeordnet; diese bleibt die wissenschaftliche Edition der Schriften von Leibniz. Nichts hier ist eine Edition, und nichts hier sollte als solche zitiert werden. Etwa drei Viertel des Nachlasses sind nie gedruckt worden; ihn lesbar und auffindbar zu machen ist der ganze Anspruch dieses Projekts.',
+      'Das ist maschinelle Ausgabe mit ehrlicher Kennzeichnung. Sie hat bestenfalls den Rang einer Vorausedition und ist der Akademie-Ausgabe ausdrücklich nachgeordnet; diese bleibt die wissenschaftliche Edition der Schriften von Leibniz. Nichts hier ist eine Edition, und nichts hier sollte als solche zitiert werden. Nach eigener Zählung ist die Akademie-Ausgabe etwa bei der Hälfte der geplanten Bände, und eine ihrer Editorinnen schätzt, dass drei Viertel der Leibniz-Papiere nie irgendwo veröffentlicht wurden (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); alles lesbar und auffindbar zu machen ist der ganze Anspruch dieses Projekts.',
     'about.what.p3':
       'Die Seitenbilder werden nicht gespiegelt. Sie werden in Ihrem Browser unmittelbar von den Servern der GWLB geladen.',
     'about.what.p3.mirror':
@@ -430,7 +477,9 @@ const STRINGS = {
     'about.numbers.recognized': 'Erkannte Seiten',
     'about.numbers.skipped': 'Übersprungene Seiten',
     'about.numbers.lines': 'Zeilen',
-    'about.numbers.version': 'Datenstand',
+    'about.numbers.version': 'Softwareversion',
+    'about.numbers.caveat':
+      'Die Seiten- und Zeilenzahlen folgen den Seiteneinträgen der Bibliothek. In der statischen JPEG-Auslieferung der GWLB zeigt ein Scan eine Seite eines aufgefalteten Bogens, also zwei Blattseiten nebeneinander, und ist unter beiden Blattnummern eingetragen; viele Bogenseiten wurden daher zweimal gelesen, und die Zeilensumme zählt sie doppelt. Eine bereinigte Zählung ist in Arbeit (siehe Repositorium, `leibniz images duplicates`).',
     'about.numbers.backend': 'Suchindex',
     'about.numbers.model': 'Erkennungsmodell',
     'about.hist.h': 'Verteilung der Zeilenkonfidenz',
@@ -471,6 +520,47 @@ const STRINGS = {
 
     'about.repo.h': 'Das Projekt',
     'about.repo.p': 'Quellcode, Datensätze, Berichte und Issue-Tracker:',
+    'about.repo.reports':
+      'Berichte auf Zenodo (CC BY 4.0): die Projektbeschreibung doi:10.5281/zenodo.22782813, der Korpuszensus doi:10.5281/zenodo.22782815, die PHILIUMM-Reproduktion mit dem Benchmark der Bildsprachmodelle doi:10.5281/zenodo.22782817 und die retro-alignierte Ground Truth doi:10.5281/zenodo.22782819.',
+
+    'about.who.h': 'Wer das gemacht hat',
+    'about.who.p1':
+      'Leibniz Legible ist ein offenes Ein-Personen-Projekt von Evan Tabak Atlas, freier Autor und Forscher in New York (evanatlas.com, ORCID 0009-0007-7374-2338). Es ist weder mit der Gottfried Wilhelm Leibniz Bibliothek noch mit der Leibniz-Edition verbunden und beansprucht nichts, was diese nicht zuerst beansprucht hätten.',
+    'about.who.p2':
+      'Korrekturen, Fragen aus den Editionsstellen und Angebote zur Mitarbeit sind über den unten verlinkten Issue-Tracker willkommen.',
+
+    'about.credits.h': 'Grundlagen',
+    'about.credits.images':
+      'Die Digitalisate der Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover (Public Domain Mark 1.0), digitalisiert 2016–2019.',
+    'about.credits.katalog':
+      'Der Arbeitskatalog der Leibniz-Edition („Ritter-Katalog“), Berlin-Brandenburgische Akademie der Wissenschaften, Leibniz-Edition Potsdam I / TELOTA, CC BY 4.0: über 70.000 Datensätze, die jeden Scan mit Datierung, Titel und Editionsnachweis verbinden.',
+    'about.credits.model':
+      'Das Handschriftenmodell des ERC-Projekts PHILIUMM für Leibniz’ Hand (Denisa-Florina Bumba, Laboratoire SPHERE, Université Paris Cité – CNRS, ERC-Grant 101020985; doi:10.5281/zenodo.21457538, CC BY 4.0), nachtrainiert aus FoNDUE-GD v2 (Simon Gabay, Genf) und betrieben mit Kraken (Benjamin Kiessling). Leibniz Legible hat dessen veröffentlichte Werte reproduziert, bevor es darauf aufbaute.',
+    'about.credits.edition':
+      'Der Lesetext derjenigen Bände der Akademie-Ausgabe, deren 25-jähriger Editionsschutz (§ 70 UrhG) abgelaufen ist, ausschließlich zum Trainieren und Messen; Einleitungen, Apparat und Kommentar der Herausgeber gelangen nie in die Pipeline.',
+    'about.credits.precedents':
+      'Das Vorbild von Bullinger Digital (Zürich), GLOBALISE (Huygens-Institut) und Transcribe Bentham (UCL), die maschinelle Transkription über ein ganzes Archiv gelegt haben, bevor eine Edition es konnte, und das ehrlich gesagt haben.',
+
+    'about.edition.h': 'Wo die eigentliche Arbeit geschieht',
+    'about.edition.p1':
+      'Die Akademie-Ausgabe, Gottfried Wilhelm Leibniz: Sämtliche Schriften und Briefe, wird seit 1923 in Hannover (Leibniz-Archiv / Leibniz-Forschungsstelle an der GWLB), Münster (Leibniz-Forschungsstelle) und Potsdam (Leibniz-Edition Potsdam I und II) für die Berlin-Brandenburgische Akademie der Wissenschaften und die Akademie der Wissenschaften zu Göttingen im Akademienprogramm erarbeitet: 68 Bände bis 2023, etwa die Hälfte der rund 130 geplanten, Abschluss voraussichtlich um 2055.',
+    'about.edition.p2':
+      'Für den gesicherten Text, die Datierung und den Kommentar: leibnizedition.de, der Arbeitskatalog sowie die Transkriptionen und Vorauseditionen des Leibniz-Archivs; für englische Übersetzungen Lloyd Stricklands Leibniz Translations. Jeder von einer Werkseite hier verlinkte Katalogeintrag ist ein Link auf deren Arbeit.',
+
+    'about.timeline.h': 'Eine kurze Zeitleiste',
+    'about.timeline.1716': '1716 — Leibniz stirbt in Hannover; der Hof versiegelt seine Papiere.',
+    'about.timeline.1889': '1889 / 1895 — Bodemanns Kataloge geben Briefen (LBr) und Handschriften (LH) die bis heute gültigen Signaturen.',
+    'about.timeline.1901': '1901 — Die Akademien planen die Edition; Ritters Katalog beginnt.',
+    'about.timeline.1923': '1923 — Der erste Band der Akademie-Ausgabe erscheint.',
+    'about.timeline.2007': '2007 — Die UNESCO nimmt den Briefwechsel in das Register des Weltdokumentenerbes auf.',
+    'about.timeline.2016': '2016–2019 — Die GWLB digitalisiert den gesamten hannoverschen Nachlass und stellt ihn unter offenen Lizenzen bereit.',
+    'about.timeline.2026a': 'Juli 2026 — PHILIUMM veröffentlicht sein offenes Leibniz-Handschriftenmodell samt Ground Truth.',
+    'about.timeline.2026b': '21. September 2026 — Leibniz Legible geht online.',
+    'about.timeline.2055': 'um 2055 — Geplanter Abschluss der Akademie-Ausgabe.',
+
+    'about.cite.h': 'Zitieren',
+    'about.cite.p':
+      'Leibniz Legible (2026), maschinelle Transkription des digitalisierten Leibniz-Nachlasses, https://leibnizlegible.com, CC BY 4.0; Projektbeschreibung doi:10.5281/zenodo.22782813. Bitte zitieren Sie Zeilen als „die Maschine liest …“, mit dem Link zur Seite und möglichst mit Zeilenkennung und Konfidenz.',
     'about.lang.p': 'Diese Seite liegt auf Englisch und auf Deutsch vor.',
 
     // ---- errors ----------------------------------------------------------

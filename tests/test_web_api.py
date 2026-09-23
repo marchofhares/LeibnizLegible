@@ -241,3 +241,43 @@ def test_real_static_dir_serves_shell_boot_script_and_robots(store_path, tmp_pat
     robots = c.get("/robots.txt")
     assert robots.status_code == 200 and robots.headers["content-type"].startswith("text/plain")
     assert "Disallow: /manifests/" in robots.text
+
+
+def test_shell_is_stamped_per_route_and_serves_discovery_files(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    home = c.get("/").text
+    assert '<link rel="canonical" href="https://leibnizlegible.com/"' in home
+    assert 'property="og:image" content="https://leibnizlegible.com/static/og.png"' in home
+    assert "<!--ll:ssr-->" not in home and "<script>" not in home
+    about = c.get("/about")
+    assert "<title>About — Leibniz Legible</title>" in about.text
+    assert 'href="https://leibnizlegible.com/about"' in about.text
+    # a work: title, description, catalogue and page links rendered server side
+    w = c.get(f"/work/{W1}")
+    assert w.status_code == 200 and 'id="ssr"' in w.text and f'href="/page/{W1}:0001"' in w.text
+    assert f'href="https://leibnizlegible.com/work/{W1}"' in w.text
+    # a page: the machine text is in the HTML, with its own ETag
+    p = c.get(f"/page/{W1}:0001")
+    assert p.status_code == 200 and "The machine reads it as" in p.text
+    assert p.headers["ETag"] != w.headers["ETag"]
+    again = c.get(f"/page/{W1}:0001", headers={"If-None-Match": p.headers["ETag"]})
+    assert again.status_code == 304
+    # unknown ids are real 404s that still carry the shell for the viewer
+    assert c.get("/work/nope").status_code == 404 and "Leibniz Legible" in c.get("/work/nope").text
+    assert c.get("/page/nope:0001").status_code == 404
+    # discovery files
+    assert c.get("/favicon.ico").headers["content-type"].startswith("image/")
+    assert c.get("/llms.txt").text.startswith("# Leibniz Legible")
+    sm = c.get("/sitemap.xml")
+    assert sm.headers["content-type"].startswith("application/xml")
+    assert f"<loc>https://leibnizlegible.com/work/{W1}</loc>" in sm.text
+    assert "Sitemap: https://leibnizlegible.com/sitemap.xml" in c.get("/robots.txt").text
+    assert c.get("/openapi.json").status_code == 200 and c.get("/docs").status_code == 404
+
+
+def test_shell_uses_base_url_when_given(store_path, tmp_path) -> None:
+    c = TestClient(
+        create_app(store_path, search=None, static_dir=STATIC_DIR, base_url="https://x.org")
+    )
+    assert 'href="https://x.org/about"' in c.get("/about").text
+    assert "<loc>https://x.org/</loc>" in c.get("/sitemap.xml").text

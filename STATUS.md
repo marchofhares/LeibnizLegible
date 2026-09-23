@@ -3,11 +3,38 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-16 (**Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-09-23 (discoverability, About page, duplicate sheet-sides; earlier: 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-09-23 (later): discoverability, About page, and a data caveat.** The
+viewer shell now carries a favicon set, a web manifest, share metadata
+(OpenGraph/Twitter with a 1200×630 card), a canonical URL and JSON-LD; the
+server stamps title, description and canonical per route and renders a summary
+for `/work/{id}` (catalogue entries, page list) and `/page/{id}` (the machine
+text) in place of `<!--ll:ssr-->`, so crawlers, answer engines and no-JS
+readers see content, and unknown ids are real 404s. New root files:
+`/sitemap.xml` (every work), `/llms.txt` (the API and the wording rule for
+agents), `/favicon.ico`; `robots.txt` opens the JSON API and keeps blind
+crawlers off the IIIF routes; `/docs` and `/redoc` are off (the CSP blocked
+their CDN assets), `/openapi.json` stays. The About page names the maintainer,
+credits the GWLB, the Arbeitskatalog, PHILIUMM/FoNDUE/Kraken and the
+precedents, describes the Akademie-Ausgabe with its own figures (68 volumes by
+2023, about half of ~130, completion ~2055; Kliege-Biller 2023 for "three
+quarters never published" — the source the "three quarters" sentence lacked),
+adds a timeline, a citation line and the four report DOIs. The two unpopulated
+search filters (language, writing stage) are hidden until C4. Work pages show
+the katalog's other printings (`drucke`) and series-only AA assignments
+(`aa_planned`). **Data caveat found today:** in the static-JPEG delivery a
+scan is one side of an unfolded sheet registered under both folio labels
+(outer `1r`+`2v`, inner `1v`+`2r`); sampled works show every sheet-side read
+twice, so `pages`/`lines` totals include repeats and search returns twin hits.
+`leibniz images duplicates` (new) hashes the thumbnails and lists the pairs;
+folding them in the index and publishing a distinct-scan count is the next
+data fix (Open Q #19). 524 tests, ruff clean.
+
 
 **🚀 Phase D built on the v1 transcription (2026-09-16): the corpus is
 searchable and browsable — the v1 public beta.** `leibniz index build` folds
@@ -1016,6 +1043,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Open questions
+
+19. **Sheet-sides registered twice (2026-09-23).** Static-JPEG works list one scan of an unfolded sheet under two folio labels; the corpus run read each twice. Run `leibniz images duplicates` over the thumbnails, publish the distinct-scan count, fold twins in the index build, and restate `pages`/`lines` on the About page.
 
 0. **Strategy review 2026-09-16 → `NOTES.md`** (accuracy levers incl. the review-queue design and the LLM-as-detector pilot; the Calculemus rescope and the missing `leibniz pack` seam; the four Academy seams; loose ends). The C3 changes live in the amended C3 prompt.
 1. ~~IIIF vs static delivery (A2).~~ **Resolved for A2:** cache the uniform METS

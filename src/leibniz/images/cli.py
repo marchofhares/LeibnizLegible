@@ -9,6 +9,8 @@ Four subcommands:
 * ``leibniz images stats`` — roll up counts/bytes/dimensions into census.md.
 * ``leibniz images thumbs`` — derive thumbnails for the image mirror.
 * ``leibniz images check-mirror`` — sample the mirror after an upload.
+* ``leibniz images duplicates`` — find sheet-sides registered under two folio
+  labels (the same scan twice) by hashing the thumbnails.
 
 Every mutating run on the store is recorded in ``runs`` with the git SHA
 (provenance, §4.5); thumbnails are derived files outside the store.
@@ -27,6 +29,7 @@ from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
 
 from leibniz import db
 from leibniz.harvest.oai import DEFAULT_CACHE_DIR as OAI_CACHE_DIR
+from leibniz.images import duplicates as dup_mod
 from leibniz.images import fetch as fetch_mod
 from leibniz.images import pages as pages_mod
 from leibniz.images import thumbs as thumbs_mod
@@ -322,3 +325,53 @@ def check_mirror(
             "[green]mirror complete[/green]" if report.complete else "[red]mirror incomplete[/red]"
         )
     raise typer.Exit(0 if report.complete else 1)
+
+
+@app.command()
+def duplicates(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    thumbs: Path = typer.Option(
+        thumbs_mod.DEFAULT_THUMBS_ROOT, "--thumbs", help="Thumbnail root (from `images thumbs`)."
+    ),
+    window: int = typer.Option(
+        dup_mod.DEFAULT_WINDOW, "--window", help="Compare each page with the next N pages."
+    ),
+    max_distance: int = typer.Option(
+        dup_mod.DEFAULT_MAX_DISTANCE, "--max-distance", help="Hash bits that may differ."
+    ),
+    work: list[str] | None = typer.Option(None, "--work", "-w", help="Only these object id(s)."),
+    report: Path = typer.Option(Path("reports/duplicates.md"), "--report", help="Markdown report."),
+    pairs: Path = typer.Option(
+        Path("data/duplicates.jsonl"), "--pairs", help="JSONL of the pairs found."
+    ),
+) -> None:
+    """Find page images that are the same scan registered twice (sheet-sides)."""
+    conn = db.init_db(db_path)
+    try:
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=console,
+        ) as bar:
+            task = bar.add_task("hashing", total=len(thumbs_mod.cached_pages(conn)))
+            stats = dup_mod.find_duplicates(
+                conn,
+                thumbs,
+                window=window,
+                max_distance=max_distance,
+                works=work or None,
+                progress=lambda _pid: bar.advance(task),
+            )
+    finally:
+        conn.close()
+    dup_mod.write_pairs(stats, pairs)
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(
+        dup_mod.render_report(stats, window=window, max_distance=max_distance), encoding="utf-8"
+    )
+    console.print(
+        f"{stats.pages_hashed:,} thumbnails hashed in {stats.works:,} works → "
+        f"[bold]{stats.n_pairs:,} duplicate pairs[/bold] ({len(stats.pages_in_pairs):,} pages); "
+        f"{stats.pages_missing:,} thumbnails missing. Report: {report}, pairs: {pairs}"
+    )

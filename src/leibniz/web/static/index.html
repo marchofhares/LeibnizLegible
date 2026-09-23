@@ -10,8 +10,76 @@
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta name="theme-color" content="#fcfbf8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14130f" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="https://leibnizlegible.com/" />
+    <!--
+      Share metadata. The server stamps the title, description, canonical and
+      og:url per route (web/api.py, ``stamp_shell``); everything else is site-wide.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Leibniz Legible" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="de_DE" />
+    <meta property="og:url" content="https://leibnizlegible.com/" />
+    <meta property="og:title" content="Leibniz Legible" />
+    <meta
+      property="og:description"
+      content="An access layer for the digitized Leibniz Nachlass: machine transcription with per-line confidence and provenance, searchable and browsable. Not an edition."
+    />
+    <meta property="og:image" content="https://leibnizlegible.com/static/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Leibniz Legible: the Leibniz Nachlass, machine-read and searchable" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Leibniz Legible" />
+    <meta
+      name="twitter:description"
+      content="An access layer for the digitized Leibniz Nachlass: machine transcription with per-line confidence and provenance, searchable and browsable. Not an edition."
+    />
+    <meta name="twitter:image" content="https://leibnizlegible.com/static/og.png" />
     <link rel="stylesheet" href="/static/style.css" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/static/icon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+    <!-- Structured data: a data block, not a script; the CSP does not apply to it. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://leibnizlegible.com/#website",
+            "url": "https://leibnizlegible.com/",
+            "name": "Leibniz Legible",
+            "description": "Machine transcription of the digitized Leibniz Nachlass with per-line confidence and provenance. Not an edition.",
+            "inLanguage": ["en", "de"],
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": { "@type": "EntryPoint", "urlTemplate": "https://leibnizlegible.com/search?q={search_term_string}" },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://leibnizlegible.com/#dataset",
+            "name": "Leibniz Legible: machine transcriptions of the digitized Leibniz Nachlass",
+            "description": "Unreviewed handwritten-text-recognition output for every digitized page of the Leibniz Nachlass at the Gottfried Wilhelm Leibniz Bibliothek, Hannover, with a confidence score and full provenance on every line. Character error rate about 8% on Latin and French. Not an edition; subordinate to the Akademie-Ausgabe.",
+            "url": "https://leibnizlegible.com/",
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isAccessibleForFree": true,
+            "creator": { "@type": "Person", "name": "Evan Tabak Atlas", "url": "https://evanatlas.com/", "sameAs": "https://orcid.org/0009-0007-7374-2338" },
+            "isBasedOn": ["https://digitale-sammlungen.gwlb.de/", "https://doi.org/10.5281/zenodo.21457538"],
+            "citation": "https://doi.org/10.5281/zenodo.22782813",
+            "distribution": [
+              { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://leibnizlegible.com/openapi.json" },
+              { "@type": "DataDownload", "encodingFormat": "application/ld+json", "contentUrl": "https://leibnizlegible.com/manifests/" }
+            ]
+          }
+        ]
+      }
+    </script>
     <!-- Flips the no-JS class before first paint; a file, not inline, for the CSP. -->
     <script src="/static/boot.js"></script>
   </head>
@@ -99,7 +167,13 @@
                 </select>
               </p>
 
-              <p class="field">
+              <!--
+                Language and writing stage are not yet populated in the index
+                (every page is "unknown" until the C4 run adds language
+                identification and strata), so the two filters stay hidden;
+                the API still accepts the parameters.
+              -->
+              <p class="field" hidden>
                 <label class="field__label" for="lang" data-i18n="search.lang">Language of the text</label>
                 <select id="lang" name="lang">
                   <option value="" data-i18n="search.lang.any">Any language</option>
@@ -111,7 +185,7 @@
                 </select>
               </p>
 
-              <p class="field">
+              <p class="field" hidden>
                 <label class="field__label" for="stratum" data-i18n="search.stratum">Writing stage</label>
                 <select id="stratum" name="stratum">
                   <option value="" data-i18n="search.stratum.any">Any stage</option>
@@ -144,6 +218,8 @@
           </form>
         </section>
 
+        <!--ll:ssr-->
+
         <!--
           Static and bilingual on purpose: i18n.js cannot run here, so both
           languages are spelled out rather than keyed.
@@ -172,7 +248,7 @@
         <h2 class="sr-only" data-i18n="footer.label">Attribution and licensing</h2>
         <p data-i18n="attr.images">
           Images: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek,
-          Hannover. Public Domain Mark 1.0. Loaded directly from the GWLB; never rehosted.
+          Hannover. Public Domain Mark 1.0. Every page links to its original at the GWLB.
         </p>
         <p data-i18n="attr.katalog">
           Catalogue: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.

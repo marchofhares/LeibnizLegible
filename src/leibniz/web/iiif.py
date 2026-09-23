@@ -1,6 +1,8 @@
 """IIIF Presentation 3 manifests + W3C annotation pages (deliverable D7).
 
-A manifest per work wraps the GWLB's own image services (never our copies) and
+A manifest per work wraps the GWLB's image services — or the project's mirror of
+its delivery scans when one is configured; the annotations always name the GWLB
+image as the source — and
 references one annotation page per canvas; the annotation page carries the
 page's transcription lines as ``supplementing`` annotations targeting the
 canvas by ``#xywh``. Every annotation embeds the SPECS §4.5 provenance tuple

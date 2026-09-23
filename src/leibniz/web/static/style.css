@@ -1302,3 +1302,17 @@ select {
 .no-js #view {
   gap: 1.2rem;
 }
+
+/* ---- server-rendered summary (crawlers, no-JS; app.js replaces it) ------ */
+.ssr__lines,
+.ssr__pages {
+  padding-left: 1.5rem;
+}
+.ssr__pages {
+  columns: 12rem;
+}
+.ssr__lines li {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
