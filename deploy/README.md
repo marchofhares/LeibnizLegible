@@ -407,7 +407,8 @@ behind a hostname works the same way.
    Writing the config file beats the interactive wizard:
 
 ```bash
-curl -fsSL https://rclone.org/install.sh | sudo bash   # the distro package is often too old for `provider = Cloudflare`
+sudo apt install -y unzip                              # the install script unpacks a zip and says so unhelpfully if this is missing
+curl -fsSL https://rclone.org/install.sh | sudo bash   # Ubuntu 24.04 ships 1.60.1 (2022); R2 wants something current
 mkdir -p ~/.config/rclone
 cat > ~/.config/rclone/rclone.conf <<'EOF'
 [r2]
@@ -417,10 +418,18 @@ access_key_id = PASTE_ACCESS_KEY_ID
 secret_access_key = PASTE_SECRET_ACCESS_KEY
 endpoint = https://<account-id>.eu.r2.cloudflarestorage.com
 acl = private
+# A bucket-scoped token cannot create or inspect buckets; without this rclone
+# tries to and fails before transferring anything.
+no_check_bucket = true
 EOF
 chmod 600 ~/.config/rclone/rclone.conf
 
-rclone lsd r2:                                     # must list leibniz-images — prove the token before a transfer measured in hours
+# Prove the token INSIDE the bucket. `rclone lsd r2:` calls ListBuckets, which
+# is an account-level permission a bucket-scoped token does not have and should
+# not have: it answers 403 even when everything is correct.
+rclone lsjson r2:leibniz-images                    # `[]` on an empty bucket = authenticated
+echo ok > /tmp/r2-probe.txt && rclone copy /tmp/r2-probe.txt r2:leibniz-images/ \
+  && rclone ls r2:leibniz-images && rclone delete r2:leibniz-images/r2-probe.txt
 uv run leibniz images thumbs --images /path/to/cache   # data/thumbs/, all cores, resumable
 
 # Thumbnails first: 7 GB proves the whole path in an hour instead of finding

@@ -31,8 +31,13 @@ then measure search p95.
 **🌐 LIVE (2026-09-21): https://leibnizlegible.com.** The v1 corpus is public
 and searchable. A 2 vCPU / 4 GB Hetzner VPS in Falkenstein runs `leibniz
 serve` behind Caddy (automatic TLS) with Meilisearch; the 15 GB serving store
-and the 235,723-page index live on the box; page images come from the GWLB's
-own endpoints while the image mirror uploads. **SPECS §3.3's search criterion
+and the 235,723-page index live on the box; **page images come from the
+project's own mirror** (2026-09-23): all 236,779 delivery derivatives
+(395.6 GiB) plus their derived thumbnails (6.0 GiB) on Cloudflare R2 behind
+`images.leibnizlegible.com`, verified with `leibniz images check-mirror`
+(500-page sample: every image and thumbnail present, no size mismatches)
+before the switch. The GWLB's servers now carry none of the viewer's traffic,
+and every page still links to its original there. **SPECS §3.3's search criterion
 is met and measured:** 200 queries over HTTPS gave wall-clock p50 108 ms,
 **p95 210 ms**, max 368 ms against the 500 ms bar (Meilisearch itself p50
 8 ms, p95 60 ms). Typo tolerance and the early-modern fold both confirmed
@@ -1135,7 +1140,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   Public Domain Mark on every view; the GWLB is told before launch. The
   code keeps the direct-from-GWLB mode as its default —
   `LEIBNIZ_IMAGE_BASE_URL` unset — so the divergence is a configuration,
-  not a fork (`web/images.py`).
+  not a fork (`web/images.py`). **Live since 2026-09-23**, after a 40-hour
+  upload at a measured 2.8 MB/s; the site ran on the GWLB's endpoints in the
+  meantime, which is why the switch cost no downtime.
 
 - **Viewer without a bundler (D2):** SPECS §4.2 says "vanilla TS/Vite"; the
   viewer ships as plain ES modules + CSS with no build step (types via JSDoc,
