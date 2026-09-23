@@ -1,14 +1,19 @@
 # Leibniz Legible
 
-An open **access layer** for the digitized Leibniz Nachlass — every page of the
-~200,000 page images held by the Gottfried Wilhelm Leibniz Bibliothek (GWLB),
+**Live at https://leibnizlegible.com (since 2026-09-21).**
+
+An open **access layer** for the digitized Leibniz Nachlass — every one of the
+236,795 page records held by the Gottfried Wilhelm Leibniz Bibliothek (GWLB),
 Hannover, machine-transcribed with per-line confidence and provenance,
 typo-tolerantly searchable, and browsable in an open IIIF viewer cross-linked to
 the scholarly catalogue.
 
 This is **machine output with honest labels** — Vorausedition-grade, explicitly
-subordinate to the Akademie-Ausgabe. It is never "an edition". Roughly 75% of the
-Nachlass has never been printed; making it *legible and findable* is the point.
+subordinate to the Akademie-Ausgabe. It is never "an edition". The edition is
+about half way through the volumes it plans (68 by 2023, completion expected
+around 2055), and one of its editors estimates that three quarters of Leibniz's
+papers have never been published anywhere (Kliege-Biller, Münster, 2023);
+making all of it *legible and findable* is the point.
 
 - **`SPECS.md`** — the project's law (mission, deliverables, architecture, legal rails).
 - **`PROMPTS.md`** — the phase-by-phase build plan.
@@ -51,7 +56,16 @@ uv run leibniz images pages          # derive all pages' delivery URLs from cach
 uv run leibniz images fetch --work 00067974 --work DE-611-HS-854976  # pull a dev slice
 uv run leibniz images verify --deep  # re-checksum the cache, report gaps
 uv run leibniz images stats          # counts/bytes/dimensions → reports/census.md
+uv run leibniz images duplicates     # sheet-sides registered under two folio labels → reports/duplicates.md
 ```
+
+**Sheet-sides are registered twice.** In the GWLB's static-JPEG delivery a scan
+is one side of an unfolded sheet — two folio pages side by side — and the METS
+lists that one image under both folio labels (outer side `1r` + `2v`, inner side
+`1v` + `2r`). The corpus run read every such image twice, so the page and line
+totals below count those repeats and search returns them as twin hits.
+`leibniz images duplicates` hashes the thumbnails and lists the pairs; folding
+them in the index and publishing a distinct-scan count is the next data fix.
 
 Caches one JPEG delivery derivative per page under `data/images/` — resumable,
 checksummed, integrity-retried. The full-corpus pull (~365 GB) is an operator
@@ -94,6 +108,14 @@ margin numbers) — apparatus, commentary and introductions never enter it
 (SPECS §7.2). Minting itself runs where the C1 corpus store lives.
 
 ### Search, viewer, IIIF (Phases D1/D2)
+
+The viewer shell is stamped per route (title, description, canonical URL, share
+metadata) and, for `/work/{id}` and `/page/{id}`, carries a server-rendered
+summary — the catalogue entries and page list, or the machine text — so search
+engines, answer engines and readers without JavaScript see the content; the app
+replaces it on boot. `/sitemap.xml` lists every work, `/llms.txt` describes the
+API for agents, `/robots.txt` opens the JSON routes and keeps blind crawlers off
+the IIIF manifests.
 
 ```bash
 uv sync --extra web                        # fastapi + uvicorn
@@ -182,9 +204,10 @@ store is a copy, the index a rebuild, and the images stay at the GWLB.
 
 ## Status
 
-**The v1 corpus run is complete (2026-09-11): 236,210 of 236,795 pages —
-99.75% of the digitized Nachlass — are machine-recognised, 13.5M lines with
-per-line confidence and provenance.** The remainder is enumerated (569 skips
+**The v1 corpus run is complete (2026-09-11): 236,210 of 236,795 page records —
+99.75% of the digitized Nachlass — are machine-recognised, 13.5M line records
+with per-line confidence and provenance (sheet-sides registered twice included;
+see the duplicates note above).** The remainder is enumerated (569 skips
 with reasons; 16 pages behind broken GWLB redirects). Phases **A0–A3, B1–B2,
 C1** are complete (`STATUS.md` has the detail). A1's census found **2,225 works
 / 236,795 page images**; A2/A3 built the image cache (395.6 GB) and katalog
@@ -207,8 +230,8 @@ exports with cards** — the v1 public beta; the operator runs `leibniz index
 build` + `leibniz serve` on the corpus store. **The deployment kit landed the
 same day** (`deploy/`: runbook, systemd + Caddy, container stack; the app
 hardened for public traffic — rate limit, security headers, CORS, read-only
-store, `/healthz`, `leibniz index bench`); going live is now the operator's
-runbook (`deploy/README.md`). Next is **C3** (fine-tune v2, a
+store, `/healthz`, `leibniz index bench`); the site went live on
+2026-09-21 (`deploy/README.md` is the runbook). Next is **C3** (fine-tune v2, a
 gate; see the amended prompt), then C4 re-reads the corpus and swaps v2 in under
 a new run. Reports are on Zenodo: project statement
 [10.5281/zenodo.22782813](https://doi.org/10.5281/zenodo.22782813), census

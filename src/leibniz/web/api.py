@@ -10,8 +10,12 @@ Routes (all read-only; the store is opened per request, read-only):
 * ``GET /manifests/{work}``    — IIIF Presentation 3 manifest (D7)
 * ``GET /annotations/{page}``  — W3C AnnotationPage with the page's lines (D7)
 * ``GET /healthz``             — liveness for the process manager / uptime monitor
-* ``/``, ``/search``, ``/work/…``, ``/page/…``, ``/about``, ``/robots.txt`` — the
-  static viewer
+* ``/``, ``/search``, ``/work/…``, ``/page/…``, ``/about`` — the viewer shell,
+  stamped per route with its title, description, canonical URL and, for a work
+  or a page, a server-rendered summary (the catalogue entries, the page list,
+  the machine text) so crawlers and readers without JavaScript see the content
+* ``/robots.txt``, ``/sitemap.xml``, ``/llms.txt``, ``/favicon.ico`` — the
+  static viewer's discovery files
 
 Build it with :func:`create_app`; ``leibniz serve`` wraps it in uvicorn. The
 public-deployment middleware (gzip, CORS for the IIIF consumers, a per-client
@@ -22,6 +26,7 @@ gets it, whatever sits in front.
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 import sqlite3
 from pathlib import Path
@@ -35,6 +40,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from leibniz import __version__, db
 from leibniz.search.backend import SearchBackend, SearchQuery
 from leibniz.search.documents import (
+    ROMAN,
     aa_ref_label,
     corpus_stats,
     latest_lines,
@@ -50,6 +56,18 @@ STATIC_DIR = Path(__file__).parent / "static"
 INDEX_ROUTES = ("/", "/search", "/about", "/work/{work_id}", "/page/{page_id}")
 CACHE_HEADERS = {"Cache-Control": "public, max-age=300"}
 NO_STORE = {"Cache-Control": "no-store"}
+DAY_CACHE = {"Cache-Control": "public, max-age=86400"}
+
+# The public origin written into the shell (canonical, og:url, og:image, the
+# structured data). ``create_app(base_url=…)`` rewrites it for another host.
+SITE_URL = "https://leibnizlegible.com"
+SITE_TITLE = "Leibniz Legible"
+SITE_DESCRIPTION = (
+    "An access layer for the digitized Leibniz Nachlass: machine transcription with "
+    "per-line confidence and provenance, searchable and browsable. Not an edition."
+)
+SSR_MARK = "<!--ll:ssr-->"
+SSR_MAX_LINES = 400
 
 
 def _open(db_path: str | Path) -> sqlite3.Connection:
@@ -120,6 +138,17 @@ def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
                 "shelfmarks": json.loads(r["shelfmark_refs"]) if r["shelfmark_refs"] else [],
                 "aa_refs": aa_refs,
                 "aa_labels": [lab for ref in aa_refs if (lab := aa_ref_label(ref))],
+                # A series without a volume is the katalog's "assigned to Reihe N,
+                # not yet published there" — the honest signal for "unprinted in
+                # the AA", to be read together with ``drucke`` (other printings).
+                "aa_planned": sorted(
+                    {
+                        f"AA {ROMAN.get(int(r['series']), str(r['series']))}"
+                        for r in aa_refs
+                        if r.get("series") is not None and r.get("volume") is None
+                    }
+                ),
+                "drucke": meta.get("drucke") or None,
                 "url": meta.get("url") or meta.get("record_url"),
                 "match_method": r["match_method"],
                 "match_conf": r["match_conf"],
@@ -163,6 +192,138 @@ def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str]) -> dict:
     }
 
 
+def _esc(text: object) -> str:
+    return html.escape(str(text if text is not None else ""), quote=True)
+
+
+def _stamp_shell(
+    shell: str,
+    *,
+    path: str,
+    title: str | None = None,
+    description: str | None = None,
+    ssr: str = "",
+    site: str = SITE_URL,
+) -> str:
+    """Stamp the viewer shell for one route: ``<title>``, the description metas,
+    the canonical/og:url, and the server-rendered block at :data:`SSR_MARK`.
+
+    The shell's site-wide strings are literal in ``index.html`` (so the file is
+    valid on its own); this replaces exactly those literals.
+    """
+    out = shell
+    if site != SITE_URL:
+        out = out.replace(SITE_URL, site)
+    url = f"{site}{path}"
+    out = out.replace(f'href="{site}/"', f'href="{url}"', 1)  # canonical
+    og_url = 'property="og:url" content="'
+    out = out.replace(f'{og_url}{site}/"', f'{og_url}{url}"', 1)
+    if title:
+        full = f"{title} — {SITE_TITLE}"
+        out = out.replace(f"<title>{SITE_TITLE}</title>", f"<title>{_esc(full)}</title>", 1)
+        for key in ('property="og:title" content="', 'name="twitter:title" content="'):
+            out = out.replace(f'{key}{SITE_TITLE}"', f'{key}{_esc(full)}"', 1)
+    if description:
+        out = out.replace(f'content="{SITE_DESCRIPTION}"', f'content="{_esc(description)}"')
+    return out.replace(SSR_MARK, ssr, 1)
+
+
+def _ssr_work(work: db.Work, pages: list, katalog: list[dict], gwlb_url: str) -> tuple:
+    """(title, description, html) for a work's server-rendered summary."""
+    title = work.title or work.gwlb_object_id
+    marks = ", ".join(work.shelfmarks or [])
+    n = len(pages)
+    description = (
+        f"{title}{' (' + marks + ')' if marks else ''}: {n:,} page images of the Leibniz "
+        f"Nachlass, machine-transcribed with per-line confidence. Not an edition."
+    )
+    parts = [
+        '<article class="panel ssr" id="ssr">',
+        f"<h1>{_esc(title)}</h1>",
+        f"<p>{_esc(marks)}</p>" if marks else "",
+        f"<p>{_esc(work.set_name or '')} · {n:,} page images · "
+        f'<a href="{_esc(gwlb_url)}">Original at the GWLB</a> · '
+        f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a></p>',
+    ]
+    if katalog:
+        items = []
+        for rec in katalog:
+            bits = [rec.get("title") or rec.get("record_id") or ""]
+            if rec.get("date"):
+                bits.append(str(rec["date"]))
+            if rec.get("aa_labels"):
+                bits.append(", ".join(rec["aa_labels"]))
+            elif rec.get("aa_planned"):
+                bits.append(", ".join(rec["aa_planned"]) + " (assigned, not yet published)")
+            if rec.get("drucke"):
+                bits.append("Other printings: " + str(rec["drucke"]))
+            items.append(f"<li>{_esc(' · '.join(b for b in bits if b))}</li>")
+        parts.append("<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>")
+        parts.append("<ul>" + "".join(items) + "</ul>")
+    if pages:
+        links = "".join(
+            f'<li><a href="/page/{_esc(p.id)}">{_esc(p.label or p.seq)}</a></li>' for p in pages
+        )
+        parts.append("<h2>Pages</h2>")
+        parts.append(f'<ol class="ssr__pages">{links}</ol>')
+    parts.append(f"<p>{_esc(attr.HONESTY)}</p></article>")
+    return title, description, "".join(parts)
+
+
+def _ssr_page(
+    page: db.Page,
+    work: db.Work | None,
+    lines: list,
+    image_url: str | None,
+    gwlb_url: str,
+    prev_id: str | None,
+    next_id: str | None,
+) -> tuple[str, str, str]:
+    """(title, description, html) for a page's server-rendered machine text."""
+    work_title = (work.title if work else None) or page.work_id
+    label = page.label or f"page {page.seq}"
+    title = f"{work_title}, fol. {label}"
+    texts = [ln.text for ln in lines if ln.text]
+    confs = [ln.conf for ln in lines if ln.conf is not None and ln.text]
+    mean = f"{sum(confs) / len(confs):.2f}" if confs else "n/a"
+    blurb = " ".join(texts)[:180].rstrip()
+    description = (
+        f"Machine transcription of {work_title}, fol. {label} ({len(texts)} lines, mean "
+        f"confidence {mean}). {blurb}"
+    ).strip()
+    nav = []
+    if prev_id:
+        nav.append(f'<a rel="prev" href="/page/{_esc(prev_id)}">Previous page</a>')
+    nav.append(f'<a href="/work/{_esc(page.work_id)}">All pages of this work</a>')
+    if next_id:
+        nav.append(f'<a rel="next" href="/page/{_esc(next_id)}">Next page</a>')
+    shown = texts[:SSR_MAX_LINES]
+    body = "".join(f"<li>{_esc(t)}</li>" for t in shown)
+    rest = len(texts) - len(shown)
+    more = f"<p>… {rest} more lines in the API.</p>" if rest else ""
+    html_out = (
+        '<article class="panel ssr" id="ssr">'
+        f"<h1>{_esc(title)}</h1>"
+        f"<p>{_esc(attr.HONESTY)} Mean line confidence on this page: {_esc(mean)}.</p>"
+        f'<p><a href="{_esc(gwlb_url)}">Original at the GWLB</a>'
+        + (f' · <a href="{_esc(image_url)}">Page image</a>' if image_url else "")
+        + f' · <a href="/annotations/{_esc(page.id)}">Annotations (IIIF)</a></p>'
+        f"<nav>{' · '.join(nav)}</nav>"
+        f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
+        "</article>"
+    )
+    return title, description, html_out
+
+
+def _sitemap_xml(site: str, work_ids: list[str]) -> str:
+    urls = [f"{site}/", f"{site}/search", f"{site}/about"] + [f"{site}/work/{w}" for w in work_ids]
+    body = "".join(f"<url><loc>{_esc(u)}</loc></url>" for u in urls)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + body + "</urlset>"
+    )
+
+
 def create_app(
     db_path: str | Path = db.DEFAULT_DB_PATH,
     *,
@@ -191,6 +352,10 @@ def create_app(
             "Machine transcriptions of the digitized Leibniz Nachlass with per-line "
             "confidence and provenance. Not an edition."
         ),
+        # /openapi.json stays; the Swagger and ReDoc pages load from a CDN that the
+        # CSP (script-src 'self') blocks, so they would render blank.
+        docs_url=None,
+        redoc_url=None,
     )
     state: dict = {"stats": None}
     images = ImageSource(image_base_url)
@@ -422,31 +587,135 @@ def create_app(
 
         # The shell is read once and stamped with where images come from
         # (``<html data-image-origin>``), so the viewer's attribution and About
-        # text need no extra request. It is revalidated on every load (ETag +
-        # 304, ``no-cache``) so a deploy shows at once; /static/* may be cached
-        # by the proxy (see deploy/Caddyfile).
-        shell = index_html.read_bytes().replace(
-            b'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'.encode()
+        # text need no extra request. Each route then stamps its own title,
+        # description, canonical URL and — for works and pages — a
+        # server-rendered summary in place of ``<!--ll:ssr-->``, so that search
+        # engines, answer engines and readers without JavaScript get the
+        # content; app.js replaces it on boot. Every variant carries its own
+        # ETag and is revalidated on every load (``no-cache``) so a deploy shows
+        # at once; /static/* may be cached by the proxy (see deploy/Caddyfile).
+        shell = index_html.read_text(encoding="utf-8").replace(
+            'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'
         )
-        shell_etag = f'"{hashlib.sha256(shell).hexdigest()[:20]}"'
-        shell_headers = {"Cache-Control": "no-cache", "ETag": shell_etag}
+        site = (base_url or SITE_URL).rstrip("/")
+
+        def respond(request: Request, body: str, status: int = 200) -> Response:
+            etag = f'"{hashlib.sha256(body.encode()).hexdigest()[:20]}"'
+            headers = {"Cache-Control": "no-cache", "ETag": etag}
+            if request.headers.get("if-none-match") == etag:
+                return Response(status_code=304, headers=headers)
+            return Response(body, status_code=status, media_type="text/html", headers=headers)
 
         def serve_index(request: Request) -> Response:
-            if request.headers.get("if-none-match") == shell_etag:
-                return Response(status_code=304, headers=shell_headers)
-            return Response(shell, media_type="text/html", headers=shell_headers)
+            return respond(request, _stamp_shell(shell, path="/", site=site))
+
+        def serve_search(request: Request) -> Response:
+            return respond(request, _stamp_shell(shell, path="/search", title="Search", site=site))
+
+        def serve_about(request: Request) -> Response:
+            return respond(request, _stamp_shell(shell, path="/about", title="About", site=site))
 
         def serve_index_work(work_id: str, request: Request) -> Response:
-            return serve_index(request)
+            conn = _open(db_path)
+            try:
+                work = db.get_work(conn, work_id)
+                if work is None:
+                    body = _stamp_shell(
+                        shell, path=f"/work/{work_id}", title="Not found", site=site
+                    )
+                    return respond(request, body, status=404)
+                pages = db.get_pages(conn, work_id)
+                katalog = _katalog_for_work(conn, work_id)
+            finally:
+                conn.close()
+            gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
+            title, description, ssr = _ssr_work(work, pages, katalog, gwlb_url)
+            body = _stamp_shell(
+                shell,
+                path=f"/work/{work_id}",
+                title=title,
+                description=description,
+                ssr=ssr,
+                site=site,
+            )
+            return respond(request, body)
 
         def serve_index_page(page_id: str, request: Request) -> Response:
-            return serve_index(request)
+            conn = _open(db_path)
+            try:
+                page = db.get_page(conn, page_id)
+                if page is None:
+                    body = _stamp_shell(
+                        shell, path=f"/page/{page_id}", title="Not found", site=site
+                    )
+                    return respond(request, body, status=404)
+                work = db.get_work(conn, page.work_id)
+                lines = latest_lines(conn, page_id)
+                neighbours = conn.execute(
+                    "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
+                    (page.work_id, page.seq - 1, page.seq + 1),
+                ).fetchall()
+            finally:
+                conn.close()
+            prev_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq - 1), None)
+            next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
+            shown = images.resolve(page)
+            gwlb_url = attr.GWLB_RESOLVE.format(work_id=page.work_id)
+            title, description, ssr = _ssr_page(
+                page, work, lines, shown.image_url, gwlb_url, prev_id, next_id
+            )
+            body = _stamp_shell(
+                shell,
+                path=f"/page/{page_id}",
+                title=title,
+                description=description,
+                ssr=ssr,
+                site=site,
+            )
+            return respond(request, body)
 
-        handlers = {"/work/{work_id}": serve_index_work, "/page/{page_id}": serve_index_page}
+        handlers = {
+            "/search": serve_search,
+            "/about": serve_about,
+            "/work/{work_id}": serve_index_work,
+            "/page/{page_id}": serve_index_page,
+        }
         for route in INDEX_ROUTES:
             app.add_api_route(
                 route, handlers.get(route, serve_index), methods=["GET"], include_in_schema=False
             )
+
+        # Discovery files at the root: the favicon browsers request blindly, the
+        # sitemap (one URL per work; the work pages link every page), llms.txt.
+        favicon = static_dir / "favicon.ico"
+        if favicon.exists():
+
+            def serve_favicon() -> FileResponse:
+                return FileResponse(favicon, media_type="image/x-icon", headers=DAY_CACHE)
+
+            app.add_api_route(
+                "/favicon.ico", serve_favicon, methods=["GET"], include_in_schema=False
+            )
+
+        llms = static_dir / "llms.txt"
+        if llms.exists():
+
+            def serve_llms() -> FileResponse:
+                return FileResponse(llms, media_type="text/plain", headers=DAY_CACHE)
+
+            app.add_api_route("/llms.txt", serve_llms, methods=["GET"], include_in_schema=False)
+
+        def serve_sitemap() -> Response:
+            if state.get("sitemap") is None:
+                conn = _open(db_path)
+                try:
+                    ids = [w.gwlb_object_id for w in db.iter_works(conn)]
+                finally:
+                    conn.close()
+                state["sitemap"] = _sitemap_xml(site, sorted(ids))
+            return Response(state["sitemap"], media_type="application/xml", headers=DAY_CACHE)
+
+        app.add_api_route("/sitemap.xml", serve_sitemap, methods=["GET"], include_in_schema=False)
 
         robots = static_dir / "robots.txt"
         if robots.exists():

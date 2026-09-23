@@ -11,7 +11,7 @@ and `MANIFEST.json` carry the counts and checksums of that run._
   (GWLB, PHILIUMM, TELOTA) or the §7.5 lawyer memo. Both remain recommended and
   are tracked in `STATUS.md`; neither blocks an upload. Recorded here so the
   divergence from SPECS §7.5 is explicit, not silent.
-- The public web app (D2) rehosts no images and carries only machine text plus
+- The public web app (D2) serves its own mirror of the GWLB delivery scans (every page links to its original) and carries only machine text plus
   §70-expired reading text; it is the lighter surface and ships first (v1).
 
 ## 1. Export

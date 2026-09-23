@@ -46,7 +46,12 @@ function katalogRecord(record) {
   const refs = (record.aa_refs || []).map(aaRef).filter(Boolean);
   if (refs.length) {
     rows.push([t('work.katalog.aa'), refs.map((r) => `<span class="aa-ref">${esc(r)}</span>`).join(' ')]);
+  } else if (record.aa_planned && record.aa_planned.length) {
+    // The katalog names a series without a volume: assigned to the AA, not
+    // yet published there. Read with the other printings below.
+    rows.push([t('work.katalog.aa.planned'), record.aa_planned.map((r) => esc(r)).join(', ')]);
   }
+  if (record.drucke) rows.push([t('work.katalog.drucke'), esc(record.drucke)]);
 
   const body = rows
     .map(([key, value]) => `<div class="deflist__row"><dt>${esc(key)}</dt><dd>${value}</dd></div>`)

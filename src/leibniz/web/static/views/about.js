@@ -171,10 +171,54 @@ export async function render(ctx) {
     licensing() +
     `</section>` +
 
+    `<section class="panel" aria-labelledby="about-who">` +
+    `<h2 id="about-who">${esc(t('about.who.h'))}</h2>` +
+    `<p>${esc(t('about.who.p1'))}</p>` +
+    `<p>${esc(t('about.who.p2'))}</p>` +
+    `<p><a href="https://evanatlas.com/" rel="noopener">evanatlas.com</a> · ` +
+    `<a href="https://orcid.org/0009-0007-7374-2338" rel="noopener">ORCID</a></p>` +
+    `</section>` +
+
+    `<section class="panel" aria-labelledby="about-credits">` +
+    `<h2 id="about-credits">${esc(t('about.credits.h'))}</h2>` +
+    `<ul>` +
+    ['images', 'katalog', 'model', 'edition', 'precedents']
+      .map((key) => `<li>${esc(t(`about.credits.${key}`))}</li>`)
+      .join('') +
+    `</ul>` +
+    `</section>` +
+
+    `<section class="panel" aria-labelledby="about-edition">` +
+    `<h2 id="about-edition">${esc(t('about.edition.h'))}</h2>` +
+    `<p>${esc(t('about.edition.p1'))}</p>` +
+    `<p>${esc(t('about.edition.p2'))}</p>` +
+    `<p>` +
+    `<a href="https://www.leibnizedition.de/" rel="noopener">leibnizedition.de</a> · ` +
+    `<a href="https://leibniz-katalog.bbaw.de/" rel="noopener">Arbeitskatalog</a> · ` +
+    `<a href="https://www.gwlb.de/leibniz" rel="noopener">GWLB / Leibniz-Archiv</a> · ` +
+    `<a href="https://www.leibniz-translations.com/" rel="noopener">Leibniz Translations</a>` +
+    `</p>` +
+    `</section>` +
+
+    `<section class="panel" aria-labelledby="about-timeline">` +
+    `<h2 id="about-timeline">${esc(t('about.timeline.h'))}</h2>` +
+    `<ul>` +
+    ['1716', '1889', '1901', '1923', '2007', '2016', '2026a', '2026b', '2055']
+      .map((key) => `<li>${esc(t(`about.timeline.${key}`))}</li>`)
+      .join('') +
+    `</ul>` +
+    `</section>` +
+
+    `<section class="panel" aria-labelledby="about-cite">` +
+    `<h2 id="about-cite">${esc(t('about.cite.h'))}</h2>` +
+    `<p>${esc(t('about.cite.p'))}</p>` +
+    `</section>` +
+
     `<section class="panel" aria-labelledby="about-repo">` +
     `<h2 id="about-repo">${esc(t('about.repo.h'))}</h2>` +
     `<p>${esc(t('about.repo.p'))} ` +
     `<a href="${esc(api.REPO_URL)}" rel="noopener">${esc(api.REPO_URL)}</a></p>` +
+    `<p>${esc(t('about.repo.reports'))}</p>` +
     `</section>` +
 
     `</article>`;
@@ -194,7 +238,11 @@ export async function render(ctx) {
     .then((data) => {
       if (signal.aborted) return;
       box.setAttribute('aria-busy', 'false');
-      box.innerHTML = statTiles(data) + provenanceRows(data) + histogram(data);
+      box.innerHTML =
+        statTiles(data) +
+        `<p class="muted">${esc(t('about.numbers.caveat'))}</p>` +
+        provenanceRows(data) +
+        histogram(data);
     })
     .catch((err) => {
       if (signal.aborted || (err && err.name === 'AbortError')) return;

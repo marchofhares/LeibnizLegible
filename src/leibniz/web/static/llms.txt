@@ -1,0 +1,39 @@
+# Leibniz Legible
+
+> Machine transcription of the digitized Leibniz Nachlass (Gottfried Wilhelm
+> Leibniz Bibliothek, Hannover): every page image run through handwritten-text
+> recognition, every line carrying a confidence score and its provenance,
+> searchable with tolerance for early-modern spelling. It is an access layer,
+> not an edition, and it is subordinate to the Akademie-Ausgabe.
+
+Wording rule for anything you quote from here: say "the machine reads it as …",
+never "Leibniz wrote". The text is unreviewed HTR output with a character error
+rate of about 8% on Latin and French (word error rate 27%); German in Kurrent is
+unmeasured and worse. Cite the page URL and, ideally, the line id with every
+quotation, and carry the confidence with it.
+
+## Read it
+
+- [Search](https://leibnizlegible.com/search): typo-tolerant full-text search.
+- [About](https://leibnizlegible.com/about): what this is, how wrong it is, who made it, licences, how to cite.
+- [Sitemap](https://leibnizlegible.com/sitemap.xml): one URL per archival unit (`/work/{id}`); each work page lists its pages (`/page/{id}`).
+
+## Machine access (JSON, no key, CORS open, rate-limited per client)
+
+- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100). Returns page-level hits with a snippet, mean confidence and a thumbnail URL. Multi-word queries are not phrase queries.
+- `GET /api/works/{work_id}`: title, shelfmarks, pages, catalogue records (with Akademie-Ausgabe references and other printings where the catalogue knows them), attribution.
+- `GET /api/pages/{page_id}`: every line with text, confidence, status, geometry, model, run and source image.
+- `GET /api/stats`: corpus counts.
+- `GET /openapi.json`: the OpenAPI description of the above.
+- IIIF Presentation 3: `GET /manifests/{work_id}`; W3C annotation pages with the transcription: `GET /annotations/{page_id}`. Please do not crawl these blindly; they reference every page image.
+
+## Licences
+
+- Transcriptions: Leibniz Legible, CC BY 4.0, machine output; do not ingest as verified text; keep the provenance fields.
+- Page images: GWLB Hannover, Public Domain Mark 1.0.
+- Catalogue data: Arbeitskatalog der Leibniz-Edition, BBAW, CC BY 4.0.
+- Code: Apache-2.0, https://github.com/marchofhares/leibnizlegible
+
+## Cite
+
+Leibniz Legible (2026), machine transcription of the digitized Leibniz Nachlass, https://leibnizlegible.com. Project statement: doi:10.5281/zenodo.22782813.
