@@ -50,6 +50,16 @@ def test_round_trip_through_env() -> None:
     assert "MEILI_API_KEY" not in ServeSettings(meili_key=None).to_env()
 
 
+def test_calculemus_url_is_a_switch_off_by_default() -> None:
+    game = "https://calculemus.leibnizlegible.com"
+    assert ServeSettings.from_env({}).calculemus_url is None
+    assert ServeSettings.from_env({"LEIBNIZ_CALCULEMUS_URL": ""}).calculemus_url is None
+    assert "LEIBNIZ_CALCULEMUS_URL" not in ServeSettings().to_env()
+    s = ServeSettings.from_env({"LEIBNIZ_CALCULEMUS_URL": game + "/"})  # trailing slash stripped
+    assert s.calculemus_url == game and s.to_env()["LEIBNIZ_CALCULEMUS_URL"] == game
+    assert ServeSettings.from_env(s.to_env()) == s
+
+
 def test_bad_backend_rejected() -> None:
     with pytest.raises(ValueError):
         ServeSettings(backend="solr")
@@ -59,12 +69,14 @@ def test_asgi_factory_builds_from_env(store_path, monkeypatch) -> None:
     monkeypatch.setenv("LEIBNIZ_DB_PATH", str(store_path))
     monkeypatch.setenv("LEIBNIZ_SEARCH_BACKEND", "none")
     monkeypatch.setenv("LEIBNIZ_RATE_LIMIT", "0")
+    monkeypatch.setenv("LEIBNIZ_CALCULEMUS_URL", "https://calculemus.leibnizlegible.com/")
     from leibniz.web.asgi import app as factory
 
     c = TestClient(factory())
     assert c.get("/healthz").json()["store"] is True
     assert c.get("/api/search", params={"q": "x"}).status_code == 503
     assert c.get("/api/works/00068642").status_code == 200
+    assert 'data-calculemus-url="https://calculemus.leibnizlegible.com"' in c.get("/about").text
 
 
 def test_listening_socket_is_tcp_bound_and_inheritable() -> None:

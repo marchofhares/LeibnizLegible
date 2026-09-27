@@ -10,7 +10,10 @@ operator decision in STATUS.md). The server stamps `<html data-image-origin>`
 with `gwlb` or `mirror`; `app.js`, `page.js` and `about.js` pick the matching
 attribution and About texts from it, and the page API says per page
 (`image_origin`) where its pixels come from while `source_image_url` always
-names the GWLB original.
+names the GWLB original. With `LEIBNIZ_CALCULEMUS_URL` set, the server also
+stamps `<html data-calculemus-url>` and `about.js` renders a link to the game
+built on this corpus; unset, the attribute is absent and nothing about the
+game reaches the page.
 
 ## How it is served
 

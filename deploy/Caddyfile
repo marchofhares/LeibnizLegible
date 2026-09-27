@@ -51,3 +51,12 @@
 www.{$LEIBNIZ_DOMAIN:localhost} {
 	redir https://{$LEIBNIZ_DOMAIN:localhost}{uri} permanent
 }
+
+# Sibling apps on this host — Calculemus (calculemus.leibnizlegible.com) —
+# keep their own site blocks in /etc/caddy/conf.d/, one file each, written by
+# their own deployment kits (deploy/README.md §13). Each block names its domain
+# literally, never as a {$VAR:localhost} fallback: with the variable absent (as
+# under `caddy validate` from a shell) that would repeat this file's fallback
+# address, and Caddy refuses a configuration that defines a site twice. A glob
+# that matches no file is fine — a warning in the journal, not an error.
+import /etc/caddy/conf.d/*.caddy

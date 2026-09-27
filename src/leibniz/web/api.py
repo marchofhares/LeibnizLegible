@@ -335,6 +335,7 @@ def create_app(
     security_headers: bool = True,
     cors: bool = True,
     image_base_url: str | None = None,
+    calculemus_url: str | None = None,
 ) -> FastAPI:
     """Build the FastAPI application over a store (+ optional search backend).
 
@@ -344,6 +345,9 @@ def create_app(
     IIIF viewers elsewhere can load the manifests (deliverable D7).
     ``image_base_url`` switches page images to the operator's mirror of the
     image cache (:mod:`leibniz.web.images`); unset, they come from the GWLB.
+    ``calculemus_url`` is the origin of the game built on this corpus, stamped
+    into the viewer shell (``<html data-calculemus-url>``) so the About page
+    can link to it; unset, nothing about the game reaches the HTML.
     """
     app = FastAPI(
         title="Leibniz Legible API",
@@ -586,9 +590,11 @@ def create_app(
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
         # The shell is read once and stamped with where images come from
-        # (``<html data-image-origin>``), so the viewer's attribution and About
-        # text need no extra request. Each route then stamps its own title,
-        # description, canonical URL and — for works and pages — a
+        # (``<html data-image-origin>``) and, only when the operator has switched
+        # it on, the game's origin (``data-calculemus-url``; absent otherwise,
+        # so nothing about it reaches the page), so the viewer's attribution
+        # and About text need no extra request. Each route then stamps its own
+        # title, description, canonical URL and — for works and pages — a
         # server-rendered summary in place of ``<!--ll:ssr-->``, so that search
         # engines, answer engines and readers without JavaScript get the
         # content; app.js replaces it on boot. Every variant carries its own
@@ -597,6 +603,9 @@ def create_app(
         shell = index_html.read_text(encoding="utf-8").replace(
             'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'
         )
+        game_url = (calculemus_url or "").strip().rstrip("/")
+        if game_url:
+            shell = shell.replace("<html ", f'<html data-calculemus-url="{_esc(game_url)}" ', 1)
         site = (base_url or SITE_URL).rstrip("/")
 
         def respond(request: Request, body: str, status: int = 200) -> Response:

@@ -123,6 +123,29 @@ function licensing() {
     .join('');
 }
 
+/**
+ * The game built on this corpus, only when the operator has switched the link
+ * on: the server then stamps `<html data-calculemus-url>` (web/api.py); with
+ * the attribute absent, nothing about the game is rendered.
+ */
+function calculemus() {
+  const url = document.documentElement.dataset.calculemusUrl;
+  if (!url) return '';
+  let host = url;
+  try {
+    host = new URL(url).host;
+  } catch {
+    // not a URL: show it as it is
+  }
+  return (
+    `<section class="panel" aria-labelledby="about-calculemus">` +
+    `<h2 id="about-calculemus">${esc(t('about.calculemus.h'))}</h2>` +
+    `<p>${esc(t('about.calculemus.p'))} ` +
+    `<a href="${esc(url)}" rel="noopener">${esc(host)}</a>.</p>` +
+    `</section>`
+  );
+}
+
 export async function render(ctx) {
   const { root, signal } = ctx;
   document.title = `${t('about.heading')} — ${t('site.name')}`;
@@ -220,6 +243,8 @@ export async function render(ctx) {
     `<a href="${esc(api.REPO_URL)}" rel="noopener">${esc(api.REPO_URL)}</a></p>` +
     `<p>${esc(t('about.repo.reports'))}</p>` +
     `</section>` +
+
+    calculemus() +
 
     `</article>`;
 

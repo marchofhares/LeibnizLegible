@@ -281,3 +281,17 @@ def test_shell_uses_base_url_when_given(store_path, tmp_path) -> None:
     )
     assert 'href="https://x.org/about"' in c.get("/about").text
     assert "<loc>https://x.org/</loc>" in c.get("/sitemap.xml").text
+
+
+def test_shell_names_the_game_only_when_switched_on(store_path, tmp_path) -> None:
+    game = "https://calculemus.leibnizlegible.com"
+    off = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    for route in ("/", "/about"):
+        text = off.get(route).text
+        # "e.g. calculemus" in the search box is Leibniz's word, not the game
+        assert "data-calculemus-url" not in text and "Calculemus" not in text and game not in text
+    on = TestClient(
+        create_app(store_path, search=None, static_dir=STATIC_DIR, calculemus_url=game + "/")
+    )
+    for route in ("/", "/about"):
+        assert f'data-calculemus-url="{game}"' in on.get(route).text  # trailing slash stripped
