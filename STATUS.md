@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-23 (discoverability, About page, duplicate sheet-sides; earlier: 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-09-27 (room for Calculemus on the host, flagged off; earlier: 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -327,6 +327,20 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### D — a sibling app on the host: Calculemus, flagged off (2026-09-27) ✅
+
+The game Calculemus! (its own repository and kit) moves onto the same VPS
+under `calculemus.leibnizlegible.com`. Changed here: `deploy/Caddyfile`
+imports `/etc/caddy/conf.d/*.caddy` (sibling apps keep their own site blocks
+there; `install.sh` creates the directory; the live box needs the one-line
+edit by hand, since the installer copies the Caddyfile only once), runbook
+§13 (DNS, the edit, memory on the 4 GB box, backups — `/var/lib/calculemus`
+is the first non-rebuildable data on the host), and the
+`LEIBNIZ_CALCULEMUS_URL` switch (`web/settings.py`, stamped into the shell as
+`<html data-calculemus-url>` like the image origin; the About page renders
+its link only then). Default off: nothing about the game in the served HTML
+until the operator sets it. Tests +2 (525), ruff clean.
 
 ### D — the image mirror (2026-09-16, operator decision; see Divergences) ✅
 
@@ -1152,6 +1166,10 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-09-27 — a sibling application shares the host.** Calculemus, the
+  game built on this corpus, runs on the same VPS under its own user, unit
+  and Caddy site block (`deploy/README.md` §13). No link to it renders on
+  leibnizlegible.com unless `LEIBNIZ_CALCULEMUS_URL` is set; default off.
 - **2026-09-16 — page images served from the project's own mirror, not from
   the GWLB (operator decision).** SPECS §3.4 and §7.1 say the viewer loads
   images from the GWLB's IIIF endpoints and that nothing is rehosted. The

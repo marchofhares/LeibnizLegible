@@ -242,6 +242,10 @@ const STRINGS = {
     'about.repo.reports':
       'Reports on Zenodo (CC BY 4.0): the project statement doi:10.5281/zenodo.22782813, the corpus census doi:10.5281/zenodo.22782815, the PHILIUMM reproduction and vision-model benchmark doi:10.5281/zenodo.22782817, and the retro-aligned ground truth doi:10.5281/zenodo.22782819.',
 
+    'about.calculemus.h': 'Calculemus',
+    'about.calculemus.p':
+      'Calculemus is a game built on this corpus: players adjudicate two machine readings of a manuscript line, and their calibrated, aggregated judgments become crowd agreement over the machine text — corrected, never verified. Play it at',
+
     'about.who.h': 'Who made this',
     'about.who.p1':
       'Leibniz Legible is a one-person open project by Evan Tabak Atlas, an independent writer and researcher in New York (evanatlas.com, ORCID 0009-0007-7374-2338). It is not affiliated with the Gottfried Wilhelm Leibniz Bibliothek or with the Leibniz-Edition, and it claims nothing they have not claimed first.',
@@ -522,6 +526,10 @@ const STRINGS = {
     'about.repo.p': 'Quellcode, Datensätze, Berichte und Issue-Tracker:',
     'about.repo.reports':
       'Berichte auf Zenodo (CC BY 4.0): die Projektbeschreibung doi:10.5281/zenodo.22782813, der Korpuszensus doi:10.5281/zenodo.22782815, die PHILIUMM-Reproduktion mit dem Benchmark der Bildsprachmodelle doi:10.5281/zenodo.22782817 und die retro-alignierte Ground Truth doi:10.5281/zenodo.22782819.',
+
+    'about.calculemus.h': 'Calculemus',
+    'about.calculemus.p':
+      'Calculemus ist ein Spiel auf der Grundlage dieses Korpus: Spielerinnen und Spieler urteilen über zwei maschinelle Lesungen einer Handschriftenzeile, und ihre kalibrierten, zusammengeführten Urteile werden zur Übereinstimmung der Crowd über den Maschinentext — korrigiert, nie verifiziert. Zu spielen unter',
 
     'about.who.h': 'Wer das gemacht hat',
     'about.who.p1':

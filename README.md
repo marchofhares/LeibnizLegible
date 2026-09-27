@@ -176,7 +176,11 @@ day-two operations. `Dockerfile` + `deploy/docker-compose.prod.yml` are the
 all-container alternative. `leibniz serve` takes every option from the
 environment too (`deploy/env.example`), runs `--workers N`, and answers
 `/healthz` for the process manager. Nothing on the server is precious: the
-store is a copy, the index a rebuild, and the images stay at the GWLB.
+store is a copy, the index a rebuild, and the images stay at the GWLB. The
+game Calculemus shares the host under its own subdomain and its own kit;
+`deploy/README.md` §13 covers what that touches here (a Caddy `conf.d`
+import, memory, backups) and the `LEIBNIZ_CALCULEMUS_URL` switch, off by
+default, that alone makes the About page link to it.
 
 ## Where things live
 

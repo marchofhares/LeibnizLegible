@@ -291,9 +291,11 @@ What is already on, and where to turn the knobs:
   `/usr/local/bin/meilisearch` (same download line as the script, new
   version), delete `/var/lib/meilisearch/data.ms`, start it, rebuild the
   index (§5). Keep `MEILI_VERSION` in `install.sh` in step with what runs.
-- **Backups.** None needed for the data: the store is a copy, the index is a
-  rebuild. Back up `/etc/leibniz-legible`, `/etc/meilisearch` and
-  `/etc/caddy` (a few KB) and you can rebuild the host from this file.
+- **Backups.** None needed for this app's data: the store is a copy, the
+  index is a rebuild. Back up `/etc/leibniz-legible`, `/etc/meilisearch`,
+  `/etc/caddy` and, once Calculemus is installed, `/etc/calculemus` (a few
+  KB) and you can rebuild the host from this file — except the game's own
+  data, which §13 covers.
 - **Disk.** Watch `/var/lib/meilisearch` after a rebuild (the old index is
   dropped first, so the peak is one index) and `/var/log/caddy`.
 - **Monitoring.** `/healthz` from an uptime checker; `systemctl status
@@ -487,3 +489,60 @@ Optional, in Cloudflare → Caching → *Cache Rules*: hostname
 `images.leibnizlegible.com`, cache eligible, edge TTL one month. The objects
 never change (a re-fetched derivative would replace the same key; purge the
 cache then). A new corpus run changes nothing here.
+
+## 13. Sibling apps on this host — Calculemus
+
+The game **Calculemus!** — its own repository and deployment kit; a Node 22 /
+Fastify server with one SQLite file — runs on this same VPS under
+`calculemus.leibnizlegible.com`: system user `calculemus`, checkout in
+`/opt/calculemus`, Node in `/opt/node`, listening on `127.0.0.1:3000`. Its
+kit does its own work; this section is what touches this host and this site.
+
+1. **DNS.** A grey-cloud (DNS only) A and AAAA record for `calculemus` in the
+   Cloudflare zone, in place **before** the site block goes live — exactly
+   what §1 requires for the apex, for the same reason: Caddy's certificate
+   challenge fails behind the orange cloud.
+2. **The one-time manual edit on the live box.** `install.sh` copies
+   `deploy/Caddyfile` only the first time (it skips whenever
+   `/etc/caddy/Caddyfile` already says "Leibniz Legible"), so a box installed
+   before the import line existed does not have it. Add, at the **end** of
+   `/etc/caddy/Caddyfile`:
+
+```
+import /etc/caddy/conf.d/*.caddy
+```
+
+   then validate, then reload:
+
+```bash
+install -d /etc/caddy/conf.d
+caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+systemctl reload caddy
+```
+
+   Reload, not restart: no downtime, the apex stays up. If `validate` fails,
+   nothing has changed yet — the running Caddy keeps its old configuration
+   until the reload. A glob that matches no file is fine (a warning in the
+   journal, not an error). Each sibling block names its domain literally,
+   never as a `{$VAR:localhost}` fallback, which would duplicate this file's
+   fallback address and make Caddy refuse the whole configuration.
+3. **Everything else is Calculemus's own kit.** `deploy/install.sh` in the
+   Calculemus repository creates the user, installs Node to `/opt/node`,
+   clones and builds the game, installs its unit and the backup timer, keeps
+   its env in `/etc/calculemus/env`, and writes the site block
+   `/etc/caddy/conf.d/calculemus.caddy`. Its runbook is `deploy/README.md` in
+   that repository.
+4. **Memory.** This box has 4 GB, and Meilisearch relies on the page cache
+   for its p95 (§7). The game's server idles around 100–150 MB RSS, but its
+   build (`pnpm build`) peaks around 500 MB: run a Calculemus install or
+   update when no index build (§5) is running.
+5. **Backups.** `/etc/calculemus` joins the small configuration set worth
+   backing up (§9). `/var/lib/calculemus` (`game.sqlite`) is the first data
+   on this box that is **not** a rebuildable copy: the game's own systemd
+   timer keeps daily SQLite backups in `/var/lib/calculemus/backups/`, on the
+   same disk; a copy off the host is the operator's.
+6. **The switch.** `LEIBNIZ_CALCULEMUS_URL`, unset by default: no link to the
+   game anywhere on leibnizlegible.com, and nothing about it in the served
+   HTML. To show the link on the About page, set
+   `LEIBNIZ_CALCULEMUS_URL=https://calculemus.leibnizlegible.com` in
+   `/etc/leibniz-legible/env` and `systemctl restart leibniz-legible`.

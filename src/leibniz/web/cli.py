@@ -96,6 +96,12 @@ def serve(
         envvar=ENV["image_base_url"],
         help="Serve page images from this mirror of the image cache (unset: from the GWLB).",
     ),
+    calculemus_url: str | None = typer.Option(
+        None,
+        "--calculemus-url",
+        envvar=ENV["calculemus_url"],
+        help="Link the About page to the game at this origin (unset: no link anywhere).",
+    ),
     forwarded_allow_ips: str | None = typer.Option(
         None,
         "--forwarded-allow-ips",
@@ -121,6 +127,7 @@ def serve(
             rate_limit=rate_limit,
             rate_burst=rate_burst,
             image_base_url=image_base_url,
+            calculemus_url=calculemus_url,
         )
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
