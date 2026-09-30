@@ -1166,6 +1166,17 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-09-30 — `tools/` introduced for operator-run helper scripts.** Not in
+  the SPECS §4 package layout; it holds shell scripts the operator runs on the
+  desktop that holds `data/`, never pipeline code. First entry:
+  `tools/fetch-kurrent-trace.sh`, which downloads (or takes a local copy of),
+  checksum-verifies, unpacks and validates the "Kurrent Trace v0.1" package —
+  383 Dresdner Hofdiarium 1673 line crops with transcriptions (Beckert, Zenodo
+  15303243) plus 180 unlabelled machine segments from LH 35, 3 A 8, Bl. 22r–v —
+  into `data/external/kurrent-trace/` (gitignored). It is the Kurrent smoke-test
+  set for the planned Kurrent track (K1). Its Dresden text carries a licence
+  conflict (Zenodo field CC BY 4.0, README CC BY-NC-SA 4.0): nc bucket, internal
+  evaluation only, never exported or committed, until the author resolves it.
 - **2026-09-27 — a sibling application shares the host.** Calculemus, the
   game built on this corpus, runs on the same VPS under its own user, unit
   and Caddy site block (`deploy/README.md` §13). No link to it renders on
