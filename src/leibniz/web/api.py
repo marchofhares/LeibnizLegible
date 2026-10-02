@@ -2,7 +2,8 @@
 
 Routes (all read-only; the store is opened per request, read-only):
 
-* ``GET /api/search``          — typo-/orthography-tolerant page search (D1)
+* ``GET /api/search``          — typo-/orthography-tolerant page search (D1),
+  with ``"exact phrases"`` and ``-exclusions``
 * ``GET /api/works/{id}``      — a work: pages, katalog records, attribution
 * ``GET /api/pages/{id}``      — a page: lines with geometry, text, confidence,
   status and provenance (SPECS §4.5), prev/next
@@ -688,7 +689,14 @@ def create_app(
 
     @app.get("/api/search")
     def api_search(
-        q: str = Query("", max_length=500),
+        q: str = Query(
+            "",
+            max_length=500,
+            description=(
+                'Words match typo-tolerantly. "Double quotes" match the exact words in that '
+                'order; a minus in front (-word, -"two words") leaves out pages containing it.'
+            ),
+        ),
         set: str | None = Query(None, alias="set"),  # noqa: A002 — the API's public name
         lang: str | None = None,
         stratum: str | None = None,

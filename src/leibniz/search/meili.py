@@ -6,6 +6,8 @@ attribute, typo tolerance on, filters on set/language/stratum/confidence/work.
 The build replaces the index wholesale (drop → create → settings → documents,
 each awaited through Meilisearch's task queue) so re-indexing is idempotent.
 ``docker compose up -d meilisearch`` runs one locally (see ``docker-compose.yml``).
+Quoted phrases and exclusions use Meilisearch's own ``"…"`` and ``-`` syntax
+(exclusions need Meilisearch ≥ 1.8); see :func:`meili_query` for the order.
 """
 
 from __future__ import annotations
@@ -17,7 +19,7 @@ import httpx
 
 from leibniz.search.backend import SearchHit, SearchQuery, SearchResult
 from leibniz.search.documents import PageDoc
-from leibniz.search.normalize import fold, query_terms
+from leibniz.search.normalize import ParsedQuery, fold, parse_query
 from leibniz.search.snippet import make_snippet
 
 DEFAULT_MEILI_URL = "http://127.0.0.1:7700"
@@ -51,6 +53,22 @@ RETRIEVE = [
 def doc_id(page_id: str) -> str:
     """Meilisearch primary keys allow only ``[A-Za-z0-9_-]``; page ids carry ``:``."""
     return page_id.replace(":", "_")
+
+
+def meili_query(query: ParsedQuery) -> str:
+    """The ``q`` Meilisearch is sent: exclusions (``-word``, ``-"a b"``), then
+    ``"phrases"``, then the plain words exactly as before.
+
+    The order is load-bearing: Meilisearch reads only the first ten terms of a
+    query (a phrase or an exclusion is one) and matches the last word as a
+    prefix, so operators placed after the words could be dropped and would
+    cost the last word its prefix match. Folded tokens carry no quotes or
+    minus signs, so the syntax added here is the only syntax in ``q``.
+    """
+    parts = [f'-"{" ".join(p)}"' if len(p) > 1 else f"-{p[0]}" for p in query.excluded]
+    parts += [f'"{" ".join(p)}"' for p in query.phrases]
+    parts += query.words
+    return " ".join(parts)
 
 
 class MeiliBackend:
@@ -163,11 +181,11 @@ class MeiliBackend:
     def search(self, query: SearchQuery) -> SearchResult:
         q = query.normalized()
         t0 = time.perf_counter()
-        terms = query_terms(q.q)
-        if not terms:
+        parsed = parse_query(q.q)
+        if not parsed.searchable:
             return SearchResult(q.q, 0, q.page, q.limit, 0, self.name, [])
         body = {
-            "q": " ".join(terms),
+            "q": meili_query(parsed),
             "limit": q.limit,
             "offset": q.offset,
             "attributesToRetrieve": RETRIEVE,
@@ -187,7 +205,7 @@ class MeiliBackend:
                 set_name=h["set_name"],
                 title=h.get("title"),
                 shelfmarks=list(h.get("shelfmarks") or []),
-                snippet=make_snippet(h.get("text"), terms),
+                snippet=make_snippet(h.get("text"), list(parsed.words), phrases=parsed.phrases),
                 n_lines=h.get("n_lines", 0),
                 mean_conf=h.get("mean_conf"),
                 lang=h.get("lang", "unknown"),
@@ -235,4 +253,11 @@ class MeiliBackend:
             return False
 
 
-__all__ = ["DEFAULT_INDEX_UID", "DEFAULT_MEILI_URL", "SETTINGS", "MeiliBackend", "doc_id"]
+__all__ = [
+    "DEFAULT_INDEX_UID",
+    "DEFAULT_MEILI_URL",
+    "SETTINGS",
+    "MeiliBackend",
+    "doc_id",
+    "meili_query",
+]

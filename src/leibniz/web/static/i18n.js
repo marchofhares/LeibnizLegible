@@ -45,7 +45,8 @@ const STRINGS = {
     // ---- search ----------------------------------------------------------
     'search.heading': 'Search the Nachlass',
     'search.label': 'Search the Nachlass',
-    'search.hint': 'The index is typo-tolerant. Search is over machine transcriptions only.',
+    'search.hint':
+      'The index is typo-tolerant. Search is over machine transcriptions only. Use "quotes" for an exact phrase and -word to leave a word out; both match exactly, so they miss words the machine misread.',
     'search.placeholder': 'e.g. calculemus',
     'search.submit': 'Search',
     'search.filters': 'Filters',
@@ -66,7 +67,7 @@ const STRINGS = {
       'Enter a word or a phrase to search the machine transcriptions of the Nachlass.',
     'search.empty': 'No page matched.',
     'search.empty.hint':
-      'Try fewer filters, a shorter query, or a different spelling. The index tolerates typos, but the text it searches is machine output and contains errors.',
+      'Try fewer filters, a shorter query, a different spelling, or no quotes. The index tolerates typos, but the text it searches is machine output and contains errors.',
     'search.error': 'The search service did not answer.',
     'search.prev': 'Previous',
     'search.next': 'Next',
@@ -333,7 +334,7 @@ const STRINGS = {
     'search.heading': 'Den Nachlass durchsuchen',
     'search.label': 'Den Nachlass durchsuchen',
     'search.hint':
-      'Der Index ist tippfehlertolerant. Durchsucht werden ausschließlich maschinelle Transkriptionen.',
+      'Der Index ist tippfehlertolerant. Durchsucht werden ausschließlich maschinelle Transkriptionen. Mit „Anführungszeichen“ suchen Sie eine genaue Wortfolge, mit -Wort schließen Sie ein Wort aus; beides sucht exakt und übersieht daher Wörter, die die Maschine falsch gelesen hat.',
     'search.placeholder': 'z. B. calculemus',
     'search.submit': 'Suchen',
     'search.filters': 'Filter',
@@ -354,7 +355,7 @@ const STRINGS = {
       'Geben Sie ein Wort oder eine Wendung ein, um die maschinellen Transkriptionen des Nachlasses zu durchsuchen.',
     'search.empty': 'Keine Seite gefunden.',
     'search.empty.hint':
-      'Versuchen Sie es mit weniger Filtern, einer kürzeren Anfrage oder einer anderen Schreibweise. Der Index verzeiht Tippfehler, der durchsuchte Text ist jedoch maschinell erzeugt und fehlerhaft.',
+      'Versuchen Sie es mit weniger Filtern, einer kürzeren Anfrage, einer anderen Schreibweise oder ohne Anführungszeichen. Der Index verzeiht Tippfehler, der durchsuchte Text ist jedoch maschinell erzeugt und fehlerhaft.',
     'search.error': 'Der Suchdienst hat nicht geantwortet.',
     'search.prev': 'Zurück',
     'search.next': 'Weiter',

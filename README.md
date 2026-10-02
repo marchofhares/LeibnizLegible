@@ -132,8 +132,11 @@ uv run leibniz serve --backend meili --host 0.0.0.0 --base-url https://your.host
 ```
 
 The index folds text and query onto the aligner's early-modern comparison
-alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. The API
-(`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
+alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. Queries
+take two operators: `"…"` (or „…“, «…») for words that must stand exactly so
+and in that order, and a leading `-` to leave out pages with a word or a
+quoted phrase; both match exactly, so they cannot see past a misread word.
+The API (`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
 every line with its geometry, text, confidence, status and provenance;
 `/api/pages/{id}/text` and `/api/works/{id}/text` are the same transcription
 as a plain-text download (one line per recognised line under a `# ` header

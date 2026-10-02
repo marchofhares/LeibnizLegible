@@ -20,7 +20,7 @@ quotation, and carry the confidence with it.
 
 ## Machine access (JSON and plain text, no key, CORS open, rate-limited per client)
 
-- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100). Returns page-level hits with a snippet, mean confidence and a thumbnail URL. Multi-word queries are not phrase queries.
+- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100). Returns page-level hits with a snippet, mean confidence and a thumbnail URL. Words match typo-tolerantly and multi-word queries are not phrase queries; "double quotes" match the exact words in that order, and a leading minus (-word, -"two words") leaves out pages that contain it. Quoted and excluded words match exactly, so they do not see past misread words.
 - `GET /api/works/{work_id}`: title, shelfmarks, pages, catalogue records (with Akademie-Ausgabe references and other printings where the catalogue knows them), attribution.
 - `GET /api/pages/{page_id}`: every line with text, confidence, status, geometry, model, run and source image.
 - `GET /api/pages/{page_id}/text`: the page's transcription as plain UTF-8 text: a header of `# ` lines (page URL, work, folio, source image, model, run and run date, line count, mean confidence, licence, this wording rule), a blank line, then one recognised line per line in reading order. `?format=tsv` gives tab-separated `line_id`, `line_seq`, `conf`, `status`, `text` under a header row instead.

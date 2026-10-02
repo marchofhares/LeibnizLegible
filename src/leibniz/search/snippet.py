@@ -4,13 +4,15 @@ Both backends match on folded text; the reader wants the machine's own reading
 with the hits marked. So the snippet is computed here, once, from the original
 page text: fold it with the offset map, find the tokens a query term matches
 (whole token; a term of ≥ :data:`PREFIX_MIN` characters matches as a prefix,
-mirroring the FTS5 query builder), map the folded spans back to original
+mirroring the FTS5 query builder) and the runs of tokens that spell a quoted
+phrase (exactly, one mark per run), map the folded spans back to original
 offsets, cut a window around the first hit, and HTML-escape everything except
 the ``<mark>`` tags. The output is the only HTML the API ever emits.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from html import escape
 
 from leibniz.search.normalize import fold_indexed
@@ -20,9 +22,17 @@ DEFAULT_WIDTH = 240
 ELLIPSIS = "…"
 
 
-def term_spans(folded: str, terms: list[str], *, prefix: bool = True) -> list[tuple[int, int]]:
-    """Folded-space ``[start, end)`` spans of tokens matching any term."""
+def term_spans(
+    folded: str,
+    terms: list[str],
+    *,
+    prefix: bool = True,
+    phrases: Sequence[Sequence[str]] = (),
+) -> list[tuple[int, int]]:
+    """Folded-space ``[start, end)`` spans of tokens matching any term, and of
+    each run of tokens that spells one of ``phrases`` (sorted, overlaps merged)."""
     spans: list[tuple[int, int]] = []
+    tokens: list[tuple[int, int]] = []
     i, n = 0, len(folded)
     while i < n:
         if folded[i] == " ":
@@ -31,13 +41,28 @@ def term_spans(folded: str, terms: list[str], *, prefix: bool = True) -> list[tu
         j = i
         while j < n and folded[j] != " ":
             j += 1
+        tokens.append((i, j))
         tok = folded[i:j]
         for t in terms:
             if tok == t or (prefix and len(t) >= PREFIX_MIN and tok.startswith(t)):
                 spans.append((i, j))
                 break
         i = j
-    return spans
+    if not phrases:
+        return spans
+    words = [folded[a:b] for a, b in tokens]
+    for phrase in phrases:
+        run = list(phrase)
+        for k in range(len(words) - len(run) + 1):
+            if run and words[k] == run[0] and words[k : k + len(run)] == run:
+                spans.append((tokens[k][0], tokens[k + len(run) - 1][1]))
+    merged: list[tuple[int, int]] = []
+    for a, b in sorted(spans):
+        if merged and a < merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(b, merged[-1][1]))
+        else:
+            merged.append((a, b))
+    return merged
 
 
 def to_original_spans(
@@ -75,13 +100,19 @@ def _window(text: str, spans: list[tuple[int, int]], width: int) -> tuple[int, i
     return start, end
 
 
-def make_snippet(original: str | None, terms: list[str], *, width: int = DEFAULT_WIDTH) -> str:
-    """Escaped snippet of ``original`` with matching tokens wrapped in ``<mark>``."""
+def make_snippet(
+    original: str | None,
+    terms: list[str],
+    *,
+    width: int = DEFAULT_WIDTH,
+    phrases: Sequence[Sequence[str]] = (),
+) -> str:
+    """Escaped snippet of ``original``, matching tokens and phrase runs in ``<mark>``."""
     text = (original or "").replace("\n", " ")
     if not text:
         return ""
     folded, src = fold_indexed(text)
-    spans = to_original_spans(term_spans(folded, terms), src, len(text))
+    spans = to_original_spans(term_spans(folded, terms, phrases=phrases), src, len(text))
     start, end = _window(text, spans, width)
     parts: list[str] = []
     if start > 0:

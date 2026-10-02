@@ -63,6 +63,18 @@ def test_search(store_path, tmp_path) -> None:
     assert c.get("/api/search", params={"q": ""}).json()["total"] == 0
 
 
+def test_search_phrases_and_exclusions(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    body = c.get("/api/search", params={"q": '"arte combinatoria"'}).json()
+    assert body["total"] == 1 and "<mark>arte combinatoria</mark>" in body["hits"][0]["snippet"]
+    assert c.get("/api/search", params={"q": "de -nature"}).json()["total"] == 1
+    r = c.get("/api/search", params={"q": "-de"})
+    assert r.status_code == 200 and r.json()["total"] == 0
+    params = c.get("/openapi.json").json()["paths"]["/api/search"]["get"]["parameters"]
+    assert "quotes" in next(p for p in params if p["name"] == "q")["description"]
+    assert '"double quotes"' in c.get("/llms.txt").text
+
+
 def test_search_unconfigured(store_path, tmp_path) -> None:
     c = _client(store_path, tmp_path, search=False)
     assert c.get("/api/search", params={"q": "x"}).status_code == 503

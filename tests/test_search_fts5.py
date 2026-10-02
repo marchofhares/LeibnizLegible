@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import random
+
 from leibniz import db
 from leibniz.search import open_backend
 from leibniz.search.backend import SearchQuery
 from leibniz.search.documents import corpus_stats, iter_page_docs
-from leibniz.search.fts5 import Fts5Backend, match_expression
+from leibniz.search.fts5 import Fts5Backend, match_expression, match_query
+from leibniz.search.normalize import parse_query
 
 W1 = "00068642"
 W2 = "DE-611-HS-854976"
@@ -75,3 +78,46 @@ def test_meta_and_open_backend(store_path, tmp_path) -> None:
     assert meta["n_docs"] == 3 and meta["stats"]["pages"] == 4 and meta["built_at"]
     again = open_backend("fts5", path=str(tmp_path / "search.sqlite"))
     assert again.count() == 3
+
+
+def test_match_query() -> None:
+    assert match_query(parse_query("Calculemus ut")) == match_expression(["calculemus", "ut"])
+    assert match_query(parse_query('"arte combinatoria" de')) == '"arte combinatoria" "de"'
+    assert match_query(parse_query('de -"la nature" -grâce')) == (
+        '("de") NOT ("la nature" OR "grace")'
+    )
+
+
+def test_phrases_and_exclusions(store_path, tmp_path) -> None:
+    be = _build(store_path, tmp_path)
+
+    def pages(q: str) -> list[str]:
+        return sorted(h.page_id for h in be.search(SearchQuery(q=q)).hits)
+
+    p1, p2, q1 = f"{W1}:0001", f"{W1}:0002", f"{W2}:0001"
+    assert pages('"arte combinatoria"') == [p1]
+    assert pages('"combinatoria arte"') == []  # the order is part of the phrase
+    assert pages("„ut sit veritas“") == [p2]  # folded inside quotes: the page reads 'vt'
+    assert pages("de") == [p1, q1]
+    assert pages("de -nature") == pages('de -"la nature"') == [p1]
+    assert pages('de -"nature la"') == [p1, q1]  # an excluded phrase is excluded in order
+    assert pages("combinat") == [p1] and pages('"combinat"') == []  # quoted: exact, no prefix
+    assert be.search(SearchQuery(q="-de")).total == 0  # exclusions alone select nothing
+    hit = be.search(SearchQuery(q='"Calculemus inquit"')).hits[0]
+    assert hit.snippet.startswith("<mark>Calculemus inquit</mark>")
+    # quoted references still find their work: FTS5 folds those columns too
+    assert pages('"AA VI,4 N. 109"') == [p1, p2]
+    assert pages('"LBr. 464"') == [q1]
+
+
+def test_hostile_queries_never_reach_fts5_as_syntax(store_path, tmp_path) -> None:
+    """Quotes of every kind, minus signs, FTS5's own operators and punctuation:
+    whatever is typed, the MATCH stays well-formed and the search answers."""
+    be = _build(store_path, tmp_path)
+    rng = random.Random(1646)
+    pieces = list("abde \"\u201c\u201d\u201e\u201f\u00ab\u00bb-*^:+(){}[],.;'\u2019&|~\\/")
+    pieces += ["NOT", "OR", "AND", "NEAR", "de", "-de", '"la', "q;"]
+    pieces += ["\u00ad", "\u200b", "\u0301"]  # soft hyphen, ZWSP, combining acute
+    for _ in range(3000):
+        q = "".join(rng.choice(pieces) for _ in range(rng.randint(1, 14)))
+        assert be.search(SearchQuery(q=q)).total >= 0, q
