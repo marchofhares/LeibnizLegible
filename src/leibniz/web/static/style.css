@@ -974,8 +974,18 @@ select {
   pointer-events: none;
 }
 
+/* Hidden with visibility, never display: OpenSeadragon writes an inline
+   `display: block` on the overlay element every time it redraws, and an inline
+   style beats any class rule, so `display: none` here left the polygons on
+   screen. The polygons take pointer events whatever their visibility
+   (`pointer-events: all`), so those go too: a click on a hidden line must not
+   select it. */
 .line-overlay.is-hidden {
-  display: none;
+  visibility: hidden;
+}
+
+.line-overlay.is-hidden .line-overlay__poly {
+  pointer-events: none;
 }
 
 .line-overlay__poly {

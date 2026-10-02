@@ -278,10 +278,23 @@ What is already on, and where to turn the knobs:
 ## 9. Operate
 
 - **Update the app.** `deploy/install.sh` again (pulls, syncs the venv,
-  reinstalls the units), then `systemctl restart leibniz-legible`. Or by hand:
-  `git -C /opt/leibniz-legible pull && sudo -u leibniz -H uv sync --project
-  /opt/leibniz-legible --frozen --no-dev --extra web && systemctl restart
-  leibniz-legible`.
+  reinstalls the units), then `systemctl restart leibniz-legible`. Or by hand,
+  running git and uv as the service user as `install.sh` does (git refuses to
+  work as root in the leibniz-owned checkout: "dubious ownership"):
+
+  ```bash
+  sudo -u leibniz -H git -C /opt/leibniz-legible pull --ff-only
+  sudo -u leibniz -H env UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache \
+    UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python \
+    uv sync --project /opt/leibniz-legible --frozen --no-dev --extra web
+  systemctl restart leibniz-legible
+  curl -s http://127.0.0.1:8000/healthz    # {"status":"ok",…}
+  ```
+
+  The shell names its stylesheet and entry scripts by content hash, so a
+  deploy reaches returning readers at once; the ES modules those scripts
+  import keep plain URLs and can take up to the hour Caddy lets browsers
+  cache `/static/*`.
 - **A new corpus run (C4).** Repeat §2 (new serving copy), §5 (rebuild the
   index; the app keeps serving the old one until the build swaps it in),
   then restart the app so `/api/stats` picks up the new build metadata.

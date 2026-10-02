@@ -115,13 +115,16 @@ summary — the catalogue entries and page list, or the machine text — so sear
 engines, answer engines and readers without JavaScript see the content; the app
 replaces it on boot. `/sitemap.xml` lists every work, `/llms.txt` describes the
 API for agents, `/robots.txt` opens the JSON routes and keeps blind crawlers off
-the IIIF manifests.
+the IIIF manifests. The shell names its stylesheet and entry scripts by content
+hash (`/static/app.js?v=…`, computed at startup), so a deploy reaches returning
+readers at once.
 
 ```bash
 uv sync --extra web                        # fastapi + uvicorn
 uv run leibniz index build                 # page index → data/search.sqlite (SQLite FTS5)
 uv run leibniz index query "calculemus"    # try it from the shell
 uv run leibniz serve                       # http://127.0.0.1:8000 — search, /work/…, /page/…, /about
+curl -OJ http://127.0.0.1:8000/api/works/00068642/text    # a work's text → leibniz-legible_00068642.txt
 # production: typo-tolerant Meilisearch
 docker compose up -d meilisearch
 uv run leibniz index build --backend meili --meili-key "$MEILI_MASTER_KEY"
@@ -131,7 +134,13 @@ uv run leibniz serve --backend meili --host 0.0.0.0 --base-url https://your.host
 The index folds text and query onto the aligner's early-modern comparison
 alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. The API
 (`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
-every line with its geometry, text, confidence, status and provenance; each
+every line with its geometry, text, confidence, status and provenance;
+`/api/pages/{id}/text` and `/api/works/{id}/text` are the same transcription
+as a plain-text download (one line per recognised line under a `# ` header
+carrying page URL, source image, model, run, confidence, licence and the
+wording rule; the work's pages streamed in canvas order, each under a
+`## Folio <label> — <page id>` line; `?format=tsv` for `line_id`, `line_seq`,
+`conf`, `status`, `text` rows) — the viewer links both. Each
 work is also a IIIF Presentation 3 manifest (`/manifests/{id}`) whose canvases
 reference W3C annotation pages (`/annotations/{page_id}`) carrying the
 transcription — the interop deliverable D7. The viewer under

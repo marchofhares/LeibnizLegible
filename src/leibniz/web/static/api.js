@@ -6,6 +6,8 @@
 //   GET /api/pages/{page_id}
 //   GET /api/stats
 //   GET /manifests/{work_id}     (linked to, never fetched here)
+//   GET /api/pages/{page_id}/text, GET /api/works/{work_id}/text
+//                                (plain-text downloads; linked to, never fetched)
 // 404s answer `{"detail": "..."}` with status 404.
 //
 // Nothing else is fetched from our own origin. The only other network traffic
@@ -100,6 +102,16 @@ export function stats(signal) {
 /** The URL of our IIIF Presentation 3 manifest for a work (for linking). */
 export function manifestUrl(workId) {
   return `/manifests/${pathSeg(workId)}`;
+}
+
+/** One page's transcription as a plain-text download, provenance in its header. */
+export function pageTextUrl(pageId) {
+  return `${API}/pages/${pathSeg(pageId)}/text`;
+}
+
+/** A whole work's transcription as one plain-text download, folio by folio. */
+export function workTextUrl(workId) {
+  return `${API}/works/${pathSeg(workId)}/text`;
 }
 
 /** The GWLB's own record page for a work. */

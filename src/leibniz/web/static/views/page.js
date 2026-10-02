@@ -28,6 +28,37 @@ function reducedMotion() {
 }
 
 // ---------------------------------------------------------------------------
+// the line overlay: shown by default, the reader's choice remembered
+// ---------------------------------------------------------------------------
+
+const OVERLAY_KEY = 'leibniz-legible.overlay';
+let overlayFallback = true; // the choice for this tab when storage is unavailable
+
+/** Is the line overlay to be shown? The stored choice, else shown. */
+function overlayWanted() {
+  try {
+    const stored = window.localStorage.getItem(OVERLAY_KEY);
+    return stored === null ? overlayFallback : stored !== 'hidden';
+  } catch {
+    return overlayFallback; // private mode, blocked storage
+  }
+}
+
+function rememberOverlay(shown) {
+  overlayFallback = shown;
+  try {
+    window.localStorage.setItem(OVERLAY_KEY, shown ? 'shown' : 'hidden');
+  } catch {
+    /* storage unavailable — the choice lasts until the tab is closed */
+  }
+}
+
+/** The toggle's label names what pressing it does; aria-pressed holds the state. */
+function overlayLabel(shown) {
+  return t(shown ? 'page.overlay.hide' : 'page.overlay.show');
+}
+
+// ---------------------------------------------------------------------------
 // geometry
 // ---------------------------------------------------------------------------
 
@@ -189,6 +220,11 @@ function pageHeader(data, pageId) {
       : `<span class="button button--disabled" aria-disabled="true">${esc(t('page.next'))} &#8594;</span>`,
   ].join('');
   const manifest = data.manifest_url || api.manifestUrl(data.work_id);
+  // The plain-text export: a download (the server sends it as an attachment
+  // with its own file name), offered only when there is text to take away.
+  const download = (data.lines || []).length
+    ? `<li><a href="${esc(api.pageTextUrl(data.page_id || pageId))}" download>${esc(t('page.download'))}</a></li>`
+    : '';
   return (
     `<header class="panel page-header">` +
     `<h1 tabindex="-1" data-view-heading>${esc(heading)}</h1>` +
@@ -196,6 +232,7 @@ function pageHeader(data, pageId) {
     `<p class="muted"><code>${esc(data.page_id || pageId)}</code></p>` +
     `<nav class="page-nav" aria-label="${esc(t('page.nav'))}">${nav}</nav>` +
     `<ul class="linklist linklist--inline">` +
+    download +
     `<li><a href="${esc(manifest)}" rel="noopener">${esc(t('page.mirador'))}</a></li>` +
     `<li><a href="${esc(api.reportUrl(data.page_id || pageId))}" rel="noopener">${esc(t('page.report'))}</a></li>` +
     `</ul></header>`
@@ -216,11 +253,12 @@ function viewerPanel(data) {
   }
   const hasImage = Boolean(data.image_service_url || data.image_url);
   const hasLines = Boolean((data.lines || []).length);
+  const shown = overlayWanted();
   const toggle =
     hasImage && hasLines
       ? `<div class="page-viewer__controls">` +
-        `<button type="button" class="button" id="overlay-toggle" aria-pressed="true">` +
-        `${esc(t('page.overlay.toggle'))}</button></div>`
+        `<button type="button" class="button" id="overlay-toggle" aria-pressed="${shown}">` +
+        `${esc(overlayLabel(shown))}</button></div>`
       : '';
   return (
     `<section class="panel page-viewer" aria-labelledby="viewer-heading">` +
@@ -325,6 +363,9 @@ function wire(root, data) {
     byId.set(String(line.line_id != null ? line.line_id : index), line);
   });
 
+  // While the overlay is hidden a line selected in the panel still zooms the
+  // image to it, and its polygon keeps the highlight for when the overlay is
+  // shown again; the hidden polygons take no pointer events (style.css).
   function highlight(id) {
     selected = id;
     for (const button of buttons) {
@@ -423,6 +464,10 @@ function wire(root, data) {
   const CLICK_MAX_MS = 700;
 
   function onOverlayPointerDown(event) {
+    if (overlaySvg && overlaySvg.classList.contains('is-hidden')) {
+      pending = null; // a hidden line is never a click target
+      return;
+    }
     const polygon = event.target.closest ? event.target.closest('.line-overlay__poly') : null;
     pending = polygon
       ? {
@@ -490,10 +535,15 @@ function wire(root, data) {
     });
   }
 
+  // The class hides the overlay through `visibility` (style.css): OpenSeadragon
+  // rewrites the element's inline `display` on every redraw.
   function onToggle() {
-    const pressed = toggle.getAttribute('aria-pressed') === 'true';
-    toggle.setAttribute('aria-pressed', String(!pressed));
-    if (overlaySvg) overlaySvg.classList.toggle('is-hidden', pressed);
+    const shown = toggle.getAttribute('aria-pressed') !== 'true';
+    rememberOverlay(shown);
+    toggle.setAttribute('aria-pressed', String(shown));
+    toggle.textContent = overlayLabel(shown);
+    if (overlaySvg) overlaySvg.classList.toggle('is-hidden', !shown);
+    if (!shown) pending = null;
   }
   if (toggle) toggle.addEventListener('click', onToggle);
 

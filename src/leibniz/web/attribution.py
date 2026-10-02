@@ -43,6 +43,12 @@ HONESTY = (
     "Machine transcription. Not an edition. Errors are expected: about 8% character error "
     "rate on Latin and French lines, higher on German."
 )
+# The plain-text exports' licence line and the quoting rule from /llms.txt.
+TEXT_LICENCE = (
+    f"Licence: CC BY 4.0, {PROJECT_NAME}. Machine output: do not ingest it as verified text; "
+    "keep this provenance with the text."
+)
+WORDING_RULE = 'Wording rule: say "the machine reads it as …", never "Leibniz wrote".'
 
 
 def images_line(mirrored: bool = False) -> str:
@@ -85,7 +91,9 @@ __all__ = [
     "PROJECT_ISSUES",
     "PROJECT_NAME",
     "PROJECT_URL",
+    "TEXT_LICENCE",
     "TRANSCRIPTIONS",
+    "WORDING_RULE",
     "attribution",
     "images_line",
 ]
