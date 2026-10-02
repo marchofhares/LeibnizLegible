@@ -3,11 +3,27 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-02 (W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-02 (W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-02 (later): W2 — search reads "quotes" and -minus.** The query
+used to be folded before either backend saw it, and folding turns every
+quotation mark and minus sign into a space: on the live site `"deus mundus"`
+and `deus -mundus` returned exactly what `deus mundus` did (97,633 hits each),
+`AND`/`OR` were searched as the words *and*/*or*, and on FTS5 `deus -mundus`
+found precisely the pages with *mundus*. Nothing in the history, the docs, the
+issues or the PRs decided against operators; the aligner's fold simply ate
+them. Now `"…"` (also „…“, “…”, «…») matches the folded words exactly and in
+order and `-word` / `-"…"` leaves out the pages that contain them, in both
+backends, while a query without either reads exactly as before. The hint under
+the search box says how, and that exact matching misses words the machine
+misread; the no-results hint suggests dropping the quotes. On Meilisearch a
+quoted shelfmark or AA reference finds nothing yet (Open questions #21).
+545 tests, ruff clean. Live after the operator's §9 update — no index rebuild
+(Phase log W2 has the checks).
 
 **2026-10-02: W1 — two reports from a reader at the Leibniz-Edition.** "Show
 line overlay does not seem to work": it did not. OpenSeadragon writes an
@@ -343,6 +359,72 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### W2 — "quoted phrases" and -exclusions in search (2026-10-02) ✅
+
+- **Why they did nothing.** `search/normalize.py` folded the whole query with
+  the aligner's recipe (punctuation → space) before either backend saw it, so
+  quotation marks and minus signs vanished and `AND`/`OR` became words. Live
+  (Meilisearch): `deus` 10,450 hits, `deus mundus` 97,633, and `"deus mundus"`,
+  `deus -mundus`, `deus AND mundus` 97,633 as well (the top hits of the last
+  marked English *and*). On FTS5, `deus -mundus` returned exactly the pages
+  with *mundus* and `deus OR mundus` only pages that also hold the word *or*.
+  No decision against operators anywhere: the search layer was written once in
+  Phase D (`ede16e1`) and touched since only by deploy fixes, `matchingStrategy`
+  never appears, the UI said "a word or a phrase" from day one, and `llms.txt`
+  (2026-09-23) described the behaviour. `NOTES.md` A.5 ("exact-match search
+  degrades from ~5% … WER predicts search behaviour (ours 27%)") is why the
+  operators are opt-in and the hint warns.
+- **The parser** (`normalize.parse_query` → `ParsedQuery(words, phrases,
+  excluded)`) reads the raw query before folding. A quotation mark (`"` „ “ ” ‟
+  « », not single quotes: ’ is the French apostrophe) opens a phrase and the
+  next closes it; an unclosed one runs to the end. A `-` excludes only where it
+  starts a word or a phrase, so *Braunschweig-Lüneburg* and a free-standing
+  dash read as before (`-Braunschweig-Lüneburg` excludes that run). Each word
+  and phrase is folded on its own (*„Vt sit“* is the phrase *ut sit*),
+  de-duplicated, 12 clauses as before with exclusions and phrases first. A
+  query with neither operator parses to the old `query_terms` exactly
+  (asserted against the old reader over the bench's fifty queries and 2,000
+  random ones). Exclusions alone search nothing.
+- **FTS5** (`match_query`): phrases as FTS5 phrases (exact, no prefix), the
+  words as before, then `(…) NOT ("a" OR "b c")`. Every token is still quoted,
+  so typed text never reaches FTS5 as syntax (a 3,000-query hostile fuzz is in
+  the suite; FTS5's `NOT` is binary, hence no exclusion-only MATCH).
+- **Meilisearch** (`meili_query`): its native `"…"` and `-` (≥ 1.8; pinned
+  1.53.2), sent as exclusions, phrases, then the words exactly as before. The
+  order is load-bearing, measured on the real binary: Meilisearch reads only
+  the first ten terms (a phrase or an exclusion is one; an exclusion after the
+  tenth word was silently ignored) and matches the last word as a prefix
+  (`calcul -mundus` found nothing, `-mundus calcul` found *calculemus*).
+  Phrases stay mandatory under the default `matchingStrategy: last` and
+  exclusions always apply; quoted and excluded words are exact, no typos and no
+  prefix (`"deus mundos"` finds nothing against *deus mundus*; `-deus` keeps
+  pages with *des*).
+- **Snippets** mark a phrase as one run in the original text (`<mark>Calculemus,
+  inquit</mark>`), a quoted word only exactly, an excluded word never.
+- **Copy**: `search.hint` EN/DE and the static `index.html` (the operators, and
+  that exact matching misses misread words); `search.empty.hint` adds "or no
+  quotes" / "oder ohne Anführungszeichen"; `llms.txt`, the `q` description in
+  `/openapi.json`, README.
+- **Verified**: 545 tests (+9), ruff clean. Against the real Meilisearch 1.53.2
+  through `MeiliBackend`, on a synthetic 80-page early-modern corpus (u/v, ſ,
+  capitals, punctuation, line breaks): 360 phrase and phrase+exclusion queries
+  return the same pages as FTS5 and as the folded text (0 mismatches); 120
+  word+exclusion checks remove exactly the pages holding the excluded word, in
+  both backends; a phrase across a line break is found by both; 3,000 hostile
+  queries, 0 errors. Server-side p95 on a 30,000-document Zipf index: one word
+  11 ms, a phrase of two common words 5 ms, word −common word 6 ms, phrase −word
+  + two words 21 ms. The app served over the seeded store with each backend and
+  driven in headless Chromium (typed queries, the language switch): phrases,
+  „German quotes“, word order, `-word`, `-"phrase"`, `-de` alone (no hits, no
+  error), both hints in EN and DE; no console errors but the sandbox's blocked
+  GWLB thumbnails.
+- **Known gap, Meilisearch only** (Open questions #21): the live index keeps
+  titles, shelfmarks, AA references and folio labels as written — only the page
+  text is folded — and there a comma or full stop breaks a phrase and *V*/*J*
+  do not fold, so a quoted `"LH XXXV, 3, 5"` or `"AA VI,4 N. 109"` finds
+  nothing where FTS5, which folds those columns, finds the work. The
+  no-results hint says to drop the quotes.
 
 ### W1 — the overlay toggle, plain-text export, deploys visible at once (2026-10-02) ✅
 
@@ -1177,6 +1259,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Open questions
 
+21. **Fold the metadata fields in the Meilisearch index (2026-10-02).** Titles, shelfmarks, AA references and folio labels are indexed as written, so a quoted reference finds nothing (W2), and even unquoted a Roman numeral with V or J never meets its folded form: *VI* is sent as *ui* and no typo is allowed under four letters. Measured on 1.53.2: `VI` does not find a page whose only VI is in `AA VI,4 N. 109`, and `AA VI,4 N. 109` finds it only through the bare *aa*, below an unrelated page whose text has *aa*. FTS5 folds those columns. Index folded copies at the next rebuild (C4) — a rebuild drops and refills the index, so not in a routine deploy.
+20. **Multi-word queries on Meilisearch are not AND (2026-10-02).** `meili.py` sends no `matchingStrategy`, so Meilisearch's default `last` drops words from the end of the query when results run short and typo-matches the first word left: live, `deus mundus` reports 97,633 hits (at result 8,900, 98 of 100 hold neither word — French *des*) and `mundus deus` 3,775, where FTS5 requires every word. `matchingStrategy: "all"` would make the backends agree and the counts honest, at the cost of pages where a word was misread past typo tolerance — a product decision, open. Quoted phrases and exclusions hold under either strategy.
 19. **Sheet-sides registered twice (2026-09-23).** Static-JPEG works list one scan of an unfolded sheet under two folio labels; the corpus run read each twice. Run `leibniz images duplicates` over the thumbnails, publish the distinct-scan count, fold twins in the index build, and restate `pages`/`lines` on the About page.
 
 0. **Strategy review 2026-09-16 → `NOTES.md`** (accuracy levers incl. the review-queue design and the LLM-as-detector pilot; the Calculemus rescope and the missing `leibniz pack` seam; the four Academy seams; loose ends). The C3 changes live in the amended C3 prompt.
@@ -1365,6 +1449,12 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**W2 (2026-10-02), operator:** after merging, the §9 update on the VPS — code
+only: no index rebuild, no Meilisearch restart, no new dependency. Then on
+the box: `deus` and `deus mundus` report what they did (10,450 and 97,633),
+`"deus mundus"` far fewer, `deus -mundus` fewer than `deus`. Readers may see
+the old hint for up to an hour (the imported modules keep plain URLs).
 
 **W1 (2026-10-02), operator:** after merging `web-overlay-text-export`, the
 §9 update on the VPS (`deploy/README.md`), then the checks in the W1 log:

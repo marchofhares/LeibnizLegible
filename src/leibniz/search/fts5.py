@@ -5,8 +5,10 @@ documents and a **contentless** FTS5 table over the folded text (plus title,
 shelfmarks and AA references, weighted up in ``bm25``). Query tokens of three
 or more characters match as prefixes, which together with the shared folding
 gives orthography tolerance; true typo tolerance is Meilisearch's job
-(:mod:`leibniz.search.meili`). Filters (set, language, stratum, minimum
-confidence, work) are plain column predicates on ``docs``.
+(:mod:`leibniz.search.meili`). Quoted phrases are FTS5 phrases (exact words in
+order, no prefix) and exclusions go behind ``NOT``; every token is quoted, so no
+user input is ever read as FTS5 syntax. Filters (set, language, stratum,
+minimum confidence, work) are plain column predicates on ``docs``.
 """
 
 from __future__ import annotations
@@ -19,7 +21,7 @@ from pathlib import Path
 
 from leibniz.search.backend import SearchHit, SearchQuery, SearchResult
 from leibniz.search.documents import PageDoc
-from leibniz.search.normalize import fold, query_terms
+from leibniz.search.normalize import ParsedQuery, fold, parse_query
 from leibniz.search.snippet import PREFIX_MIN, make_snippet
 
 DEFAULT_INDEX_PATH = "data/search.sqlite"
@@ -69,6 +71,25 @@ def match_expression(terms: list[str]) -> str:
             continue
         parts.append(f'"{t}"*' if len(t) >= PREFIX_MIN else f'"{t}"')
     return " ".join(parts)
+
+
+def _phrase(tokens: tuple[str, ...]) -> str:
+    return '"' + " ".join(t.replace('"', "") for t in tokens) + '"'
+
+
+def match_query(query: ParsedQuery) -> str:
+    """FTS5 MATCH for a :attr:`~ParsedQuery.searchable` query: the phrases, then
+    the words as :func:`match_expression` writes them, all ANDed, minus the
+    exclusions (``(…) NOT ("a" OR "b c")``; FTS5's ``NOT`` needs something to
+    subtract from). Plain words alone give :func:`match_expression`'s string
+    unchanged."""
+    words = match_expression(list(query.words))
+    if not query.phrases and not query.excluded:
+        return words
+    positive = " ".join([*map(_phrase, query.phrases), *([words] if words else [])])
+    if not query.excluded:
+        return positive
+    return f"({positive}) NOT ({' OR '.join(map(_phrase, query.excluded))})"
 
 
 class Fts5Backend:
@@ -195,13 +216,13 @@ class Fts5Backend:
     def search(self, query: SearchQuery) -> SearchResult:
         q = query.normalized()
         t0 = time.perf_counter()
-        terms = query_terms(q.q)
+        parsed = parse_query(q.q)
         empty = SearchResult(q.q, 0, q.page, q.limit, 0, self.name, [])
-        if not terms:
+        if not parsed.searchable:
             return empty
         if str(self.path) != ":memory:" and not self.path.exists():
             return empty
-        match = match_expression(terms)
+        match = match_query(parsed)
         where, params = self._filters(q)
         conn = self._connect()
         try:
@@ -227,7 +248,7 @@ class Fts5Backend:
                 set_name=r["set_name"],
                 title=r["title"],
                 shelfmarks=json.loads(r["shelfmarks"]),
-                snippet=make_snippet(r["text"], terms),
+                snippet=make_snippet(r["text"], list(parsed.words), phrases=parsed.phrases),
                 n_lines=r["n_lines"],
                 mean_conf=r["mean_conf"],
                 lang=r["lang"],
@@ -266,4 +287,4 @@ class Fts5Backend:
         return str(self.path) == ":memory:" or self.path.exists()
 
 
-__all__ = ["DEFAULT_INDEX_PATH", "Fts5Backend", "match_expression"]
+__all__ = ["DEFAULT_INDEX_PATH", "Fts5Backend", "match_expression", "match_query"]

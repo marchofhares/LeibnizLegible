@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import random
 
 import httpx
 import pytest
@@ -10,7 +11,8 @@ import pytest
 from leibniz import db
 from leibniz.search.backend import SearchQuery
 from leibniz.search.documents import iter_page_docs
-from leibniz.search.meili import MeiliBackend, doc_id
+from leibniz.search.meili import MeiliBackend, doc_id, meili_query
+from leibniz.search.normalize import parse_query
 
 W1 = "00068642"
 W2 = "DE-611-HS-854976"
@@ -25,6 +27,7 @@ class FakeMeili:
         self.tasks = 0
         self.task_state: dict[int, dict] = {}
         self.calls: list[str] = []
+        self.searches: list[dict] = []
 
     def _task(self, status: str = "succeeded", error: dict | None = None) -> httpx.Response:
         self.tasks += 1
@@ -64,6 +67,7 @@ class FakeMeili:
         if method == "POST" and path.endswith("/search"):
             uid = path.split("/")[2]
             body = json.loads(request.content)
+            self.searches.append(body)
             q = body["q"]
             hits = [d for d in self.indexes[uid].values() if q.split()[0] in d["folded"]]
             for f in body.get("filter", []):
@@ -164,3 +168,35 @@ def test_task_failure_raises(store_path) -> None:
     )
     with pytest.raises(RuntimeError, match="boom"):
         be.rebuild([])
+
+
+def test_operators_reach_meilisearch_first(store_path, fake) -> None:
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))
+    conn.close()
+    be.search(SearchQuery(q="Calculemus inquit"))
+    be.search(SearchQuery(q='de -"la nature" „arte combinatoria“ Calculemus -grâce'))
+    assert [s["q"] for s in fake.searches] == [
+        "calculemus inquit",  # without operators: exactly as before
+        '-"la nature" -grace "arte combinatoria" de calculemus',  # exclusions, phrases, words
+    ]
+    assert be.search(SearchQuery(q="-de")).total == 0
+    assert len(fake.searches) == 2  # exclusions alone: nothing is sent
+
+
+def test_meili_query_is_well_formed() -> None:
+    """Folded words carry no quotes or minus signs, so whatever is typed, the only
+    syntax in ``q`` is the syntax :func:`meili_query` adds."""
+    rng = random.Random(1700)
+    pieces = list("abde \"“”„«»-*:(),.;'’&\\/") + ["-de", '"la', "q;"]
+    for _ in range(3000):
+        typed = "".join(rng.choice(pieces) for _ in range(rng.randint(1, 14)))
+        parsed = parse_query(typed)
+        if not parsed.searchable:
+            continue
+        q = meili_query(parsed)
+        assert q.count('"') % 2 == 0 and '""' not in q, typed
+        assert all(i == 0 or q[i - 1] == " " for i, c in enumerate(q) if c == "-"), typed
+        terms = len(parsed.excluded) + len(parsed.phrases) + len(parsed.words)
+        assert terms <= 12, typed
