@@ -6,6 +6,10 @@ Routes (all read-only; the store is opened per request, read-only):
 * ``GET /api/works/{id}``      — a work: pages, katalog records, attribution
 * ``GET /api/pages/{id}``      — a page: lines with geometry, text, confidence,
   status and provenance (SPECS §4.5), prev/next
+* ``GET /api/pages/{id}/text`` — the page's transcription as a plain-text (or
+  ``?format=tsv``) download, its provenance in a ``# `` comment header
+* ``GET /api/works/{id}/text`` — every page of a work in canvas order, streamed,
+  one ``## Folio …`` block per page
 * ``GET /api/stats``           — corpus counts for the About page
 * ``GET /manifests/{work}``    — IIIF Presentation 3 manifest (D7)
 * ``GET /annotations/{page}``  — W3C AnnotationPage with the page's lines (D7)
@@ -28,14 +32,23 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import re
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Annotated
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import (
+    FileResponse,
+    JSONResponse,
+    PlainTextResponse,
+    Response,
+    StreamingResponse,
+)
 
 from leibniz import __version__, db
 from leibniz.search.backend import SearchBackend, SearchQuery
@@ -69,16 +82,61 @@ SITE_DESCRIPTION = (
 SSR_MARK = "<!--ll:ssr-->"
 SSR_MAX_LINES = 400
 
+# The plain-text exports: ``?format=`` → media type, and the TSV variant's columns.
+TEXT_MEDIA = {"txt": "text/plain; charset=utf-8", "tsv": "text/tab-separated-values; charset=utf-8"}
+TSV_COLUMNS = ("line_id", "line_seq", "conf", "status", "text")
+# The header's last lines say how the body is laid out, for whoever parses it.
+PAGE_LAYOUT = "After the first blank line: the recognised lines in reading order, one per line."
+WORK_LAYOUT = (
+    'After the first blank line, page by page: a "## Folio <label> — <page id>" line '
+    '("## Canvas <n>" where no folio label is recorded), "# " lines naming its source image '
+    "and model, then its recognised lines in reading order, one per line."
+)
+TSV_LAYOUT = (
+    "Each recognised line is a tab-separated row (" + ", ".join(TSV_COLUMNS) + ") under the "
+    "header row that opens the body."
+)
+TextFormat = Annotated[
+    str,
+    Query(
+        alias="format",
+        pattern="^(txt|tsv)$",
+        description=(
+            "`txt` (default): one recognised line per line of text; `tsv`: tab-separated "
+            "`line_id`, `line_seq`, `conf`, `status`, `text` under a header row."
+        ),
+    ),
+]
+TEXT_RESPONSES: dict = {
+    200: {
+        "description": "UTF-8 text with a `# ` comment header (`?format=tsv`: tab-separated).",
+        "content": {"text/tab-separated-values": {"schema": {"type": "string"}}},
+    },
+    404: {"description": "No such id."},
+}
 
-def _open(db_path: str | Path) -> sqlite3.Connection:
+# The shell's own stylesheet and entry scripts get a content hash in their URL
+# (``?v=…``), so a deploy reaches returning readers at once although the proxy
+# lets browsers cache /static/* for an hour (deploy/Caddyfile).
+VERSIONED_ASSETS = ("style.css", "boot.js", "app.js")
+
+
+def _open(db_path: str | Path, *, any_thread: bool = False) -> sqlite3.Connection:
     """A read-only connection to the store (``mode=ro`` + ``query_only``): the
-    serving process can never write, whatever a bug or a request does."""
+    serving process can never write, whatever a bug or a request does.
+
+    ``any_thread`` is for a streamed response: Starlette advances a sync body
+    generator on whichever worker thread is free, one step at a time, so the
+    connection must not be pinned to the thread that opened it.
+    """
     if str(db_path) == ":memory:":
         return db.connect(db_path)
     p = Path(db_path)
     if not p.exists():
         raise HTTPException(503, f"store not found: {db_path}")
-    conn = sqlite3.connect(f"{p.resolve().as_uri()}?mode=ro", uri=True)
+    conn = sqlite3.connect(
+        f"{p.resolve().as_uri()}?mode=ro", uri=True, check_same_thread=not any_thread
+    )
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA query_only = ON")
     conn.execute("PRAGMA busy_timeout = 5000")
@@ -192,6 +250,20 @@ def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str]) -> dict:
     }
 
 
+def _with_text(lines: list[db.Line]) -> list[db.Line]:
+    """The lines a page shows, from :func:`latest_lines`: those with text."""
+    return [ln for ln in lines if ln.text]
+
+
+def _line_stats(lines: list[db.Line]) -> dict:
+    """``n_lines`` and ``mean_conf`` over a page's lines with text."""
+    confs = [ln.conf for ln in lines if ln.conf is not None]
+    return {
+        "n_lines": len(lines),
+        "mean_conf": round(sum(confs) / len(confs), 4) if confs else None,
+    }
+
+
 def _esc(text: object) -> str:
     return html.escape(str(text if text is not None else ""), quote=True)
 
@@ -237,13 +309,19 @@ def _ssr_work(work: db.Work, pages: list, katalog: list[dict], gwlb_url: str) ->
         f"{title}{' (' + marks + ')' if marks else ''}: {n:,} page images of the Leibniz "
         f"Nachlass, machine-transcribed with per-line confidence. Not an edition."
     )
+    download = (
+        f' · <a href="/api/works/{_esc(work.gwlb_object_id)}/text" download>'
+        "Download the text of this work</a>"
+        if any(p.status == "recognized" for p in pages)
+        else ""
+    )
     parts = [
         '<article class="panel ssr" id="ssr">',
         f"<h1>{_esc(title)}</h1>",
         f"<p>{_esc(marks)}</p>" if marks else "",
         f"<p>{_esc(work.set_name or '')} · {n:,} page images · "
         f'<a href="{_esc(gwlb_url)}">Original at the GWLB</a> · '
-        f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a></p>',
+        f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a>{download}</p>',
     ]
     if katalog:
         items = []
@@ -291,6 +369,9 @@ def _ssr_page(
         f"Machine transcription of {work_title}, fol. {label} ({len(texts)} lines, mean "
         f"confidence {mean}). {blurb}"
     ).strip()
+    download = (
+        f' · <a href="/api/pages/{_esc(page.id)}/text" download>Download text</a>' if texts else ""
+    )
     nav = []
     if prev_id:
         nav.append(f'<a rel="prev" href="/page/{_esc(prev_id)}">Previous page</a>')
@@ -307,7 +388,7 @@ def _ssr_page(
         f"<p>{_esc(attr.HONESTY)} Mean line confidence on this page: {_esc(mean)}.</p>"
         f'<p><a href="{_esc(gwlb_url)}">Original at the GWLB</a>'
         + (f' · <a href="{_esc(image_url)}">Page image</a>' if image_url else "")
-        + f' · <a href="/annotations/{_esc(page.id)}">Annotations (IIIF)</a></p>'
+        + f' · <a href="/annotations/{_esc(page.id)}">Annotations (IIIF)</a>{download}</p>'
         f"<nav>{' · '.join(nav)}</nav>"
         f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
         "</article>"
@@ -322,6 +403,188 @@ def _sitemap_xml(site: str, work_ids: list[str]) -> str:
         '<?xml version="1.0" encoding="UTF-8"?>'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + body + "</urlset>"
     )
+
+
+def _version_assets(shell: str, static_dir: Path) -> str:
+    """Append ``?v=`` and the first 12 hex digits of its SHA-256 to the shell's
+    reference to each of :data:`VERSIONED_ASSETS` (once, at startup).
+
+    The ES modules ``app.js`` imports keep their plain URLs, so a browser may
+    still take those from its cache for up to an hour after a deploy.
+    """
+    for name in VERSIONED_ASSETS:
+        asset = static_dir / name
+        if asset.is_file():
+            digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
+            shell = shell.replace(f'"/static/{name}"', f'"/static/{name}?v={digest}"')
+    return shell
+
+
+# ---- plain-text exports ---------------------------------------------------- #
+
+
+def _text_headers(object_id: str, fmt: str) -> dict[str, str]:
+    """The cache headers plus the download's name, ``leibniz-legible_<id>.<fmt>``.
+
+    A page id's colon becomes ``_`` there: Windows refuses ``:`` in a file name
+    (browsers rewrite it anyway; other clients would not).
+    """
+    name = re.sub(r"[^A-Za-z0-9._-]", "_", object_id)
+    disposition = f'attachment; filename="leibniz-legible_{name}.{fmt}"'
+    return {**CACHE_HEADERS, "Content-Disposition": disposition}
+
+
+def _folio(page: db.Page) -> str:
+    """``Folio 1r``, or ``Canvas 3`` where the METS records no folio label."""
+    return f"Folio {page.label}" if page.label else f"Canvas {page.seq}"
+
+
+def _why(page: db.Page) -> str:
+    """Why a page has no text, as its status says (``skipped: no_lines``)."""
+    return f"{page.status}: {page.skip_reason}" if page.skip_reason else page.status
+
+
+def _title_row(work: db.Work | None, work_id: str) -> str:
+    title = (work.title if work else None) or work_id
+    marks = [m for m in (work.shelfmarks if work else []) if m and m != title]
+    if not marks:
+        return f"Title: {title}"
+    return f"Title: {title} (shelfmark{'s' if len(marks) > 1 else ''} {'; '.join(marks)})"
+
+
+def _count_row(n_lines: int, mean_conf: float | None, where: str = "") -> str:
+    mean = f"{mean_conf:.2f}" if mean_conf is not None else "not recorded"
+    return f"Lines: {n_lines:,} recognised{where}, mean confidence {mean}"
+
+
+def _run_rows(lines: list[db.Line], runs: dict[int | None, dict | None]) -> list[str]:
+    """One ``Model: …, run …, <date> — n lines, status …`` row per recognition run
+    behind ``lines``, newest first: one run as a rule, two where a later run
+    re-read part of the page (``runs`` maps run id → :func:`_run_info`)."""
+    groups: dict[int | None, list[db.Line]] = {}
+    for ln in lines:
+        groups.setdefault(ln.run_id, []).append(ln)
+    rows = []
+    for run_id in sorted(groups, key=lambda r: -1 if r is None else r, reverse=True):
+        group = groups[run_id]
+        info = runs.get(run_id) or {}
+        model = info.get("model") or group[0].model or "not recorded"
+        when = info.get("finished_at") or info.get("started_at") or "date not recorded"
+        n = len(group)
+        rows.append(
+            f"Model: {model}, run {run_id if run_id is not None else 'not recorded'}, {when}"
+            f" — {n:,} line{'' if n == 1 else 's'}, "
+            f"status {', '.join(sorted({ln.status for ln in group}))}"
+        )
+    return rows
+
+
+def _text_rows(lines: list[db.Line], fmt: str) -> list[str]:
+    """The body: each line's text on one output line (a line break inside it,
+    and in TSV a tab, becomes a space), or its TSV row."""
+    texts = [" ".join((ln.text or "").splitlines()) for ln in lines]
+    if fmt != "tsv":
+        return texts
+    return [
+        "\t".join(
+            (
+                ln.id,
+                str(ln.line_seq),
+                "" if ln.conf is None else str(round(ln.conf, 4)),
+                ln.status,
+                text.replace("\t", " "),
+            )
+        )
+        for ln, text in zip(lines, texts, strict=True)
+    ]
+
+
+def _head(rows: list[str], fmt: str) -> str:
+    """The ``# `` comment header, the blank line, and in TSV the column row."""
+    out = "".join(f"# {row}\n" for row in rows) + "\n"
+    return out + ("\t".join(TSV_COLUMNS) + "\n" if fmt == "tsv" else "")
+
+
+def _page_text(
+    site: str,
+    page: db.Page,
+    work: db.Work | None,
+    lines: list[db.Line],
+    runs: dict[int | None, dict | None],
+    fmt: str,
+) -> str:
+    """One page's export; ``lines`` are its lines with text, as ``/api/pages`` shows them."""
+    stats = _line_stats(lines)
+    rows = [
+        f"{attr.PROJECT_NAME} — {site}",
+        f"Page: {site}/page/{page.id}",
+        _title_row(work, page.work_id),
+        f"{_folio(page)}, page id {page.id}",
+        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=page.work_id)}",
+        f"Source image: {ImageSource.source_url(page) or 'not recorded'}",
+        *_run_rows(lines, runs),
+        _count_row(stats["n_lines"], stats["mean_conf"])
+        if lines
+        else f"Lines: 0 recognised ({_why(page)})",
+        attr.HONESTY,
+        attr.TEXT_LICENCE,
+        attr.WORDING_RULE,
+        PAGE_LAYOUT,
+        *([TSV_LAYOUT] if fmt == "tsv" else []),
+    ]
+    return _head(rows, fmt) + "".join(f"{row}\n" for row in _text_rows(lines, fmt))
+
+
+def _work_text(
+    db_path: str | Path,
+    site: str,
+    work: db.Work,
+    pages: list[db.Page],
+    summaries: dict[str, tuple[int, float | None]],
+    fmt: str,
+) -> Iterator[str]:
+    """A work's export, one chunk per page in canvas order.
+
+    The header comes from the one :func:`line_summaries_by_page` query; each
+    page is then read with :func:`latest_lines` as it is sent, so a convolute
+    of thousands of pages never sits in memory. The generator opens its own
+    connection (Starlette steps it from worker threads) and closes it at the
+    end, or when the client goes away and the generator is discarded.
+    """
+    n_lines = sum(n for n, _ in summaries.values())
+    weighted = [(n, c) for n, c in summaries.values() if c is not None]
+    total = sum(n for n, _ in weighted)
+    mean = sum(n * c for n, c in weighted) / total if total else None
+    rows = [
+        f"{attr.PROJECT_NAME} — {site}",
+        f"Work: {site}/work/{work.gwlb_object_id}",
+        _title_row(work, work.gwlb_object_id),
+        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)}",
+        _count_row(n_lines, mean, f" on {len(summaries):,} of {len(pages):,} pages"),
+        attr.HONESTY,
+        attr.TEXT_LICENCE,
+        attr.WORDING_RULE,
+        WORK_LAYOUT,
+        *([TSV_LAYOUT] if fmt == "tsv" else []),
+    ]
+    yield _head(rows, fmt)
+    conn = _open(db_path, any_thread=True)
+    try:
+        runs: dict[int | None, dict | None] = {}
+        for i, page in enumerate(pages):
+            lines = _with_text(latest_lines(conn, page.id))
+            for run_id in {ln.run_id for ln in lines} - runs.keys():
+                runs[run_id] = _run_info(conn, run_id)
+            block = [f"## {_folio(page)} — {page.id}"]
+            if lines:
+                block.append(f"# Source image: {ImageSource.source_url(page) or 'not recorded'}")
+                block += [f"# {row}" for row in _run_rows(lines, runs)]
+                block += _text_rows(lines, fmt)
+            else:
+                block.append(f"# No recognised text on this page ({_why(page)}).")
+            yield ("\n" if i else "") + "".join(f"{row}\n" for row in block)
+    finally:
+        conn.close()
 
 
 def create_app(
@@ -363,6 +626,9 @@ def create_app(
     )
     state: dict = {"stats": None}
     images = ImageSource(image_base_url)
+    # The public origin the shell and the text exports cite (canonical URLs);
+    # the manifests use the requesting host instead (``base``).
+    site = (base_url or SITE_URL).rstrip("/")
 
     # Middleware. The last one added is the outermost: headers on every response,
     # then CORS (so a 429 still carries the CORS headers a browser needs to read
@@ -488,6 +754,7 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
             lines = latest_lines(conn, page_id)
+            recognised = _with_text(lines)
             run_dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
             neighbours = conn.execute(
                 "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
@@ -495,7 +762,6 @@ def create_app(
             ).fetchall()
             prev_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq - 1), None)
             next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
-            confs = [ln.conf for ln in lines if ln.conf is not None and ln.text]
             run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
             shown = images.resolve(page)  # display fields; ``page`` stays the provenance
             body = {
@@ -523,17 +789,71 @@ def create_app(
                 "annotations_url": f"/annotations/{page.id}",
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=page.work_id),
                 "run": _run_info(conn, max(run_ids) if run_ids else None),
-                "stats": {
-                    "n_lines": len([ln for ln in lines if ln.text]),
-                    "mean_conf": round(sum(confs) / len(confs), 4) if confs else None,
-                },
-                "lines": [_line_dict(ln, page, run_dates) for ln in lines if ln.text],
+                "stats": _line_stats(recognised),
+                "lines": [_line_dict(ln, page, run_dates) for ln in recognised],
                 "honesty": attr.HONESTY,
                 "attribution": attr.attribution(images.mirrored),
             }
         finally:
             conn.close()
         return JSONResponse(body, headers=CACHE_HEADERS)
+
+    # ---- plain-text exports ------------------------------------------------ #
+    # Nested under the JSON routes' prefixes: /robots.txt already admits them,
+    # and the ``str`` path convertor never matches a slash, so neither shadows
+    # /api/pages/{page_id} or /api/works/{work_id}.
+    @app.get(
+        "/api/pages/{page_id}/text",
+        summary="A page's transcription as plain text",
+        description=(
+            "The machine transcription of one page as a download: a header of `# ` lines "
+            "(page URL, work, folio, source image, model, run and run date, line count and "
+            "mean confidence, the licence and the wording rule), a blank line, then the "
+            "recognised lines in reading order — the lines `/api/pages/{page_id}` shows."
+        ),
+        response_class=PlainTextResponse,
+        responses=TEXT_RESPONSES,
+    )
+    def api_page_text(page_id: str, fmt: TextFormat = "txt") -> Response:
+        conn = _open(db_path)
+        try:
+            page = db.get_page(conn, page_id)
+            if page is None:
+                raise HTTPException(404, f"page {page_id} not found")
+            work = db.get_work(conn, page.work_id)
+            lines = _with_text(latest_lines(conn, page_id))
+            runs = {run_id: _run_info(conn, run_id) for run_id in {ln.run_id for ln in lines}}
+        finally:
+            conn.close()
+        body = _page_text(site, page, work, lines, runs, fmt)
+        return Response(body, media_type=TEXT_MEDIA[fmt], headers=_text_headers(page.id, fmt))
+
+    @app.get(
+        "/api/works/{work_id}/text",
+        summary="A work's transcription as plain text, page by page",
+        description=(
+            "Every page of a work in canvas order, streamed: the work's `# ` header, then "
+            "per page a `## Folio <label> — <page_id>` line, its source image and model, "
+            "and its recognised lines; a page without recognised text gets a one-line note."
+        ),
+        response_class=PlainTextResponse,
+        responses=TEXT_RESPONSES,
+    )
+    def api_work_text(work_id: str, fmt: TextFormat = "txt") -> StreamingResponse:
+        conn = _open(db_path)
+        try:
+            work = db.get_work(conn, work_id)
+            if work is None:
+                raise HTTPException(404, f"work {work_id} not found")
+            pages = db.get_pages(conn, work_id)
+            summaries = line_summaries_by_page(conn, work_id)
+        finally:
+            conn.close()
+        return StreamingResponse(
+            _work_text(db_path, site, work, pages, summaries, fmt),
+            media_type=TEXT_MEDIA[fmt],
+            headers=_text_headers(work.gwlb_object_id, fmt),
+        )
 
     # ---- IIIF (D7) -------------------------------------------------------- #
     @app.get("/manifests/{work_id}")
@@ -599,14 +919,15 @@ def create_app(
         # engines, answer engines and readers without JavaScript get the
         # content; app.js replaces it on boot. Every variant carries its own
         # ETag and is revalidated on every load (``no-cache``) so a deploy shows
-        # at once; /static/* may be cached by the proxy (see deploy/Caddyfile).
+        # at once; /static/* may be cached for an hour (see deploy/Caddyfile),
+        # so the shell names its stylesheet and entry scripts by content hash.
         shell = index_html.read_text(encoding="utf-8").replace(
             'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'
         )
         game_url = (calculemus_url or "").strip().rstrip("/")
         if game_url:
             shell = shell.replace("<html ", f'<html data-calculemus-url="{_esc(game_url)}" ', 1)
-        site = (base_url or SITE_URL).rstrip("/")
+        shell = _version_assets(shell, static_dir)
 
         def respond(request: Request, body: str, status: int = 200) -> Response:
             etag = f'"{hashlib.sha256(body.encode()).hexdigest()[:20]}"'

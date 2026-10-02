@@ -32,6 +32,14 @@ Everything in `index.html` is referenced by **absolute** path (`/static/…`)
 because the same document is served from nested paths like
 `/page/00068642:0007`.
 
+The proxy lets browsers cache `/static/*` for an hour (`deploy/Caddyfile`), so
+the server rewrites the shell's references to `style.css`, `boot.js` and
+`app.js` with a content hash, `/static/app.js?v=<12 hex>`, computed once at
+startup: after a deploy the shell (always revalidated) names new URLs and
+returning readers fetch the new files at once. The ES modules `app.js`
+imports (`./views/page.js`, `./i18n.js`, …) keep their plain URLs and can
+still come from a browser's cache for up to that hour.
+
 `{page_id}` contains a colon (`00068642:0007`). A colon is a legal path
 character (RFC 3986 `pchar`), so it is *not* percent-encoded — in the address
 bar or in the API call. Starlette's default `str` path convertor matches it
@@ -62,7 +70,7 @@ def spa(...): return FileResponse(STATIC_DIR / "index.html")
 | `boot.js` | one line, loaded synchronously in `<head>`: drops the `no-js` class before first paint (a file, not inline, because of the CSP — see below) |
 | `robots.txt` | served at `/robots.txt`: human pages open, `/api/`, `/manifests/`, `/annotations/` closed to crawlers (their canvases would pull every GWLB image) |
 | `app.js` | boot, i18n over the static chrome, router (`pushState` + `popstate`), link and form interception |
-| `api.js` | `search` / `work` / `page` / `stats` wrappers, `ApiError`, URL builders |
+| `api.js` | `search` / `work` / `page` / `stats` wrappers, `ApiError`, URL builders (manifests, the plain-text downloads, the GWLB record, the error report) |
 | `dom.js` | `esc()`, the snippet sanitiser, number/date formatting, confidence bands, chips and badges |
 | `i18n.js` | the whole EN + DE string table and `t()` |
 | `style.css` | design tokens, light + dark themes, every component |
@@ -99,7 +107,10 @@ For static markup in `index.html`, add `data-i18n="key"` (text content),
 `data-i18n-label`, `data-i18n-placeholder` or `data-i18n-title` (attributes);
 `app.js` applies them on boot and on every language change. The language is
 persisted in `localStorage` under `leibniz-legible.lang` and mirrored to
-`<html lang>`.
+`<html lang>`; the reader's line-overlay choice under
+`leibniz-legible.overlay` (`shown` / `hidden`; absent means shown). Every
+storage access sits in `try`/`catch`: blocked storage only means the choice
+lasts until the tab is closed.
 
 **Adding a view.** Export `async render(ctx)` from `views/<name>.js` and add it
 to `VIEWS` + `parseRoute()` in `app.js`. `ctx` carries `{ root, route, query,
@@ -155,6 +166,15 @@ Note for anyone touching the overlay: OpenSeadragon captures the pointer on its
 own container, so `click` never reaches a polygon. Selection is detected from
 `pointerdown` on the polygon plus a `pointerup` that is close enough in space
 and time — which also keeps a pan that starts on a line a pan.
+
+And: OpenSeadragon writes an inline `style.display = "block"` on the overlay
+element every time it redraws it, and an inline style beats any class rule.
+`.line-overlay.is-hidden` therefore hides with `visibility: hidden`, never
+`display: none` (which is what made "Show line overlay" do nothing until W1),
+and switches the polygons' `pointer-events` off, because `pointer-events: all`
+ignores visibility and a hidden line would still take a click. The toggle's
+label names what pressing it does ("Hide line overlay" while shown);
+`aria-pressed` carries the state.
 
 ## Testing
 

@@ -34,6 +34,12 @@ function links(data) {
   items.push(
     `<a href="${esc(api.manifestUrl(data.work_id))}">${esc(t('work.ourManifest'))}</a>`,
   );
+  // The whole work as one plain-text download, when any page has text.
+  if ((data.pages || []).some((p) => p.n_lines > 0)) {
+    items.push(
+      `<a href="${esc(api.workTextUrl(data.work_id))}" download>${esc(t('work.download'))}</a>`,
+    );
+  }
   return `<ul class="linklist">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 }
 

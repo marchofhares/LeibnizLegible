@@ -13,8 +13,10 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		-Server
 	}
-	# The viewer's static files change only on deploy (index.html itself is
-	# `no-cache` from the app, so a deploy shows within the hour).
+	# The viewer's static files change only on deploy. index.html itself is
+	# `no-cache` from the app and names style.css, boot.js and app.js by
+	# content hash (?v=…), so those show at once; the ES modules app.js
+	# imports keep plain URLs and show within the hour.
 	@static path /static/*
 	header @static Cache-Control "public, max-age=3600"
 

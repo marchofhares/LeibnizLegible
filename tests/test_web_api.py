@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
+import re
 import sqlite3
 from pathlib import Path
+from urllib.robotparser import RobotFileParser
 
 import httpx
 import pytest
+from fastapi.responses import StreamingResponse
 from fastapi.testclient import TestClient
 
 from leibniz import db
-from leibniz.search.documents import corpus_stats, iter_page_docs
+from leibniz.search.documents import corpus_stats, iter_page_docs, latest_lines
 from leibniz.search.fts5 import Fts5Backend
 from leibniz.web import api
+from leibniz.web import attribution as attr
 from leibniz.web.api import INDEX_ROUTES, STATIC_DIR, create_app
 
 W1 = "00068642"
@@ -236,7 +241,8 @@ def test_real_static_dir_serves_shell_boot_script_and_robots(store_path, tmp_pat
     c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
     r = c.get("/")
     assert r.status_code == 200 and r.headers["Cache-Control"] == "no-cache"
-    assert '<script src="/static/boot.js"></script>' in r.text and "<script>" not in r.text
+    assert re.search(r'<script src="/static/boot\.js\?v=[0-9a-f]{12}"></script>', r.text)
+    assert "<script>" not in r.text
     assert "no-js" in c.get("/static/boot.js").text
     robots = c.get("/robots.txt")
     assert robots.status_code == 200 and robots.headers["content-type"].startswith("text/plain")
@@ -295,3 +301,251 @@ def test_shell_names_the_game_only_when_switched_on(store_path, tmp_path) -> Non
     )
     for route in ("/", "/about"):
         assert f'data-calculemus-url="{game}"' in on.get(route).text  # trailing slash stripped
+
+
+# ---- plain-text exports ----------------------------------------------------- #
+
+
+def _texts(store_path: Path, page_id: str) -> list[str]:
+    """What /api/pages shows for a page: the latest run per line, lines with text."""
+    conn = db.connect(store_path)
+    try:
+        return [ln.text for ln in latest_lines(conn, page_id) if ln.text]
+    finally:
+        conn.close()
+
+
+def _split(text: str) -> tuple[list[str], list[str]]:
+    """(header lines, body lines) of an export: the header ends at the first blank line."""
+    head, _, body = text.partition("\n\n")
+    return head.split("\n"), body.splitlines()
+
+
+def test_page_text_export(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get(f"/api/pages/{W1}:0001/text")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "text/plain; charset=utf-8"
+    # the id's colon is not a file-name character everywhere (Windows)
+    assert r.headers["content-disposition"] == (
+        'attachment; filename="leibniz-legible_00068642_0001.txt"'
+    )
+    assert r.headers["cache-control"] == api.CACHE_HEADERS["Cache-Control"]
+    head, body = _split(r.text)
+    assert all(row.startswith("# ") for row in head)
+    # the header, in the documented order
+    expected = [
+        "# Leibniz Legible — https://leibnizlegible.com",
+        f"# Page: https://leibnizlegible.com/page/{W1}:0001",
+        "# Title: LH 4,6,18 (shelfmark LH IV, 6, 18)",
+        f"# Folio 1r, page id {W1}:0001",
+        f"# Original at the GWLB: https://digitale-sammlungen.gwlb.de/resolve?id={W1}",
+        f"# Source image: https://digitale-sammlungen.gwlb.de/iiif/{W1}/ptif/1.ptif",
+        "# Model: leibniz-htr-v2@v2, run 3",  # the re-read line: the later run first
+        "# Model: FoNDUE-GD_v2_ft_Leibniz@v1, run 2",
+        "# Lines: 3 recognised, mean confidence 0.74",
+        f"# {attr.HONESTY}",
+        f"# {attr.TEXT_LICENCE}",
+        f"# {attr.WORDING_RULE}",
+    ]
+    at = [next(i for i, row in enumerate(head) if row.startswith(e)) for e in expected]
+    assert at == sorted(at)
+    assert "— 1 line, status machine" in head[at[6]] and "— 2 lines" in head[at[7]]
+    assert 'say "the machine reads it as …", never "Leibniz wrote"' in r.text
+    # the body is exactly what /api/pages shows, in reading order
+    assert body == _texts(store_path, f"{W1}:0001")
+    assert body == [ln["text"] for ln in c.get(f"/api/pages/{W1}:0001").json()["lines"]]
+    assert body[0] == "Calculemus inquit Leibnitius."  # the later run's reading
+
+
+def test_page_text_export_tsv(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get(f"/api/pages/{W1}:0001/text", params={"format": "tsv"})
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "text/tab-separated-values; charset=utf-8"
+    assert r.headers["content-disposition"].endswith('filename="leibniz-legible_00068642_0001.tsv"')
+    head, body = _split(r.text)
+    txt_head, _ = _split(c.get(f"/api/pages/{W1}:0001/text").text)
+    assert head[: len(txt_head)] == txt_head  # the same header, plus the column note
+    assert body[0].split("\t") == ["line_id", "line_seq", "conf", "status", "text"]
+    rows = [row.split("\t") for row in body[1:]]
+    assert all(len(row) == 5 for row in rows)
+    assert [row[0] for row in rows] == [f"{W1}:0001:000", f"{W1}:0001:001", f"{W1}:0001:002"]
+    assert [row[1] for row in rows] == ["0", "1", "2"]
+    assert [row[2] for row in rows] == ["0.95", "0.72", "0.55"]
+    assert {row[3] for row in rows} == {"machine"}
+    assert [row[4] for row in rows] == _texts(store_path, f"{W1}:0001")
+
+
+def test_page_text_export_of_a_page_without_text(store_path, tmp_path) -> None:
+    r = _client(store_path, tmp_path).get(f"/api/pages/{W1}:0003/text")
+    head, body = _split(r.text)
+    assert r.status_code == 200 and body == []
+    assert "# Lines: 0 recognised (skipped: no_lines)" in head
+    assert not any(row.startswith("# Model:") for row in head)
+
+
+def test_text_export_keeps_one_output_line_per_line(store_path, tmp_path) -> None:
+    conn = db.connect(store_path)
+    conn.execute(
+        "UPDATE lines SET text = ? WHERE page_id = ? AND line_seq = 1",
+        ("ab\tcd\nef", f"{W2}:0001"),
+    )
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path)
+    _, body = _split(c.get(f"/api/pages/{W2}:0001/text").text)
+    assert body == ["La Monadologie et les principes", "ab\tcd ef"]
+    _, rows = _split(c.get(f"/api/pages/{W2}:0001/text", params={"format": "tsv"}).text)
+    assert rows[2].split("\t")[1:] == ["1", "0.86", "machine", "ab cd ef"]
+
+
+def test_work_text_export(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get(f"/api/works/{W1}/text")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "text/plain; charset=utf-8"
+    assert r.headers["content-disposition"] == 'attachment; filename="leibniz-legible_00068642.txt"'
+    assert "content-length" not in r.headers  # streamed
+    head, body = _split(r.text)
+    assert f"# Work: https://leibnizlegible.com/work/{W1}" in head
+    assert "# Lines: 5 recognised on 2 of 3 pages, mean confidence 0.78" in head
+    for line in (attr.HONESTY, attr.TEXT_LICENCE, attr.WORDING_RULE):
+        assert f"# {line}" in head
+    # one heading per page, in canvas order
+    headings = [row for row in body if row.startswith("## ")]
+    assert headings == [
+        f"## Folio 1r — {W1}:0001",
+        f"## Folio 1v — {W1}:0002",
+        f"## Folio 2r — {W1}:0003",
+    ]
+    blocks = {}
+    for row in body:
+        if row.startswith("## "):
+            blocks[row.rsplit(" — ", 1)[1]] = current = []
+        elif row:
+            current.append(row)
+    for pid in (f"{W1}:0001", f"{W1}:0002"):
+        assert [row for row in blocks[pid] if not row.startswith("# ")] == _texts(store_path, pid)
+        assert blocks[pid][0].startswith("# Source image: https://digitale-sammlungen.gwlb.de/")
+    assert blocks[f"{W1}:0001"][1].startswith("# Model: leibniz-htr-v2@v2, run 3")
+    # a page without recognised text is a one-line note
+    assert blocks[f"{W1}:0003"] == ["# No recognised text on this page (skipped: no_lines)."]
+    # a page with no folio label is named by its canvas
+    other = c.get(f"/api/works/{W2}/text", params={"format": "tsv"})
+    assert other.headers["content-type"] == "text/tab-separated-values; charset=utf-8"
+    _, rows = _split(other.text)
+    assert rows[0] == "\t".join(api.TSV_COLUMNS) and f"## Canvas 1 — {W2}:0001" in rows
+    data = [row.split("\t") for row in rows[1:] if not row.startswith("#")]
+    assert [row[4] for row in data] == _texts(store_path, f"{W2}:0001")
+
+
+def test_work_text_export_streams_page_by_page(store_path, monkeypatch) -> None:
+    read: list[str] = []
+
+    def counting(conn, page_id):
+        read.append(page_id)
+        return latest_lines(conn, page_id)
+
+    monkeypatch.setattr(api, "latest_lines", counting)
+    conn = db.connect(store_path)
+    work, pages = db.get_work(conn, W1), db.get_pages(conn, W1)
+    summaries = api.line_summaries_by_page(conn, W1)
+    conn.close()
+    chunks = api._work_text(store_path, api.SITE_URL, work, pages, summaries, "txt")
+    assert next(chunks).startswith("# Leibniz Legible") and read == []  # header before any page
+    rest = list(chunks)
+    assert len(rest) == len(pages) and read == [p.id for p in pages]
+    assert rest[0].startswith(f"## Folio 1r — {W1}:0001") and rest[1].startswith("\n## Folio 1v")
+    # the route hands that generator to a streaming response
+    app = create_app(store_path, search=None, static_dir=None)
+    route = next(r for r in app.routes if getattr(r, "path", "") == "/api/works/{work_id}/text")
+    assert isinstance(route.endpoint(work_id=W1, fmt="txt"), StreamingResponse)
+
+
+def test_text_exports_404_and_formats(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    assert c.get("/api/pages/nope:0001/text").status_code == 404
+    assert c.get("/api/works/nope/text").status_code == 404
+    assert c.get("/api/works/nope/text").json() == {"detail": "work nope not found"}
+    assert c.get(f"/api/pages/{W1}:0001/text", params={"format": "xml"}).status_code == 422
+    # the JSON routes the exports nest under are not shadowed
+    assert c.get(f"/api/pages/{W1}:0001").headers["content-type"] == "application/json"
+    assert c.get(f"/api/works/{W1}").json()["work_id"] == W1
+
+
+def test_text_exports_are_documented_and_crawlable(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    spec = c.get("/openapi.json").json()["paths"]
+    for path in ("/api/pages/{page_id}/text", "/api/works/{work_id}/text"):
+        get = spec[path]["get"]
+        assert get["summary"] and "format" in [p["name"] for p in get["parameters"]]
+        assert {"text/plain", "text/tab-separated-values"} <= set(
+            get["responses"]["200"]["content"]
+        )
+        assert "404" in get["responses"]
+    robots = RobotFileParser()
+    robots.parse(c.get("/robots.txt").text.splitlines())
+    for url in (f"/api/pages/{W1}:0001/text", f"/api/works/{W1}/text"):
+        assert robots.can_fetch("*", f"https://leibnizlegible.com{url}")
+    assert not robots.can_fetch("*", f"https://leibnizlegible.com/manifests/{W1}")
+    llms = c.get("/llms.txt").text
+    assert "/api/pages/{page_id}/text" in llms and "/api/works/{work_id}/text" in llms
+
+
+def test_server_rendered_pages_link_the_text_exports(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    page = c.get(f"/page/{W1}:0001").text
+    assert f'<a href="/api/pages/{W1}:0001/text" download>Download text</a>' in page
+    skipped = c.get(f"/page/{W1}:0003").text  # nothing to download
+    assert f"/api/pages/{W1}:0003/text" not in skipped and "Download text" not in skipped
+    work = c.get(f"/work/{W1}").text
+    assert f'<a href="/api/works/{W1}/text" download>Download the text of this work</a>' in work
+
+
+# ---- asset versioning --------------------------------------------------------- #
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+
+
+def test_shell_names_its_assets_by_content_hash(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    for route in ("/", "/about", f"/work/{W1}", f"/page/{W1}:0001"):
+        text = c.get(route).text
+        for name in api.VERSIONED_ASSETS:
+            assert f'"/static/{name}?v={_digest(STATIC_DIR / name)}"' in text, (route, name)
+            assert f'"/static/{name}"' not in text
+    versioned = f"/static/style.css?v={_digest(STATIC_DIR / 'style.css')}"
+    assert c.get(versioned).text == (STATIC_DIR / "style.css").read_text(encoding="utf-8")
+
+
+def test_asset_versions_follow_the_file_content(store_path, tmp_path) -> None:
+    static = tmp_path / "static"
+    static.mkdir()
+    (static / "index.html").write_text(
+        '<!doctype html><html lang="en"><title>Leibniz Legible</title>'
+        '<link rel="stylesheet" href="/static/style.css" />'
+        '<script src="/static/boot.js"></script>'
+        '<script type="module" src="/static/app.js"></script></html>',
+        encoding="utf-8",
+    )
+    for name in api.VERSIONED_ASSETS:
+        (static / name).write_text(f"/* {name} v1 */", encoding="utf-8")
+
+    def versions(client: TestClient) -> dict[str, str]:
+        found = re.findall(
+            r'/static/(style\.css|boot\.js|app\.js)\?v=([0-9a-f]{12})"', client.get("/").text
+        )
+        return dict(found)
+
+    before = TestClient(create_app(store_path, search=None, static_dir=static))
+    first = versions(before)
+    assert first == {name: _digest(static / name) for name in api.VERSIONED_ASSETS}
+    (static / "style.css").write_text("/* style.css v2 */", encoding="utf-8")
+    assert versions(before) == first  # computed once, at startup
+    after = versions(TestClient(create_app(store_path, search=None, static_dir=static)))
+    assert after["style.css"] != first["style.css"]
+    assert after["style.css"] == _digest(static / "style.css")
+    assert after["boot.js"] == first["boot.js"] and after["app.js"] == first["app.js"]

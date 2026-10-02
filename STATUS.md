@@ -3,11 +3,27 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-09-27 (room for Calculemus on the host, flagged off; earlier: 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-02 (W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-02: W1 — two reports from a reader at the Leibniz-Edition.** "Show
+line overlay does not seem to work": it did not. OpenSeadragon writes an
+inline `display: block` on the overlay element at every redraw, an inline
+style beats a class rule, so `.line-overlay.is-hidden { display: none }` never
+won — the button flipped `aria-pressed` and the class while the polygons stayed
+on screen. Fixed (hide by `visibility`, hidden polygons take no clicks, the
+label says what pressing does, the choice is remembered per browser) and
+verified in Chromium on the live page before and the fixed viewer after. "An
+option to export the transcription of each folio": `GET /api/pages/{id}/text`
+and `GET /api/works/{id}/text` (plain text, `?format=tsv`, a `# ` provenance
+header; a work streamed page by page under `## Folio …` lines), linked from
+the page and work views and their server-rendered fallbacks. And the shell
+now names `style.css`, `boot.js`, `app.js` by content hash, so a deploy
+reaches returning readers at once. 536 tests, ruff clean. Live after the
+operator's §9 update (Phase log W1 has the checks).
 
 **2026-09-23 (later): discoverability, About page, and a data caveat.** The
 viewer shell now carries a favicon set, a web manifest, share metadata
@@ -327,6 +343,109 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### W1 — the overlay toggle, plain-text export, deploys visible at once (2026-10-02) ✅
+
+From a reader's report (Leibniz-Edition): the overlay button did nothing, and
+could each folio's transcription be exported?
+
+- **The toggle, root cause.** `views/page.js` attaches the line SVG with
+  `viewer.addOverlay`; OpenSeadragon 5.0.1's `Overlay.drawHTML` sets
+  `element.style.display = "block"` on every redraw, and that inline style
+  beat `.line-overlay.is-hidden { display: none }`. Reproduced on the live
+  site (`/page/00068221:0043`, headless Chromium): after a click
+  `aria-pressed="false"` and the class were set, computed `display` stayed
+  `block`, the polygon's `getBoundingClientRect()` stayed 16×9 px. A second
+  trap the trial of `visibility: hidden` alone exposed: the polygons carry
+  `pointer-events: all`, which ignores visibility, so an invisible line still
+  took the click (`elementFromPoint` at its centre returned the polygon).
+- **The fix.** `style.css` hides with `visibility: hidden` and sets the hidden
+  polygons' `pointer-events: none` (page.js also drops a gesture that starts
+  on a hidden overlay); a line chosen in the panel still zooms the image and
+  keeps its polygon's highlight for when the overlay returns. The label says
+  what pressing does — "Hide line overlay" / "Show line overlay", DE
+  "Zeilenraster ausblenden" / "einblenden" (`page.overlay.hide|show`; the old
+  `page.overlay.toggle` key is gone) — and `aria-pressed` keeps the state, as
+  asked. (The ARIA practices prefer a toggle whose label never changes; if a
+  screen-reader user finds "Hide line overlay, pressed" confusing, drop
+  `aria-pressed` and let the label carry the state.) The choice is remembered
+  per browser in `localStorage['leibniz-legible.overlay']` (`shown`/`hidden`,
+  absent = shown), every access in try/catch; with storage blocked it lasts
+  for the tab.
+- **Plain-text export.** `GET /api/pages/{page_id}/text` and `GET
+  /api/works/{work_id}/text`, `text/plain; charset=utf-8` (`?format=tsv`:
+  `text/tab-separated-values`, columns `line_id, line_seq, conf, status,
+  text` under a header row), `Content-Disposition: attachment;
+  filename="leibniz-legible_<id>.txt"` (the page id's colon as `_`, see
+  Divergences), `CACHE_HEADERS`, 404 like the JSON routes, in the OpenAPI
+  schema with summaries. Header lines start with `# `: project and URL, the
+  page or work URL, title and shelfmark(s), folio and page id, the GWLB
+  original, the source image URI, model · run · run date per recognition run
+  behind the lines (a page partly re-read by a later run lists both, with
+  line counts), line count and mean confidence, `attr.HONESTY`,
+  `attr.TEXT_LICENCE`, `attr.WORDING_RULE`, and a line saying how the body is
+  laid out. Then a blank line and the lines `latest_lines` gives, with text,
+  exactly as `/api/pages` shows them (one helper, `_with_text`, now serves
+  both; a line break inside a text becomes a space so one output line stays
+  one line). The work export is a `StreamingResponse` over a generator: the
+  header from the one `line_summaries_by_page` query, then per page in canvas
+  order `## Folio <label> — <page_id>` (`## Canvas <n>` where no label is
+  recorded), its source image and model as `# ` lines, its lines; a page
+  without text is a one-line note (`# No recognised text on this page
+  (skipped: no_lines).`). The generator opens its own read-only connection
+  (`_open(..., any_thread=True)`: Starlette steps a sync body iterator on
+  whatever worker thread is free) and closes it at the end or when the client
+  goes away. Nested under `/api/pages/` and `/api/works/`, so `robots.txt`
+  already admits them and the JSON routes are not shadowed (the `str`
+  convertor never matches a slash). Links: "Download text" / "Text
+  herunterladen" in the page header's link list, "Download the text of this
+  work" / "Text dieses Werks herunterladen" in the work view's links (both
+  only when there is text; `api.pageTextUrl` / `api.workTextUrl`), and the
+  same links in `_ssr_page` / `_ssr_work`. Documented in `llms.txt` (machine
+  access) and the README.
+- **Deploys visible at once.** `create_app` rewrites the shell's
+  `/static/style.css`, `/static/boot.js` and `/static/app.js` references to
+  `?v=<first 12 hex of the file's SHA-256>`, computed once at startup (a
+  restart picks up new files). **Not versioned: the ES modules `app.js`
+  imports** (`views/*.js`, `i18n.js`, `api.js`, `dom.js`) — Caddy lets
+  browsers cache `/static/*` for an hour, so a change to those can still lag
+  up to an hour for a returning reader. For this deploy that means the CSS
+  half of the overlay fix lands at once (the old page.js toggles the class,
+  so hiding works) while the new labels and download links can take the
+  hour. Doing better would mean the server stamping an import map, or
+  versioned import specifiers — not done.
+- **Runbook fix.** `deploy/README.md` §9's by-hand update ran
+  `git -C /opt/leibniz-legible pull` as root, which git refuses in the
+  leibniz-owned checkout ("dubious ownership" — the reason `install.sh` runs
+  git and uv as the service user); it now does the same as `install.sh`.
+- **Verified.** Tests +11 (536 with the `gt` and `release` extras; without
+  `gt` the six Pillow tests error on import, as before this change), ruff
+  clean. Headless Chromium against the live site (the bug reproduced; the new
+  rule injected with `addStyleTag`: polygons `visibility: hidden` after a
+  click and the hit test falls through to the canvas, `visible` again after
+  the second), then 26 checks of the new viewer against the app on the
+  fixture store (labels EN/DE, `aria-pressed`, the stored choice across
+  in-app navigation and reload and with storage blocked, no selection through
+  a hidden line, panel selection while hidden, both downloads and their file
+  names, no link on a skipped page, versioned asset URLs, no console errors,
+  no CSP violations) and axe-core: 0 violations (page with the overlay shown
+  and hidden, EN and DE; work view).
+- **Playwright recipe** (re-run after deploying). In a scratch directory:
+  `npm init -y && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install playwright`.
+  On the operator's machine `npx playwright install chromium` and plain
+  `chromium.launch()`; in a Claude Code cloud container launch
+  `executablePath: '/opt/pw-browsers/chromium'`, `proxy: { server:
+  process.env.HTTPS_PROXY }`, and — not `ignoreHTTPSErrors` — pin the egress
+  proxy's CA: `awk '/BEGIN CERTIFICATE/{n++} n{print > sprintf("c%03d.pem",
+  n)}' /root/.ccr/ca-bundle.crt; for f in c*.pem; do openssl x509 -in $f
+  -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256
+  -binary | base64; done | paste -sd,` → `args:
+  ['--ignore-certificate-errors-spki-list=<that list>']`. Then: open
+  `https://leibnizlegible.com/page/00068221:0043`, wait for
+  `.line-overlay__poly`, click `#overlay-toggle`, read the polygon's computed
+  `visibility` and the button's text. Today: `visible | Show line overlay`
+  (the bug); after the deploy: `hidden | Show line overlay`, and a second
+  click gives `visible | Hide line overlay`.
 
 ### D — a sibling app on the host: Calculemus, flagged off (2026-09-27) ✅
 
@@ -1010,7 +1129,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **475** |
+| Tests passing | **536** (2026-10-02, W1; with the `gt` + `release` extras) |
 | **Phase D (2026-09-16)** | search index (FTS5/Meili) · API · IIIF v3 + annotations · viewer (EN/DE, axe-clean) · Parquet exports + cards |
 | Reports on Zenodo | statement 22782813 · census 22782815 · PHILIUMM repro 22782817 · retro-aligned GT 22782819 |
 | **C1 corpus run (2026-09-11)** | **COMPLETE: 236,210/236,795 pages recognised (99.75%) · 13,508,625 lines** |
@@ -1166,6 +1285,16 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-02 — W1 text export, two departures from the prompt.** (1) The
+  download name is `leibniz-legible_<id>.txt` with the page id's colon as `_`
+  (`leibniz-legible_00068221_0043.txt`): Windows refuses `:` in a file name;
+  browsers would rewrite it anyway, curl and other clients would not. The id
+  itself, colon included, is in the file's header. (2) The work export names
+  the source image and the model/run/date per page, under each `## Folio`
+  heading, rather than in the work's header: every page has its own image,
+  and the corpus run's batches give neighbouring pages different run ids. The
+  TSV variant is served as `text/tab-separated-values`, the plain variant as
+  `text/plain`.
 - **2026-09-30 — `tools/` introduced for operator-run helper scripts.** Not in
   the SPECS §4 package layout; it holds shell scripts the operator runs on the
   desktop that holds `data/`, never pipeline code. First entry:
@@ -1236,6 +1365,12 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**W1 (2026-10-02), operator:** after merging `web-overlay-text-export`, the
+§9 update on the VPS (`deploy/README.md`), then the checks in the W1 log:
+both text endpoints answer `200` with a `# ` header, and the overlay
+one-liner prints `hidden | Show line overlay`. Optionally tell the reader at
+the Leibniz-Edition that both reports are answered.
 
 **Phase D is built on v1 and deployable (2026-09-16); the operator runs the
 runbook.** `deploy/README.md`: `deploy/prepare-store.sh` on the desktop,
