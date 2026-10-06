@@ -14,6 +14,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.testclient import TestClient
 
 from leibniz import db
+from leibniz.catalog import crosswalk
 from leibniz.search.documents import corpus_stats, iter_page_docs, latest_lines
 from leibniz.search.fts5 import Fts5Backend
 from leibniz.web import api
@@ -679,6 +680,18 @@ def test_work_page_links_back_into_the_browse_index(store_path, tmp_path) -> Non
     )
     letters = c.get(f"/work/{W2}").text
     assert '<a href="/browse#lbr">Briefwechsel (LBr)</a>' in letters
+
+
+def test_viewer_has_words_for_every_crosswalk_method() -> None:
+    """A record's link to its work is shown in words: "Link: gwlb_link" read
+    like a placeholder nobody had filled in."""
+    source = Path(crosswalk.__file__).read_text(encoding="utf-8")
+    methods = set(re.findall(r'CrosswalkMatch\([^)]*?"([a-z_]+)"', source))
+    assert methods == {"gwlb_link", "shelfmark"}  # a new method needs its words below
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for method in methods:
+        assert strings.count(f"'work.katalog.match.{method}':") == 2, method  # EN and DE
+    assert strings.count("'work.katalog.match':") == 2  # the fallback, by name
 
 
 # ---- asset versioning --------------------------------------------------------- #

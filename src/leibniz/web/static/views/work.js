@@ -56,6 +56,18 @@ function links(data) {
   return `<ul class="linklist">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 }
 
+/**
+ * How a catalogue record came to be linked to this work, in words: the
+ * crosswalk's method (`gwlb_link`, `shelfmark`) is an identifier, not a label.
+ * A method the string table has no words for is shown by name.
+ */
+function matchLine(record) {
+  const vars = { method: record.match_method || '—', conf: conf(record.match_conf) };
+  const worded = `work.katalog.match.${record.match_method}`;
+  const text = t(worded, vars);
+  return text === worded ? t('work.katalog.match', vars) : text;
+}
+
 function katalogRecord(record) {
   const rows = [];
   if (record.incipit) rows.push([t('work.katalog.incipit'), esc(record.incipit)]);
@@ -78,12 +90,7 @@ function katalogRecord(record) {
 
   const match =
     record.match_method || typeof record.match_conf === 'number'
-      ? `<p class="katalog__match muted">${esc(
-          t('work.katalog.match', {
-            method: record.match_method || '—',
-            conf: conf(record.match_conf),
-          }),
-        )}</p>`
+      ? `<p class="katalog__match muted">${esc(matchLine(record))}</p>`
       : '';
 
   const link = record.url

@@ -23,8 +23,13 @@ now loads the modules from `/static/m/<build>/`, where `<build>` hashes every
 module; their relative imports resolve under the same prefix, so a browser
 gets one consistent set. Reproduced before the fix and healed after it in one
 browser behind a proxy that caches as Caddy does (8 checks); every view and
-the 60 browse checks hold on the corpus store; 570 tests, ruff clean. Live
-after the operator's §9 update of `web-versioned-modules`.
+the 60 browse checks hold on the corpus store. On the same branch, a second
+report from the operator's look round: each catalogue record on a work page
+ended "Link: gwlb_link, confidence 1.00" — the crosswalk's method name shown
+as if it were a label. It now reads "The catalogue record itself links to
+this scan · confidence 1.00" (or "Linked by matching shelfmarks · confidence
+0.70"), in both languages. 571 tests, ruff clean. Live after the operator's
+§9 update of `web-versioned-modules`.
 
 **2026-10-06: W3 — a browse page: the Nachlass by shelfmark family, section
 and convolute.** The same reader at the Leibniz-Edition asked for "an index of
@@ -442,7 +447,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   build path. → the fix with only `i18n.js` changed, `app.js` untouched: the
   new label at once, under a new build path. A reader away during W3 (before
   W3 → the fix): healthy. Control: a fresh browser on W3 is healthy.
-- **Verified.** 570 tests (+1), ruff clean: the shell names one module build
+- **Verified.** 570 tests (+1; 571 with the link wording below), ruff clean: the shell names one module build
   on every route; every module is served under it and imports only by
   relative path (the invariant the prefix rests on); the build moves when an
   imported module changes — the fault's shape — and stays put for the
@@ -452,6 +457,27 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   `i18n.js`, not two copies), and the 60 browse checks pass unchanged.
 - **For every later deploy.** Check as a returning reader too: open the site,
   deploy, reload in the same browser without a hard reload.
+- **Also on this branch: a record's link, in words.** The operator, looking
+  round the new index, opened LH 40 (`/work/00068539`): each of its 19
+  catalogue records ended "Link: gwlb_link, confidence 1.00", which read
+  like an unfilled placeholder. It was the crosswalk's `match_method` put
+  into the sentence as it is stored (so since Phase D, `ede16e1`; not new
+  with W3). The store holds two methods,
+  `gwlb_link` (17,557 links, the catalogue record's own link to the scan)
+  and `shelfmark` (89, matched by normalised shelfmark). `views/work.js` now
+  words each (`work.katalog.match.<method>`, EN and DE: "The catalogue
+  record itself links to this scan · confidence 1.00", "Linked by matching
+  shelfmarks · confidence 0.70"; "by hand" is ready for a manual link), and
+  a method without words still shows by name rather than vanish. The API
+  keeps `match_method` as it is. A test ties the words to the methods
+  `catalog/crosswalk.py` writes (571 tests); checked in Chromium on LH 40,
+  on a work linked both ways (`00068032`), in German, and with a made-up
+  method. **Seen in the same section and not changed:** the row
+  "Correspondent" shows the record's sender with the catalogue's link text,
+  so a letter *from* Leibniz reads "Correspondent: Leibniz (GND)"
+  (`_katalog_for_work` passes `absender` through; sender and addressee, tags
+  stripped as `browse.correspondent_names` does, would be right); and a
+  skipped page shows its reason as stored ("skipped (no_lines)").
 - **Docs.** `deploy/README.md` §9, README, and the comment in
   `deploy/Caddyfile` (the live Caddyfile is edited by hand and keeps its old
   comment; nothing needs doing on the box).
@@ -1477,7 +1503,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **570** (2026-10-06, W3 fix; with the `gt` + `release` extras; 569 after W3, 545 after W2) |
+| Tests passing | **571** (2026-10-06, W3 fix; with the `gt` + `release` extras; 569 after W3, 545 after W2) |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -1751,7 +1777,9 @@ update on the VPS — code only. Then, over HTTP: the shell of any page names
 `/static/m/<12 hex digits>/app.js` and no `"/static/app.js`; that address and
 `/static/m/<the same>/i18n.js` answer 200; `/browse` and `/api/works` answer
 as before. In the browser you used earlier that day, with no hard reload:
-`/browse` works and the nav reads "Browse".
+`/browse` works and the nav reads "Browse", and on `/work/00068539` each
+catalogue record ends "The catalogue record itself links to this scan ·
+confidence 1.00".
 
 **W3 (2026-10-06), operator:** ✅ merged (#38) and live the same day; the
 checks below passed. The steps were: merge `web-browse-index`, then the §9 update on
