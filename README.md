@@ -116,9 +116,10 @@ and page list, or the machine text — so search engines, answer engines and
 readers without JavaScript see the content; the app replaces it on boot.
 `/sitemap.xml` lists the index and every work, `/llms.txt` describes the
 API for agents, `/robots.txt` opens the JSON routes and keeps blind crawlers off
-the IIIF manifests. The shell names its stylesheet and entry scripts by content
-hash (`/static/app.js?v=…`, computed at startup), so a deploy reaches returning
-readers at once.
+the IIIF manifests. The shell names what it loads by content, computed at
+startup — the stylesheet and boot script by hash (`?v=…`), the ES modules as
+one set under `/static/m/<build>/` — so a deploy reaches returning readers at
+once, and never as a mix of new modules and cached old ones.
 
 ```bash
 uv sync --extra web                        # fastapi + uvicorn

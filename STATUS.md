@@ -3,11 +3,28 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-06 (W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-06 (later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-06 (later): W3 fix — a deploy no longer mixes new and old viewer
+modules.** Minutes after W3 went live the operator opened `/browse` and saw
+"nav.browse" in the nav, "browse.heading" in the tab title, and "Something
+went wrong: api.works is not a function". Cause: the proxy lets browsers keep
+`/static/*` for an hour and the shell named only `app.js` by content hash, so
+a returning reader ran the new `app.js` and `views/browse.js` against the
+`i18n.js` and `api.js` cached before the deploy. A hard reload cleared it and
+every such browser heals within the hour, but any deploy that changes what
+one module asks of another would do it again (W1 had recorded the imported
+modules as "not versioned" and expected a lag, not a broken page). The shell
+now loads the modules from `/static/m/<build>/`, where `<build>` hashes every
+module; their relative imports resolve under the same prefix, so a browser
+gets one consistent set. Reproduced before the fix and healed after it in one
+browser behind a proxy that caches as Caddy does (8 checks); every view and
+the 60 browse checks hold on the corpus store; 570 tests, ruff clean. Live
+after the operator's §9 update of `web-versioned-modules`.
 
 **2026-10-06: W3 — a browse page: the Nachlass by shelfmark family, section
 and convolute.** The same reader at the Leibniz-Edition asked for "an index of
@@ -29,9 +46,11 @@ somebody else's (LBr. 57, Johann Bernoulli's, would have read "Mencke, O.").
 The LBr numbers run alphabetically by correspondent, so a name is shown only
 where it fits that order — a missing name is honest, a wrong one is not.
 569 tests, ruff clean; verified against the corpus store on the desktop (over
-HTTP, then 60 checks in Chromium, axe 0 violations). Live after the operator's
-§9 update (Phase log W3 has the checks). The §9 updates of W1 and W2 were
-found live on 2026-10-06, before this phase began (all three checks passed).
+HTTP, then 60 checks in Chromium, axe 0 violations). **Live since 2026-10-06:**
+merged as #38, the §9 update run the same evening, eight HTTP checks and the
+same 60 browser checks passed against the live site, whose `/api/works` gives
+the numbers above. The §9 updates of W1 and W2 were found live that day,
+before this phase began (all three checks passed).
 
 **2026-10-02 (later): W2 — search reads "quotes" and -minus.** The query
 used to be folded before either backend saw it, and folding turns every
@@ -384,6 +403,59 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
+### W3 fix — the viewer's modules as one versioned set (2026-10-06) ✅
+
+- **The fault, live.** W3 was deployed and passed its checks. Minutes later
+  the operator opened `/browse` in the browser they had used all day: the nav
+  read "Search | nav.browse | About", the tab "browse.heading — Leibniz
+  Legible", the page "Something went wrong: api.works is not a function". A
+  hard reload cleared it.
+- **Cause.** `deploy/Caddyfile` sends `Cache-Control: public, max-age=3600`
+  on `/static/*`. The shell (`no-cache`) named `app.js?v=<hash>`, so the new
+  `app.js` was fetched at once, and with it `views/browse.js`, which no
+  browser had yet. But `app.js` imports `./i18n.js`, `./dom.js`, `../api.js`
+  by plain address, and those came from the cache of an hour or less before:
+  an `i18n.js` without the `nav.browse` and `browse.*` strings (so `t()` gave
+  the keys back) and an `api.js` without `works()`. The live server itself
+  sent the right files throughout.
+- **Why the checks missed it.** Every browser check, the 60 on the desktop
+  and the 60 on the live site, began with an empty profile, and a fresh
+  browser has no old module to pair with the new `app.js`. W1 had recorded
+  the imported modules as "not versioned" and expected a lag of up to an
+  hour; the hand-over repeated that. The truth was a mix of new and old code.
+- **The fix** (`web/api.py`). The modules are versioned as a set, not one by
+  one: `_modules_build` hashes every `.js` file outside `vendor/` (names and
+  contents, 12 hex digits), the shell loads `/static/m/<build>/app.js`, and
+  because every import in the viewer is relative, `./i18n.js` and
+  `../api.js` resolve under the same prefix. The app mounts the static
+  directory a second time at `/static/m/{build}`, before `/static`; any build
+  answers with the current files (a shell from just before a restart still
+  gets one consistent set), and the plain addresses still answer (a tab
+  opened before a deploy). `style.css` and `boot.js` keep their `?v=`. No
+  JavaScript changed.
+- **Reproduced, then healed.** A proxy that adds the Caddyfile's header to
+  `/static/*` (Playwright's own request routing switches the browser cache
+  off, so it cannot stand in for one), the app restarted behind it from one
+  tree after another, and one browser context across them. Main before W3
+  (`30d0849`) → W3 as deployed (`8d54354`): the operator's three symptoms,
+  word for word. The same browser → the fix: healthy, every module from one
+  build path. → the fix with only `i18n.js` changed, `app.js` untouched: the
+  new label at once, under a new build path. A reader away during W3 (before
+  W3 → the fix): healthy. Control: a fresh browser on W3 is healthy.
+- **Verified.** 570 tests (+1), ruff clean: the shell names one module build
+  on every route; every module is served under it and imports only by
+  relative path (the invariant the prefix rests on); the build moves when an
+  imported module changes — the fault's shape — and stays put for the
+  stylesheet or a vendored script. On the corpus store every view (search,
+  browse, about, work, a page with its 84 lines, not found) loads its ten
+  modules from one build path, the language carries from view to view (one
+  `i18n.js`, not two copies), and the 60 browse checks pass unchanged.
+- **For every later deploy.** Check as a returning reader too: open the site,
+  deploy, reload in the same browser without a hard reload.
+- **Docs.** `deploy/README.md` §9, README, and the comment in
+  `deploy/Caddyfile` (the live Caddyfile is edited by hand and keeps its old
+  comment; nothing needs doing on the box).
+
 ### W3 — the browse index: shelfmark family → section → convolute (2026-10-06) ✅
 
 From the same reader at the Leibniz-Edition as W1: an index of the shelfmark
@@ -545,7 +617,8 @@ pages already list the folios; the levels above them were missing.
   copying the store, with no code change. Names are the catalogue's short
   forms ("Bernoulli, Joh."). The twelve LH sections without a digitized unit
   (14, 16–18, 22, 26, 28–33) do not appear. `/api/works` may be cached for a
-  day, and the imported ES modules for an hour (W1).
+  day. (The hour for which browsers kept the imported ES modules turned out
+  to be a fault, not a limit: see the W3 fix above.)
 - **Follow-ups seen.** A reviewed table of the 42 LH section names (Open
   questions #22); full names for the correspondents (the records' titles
   have them: "Leibniz an Heinrich Oldenburg"); the same breadcrumb on the
@@ -1404,7 +1477,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **569** (2026-10-06, W3; with the `gt` + `release` extras; 545 after W2) |
+| Tests passing | **570** (2026-10-06, W3 fix; with the `gt` + `release` extras; 569 after W3, 545 after W2) |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -1673,7 +1746,15 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**W3 (2026-10-06), operator:** merge `web-browse-index`, then the §9 update on
+**W3 fix (2026-10-06), operator:** merge `web-versioned-modules`, then the §9
+update on the VPS — code only. Then, over HTTP: the shell of any page names
+`/static/m/<12 hex digits>/app.js` and no `"/static/app.js`; that address and
+`/static/m/<the same>/i18n.js` answer 200; `/browse` and `/api/works` answer
+as before. In the browser you used earlier that day, with no hard reload:
+`/browse` works and the nav reads "Browse".
+
+**W3 (2026-10-06), operator:** ✅ merged (#38) and live the same day; the
+checks below passed. The steps were: merge `web-browse-index`, then the §9 update on
 the VPS (`deploy/README.md`) — code only: no index rebuild, no Meilisearch
 restart, no new dependency. Then, over HTTP: `/browse` answers 200 and its
 HTML holds the family headings, `id="lh-35"` and `/work/` links; `/api/works`
@@ -1683,7 +1764,8 @@ and the three W1/W2 checks still pass (a page's `/text` starts with `# `, the
 search page says "for an exact phrase", `style.css` hides the overlay by
 `visibility`). In a private window: the nav link, EN and DE, the filter, the
 order toggle of the letters, `/browse#lh-35`, a work page's breadcrumb.
-Returning readers may see the old modules for up to an hour. Then the reply
+(Returning readers were expected to see the old modules for up to an hour;
+they saw a broken mix instead — the W3 fix.) Still open: the reply
 to the reader at the Leibniz-Edition: the index is there; does the grouping
 match how the Arbeitsstellen think of the Faszikel (Open questions #22); and
 the two standing asks — a TELOTA contact for an Arbeitskatalog export, which
