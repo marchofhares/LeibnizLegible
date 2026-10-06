@@ -4,6 +4,8 @@ Routes (all read-only; the store is opened per request, read-only):
 
 * ``GET /api/search``          — typo-/orthography-tolerant page search (D1),
   with ``"exact phrases"`` and ``-exclusions``
+* ``GET /api/works``           — every work as a compact row, and the browse tree
+  (shelfmark family → section → works; :mod:`leibniz.web.browse`)
 * ``GET /api/works/{id}``      — a work: pages, katalog records, attribution
 * ``GET /api/pages/{id}``      — a page: lines with geometry, text, confidence,
   status and provenance (SPECS §4.5), prev/next
@@ -15,10 +17,11 @@ Routes (all read-only; the store is opened per request, read-only):
 * ``GET /manifests/{work}``    — IIIF Presentation 3 manifest (D7)
 * ``GET /annotations/{page}``  — W3C AnnotationPage with the page's lines (D7)
 * ``GET /healthz``             — liveness for the process manager / uptime monitor
-* ``/``, ``/search``, ``/work/…``, ``/page/…``, ``/about`` — the viewer shell,
-  stamped per route with its title, description, canonical URL and, for a work
-  or a page, a server-rendered summary (the catalogue entries, the page list,
-  the machine text) so crawlers and readers without JavaScript see the content
+* ``/``, ``/search``, ``/browse``, ``/work/…``, ``/page/…``, ``/about`` — the
+  viewer shell, stamped per route with its title, description, canonical URL
+  and, for the browse index, a work or a page, a server-rendered summary (the
+  whole index, the catalogue entries, the page list, the machine text) so
+  crawlers and readers without JavaScript see the content
 * ``/robots.txt``, ``/sitemap.xml``, ``/llms.txt``, ``/favicon.ico`` — the
   static viewer's discovery files
 
@@ -61,13 +64,13 @@ from leibniz.search.documents import (
     line_summaries_by_page,
 )
 from leibniz.web import attribution as attr
-from leibniz.web import iiif
+from leibniz.web import browse, iiif
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
 from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
 STATIC_DIR = Path(__file__).parent / "static"
-INDEX_ROUTES = ("/", "/search", "/about", "/work/{work_id}", "/page/{page_id}")
+INDEX_ROUTES = ("/", "/search", "/browse", "/about", "/work/{work_id}", "/page/{page_id}")
 CACHE_HEADERS = {"Cache-Control": "public, max-age=300"}
 NO_STORE = {"Cache-Control": "no-store"}
 DAY_CACHE = {"Cache-Control": "public, max-age=86400"}
@@ -301,8 +304,21 @@ def _stamp_shell(
     return out.replace(SSR_MARK, ssr, 1)
 
 
-def _ssr_work(work: db.Work, pages: list, katalog: list[dict], gwlb_url: str) -> tuple:
-    """(title, description, html) for a work's server-rendered summary."""
+def _crumbs(place: dict | None) -> str:
+    """A work's way back into the browse index: "Browse › LH 35 · Mathematik"."""
+    if not place:
+        return ""
+    return (
+        '<nav aria-label="Breadcrumb"><a href="/browse">Browse</a> › '
+        f'<a href="/browse#{_esc(place["anchor"])}">{_esc(place["title"])}</a></nav>'
+    )
+
+
+def _ssr_work(
+    work: db.Work, pages: list, katalog: list[dict], gwlb_url: str, place: dict | None = None
+) -> tuple:
+    """(title, description, html) for a work's server-rendered summary; ``place``
+    is where the work sits in the browse index (:func:`browse.places`)."""
     title = work.title or work.gwlb_object_id
     marks = ", ".join(work.shelfmarks or [])
     n = len(pages)
@@ -318,6 +334,7 @@ def _ssr_work(work: db.Work, pages: list, katalog: list[dict], gwlb_url: str) ->
     )
     parts = [
         '<article class="panel ssr" id="ssr">',
+        _crumbs(place),
         f"<h1>{_esc(title)}</h1>",
         f"<p>{_esc(marks)}</p>" if marks else "",
         f"<p>{_esc(work.set_name or '')} · {n:,} page images · "
@@ -397,8 +414,70 @@ def _ssr_page(
     return title, description, html_out
 
 
+BROWSE_TITLE = "Browse by shelfmark"
+BROWSE_NOTE = (
+    "Titles and shelfmarks are the library's. Section names are cut from its titles. "
+    "Correspondent names come from the linked records of the Arbeitskatalog der "
+    "Leibniz-Edition (BBAW / TELOTA, CC BY 4.0), checked against the alphabetical order of "
+    "the LBr numbers; where no record is linked yet, or the names do not fit that order, "
+    "an entry shows its shelfmark only. The texts behind the links are machine "
+    "transcriptions, not an edition."
+)
+
+
+def _counts(n_works: int, n_pages: int) -> str:
+    return (
+        f"{n_works:,} work{'' if n_works == 1 else 's'}, "
+        f"{n_pages:,} page image{'' if n_pages == 1 else 's'}"
+    )
+
+
+def _ssr_browse_entry(family: str, entry: browse.Entry) -> str:
+    """One work of the index: a link, and what else names it."""
+    href = f"/work/{_esc(entry.work_id)}"
+    if family in ("LH", "LBr"):  # the label is the shelfmark, or the correspondent
+        rest = entry.shelfmark if entry.label != entry.shelfmark and family == "LBr" else ""
+        text = entry.label
+    else:  # the shelfmark, then the (cut) title
+        text = entry.shelfmark or entry.label
+        rest = entry.label if entry.shelfmark else ""
+    return f'<li><a href="{href}">{_esc(text)}</a>{" · " + _esc(rest) if rest else ""}</li>'
+
+
+def _ssr_browse(families: list[browse.Family]) -> tuple[str, str, str]:
+    """(title, description, html) for the browse index: every family and
+    section with a link per work, so crawlers and readers without JavaScript
+    get the whole index (``<details>`` needs none)."""
+    n_works = sum(f.n_works for f in families)
+    n_pages = sum(f.n_pages for f in families)
+    description = (
+        f"The digitized Leibniz Nachlass by shelfmark: {n_works:,} works and {n_pages:,} page "
+        "images. The manuscripts (LH) by section, the correspondence (LBr) by correspondent, "
+        "the annotated books (Marginalien) by number; every entry opens the work and its folios."
+    )
+    parts = [
+        '<article class="panel ssr" id="ssr">',
+        "<h1>Browse the Nachlass by shelfmark</h1>",
+        f"<p>{_counts(n_works, n_pages)}. {_esc(BROWSE_NOTE)}</p>",
+    ]
+    for family in families:
+        parts.append(f"<h2>{_esc(family.name)}</h2>")
+        parts.append(f"<p>{_counts(family.n_works, family.n_pages)}</p>")
+        for section in family.sections:
+            parts.append(
+                f'<details id="{_esc(section.anchor)}"><summary>{_esc(section.title)} '
+                f"({_counts(section.n_works, section.n_pages)})</summary>"
+                '<ul class="ssr__index">'
+            )
+            parts.extend(_ssr_browse_entry(family.key, entry) for entry in section.entries)
+            parts.append("</ul></details>")
+    parts.append("</article>")
+    return BROWSE_TITLE, description, "".join(parts)
+
+
 def _sitemap_xml(site: str, work_ids: list[str]) -> str:
-    urls = [f"{site}/", f"{site}/search", f"{site}/about"] + [f"{site}/work/{w}" for w in work_ids]
+    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/about"]
+    urls += [f"{site}/work/{w}" for w in work_ids]
     body = "".join(f"<url><loc>{_esc(u)}</loc></url>" for u in urls)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
@@ -652,6 +731,33 @@ def create_app(
     def base(request: Request) -> str:
         return (base_url or str(request.base_url)).rstrip("/")
 
+    def browse_index() -> dict:
+        """The browse tree with what is served from it, built on first use and
+        kept for the life of the process: the works table and the catalogue
+        links change only with a corpus run, and the app is restarted then."""
+        if state.get("browse") is None:
+            conn = _open(db_path)
+            try:
+                families = browse.build_index(
+                    db.iter_works(conn),
+                    browse.group_correspondents(conn.execute(browse.CORRESPONDENTS_SQL)),
+                    db.matched_work_ids(conn),
+                )
+            finally:
+                conn.close()
+            state["browse"] = {"families": families, "places": browse.places(families)}
+        return state["browse"]
+
+    def works_body(families: list[browse.Family]) -> dict:
+        return {
+            "n_works": sum(f.n_works for f in families),
+            "n_pages": sum(f.n_pages for f in families),
+            "works": browse.rows(families),
+            "groups": browse.tree(families),
+            "note": BROWSE_NOTE,
+            "attribution": attr.attribution(images.mirrored),
+        }
+
     # ---- operations -------------------------------------------------------- #
     @app.get("/healthz", include_in_schema=False)
     def healthz() -> JSONResponse:
@@ -727,6 +833,39 @@ def create_app(
                 hit.thumb_url = images.thumb_url_for(hit.work_id, hit.seq, hit.thumb_url)
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
 
+    @app.get(
+        "/api/works",
+        summary="Every work, by shelfmark family and section",
+        description=(
+            "The whole Nachlass as one list: `works` holds a compact row per work (`work_id`, "
+            "`set`, `title`, `shelfmark`, `shelfmarks`, `family`, `section`, `section_label`, "
+            "`label`, `n_canvases`, `has_katalog`), `groups` the browse tree — family (`LH`, "
+            "`LBr`, `Marg`, `Other`) → section (with its `anchor` on `/browse`, its counts and "
+            "the work ids of its `entries` in order; the letters also `by_number`). A letter "
+            "convolute's `label` is its correspondent where the linked catalogue records name "
+            "one that fits the alphabetical order of the LBr numbers, else its shelfmark."
+        ),
+    )
+    def api_works(
+        set: str | None = Query(  # noqa: A002 — the API's public name
+            None, alias="set", description="Only the works of one OAI set, e.g. `Leibnitiana`."
+        ),
+        family: str | None = Query(
+            None,
+            pattern="^(LH|LBr|Marg|Other)$",
+            description="Only one family: `LH`, `LBr`, `Marg` or `Other`.",
+        ),
+    ) -> Response:
+        index = browse_index()
+        if set is None and family is None:  # the whole list: rendered once
+            if "json" not in index:
+                index["json"] = JSONResponse(works_body(index["families"])).body
+            return Response(index["json"], media_type="application/json", headers=DAY_CACHE)
+        narrowed = browse.select(index["families"], set_name=set, family=family)
+        return JSONResponse(works_body(narrowed), headers=DAY_CACHE)
+
+    # /api/works/{work_id} does not shadow the list above, nor the list it: the
+    # ``str`` convertor needs at least one character and never matches a slash.
     @app.get("/api/works/{work_id}")
     def api_work(work_id: str) -> JSONResponse:
         conn = _open(db_path)
@@ -751,6 +890,8 @@ def create_app(
             }
         finally:
             conn.close()
+        # where the work sits in the browse index: the work page's way back
+        body["browse"] = browse_index()["places"].get(work.gwlb_object_id)
         return JSONResponse(body, headers=CACHE_HEADERS)
 
     @app.get("/api/pages/{page_id}")
@@ -953,6 +1094,20 @@ def create_app(
         def serve_about(request: Request) -> Response:
             return respond(request, _stamp_shell(shell, path="/about", title="About", site=site))
 
+        def serve_browse(request: Request) -> Response:
+            index = browse_index()
+            if "html" not in index:  # 2,000-odd links: stamped once
+                title, description, ssr = _ssr_browse(index["families"])
+                index["html"] = _stamp_shell(
+                    shell,
+                    path="/browse",
+                    title=title,
+                    description=description,
+                    ssr=ssr,
+                    site=site,
+                )
+            return respond(request, index["html"])
+
         def serve_index_work(work_id: str, request: Request) -> Response:
             conn = _open(db_path)
             try:
@@ -967,7 +1122,8 @@ def create_app(
             finally:
                 conn.close()
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
-            title, description, ssr = _ssr_work(work, pages, katalog, gwlb_url)
+            place = browse_index()["places"].get(work.gwlb_object_id)
+            title, description, ssr = _ssr_work(work, pages, katalog, gwlb_url, place)
             body = _stamp_shell(
                 shell,
                 path=f"/work/{work_id}",
@@ -1014,6 +1170,7 @@ def create_app(
 
         handlers = {
             "/search": serve_search,
+            "/browse": serve_browse,
             "/about": serve_about,
             "/work/{work_id}": serve_index_work,
             "/page/{page_id}": serve_index_page,
@@ -1024,7 +1181,8 @@ def create_app(
             )
 
         # Discovery files at the root: the favicon browsers request blindly, the
-        # sitemap (one URL per work; the work pages link every page), llms.txt.
+        # sitemap (the browse index and one URL per work; the work pages link
+        # every page), llms.txt.
         favicon = static_dir / "favicon.ico"
         if favicon.exists():
 
