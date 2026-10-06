@@ -118,8 +118,13 @@ def _norm_token(token: str) -> str | None:
     return t.lower()
 
 
-def normalize_signature(raw: str) -> Signature:
-    """Parse one shelfmark string into a canonical :class:`Signature`."""
+def split_family(raw: str) -> tuple[str | None, str]:
+    """A shelfmark's family and what follows its label, as written.
+
+    ``"LH 35, 3 A 8"`` → ``("LH", " 35, 3 A 8")``; ``(None, "")`` for a foreign
+    signature. The tail is untouched (no Roman→Arabic, no lower-casing), for
+    callers that order or display it rather than match on it.
+    """
     text = " ".join((raw or "").split())
     family = None
     tail = ""
@@ -128,6 +133,12 @@ def normalize_signature(raw: str) -> Signature:
         m = pat.search(text)
         if m is not None and m.start() < best:
             family, tail, best = fam, text[m.end() :], m.start()
+    return family, tail
+
+
+def normalize_signature(raw: str) -> Signature:
+    """Parse one shelfmark string into a canonical :class:`Signature`."""
+    family, tail = split_family(raw)
     if family is None:
         return Signature(raw=raw, family=None, parts=())
 
@@ -166,4 +177,5 @@ __all__ = [
     "roman_to_int",
     "signature_key",
     "signature_keys",
+    "split_family",
 ]
