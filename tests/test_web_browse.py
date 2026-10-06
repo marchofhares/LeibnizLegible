@@ -197,6 +197,29 @@ def test_correspondent_names_strip_source_tags_and_split_run_together_cells() ->
     assert names("?") == [] and names(None) == [] and names("") == []
 
 
+def test_names_as_written_keep_the_catalogues_doubt() -> None:
+    written = browse.names_as_written
+    assert written("Danckelmann,E. (KorrespDB) (GND)") == ["Danckelmann, E."]
+    assert written("Leibniz (GND)") == ["Leibniz"]
+    assert written("Leopold I. (Kaiser) (KorrespDB) (GND)") == ["Leopold I. (Kaiser)"]
+    # several people in one cell, as the catalogue runs them together
+    assert written("Bossuet (KorrespDB) (GND)Pirot (KorrespDB) (GND)") == ["Bossuet", "Pirot"]
+    assert written("Zanovello (KorrespDB)Mauro (KorrespDB) (GND)Mocenigo (KorrespDB)") == [
+        "Zanovello",
+        "Mauro",
+        "Mocenigo",
+    ]
+    assert written("Sophie (KorrespDB) (GND)Orléans,Elisabeth Charlotte v. (KorrespDB) (GND)u.a.")[
+        1:
+    ] == ["Orléans, Elisabeth Charlotte v.", "u.a."]
+    # showing a record keeps the doubt that counting names drops
+    assert written("Leibniz (GND)?") == ["Leibniz ?"] and written("Ilgen ?") == ["Ilgen ?"]
+    assert written("?") == ["?"] and written("Krebs (?) (KorrespDB)") == ["Krebs (?)"]
+    assert browse.correspondent_names("Ilgen ?") == ["Ilgen"]
+    assert browse.correspondent_names("?") == []
+    assert written(None) == [] == written("") == written("  ")
+
+
 def test_correspondent_is_the_name_most_often_beside_leibniz() -> None:
     rows = [
         C("Oldenburg (KorrespDB) (GND)", "Leibniz (GND)", 30, "Heinrich Oldenburg an Leibniz"),

@@ -72,7 +72,11 @@ function katalogRecord(record) {
   const rows = [];
   if (record.incipit) rows.push([t('work.katalog.incipit'), esc(record.incipit)]);
   if (record.date) rows.push([t('work.katalog.date'), esc(record.date)]);
-  if (record.correspondent) rows.push([t('work.katalog.correspondent'), esc(record.correspondent)]);
+  // Sender and addressee, each as the catalogue names them. (One row called
+  // "Correspondent" used to show the sender alone: Leibniz, in his own letters.)
+  const people = (names) => (names || []).map((name) => esc(name)).join('; ');
+  if (people(record.sender)) rows.push([t('work.katalog.sender'), people(record.sender)]);
+  if (people(record.addressee)) rows.push([t('work.katalog.addressee'), people(record.addressee)]);
 
   const refs = (record.aa_refs || []).map(aaRef).filter(Boolean);
   if (refs.length) {

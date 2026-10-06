@@ -183,6 +183,25 @@ def _run_info(conn: sqlite3.Connection, run_id: int | None) -> dict | None:
     }
 
 
+def _people(meta: dict) -> dict:
+    """Who a catalogue record names: ``sender`` and ``addressee`` as the
+    catalogue writes them (its link texts "(KorrespDB)", "(GND)" removed,
+    several people apart, its doubt marks kept), and ``correspondent``, the
+    people beside Leibniz — in a letter of his, the addressee, not himself."""
+    cells = (meta.get("absender"), meta.get("adressat"))
+    others = dict.fromkeys(
+        name
+        for cell in cells
+        for name in browse.correspondent_names(cell)
+        if name != browse.LEIBNIZ
+    )
+    return {
+        "sender": browse.names_as_written(cells[0]),
+        "addressee": browse.names_as_written(cells[1]),
+        "correspondent": "; ".join(others) or meta.get("correspondent") or None,
+    }
+
+
 def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
     rows = conn.execute(
         """
@@ -203,7 +222,7 @@ def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
                 "title": meta.get("title") or meta.get("titel"),
                 "incipit": meta.get("incipit"),
                 "date": meta.get("datum") or meta.get("date"),
-                "correspondent": meta.get("absender") or meta.get("correspondent"),
+                **_people(meta),
                 "place": meta.get("ort"),
                 "textart": meta.get("textart"),
                 "shelfmarks": json.loads(r["shelfmark_refs"]) if r["shelfmark_refs"] else [],

@@ -682,6 +682,49 @@ def test_work_page_links_back_into_the_browse_index(store_path, tmp_path) -> Non
     assert '<a href="/browse#lbr">Briefwechsel (LBr)</a>' in letters
 
 
+def test_work_names_sender_and_addressee_of_each_record(store_path, tmp_path) -> None:
+    """The work page showed one row, "Correspondent", holding the record's sender
+    with the catalogue's link text: "Leibniz (GND)" on every letter he wrote."""
+    _link_letters(store_path)
+    conn = db.connect(store_path)
+    for rid, absender, adressat in (
+        ("k-4", "Brosseau (KorrespDB) (GND)", "Cordemann (KorrespDB)Leibniz (GND)"),
+        ("k-5", "?", "Leibniz (GND)?"),
+        ("k-6", None, None),
+    ):
+        meta = {"titel": rid, "absender": absender, "adressat": adressat}
+        db.upsert_katalog_record(conn, db.KatalogRecord(record_id=rid, metadata=meta))
+        db.upsert_crosswalk(conn, db.CrosswalkMatch(rid, W2, "gwlb_link", 1.0))
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path)
+    r = c.get(f"/api/works/{W2}")
+    people = {
+        k["record_id"]: (k["sender"], k["addressee"], k["correspondent"])
+        for k in r.json()["katalog"]
+    }
+    assert people == {
+        "k-1": (["Hansen"], ["Leibniz"], "Hansen"),
+        "k-2": (["Leibniz"], ["Hansen"], "Hansen"),  # his own letter: not himself
+        "k-3": (["Leibniz"], ["Tschirnhaus"], "Tschirnhaus"),
+        "k-4": (["Brosseau"], ["Cordemann", "Leibniz"], "Brosseau; Cordemann"),
+        "k-5": (["?"], ["Leibniz ?"], None),  # the catalogue's doubt, kept
+        "k-6": ([], [], None),
+    }
+    assert "KorrespDB" not in r.text and "(GND)" not in r.text
+    # a record with neither field, as most writings have none
+    first = c.get(f"/api/works/{W1}").json()["katalog"][0]
+    assert (first["sender"], first["addressee"], first["correspondent"]) == ([], [], None)
+    # the viewer has a row for each, under the catalogue's own two terms
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for key in ("work.katalog.sender", "work.katalog.addressee"):
+        assert strings.count(f"'{key}':") == 2, key  # EN and DE
+    assert "work.katalog.correspondent" not in strings
+    assert "work.katalog.correspondent" not in (STATIC_DIR / "views" / "work.js").read_text(
+        encoding="utf-8"
+    )
+
+
 def test_viewer_has_words_for_every_crosswalk_method() -> None:
     """A record's link to its work is shown in words: "Link: gwlb_link" read
     like a placeholder nobody had filled in."""
