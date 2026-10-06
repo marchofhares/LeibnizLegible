@@ -663,7 +663,8 @@ def test_browse_page_is_server_rendered_with_a_link_per_work(store_path, tmp_pat
     assert f'<li><a href="/work/{W1}">LH IV, 6, 18</a></li>' in r.text
     assert f'<li><a href="/work/{W2}">Hansen</a> · LBr. 464</li>' in r.text
     assert "machine transcriptions, not an edition" in r.text
-    # the stamped body is revalidated like the others
+    # the shell's nav knows the page; the stamped body is revalidated like the others
+    assert '<a href="/browse" data-nav="browse" data-i18n="nav.browse">Browse</a>' in r.text
     again = c.get("/browse", headers={"If-None-Match": r.headers["ETag"]})
     assert again.status_code == 304
     assert "<loc>https://leibnizlegible.com/browse</loc>" in c.get("/sitemap.xml").text

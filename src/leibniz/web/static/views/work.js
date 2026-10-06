@@ -1,10 +1,23 @@
-// views/work.js — one work: its shelfmarks, its catalogue records, and the
-// strip of page images it is made of.
+// views/work.js — one work: its place in the browse index, its shelfmarks, its
+// catalogue records, and the strip of page images it is made of.
 
 import { t, tn } from '../i18n.js';
 import * as api from '../api.js';
 import { esc, pathSeg, num, conf, setLabel, aaRef, folioLabel } from '../dom.js';
 import { errorPanel, loading, renderNotFound } from './common.js';
+
+/** The way back into the browse index: "Browse › LH 35 · Mathematik". */
+function crumbs(data) {
+  const place = data.browse;
+  if (!place || !place.anchor) return '';
+  // The section's name is the archive's own and arrives as data.
+  return (
+    `<nav class="crumbs" aria-label="${esc(t('crumbs.label'))}"><ol>` +
+    `<li><a href="/browse">${esc(t('nav.browse'))}</a></li>` +
+    `<li><a href="/browse#${esc(place.anchor)}">${esc(place.title || place.label)}</a></li>` +
+    `</ol></nav>`
+  );
+}
 
 function identity(data) {
   const shelfmarks = (data.shelfmarks || []).filter(Boolean);
@@ -166,6 +179,7 @@ export async function render(ctx) {
   root.innerHTML =
     `<article class="work">` +
     `<header class="panel work__header">` +
+    crumbs(data) +
     `<h1 tabindex="-1" data-view-heading>${esc(title)}</h1>` +
     `<p class="muted work__id"><code>${esc(data.work_id || workId)}</code></p>` +
     identity(data) +

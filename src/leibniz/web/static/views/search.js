@@ -179,12 +179,17 @@ function renderPagination(params, data) {
   );
 }
 
+/** The other way in, offered where the search has nothing to show. */
+function browseLink() {
+  return `<a href="/browse">${esc(t('search.browse'))}</a>`;
+}
+
 function renderResults(params, data) {
   const total = Number(data.total) || 0;
   if (total === 0 || !(data.hits || []).length) {
     return (
       `<div class="state state--empty"><p>${esc(t('search.empty'))}</p>` +
-      `<p class="hint">${esc(t('search.empty.hint'))}</p></div>`
+      `<p class="hint">${esc(t('search.empty.hint'))} ${browseLink()}</p></div>`
     );
   }
   const summary =
@@ -227,7 +232,8 @@ export async function render(ctx) {
     : `${t('search.heading')} — ${t('site.name')}`;
 
   if (!params.q && !params.work) {
-    results.innerHTML = `<p class="state state--start">${esc(t('search.start'))}</p>`;
+    results.innerHTML =
+      `<p class="state state--start">${esc(t('search.start'))} ${browseLink()}</p>`;
     return;
   }
 

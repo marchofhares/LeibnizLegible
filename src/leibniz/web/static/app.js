@@ -1,8 +1,9 @@
 // app.js — bootstrap, i18n application to the static chrome, and the router.
 //
-// The FastAPI app serves this file's index.html for five paths:
+// The FastAPI app serves this file's index.html for six paths:
 //   /                 search
 //   /search           search (with ?q=&set=&lang=&stratum=&min_conf=&work=&page=)
+//   /browse           the index by shelfmark (with #lh-35, #lbr … for a section)
 //   /work/{work_id}   one work
 //   /page/{page_id}   one page
 //   /about            about
@@ -14,12 +15,14 @@ import { initLang, setLang, getLang, onLangChange, t, languages } from './i18n.j
 import { conf } from './dom.js';
 import { renderNotFound } from './views/common.js';
 import * as searchView from './views/search.js';
+import * as browseView from './views/browse.js';
 import * as workView from './views/work.js';
 import * as pageView from './views/page.js';
 import * as aboutView from './views/about.js';
 
 const VIEWS = {
   search: searchView,
+  browse: browseView,
   work: workView,
   page: pageView,
   about: aboutView,
@@ -30,6 +33,7 @@ let searchPanel = null;
 let currentCleanup = null;
 let currentController = null;
 let currentRoute = null;
+let renderedAt = null; // pathname + search of the view on screen
 
 // ---------------------------------------------------------------------------
 // i18n applied to static markup
@@ -79,6 +83,7 @@ function syncNav() {
 export function parseRoute(pathname) {
   const path = pathname.replace(/\/{2,}/g, '/').replace(/(.)\/+$/, '$1');
   if (path === '/' || path === '/search') return { name: 'search' };
+  if (path === '/browse') return { name: 'browse' };
   if (path === '/about') return { name: 'about' };
   let m = /^\/work\/(.+)$/.exec(path);
   if (m) return { name: 'work', id: safeDecode(m[1]) };
@@ -130,6 +135,7 @@ async function render(opts) {
 
   const route = parseRoute(location.pathname);
   currentRoute = route;
+  renderedAt = location.pathname + location.search;
   syncNav();
 
   if (route.name === 'notfound') {
@@ -169,8 +175,18 @@ async function render(opts) {
   afterRender(focusHeading);
 }
 
+/** The element in the view that the address's #fragment names, if any. */
+function hashTarget() {
+  const id = safeDecode(location.hash.slice(1));
+  const node = id ? document.getElementById(id) : null;
+  return node && viewRoot.contains(node) ? node : null;
+}
+
 function afterRender(focusHeading) {
   if (!focusHeading) return;
+  // A view that honours a #fragment (the browse index opens that section) has
+  // already put the focus and the page there.
+  if (hashTarget()) return;
   const heading = viewRoot.querySelector('[data-view-heading]');
   if (heading) {
     heading.focus({ preventScroll: true });
@@ -200,7 +216,7 @@ function onClick(event) {
   if (url.pathname === location.pathname && url.hash && !url.search) return; // in-page anchor
   if (!isAppPath(url.pathname)) return; // /api/…, /manifests/…, /static/… leave the app
   event.preventDefault();
-  navigate(url.pathname + url.search);
+  navigate(url.pathname + url.search + url.hash);
 }
 
 function onLangButton(event) {
@@ -267,7 +283,12 @@ function boot() {
 
   document.addEventListener('click', onClick);
   document.addEventListener('click', onLangButton);
-  window.addEventListener('popstate', () => render({ focusHeading: true }));
+  window.addEventListener('popstate', () => {
+    // Back or forward between two #fragments of the page on screen: the view
+    // follows the fragment itself (hashchange); nothing to render again.
+    if (location.pathname + location.search === renderedAt) return;
+    render({ focusHeading: true });
+  });
 
   onLangChange(() => {
     applyI18n(document);
