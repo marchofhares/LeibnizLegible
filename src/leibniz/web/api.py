@@ -119,10 +119,19 @@ TEXT_RESPONSES: dict = {
     404: {"description": "No such id."},
 }
 
-# The shell's own stylesheet and entry scripts get a content hash in their URL
-# (``?v=…``), so a deploy reaches returning readers at once although the proxy
-# lets browsers cache /static/* for an hour (deploy/Caddyfile).
-VERSIONED_ASSETS = ("style.css", "boot.js", "app.js")
+# The proxy lets browsers cache /static/* for an hour (deploy/Caddyfile), so
+# what the shell loads must change its address when its content does, or a
+# deploy reaches returning readers late. The stylesheet and the boot script get
+# a content hash in their URL (``?v=…``). The viewer's ES modules import each
+# other by relative path, so they are versioned as one set: the shell loads
+# ``app.js`` from ``/static/m/<build>/``, where ``<build>`` hashes every
+# module, and each ``./i18n.js`` or ``../api.js`` resolves under the same
+# prefix. A hash on ``app.js`` alone is not enough: after a deploy a returning
+# reader ran the new ``app.js`` against a cached old ``i18n.js`` and ``api.js``
+# (W3, 2026-10-06: "nav.browse" in the nav, "api.works is not a function").
+VERSIONED_ASSETS = ("style.css", "boot.js")
+MODULE_ENTRY = "app.js"
+MODULES_PREFIX = "/static/m"
 
 
 def _open(db_path: str | Path, *, any_thread: bool = False) -> sqlite3.Connection:
@@ -485,18 +494,33 @@ def _sitemap_xml(site: str, work_ids: list[str]) -> str:
     )
 
 
-def _version_assets(shell: str, static_dir: Path) -> str:
-    """Append ``?v=`` and the first 12 hex digits of its SHA-256 to the shell's
-    reference to each of :data:`VERSIONED_ASSETS` (once, at startup).
+def _modules_build(static_dir: Path) -> str:
+    """One version for the viewer's ES modules as a set: the first 12 hex
+    digits of a SHA-256 over every ``.js`` file outside ``vendor/``, names and
+    contents. Any change to any of them is a new build."""
+    digest = hashlib.sha256()
+    for path in sorted(static_dir.rglob("*.js")):
+        rel = path.relative_to(static_dir)
+        if rel.parts[0] == "vendor":
+            continue
+        digest.update(rel.as_posix().encode() + b"\0" + path.read_bytes() + b"\0")
+    return digest.hexdigest()[:12]
 
-    The ES modules ``app.js`` imports keep their plain URLs, so a browser may
-    still take those from its cache for up to an hour after a deploy.
-    """
+
+def _version_assets(shell: str, static_dir: Path) -> str:
+    """Make the shell name what it loads by content (once, at startup): ``?v=``
+    and the first 12 hex digits of its SHA-256 on each of
+    :data:`VERSIONED_ASSETS`, and the module entry under
+    ``/static/m/<build>/`` (:func:`_modules_build`), from where its relative
+    imports resolve to the same build."""
     for name in VERSIONED_ASSETS:
         asset = static_dir / name
         if asset.is_file():
             digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
             shell = shell.replace(f'"/static/{name}"', f'"/static/{name}?v={digest}"')
+    if (static_dir / MODULE_ENTRY).is_file():
+        entry = f"{MODULES_PREFIX}/{_modules_build(static_dir)}/{MODULE_ENTRY}"
+        shell = shell.replace(f'"/static/{MODULE_ENTRY}"', f'"{entry}"')
     return shell
 
 
@@ -1056,6 +1080,13 @@ def create_app(
     if index_html is not None and index_html.exists():
         from fastapi.staticfiles import StaticFiles
 
+        # The same files twice: under /static/m/<build>/ for the module set the
+        # shell names (any build answers with the current files, so a shell
+        # from just before a restart still gets one consistent set), and under
+        # /static/ for everything else. The versioned mount must come first.
+        app.mount(
+            MODULES_PREFIX + "/{build}", StaticFiles(directory=str(static_dir)), name="modules"
+        )
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
         # The shell is read once and stamped with where images come from
@@ -1069,7 +1100,8 @@ def create_app(
         # content; app.js replaces it on boot. Every variant carries its own
         # ETag and is revalidated on every load (``no-cache``) so a deploy shows
         # at once; /static/* may be cached for an hour (see deploy/Caddyfile),
-        # so the shell names its stylesheet and entry scripts by content hash.
+        # so the shell names its stylesheet, its boot script and the build of
+        # its modules by content (``_version_assets``).
         shell = index_html.read_text(encoding="utf-8").replace(
             'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'
         )

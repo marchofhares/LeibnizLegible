@@ -688,20 +688,63 @@ def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
 
 
+def _module_entry(text: str) -> str:
+    """The module entry a shell names: ``/static/m/<build>/app.js``."""
+    found = re.search(
+        r'<script type="module" src="(/static/m/[0-9a-f]{12}/app\.js)"></script>', text
+    )
+    assert found, "the shell does not load app.js from a versioned module path"
+    return found.group(1)
+
+
 def test_shell_names_its_assets_by_content_hash(store_path, tmp_path) -> None:
     c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
-    for route in ("/", "/about", f"/work/{W1}", f"/page/{W1}:0001"):
+    entries = set()
+    for route in ("/", "/about", "/browse", f"/work/{W1}", f"/page/{W1}:0001"):
         text = c.get(route).text
         for name in api.VERSIONED_ASSETS:
             assert f'"/static/{name}?v={_digest(STATIC_DIR / name)}"' in text, (route, name)
             assert f'"/static/{name}"' not in text
+        entries.add(_module_entry(text))
+        assert '"/static/app.js' not in text  # never the bare entry, hashed or not
+    assert len(entries) == 1
     versioned = f"/static/style.css?v={_digest(STATIC_DIR / 'style.css')}"
     assert c.get(versioned).text == (STATIC_DIR / "style.css").read_text(encoding="utf-8")
 
 
+def test_viewer_modules_are_served_as_one_versioned_set(store_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    prefix = _module_entry(c.get("/browse").text).rsplit("/", 1)[0]  # /static/m/<build>
+    modules = [
+        p
+        for p in sorted(STATIC_DIR.rglob("*.js"))
+        if p.relative_to(STATIC_DIR).parts[0] != "vendor"
+    ]
+    names = {p.relative_to(STATIC_DIR).as_posix() for p in modules}
+    assert {"app.js", "i18n.js", "api.js", "dom.js", "views/browse.js", "views/work.js"} <= names
+    for path in modules:
+        rel = path.relative_to(STATIC_DIR).as_posix()
+        r = c.get(f"{prefix}/{rel}")
+        assert r.status_code == 200 and "javascript" in r.headers["content-type"], rel
+        assert r.content == path.read_bytes(), rel
+        # what makes one prefix enough: every import is relative, so it resolves
+        # under the prefix its importer was loaded from
+        specifiers = re.findall(
+            r"""(?:\bfrom\s*|\bimport\s*\(?\s*)['"]([^'"]+)['"]""", path.read_text(encoding="utf-8")
+        )
+        assert all(s.startswith(("./", "../")) for s in specifiers), (rel, specifiers)
+    assert "from './i18n.js'" in (STATIC_DIR / "app.js").read_text(encoding="utf-8")
+    assert c.get(f"{prefix}/views/nope.js").status_code == 404
+    # the plain addresses still answer (a tab opened before a deploy), and any
+    # build answers with the current files: one consistent set either way
+    assert c.get("/static/i18n.js").content == (STATIC_DIR / "i18n.js").read_bytes()
+    assert c.get("/static/m/000000000000/api.js").content == (STATIC_DIR / "api.js").read_bytes()
+
+
 def test_asset_versions_follow_the_file_content(store_path, tmp_path) -> None:
     static = tmp_path / "static"
-    static.mkdir()
+    (static / "views").mkdir(parents=True)
+    (static / "vendor").mkdir()
     (static / "index.html").write_text(
         '<!doctype html><html lang="en"><title>Leibniz Legible</title>'
         '<link rel="stylesheet" href="/static/style.css" />'
@@ -709,21 +752,40 @@ def test_asset_versions_follow_the_file_content(store_path, tmp_path) -> None:
         '<script type="module" src="/static/app.js"></script></html>',
         encoding="utf-8",
     )
-    for name in api.VERSIONED_ASSETS:
+    for name in ("style.css", "boot.js", "app.js", "i18n.js", "views/browse.js", "vendor/lib.js"):
         (static / name).write_text(f"/* {name} v1 */", encoding="utf-8")
 
     def versions(client: TestClient) -> dict[str, str]:
-        found = re.findall(
-            r'/static/(style\.css|boot\.js|app\.js)\?v=([0-9a-f]{12})"', client.get("/").text
-        )
-        return dict(found)
+        text = client.get("/").text
+        found = dict(re.findall(r'/static/(style\.css|boot\.js)\?v=([0-9a-f]{12})"', text))
+        found["modules"] = _module_entry(text).split("/")[3]
+        return found
+
+    def restarted() -> dict[str, str]:
+        return versions(TestClient(create_app(store_path, search=None, static_dir=static)))
 
     before = TestClient(create_app(store_path, search=None, static_dir=static))
     first = versions(before)
-    assert first == {name: _digest(static / name) for name in api.VERSIONED_ASSETS}
+    assert {name: first[name] for name in api.VERSIONED_ASSETS} == {
+        name: _digest(static / name) for name in api.VERSIONED_ASSETS
+    }
     (static / "style.css").write_text("/* style.css v2 */", encoding="utf-8")
     assert versions(before) == first  # computed once, at startup
-    after = versions(TestClient(create_app(store_path, search=None, static_dir=static)))
-    assert after["style.css"] != first["style.css"]
-    assert after["style.css"] == _digest(static / "style.css")
-    assert after["boot.js"] == first["boot.js"] and after["app.js"] == first["app.js"]
+    after = restarted()
+    assert after["style.css"] == _digest(static / "style.css") != first["style.css"]
+    assert after["boot.js"] == first["boot.js"] and after["modules"] == first["modules"]
+    # The fault of 2026-10-06: a module that app.js imports changes and app.js
+    # itself does not. The whole set moves to a new address, so a browser can
+    # never run the new app.js against an i18n.js it cached before the deploy.
+    (static / "i18n.js").write_text("/* i18n.js v2 */", encoding="utf-8")
+    moved = restarted()
+    assert moved["modules"] != after["modules"] and moved["style.css"] == after["style.css"]
+    (static / "views" / "browse.js").write_text("/* views/browse.js v2 */", encoding="utf-8")
+    deeper = restarted()
+    assert deeper["modules"] not in (moved["modules"], after["modules"])
+    # a new module is a new build; a vendored script is not part of the set
+    (static / "views" / "new.js").write_text("/* new */", encoding="utf-8")
+    added = restarted()
+    assert added["modules"] != deeper["modules"]
+    (static / "vendor" / "lib.js").write_text("/* vendor/lib.js v2 */", encoding="utf-8")
+    assert restarted() == added
