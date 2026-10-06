@@ -3,11 +3,35 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-02 (W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-06 (W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-06: W3 — a browse page: the Nachlass by shelfmark family, section
+and convolute.** The same reader at the Leibniz-Edition asked for "an index of
+the individual shelfmark groups", to "start from the group name ('Faszikel')
+and identify the relevant shelfmark and folios". The site had search, work
+pages and page views and nothing above them. `/browse` now lists all 2,225
+works: the manuscripts in the 30 LH sections that have digitized units
+(*LH 1 · Theologie* … *LH 35 · Mathematik* … *LH 42*), the 1,060 letter
+convolutes by correspondent or by number, the 370 annotated books by number,
+and 45 works outside the three series by collection. A filter narrows by
+shelfmark, name or title as you type; every section has an anchor
+(`/browse#lh-35`) and every work page a breadcrumb back to it; the whole index
+is server-rendered for crawlers and readers without JavaScript; `GET
+/api/works` serves it as data; EN and DE. **A correspondent is named on 680 of
+the 1,060 letter convolutes (64.2 %)**, while 744 (70.2 %) have catalogue
+records at all. The gap is deliberate: the linked records are not the whole
+convolute, and the name found most often in them is in some sixty cases
+somebody else's (LBr. 57, Johann Bernoulli's, would have read "Mencke, O.").
+The LBr numbers run alphabetically by correspondent, so a name is shown only
+where it fits that order — a missing name is honest, a wrong one is not.
+569 tests, ruff clean; verified against the corpus store on the desktop (over
+HTTP, then 60 checks in Chromium, axe 0 violations). Live after the operator's
+§9 update (Phase log W3 has the checks). The §9 updates of W1 and W2 were
+found live on 2026-10-06, before this phase began (all three checks passed).
 
 **2026-10-02 (later): W2 — search reads "quotes" and -minus.** The query
 used to be folded before either backend saw it, and folding turns every
@@ -359,6 +383,175 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### W3 — the browse index: shelfmark family → section → convolute (2026-10-06) ✅
+
+From the same reader at the Leibniz-Edition as W1: an index of the shelfmark
+groups, to get from a group's name to the shelfmark and its folios. The work
+pages already list the folios; the levels above them were missing.
+
+- **What is there.** `/browse` (nav: *Browse* / *Signaturen*): four headed
+  families, each section a `<details>` with its counts — *Handschriften (LH)*
+  750 works in 30 sections, *Briefwechsel (LBr)* 1,060, *Marginalien* 370,
+  *Other* 45 in four sets (Leibnitiana 12, the reconstructions 2, and the 5
+  manuscript-set and 26 Marginalien-set works without a usable shelfmark).
+  A filter box narrows by shelfmark, name or title as you type (accent-blind;
+  a query starts at a word, and ends at one once a separator is typed: `LH 3,`
+  is section 3, `LH 3` still finds LH 35); the letters switch between name and
+  number order; every entry links `/work/{id}` and shows its page count and a
+  **K** where catalogue records are linked. Sections carry stable anchors
+  (`#lh-35`, `#lbr`, `#marg`, `#other-leibnitiana`); a work page opens with
+  "Browse › LH 35 · Mathematik" pointing at its anchor, and the index opens
+  and focuses the section a `#fragment` names. The search view's start and
+  no-result states link to the index. EN and DE; the family and section
+  names are the archive's own German words in both.
+- **Server side.** `_ssr_browse` renders the whole index into the shell (every
+  family and section, a link per work, `<details>` so it works without
+  JavaScript), stamped once per process; `/browse` is in `INDEX_ROUTES`, the
+  sitemap and `llms.txt`; the work page's server-rendered summary carries the
+  same breadcrumb. `GET /api/works` (no id): `works`, a compact row per work
+  (`work_id`, `set`, `title`, `shelfmark`, `shelfmarks`, `family`, `section`,
+  `section_label`, `label`, `n_canvases`, `has_katalog`), and `groups`, the
+  tree (family → section with `anchor`, `title`, counts and the work ids of
+  its `entries` in order; the letters also `by_number`), under `DAY_CACHE`,
+  built on first use and held for the life of the process, with `?set=` and
+  `?family=`. `/api/works/{id}` gained `browse` (the work's section).
+  `robots.txt` gained `Allow: /api/works`: the old rule covered only
+  `/api/works/`, and `Disallow: /api/` caught the bare path.
+- **The grouping rules** (`web/browse.py`: pure functions over the `works`
+  rows, one grouped query of sender/addressee pairs per letter convolute —
+  `CORRESPONDENTS_SQL` — and the ids of the works with records; about 50 ms
+  for the corpus).
+  - *Family* is that of the first shelfmark with a recognised label, whatever
+    the OAI set; the two small sets are never spread over the series; they,
+    and every work without a usable LH/LBr/Marg shelfmark, go to *Other*, one
+    section per set, by shelfmark string.
+  - *LH*: the section is the first part as a number (Roman numerals read).
+    Its label is the phrase the library's titles give it ("Leibniz-Handschriften
+    zur *Mathematik* LH 35, …"; "zur/zu/zum" dropped, the catalogue's slips
+    tolerated) where more than half of the section's titles agree, else
+    `LH <n>`; an entry whose own phrase differs carries it. In 28 sections
+    the titles name one phrase and no other; LH 37 and LH 42 get none (their
+    titles name sub-groups: "LH 37, 1 · Akustik", "LH 42, 4, 1 ·
+    Aufzeichnungen zur Rechenmaschine").
+  - *LBr*: one section. Per convolute the names beside Leibniz in the linked
+    records' sender and addressee cells are counted per record (source tags
+    `(KorrespDB)`, `(GND)` stripped, cells naming several people split,
+    `Surname,Initials` spaced, doubt marks dropped, a bare surname counted
+    with its one fuller form), else the *X* of a record titled "X an Leibniz"
+    / "Leibniz an X", else nothing. Then the order check below decides which
+    name, if any, is shown; without one the label is the bare shelfmark.
+    Two orders: by name (accent-blind; the unnamed last, by number, under a
+    line that says so) and by number (the F series after the plain numbers).
+  - *Marg*: one section by number; the title cut at a word near 120
+    characters, the whole title in the `title` attribute.
+  - *Order* is natural (2 before 10, numbers before letters) and read from
+    the shelfmark as written.
+- **Why the letters are checked against their numbers.** The store holds the
+  catalogue records of the §70 volumes only, so a convolute's linked records
+  are often a handful of third-party letters, and "the most frequent name"
+  is then wrong with full confidence: LBr. 57 (Johann Bernoulli) → "Mencke,
+  O.", LBr. 16 (Arnauld) → the landgrave who forwarded his letters, LBr. 389
+  (Helmont) → "Motzfeld" on twenty records. The LBr numbers run
+  alphabetically by correspondent (Bodemann, 1889; the labels themselves show
+  it: 2 Abercromby … 1028 Zunner), so `names_in_order` keeps the longest run
+  of names that stays alphabetical down the numbers (a weighted longest
+  non-decreasing chain; more records, then the earlier mention, break ties).
+  A name may be filed under any word of it (Ursinus v.Bär under B,
+  DesVignoles under V, "gen. Schütz" under Sch), with J read as I as the
+  numbering interfiles them, and an umlaut as its vowel or spelled out. A
+  convolute's lesser name wins where its most frequent one is out of place;
+  a most frequent name outside the run is still shown when ten or more
+  records carry it and its initial fits between its neighbours' (C and K as
+  one) — the catalogue spells some names otherwise than the shelf does.
+  **Measured on the corpus:** of the 1,025 numbered convolutes 713 have name
+  candidates; 634 keep their most frequent name (two of them by that last
+  rule: Chuno, LBr. 185, and Crafft, LBr. 501), 21 take a lesser name that
+  fits (Addison, Arnauld, Berckelmann, Bernoulli, Drevet, Helmont, Kraus,
+  Mocenigo, Schott, Spinoza …), 58 stay unnamed. The F series (princes, by
+  house and first name) has no single order: it keeps its most frequent name,
+  and a name that would label two F convolutes stays with the one that has
+  more records (25 of 35 named, 2 withheld). In all **680 of 1,060 (64.2 %)**
+  carry a name; 744 (70.2 %) have records; 4 have records that name nobody.
+  What the check cannot see: a wrong name that happens to fit alphabetically.
+- **Shapes in the live rows that the prompt's rules did not cover.**
+  (1) `LBr. 726` is filed in the manuscripts' set: placed with the letters,
+  and the correspondents query takes `OR w.shelfmarks LIKE '%LBr%'` so it
+  gets its name (Philipp, Chr.). (2) `L Br. 827`, the label spelled apart,
+  parses to no family: repaired in `browse.py` only, placed with the letters.
+  (3) The normaliser reads a lone C, D, I, L, M, V or X as a Roman numeral,
+  right for `LH XXXV, I, 17` and wrong for the part letters of `LH 1, 3, 7 C`
+  (it would sort I, L, C, D, M before A): order comes from the shelfmark as
+  written, and a letter is a numeral only where the section itself is
+  written in Roman. (4) 35 manuscripts carry a second shelfmark, a variant
+  or a slip of the first (`LH 1, 3, 7 A` / `LH 1, 3, 7a`, `Lh 35, 4, 14`,
+  `LH35, 7, 3`, `LHH 41, 7c`); the first one places them.
+  (5) Sender and addressee cells run several people together without a
+  separator ("Brand,H. (KorrespDB) (GND)Leibniz (GND)"), carry qualifiers in
+  parentheses that belong to the name ("Leopold I. (Kaiser)"), `?` for an
+  unknown, or are empty. (6) The one live candidate for the
+  title fallback is "Leibniz an -- (?)"; a name without a letter is refused,
+  so the fallback names no convolute today. (7) Five Leibnitiana works carry
+  LH shelfmarks (`LH XLII,5`, `LH XXXV, I, 17, Bl. 1 - 17`): they stay in
+  their own group as asked, and the filter finds them by shelfmark. (8) Five
+  works of the manuscripts' set have no LH shelfmark (four "Handschriftenbestand
+  Ms", `Ms IV, 471 : A-F` …, one without any), and 26 of the Marginalien set
+  have none or a foreign one (22 of them with no page images): *Other*.
+  (9) Section labels are verbatim: LH 11 reads "Allgemeinen Geschichte" (the
+  dative of "zur Allgemeinen Geschichte"), LH 9 "Archälogie" and LH 15
+  "Würtemberg" (the library's spellings). (10) 27 works have no page images
+  and are listed with "0 pages".
+- **The three live fixtures** (`tests/fixtures/works_live.json`,
+  `lbr_correspondents_live.json`, `crosswalk_works_live.json`; 2,225, 2,244
+  and 1,197 rows, 0.9 MB of CC0 and CC BY metadata), exported read-only
+  (`mode=ro`) from the corpus store on 2026-10-06: the works table
+  (`gwlb_object_id, set_name, title, shelfmarks, n_canvases`, by id),
+  `browse.CORRESPONDENTS_SQL`, and `SELECT DISTINCT work_id FROM crosswalk`,
+  one JSON object per line. `tests/test_web_browse.py` runs the tree over
+  them (every work in exactly one entry, the sections, the family counts, the
+  share, eleven convolutes by name) beside synthetic tests of every rule.
+- **Verified.** 569 tests (+24), ruff clean. Against the corpus store,
+  opened read-only by `leibniz serve --backend none --port 8765` (the store's
+  size and date unchanged afterwards): `/api/works` 0.64 s on the first call
+  and 2 ms after it, 781 KB (84 KB gzipped), 2,225 rows, every work once in
+  the tree; `/browse` 187 KB of HTML (43 KB gzipped) with 2,225 distinct
+  `/work/` links under 36 anchors; robots, sitemap (2,229 URLs) and llms.txt
+  carry the new lines; search answers 503 by design. Then 60 checks in
+  Chromium (Playwright): the tree, the filter (shelfmark, name, title,
+  accents, the word boundary, no match, clearing), both orders of the letters
+  and the note between named and unnamed, keyboard reach and a visible focus
+  ring, an entry to its work page, the breadcrumb back to its opened and
+  focused section (in-app and on a full load), EN and DE with the open
+  sections kept across the switch, the search view's link, 390 px without
+  horizontal scroll (sections open, filtering, the work page), the index
+  with JavaScript off, no console errors and no failed request; axe-core 0
+  violations in seven states. The first axe run found one violation that
+  predates this phase, on every view: the EN/DE buttons' spoken names
+  ("English") did not contain their visible labels — now "EN: English",
+  "DE: German" (WCAG 2.5.3).
+- **Where it ran** (see Divergences). Inside WSL2, on the checkout the corpus
+  runs used, from a session started in Windows; a separate environment
+  `.venv-w3` (`UV_PROJECT_ENVIRONMENT`, `UV_FROZEN`) so the pipeline's `.venv`
+  was never synced; `.gitignore` has `.venv-*/`. **Suite on Windows:** not
+  run — nothing here executes on the Windows side but the browser; the
+  suite's clean bill is the WSL one above. Opening the WAL-mode store
+  read-only leaves an empty `inventory.sqlite-wal` and a 32 KB `-shm` beside
+  it (as `leibniz serve` always has); they are not a write to the store.
+- **Known limits.** A correspondent's name exists only where catalogue
+  records are linked and agree with the shelf order: 380 convolutes are
+  unnamed (316 without records, 4 whose records name nobody, 60 withheld). A
+  full Arbeitskatalog export from TELOTA would complete them, and the labels
+  then fill in by re-running the catalogue crosswalk on the desktop and
+  copying the store, with no code change. Names are the catalogue's short
+  forms ("Bernoulli, Joh."). The twelve LH sections without a digitized unit
+  (14, 16–18, 22, 26, 28–33) do not appear. `/api/works` may be cached for a
+  day, and the imported ES modules for an hour (W1).
+- **Follow-ups seen.** A reviewed table of the 42 LH section names (Open
+  questions #22); full names for the correspondents (the records' titles
+  have them: "Leibniz an Heinrich Oldenburg"); the same breadcrumb on the
+  page view; cross-listing the Leibnitiana pieces that carry LH shelfmarks;
+  `L Br.` and the lone-letter Roman reading in `catalog/shelfmarks.py` itself
+  (left alone here: it is the crosswalk's key).
 
 ### W2 — "quoted phrases" and -exclusions in search (2026-10-02) ✅
 
@@ -1211,7 +1404,10 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **536** (2026-10-02, W1; with the `gt` + `release` extras) |
+| Tests passing | **569** (2026-10-06, W3; with the `gt` + `release` extras; 545 after W2) |
+| **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
+| **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
+| W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
 | **Phase D (2026-09-16)** | search index (FTS5/Meili) · API · IIIF v3 + annotations · viewer (EN/DE, axe-clean) · Parquet exports + cards |
 | Reports on Zenodo | statement 22782813 · census 22782815 · PHILIUMM repro 22782817 · retro-aligned GT 22782819 |
 | **C1 corpus run (2026-09-11)** | **COMPLETE: 236,210/236,795 pages recognised (99.75%) · 13,508,625 lines** |
@@ -1259,6 +1455,7 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Open questions
 
+22. **The browse index wants two authorities (2026-10-06, W3).** (a) *LH section names* are cut from the GWLB's titles: LH 11 reads "Allgemeinen Geschichte" (the title's dative), LH 9 "Archälogie" and LH 15 "Würtemberg" (the library's spellings), LH 37 and LH 42 have no name (their titles name sub-groups), and the twelve sections without a digitized unit are absent. A reviewed table of the 42 section names would settle all four; the question to the Leibniz-Edition is whether the grouping matches how the Arbeitsstellen think of the Faszikel. (b) *Correspondents*: 380 of the 1,060 letter convolutes are unnamed (316 without linked records, 4 whose records name nobody, 60 whose names do not fit the order of the LBr numbers). A full Arbeitskatalog export completes them with no code change. The order check cannot see a wrong name that happens to fit alphabetically, and the F series has no order to check against; a reader who knows the convolutes should look over the named ones once (`/api/works?family=LBr`).
 21. **Fold the metadata fields in the Meilisearch index (2026-10-02).** Titles, shelfmarks, AA references and folio labels are indexed as written, so a quoted reference finds nothing (W2), and even unquoted a Roman numeral with V or J never meets its folded form: *VI* is sent as *ui* and no typo is allowed under four letters. Measured on 1.53.2: `VI` does not find a page whose only VI is in `AA VI,4 N. 109`, and `AA VI,4 N. 109` finds it only through the bare *aa*, below an unrelated page whose text has *aa*. FTS5 folds those columns. Index folded copies at the next rebuild (C4) — a rebuild drops and refills the index, so not in a routine deploy.
 20. **Multi-word queries on Meilisearch are not AND (2026-10-02).** `meili.py` sends no `matchingStrategy`, so Meilisearch's default `last` drops words from the end of the query when results run short and typo-matches the first word left: live, `deus mundus` reports 97,633 hits (at result 8,900, 98 of 100 hold neither word — French *des*) and `mundus deus` 3,775, where FTS5 requires every word. `matchingStrategy: "all"` would make the backends agree and the counts honest, at the cost of pages where a word was misread past typo tolerance — a product decision, open. Quoted phrases and exclusions hold under either strategy.
 19. **Sheet-sides registered twice (2026-09-23).** Static-JPEG works list one scan of an unfolded sheet under two folio labels; the corpus run read each twice. Run `leibniz images duplicates` over the thumbnails, publish the distinct-scan count, fold twins in the index build, and restate `pages`/`lines` on the About page.
@@ -1369,6 +1566,32 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-06 — W3, departures from the prompt.** (1) *Where it ran.* The
+  prompt assumed a Windows checkout (Windows uv, `.venv-win`, the suite's
+  Windows failures listed). This checkout is the WSL2 tree the corpus runs
+  used, opened from Windows as `\\wsl.localhost\Ubuntu\…`, so git, uv, pytest
+  and the app ran inside WSL through `wsl.exe`: Windows git reports this
+  tree's shell scripts as modified (mode bits) and has `autocrlf=true`, and
+  SQLite across the 9P share is not something to try on the master store.
+  The side environment is `.venv-w3`, and `.gitignore` has `.venv-*/` rather
+  than `.venv-win/`. The suite was not run on Windows. Playwright ran from
+  Windows Node in the session's temp folder (not `scratchpad/pw`) against the
+  WSL server over localhost; its screenshots stayed there. (2) *The letters'
+  names are checked against the order of their numbers*, beyond the prompt's
+  "most frequent name" (Phase log W3): fewer names, none knowingly wrong.
+  (3) *The correspondents query* has one predicate more than the prompt's
+  export (`OR w.shelfmarks LIKE '%LBr%'`), for the LBr convolute filed in the
+  manuscripts' set; the fixture was exported with the module's own query.
+  (4) *The family follows the shelfmark, not the set*, except for the two
+  small sets. (5) `catalog/shelfmarks.py` gained `split_family()` — the label
+  search of `normalize_signature`, extracted so the tail can be read as
+  written; keys and matching are unchanged. (6) In `/api/works` the `groups`
+  tree lists work ids and the rows carry the rest, so each title travels
+  once. (7) The prompt calls the LH sections "the Ritter scheme"; this
+  repository's own texts give the LH and LBr shelfmarks to Bodemann's
+  catalogues (1889/1895). The page names neither and says the section names
+  are cut from the library's titles. (8) The EN/DE buttons' spoken names
+  changed (an axe finding older than this phase, on every view).
 - **2026-10-02 — W1 text export, two departures from the prompt.** (1) The
   download name is `leibniz-legible_<id>.txt` with the page id's colon as `_`
   (`leibniz-legible_00068221_0043.txt`): Windows refuses `:` in a file name;
@@ -1450,13 +1673,31 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**W2 (2026-10-02), operator:** after merging, the §9 update on the VPS — code
+**W3 (2026-10-06), operator:** merge `web-browse-index`, then the §9 update on
+the VPS (`deploy/README.md`) — code only: no index rebuild, no Meilisearch
+restart, no new dependency. Then, over HTTP: `/browse` answers 200 and its
+HTML holds the family headings, `id="lh-35"` and `/work/` links; `/api/works`
+answers 200 JSON with `groups`; `/robots.txt` has the line `Allow:
+/api/works`; `/sitemap.xml` lists `/browse`; `/llms.txt` mentions `/browse`;
+and the three W1/W2 checks still pass (a page's `/text` starts with `# `, the
+search page says "for an exact phrase", `style.css` hides the overlay by
+`visibility`). In a private window: the nav link, EN and DE, the filter, the
+order toggle of the letters, `/browse#lh-35`, a work page's breadcrumb.
+Returning readers may see the old modules for up to an hour. Then the reply
+to the reader at the Leibniz-Edition: the index is there; does the grouping
+match how the Arbeitsstellen think of the Faszikel (Open questions #22); and
+the two standing asks — a TELOTA contact for an Arbeitskatalog export, which
+would name the remaining letter convolutes, and CC BY or written permission
+for the Reihe VIII reading text. Next phase: K1, from a fresh session on the
+merged main.
+
+**W2 (2026-10-02), operator:** ✅ live (checked 2026-10-06). After merging, the §9 update on the VPS — code
 only: no index rebuild, no Meilisearch restart, no new dependency. Then on
 the box: `deus` and `deus mundus` report what they did (10,450 and 97,633),
 `"deus mundus"` far fewer, `deus -mundus` fewer than `deus`. Readers may see
 the old hint for up to an hour (the imported modules keep plain URLs).
 
-**W1 (2026-10-02), operator:** after merging `web-overlay-text-export`, the
+**W1 (2026-10-02), operator:** ✅ live (checked 2026-10-06). After merging `web-overlay-text-export`, the
 §9 update on the VPS (`deploy/README.md`), then the checks in the W1 log:
 both text endpoints answer `200` with a `# ` header, and the overlay
 one-liner prints `hidden | Show line overlay`. Optionally tell the reader at

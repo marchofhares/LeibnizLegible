@@ -110,10 +110,11 @@ margin numbers) — apparatus, commentary and introductions never enter it
 ### Search, viewer, IIIF (Phases D1/D2)
 
 The viewer shell is stamped per route (title, description, canonical URL, share
-metadata) and, for `/work/{id}` and `/page/{id}`, carries a server-rendered
-summary — the catalogue entries and page list, or the machine text — so search
-engines, answer engines and readers without JavaScript see the content; the app
-replaces it on boot. `/sitemap.xml` lists every work, `/llms.txt` describes the
+metadata) and, for `/browse`, `/work/{id}` and `/page/{id}`, carries a
+server-rendered summary — the whole index by shelfmark, the catalogue entries
+and page list, or the machine text — so search engines, answer engines and
+readers without JavaScript see the content; the app replaces it on boot.
+`/sitemap.xml` lists the index and every work, `/llms.txt` describes the
 API for agents, `/robots.txt` opens the JSON routes and keeps blind crawlers off
 the IIIF manifests. The shell names its stylesheet and entry scripts by content
 hash (`/static/app.js?v=…`, computed at startup), so a deploy reaches returning
@@ -123,7 +124,7 @@ readers at once.
 uv sync --extra web                        # fastapi + uvicorn
 uv run leibniz index build                 # page index → data/search.sqlite (SQLite FTS5)
 uv run leibniz index query "calculemus"    # try it from the shell
-uv run leibniz serve                       # http://127.0.0.1:8000 — search, /work/…, /page/…, /about
+uv run leibniz serve                       # http://127.0.0.1:8000 — search, /browse, /work/…, /page/…, /about
 curl -OJ http://127.0.0.1:8000/api/works/00068642/text    # a work's text → leibniz-legible_00068642.txt
 # production: typo-tolerant Meilisearch
 docker compose up -d meilisearch
@@ -143,7 +144,13 @@ as a plain-text download (one line per recognised line under a `# ` header
 carrying page URL, source image, model, run, confidence, licence and the
 wording rule; the work's pages streamed in canvas order, each under a
 `## Folio <label> — <page id>` line; `?format=tsv` for `line_id`, `line_seq`,
-`conf`, `status`, `text` rows) — the viewer links both. Each
+`conf`, `status`, `text` rows) — the viewer links both. `/api/works` (no id)
+lists every work as a compact row together with the tree behind `/browse`
+(`web/browse.py`): shelfmark family → section → works, the manuscripts by LH
+section under the name the library's titles give it, the letter convolutes by
+correspondent — a name is shown only where the linked catalogue records name
+one that fits the alphabetical order of the LBr numbers — and the annotated
+books by number (`?set=`, `?family=` narrow it). Each
 work is also a IIIF Presentation 3 manifest (`/manifests/{id}`) whose canvases
 reference W3C annotation pages (`/annotations/{page_id}`) carrying the
 transcription — the interop deliverable D7. The viewer under
