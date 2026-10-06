@@ -238,3 +238,324 @@ _Depends on: C4, D2._
 _Depends on: D2._
 
 > Smallest useful human-in-the-loop: on the page view, an "improve this line" affordance → auth via a simple invite-token allowlist (no accounts system) → submitted corrections stored as new line versions with `status='corrected'`, corrector identity, and timestamp; original machine rows immutable; a `/corrections` review queue where the operator promotes to `status='verified'`. Export corrections as a supplementary GT dataset. Rate-limited, spam-safe, and entirely optional to the Tier 1 definition of done — do not let this phase grow into a platform.
+
+---
+
+## Follow-up phases (2026-10)
+
+_Phases outside the A0–E1 build order, each run from one prompt in one session. The prompts are appended verbatim, as they were given, except that a correspondent's name is withheld (square brackets mark the place); `STATUS.md` records what each session found and where it departed from its prompt._
+
+### Phase W3 — A browse page (run 2026-10-06)
+
+~~~~text
+Phase W3 — A browse page: the Nachlass by shelfmark family, section and convolute.
+One local session on the operator's Windows desktop: pre-flight, build, hand-over,
+deploy, verify.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. This phase is W3: STATUS.md already holds
+W1 (overlay toggle, text export) and W2 (quoted phrases and exclusions in search),
+both of 2026-10-02. Do not reuse either label.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code on the operator's Windows desktop, started from PowerShell,
+inside the repository checkout. Your shell tool may be PowerShell or Git Bash:
+check which (`$PSVersionTable` works only in PowerShell; `echo $0` only in bash)
+and write commands for the shell you actually have. In Windows PowerShell 5.1
+`&&` does not chain commands (use `;` or separate calls), environment variables
+are set with `$env:NAME = "value"`, and there are no heredocs: write any script
+to a file under scratchpad/ (gitignored) and run it from there.
+This machine holds the project's data. data/inventory.sqlite is the MASTER store
+(13.5M v1 lines, 297k gt_lines, the product of two months of compute) and
+data/images is the 396 GB page cache. Rules:
+- Open the store read-only only: through `uv run leibniz …` commands (they open
+  mode=ro) or through Python's sqlite3 with a `file:…?mode=ro` URI. Never run a
+  write, a VACUUM, or a move against it. Never delete anything under data/.
+- Ask the operator, before running anything: (a) is this checkout the one the
+  C1/C2 runs used, and did those runs happen inside WSL2 (STATUS says the box is
+  a 16-core WSL2 machine with a GTX 1660 Ti); (b) the path of data/inventory.sqlite
+  as seen from this shell. Wait for the answers.
+- Keep the existing Python environment intact. If `.venv` exists and holds
+  `bin/python` but no `Scripts\python.exe`, it is the Linux environment the
+  pipeline runs in; do not let Windows uv touch it. Before any `uv` command set
+  `$env:UV_PROJECT_ENVIRONMENT = ".venv-win"` (bash: `export
+  UV_PROJECT_ENVIRONMENT=.venv-win`) and add the line `.venv-win/` to .gitignore
+  (commit it with the rest; note it in STATUS). If `uv --version` fails, ask the
+  operator before installing anything (`winget install astral-sh.uv`).
+- Line endings: the repo has no .gitattributes. Check `git config --get
+  core.autocrlf`. Write new text files with LF endings; before each commit read
+  `git diff --stat` and treat a file where every line changed as a line-ending
+  accident: revert it and redo the edit.
+- The operator merges. You push the branch and hand over; you never merge and
+  never close the PR. You may create the PR with `gh` only on the operator's yes.
+- The VPS: you run nothing there without the operator's explicit yes in chat for
+  the exact command shown, and nothing other than the §9 "Update the app" block
+  from deploy/README.md.
+- Email: you draft; the operator sends.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` must be empty and `git rev-parse --abbrev-ref HEAD`
+   should be main; otherwise stop and ask. `git fetch origin` and `git pull
+   --ff-only origin main`. Confirm `git remote -v` points at
+   github.com/marchofhares/leibnizlegible and that `git config user.name` and
+   `user.email` are set.
+2. Environment: `uv --version`; `node --version` (needed only for the Playwright
+   check in Task 3; if absent, ask the operator whether to install it with
+   `winget install OpenJS.NodeJS.LTS` or to do the browser check by hand);
+   `gh --version` and `gh auth status` (optional, for creating the PR); `ssh -V`
+   (for the deploy in Task 5).
+3. Baseline on this machine, with UV_PROJECT_ENVIRONMENT set as above: `uv sync
+   --extra web --extra gt --extra release`, `uv run ruff check .`, `uv run ruff
+   format --check .`, `uv run pytest -q`. Record the counts. Failures that are
+   Windows-only (file locking on temp SQLite files, path separators, a missing
+   SQLite FTS5 module) are pre-existing and not yours: list them in STATUS.md
+   under "Suite on Windows" and, if WSL is available, run the suite there too
+   (`wsl -e bash -lc "cd <path> && uv run pytest -q"`) for the clean bill. Never
+   change unrelated tests or code to make them pass on Windows.
+4. Live-site state. STATUS.md's "Next" still lists the §9 deploy of W1 and W2 as
+   an operator step; find out whether it ran:
+   - GET https://leibnizlegible.com/api/pages/00068221:0043/text → 200 and a body
+     starting with "# " (W1 text export);
+   - GET https://leibnizlegible.com/search → the HTML contains the phrase
+     "for an exact phrase" (the W2 hint);
+   - GET https://leibnizlegible.com/static/style.css → contains
+     ".line-overlay.is-hidden" followed by "visibility: hidden" (the W1 overlay fix).
+   Use Invoke-WebRequest -UseBasicParsing or curl. Record pass/fail for each; a
+   failure means the VPS is behind main, which the deploy in Task 5 fixes (it
+   pulls main), so re-check all three after that deploy.
+5. Print a short plan and wait for the operator's "go".
+
+## Context
+Leibniz Legible (https://leibnizlegible.com) is live. The web layer is
+src/leibniz/web/: api.py (FastAPI, create_app; JSON API; the viewer shell served
+for INDEX_ROUTES, each with a server-rendered fallback for crawlers via
+_stamp_shell and the _ssr_* helpers; _sitemap_xml lists one URL per work;
+DAY_CACHE is the one-day Cache-Control header), static/ (app.js router with
+parseRoute and the VIEWS map for /, /search, /about, /work/{id}, /page/{id};
+views in static/views/; EN and DE strings in static/i18n.js; helpers in
+static/dom.js including setLabel and folioLabel; index.html with the site nav
+linking Search and About; robots.txt and llms.txt). Store access is in
+src/leibniz/db.py: Work(gwlb_object_id, set_name, title, shelfmarks, metadata,
+manifest_url, n_canvases), iter_works(conn, set_name=None), get_pages.
+_katalog_for_work(conn, work_id) in api.py returns the catalogue records linked
+to a work; its `correspondent` field is the record's `absender` only, which is
+why the browse index reads the raw record metadata instead (LBr rule below).
+Shelfmark parsing lives in src/leibniz/catalog/shelfmarks.py:
+normalize_signature(raw) → Signature(family in {"LH","LBr","Marg","LK"} or
+None, parts: tuple of normalised tokens, lower-cased, Roman numerals converted
+to Arabic, e.g. "LH XXXV, 3 A 8" → ('35','3','a','8'), blatt). Tests:
+tests/test_web_*.py with the fixture store `store_path` from tests/conftest.py
+and the `_client` helper in tests/test_web_api.py. The app starts with
+`uv run leibniz serve` (a top-level command; `--backend none` runs it without a
+search index; the default store path is data/inventory.sqlite, opened read-only;
+single-worker mode is plain uvicorn and works on Windows). Everything runs
+offline. Branch `web-browse-index`, created from the updated main.
+
+The site has search, work pages and page views, but no way to browse. A reader
+from the Leibniz-Edition ([name and role withheld]) asked
+for "an index of the individual shelfmark groups", so that one can "start from
+the group name ('Faszikel') and identify the relevant shelfmark and folios". The
+work pages already list folios with thumbnails; the missing levels are above them.
+
+## The data, as it actually is (2,225 works)
+You have the live store, so export the metadata the grouping needs as committed
+fixtures, read-only. Write scratchpad/export_live_fixtures.py with this content
+and run it from the repo root with `uv run python scratchpad/export_live_fixtures.py`
+(adjust the path to the store if the operator gave another):
+
+    import json, sqlite3
+    from pathlib import Path
+    conn = sqlite3.connect("file:data/inventory.sqlite?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    out = Path("tests/fixtures")
+    def dump(name, sql):
+        rows = [dict(r) for r in conn.execute(sql)]
+        body = "[\n" + ",\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n]\n"
+        (out / name).write_text(body, encoding="utf-8", newline="\n")
+        print(f"{name}: {len(rows)} rows")
+    dump("works_live.json",
+         "SELECT gwlb_object_id, set_name, title, shelfmarks, n_canvases "
+         "FROM works ORDER BY gwlb_object_id")
+    dump("lbr_correspondents_live.json", """
+         SELECT c.work_id,
+                json_extract(k.metadata,'$.absender') AS absender,
+                json_extract(k.metadata,'$.adressat') AS adressat,
+                COUNT(*) AS n_records,
+                MIN(json_extract(k.metadata,'$.titel')) AS titel
+           FROM crosswalk c
+           JOIN katalog_records k ON k.record_id = c.katalog_record_id
+           JOIN works w ON w.gwlb_object_id = c.work_id
+          WHERE w.set_name = 'LeibnizBriefwechsel'
+          GROUP BY c.work_id, json_extract(k.metadata,'$.absender'),
+                   json_extract(k.metadata,'$.adressat')
+          ORDER BY c.work_id, n_records DESC""")
+    dump("crosswalk_works_live.json",
+         "SELECT DISTINCT work_id FROM crosswalk ORDER BY work_id")
+
+Expect 2,225 works rows, a few thousand LBr rows, and about 1,300 crosswalked
+work ids; the three files together are well under a megabyte of CC0 and CC BY
+metadata and are committed with this phase. The works file carries
+`shelfmarks` as a JSON-encoded array inside a string. Inspect the real rows
+before writing the rules, and report in STATUS.md any shape the rules below do
+not cover. What the census and these files show:
+- LeibnizHandschriften, 756 works: titles carry the section name and shelfmark,
+  e.g. "Leibniz-Handschriften zur Mathematik LH 35, 3 A 8", "Leibniz-Handschriften
+  zur Theologie LH 1, 19", "Leibniz-Handschriften zu Braunschweig-Lüneburg LH 23,
+  2, 21". The section is the first shelfmark part (LH 1 … LH 42, the Ritter
+  scheme); its name is the "zur/zu/zum …" phrase in the title.
+- LeibnizBriefwechsel, 1,059 works: titles are the generic "Nachlass Gottfried
+  Wilhelm Leibniz"; the shelfmark is "LBr. 228" or "LBr. F 20". The harvest keeps
+  no names from MODS, so the correspondent is only available from the linked
+  catalogue records: their metadata carries `absender` and `adressat` as separate
+  fields, each like "Oldenburg (KorrespDB) (GND)" or "Leibniz (GND)", and a
+  `titel` like "Leibniz an Heinrich Oldenburg". Roughly half of all works have
+  records today, so there must be a graceful fallback.
+- LeibnizMarginalien, 396 works: titles are the long titles of the annotated
+  printed books; shelfmarks like "Leibn. Marg. 64:1" or "Leibn. Marg. 230, Stück 1".
+- leibniz-rekonstruktionen (2) and Leibnitiana (12): small, list them as their
+  own groups.
+
+## Task 1 — Grouping logic (pure, tested)
+Add src/leibniz/web/browse.py with pure functions that take Work rows, a map
+work_id → correspondent rows (absender, adressat, n_records, titel), and the set
+of work ids with records, and return a tree family → section → entries. Rules:
+- LH: section = first part as an integer; section label = the majority "zur/zu/
+  zum X" phrase among that section's titles, fallback "LH <n>". Entries sorted by
+  natural order of the remaining parts (numeric before alphabetic, 2 before 10).
+- LBr: one section, entries labelled by correspondent: pool the work's absender
+  and adressat values, drop Leibniz himself (any value whose name part is
+  "Leibniz"), strip parenthesised source tags like "(KorrespDB)" and "(GND)",
+  normalise "Surname,Initials" to "Surname, Initials", and take the most
+  frequent remaining name weighted by n_records; fallback to the titel pattern
+  "X an Leibniz" / "Leibniz an X"; final fallback the bare shelfmark. Offer both
+  orders in the data: alphabetical by label and by LBr number (lettered numbers
+  such as "F 20" sort after the plain numbers, by letter then number).
+- Marg: one section, sorted by Marg number, title truncated to about 120
+  characters at a word boundary with the full title in a title attribute.
+- Everything else (LK, foreign, unparsable, the two small sets): an "Other"
+  section per set, sorted by shelfmark string.
+Each entry: work_id, shelfmark(s), label, title, n_canvases, and whether the work
+has catalogue records. Tests on synthetic Work rows covering every rule above,
+including Roman-numeral shelfmarks, a work whose only correspondent row is
+Leibniz himself, and missing records; plus one test over the three live
+fixtures asserting the headline shape: every work lands in exactly one entry,
+the LH sections present, and the share of LBr works that received a
+correspondent label (print that share; it goes in STATUS.md).
+
+## Task 2 — API
+GET /api/works (no id): the full list, compact rows (work_id, set, title,
+shelfmarks, family, section, section_label, label, n_canvases, has_katalog),
+plus a `groups` tree from Task 1, under DAY_CACHE. Compute once per process on
+first use and hold in memory (the works table changes only on a corpus run; the
+app restarts then; several worker processes each holding a copy is fine); build
+the correspondent labels with one grouped SQL query over the crosswalk and
+katalog_records tables (json_extract on metadata for absender, adressat and
+titel; the same query as the export above) rather than one query per work.
+Optional `?set=` and `?family=` filters. Make sure the existing
+/api/works/{work_id} and /api/works/{work_id}/text routes are not shadowed. Add
+`Allow: /api/works` (no trailing slash) to static/robots.txt: the current rule
+allows only `/api/works/`, and `Disallow: /api/` would catch the bare path. Tests
+on the fixture store: shape, grouping of the fixture's LH and LBr works, filters,
+cache header, robots.
+
+## Task 3 — The browse page, verified against the real store
+- Route /browse: add to INDEX_ROUTES with a server-rendered fallback
+  (_ssr_browse) that lists every family and section with links to the work
+  pages, so crawlers and readers without JavaScript get the whole index; add
+  /browse to the sitemap and a line to static/llms.txt.
+- Client: static/views/browse.js registered in app.js (parseRoute and the VIEWS
+  map); a nav link "Browse" (DE: "Signaturen") in index.html via data-i18n, and a
+  link from the search view's empty state. Layout: family tabs or headed
+  sections (Handschriften, Briefwechsel, Marginalien, Other), collapsible
+  sections using details/summary with counts (works, pages), a client-side
+  filter box that narrows by shelfmark, label or title as you type, and an
+  LBr sort toggle (by name / by number). Each entry links to /work/{id}; every
+  section has a stable anchor (e.g. #lh-35) so work pages can link back: add a
+  breadcrumb on the work page "Browse › LH 35 · Mathematik" pointing at the
+  anchor. All strings EN and DE; section labels are the archive's own German
+  phrases and stay as data in both languages. Keyboard reachable, visible focus,
+  no horizontal scroll at phone width, honest about machine text where the
+  existing views are.
+- Tests: the INDEX_ROUTES test covers /browse; SSR contains a link to each
+  fixture work; sitemap includes /browse; robots allows /api/works.
+- Verification against the real store. Start the app in the background on the
+  master store, read-only, on a spare port: `uv run leibniz serve --backend none
+  --port 8765` (search answers 503 by design; works, pages and /browse work).
+  First over HTTP: /browse returns the server-rendered index with every family
+  and a link per work; /api/works returns the rows and the groups tree in well
+  under a second after the first call; /robots.txt, /sitemap.xml and /llms.txt
+  carry the new lines. Then in a browser. If Node is present: Playwright from
+  npm in scratchpad/pw (`npm init -y`, `npm install playwright axe-core`, `npx
+  playwright install chromium`, about 150 MB; plain `chromium.launch()`, no proxy
+  settings here), load http://127.0.0.1:8765/browse and check: the tree renders,
+  the filter narrows, the LBr toggle reorders, an entry link resolves to its
+  work page, a work page's breadcrumb lands on its section anchor, EN and DE, no
+  console errors, axe-core zero violations; phone width too (390 px, no
+  horizontal scroll). Screenshots under scratchpad/, never in the repo. If Node
+  is absent and the operator declined to install it, print that URL and the
+  same checklist for the operator to run in their own browser, and wait for
+  their report. Stop the server when done.
+
+## Task 4 — Record, commit, push, hand over
+ruff + pytest clean (with the Windows caveat from Task 0 recorded). STATUS.md: a
+"W3" entry (Current state, Phase log, Key numbers, Next) with what was built,
+the grouping rules, the measured LBr label share, the known limits
+(correspondent labels exist only where catalogue records are linked, about half
+the works today; a full Arbeitskatalog export from TELOTA would complete them,
+and the labels then fill in by re-running the catalogue crosswalk on the
+desktop and copying the store, with no code change), the three live fixtures,
+the Windows notes (.venv-win, suite results), and the follow-ups you see; under
+Next, the operator's §9 deploy and the live checks of Task 5. Append this prompt
+verbatim to PROMPTS.md under a heading "Follow-up phases (2026-10)" (create it
+if absent). Commit in sensible pieces with descriptive messages (fixtures and
+.gitignore; browse.py and tests; API; viewer; docs), then `git push -u origin
+web-browse-index`. Then hand over: print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...web-browse-index?expand=1
+(or, if gh is authenticated and the operator says yes, create the PR with
+`gh pr create --base main --head web-browse-index` and a short title and body),
+tell the operator what to read in the diff (the STATUS.md entry, the LBr share,
+any shapes the rules could not place), and ask them to say "merged" when the
+PR is merged. Wait. Do not touch the branch or main in the meantime.
+
+## Task 5 — Deploy, only after "merged", only with a yes
+Ask the operator for the SSH target (for example root@leibnizlegible.com) and
+whether to run the deploy from this session. Show the exact command first and
+run it only on an explicit yes. It is the §9 "Update the app" block from
+deploy/README.md and nothing else; the remote shell is bash, so `&&` is right
+inside the quoted string even from PowerShell; if the login user is not root,
+prefix systemctl with sudo:
+
+    ssh <target> "sudo -u leibniz -H git -C /opt/leibniz-legible pull --ff-only && sudo -u leibniz -H env UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python uv sync --project /opt/leibniz-legible --frozen --no-dev --extra web && systemctl restart leibniz-legible && sleep 2 && curl -s http://127.0.0.1:8000/healthz"
+
+Code only: no index rebuild, no Meilisearch restart, no new dependency. If the
+operator prefers to run it themselves, print the block and wait for their
+output. Then verify live, over HTTP from here: /browse is 200 and its
+server-rendered body holds the family headings, a section anchor and a /work/
+link; /api/works is 200 JSON with `groups`; /robots.txt has the exact line
+`Allow: /api/works`; /sitemap.xml lists /browse; /llms.txt mentions /browse;
+and the three W1/W2 checks from Task 0 all pass now. Tell the operator to open
+https://leibnizlegible.com/browse in a private window and look at the nav link,
+EN and DE, the filter, the LBr toggle, one LH anchor and a work page's
+breadcrumb; returning readers may see the old ES modules for up to an hour
+(Caddy's cache on /static/). If anything fails live, say exactly what, propose
+the fix as a new branch, and do not patch anything on the server.
+
+## Task 6 — Draft the message to [the reader] (the operator sends it)
+Write a short reply in English to his mail of 2 October, as a draft in
+scratchpad/[reader]-reply.md and in chat: the index is live at
+https://leibnizlegible.com/browse, grouped by LH section with the Ritter names,
+LBr by correspondent where the Arbeitskatalog links exist, Marginalien by
+number; the transcription export and the overlay fix are live as well (if the
+Task 5 checks confirm it); ask whether the grouping matches how the
+Arbeitsstellen think of the Faszikel; and repeat, briefly, the two asks from
+the operator's 2 October mail: the TELOTA contact for an Arbeitskatalog export
+(which would complete the correspondent labels for the other half of the
+works), and CC BY or written permission for the Reihe VIII reading text. No
+numbers in the draft that the session did not measure. Do not send anything.
+
+## Finish
+A closing summary in chat: what is merged and live, the LBr label share, the
+pre-existing Windows test failures if any, what [the reader]'s reply would unlock, and
+that the next phase is K1 from a fresh session on the merged main.
+~~~~

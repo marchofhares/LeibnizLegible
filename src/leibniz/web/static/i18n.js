@@ -20,10 +20,14 @@ const STRINGS = {
     'site.skip': 'Skip to main content',
     'nav.label': 'Main',
     'nav.search': 'Search',
+    'nav.browse': 'Browse',
     'nav.about': 'About',
+    'crumbs.label': 'Breadcrumb',
     'lang.label': 'Language',
-    'lang.en': 'English',
-    'lang.de': 'German',
+    // Spoken names of the EN / DE buttons; each begins with what the button
+    // shows, so that the name contains the visible label (WCAG 2.5.3).
+    'lang.en': 'EN: English',
+    'lang.de': 'DE: German',
     'footer.label': 'Attribution and licensing',
     'footer.repo': 'Source code and issue tracker',
 
@@ -79,6 +83,47 @@ const STRINGS = {
     'search.filteredToWork': 'Restricted to one work.',
     'search.clearWork': 'Search all works',
     'search.noWork': 'Untitled work',
+    'search.browse': 'Or browse the Nachlass by shelfmark.',
+
+    // ---- browse ----------------------------------------------------------
+    // Family and section names are the archive's own German words; they stay
+    // as data in both languages (the API sends them).
+    'browse.heading': 'Browse the Nachlass by shelfmark',
+    'browse.intro':
+      'Every digitized unit of the Nachlass, grouped as it is shelved: the manuscripts (LH) by section, the correspondence (LBr) by correspondent, the annotated books (Marginalien) by number. Each entry opens the work with its folios.',
+    'browse.loading': 'Loading the index…',
+    'browse.filter.label': 'Filter by shelfmark, name or title',
+    'browse.filter.placeholder': 'e.g. LH 35, 3 or Oldenburg',
+    'browse.filter.count': '{n} of {total} works match.',
+    'browse.filter.count.one': '{n} of {total} works matches.',
+    'browse.filter.none': 'No work matches this filter.',
+    'browse.matching': '{n} of {total}',
+    'browse.works': '{n} works',
+    'browse.works.one': '{n} work',
+    'browse.pageimages': '{n} page images',
+    'browse.pageimages.one': '{n} page image',
+    'browse.pages': '{n} pages',
+    'browse.pages.one': '{n} page',
+    'browse.family.LH': 'Handschriften (LH)',
+    'browse.family.LBr': 'Briefwechsel (LBr)',
+    'browse.family.Marg': 'Marginalien',
+    'browse.family.Other': 'Other',
+    'browse.about.LH':
+      'Leibniz’s manuscripts, in the sections of the LH shelfmarks. The section names are cut from the library’s own titles.',
+    'browse.about.LBr':
+      'The correspondence, one convolute per correspondent. A name is shown where the linked records of the Arbeitskatalog name one that fits the alphabetical order of the LBr numbers; otherwise the entry shows its shelfmark only.',
+    'browse.about.Marg': 'Printed books with Leibniz’s marginal notes, by number.',
+    'browse.about.Other': 'Units outside the three shelfmark series, by collection.',
+    'browse.all.LBr': 'All letter convolutes',
+    'browse.all.Marg': 'All annotated books',
+    'browse.sort.label': 'Order of the letter convolutes',
+    'browse.sort.name': 'By name',
+    'browse.sort.number': 'By number',
+    'browse.unnamed': 'No correspondent established here yet; by number:',
+    'browse.katalog': 'catalogue records linked',
+    'browse.katalog.short': 'K',
+    'browse.note':
+      'Titles and shelfmarks are the library’s. Correspondent names come from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, used under CC BY 4.0. K marks a work with linked catalogue records. The texts behind the links are machine transcriptions, not an edition.',
 
     // ---- work ------------------------------------------------------------
     'work.heading': 'Work',
@@ -308,10 +353,12 @@ const STRINGS = {
     'site.skip': 'Zum Hauptinhalt springen',
     'nav.label': 'Hauptnavigation',
     'nav.search': 'Suche',
+    'nav.browse': 'Signaturen',
     'nav.about': 'Über das Projekt',
+    'crumbs.label': 'Navigationspfad',
     'lang.label': 'Sprache',
-    'lang.en': 'Englisch',
-    'lang.de': 'Deutsch',
+    'lang.en': 'EN: Englisch',
+    'lang.de': 'DE: Deutsch',
     'footer.label': 'Nachweis und Lizenzen',
     'footer.repo': 'Quellcode und Fehlermeldungen',
 
@@ -367,6 +414,45 @@ const STRINGS = {
     'search.filteredToWork': 'Auf ein Werk eingeschränkt.',
     'search.clearWork': 'Alle Werke durchsuchen',
     'search.noWork': 'Werk ohne Titel',
+    'search.browse': 'Oder den Nachlass nach Signaturen durchsehen.',
+
+    // ---- browse ----------------------------------------------------------
+    'browse.heading': 'Der Nachlass nach Signaturen',
+    'browse.intro':
+      'Alle digitalisierten Einheiten des Nachlasses in der Ordnung ihrer Aufstellung: die Handschriften (LH) nach Abteilungen, der Briefwechsel (LBr) nach Korrespondenten, die annotierten Drucke (Marginalien) nach Nummern. Jeder Eintrag führt zum Werk und seinen Blättern.',
+    'browse.loading': 'Verzeichnis wird geladen …',
+    'browse.filter.label': 'Nach Signatur, Name oder Titel filtern',
+    'browse.filter.placeholder': 'z. B. LH 35, 3 oder Oldenburg',
+    'browse.filter.count': '{n} von {total} Werken passen.',
+    'browse.filter.count.one': '{n} von {total} Werken passt.',
+    'browse.filter.none': 'Kein Werk passt zu diesem Filter.',
+    'browse.matching': '{n} von {total}',
+    'browse.works': '{n} Werke',
+    'browse.works.one': '{n} Werk',
+    'browse.pageimages': '{n} Seitenbilder',
+    'browse.pageimages.one': '{n} Seitenbild',
+    'browse.pages': '{n} Seiten',
+    'browse.pages.one': '{n} Seite',
+    'browse.family.LH': 'Handschriften (LH)',
+    'browse.family.LBr': 'Briefwechsel (LBr)',
+    'browse.family.Marg': 'Marginalien',
+    'browse.family.Other': 'Weitere',
+    'browse.about.LH':
+      'Leibniz’ Handschriften in den Abteilungen der LH-Signaturen. Die Namen der Abteilungen sind den Titeln der Bibliothek entnommen.',
+    'browse.about.LBr':
+      'Der Briefwechsel, ein Konvolut je Korrespondent. Ein Name steht dort, wo die verknüpften Datensätze des Arbeitskatalogs einen nennen, der zur alphabetischen Folge der LBr-Nummern passt; sonst steht nur die Signatur.',
+    'browse.about.Marg': 'Drucke mit Marginalien von Leibniz, nach Nummern.',
+    'browse.about.Other': 'Einheiten außerhalb der drei Signaturenreihen, nach Bestand.',
+    'browse.all.LBr': 'Alle Briefkonvolute',
+    'browse.all.Marg': 'Alle annotierten Drucke',
+    'browse.sort.label': 'Reihenfolge der Briefkonvolute',
+    'browse.sort.name': 'Nach Name',
+    'browse.sort.number': 'Nach Nummer',
+    'browse.unnamed': 'Hier noch ohne ermittelten Korrespondenten; nach Nummer:',
+    'browse.katalog': 'Katalogisate verknüpft',
+    'browse.katalog.short': 'K',
+    'browse.note':
+      'Titel und Signaturen sind die der Bibliothek. Die Namen der Korrespondenten stammen aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, genutzt unter CC BY 4.0. K kennzeichnet ein Werk mit verknüpften Katalogisaten. Die Texte hinter den Links sind maschinelle Transkriptionen, keine Edition.',
 
     // ---- work ------------------------------------------------------------
     'work.heading': 'Werk',

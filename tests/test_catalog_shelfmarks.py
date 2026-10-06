@@ -97,6 +97,13 @@ def test_empty_and_garbage() -> None:
     assert sm.signature_key("Paris, BnF") is None
 
 
+def test_split_family_keeps_the_tail_as_written() -> None:
+    assert sm.split_family("LH 35, 3 A 8") == ("LH", " 35, 3 A 8")
+    assert sm.split_family("ZEN  Leibn. Marg. 64:1") == ("Marg", " 64:1")
+    assert sm.split_family("LBr. F 20") == ("LBr", " F 20")
+    assert sm.split_family("Ms IV, 313") == (None, "") == sm.split_family("")
+
+
 # -- Aggregation across a work's shelfmarks --------------------------------- #
 
 

@@ -515,6 +515,172 @@ def test_server_rendered_pages_link_the_text_exports(store_path, tmp_path) -> No
     assert f'<a href="/api/works/{W1}/text" download>Download the text of this work</a>' in work
 
 
+# ---- the browse index (W3) ----------------------------------------------------- #
+
+
+def _link_letters(store_path: Path) -> None:
+    """Three catalogue records on the letter convolute W2, as the katalog writes them."""
+    conn = db.connect(store_path)
+    for rid, absender, adressat, titel in (
+        ("k-1", "Hansen (KorrespDB) (GND)", "Leibniz (GND)", "Friedrich Adolf Hansen an Leibniz"),
+        ("k-2", "Leibniz (GND)", "Hansen (KorrespDB) (GND)", "Leibniz an Friedrich Adolf Hansen"),
+        ("k-3", "Leibniz (GND)", "Tschirnhaus (KorrespDB) (GND)", "Leibniz an Tschirnhaus"),
+    ):
+        meta = {"absender": absender, "adressat": adressat, "titel": titel, "gwlb_ids": [W2]}
+        db.upsert_katalog_record(conn, db.KatalogRecord(record_id=rid, metadata=meta))
+        db.upsert_crosswalk(conn, db.CrosswalkMatch(rid, W2, "gwlb_link", 1.0))
+    conn.commit()
+    conn.close()
+
+
+def test_works_list_rows_and_groups(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get("/api/works")
+    assert r.status_code == 200 and r.headers["content-type"] == "application/json"
+    assert r.headers["cache-control"] == api.DAY_CACHE["Cache-Control"]
+    body = r.json()
+    assert (body["n_works"], body["n_pages"]) == (2, 4)
+    assert set(body["attribution"]) == {"images", "katalog", "transcriptions"}
+    assert "machine transcriptions, not an edition" in body["note"]
+    manuscript, letters = body["works"]  # by work id
+    assert manuscript == {
+        "work_id": W1,
+        "set": "LeibnizHandschriften",
+        "title": "LH 4,6,18",
+        "shelfmark": "LH IV, 6, 18",
+        "shelfmarks": ["LH IV, 6, 18"],
+        "family": "LH",
+        "section": "4",  # the Roman numeral read as its number
+        "section_label": "LH 4",  # no phrase in the fixture's title
+        "label": "LH IV, 6, 18",
+        "n_canvases": 3,
+        "has_katalog": True,
+    }
+    assert (letters["work_id"], letters["family"], letters["section"]) == (W2, "LBr", "LBr")
+    assert letters["label"] == "LBr. 464" and letters["has_katalog"] is False  # no records
+    assert [(g["family"], g["name"], g["n_works"], g["n_pages"]) for g in body["groups"]] == [
+        ("LH", "Handschriften (LH)", 1, 3),
+        ("LBr", "Briefwechsel (LBr)", 1, 1),
+    ]
+    assert body["groups"][0]["sections"] == [
+        {
+            "section": "4",
+            "anchor": "lh-4",
+            "label": "LH 4",
+            "title": "LH 4",
+            "n_works": 1,
+            "n_pages": 3,
+            "entries": [W1],
+        }
+    ]
+    lbr = body["groups"][1]["sections"][0]
+    assert (lbr["anchor"], lbr["entries"], lbr["by_number"]) == ("lbr", [W2], [W2])
+
+
+def test_works_list_names_letters_by_correspondent_once_per_process(store_path, tmp_path) -> None:
+    _link_letters(store_path)
+    c = _client(store_path, tmp_path)
+    letters = c.get("/api/works").json()["works"][1]
+    assert letters["label"] == "Hansen" and letters["has_katalog"] is True
+    assert letters["shelfmark"] == "LBr. 464" and letters["section_label"] == "Briefwechsel (LBr)"
+    # built on first use and kept: the works table changes only with a corpus run
+    conn = db.connect(store_path)
+    db.upsert_work(conn, db.Work("NEW", "LeibnizMarginalien", shelfmarks=["Leibn. Marg. 9"]))
+    conn.commit()
+    conn.close()
+    assert c.get("/api/works").json()["n_works"] == 2
+    assert c.get("/api/works", params={"family": "Marg"}).json()["n_works"] == 0
+    fresh = _client(store_path, tmp_path)  # a restart sees the new work
+    assert [g["family"] for g in fresh.get("/api/works").json()["groups"]] == ["LH", "LBr", "Marg"]
+
+
+def test_works_list_filters(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    letters = c.get("/api/works", params={"set": "LeibnizBriefwechsel"})
+    assert letters.headers["cache-control"] == api.DAY_CACHE["Cache-Control"]
+    assert [w["work_id"] for w in letters.json()["works"]] == [W2]
+    assert [g["family"] for g in letters.json()["groups"]] == ["LBr"]
+    manuscripts = c.get("/api/works", params={"family": "LH"}).json()
+    assert [w["work_id"] for w in manuscripts["works"]] == [W1] and manuscripts["n_pages"] == 3
+    both = c.get("/api/works", params={"family": "LH", "set": "LeibnizBriefwechsel"}).json()
+    assert both["works"] == [] and both["groups"] == [] and both["n_works"] == 0
+    assert c.get("/api/works", params={"set": "nope"}).json()["works"] == []
+    assert c.get("/api/works", params={"family": "Marg"}).json()["groups"] == []
+    assert c.get("/api/works", params={"family": "nope"}).status_code == 422
+
+
+def test_works_list_does_not_shadow_the_work_routes(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    assert "groups" in c.get("/api/works").json()
+    one = c.get(f"/api/works/{W1}").json()
+    assert one["work_id"] == W1 and "groups" not in one and len(one["pages"]) == 3
+    # the work says where it sits in the index: the work page's way back
+    assert one["browse"] == {
+        "family": "LH",
+        "section": "4",
+        "anchor": "lh-4",
+        "label": "LH 4",
+        "title": "LH 4",
+    }
+    assert c.get(f"/api/works/{W2}").json()["browse"]["anchor"] == "lbr"
+    text = c.get(f"/api/works/{W1}/text")
+    assert text.status_code == 200 and text.headers["content-type"].startswith("text/plain")
+    assert c.get("/api/works/nope").status_code == 404
+    slash = c.get("/api/works/")  # redirected to the list, never read as an empty id
+    assert slash.status_code == 200 and "groups" in slash.json()
+
+
+def test_works_list_is_documented_and_crawlable(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    get = c.get("/openapi.json").json()["paths"]["/api/works"]["get"]
+    assert get["summary"] and {p["name"] for p in get["parameters"]} == {"set", "family"}
+    lines = c.get("/robots.txt").text.splitlines()
+    assert "Allow: /api/works" in lines and "Allow: /api/works/" in lines
+    assert lines.index("Allow: /api/works") < lines.index("Disallow: /api/")
+    robots = RobotFileParser()
+    robots.parse(lines)
+    for url in ("/api/works", "/api/works?family=LBr", f"/api/works/{W1}", "/browse"):
+        assert robots.can_fetch("*", f"https://leibnizlegible.com{url}"), url
+    assert not robots.can_fetch("*", "https://leibnizlegible.com/api/other")
+    llms = c.get("/llms.txt").text
+    assert "`GET /api/works`:" in llms and "https://leibnizlegible.com/browse" in llms
+
+
+def test_browse_page_is_server_rendered_with_a_link_per_work(store_path, tmp_path) -> None:
+    _link_letters(store_path)
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    r = c.get("/browse")
+    assert r.status_code == 200 and r.headers["Cache-Control"] == "no-cache"
+    assert "<title>Browse by shelfmark — Leibniz Legible</title>" in r.text
+    assert '<link rel="canonical" href="https://leibnizlegible.com/browse"' in r.text
+    assert 'id="ssr"' in r.text and "<!--ll:ssr-->" not in r.text
+    # every family and section, each under its anchor, and a link per work
+    assert "<h2>Handschriften (LH)</h2>" in r.text and "<h2>Briefwechsel (LBr)</h2>" in r.text
+    assert '<details id="lh-4"><summary>LH 4 (1 work, 3 page images)</summary>' in r.text
+    assert (
+        '<details id="lbr"><summary>Briefwechsel (LBr) (1 work, 1 page image)</summary>' in r.text
+    )
+    assert f'<li><a href="/work/{W1}">LH IV, 6, 18</a></li>' in r.text
+    assert f'<li><a href="/work/{W2}">Hansen</a> · LBr. 464</li>' in r.text
+    assert "machine transcriptions, not an edition" in r.text
+    # the shell's nav knows the page; the stamped body is revalidated like the others
+    assert '<a href="/browse" data-nav="browse" data-i18n="nav.browse">Browse</a>' in r.text
+    again = c.get("/browse", headers={"If-None-Match": r.headers["ETag"]})
+    assert again.status_code == 304
+    assert "<loc>https://leibnizlegible.com/browse</loc>" in c.get("/sitemap.xml").text
+
+
+def test_work_page_links_back_into_the_browse_index(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    work = c.get(f"/work/{W1}").text
+    assert (
+        '<nav aria-label="Breadcrumb"><a href="/browse">Browse</a> › '
+        '<a href="/browse#lh-4">LH 4</a></nav>' in work
+    )
+    letters = c.get(f"/work/{W2}").text
+    assert '<a href="/browse#lbr">Briefwechsel (LBr)</a>' in letters
+
+
 # ---- asset versioning --------------------------------------------------------- #
 
 

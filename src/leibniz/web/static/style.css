@@ -818,6 +818,166 @@ select {
   color: var(--muted);
 }
 
+/* ------------------------------------------------------------- browse view */
+
+.browse {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.browse__filter {
+  margin-top: 0.9rem;
+  max-width: 34rem;
+}
+
+.browse__note {
+  margin: 0;
+  max-width: 62rem;
+}
+
+/* These set a display of their own, which would beat the hidden attribute. */
+.family[hidden],
+.section[hidden],
+.entry[hidden],
+.entries__note[hidden] {
+  display: none;
+}
+
+.family__meta {
+  margin-bottom: 0.35rem;
+}
+
+.family__about {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 62rem;
+}
+
+.section {
+  border-top: 1px solid var(--rule);
+}
+
+.section__summary {
+  cursor: pointer;
+  padding: 0.5rem 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+
+.section__summary:hover .section__title {
+  text-decoration: underline;
+}
+
+.section__title {
+  font-weight: 600;
+}
+
+.section__count {
+  margin-left: 0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.section__sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.2rem 0 0.6rem 1.35rem;
+}
+
+.section__sort [aria-pressed='true'] {
+  background: var(--link);
+  border-color: var(--link);
+  color: var(--on-accent);
+}
+
+.entries {
+  list-style: none;
+  margin: 0.1rem 0 1rem;
+  padding: 0 0 0 1.35rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.05rem 1.6rem;
+}
+
+/* Short entries run in columns; min() keeps one column inside a phone. */
+.entries--lh {
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+}
+
+.entries--lbr {
+  grid-template-columns: repeat(auto-fill, minmax(min(21rem, 100%), 1fr));
+}
+
+.entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.6rem;
+  min-width: 0;
+  padding: 0.14rem 0;
+}
+
+.entry__link {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.entry__mark {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.entries--lbr .entry__label + .entry__mark,
+.entries--lbr .entry__mark + .entry__label {
+  margin-left: 0.25rem;
+}
+
+.entry__meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.chip--kat {
+  background: var(--bg-sunken);
+  color: var(--fg);
+  padding-inline: 0.35rem;
+}
+
+.entries__note {
+  grid-column: 1 / -1;
+  margin: 0.7rem 0 0.2rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* The way back from a work into the index. */
+.crumbs ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.45rem;
+  margin: 0 0 0.45rem;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.crumbs li + li::before {
+  content: '›';
+  margin-right: 0.45rem;
+  color: var(--muted);
+}
+
 /* --------------------------------------------------------------- work view */
 
 .work {
@@ -1315,11 +1475,15 @@ select {
 
 /* ---- server-rendered summary (crawlers, no-JS; app.js replaces it) ------ */
 .ssr__lines,
-.ssr__pages {
+.ssr__pages,
+.ssr__index {
   padding-left: 1.5rem;
 }
 .ssr__pages {
   columns: 12rem;
+}
+.ssr__index {
+  columns: 16rem;
 }
 .ssr__lines li {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

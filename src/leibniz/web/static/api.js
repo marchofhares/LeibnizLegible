@@ -2,6 +2,7 @@
 //
 // The contract (fixed, implemented by src/leibniz/web/api.py):
 //   GET /api/search?q&set&lang&stratum&min_conf&work&page&limit
+//   GET /api/works               (every work as a row + the browse tree)
 //   GET /api/works/{work_id}
 //   GET /api/pages/{page_id}
 //   GET /api/stats
@@ -82,6 +83,11 @@ export function searchQuery(params) {
 export function search(params, signal) {
   const qs = searchQuery(params);
   return getJSON(`${API}/search${qs ? `?${qs}` : ''}`, signal);
+}
+
+/** GET /api/works — every work as a compact row, and the browse tree. */
+export function works(signal) {
+  return getJSON(`${API}/works`, signal);
 }
 
 /** GET /api/works/{work_id} */
