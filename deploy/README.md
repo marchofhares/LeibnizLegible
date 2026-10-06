@@ -291,10 +291,13 @@ What is already on, and where to turn the knobs:
   curl -s http://127.0.0.1:8000/healthz    # {"status":"ok",…}
   ```
 
-  The shell names its stylesheet and entry scripts by content hash, so a
-  deploy reaches returning readers at once; the ES modules those scripts
-  import keep plain URLs and can take up to the hour Caddy lets browsers
-  cache `/static/*`.
+  The shell names what it loads by content — its stylesheet and boot script
+  by hash (`?v=…`), the viewer's ES modules under `/static/m/<build>/`, a
+  path that changes when any module does — so a deploy reaches returning
+  readers at once and as one consistent set, although Caddy lets browsers
+  cache `/static/*` for an hour. (Until 2026-10-06 the modules `app.js`
+  imports kept plain addresses, and for an hour after a deploy a returning
+  reader could run the new `app.js` against cached old ones.)
 - **A new corpus run (C4).** Repeat §2 (new serving copy), §5 (rebuild the
   index; the app keeps serving the old one until the build swaps it in),
   then restart the app so `/api/stats` picks up the new build metadata.

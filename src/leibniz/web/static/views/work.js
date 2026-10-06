@@ -56,11 +56,27 @@ function links(data) {
   return `<ul class="linklist">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 }
 
+/**
+ * How a catalogue record came to be linked to this work, in words: the
+ * crosswalk's method (`gwlb_link`, `shelfmark`) is an identifier, not a label.
+ * A method the string table has no words for is shown by name.
+ */
+function matchLine(record) {
+  const vars = { method: record.match_method || '—', conf: conf(record.match_conf) };
+  const worded = `work.katalog.match.${record.match_method}`;
+  const text = t(worded, vars);
+  return text === worded ? t('work.katalog.match', vars) : text;
+}
+
 function katalogRecord(record) {
   const rows = [];
   if (record.incipit) rows.push([t('work.katalog.incipit'), esc(record.incipit)]);
   if (record.date) rows.push([t('work.katalog.date'), esc(record.date)]);
-  if (record.correspondent) rows.push([t('work.katalog.correspondent'), esc(record.correspondent)]);
+  // Sender and addressee, each as the catalogue names them. (One row called
+  // "Correspondent" used to show the sender alone: Leibniz, in his own letters.)
+  const people = (names) => (names || []).map((name) => esc(name)).join('; ');
+  if (people(record.sender)) rows.push([t('work.katalog.sender'), people(record.sender)]);
+  if (people(record.addressee)) rows.push([t('work.katalog.addressee'), people(record.addressee)]);
 
   const refs = (record.aa_refs || []).map(aaRef).filter(Boolean);
   if (refs.length) {
@@ -78,12 +94,7 @@ function katalogRecord(record) {
 
   const match =
     record.match_method || typeof record.match_conf === 'number'
-      ? `<p class="katalog__match muted">${esc(
-          t('work.katalog.match', {
-            method: record.match_method || '—',
-            conf: conf(record.match_conf),
-          }),
-        )}</p>`
+      ? `<p class="katalog__match muted">${esc(matchLine(record))}</p>`
       : '';
 
   const link = record.url

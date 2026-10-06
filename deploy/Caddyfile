@@ -14,9 +14,10 @@
 		-Server
 	}
 	# The viewer's static files change only on deploy. index.html itself is
-	# `no-cache` from the app and names style.css, boot.js and app.js by
-	# content hash (?v=…), so those show at once; the ES modules app.js
-	# imports keep plain URLs and show within the hour.
+	# `no-cache` from the app and names what it loads by content: style.css
+	# and boot.js by hash (?v=…), the ES modules under /static/m/<build>/, a
+	# path that changes when any of them does. So a deploy shows at once and
+	# as one consistent set, however long a browser may keep a file here.
 	@static path /static/*
 	header @static Cache-Control "public, max-age=3600"
 

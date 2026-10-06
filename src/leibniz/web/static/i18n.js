@@ -137,10 +137,18 @@ const STRINGS = {
     'work.katalog.none': 'No catalogue record is linked to this work yet.',
     'work.katalog.incipit': 'Incipit',
     'work.katalog.date': 'Date',
-    'work.katalog.correspondent': 'Correspondent',
+    'work.katalog.sender': 'Sender',
+    'work.katalog.addressee': 'Addressee',
     'work.katalog.aa': 'Akademie-Ausgabe',
     'work.katalog.aa.planned': 'Akademie-Ausgabe (assigned, not yet published)',
     'work.katalog.drucke': 'Other printings',
+    // How a record came to be linked to this work: the crosswalk's methods in
+    // words. A method with no words here falls back to the line after them,
+    // which shows its name (visible, never silent).
+    'work.katalog.match.gwlb_link':
+      'The catalogue record itself links to this scan · confidence {conf}',
+    'work.katalog.match.shelfmark': 'Linked by matching shelfmarks · confidence {conf}',
+    'work.katalog.match.manual': 'Linked by hand · confidence {conf}',
     'work.katalog.match': 'Link: {method}, confidence {conf}',
     'work.katalog.record': 'Record in the Leibniz-Katalog',
     'work.katalog.attr':
@@ -466,10 +474,16 @@ const STRINGS = {
     'work.katalog.none': 'Diesem Werk ist bisher kein Katalogisat zugeordnet.',
     'work.katalog.incipit': 'Incipit',
     'work.katalog.date': 'Datierung',
-    'work.katalog.correspondent': 'Korrespondent',
+    'work.katalog.sender': 'Absender',
+    'work.katalog.addressee': 'Adressat',
     'work.katalog.aa': 'Akademie-Ausgabe',
     'work.katalog.aa.planned': 'Akademie-Ausgabe (vorgesehen, noch nicht erschienen)',
     'work.katalog.drucke': 'Weitere Drucke',
+    'work.katalog.match.gwlb_link':
+      'Der Katalogdatensatz verweist selbst auf dieses Digitalisat · Konfidenz {conf}',
+    'work.katalog.match.shelfmark':
+      'Über übereinstimmende Signaturen zugeordnet · Konfidenz {conf}',
+    'work.katalog.match.manual': 'Von Hand zugeordnet · Konfidenz {conf}',
     'work.katalog.match': 'Zuordnung: {method}, Konfidenz {conf}',
     'work.katalog.record': 'Datensatz im Leibniz-Katalog',
     'work.katalog.attr':

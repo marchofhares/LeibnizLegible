@@ -323,6 +323,22 @@ def correspondent_names(cell: str | None) -> list[str]:
     return [name for name in names if name not in _NOT_A_NAME]
 
 
+def names_as_written(cell: str | None) -> list[str]:
+    """The people in one sender or addressee cell as the catalogue names them,
+    for showing a record rather than for counting: its link texts gone,
+    several people apart, ``Surname,Initials`` spaced — and its doubt kept:
+    ``"Ilgen ?"``, ``"Leibniz ?"`` (the catalogue puts the mark after the link
+    text), a lone ``"?"`` for an unknown hand, ``"u.a."`` for "and others"."""
+    names: list[str] = []
+    for piece in _SOURCE_TAGS.split(cell or ""):
+        name = re.sub(r",(?=\S)", ", ", " ".join(piece.split()))
+        if name in ("?", "(?)") and names and not names[-1].endswith("?"):
+            names[-1] += " ?"
+        elif name:
+            names.append(name)
+    return names
+
+
 def _name_in_titel(titel: str | None) -> str | None:
     """The *X* of "X an Leibniz" or "Leibniz an X"."""
     text = " ".join((titel or "").split())
@@ -716,6 +732,7 @@ __all__ = [
     "correspondent_names",
     "correspondent_weights",
     "group_correspondents",
+    "names_as_written",
     "names_in_order",
     "natural_key",
     "places",
