@@ -19,6 +19,7 @@ __pycache__/
 build/
 dist/
 .venv/
+.venv-*/
 venv/
 
 # --- Local scratch (session temp; the canonical scratchpad is outside the repo) -
