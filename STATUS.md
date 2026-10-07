@@ -3,11 +3,49 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-06 (later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-07 (**C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-07: C2b — the audit closed and read.** On 7 October Denisa-Florina
+Bumba and David Rabouin (PHILIUMM) returned the 200-line hand-audit sheet
+with 199 verdicts and 86 notes. Scored (`reports/gt-audit.md`): **corpus-
+weighted precision 72.3 %** against the 95 % gate — **FAIL as written**, in
+every stratum (fair copies 84.0 %, light revision 86.7 %, heavy revision
+64.6 %, scraps 57.1 %); counting boundary-off lines as usable, **92.2 %**.
+Read line by line, the failure is not the one the gate was written for.
+One pattern per judged line, from the verdict, the note, the minted text
+and the HTR reading (`align/audit_patterns.py`): of the 16 *wrong*
+verdicts, **one is a wrong line** (a fragment of *vérité* on a strip that
+reads *serviteur*); the other fifteen are the right line with the
+edition's text differing from the page — five formula lines, three
+accents or commas the edition regularises, three disputed readings
+(*Casal* for *Casai*), two editorial brackets leaked from the apparatus
+(`droit[e]`, `[l'j`), two interlinear additions rendered inline. The 33
+*boundary* verdicts are a letter or a short word off at an end, as the
+auditors said. On 14 of the *correct* lines the note names a missing
+line-end hyphen: the word was split by the scribe, the mint rejoined it
+and cut it bare. That one is fixed: `align_piece(keep_hyphen=True)`, now
+the default, puts the scribe's own mark back on the earlier line (an `=`
+stays an `=`); it reaches the 6 lines whose HTR read the mark, not the 8
+where the HTR dropped it too. The notes' 46 corrections, placed in the
+minted text, give the first sample of the normalization tax on real
+lines: 3.1 % character distance as written on the accent-and-comma
+lines, 0.0 % under the aligner's fold — the fold hides exactly what a
+diplomatic scorer charges. A read-only census (`leibniz align
+audit-reach`) measures every pattern across the 297k minted lines, plus
+Leibniz's own hand from the catalogue's Textart and the Marginalien set;
+built and tested here, **to be run on the master store** (minutes). The
+C3 prompt carries Amendment 2: train on the re-minted lines with hyphens
+kept, exclude formula and Marginalien lines, hold out PHILIUMM's pages,
+stratify by hand, keep the 199 judged lines as a sanity set. The
+operator's own 20 verdicts of 16 September agree with PHILIUMM's on 11:
+four lines the operator called wrong they call correct, as the second
+witness had predicted. 606 tests, ruff clean. Branch
+`claude/dazzling-hopper-uxji2x` (see Divergences); merge after the
+PHILIUMM team has seen the scored report.
 
 **2026-10-06 (later): W3 fix — a deploy no longer mixes new and old viewer
 modules.** Minutes after W3 went live the operator opened `/browse` and saw
@@ -410,6 +448,87 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### C2b — the audit closed and read (2026-10-07) ✅ score · ✅ patterns · ✅ hyphen fix · ⏳ reach census (operator's run)
+
+- **What arrived.** `reports/gt-audit/gt-audit-verdicts-philiumm.csv`: the
+  sheet of 2026-09-16 (`audit-sheet --seed 0`, 50 lines per stratum) judged
+  by the PHILIUMM team — 136 correct · 33 boundary · 16 wrong · 14
+  unreadable · 1 blank ("we cannot decipher"); 86 notes in English, with
+  corrections in quotes. Their own summary, in substance: they marked
+  *correct* when the alignment was right and the issues minor; the
+  line-end hyphen is very often missing on words cut at the line end;
+  *boundary* was used for a letter missing at the start or added at the
+  end; sections with mathematical expressions are generally wrong, as in
+  their own HTR; additions appear inline because the edition renders the
+  final state; overall the alignments are very good.
+- **Score** (`audit-score`, `reports/gt-audit.md`). Precision = correct ÷
+  (correct + boundary + wrong): fair_copy 42/50 = 84.0 % (Wilson 71–92),
+  light_revision 39/45 = 86.7 % (74–94), heavy_revision 31/48 = 64.6 %
+  (50–77), scrap 24/42 = 57.1 % (42–71); pooled 136/185 = 73.5 %;
+  **corpus-weighted 72.3 %, FAIL at ≥ 95 %**, every stratum below the gate.
+  *Usable* (boundary included): 88.0 / 97.8 / 89.6 / 90.5 %, **weighted
+  92.2 %**. Weights are the C2 mint's stratum counts (9,913 · 96,175 ·
+  190,162 · 1,174), passed on the command line because this session had no
+  store; the report names the source. The second witness now skips strips
+  under four folded characters (the 14 unreadables are mostly one letter)
+  and lists 9 verdicts, all *wrong* lines whose HTR reading agrees with the
+  minted text at 0.82–0.98: the right line, read differently.
+- **Agreement with the operator's preliminary pass** (20 lines, fair copies):
+  11/20. PHILIUMM calls *correct* four lines the operator called *wrong*
+  (all four were on the 2026-09-16 re-check list) and three the operator
+  could not read; they call *wrong* two the operator passed (*Casal* /
+  *Casai*; a capital and an accent).
+- **Patterns** (`align/audit_patterns.py`, rules and precedence in its
+  docstring and in the report; per-line CSV
+  `gt-audit-verdicts-philiumm-patterns.csv`; 3 lines settled by hand in
+  `gt-audit-pattern-overrides.csv`). Over the 199 judged lines: correct
+  102 · boundary-letter 35 · normalization 16 · unreadable 14 · hyphen 13 ·
+  bracket 7 · math 5 · reading 4 · addition 2 · other 1. By verdict: the 16
+  *wrong* are math 5, reading 3, normalization 3, addition 2, bracket 2,
+  **other 1 — the one misaligned line** (`DE-611-HS-959288:0086:029`,
+  minted *érité*, strip *serviteur*). The 136 *correct* carry 13 hyphen, 13
+  normalization, 4 boundary-letter, 3 bracket, 1 reading notes: the
+  auditors' "corrected in the comment but assigned correct". The prompt
+  named seven patterns; *bracket*, *normalization* and *reading* were
+  added because without them fifteen of the sixteen *wrong* verdicts
+  would read *other*, and none of those fifteen is a wrong line.
+- **Hyphens.** 14 lines carry the signal; 6 have an HTR line ending in a
+  hyphen mark (what the fix restores), 8 a note saying the hyphen is on the
+  page while the HTR read none. The mint's stored text is stripped, so the
+  census can see only the first kind; the second is a C3 question (the
+  re-mint cannot invent a mark the HTR did not read).
+- **Corrections** (`gt-audit-verdicts-philiumm-corrections.csv`): 46 notes
+  spell out an edit, 45 placed in the minted text. Mean character distance
+  minted → corrected, as written / under the aligner's fold: all 9.4 / 7.9 %;
+  boundary-letter 8.6 / 7.9 %; **normalization 3.1 / 0.0 %**; reading
+  3.3 / 3.4 %; bracket 8.0 / 6.3 %; the addition 32.1 / 32.7 %. Word-level
+  corrections, so floors.
+- **The fix** (`align/align.py`): `keep_hyphen=True` by default; the
+  earlier line's slice ends with the HTR line's own mark when the cut falls
+  inside a word; `AlignedLine.kept_hyphen` records it; a dash the
+  projection leaves at a word boundary stays dropped. Off, the slices are
+  byte-identical to the C2 mint's (tested). The B2 harness takes the knob
+  through `EvalConfig` and gives the same numbers either way: its grade
+  folds punctuation away. **Not applied to the store**: the re-mint runs
+  once, before C3 (Next).
+- **Reach census** (`align/audit_reach.py`, `leibniz align audit-reach`):
+  per open-bucket minted line — hyphen (HTR mark + minted letter), math
+  (the audit's density cut, which misses inline algebra in prose: `ia yy x
+  2ax —` is 4 %), addition (a proxy: the page's overlap or short-line
+  fraction at the heavy-revision cut), eigh. (the record's Textart),
+  Marginalien (the work's set), bracket, LH 35. Writes
+  `reports/gt-audit/reach.md`, `reach-summary.json` and
+  `data/gt/flags.jsonl` for C3; opens the store `mode=ro` + `query_only`.
+  Built and tested on a seeded store; **the hand census and every reach
+  number wait for the operator's run** — nothing here is a number this
+  session produced.
+- **Tooling:** `audit-score --weights/--weights-source` (no store needed;
+  refuses to create an empty store when `--db` is missing), `--compare`
+  (+ `--compare-labels`), `--patterns/--no-patterns`, `--overrides`,
+  `--patterns-out`, `--corrections-out`; `audit-reach`. +33 tests (606).
+- **C3 amendment 2** in PROMPTS.md (six points); the C2b prompt appended
+  under "Follow-up phases (2026-10)".
 
 ### W3 fix — the viewer's modules as one versioned set (2026-10-06) ✅
 
@@ -1524,7 +1643,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **573** (2026-10-06, W3 fix; with the `gt` + `release` extras; 569 after W3, 545 after W2) |
+| Tests passing | **606** (2026-10-07, C2b; with the `gt` + `web` + `release` extras; 573 after the W3 fix, 569 after W3) |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -1541,7 +1660,9 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C2 banded aligner | O(len·band) NW + traceback; **0 mismatches vs full DP** (exactness-tested) |
 | **C2 anchored aligner (2026-09-15)** | k-gram chain → chunked band; crash shape **44 MB / 1.9 s** (was ~6 GB, OOM-killed); 300k-char treatise 112 MB / 46 s |
 | **C2 mint (2026-09-16)** | **297,424 open-bucket GT lines** (fair 9,913 · light 96,175 · heavy 190,162 · scrap 1,174) from 6,383 pieces; 5.9× target; ~2 h on 6 workers |
-| C2 hand audit | **preliminary**: 20/200 judged (fair copies only) — 12 correct · 5 wrong · 3 unreadable; all 5 "wrong" agree with the HTR reading at 0.82–0.98 (likely misjudged); gate **deferred** to C3's ablation |
+| **C2 hand audit (PHILIUMM, 2026-10-07)** | 199/200 judged: 136 correct · 33 boundary · 16 wrong · 14 unreadable → **weighted precision 72.3 % (FAIL at 95 %)**, usable **92.2 %**; per stratum 84.0 / 86.7 / 64.6 / 57.1 %; **1 misaligned line in 185 scored**; patterns: boundary-letter 35 · normalization 16 · hyphen 13 · bracket 7 · math 5 · reading 4 · addition 2 |
+| C2 normalization tax, first sample | 46 corrections, 45 placed: 9.4 % as written / 7.9 % folded; on the accent-and-comma lines **3.1 % / 0.0 %** |
+| C2 audit agreement | the operator's 20 (2026-09-16) vs PHILIUMM: 11/20 |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
 | **C2 extraction QA (live, real Leibniz print)** | `gpt-4o` reading-text extract, head/page-no dropped; 2-model QA flagged **1/2**, agreement **0.67** |
@@ -1659,17 +1780,29 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     corpus-wide after the `140d58d`/token-layout fixes). They are ready to gate
     search and the UI.
 
-18. **(C2) Precision of the minted GT: audit preliminary, gate deferred.**
-    Yield is 5.9× target, but B2's 97.5 % precision was measured on
-    favourable material against PHILIUMM's diplomatic GT; the corpus mint has
-    no reference. The operator judged 20/200 (fair copies): 12 correct, 5
-    wrong, 3 unreadable — and all five "wrong" sit on lines whose HTR reading
-    agrees with the minted text at 0.82–0.98, i.e. likely misjudged (C2
-    close-out log). Open until someone who reads the hands finishes the sheet
-    (`reports/gt-audit/`), or C3's ablation (PHILIUMM GT alone vs + C2 GT on
-    the held-out set) settles the question empirically — the latter is now
-    the plan. If a stratum then fails, the levers are its threshold
-    (`STRATUM_THRESHOLDS`), the burst/overhang guards, and Q #17.
+18. **(C2) Precision of the minted GT — audited 2026-10-07, restated.** The
+    PHILIUMM team judged 199 of the 200 lines: **weighted precision 72.3 %
+    as written, FAIL at 95 % in every stratum; 92.2 % with boundary slips
+    counted usable** (`reports/gt-audit.md`, C2b log). Read by pattern, the
+    gate as written measures three different things at once. (a) *Does the
+    mint pick the right line?* Yes: one misaligned line in 185 scored. (b)
+    *Does the slice start and end where the line does?* Not always: 35 lines
+    are a letter or a short word off at an end (18 %, worst in scraps and
+    heavy revision), and 13 lost the scribe's line-end hyphen (fixed in the
+    aligner; the re-mint before C3 applies it). (c) *Is the edition's text
+    the page's text?* No, by design: accents, capitals and commas the
+    edition regularises (16 lines), disputed readings (4), editorial brackets
+    leaked from the apparatus (7), formulae (5) and inline additions (2) are
+    the reading text being a reading text. The levers, in order: the
+    re-mint with hyphens kept; the C3 exclusions (math, Marginalien, bracket
+    lines — Amendment 2); Denisa's apparatus-reinsertion script for the
+    additions (Standing items); and for the boundary slips Q #17's edge
+    scatter plus a one-letter cut at line ends that is as much the segmenter's
+    crop as the aligner's. What stays open: a second judging round on a fresh
+    200 after the re-mint (the sheet and the CSV shape are theirs to reuse),
+    and C3's ablation as the empirical test. The threshold levers
+    (`STRATUM_THRESHOLDS`) would not have helped: the failing lines are
+    well-aligned.
 17. **(C2) Edge-of-passage scatter under unit costs.** With the HTR ends not
     free (the piece's lines must all be consumed) and the edition ends free,
     the DP is indifferent between matching the passage's last few characters
@@ -1685,6 +1818,28 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-10-07 — C2b, departures from the prompt.** (1) *Where it ran.* The
+  prompt assumed the WSL2 checkout with the master store and `.venv-w3`;
+  this session ran in a cloud container on a fresh clone with no store, in
+  a side environment `.venv-cloud` (`gt` + `web` + `release` extras). So
+  the stratum weights for `audit-score` came from the committed C2 mint
+  counts (`--weights`, named in the report; the operator's local run
+  against the store must reproduce 72.3 %), Task 3's reach census was
+  built and tested on a seeded store but **not run**, and the hand census
+  it carries is unmeasured. (2) *Branch.* `claude/dazzling-hopper-uxji2x`,
+  the session's designated branch, not `c2-audit-closeout`. (3) *Pattern
+  names.* `bracket`, `normalization` and `reading` were added to the
+  prompt's list (see the C2b log for why). (4) *Precedence.* A *boundary*
+  verdict names its line before the hyphen signal; the prompt had the
+  hyphen rule first. (5) *The override file* was written by this session
+  from the notes (three lines), not settled by the operator in chat; the
+  `why` column says so and the operator may change it and re-run. (6)
+  *Second witness.* Strips under four folded characters are no longer
+  listed for re-checking (a rule change to the 2026-09-16 tooling). (7)
+  `audit-score` without `--weights` now refuses a missing store instead of
+  creating an empty one (the old behaviour would have scored with equal
+  weights, silently).
 
 - **2026-10-06 — W3, departures from the prompt.** (1) *Where it ran.* The
   prompt assumed a Windows checkout (Windows uv, `.venv-win`, the suite's
@@ -1792,6 +1947,35 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**C2b (2026-10-07), operator — in this order:**
+
+1. On the desktop, in WSL: `git fetch origin claude/dazzling-hopper-uxji2x
+   && git checkout claude/dazzling-hopper-uxji2x`, then with
+   `UV_PROJECT_ENVIRONMENT=.venv-w3`:
+   `uv run leibniz align audit-score reports/gt-audit/gt-audit-verdicts-philiumm.csv --compare reports/gt-audit/gt-audit-verdicts.csv --compare-labels "PHILIUMM (2026-10-07),the operator's preliminary pass (2026-09-16)"`
+   — weights from the store this time; it must print **72.3 %** (if not,
+   the mint changed since 2026-09-16: say so in STATUS). Then
+   `uv run leibniz align audit-reach` (minutes, read-only): writes
+   `reports/gt-audit/reach.md`, `reach-summary.json` and
+   `data/gt/flags.jsonl`. Read reach.md — the hyphen share is the size of
+   the re-mint's change, the `eigh` share the hand census for the call —
+   and commit the two reports to the branch.
+2. Send Denisa and David the five-line summary (the session's hand-over)
+   with `reports/gt-audit.md` attached; then merge. They judged the lines;
+   they see the score first.
+3. **Before C3, once:** the re-mint with hyphens kept. The factory is
+   idempotent and the aligner's default is now `keep_hyphen=True`, so it is
+   the C2 runbook line **without `--resume`** (resume skips every piece
+   already minted): six shards of
+   `uv run leibniz align factory data/gt/edition_cache.jsonl --shard $i/6`
+   under nohup, about two hours; then `leibniz align gt-report` and
+   `leibniz align audit-reach` again (the hyphen share should drop to the
+   lines whose HTR read no mark). Do it after P1 has produced
+   `reports/philiumm/heldout_pages.csv`, so one re-mint carries every C2b
+   flag.
+4. Offer PHILIUMM a second judging round on a fresh 200 of the re-minted
+   lines (`audit-sheet --seed 1`), same CSV shape.
 
 **W3 fix (2026-10-06), operator:** merge `web-versioned-modules`, then the §9
 update on the VPS — code only. Then, over HTTP: the shell of any page names

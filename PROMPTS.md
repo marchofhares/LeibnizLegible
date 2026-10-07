@@ -188,6 +188,14 @@ _Depends on: C2._
 > 4. **Add character n-gram language-model decoding** (Tarride et al. 2024: −12% relative CER across 12 datasets in PyLaia). Kraken does not ship one as far as verified; implement over the CTC logits (torchaudio `ctc_decoder` + KenLM). Train the LM on *diplomatic* GT, never on edition text, or it will push toward expansions. Report with and without.
 >
 > Two honesty notes for the model card: (a) the ablation is a weaker test of GT precision than STATUS assumed — a flat result is consistent with Bullinger even at good precision, so the hand audit (Q #18) still matters; (b) the PHILIUMM transcription conventions are on an access-controlled wiki, so any published claim of "diplomatic" fidelity must state what was verified. Also measure, once v2 exists, the number nobody has: on the val split, the fraction of v1/v2 *disagreements* where either reading is exactly right, per stratum — it decides whether Calculemus's A/B mechanic has the truth in the pair.
+>
+> **Amendment 2 (2026-10-07, from the audit — see STATUS.md "C2b").** The PHILIUMM team judged the 200-line sheet (199 verdicts); the patterns behind the non-*correct* verdicts and their reach across the mint are in `reports/gt-audit.md` and `reports/gt-audit/reach.md`. Six consequences for C3:
+> 1. **Train on the re-minted lines with hyphens kept** (`align_piece(keep_hyphen=True)`, the default since C2b): the missing line-end hyphen was the most frequent fault of the minted text. The re-mint runs once, before C3, with every C2b flag in place (the factory is idempotent; about two hours on six shards).
+> 2. **Exclude lines flagged `math`** (`data/gt/flags.jsonl` from `leibniz align audit-reach`) **and lines from Marginalien works**: formula lines are wrong in the mint and in the HTR alike, and the Marginalien body is print, not Leibniz.
+> 3. **Exclude PHILIUMM's 1,010 pages from the held-out set** (`reports/philiumm/heldout_pages.csv`, once P1 has produced it): the model this project runs trained on them.
+> 4. **Stratify the held-out set by stratum, language and hand** (`eigh.` in the record's Textart, the `eigh` flag of the reach census).
+> 5. **Keep the 199 PHILIUMM-judged lines and their corrections out of training** (`reports/gt-audit/gt-audit-verdicts-philiumm.csv`, `…-corrections.csv`) and use them as a sanity set: a model that gets them wrong where the auditors read them is not better.
+> 6. **Report CER by hand** as well as by stratum and language.
 
 ---
 
@@ -558,4 +566,142 @@ numbers in the draft that the session did not measure. Do not send anything.
 A closing summary in chat: what is merged and live, the LBr label share, the
 pre-existing Windows test failures if any, what [the reader]'s reply would unlock, and
 that the next phase is K1 from a fresh session on the merged main.
+~~~~
+
+
+### Phase C2b — Close the C2 audit and learn from it (run 2026-10-07)
+
+~~~~text
+Phase C2b — Close the C2 audit and learn from it: score the PHILIUMM verdicts,
+name the failure patterns, measure their reach across the mint, build the cheap
+fix. One local session on the operator's desktop (WSL2 Ubuntu).
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md, in particular the C2 close-out of 2026-09-16 and Open
+question #18. If this prompt conflicts with the repo, the repo + STATUS.md win;
+record the divergence in STATUS.md. Write the "C2b — audit close-out" entry in
+STATUS.md after every task; if one exists, continue from its first unfinished
+task on the existing branch.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. data/inventory.sqlite is the MASTER store (16 GB:
+13.5M v1 lines, 297k gt_lines): open it read-only only (`uv run leibniz …`
+commands open it mode=ro; your own Python uses a `file:…?mode=ro` URI); never
+write, VACUUM or move it. The page-image cache is /mnt/d/leibniz-images.
+`.venv` is the pipeline environment (never run `uv sync` against it); use the
+side environment `.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3 for every
+`uv` command; its extras are web, gt and release). This phase writes nothing to
+the store: the fix it builds is applied by a re-mint scheduled before C3, not
+here. Every result lives in reports/ as small committed files rendered by code
+from data; never write a number you did not produce. The operator merges, after
+the PHILIUMM team has seen the scored result (the repo is public). You push the
+branch and hand over. Branch: `c2-audit-closeout`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+`git status --porcelain` shows nothing but the operator's own untracked files
+(logs, *.log, resume-run.sh, .python-version, reports/gt-audit/gt-audit.html
+and the like; leave them alone); HEAD is main; `git pull --ff-only origin
+main`. Confirm reports/gt-audit/gt-audit-verdicts-philiumm.csv exists with the
+columns ref, stratum, verdict, note and about 200 rows; if not, ask for its
+path. Baseline: `uv run ruff check .`, `uv run ruff format --check .`,
+`uv run pytest -q`; record the counts. Print a short plan and wait for "go".
+
+## What arrived
+On 2026-10-07 Denisa-Florina Bumba and David Rabouin (PHILIUMM) returned the
+200-line audit sheet (reports/gt-audit/gt-audit.html, built 2026-09-16 by
+`leibniz align audit-sheet --seed 0`, equal numbers per stratum; its lines are
+in reports/gt-audit/gt-audit-lines.csv with gt_text and htr_text per ref) with
+199 of 200 lines judged. Their summary, in substance: they sometimes corrected
+the transcription in the note but still marked "correct" when the alignment
+was right and the issues minor; one line they could not decipher; very often
+the end-of-line hyphen is missing on words cut at the line end while the word
+slice itself is right; "boundary" was used for small boundary issues, a letter
+missing at the start or one added at the end; sections with mathematical
+expressions are generally wrong, as in their own HTR; additions appear inline
+because the edition renders the final state, although visually they do not
+belong to the line; overall the alignments are very good. The operator's own
+preliminary 20-line pass (12 correct, 5 wrong, 3 unreadable, fair copies only)
+is reports/gt-audit/gt-audit-verdicts.csv with reports/gt-audit.md; its
+second-witness check found all five "wrong" verdicts contradicted by the
+machine reading.
+
+## Task 1 — Score
+`uv run leibniz align audit-score reports/gt-audit/gt-audit-verdicts-philiumm.csv`
+regenerates reports/gt-audit.md: precision per stratum with Wilson intervals,
+the corpus-weighted figure against the 95 % gate, the second-witness list.
+Read it. Also compute agreement between the operator's 20 verdicts and theirs
+on the same refs and put it in the report. Record the verdict, PASS or FAIL,
+per stratum and weighted, and what "usable" (boundary included) gives. Commit.
+
+## Task 2 — Name the patterns
+Add src/leibniz/align/audit_patterns.py (pure, tested on synthetic rows): for
+each judged row, from verdict, note, gt_text, htr_text, the folded similarity
+and the HTR line's last character, assign one pattern:
+- hyphen: the HTR line ends in one of the aligner's hyphen characters
+  (align.py _HYPHENS) and the minted text ends in a letter;
+- boundary-letter: verdict boundary, or a one-character difference at either
+  end between the minted text and a correction given in the note;
+- math: digits, operators, Greek or bracket density above a cut you state, or
+  the note says so;
+- addition: the note says so, or the minted text exceeds the HTR reading in
+  folded length by more than the aligner's insertion floor;
+- unreadable; correct; other.
+Notes are free text in English or French: match conservatively and keep a
+committed override CSV (ref, pattern, why) for rows the rules cannot decide;
+print those rows and ask the operator to settle them in chat. Where a note
+carries a corrected transcription, store (ref, minted text, correction) in
+reports/gt-audit/gt-audit-philiumm-corrections.csv and compute the folded
+similarity between minted and corrected text: the first measured sample of the
+normalization tax on real lines. Extend reports/gt-audit.md with a pattern
+table per stratum and the corrections table (render through audit.py's
+report code, prose templated). Commit.
+
+## Task 3 — Reach across the mint (read-only)
+`leibniz align audit-reach`, over all open-bucket gt_lines joined to the v1
+lines (line_image_ref is the canonical "{page_id}:{line_seq:03d}"; take the
+recognised row as audit.line_geometry does):
+- hyphen: minted lines whose HTR text ends in a hyphen character while the
+  minted text ends in a letter; count and share per stratum and per volume;
+- math: the Task 2 density score per minted line, plus the piece's volume
+  (Reihe III and the mathematical LH 35 pieces); counts above the cut;
+- additions: minted lines on pages whose page_stats overlap or short-line
+  fractions exceed the heavy-revision cuts in align/stratum.py (a proxy; say so);
+- hand: per minted line, whether the piece's catalogue textart carries "eigh."
+  (Leibniz's own hand; gt_lines.source names the record id, katalog_records
+  holds textart); shares per stratum and per volume;
+- Marginalien: minted lines whose work is in the Marginalien set (expected
+  near zero; measure).
+Writes reports/gt-audit/reach.md and reach-summary.json; per-line flags to
+data/gt/flags.jsonl (ref, flags) for C3, with a committed count table. Run it
+here (minutes). Commit.
+
+## Task 4 — The cheap fix, built and tested, not applied
+In src/leibniz/align/align.py add keep_hyphen (default True for new mints):
+when dehyphenation joined a word across a line break, the earlier line's
+minted slice ends with the very hyphen character the HTR line showed ("=" stays
+"="), and the next line's slice starts with the rest of the word as now.
+AlignedLine records that it happened. Tests; the B2 evaluate harness gives the
+same numbers with the option off. Do not re-mint: the re-mint runs once, before
+C3, with every C2b flag in place (STATUS.md's Next records it with the runbook
+line: the factory is idempotent, about two hours on six shards). Commit.
+
+## Task 5 — Amend C3
+In PROMPTS.md, under the C3 prompt's 2026-09-16 amendment, add "Amendment 2
+(2026-10, from the audit)": train on re-minted lines with hyphens kept; exclude
+lines flagged math and lines from Marginalien works; exclude PHILIUMM's 1,010
+pages from the held-out set (reports/philiumm/heldout_pages.csv once P1 has
+produced it); stratify the held-out set by stratum, language and hand (eigh.);
+keep the 199 PHILIUMM-judged lines and their corrections out of training and
+use them as a sanity set; report CER by hand. Commit.
+
+## Finish and hand-over
+STATUS.md: the C2 gate verdict with its numbers; Open question #18 closed or
+restated; the patterns and their reach; the hand census; under Next, the
+re-mint before C3. Append this prompt verbatim to PROMPTS.md under "Follow-up
+phases (2026-10)". ruff + pytest clean. `git push -u origin c2-audit-closeout`,
+print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...c2-audit-closeout?expand=1
+and a five-line summary of the verdict for the operator to send to the PHILIUMM
+team. Do not merge.
 ~~~~
