@@ -105,6 +105,7 @@ class ReachCensus:
     n_pages: int
     n_records: int
     n_records_with_textart: int
+    n_skipped: int = 0  # rows whose line_image_ref is not "{page_id}:{line_seq:03d}"
 
     @property
     def n(self) -> int:
@@ -130,6 +131,7 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
     work_info: dict[str, tuple[bool, bool]] = {}
     textart: dict[str, str | None] = {}
     out: list[ReachLine] = []
+    skipped = 0
     for r in rows:
         ref, text, stratum, source = (
             r["line_image_ref"],
@@ -137,7 +139,11 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
             r["stratum"] or "unknown",
             r["source"] or "",
         )
-        page_id, seq = split_ref(ref)
+        try:
+            page_id, seq = split_ref(ref)
+        except ValueError:  # an older reference form (the B2 prototype's "#xywh")
+            skipped += 1
+            continue
         work_id = page_id.rpartition(":")[0]
         volume, rec = parse_source(source)
         if page_id not in htr_cache:
@@ -172,6 +178,7 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
         n_pages=len(htr_cache),
         n_records=len(textart),
         n_records_with_textart=sum(1 for v in textart.values() if v),
+        n_skipped=skipped,
     )
 
 
@@ -253,6 +260,7 @@ def summary(c: ReachCensus, *, strata: Sequence[str]) -> dict:
         "n_pages": c.n_pages,
         "n_records": c.n_records,
         "n_records_with_textart": c.n_records_with_textart,
+        "n_skipped": c.n_skipped,
         "flags": FLAGS,
         "all": all_rows[0] if all_rows else {},
         "by_stratum": _table(_group(c.lines, "stratum"), order=strata),
@@ -277,6 +285,12 @@ def render(c: ReachCensus, *, strata: Sequence[str], flags_path: Path | None) ->
         if flags_path
         else f"{c.n:,} open-bucket minted lines on {c.n_pages:,} pages."
     )
+    if c.n_skipped:
+        A("")
+        A(
+            f"{c.n_skipped:,} open-bucket rows carry a reference that is not "
+            f"`{{page_id}}:{{line_seq:03d}}` and were skipped."
+        )
     A("")
     A(
         "*hyphen*: HTR line ends in a hyphen mark, minted text in a letter (what the re-mint "

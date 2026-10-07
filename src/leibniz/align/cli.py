@@ -695,6 +695,7 @@ def audit_reach(
     _console.print(
         f"[bold]audit-reach[/bold] {c.n:,} lines on {c.n_pages:,} pages → {out_dir / 'reach.md'}; "
         f"{n_flags:,} flag rows → {flags_out}"
+        + (f"; {c.n_skipped:,} rows with a non-canonical reference skipped" if c.n_skipped else "")
     )
     _console.print(
         "  "

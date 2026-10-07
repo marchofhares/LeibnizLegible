@@ -85,6 +85,8 @@ def _seed(path: Path) -> None:
             GtPair("W2:0001:001", "droit[e] zwei", src2, "fair_copy", 0.9, "open"),
             GtPair("M1:0001:000", "marg", src3, "light_revision", 0.9, "open"),
             GtPair("M1:0001:000", "nc text", "transkriptionspool", "light_revision", 0.9, "nc"),
+            # an older reference form (the B2 prototype's): skipped and counted, not a crash
+            GtPair("W1:0001#xywh=0,0,9,9", "old form", src3, "fair_copy", 0.9, "open"),
         ],
     )
     conn.commit()
@@ -119,6 +121,7 @@ def test_census_flags(tmp_path: Path) -> None:
     conn.close()
     flags = {ln.ref: set(ln.flags) for ln in c.lines}
     assert c.n == 6 and c.n_pages == 3 and c.n_records == 3 and c.n_records_with_textart == 2
+    assert c.n_skipped == 1
     assert flags["W1:0001:000"] == {"hyphen", "eigh", "lh35"}
     assert flags["W1:0001:001"] == {"math", "eigh", "lh35"}
     assert flags["W1:0001:002"] == {"hyphen", "eigh", "lh35"}  # the v2 reading ends in a hyphen
@@ -136,7 +139,7 @@ def test_census_flags(tmp_path: Path) -> None:
     by_vol = {r["key"]: r for r in s["by_volume"]}
     assert by_vol["III,3"]["math"] == 1 and by_vol["I,7"]["addition"] == 2
     md = R.render(c, strata=("fair_copy",), flags_path=Path("data/gt/flags.jsonl"))
-    assert "| III,3 | 3 |" in md and "marginalien" in md
+    assert "| III,3 | 3 |" in md and "marginalien" in md and "1 open-bucket rows carry" in md
 
 
 def test_audit_reach_cli(tmp_path: Path) -> None:
@@ -148,7 +151,7 @@ def test_audit_reach_cli(tmp_path: Path) -> None:
         ["align", "audit-reach", "--db", str(store), "--out", str(out), "--flags-out", str(flags)],
     )
     assert res.exit_code == 0, res.stdout
-    assert "6 lines on 3 pages" in res.stdout
+    assert "6 lines on 3 pages" in res.stdout and "1 rows with a non-canonical" in res.stdout
     rows = [json.loads(line) for line in flags.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 6 and rows[0]["ref"] == "W1:0001:000" and "hyphen" in rows[0]["flags"]
     summ = json.loads((out / "reach-summary.json").read_text(encoding="utf-8"))
