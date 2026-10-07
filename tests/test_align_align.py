@@ -30,9 +30,12 @@ def test_hyphenation_rejoins_split_word() -> None:
     htr = _htr("de quinque Machinis industri-", "ae atque experientiae artificum")
     edition = "de quinque Machinis industriae atque experientiae artificum"
     res = align_piece(htr, edition, threshold=0.5)
-    # the split word 'industri-/ae' is cut at the line break: line0 ends 'industri'.
-    assert res.lines[0].edition_text.rstrip().endswith("industri")
+    # the split word 'industri-/ae' is cut at the line break: line0 ends 'industri'
+    # (plus the scribe's own hyphen, kept by default since C2b).
+    assert res.lines[0].edition_text.rstrip().endswith("industri-")
     assert res.lines[1].edition_text.lstrip().startswith("ae")
+    bare = align_piece(htr, edition, threshold=0.5, keep_hyphen=False)
+    assert bare.lines[0].edition_text.rstrip().endswith("industri")
 
 
 def test_confidence_never_exceeds_one() -> None:
@@ -113,3 +116,56 @@ def test_edition_only_burst_is_not_minted() -> None:
     assert hit.align_conf >= 0.6 and not hit.aligned  # only the burst rule refuses it
     assert all(ln.aligned for ln in res.lines[:7] + res.lines[8:])
     assert res.lines[8].edition_text.strip() == lines[8]
+
+
+def test_keep_hyphen_restores_the_scribes_mark() -> None:
+    htr = _htr("de quinque Machinis industri-", "ae atque experientiae artificum")
+    edition = "de quinque Machinis industriae atque experientiae artificum"
+    kept = align_piece(htr, edition, threshold=0.5)
+    assert kept.lines[0].edition_text == "de quinque Machinis industri-"
+    assert kept.lines[0].kept_hyphen == "-"
+    assert kept.lines[1].edition_text == "ae atque experientiae artificum"
+    assert kept.lines[1].kept_hyphen == ""
+    # the very character the HTR showed: a double-oblique "=" stays "="
+    eq = align_piece(
+        _htr("Deus autem expresse et minis pro=", "videatur omnibus"),
+        "Deus autem expresse et minis provideatur omnibus",
+        threshold=0.5,
+    )
+    assert eq.lines[0].edition_text.endswith("pro=") and eq.lines[0].kept_hyphen == "="
+    # off: the C2 mint's behaviour, slices identical to before and nothing recorded
+    off = align_piece(htr, edition, threshold=0.5, keep_hyphen=False)
+    assert off.lines[0].edition_text == "de quinque Machinis industri"
+    assert all(ln.kept_hyphen == "" for ln in off.lines)
+    assert [(ln.align_conf, ln.n_matched, ln.aligned) for ln in off.lines] == [
+        (ln.align_conf, ln.n_matched, ln.aligned) for ln in kept.lines
+    ]
+    # a dash the projection leaves at a word boundary (a sentence end) is not a split word
+    dash = align_piece(
+        _htr("plusieurs mots -", "Le reste suit"), "plusieurs mots. Le reste suit", threshold=0.5
+    )
+    assert dash.lines[0].kept_hyphen == "" and "-" not in dash.lines[0].edition_text
+    # and without dehyphenation there is nothing to restore
+    nod = align_piece(htr, edition, threshold=0.5, dehyphenate=False)
+    assert all(ln.kept_hyphen == "" for ln in nod.lines)
+
+
+def test_evaluate_harness_numbers_do_not_move_with_keep_hyphen() -> None:
+    from leibniz.align.evaluate import EvalConfig, GoldLine, Piece, evaluate_piece
+
+    gold = [
+        "de quinque Machinis industri-",
+        "ae atque experientiae artificum",
+        "et alia verba sequuntur",
+    ]
+    piece = Piece("p", [GoldLine(f"L{i}", g, b"") for i, g in enumerate(gold)])
+    htr = {f"L{i}": g for i, g in enumerate(gold)}
+    on = evaluate_piece(piece, htr, EvalConfig("on", keep_hyphen=True))
+    off = evaluate_piece(piece, htr, EvalConfig("off", keep_hyphen=False))
+    assert [(e.slice_sim, e.correct, e.align_conf) for e in on] == [
+        (e.slice_sim, e.correct, e.align_conf) for e in off
+    ]
+    # the harness's reference is the diplomatic gold joined by spaces, so it already
+    # carries the hyphen and the cut falls after "- ": nothing to restore, same slices
+    assert [e.projected for e in on] == [e.projected for e in off]
+    assert on[0].projected.rstrip().endswith("industri-")
