@@ -151,7 +151,8 @@ def test_audit_reach_cli(tmp_path: Path) -> None:
         ["align", "audit-reach", "--db", str(store), "--out", str(out), "--flags-out", str(flags)],
     )
     assert res.exit_code == 0, res.stdout
-    assert "6 lines on 3 pages" in res.stdout and "1 rows with a non-canonical" in res.stdout
+    flat = " ".join(res.stdout.split())  # the console wraps long lines
+    assert "6 lines on 3 pages" in flat and "1 rows with a non-canonical" in flat
     rows = [json.loads(line) for line in flags.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == 6 and rows[0]["ref"] == "W1:0001:000" and "hyphen" in rows[0]["flags"]
     summ = json.loads((out / "reach-summary.json").read_text(encoding="utf-8"))
