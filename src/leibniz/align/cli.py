@@ -485,6 +485,22 @@ def audit_sheet(
         )
 
 
+def _parse_weights(spec: str) -> dict[str, int]:
+    """``fair_copy=9913,light_revision=96175,…`` → ``{stratum: count}``."""
+    out: dict[str, int] = {}
+    for part in spec.split(","):
+        if not part.strip():
+            continue
+        try:
+            k, v = part.split("=", 1)
+            out[k.strip()] = int(v.strip().replace("_", "").replace(" ", ""))
+        except ValueError:
+            raise typer.BadParameter(f"--weights wants stratum=count pairs, got {part!r}") from None
+    if not out:
+        raise typer.BadParameter("--weights is empty")
+    return out
+
+
 @app.command(name="audit-score")
 def audit_score(
     verdicts: Path = typer.Argument(..., help="The downloaded gt-audit-verdicts.csv."),
@@ -498,27 +514,132 @@ def audit_score(
         help="The sheet's gt-audit-lines.csv (default: next to the verdicts) — "
         "cross-checks every verdict against the HTR reading of the strip.",
     ),
+    weights: str = typer.Option(
+        None,
+        "--weights",
+        help="Stratum line counts as stratum=count pairs, for a machine without the store "
+        "(e.g. the C2 mint's counts from reports/gt-factory.md); the store is then not opened.",
+    ),
+    weights_source: str = typer.Option(
+        None, "--weights-source", help="Where the --weights counts come from (named in the report)."
+    ),
+    compare: Path = typer.Option(
+        None,
+        "--compare",
+        help="A second verdict CSV on the same sheet (another auditor): the report gains "
+        "an agreement section on the lines both judged.",
+    ),
+    compare_labels: str = typer.Option(
+        "these verdicts,the other auditor", "--compare-labels", help="Two labels, comma-separated."
+    ),
+    patterns: bool = typer.Option(
+        True,
+        "--patterns/--no-patterns",
+        help="Name a failure pattern per judged line (needs --lines).",
+    ),
+    overrides: Path = typer.Option(
+        None,
+        "--overrides",
+        help="Override CSV (ref, pattern, why) for lines the rules cannot decide "
+        "(default: gt-audit-pattern-overrides.csv next to the verdicts; written with the "
+        "undecided refs when absent).",
+    ),
+    patterns_out: Path = typer.Option(
+        None, "--patterns-out", help="Per-line pattern CSV (default: <verdicts stem>-patterns.csv)."
+    ),
+    corrections_out: Path = typer.Option(
+        None,
+        "--corrections-out",
+        help="Corrections CSV (default: <verdicts stem>-corrections.csv).",
+    ),
 ) -> None:
     """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
-    from leibniz.align.audit import read_verdicts, render_score, score_verdicts, text_evidence
+    from leibniz.align import audit_patterns as P
+    from leibniz.align.audit import (
+        STRATA,
+        read_verdicts,
+        render_agreement,
+        render_score,
+        score_verdicts,
+        text_evidence,
+        verdict_agreement,
+    )
     from leibniz.db import open_db
 
     rows = read_verdicts(verdicts)
     if lines_csv is None and (verdicts.parent / "gt-audit-lines.csv").exists():
         lines_csv = verdicts.parent / "gt-audit-lines.csv"
     evidence = text_evidence(rows, lines_csv) if lines_csv is not None else []
-    with open_db(db_path) as conn:
-        weights = {
-            (r[0] or "unknown"): r[1]
-            for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
-        }
-    score = score_verdicts(rows, weights)
-    note = (
-        f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); "
-        f"stratum weights from `{db_path}`."
-    )
+    if weights is not None:
+        weight_counts = _parse_weights(weights)
+        src = weights_source or "the command line"
+        weight_note = (
+            "stratum weights from "
+            + src
+            + " ("
+            + ", ".join(f"{k} {v:,}" for k, v in weight_counts.items())
+            + ")"
+        )
+    else:
+        if not Path(db_path).exists():
+            raise typer.BadParameter(
+                f"store not found at {db_path}; pass --db, or --weights for a machine without it"
+            )
+        with open_db(db_path) as conn:
+            weight_counts = {
+                (r[0] or "unknown"): r[1]
+                for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+            }
+        weight_note = f"stratum weights from `{db_path}`"
+    score = score_verdicts(rows, weight_counts)
+    note = f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); {weight_note}."
+    sections: list[list[str]] = []
+    if compare is not None:
+        la, _, lb = compare_labels.partition(",")
+        agr = verdict_agreement(
+            rows, read_verdicts(compare), label_a=la.strip() or "A", label_b=lb.strip() or "B"
+        )
+        sections.append(render_agreement(agr))
+        _console.print(
+            f"[bold]agreement[/bold] with {compare.name}: {agr.n_same}/{agr.n} on the lines "
+            "both judged"
+        )
+    n_undecided = 0
+    if patterns and lines_csv is not None:
+        prow = P.classify_rows(rows, P.read_lines_csv(lines_csv))
+        ov_path = overrides or verdicts.parent / "gt-audit-pattern-overrides.csv"
+        n_over = P.apply_overrides(prow, P.read_overrides(ov_path))
+        n_undecided = P.write_override_template(prow, ov_path)
+        p_out = patterns_out or verdicts.with_name(verdicts.stem + "-patterns.csv")
+        c_out = corrections_out or verdicts.with_name(verdicts.stem + "-corrections.csv")
+        P.write_patterns_csv(prow, p_out)
+        table = P.corrections_table(prow)
+        P.write_corrections_csv(table, c_out)
+        sections.append(P.render_patterns(prow, strata=STRATA))
+        sections.append(P.render_corrections(table))
+        counts = P.pattern_counts(prow).get("all", {})
+        _console.print(
+            "[bold]patterns[/bold] "
+            + ", ".join(f"{k} {v}" for k, v in sorted(counts.items(), key=lambda kv: -kv[1]))
+            + f" → {p_out}; {len(table)} corrections → {c_out}; {n_over} overrides from "
+            + ov_path.name
+        )
+        for r in prow:
+            if r.undecided:
+                _console.print(
+                    f"[yellow]undecided[/yellow] {r.ref} ({r.stratum}, {r.verdict}): "
+                    f"{r.note or 'no note'!s:.90}"
+                )
+        if n_undecided:
+            _console.print(
+                f"[yellow]{n_undecided} lines the rules cannot decide — settle them in {ov_path} "
+                f"(ref, pattern, why) and re-run[/yellow]"
+            )
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_score(score, sheet_note=note, evidence=evidence), encoding="utf-8")
+    out.write_text(
+        render_score(score, sheet_note=note, evidence=evidence, extra_sections=sections),
+        encoding="utf-8",
+    )
     flagged = sum(1 for e in evidence if e.recheck)
     if flagged:
         _console.print(
@@ -534,6 +655,54 @@ def audit_score(
             f"[bold {colour}]weighted precision {100 * wp:.1f} % ({gate})[/bold {colour}] "
             f"· {score.pooled.n_judged} judged, {score.n_unjudged} blank → {out}"
         )
+
+
+@app.command(name="audit-reach")
+def audit_reach(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    out_dir: Path = typer.Option(
+        Path("reports/gt-audit"), "--out", help="Directory for reach.md + reach-summary.json."
+    ),
+    flags_out: Path = typer.Option(
+        Path("data/gt/flags.jsonl"),
+        "--flags-out",
+        help="Per-line flags for C3 (JSONL, gitignored).",
+    ),
+) -> None:
+    """Measure the audit's failure patterns across every open-bucket minted line (read-only)."""
+    import json
+
+    from leibniz.align import audit_reach as R
+    from leibniz.align.audit import STRATA
+
+    conn = R.open_readonly(db_path)
+    try:
+        c = R.census(conn)
+    finally:
+        conn.close()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    n_flags = R.write_flags(c, flags_out)
+    (out_dir / "reach.md").write_text(
+        R.render(c, strata=STRATA, flags_path=flags_out), encoding="utf-8"
+    )
+    summ = R.summary(c, strata=STRATA)
+    (out_dir / "reach-summary.json").write_text(
+        json.dumps(summ, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    a = summ["all"]
+    _console.print(
+        f"[bold]audit-reach[/bold] {c.n:,} lines on {c.n_pages:,} pages → {out_dir / 'reach.md'}; "
+        f"{n_flags:,} flag rows → {flags_out}"
+    )
+    _console.print(
+        "  "
+        + " · ".join(
+            f"{f} {a[f]:,} ({'—' if a[f + '_share'] is None else f'{100 * a[f + "_share"]:.1f} %'})"
+            for f in R.FLAGS
+        )
+    )
 
 
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the

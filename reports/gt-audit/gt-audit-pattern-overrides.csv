@@ -1,0 +1,4 @@
+ref,pattern,why
+DE-611-HS-959288:0086:029,other,"the one misaligned line the audit found: the minted fragment ""érité"" (of vérité) sits on a strip that reads ""serviteur""; settled 2026-10-07 from the note"
+DE-611-HS-860722:0092:013,math,"a formula fragment (x°, etc.) judged wrong without a note; the density cut cannot see a single power sign; same manuscript as the x4 line; settled 2026-10-07"
+DE-611-HS-860722:0087:064,math,"the note reads ""+ x"" where the edition prints ""tc."": a formula misread by the OCR of the edition, same manuscript as the x4 line; settled 2026-10-07"

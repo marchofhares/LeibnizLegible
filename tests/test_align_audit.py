@@ -229,3 +229,123 @@ def test_text_evidence_flags_only_contradictions(tmp_path: Path) -> None:
     assert ev[0].recheck and "same line" in ev[0].recheck
     assert ev[1].recheck and "only" in ev[1].recheck
     assert ev[2].recheck is None
+
+
+def _verdict_file(
+    path: Path,
+    lines: list[dict[str, str]],
+    verdicts: dict[int, str],
+    notes: dict[int, str] | None = None,
+) -> Path:
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["ref", "stratum", "verdict", "note"])
+        for k, r in enumerate(lines):
+            w.writerow([r["ref"], r["stratum"], verdicts.get(k, ""), (notes or {}).get(k, "")])
+    return path
+
+
+def test_audit_score_without_the_store(tmp_path: Path) -> None:
+    """A machine without the store passes the mint's stratum counts on the command line."""
+    db_path, images = tmp_path / "inv.sqlite", tmp_path / "images"
+    _seed(db_path, images)
+    out_dir = tmp_path / "audit"
+    res = runner.invoke(
+        app,
+        [
+            "align",
+            "audit-sheet",
+            "--db",
+            str(db_path),
+            "--images",
+            str(images),
+            "--out",
+            str(out_dir),
+            "--n",
+            "8",
+        ],
+    )
+    assert res.exit_code == 0, res.stdout
+    with (out_dir / "gt-audit-lines.csv").open(encoding="utf-8") as fh:
+        lines = list(csv.DictReader(fh))
+    verdicts = _verdict_file(
+        out_dir / "philiumm.csv",
+        lines,
+        {k: ("wrong" if k == 0 else "correct") for k in range(8)},
+        {0: '"htr text 0" instead of "gt text 0"', 1: "missing hyphen at the end"},
+    )
+    mine = _verdict_file(out_dir / "mine.csv", lines, {0: "correct", 1: "correct", 2: "wrong"})
+    md = tmp_path / "gt-audit.md"
+    # no store on this machine: refuse rather than create an empty one
+    res = runner.invoke(
+        app,
+        [
+            "align",
+            "audit-score",
+            str(verdicts),
+            "--db",
+            str(tmp_path / "nope.sqlite"),
+            "--out",
+            str(md),
+        ],
+    )
+    assert res.exit_code != 0 and not (tmp_path / "nope.sqlite").exists()
+    res = runner.invoke(
+        app,
+        [
+            "align",
+            "audit-score",
+            str(verdicts),
+            "--db",
+            str(tmp_path / "nope.sqlite"),
+            "--out",
+            str(md),
+            "--weights",
+            "fair_copy=100,light_revision=300,heavy_revision=500,scrap=100",
+            "--weights-source",
+            "the test",
+            "--compare",
+            str(mine),
+            "--compare-labels",
+            "PHILIUMM,the operator",
+        ],
+    )
+    assert res.exit_code == 0, res.stdout
+    text = md.read_text(encoding="utf-8")
+    assert "stratum weights from the test (fair_copy 100" in text
+    assert "## Agreement: PHILIUMM vs the operator" in text and "agree on 1 (33 %)" in text
+    assert "## Patterns" in text and "## Corrections in the notes" in text
+    assert "Per stratum against the same gate" in text
+    assert (out_dir / "philiumm-patterns.csv").exists() and (
+        out_dir / "philiumm-corrections.csv"
+    ).exists()
+    with (out_dir / "philiumm-patterns.csv").open(encoding="utf-8") as fh:
+        pats = {r["ref"]: r["pattern"] for r in csv.DictReader(fh)}
+    assert pats[lines[0]["ref"]] == "reading" and pats[lines[1]["ref"]] == "hyphen"
+    assert "agreement with mine.csv: 1/3" in res.stdout
+    # the override template is written only for undecided rows: none here
+    assert not (out_dir / "gt-audit-pattern-overrides.csv").exists()
+
+
+def test_verdict_agreement_matrix() -> None:
+    a = [
+        {"ref": "x", "stratum": "s", "verdict": "correct"},
+        {"ref": "y", "stratum": "s", "verdict": "wrong"},
+        {"ref": "z", "stratum": "s", "verdict": ""},
+    ]
+    b = [
+        {"ref": "x", "stratum": "s", "verdict": "correct"},
+        {"ref": "y", "stratum": "s", "verdict": "correct"},
+        {"ref": "z", "stratum": "s", "verdict": "correct"},
+    ]
+    agr = audit.verdict_agreement(a, b, label_a="A", label_b="B")
+    assert (
+        agr.n == 2
+        and agr.n_same == 1
+        and agr.matrix() == {("correct", "correct"): 1, ("wrong", "correct"): 1}
+    )
+    md = "\n".join(audit.render_agreement(agr))
+    assert "agree on 1 (50 %)" in md and "| `y` | s | wrong | correct |" in md
+    assert "No line was judged by both" in "\n".join(
+        audit.render_agreement(audit.verdict_agreement([], b))
+    )

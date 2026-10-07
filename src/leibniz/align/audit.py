@@ -473,6 +473,16 @@ class AuditScore:
         return num / den if den else None
 
     @property
+    def weighted_usable(self) -> float | None:
+        """The weighted figure with boundary-off lines counted as usable."""
+        num = den = 0.0
+        for s in self.by_stratum.values():
+            if s.usable is not None and s.weight > 0:
+                num += s.weight * s.usable
+                den += s.weight
+        return num / den if den else None
+
+    @property
     def passes_gate(self) -> bool | None:
         p = self.weighted_precision
         return None if p is None else p >= self.gate
@@ -521,9 +531,12 @@ def score_verdicts(
 
 
 # Folded minted↔HTR similarity above which a "wrong"/"unreadable" verdict, or
-# below which (RECHECK_LOW) a "correct" one, is flagged for a second look.
+# below which (RECHECK_LOW) a "correct" one, is flagged for a second look. A
+# strip of fewer than RECHECK_MIN_CHARS folded characters is never flagged: the
+# machine agreeing on a lone letter proves nothing about the line.
 RECHECK_HIGH = 0.8
 RECHECK_LOW = 0.5
+RECHECK_MIN_CHARS = 4
 
 
 @dataclass(slots=True)
@@ -539,6 +552,8 @@ class Evidence:
 
     @property
     def recheck(self) -> str | None:
+        if len(normalize_indexed(self.gt_text)[0]) < RECHECK_MIN_CHARS:
+            return None
         if self.verdict in ("wrong", "unreadable") and self.similarity >= RECHECK_HIGH:
             return f"machine reading agrees at {self.similarity:.2f}: likely the same line"
         if self.verdict == "correct" and self.similarity < RECHECK_LOW:
@@ -572,10 +587,92 @@ def text_evidence(rows: Sequence[dict[str, str]], lines_csv: Path) -> list[Evide
     return out
 
 
+@dataclass(slots=True)
+class Agreement:
+    """Two auditors' verdicts on the lines both judged."""
+
+    label_a: str
+    label_b: str
+    pairs: list[tuple[str, str, str, str]]  # (ref, stratum, verdict_a, verdict_b)
+
+    @property
+    def n(self) -> int:
+        return len(self.pairs)
+
+    @property
+    def n_same(self) -> int:
+        return sum(1 for _, _, a, b in self.pairs if a == b)
+
+    def matrix(self) -> dict[tuple[str, str], int]:
+        out: dict[tuple[str, str], int] = {}
+        for _, _, a, b in self.pairs:
+            out[(a, b)] = out.get((a, b), 0) + 1
+        return out
+
+
+def verdict_agreement(
+    rows_a: Sequence[dict[str, str]],
+    rows_b: Sequence[dict[str, str]],
+    *,
+    label_a: str = "A",
+    label_b: str = "B",
+) -> Agreement:
+    """Pair the verdicts two auditors gave to the same refs (blank rows ignored)."""
+    judged_b = {
+        r["ref"]: (r.get("verdict") or "").strip().lower()
+        for r in rows_b
+        if (r.get("verdict") or "").strip().lower() in VERDICTS
+    }
+    pairs: list[tuple[str, str, str, str]] = []
+    for r in rows_a:
+        va = (r.get("verdict") or "").strip().lower()
+        if va not in VERDICTS or r["ref"] not in judged_b:
+            continue
+        pairs.append((r["ref"], (r.get("stratum") or "unknown").strip(), va, judged_b[r["ref"]]))
+    return Agreement(label_a, label_b, pairs)
+
+
+def render_agreement(agr: Agreement) -> list[str]:
+    out: list[str] = []
+    A = out.append
+    A(f"## Agreement: {agr.label_a} vs {agr.label_b}")
+    A("")
+    if not agr.n:
+        A("No line was judged by both.")
+        return out
+    A(
+        f"On the {agr.n} lines both judged, the verdicts agree on {agr.n_same} "
+        f"({100 * agr.n_same / agr.n:.0f} %)."
+    )
+    A("")
+    A(f"| {agr.label_a} ↓ · {agr.label_b} → | " + " | ".join(VERDICTS) + " |")
+    A("|---|" + "---:|" * len(VERDICTS))
+    m = agr.matrix()
+    for va in VERDICTS:
+        if not any(m.get((va, vb)) for vb in VERDICTS):
+            continue
+        A(f"| {va} | " + " | ".join(str(m.get((va, vb), 0)) for vb in VERDICTS) + " |")
+    diffs = [(ref, s, a, b) for ref, s, a, b in agr.pairs if a != b]
+    if diffs:
+        A("")
+        A("Lines where they differ:")
+        A("")
+        A(f"| ref | stratum | {agr.label_a} | {agr.label_b} |")
+        A("|---|---|---|---|")
+        for ref, s, a, b in diffs:
+            A(f"| `{ref}` | {s} | {a} | {b} |")
+    return out
+
+
 def render_score(
-    score: AuditScore, *, sheet_note: str = "", evidence: Sequence[Evidence] | None = None
+    score: AuditScore,
+    *,
+    sheet_note: str = "",
+    evidence: Sequence[Evidence] | None = None,
+    extra_sections: Sequence[Sequence[str]] = (),
 ) -> str:
-    """``reports/gt-audit.md``."""
+    """``reports/gt-audit.md``; ``extra_sections`` are rendered markdown blocks
+    (agreement, patterns, corrections) appended in order."""
     out: list[str] = []
     A = out.append
     A("# GT hand audit — C2 precision gate")
@@ -630,6 +727,21 @@ def render_score(
         "are Wilson 95 %. Equal numbers were drawn per stratum, so the pooled row "
         "over-represents the rare strata; the weighted figure is the one to read."
     )
+    if wp is not None:
+        wu = score.weighted_usable
+        per = [
+            f"{s.stratum} {'PASS' if s.precision >= score.gate else 'FAIL'} "
+            f"({100 * s.precision:.1f} %)"
+            for s in score.by_stratum.values()
+            if s.precision is not None
+        ]
+        A("")
+        A(
+            f"Per stratum against the same gate: {'; '.join(per)}. Counting boundary-off lines as "
+            f"usable, the corpus-weighted figure is **{100 * wu:.1f} %**."
+            if wu is not None
+            else f"Per stratum against the same gate: {'; '.join(per)}."
+        )
     if evidence:
         flagged = [e for e in evidence if e.recheck]
         not_ok = [e for e in evidence if e.verdict != "correct"]
@@ -659,6 +771,10 @@ def render_score(
                     f"| {k} | `{e.ref}` | {e.stratum} | {e.verdict} | {e.similarity:.2f} | "
                     f"{_cell(e.gt_text)} | {_cell(e.htr_text)} | {e.recheck} |"
                 )
+    for block in extra_sections:
+        if block:
+            A("")
+            out.extend(block)
     return "\n".join(out) + "\n"
 
 
@@ -672,6 +788,7 @@ __all__ = [
     "DEFAULT_N",
     "STRATA",
     "VERDICTS",
+    "Agreement",
     "AuditLine",
     "AuditScore",
     "AuditSheet",
@@ -681,10 +798,12 @@ __all__ = [
     "build_sheet",
     "crop_box",
     "read_verdicts",
+    "render_agreement",
     "render_score",
     "render_sheet",
     "sample_lines",
     "score_verdicts",
     "text_evidence",
+    "verdict_agreement",
     "wilson",
 ]
