@@ -52,8 +52,10 @@ clean; against the app on the fixture store in headless Chromium, **39
 checks** pass (selection and copy on the block and in the line list, the
 piece's download from the work page, EN and DE, 390 px without horizontal
 scroll, no console errors, axe-core 0 violations on the page and work views
-in both languages and at phone width). Not run on the master store and not
-yet on staging: that look is the operator's (Next). Branch
+in both languages and at phone width). On staging the same evening, the
+operator's six HTTP checks answered as designed, the first run of the piece
+text on the real store (record 41800: 84 lines on its 2 pages, mean
+confidence 0.96); the look in the browser is theirs (Next). Branch
 `claude/dazzling-hopper-uxji2x`; nothing merged, nothing deployed.
 
 **2026-10-08: S1 — the staging kit is on the branch; the install on the box
@@ -532,7 +534,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ⏳ the staging look
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted · ⏳ the browser look
 
 - **Setting.** A cloud session, no store, on the plan's one branch under the
   preamble's evening revision (see Divergences): the code and the tests
@@ -655,9 +657,22 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   support, and the copy handler is plain DOM; the operator's look on staging
   in their own browser is the test. The master store was not opened; the
   staging checks under Next are the real-data run.
-- **Next.** The staging look (Next, W4), then the three sentences for David
-  (`scratchpad/david-text-access.md` in the session; the hand-over has
-  them).
+- **On staging, verified by the operator the same evening.** `staging.sh`
+  put the branch on staging and the six HTTP checks came back as designed:
+  the server-rendered page view still carries its text; `GET
+  /api/records/41800/text` answers the header as built — the record's
+  title, incipit, date (1682), AA VI,4 N. 109, its other printing, the work,
+  `Folios: Bl. 1 (from the shelfmark LH 4, 6, 18 Bl. 1): 2 pages, canvases
+  1–2`, the catalogue's licence line — then two `## Folio` blocks, and
+  **84 recognised lines on its 2 pages, mean confidence 0.96**, the first
+  run of the piece text on the real store; the work's records carry
+  `text_url` for 41800 and 59095 and no other; an unknown record answers
+  404; `robots.txt` allows `/api/records/`. What remains is the look in the
+  browser (the Text block, Copy, the copy from the line list, the piece
+  downloads, DE, About).
+- **Next.** The browser look on staging (Next, W4), then the three
+  sentences for David (`scratchpad/david-text-access.md` in the session;
+  the hand-over has them).
 
 ### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
 
@@ -2095,7 +2110,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | Metric | Value |
 | --- | --- |
 | Tests passing | **644** (2026-10-08, W4; 634 after S1, 621 after P1 Task 2, 606 after C2b; with the `gt` + `web` + `release` extras) |
-| **W4 text access (2026-10-08)** | the live page view before: a drag in the line list selected 0 characters, select-all copied 11,828 with the chrome; after, on the fixture store: **39/39** browser checks, axe-core 0 violations ×5, 390 px without horizontal scroll |
+| **W4 text access (2026-10-08)** | the live page view before: a drag in the line list selected 0 characters, select-all copied 11,828 with the chrome; after, on the fixture store: **39/39** browser checks, axe-core 0 violations ×5, 390 px without horizontal scroll; on staging (operator, the same evening): record 41800 answers **84 lines on 2 pages, mean confidence 0.96** |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -2459,12 +2474,13 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 merges.** The SSH target and the staging user name are on the plan page,
 not here.
 
-1. Put the branch on staging:
+1. ✅ Done 2026-10-08, evening. Put the branch on staging:
    `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
    (it fetches, syncs the venv, restarts the staging unit, prints `/healthz`
    and the address; paste the output back).
-2. Over HTTP, each line asks for the password once; the expected answer is
-   after the arrow:
+2. ✅ Done the same evening, every answer as expected (record 41800: 84
+   recognised lines on its 2 pages, mean confidence 0.96). Over HTTP, each
+   line asks for the password once; the expected answer is after the arrow:
    - `curl -su USER https://staging.leibnizlegible.com/page/00068221:0043 | grep -c 'The machine reads it as'` → `1` (the server-rendered text is still there);
    - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | head -16` → a `# ` header beginning `# Leibniz Legible`, with `# Catalogue record: 41800 — [Praefatio operis ad instaurationem scientiarum]`, `# Akademie-Ausgabe: AA VI,4 N. 109`, `# Work: https://staging.leibnizlegible.com/work/00068642`, `# Folios: Bl. 1 (from the shelfmark LH 4, 6, 18 Bl. 1): 2 pages, canvases 1–2, …` (the live work's records, read from the live API on 2026-10-08: 41800 is on Bl. 1, 59095 "De cognitione" on Bl. 2);
    - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | grep -c '^## Folio'` → `2`;
@@ -2473,7 +2489,7 @@ not here.
    - `curl -su USER -o /dev/null -w '%{http_code}\n' https://staging.leibnizlegible.com/api/records/nope/text` → `404`;
    - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep records` → `Allow: /api/records/`;
    - `curl -su USER https://staging.leibnizlegible.com/llms.txt | grep -c '/api/records/{record_id}/text'` → `1`.
-3. In the browser, with the password: `/page/00068221:0043` — the Text block
+3. ⏳ In the browser, with the password: `/page/00068221:0043` — the Text block
    under the line list, Copy (then paste somewhere: 108 lines, nothing
    else), "Download this page as text", "Text of this page" in the header;
    drag across two lines of the line list and copy: the two lines alone;
