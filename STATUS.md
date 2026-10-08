@@ -3,11 +3,30 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-08 (**C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-08 (**S1, the staging site: the kit is on the branch and tested; the install on the box is the operator's**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-08: S1 — the staging kit is on the branch; the install on the box
+is the operator's.** A second copy of the site at
+`https://staging.leibnizlegible.com`, behind HTTP basic auth, running any
+pushed branch against the live serving store and the live search index, so
+that every later web change (W4, L1, later M1) is looked at on the real
+server before it is merged. Built in a cloud session, so nothing ran on the
+box: `deploy/leibniz-legible-staging.service`, `staging.env.example`,
+`staging.caddy.example`, `staging-install.sh` (root, once, idempotent; the
+password typed on the box and hashed by `caddy hash-password`; the site
+block validated over the whole Caddy configuration before a `reload`, never
+a restart) and `staging.sh` (`BRANCH`, `--main`, `--status`, `--index`,
+`--drop-index`), with runbook §14 and a test that holds each file to its
+production counterpart. One code change: the Meilisearch index name comes
+from the environment (`LEIBNIZ_MEILI_INDEX`; `leibniz serve --meili-index`;
+`leibniz index build|status|query --meili-index`; the default is the live
+name, so production is unchanged), which is what lets a staging index be
+built beside the live one. 634 tests, ruff clean. The operator's commands
+are under Next; the first run on the box is the kit's first real test.
 
 **2026-10-07: C2b — the audit closed and read.** On 7 October Denisa-Florina
 Bumba and David Rabouin (PHILIUMM) returned the 200-line hand-audit sheet
@@ -458,6 +477,70 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### S1 — a staging site on the VPS (2026-10-08) ✅ kit built and tested · ⏳ the install (operator)
+
+- **Setting.** A cloud session, no SSH and no store, on the plan's one branch
+  (the preamble; see Divergences). Task 0's look at the box (memory, disk,
+  the Caddy version, the `import` line) could not run here; the scripts
+  check the two facts they depend on themselves: the Caddy version decides
+  `basic_auth` against `basicauth` (renamed in 2.8), and a Caddyfile without
+  the §13 import line stops the install before it changes anything. The
+  rest is handed over as commands under Next.
+- **Task 1, the index name from the environment.** `LEIBNIZ_MEILI_INDEX`
+  (default `leibniz_pages`) in `web/settings.py` (`ServeSettings.meili_index`,
+  through `to_env`/`from_env` so worker processes get it), `leibniz serve
+  --meili-index`, `leibniz index build|status|query --meili-index` (the
+  option, else the variable, else the default; `index status` prints the
+  uid), `open_backend(meili_index=)` into `MeiliBackend(index_uid=)`, which
+  already existed; `deploy/env.example` and the compose file carry the
+  variable. Nothing changes for production.
+- **Task 2, the kit** (`deploy/`, runbook §14). The unit is the production
+  unit with its own checkout `/opt/leibniz-legible-staging`,
+  `EnvironmentFile=/etc/leibniz-legible/staging.env` and venv, the same
+  sandbox and `ReadWritePaths`. The env is `env.example` with
+  `LEIBNIZ_PORT=8001`, `LEIBNIZ_WORKERS=1`,
+  `LEIBNIZ_BASE_URL=https://staging.leibnizlegible.com`,
+  `LEIBNIZ_RATE_LIMIT=0`. The site block is the production block plus
+  `basic_auth` (one user, a bcrypt hash) and `X-Robots-Tag "noindex,
+  nofollow"`, the domain named literally, its own JSON log kept 168 h.
+  `staging-install.sh` (root, once, idempotent): the preconditions first,
+  then the checkout and venv as `leibniz` with the live checkout's uv
+  caches; the unit; `staging.env` from the example with the live env's
+  store path, search key, image origin and proxy address copied in (an
+  existing file is left alone); the site block rendered from the example
+  with the hash from `caddy hash-password` (the password read on the
+  terminal and piped, never on a command line); `caddy validate` over the
+  whole configuration, then `systemctl reload caddy` (a failed validate
+  puts the previous block back and reloads nothing); `systemctl enable`;
+  then `staging.sh BRANCH`. A re-run keeps the password unless
+  `--password`; `--user` renames. `staging.sh BRANCH` (root, any time):
+  fetch, `checkout -B staging origin/BRANCH`, `uv sync --frozen`, restart,
+  `/healthz`, the address; `--main`; `--status`; `--index` builds
+  `leibniz_pages_staging` as a transient systemd unit with the master key
+  after saying what it costs and asking, the staging unit stopped meanwhile
+  and the serving key's scope checked first (`meili-search-key.sh` scopes
+  it to `leibniz_pages*`, which covers the name); `--drop-index`. Both
+  scripts `bash -n` and shellcheck clean.
+- **Tests.** +12 (634): the settings and both CLIs take the index name (a
+  fake Meilisearch records that a build touches only the named index and
+  its `_meta`); `tests/test_deploy_staging.py` holds the unit to four
+  changed lines, the env to four changed values, the Caddy block to the
+  production directives plus its two additions, and the scripts to `bash
+  -n` (shellcheck where installed) and to the same domain, port, paths and
+  index names as the examples.
+- **Unverified, by construction.** Nothing ran on a box. The piped `caddy
+  hash-password`, `systemd-run --remain-after-exit` with `--setenv`, and
+  the read of the key's scope (`GET /keys/{key}`) are standard but
+  untested here; the first install is the test. Whatever fails is fixed in
+  the kit on the branch and the install re-run, never patched by hand on
+  the box.
+- **Open.** The operator wrote that an unlisted host would do without a
+  password. The kit keeps basic auth: the certificate Caddy obtains puts
+  the host name in the public certificate-transparency logs the moment the
+  site exists, so "not findable" is not available, and the password is what
+  keeps the site private. Dropping it is a small change if wanted.
+- **Next.** The install (Next); then W4, verified on staging.
 
 ### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 run on the store · ⏸ Task 3 (waits for the layout model)
 
@@ -1976,6 +2059,28 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-08 — S1, departures from the prompt and from the plan's
+  preamble.** (1) *Where it ran.* A cloud session with no SSH: Task 0's
+  look at the box and Task 4's install are handed over as commands (Next),
+  as the C2b and P1 sessions did with the store. (2) *Branch.*
+  `claude/dazzling-hopper-uxji2x`, the plan's one branch, not
+  `deploy-staging` and not the session's own designated branch; no wait for
+  "merged"; no §9 production update: the kit is installed from a clone of
+  the branch, as the plan's amendment says. (3) The install folds Task 4's
+  step 3 in: `staging-install.sh --branch BRANCH` ends by running
+  `staging.sh BRANCH`. (4) `staging.sh` has `--status` and `--drop-index`
+  beyond the prompt's `--main` and `--index`. (5) The user name is asked
+  for on the terminal when `--user` is not given (the prompt had the
+  session ask the operator; nobody could answer here). (6) The staging
+  index is `leibniz_pages_staging` and the key's scope is checked, not
+  widened: `meili-search-key.sh` already scopes the key to
+  `leibniz_pages*`. (7) `staging.env` is installed from the example with
+  the live env's store path, key, image origin and proxy address copied in,
+  since the example cannot carry the key. (8) The password stays although
+  the operator said an unlisted host would do (the S1 log says why). (9)
+  `--index` and §14 cite §5's measured 5 h 33 m for the live build; no new
+  figure was produced.
+
 - **2026-10-07 — C2b, departures from the prompt.** (1) *Where it ran.* The
   prompt assumed the WSL2 checkout with the master store and `.venv-w3`;
   this session ran in a cloud container on a fresh clone with no store, in
@@ -2104,6 +2209,40 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**S1 (2026-10-08), operator — the install, in this order:**
+
+1. The read-only look at the box; paste it into the next session if anything
+   surprises (the last two lines must show `import /etc/caddy/conf.d/*.caddy`
+   and `calculemus.caddy`):
+   `ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'`
+2. DNS: ✅ the `staging` A record exists, DNS only; an AAAA record too if the
+   box has IPv6.
+3. The install, in your own terminal (the password prompt needs one), with
+   NAME the user name you choose:
+   `ssh -t <target> 'sudo git clone --branch claude/dazzling-hopper-uxji2x --depth 1 https://github.com/marchofhares/LeibnizLegible /opt/leibniz-legible-kit && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user NAME --branch claude/dazzling-hopper-uxji2x'`
+   Expected, in order: no precondition message; `cloned … (claude/dazzling-hopper-uxji2x)`;
+   `wrote /etc/leibniz-legible/staging.env …` with seven lines under it;
+   `== caddy: … (basic_auth, user NAME)` then Caddy's `Valid configuration`;
+   `== staging ← claude/dazzling-hopper-uxji2x`, uv's sync lines,
+   `{"status":"ok","version":"0.1.0","store":true,"search":{"backend":"meili","ok":true}}`,
+   `staging runs claude/dazzling-hopper-uxji2x at <sha> — <subject>`;
+   `https://staging.leibnizlegible.com/ answers 401 without credentials`.
+   If the certificate is not there yet the last line says so and
+   `journalctl -u caddy -n 20` shows it being obtained.
+4. The checks: `ssh <target> 'systemctl is-active leibniz-legible-staging; curl -s http://127.0.0.1:8001/healthz; echo; curl -sI https://staging.leibnizlegible.com/ | head -1'`
+   → `active`, the healthz line above, `HTTP/2 401`. In the browser, with
+   the password: `/browse` on staging matches production, and
+   `curl -s https://leibnizlegible.com/api/stats` and
+   `curl -su NAME https://staging.leibnizlegible.com/api/stats` report the
+   same figures (the same index).
+5. From now on every web step ends with
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh <branch>`
+   (after the final merge, `/opt/leibniz-legible/deploy/staging.sh`), and
+   `--main` after the merge. `rm -rf /opt/leibniz-legible-kit` once the
+   install is done; the staging checkout carries the kit.
+   If anything fails, paste the output into a session: the fix goes into the
+   kit on the branch and the install is re-run (it is idempotent).
 
 **P1 (2026-10-08): Task 2 ran on the store** (`9c85f0a`); a later `compare`
 rerun adds the coverage section to the report (optional, minutes). Task 3

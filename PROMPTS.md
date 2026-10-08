@@ -959,3 +959,206 @@ call (what agrees, what differs, what it does not prove), and the reminder
 that the PR is merged only after the PHILIUMM team has seen the numbers. Do
 not merge.
 ~~~~
+
+
+### Phase S1 — A staging site on the VPS (built 2026-10-08; the install is the operator's)
+
+_Run in a cloud session under the 8 October plan's session preamble: one branch
+(`claude/dazzling-hopper-uxji2x`, not `deploy-staging`), no merge, no §9
+production update, the kit installed on the box from a clone of the branch and
+`staging.sh` run from that clone or from the staging checkout. The preamble's
+text is below the prompt, once; the departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase S1 — A staging site on the VPS: see a branch on the real server, behind a
+password, before anyone else does. One local session on the operator's desktop
+(WSL2 Ubuntu) for the code and the runbook; the installation on the box over
+SSH, each step shown and run only on the operator's yes.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md, STATUS.md, and deploy/README.md in full (§1, §3 to §5, §8, §9 and §13
+above all), deploy/Caddyfile, deploy/leibniz-legible.service, deploy/env.example
+and deploy/install.sh. If this prompt conflicts with the repo, the repo +
+STATUS.md win; record the divergence in STATUS.md. Write the "S1 — staging site"
+entry in STATUS.md at the end.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. Nothing here touches data/ or the master store; use
+`.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3). The operator merges; you
+push and hand over. The VPS: nothing runs there without the operator's explicit
+yes for the exact command shown, and every command you run there is one of this
+phase's own scripts, the §9 block, or a one-line read-only check. Never edit a
+file on the box by hand: a fix goes into the kit, on a branch. Branch:
+`deploy-staging`, created from main.
+
+## What exists on the box (from the runbook; verify the few facts Task 0 names)
+A 2 vCPU / 4 GB Hetzner VPS. The app: system user `leibniz`, checkout
+/opt/leibniz-legible with its own .venv made by uv with
+UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache and
+UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python; unit
+leibniz-legible.service (hardened sandbox; WorkingDirectory the checkout;
+EnvironmentFile /etc/leibniz-legible/env; ExecStart .venv/bin/leibniz serve;
+ReadWritePaths /var/lib/leibniz-legible), listening on 127.0.0.1:8000 with two
+workers. The serving store /var/lib/leibniz-legible/inventory.sqlite is a
+rollback-journal copy the app opens read-only. Meilisearch on 127.0.0.1:7700,
+master key in /etc/meilisearch/env (root:meilisearch, 0640), a restricted
+search key in the app's env (deploy/meili-search-key.sh made it; read that
+script to learn which indexes the key is scoped to). The index uid is
+leibniz_pages with leibniz_pages_meta beside it (search/meili.py
+DEFAULT_INDEX_UID; MeiliBackend takes index_uid, but nothing sets it from the
+environment yet). Caddy: /etc/caddy/Caddyfile from deploy/Caddyfile with
+LEIBNIZ_DOMAIN from /etc/leibniz-legible/caddy.env, and
+`import /etc/caddy/conf.d/*.caddy` at its end, present on the live box since
+Calculemus (§13 item 2 says how it was added by hand); each sibling block names
+its domain literally, never as a {$VAR} fallback. DNS is on Cloudflare; a host
+Caddy must get a certificate for is DNS-only (grey cloud) before its block goes
+live (§1, §13). Calculemus runs on 127.0.0.1:3000 under its own user. Memory
+is the constraint (§13 item 4): Meilisearch relies on the page cache for its
+p95.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+Clean tree on main (the operator's own untracked files aside); `git pull
+--ff-only origin main`; baseline ruff + pytest. Ask the operator and wait: the
+SSH target; whether the DNS record `staging` (A, and AAAA if the box has IPv6)
+is in place as DNS-only; the user name they want for the password prompt (the
+password itself is typed on the box, never in chat). Then, with a yes, one
+read-only check on the box:
+    ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'
+Record memory and disk, the Caddy version (the directive is basic_auth from
+Caddy 2.8, basicauth before) and that the import line is there. Print a plan
+and wait for "go".
+
+## Task 1 — One small code change: the index name from the environment
+web/settings.py: LEIBNIZ_MEILI_INDEX (default leibniz_pages) passed to
+MeiliBackend as index_uid; `leibniz serve --meili-index`; `leibniz index
+build|status|query --meili-index` likewise; deploy/env.example documents it.
+Tests in tests/test_web_settings.py and the search CLI tests. Nothing changes
+for production: the default is the current name.
+
+## Task 2 — The staging kit (deploy/, documented in a new runbook §14)
+- deploy/leibniz-legible-staging.service: the production unit with
+  WorkingDirectory=/opt/leibniz-legible-staging,
+  EnvironmentFile=/etc/leibniz-legible/staging.env,
+  ExecStart=/opt/leibniz-legible-staging/.venv/bin/leibniz serve, the same
+  sandbox lines, the same ReadWritePaths.
+- deploy/staging.env.example: the production env with LEIBNIZ_PORT=8001,
+  LEIBNIZ_WORKERS=1, LEIBNIZ_BASE_URL=https://staging.leibnizlegible.com, the
+  same LEIBNIZ_DB_PATH (both processes open the copy read-only), the same
+  MEILI_URL and search key, LEIBNIZ_MEILI_INDEX=leibniz_pages (production's
+  index, read only) with a comment on when to point it at a staging index,
+  LEIBNIZ_RATE_LIMIT=0 (one reader behind a password), the same image base URL.
+- deploy/staging.caddy.example: a site block for staging.leibnizlegible.com,
+  named literally: basic_auth (or basicauth, per Task 0) with one user and a
+  bcrypt hash placeholder; encode zstd gzip; the production headers plus
+  X-Robots-Tag "noindex, nofollow"; reverse_proxy 127.0.0.1:8001; its own JSON
+  access log under /var/log/caddy with roll_keep_for 168h. Installed as
+  /etc/caddy/conf.d/staging.caddy. Basic auth already turns every crawler away
+  with 401; the header is belt and braces.
+- deploy/staging-install.sh, run once as root on the box: creates
+  /opt/leibniz-legible-staging as a clone of the public repository owned by
+  leibniz (https, no credentials); `uv sync --frozen --no-dev --extra web` into
+  its own .venv with the shared cache and interpreter directories; installs the
+  unit; installs staging.env from the example if absent, else leaves it;
+  asks for the password on the terminal and writes the Caddy block with the
+  hash from `caddy hash-password` (the plaintext never leaves the terminal);
+  `caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile`, then
+  `systemctl reload caddy` (reload, never restart; the apex stays up; a failed
+  validate changes nothing); `systemctl enable --now leibniz-legible-staging`;
+  `curl -s http://127.0.0.1:8001/healthz`. Idempotent: a re-run updates in
+  place and keeps the existing password unless asked.
+- deploy/staging.sh <branch>, as root, any time: as leibniz,
+  `git -C /opt/leibniz-legible-staging fetch origin && git checkout -B
+  staging origin/<branch>`; uv sync as above; restart the staging unit;
+  healthz; print https://staging.leibnizlegible.com. Options: `--main` puts
+  staging back on main; `--index` builds a staging Meilisearch index named
+  leibniz_pages_staging with the master key from /etc/meilisearch/env and
+  points staging.env at it, for a branch that changes what the index holds
+  (M1): an hour or more, double the index's disk, and the staging unit
+  stopped meanwhile; the script says so and asks before building. If the
+  search key is scoped to named indexes, the script widens it or makes a
+  second one with the master key; read deploy/meili-search-key.sh first.
+- deploy/README.md §14 "Staging site": what it is for; the one-time setup
+  (the DNS record, staging-install.sh); daily use (push a branch,
+  staging.sh <branch>, look, merge, §9, staging.sh --main); what is shared
+  (the store copy, Meilisearch, the uv caches) and what is not (the base URL
+  embedded in staging's manifests, which are never to be shared); the data
+  caveat (a branch that needs a new serving copy, as M1 does, needs that copy
+  uploaded to a second path and LEIBNIZ_DB_PATH in staging.env pointed at it:
+  §2 and a 15 GB transfer); memory (one worker, about 150 MB RSS; stop the
+  staging unit during an index build); the password (one user; change it by
+  re-running the install script); teardown (disable the unit, remove the block,
+  reload Caddy, remove the checkout).
+Tests: a test reads the staging unit, env and Caddy examples beside their
+production counterparts and asserts the intended differences and nothing else;
+shell scripts pass `bash -n`, and shellcheck if it is installed.
+
+## Task 3 — Record, push, hand over
+STATUS.md "S1 — staging site" entry; append this prompt verbatim to PROMPTS.md
+under "Follow-up phases (2026-10)". ruff + pytest. `git push -u origin
+deploy-staging`; print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...deploy-staging?expand=1;
+wait for "merged".
+
+## Task 4 — Install on the box, each step with a yes
+1. The production §9 update (the exact command as in W4; code only), so the
+   box holds the kit and the settings change; healthz on 8000.
+2. The install: `ssh -t <target> sudo /opt/leibniz-legible/deploy/staging-install.sh`,
+   run by the operator in their own terminal because of the password prompt
+   (print the line for them), or by you with `ssh -t` if they prefer to type
+   the password into your terminal. Then your checks, read-only:
+   `systemctl is-active leibniz-legible-staging`; healthz on 8001;
+   `curl -sI https://staging.leibnizlegible.com/` answers 401 without
+   credentials; the operator confirms the page opens with the password in
+   their browser.
+3. A first use: `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh main`;
+   then /browse on staging matches production, and `/api/stats` on both report
+   the same build.
+If anything fails, say exactly what, fix it in the kit on a new branch, and
+never patch anything on the box by hand.
+~~~~
+
+The session preamble of the 8 October plan, pasted before this prompt (and
+before every later one of that plan):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull`,
+   commit there, `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (once the staging kit of step S1 exists on the box); run the live checks
+   against https://staging.leibnizlegible.com with the operator's password,
+   or against a local server on a spare port. The live site changes only at
+   the operator's final merge. Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "C2b"
+   and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environment is .venv-w3 on the desktop; in the cloud
+   make your own (.venv-cloud, with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far.
+~~~~
