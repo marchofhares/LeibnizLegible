@@ -549,10 +549,19 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   directory's mode). **The re-run at 13:25 UTC went through:** validate,
   reload, the unit, the venv (24 packages, the system CPython 3.12.3 as on
   the live checkout), `/healthz` ok with search ok, staging on `2f7a362`;
-  the certificate was not yet issued at the script's last check. The piped
-  `caddy hash-password` worked (the hash is in the block, the password
-  survived the re-run); `systemd-run --remain-after-exit` with `--setenv`
-  and the read of the key's scope (`GET /keys/{key}`) are still untested.
+  the certificate was not yet issued at the script's last check. Minutes
+  later, from the cloud session: `https://staging.leibnizlegible.com/`
+  answers `401` over a valid certificate with `WWW-Authenticate: Basic
+  realm="restricted"`, the live site `200`. One detail for the record: the
+  401 itself carries `Server: Caddy` and neither the HSTS nor the
+  `X-Robots-Tag` header, because Caddy writes its own error responses
+  outside the `header` directive's wrapper; every response that passes the
+  password goes through the proxy and carries them, as the live site's
+  `200` and its app-served `404` show (HSTS present, no `Server`). A 401 is
+  not indexable content, so nothing is lost. The piped `caddy
+  hash-password` worked (the hash is in the block, the password survived
+  the re-run); `systemd-run --remain-after-exit` with `--setenv` and the
+  read of the key's scope (`GET /keys/{key}`) are still untested.
 - **Open.** The operator wrote that an unlisted host would do without a
   password. The kit keeps basic auth: the certificate Caddy obtains puts
   the host name in the public certificate-transparency logs the moment the
@@ -2250,7 +2259,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    `https://staging.leibnizlegible.com/ answers 401 without credentials`.
    If the certificate is not there yet the last line says so and
    `journalctl -u caddy -n 20` shows it being obtained.
-4. The checks: `ssh <target> 'systemctl is-active leibniz-legible-staging; curl -s http://127.0.0.1:8001/healthz; echo; curl -sI https://staging.leibnizlegible.com/ | head -1'`
+4. ✅ from the cloud session, 2026-10-08: `401` over a valid certificate
+   without credentials, the live site `200`. Still the operator's: the
+   on-box line `ssh <target> 'systemctl is-active leibniz-legible-staging; curl -s http://127.0.0.1:8001/healthz; echo; curl -sI https://staging.leibnizlegible.com/ | head -1'`
    → `active`, the healthz line above, `HTTP/2 401`. In the browser, with
    the password: `/browse` on staging matches production, and
    `curl -s https://leibnizlegible.com/api/stats` and

@@ -6,9 +6,12 @@
 #
 # The domain is named literally, never as a {$VAR:localhost} fallback (§13).
 # Basic auth answers every crawler with 401 before the app sees the request;
-# the X-Robots-Tag header is belt and braces. Everything else is the
-# production block: compression, HSTS, no Server header, the hour of caching
-# on /static/*, a JSON access log kept for seven days.
+# the X-Robots-Tag header is belt and braces on what passes the password
+# (Caddy writes the 401 itself, outside the header directive, so that one
+# response carries neither it nor HSTS; a 401 is not indexable content).
+# Everything else is the production block: compression, HSTS, no Server
+# header, the hour of caching on /static/*, a JSON access log kept for
+# seven days.
 staging.leibnizlegible.com {
 	basic_auth {
 		__STAGING_USER__ __STAGING_HASH__
