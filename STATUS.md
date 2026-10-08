@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-08 (**S1, the staging site: the kit is on the branch and tested; the install on the box is the operator's**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-08 (**S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -25,8 +25,15 @@ production counterpart. One code change: the Meilisearch index name comes
 from the environment (`LEIBNIZ_MEILI_INDEX`; `leibniz serve --meili-index`;
 `leibniz index build|status|query --meili-index`; the default is the live
 name, so production is unchanged), which is what lets a staging index be
-built beside the live one. 634 tests, ruff clean. The operator's commands
-are under Next; the first run on the box is the kit's first real test.
+built beside the live one. 634 tests, ruff clean. **Installed on the box
+the same day and verified by the operator:** the first run stopped at the
+Caddy reload over a log file that `caddy validate` had created as root (the
+S1 log has it; the fixed kit's re-run went through); then the page opens
+with the password, `/browse` matches the live site, `/api/stats` reports
+the same figures from the same index, and every authenticated response
+carries HSTS and `X-Robots-Tag: noindex, nofollow` without a `Server`
+header. From here on, every web change on the branch is one `staging.sh`
+line and a look before anything is merged.
 
 **2026-10-07: C2b — the audit closed and read.** On 7 October Denisa-Florina
 Bumba and David Rabouin (PHILIUMM) returned the 200-line hand-audit sheet
@@ -478,7 +485,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### S1 — a staging site on the VPS (2026-10-08) ✅ kit built and tested · ⏳ the install (operator)
+### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
 
 - **Setting.** A cloud session, no SSH and no store, on the plan's one branch
   (the preamble; see Divergences). Task 0's look at the box (memory, disk,
@@ -567,7 +574,14 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the host name in the public certificate-transparency logs the moment the
   site exists, so "not findable" is not available, and the password is what
   keeps the site private. Dropping it is a small change if wanted.
-- **Next.** The install (Next); then W4, verified on staging.
+- **Verified by the operator, 2026-10-08.** The page opens in the browser
+  with the password; `/browse` matches the live site; an authenticated
+  `GET /` answers `200` with HSTS and `X-Robots-Tag: noindex, nofollow` and
+  no `Server` header; `/api/stats` is identical on both sites (2,225 works,
+  236,795 pages, 13,508,625 lines, the same confidence histogram), as it
+  must be, both reading the same index.
+- **Next.** W4, text access, on this branch, verified on staging with
+  `staging.sh claude/dazzling-hopper-uxji2x` before anything is merged.
 
 ### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 run on the store · ⏸ Task 3 (waits for the layout model)
 
@@ -2237,43 +2251,17 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**S1 (2026-10-08), operator — the install, in this order:**
-
-1. ✅ Done 2026-10-08 (the figures are in the S1 log). The read-only look at
-   the box, for the record:
-   `ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'`
-2. DNS: ✅ the `staging` A record exists, DNS only; an AAAA record too if the
-   box has IPv6.
-3. ✅ Installed 2026-10-08 (user `evanatlas`): the first run stopped at the
-   Caddy reload (the S1 log says why), the re-run with the fixed kit went
-   through. The re-run line, which keeps the password:
-   `ssh -t root@49.13.13.213 'sudo git -C /opt/leibniz-legible-kit pull --ff-only && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user evanatlas --branch claude/dazzling-hopper-uxji2x'`
-   The first run's line, for the record, with NAME the user name:
-   `ssh -t <target> 'sudo git clone --branch claude/dazzling-hopper-uxji2x --depth 1 https://github.com/marchofhares/LeibnizLegible /opt/leibniz-legible-kit && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user NAME --branch claude/dazzling-hopper-uxji2x'`
-   Expected, in order: no precondition message; `cloned … (claude/dazzling-hopper-uxji2x)`;
-   `wrote /etc/leibniz-legible/staging.env …` with seven lines under it;
-   `== caddy: … (basic_auth, user NAME)` then Caddy's `Valid configuration`;
-   `== staging ← claude/dazzling-hopper-uxji2x`, uv's sync lines,
-   `{"status":"ok","version":"0.1.0","store":true,"search":{"backend":"meili","ok":true}}`,
-   `staging runs claude/dazzling-hopper-uxji2x at <sha> — <subject>`;
-   `https://staging.leibnizlegible.com/ answers 401 without credentials`.
-   If the certificate is not there yet the last line says so and
-   `journalctl -u caddy -n 20` shows it being obtained.
-4. ✅ from the cloud session, 2026-10-08: `401` over a valid certificate
-   without credentials, the live site `200`. Still the operator's: the
-   on-box line `ssh <target> 'systemctl is-active leibniz-legible-staging; curl -s http://127.0.0.1:8001/healthz; echo; curl -sI https://staging.leibnizlegible.com/ | head -1'`
-   → `active`, the healthz line above, `HTTP/2 401`. In the browser, with
-   the password: `/browse` on staging matches production, and
-   `curl -s https://leibnizlegible.com/api/stats` and
-   `curl -su NAME https://staging.leibnizlegible.com/api/stats` report the
-   same figures (the same index).
-5. From now on every web step ends with
-   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh <branch>`
-   (after the final merge, `/opt/leibniz-legible/deploy/staging.sh`), and
-   `--main` after the merge. `rm -rf /opt/leibniz-legible-kit` once the
-   install is done; the staging checkout carries the kit.
-   If anything fails, paste the output into a session: the fix goes into the
-   kit on the branch and the install is re-run (it is idempotent).
+**S1 (2026-10-08): ✅ staging installed and verified** (the S1 log has the
+run, the first failure and the fix). Standing, for every web step from now
+on: push the branch, then
+`ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+(after the final merge, `/opt/leibniz-legible/deploy/staging.sh`), look at
+`https://staging.leibnizlegible.com` with the password, and only then merge;
+`staging.sh --main` after the merge. A new password:
+`/opt/leibniz-legible-staging/deploy/staging-install.sh --password`. The
+kit clone `/opt/leibniz-legible-kit` is no longer needed (`rm -rf`). Never
+send a staging link to anyone. Next step of the plan: W4, text access, on
+this branch.
 
 **P1 (2026-10-08): Task 2 ran on the store** (`9c85f0a`); a later `compare`
 rerun adds the coverage section to the report (optional, minutes). Task 3
