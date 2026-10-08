@@ -365,7 +365,9 @@ def pair_lines(
 class FileMatch:
     name: str
     split: str
-    status: str  # matched | unparsed | no_work | ambiguous_work | no_page | no_layout | no_xml
+    # matched | resolved (pages found, no XML needed: clean and val) | unparsed | no_work |
+    # ambiguous_work | no_page | no_layout | no_xml (a noisy file whose XML is not fetched)
+    status: str
     work_ids: list[str] = field(default_factory=list)
     page_ids: list[str] = field(default_factory=list)
     layout: str = ""  # "single", "two canvases (A|B)", "one scan"
@@ -428,7 +430,7 @@ def match_file(
     if fm.status in ("unparsed", "no_work", "no_page"):
         return fm
     if doc is None:
-        fm.status = "no_xml"
+        fm.status = "no_xml" if fn.split == "noisy" else "resolved"
         return fm
     fm.their_lines = len(doc.lines)
     pages = [p for pid in fm.page_ids if (p := db.get_page(conn, pid)) is not None]
@@ -436,12 +438,14 @@ def match_file(
     fm.our_lines = sum(len(v) for v in ours.values())
     their_w, their_h = doc.width or 0, doc.height or 0
     candidates: list[tuple[str, list[Placement]]] = []
-    if len(pages) == 2 and _same_scan(pages[0], pages[1]):
+    if len(pages) == 2 and (_same_scan(pages[0], pages[1]) or _same_size(pages[0], pages[1])):
+        # the store registers the sheet scan once per folio label (Open Q #19): their
+        # opening is that scan, so one page carries every line of both folios
         pl = placements_for(their_w, their_h, pages[:1], order=[0])
         if pl:
-            candidates.append(("one scan", pl))
-        fm.notes.append("both folio labels point at the same scan")
-    elif len(pages) == 2:
+            candidates.append(("one scan (registered under both labels)", pl))
+            fm.notes.append("both folio labels point at the same scan; the first page taken")
+    if len(pages) == 2 and not candidates:
         for order, label in (
             ([0, 1], "two canvases (first|second)"),
             ([1, 0], "two canvases (second|first)"),
@@ -492,6 +496,10 @@ def _same_scan(a: db.Page, b: db.Page) -> bool:
     if a.sha256 and b.sha256:
         return a.sha256 == b.sha256
     return bool(a.local_path) and a.local_path == b.local_path
+
+
+def _same_size(a: db.Page, b: db.Page) -> bool:
+    return bool(a.width and a.height) and (a.width, a.height) == (b.width, b.height)
 
 
 def run_match(
@@ -578,6 +586,9 @@ def match_summary(matches: Sequence[FileMatch]) -> dict:
     return {
         "files": len(matches),
         "by_split_status": by_status,
+        "resolved": sum(
+            1 for m in matches if m.status in ("matched", "resolved", "ambiguous_work")
+        ),
         "noisy_matched": len(noisy),
         "their_lines": sum(m.their_lines for m in noisy),
         "our_lines": sum(m.our_lines for m in noisy),
@@ -588,7 +599,7 @@ def match_summary(matches: Sequence[FileMatch]) -> dict:
         "unresolved": [
             {"name": m.name, "split": m.split, "status": m.status, "notes": m.notes}
             for m in matches
-            if m.status not in ("matched", "ambiguous_work")
+            if m.status not in ("matched", "resolved", "ambiguous_work")
         ],
     }
 
@@ -835,23 +846,25 @@ def render(
     A("## Matching their files to this project's pages")
     A("")
     A(
-        "| split | files | matched | ambiguous work | no work | no page | no layout | unparsed | "
-        "no xml |"
+        "| split | files | matched (lines paired) | resolved (pages only) | ambiguous work | "
+        "no work | no page | no layout | unparsed | no xml |"
     )
-    A("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+    A("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     for split in ("noisy", "clean", "val"):
         c = ms["by_split_status"].get(split, {})
         n = sum(c.values())
         A(
-            f"| {split} | {n} | {c.get('matched', 0)} | {c.get('ambiguous_work', 0)} | "
-            f"{c.get('no_work', 0)} | {c.get('no_page', 0)} | {c.get('no_layout', 0)} | "
-            f"{c.get('unparsed', 0)} | {c.get('no_xml', 0)} |"
+            f"| {split} | {n} | {c.get('matched', 0)} | {c.get('resolved', 0)} | "
+            f"{c.get('ambiguous_work', 0)} | {c.get('no_work', 0)} | {c.get('no_page', 0)} | "
+            f"{c.get('no_layout', 0)} | {c.get('unparsed', 0)} | {c.get('no_xml', 0)} |"
         )
     A("")
     A(
         f"{len(ms['pages'])} distinct pages of this project resolve from the three splits "
-        f"(`heldout_pages.csv`). On the {ms['noisy_matched']} matched noisy files: "
-        f"{ms['their_lines']:,} of their lines, {ms['our_lines']:,} of this project's, "
+        f"(`heldout_pages.csv`; the clean and val files are resolved to pages only, their XML "
+        f"is not needed). On the {ms['noisy_matched']} matched noisy files: "
+        f"{ms['their_lines']:,} of their lines, {ms['our_lines']:,} of this project's (both "
+        f"folio registrations of a sheet scan counted), "
         f"**{ms['pairs']:,} paired** by bounding-box IoU ≥ {IOU_DEFAULT} (at "
         + ", ".join(f"≥ {t}: {ms['pairs_by_iou'].get(f'iou≥{t}', 0):,}" for t in IOU_SENSITIVITY)
         + "). Layouts chosen: "

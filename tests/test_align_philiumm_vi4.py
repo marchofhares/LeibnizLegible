@@ -236,7 +236,9 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
     assert by["LH_1_3_7_A_0004v-0003r"].status == "no_page" and by[
         "LH_1_3_7_A_0004v-0003r"
     ].work_ids == ["00099002"]
-    assert by["LH_1_20_0062v"].status == "no_xml" and by["LH_1_20_0062v"].page_ids == [f"{W}:0001"]
+    assert by["LH_1_20_0062v"].status == "resolved" and by["LH_1_20_0062v"].page_ids == [
+        f"{W}:0001"
+    ]
     V.write_match(matches, dest / V.MATCH_NAME)
     back = V.read_match(dest / V.MATCH_NAME)
     assert [m.name for m in back] == [m.name for m in matches] and back[0].pairs[0].iou == matches[
@@ -251,6 +253,12 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
         f"{W}:0003",
     }
     summ = V.match_summary(matches)
+    assert summ["resolved"] == 3 and {u["name"] for u in summ["unresolved"]} == {
+        "LH_1_20_0099r",
+        "LH_9_9_0001r",
+        "0001_page_12210614_docId_307926",
+        "LH_1_3_7_A_0004v-0003r",
+    }
     assert (
         summ["noisy_matched"] == 2
         and summ["pairs"] == 6
@@ -271,7 +279,7 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
     assert cs["total"]["agree"] == 1 and cs["by_stratum"]["heavy_revision"]["disagree"] == 1
     assert cs["witness_disagree"]["ours_closer"] == 1  # the HTR reads "prima linea dextra"
     md = V.render(matches, rows, cs, listing=json.loads((dest / V.LISTING_NAME).read_text()))
-    assert "**6 paired**" in md and "| noisy | 4 | 2 |" in md and "did not resolve" in md
+    assert "**6 paired**" in md and "| noisy | 4 | 2 | 0 |" in md and "did not resolve" in md
     assert V.write_judged(rows, tmp_path / "j.csv") == 6
     sample = V.disagreement_sample(rows, n=10)
     assert [r.bucket for r in sample] == ["disagree", "near"]
@@ -383,3 +391,47 @@ def test_vi4_cli_round_trip(tmp_path: Path) -> None:
     assert res.exit_code == 0, res.stdout
     assert "2 lines with image strips" in " ".join(res.stdout.split())
     assert (dest / "philiumm-disagreements.html").exists()
+
+
+def test_opening_registered_twice_is_one_scan(tmp_path: Path) -> None:
+    """The store holds the sheet scan once per folio label (Open Q #19): their opening
+    image has that scan's size, so one page carries every line of both folios."""
+    store, dest, images = _seed(tmp_path)
+    conn = db.connect(store)
+    # make 62v and 63r the same 2000 × 1500 scan with the lines of both halves
+    for seq in (1, 2):
+        conn.execute(
+            "UPDATE pages SET width = 2000, height = 1500 WHERE work_id = ? AND seq = ?", (W, seq)
+        )
+    conn.execute("DELETE FROM lines WHERE page_id IN (?, ?)", (f"{W}:0001", f"{W}:0002"))
+    conn.execute("DELETE FROM gt_lines")
+    seg = db.start_run(conn, "segment", model="seg")
+    rec = db.start_run(conn, "recognize", model="htr@v1")
+    for pid in (f"{W}:0001", f"{W}:0002"):
+        for seq, (x0, y0, x1, y1) in enumerate(
+            ((100, 100, 900, 160), (1100, 100, 1900, 160), (1100, 200, 1900, 260))
+        ):
+            db.insert_line(
+                conn,
+                db.Line(
+                    page_id=pid,
+                    line_seq=seq,
+                    polygon=[[x0, y0], [x1, y0], [x1, y1], [x0, y1]],
+                    run_id=seg,
+                    status="machine",
+                ),
+            )
+            db.set_line_recognition(
+                conn, pid, seq, text=f"line {seq}", conf=0.9, model="htr", run_id=rec
+            )
+    conn.commit()
+    conn.close()
+    from leibniz.align.audit_reach import open_readonly
+
+    ro = open_readonly(store)
+    by = {m.name: m for m in V.run_match(ro, dest)}
+    ro.close()
+    m = by["LH_1_20_0063r-0062v"]
+    assert m.status == "matched" and m.layout.startswith("one scan")
+    # the first-named folio's page (63r, seq 2) carries the lines of both halves
+    assert {p.ref for p in m.pairs} == {f"{W}:0002:000", f"{W}:0002:001", f"{W}:0002:002"}
