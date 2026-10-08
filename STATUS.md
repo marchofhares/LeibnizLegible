@@ -486,7 +486,12 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   check the two facts they depend on themselves: the Caddy version decides
   `basic_auth` against `basicauth` (renamed in 2.8), and a Caddyfile without
   the §13 import line stops the install before it changes anything. The
-  rest is handed over as commands under Next.
+  rest is handed over as commands under Next. **The operator's look at the
+  box, pasted back the same day:** 3,814 MB of RAM with 3,118 MB available
+  and 3,223 MB in the page cache, 618 MB of the 4 GB swap in use; one 75 GB
+  disk with 33 GB free; the app, Meilisearch and Caddy active; Caddy
+  v2.11.4, so the directive is `basic_auth`; the import line in place with
+  `calculemus.caddy` beside it. Nothing in it changes the kit.
 - **Task 1, the index name from the environment.** `LEIBNIZ_MEILI_INDEX`
   (default `leibniz_pages`) in `web/settings.py` (`ServeSettings.meili_index`,
   through `to_env`/`from_env` so worker processes get it), `leibniz serve
@@ -2212,9 +2217,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 **S1 (2026-10-08), operator — the install, in this order:**
 
-1. The read-only look at the box; paste it into the next session if anything
-   surprises (the last two lines must show `import /etc/caddy/conf.d/*.caddy`
-   and `calculemus.caddy`):
+1. ✅ Done 2026-10-08 (the figures are in the S1 log). The read-only look at
+   the box, for the record:
    `ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'`
 2. DNS: ✅ the `staging` A record exists, DNS only; an AAAA record too if the
    box has IPv6.
