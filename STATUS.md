@@ -459,6 +459,67 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
+### P1 — PHILIUMM cross-checks: Task 1, their aligner's worked example (2026-10-08) ✅ Task 1 · ⏳ Task 2 (code next, runs on the store) · ⏸ Task 3 (waits for the layout model)
+
+- **Setting.** Run in the cloud session on the C2b branch (no store needed for
+  Task 1). Their alignment repository was read at commit `9d2ee4e500e0`
+  (main, "Delete temporary files", 2026-09-21): no licence file; nothing copied,
+  the worked example fetched cache-first by raw URL into `data/philiumm/sample/`
+  (`align/philiumm/fetch.py`, the commit pinned in a `COMMIT` marker). Task 0's
+  two questions: the new RF-DETR model is not out (Denisa expects it mid-to-late
+  October), and Task 3 waits for it.
+- **What was built.** `align/pagexml.py` (PAGE XML lines in document order, with
+  zone type, geometry, text and their per-line attributes; tested on a fixture);
+  `align/philiumm/sample.py` + `leibniz align philiumm-sample` (fetch, align
+  under four configurations, their CSV columns, the line-by-line comparison,
+  the HTR-witness tally, `reports/philiumm/alignment-sample.md` + `.json`,
+  the full pairs in `data/philiumm/sample/comparison.csv`); +10 tests (616).
+- **Their run** (`alignment_report.csv`): 257 HTR lines, 230 replaced
+  (89.5 %), 26 without a match; no per-line gate
+  (`--conf_threshold 0.0`, `nb_low_conf` = 0), `--min_sim 0.5`; their score is
+  `1 − Levenshtein ÷ max(len)` on raw text between the HTR line and the best
+  window of whole edition words. Their output carries it per line:
+  212 of 230 aligned lines reach 0.7, 230 reach 0.5.
+- **This project's aligner on the same files** (`align_piece`, free edition
+  ends, threshold 0.60; *raw ≥ 0.7* = their formula and the dataset card's cut
+  on the HTR line vs the minted slice):
+  per file 121/142 (85.2 %) and 51/115 (44.3 %) —
+  each image is a bifolium side, and `0002v-0001r` holds 2v and 1r, the end
+  and the start of the passage, which one monotone alignment cannot both
+  place; both files as one piece 108/257 and 173/257 by order;
+  **per region (each zone its own piece) 194/257 (75.5 %), 179 at
+  raw ≥ 0.7 (69.6 %)** against their 230 (89.5 %) with no gate and
+  212 at ≥ 0.7.
+- **Line by line, per region vs theirs:** both same 170 (66.1 %),
+  both different 20, this project only 4, theirs only 40, neither 23.
+  By zone: MainZone 131/184 same, 27 theirs only; MarginTextZone
+  39/64 same, 13 theirs only; the 6 library-stamp lines and the page
+  numbers are *neither* on both sides. On the 20 lines both aligned
+  differently, the HTR reading of the strip is closer to this project's slice
+  on 9 and to their window on 11: the usual shape is a slice running on past
+  a window where the HTR reads more words (`Brentius in prolegomenis contra
+  Petrum` vs `… contra`), or a window reaching into the next line.
+- **Why the 40 *theirs only* lines (22 of them with their score ≥ 0.9).** The
+  edition text interleaves the marginal notes at their textual position
+  (`Am Rande:` blocks of several hundred characters) and passages the page
+  puts elsewhere, so a main zone's monotone alignment meets long edition-only
+  insertions: the exact DP prefers to mis-match the lines that follow (file
+  B's main zone, lines 2–8 `Tutius est statuere…` and 55–65, placed on the
+  margin text at confidence 0.2–0.4), or the insertions land on a line and
+  sink it (file A, lines 79–82) or trip the burst guard (line 108, 63 inserted
+  characters). Forcing the anchor-guided path for every size gives 191, the
+  same block lost. Their Passim windows are order-free and immune. **This is
+  the same mechanism C2b saw in the mint** (additions rendered inline, the
+  edition's order against the page's), now measured on their example: a
+  monotone aligner needs the marginalia separated from the main text before
+  alignment (Denisa's apparatus-reinsertion script, or the edition's own
+  markup), or an order-free fallback for the lines it declines.
+- **What it does not prove.** Agreement is not correctness: both aligners read
+  the same edition text and can share a mistake; a line both decline is not
+  thereby wrong; the HTR witness is a noisy reader. The example is one
+  heavily revised draft (LH I 3,4, a Konzept with marginalia); Task 2 measures
+  the same question on 735 pages.
+
 ### C2b — the audit closed and read (2026-10-07) ✅ score · ✅ patterns · ✅ hyphen fix · ⏳ reach census (operator's run)
 
 - **What arrived.** `reports/gt-audit/gt-audit-verdicts-philiumm.csv`: the
@@ -1680,7 +1741,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **606** (2026-10-07, C2b; with the `gt` + `web` + `release` extras; 573 after the W3 fix, 569 after W3) |
+| Tests passing | **616** (2026-10-08, P1 Task 1; 606 after C2b; with the `gt` + `web` + `release` extras) |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -1701,6 +1762,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C2 normalization tax, first sample | 46 corrections, 45 placed: 9.4 % as written / 7.9 % folded; on the accent-and-comma lines **3.1 % / 0.0 %** |
 | C2 audit agreement | the operator's 20 (2026-09-16) vs PHILIUMM: 11/20 |
 | **C2 reach census (2026-10-08)** | 297,424 lines · hyphen **7,822 (2.6 %)** · bracket 4,338 (1.5 %) · math 249 (0.1 %, a floor) · addition proxy 82.7 % (useless) · Marginalien 0 · LH 35 9,145 |
+| **P1 Task 1: their aligner's example (2026-10-08)** | theirs 230/257 (89.5 %, no gate; 212 at ≥ 0.7) · this project per region **194/257 (75.5 %)**, 179 at raw ≥ 0.7 · both same 170 · theirs only 40 (the interleaved marginalia) |
 | **C2 hand census (2026-10-08)** | of 296,587 lines with a Textart: author's own hand **40.1 %**, **Leibniz's own hand 25.7 %** (fair 1.7 · light 8.3 · heavy 35.8 · scrap 18.2 %) |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
@@ -1986,6 +2048,11 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**P1 (2026-10-08), in progress on the same branch:** Task 1 is done
+(`reports/philiumm/alignment-sample.md`); Task 2's code comes next, its four
+runs against the store are the operator's; Task 3 waits for the new RF-DETR
+model. Merge order unchanged: after the PHILIUMM team has seen the numbers.
 
 **C2b (2026-10-07), operator — in this order:**
 
