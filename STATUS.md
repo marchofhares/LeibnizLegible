@@ -2469,6 +2469,14 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
+**The final merge is unblocked (2026-10-08, late evening):** the scored
+audit has gone to the PHILIUMM team and the staging look is done. The order
+is the plan page's "final merge" section: merge the pull request, `git
+checkout main && git pull --ff-only origin main` on the desktop, the §9
+update on the box (code only), the same checks on the live site, then
+`staging.sh --main`. Deploying before the call of 13 October makes the Text
+block clickable on the call.
+
 **W4 (2026-10-08), operator — the staging look, in WSL, before anything
 merges.** The SSH target and the staging user name are on the plan page,
 not here.
@@ -2542,9 +2550,9 @@ unchanged: after the PHILIUMM team has seen the numbers.
 
 1. ✅ Done 2026-10-08: the score against the store reproduced 72.3 %; the
    reach census ran (minutes) and its reports are committed (`bd01eef`).
-2. Send Denisa and David the five-line summary (the session's hand-over)
-   with `reports/gt-audit.md` attached; then merge. They judged the lines;
-   they see the score first.
+2. ✅ Done 2026-10-08, evening: the scored report (`reports/gt-audit.md`)
+   went to Denisa and David with the reply to their notes of 7 October.
+   They have seen the score first, so the merge is no longer held by it.
 3. **Before C3, once:** the re-mint with hyphens kept. The factory is
    idempotent and the aligner's default is now `keep_hyphen=True`, so it is
    the C2 runbook line **without `--resume`** (resume skips every piece
