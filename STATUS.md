@@ -459,7 +459,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 built, ⏳ its four runs on the store · ⏸ Task 3 (waits for the layout model)
+### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 run on the store · ⏸ Task 3 (waits for the layout model)
 
 - **Setting.** Run in the cloud session on the C2b branch (no store needed for
   Task 1). Their alignment repository was read at commit `9d2ee4e500e0`
@@ -541,6 +541,39 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the Hub's rename to `DenisaBumba/…`. Expect, from Task 1: disagreements
   concentrated on pages with margin zones; `no_layout` where their image
   is not the GWLB derivative at a uniform scale — the report counts both.
+- **Task 2, run on the store (2026-10-08, `reports/philiumm/vi4-crosscheck.md`,
+  `vi4-summary.json`, `vi4-match-summary.json`, `heldout_pages.csv`).** Of the
+  1,010 files, 735 noisy matched with lines paired and
+  233 clean + 23 val resolved to pages; 19 did not: 8 eScriptorium
+  ids with no shelfmark in the name, and 11 folios of LH 35, 1, 1 whose work
+  (`00067960`) carries no folio label on any of its 54 pages — the same class
+  the C2 resolver cannot localize. **1,149 distinct pages are held out for C3.**
+  On the matched noisy files 93,021 of their lines met 62,114 of this project's
+  at bounding-box IoU ≥ 0.5 (68,351 at 0.3, 54,492 at 0.7); 419 openings
+  were the sheet scan the store registers under both folio labels, paired
+  against the registration that carries the minted lines.
+- **The paired lines, judged** (62,114): agree 9,307 (15.0 %) · near 2,886 ·
+  disagree 771 · this project only 5,145 · theirs only 21,949 ·
+  neither 22,056. This project minted text on 18,109 of the paired lines
+  (29.2 %), theirs on 34,913 (56.2 %); where both have text
+  (12,964), they agree at ≥ 0.9 on 71.8 % and differ at < 0.7 on 5.9 %.
+  Every minted pair is heavy revision bar 112: these are drafts, held to the 0.72
+  threshold, against a run with no per-line gate. On the 771 *disagree* lines the
+  HTR reading is closer to this project's text on 383 and to theirs on 381
+  (near: 1159 / 1682): a coin toss, as two sound aligners on one edition should
+  give; the sample shows mostly line-start and line-end slips of a word (their
+  whole-word window against this project's slice), the audit's boundary pattern.
+- **Where the gap is.** 161 of the 731 judged files carry no minted line at all;
+  their text covers 7,838 paired lines there — coverage (pieces the factory did
+  not localize, had no edition text for, or declined whole), not alignment.
+  On the 570 files with some mint: theirs only 14,111 against this project
+  only 5,145. By zone: main zones, this project 17,513 lines with text to
+  their 29,957; **margin zones 596 to 4,954** — the marginalia the monotone
+  aligner cannot place (Task 1's finding, at scale). What agreement does not
+  prove: both read the same edition; a shared reading is the edition's, not
+  the page's. The sheet (`data/philiumm/philiumm-disagreements.html`, 300
+  lines, both texts, verdicts in the C2 CSV shape) is the second thing to
+  offer the PHILIUMM team.
 
 ### C2b — the audit closed and read (2026-10-07) ✅ score · ✅ patterns · ✅ hyphen fix · ⏳ reach census (operator's run)
 
@@ -1784,6 +1817,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C2 normalization tax, first sample | 46 corrections, 45 placed: 9.4 % as written / 7.9 % folded; on the accent-and-comma lines **3.1 % / 0.0 %** |
 | C2 audit agreement | the operator's 20 (2026-09-16) vs PHILIUMM: 11/20 |
 | **C2 reach census (2026-10-08)** | 297,424 lines · hyphen **7,822 (2.6 %)** · bracket 4,338 (1.5 %) · math 249 (0.1 %, a floor) · addition proxy 82.7 % (useless) · Marginalien 0 · LH 35 9,145 |
+| **P1 Task 2: A VI,4 under two aligners (2026-10-08)** | 62,114 paired lines on 735 pages: agree 9,307 · near 2,886 · disagree 771 · ours only 5,145 · theirs only 21,949 (7,838 on 161 pages with no mint at all) · neither 22,056; HTR witness on disagreements 383 / 381; **1,149 held-out pages** |
 | **P1 Task 1: their aligner's example (2026-10-08)** | theirs 230/257 (89.5 %, no gate; 212 at ≥ 0.7) · this project per region **194/257 (75.5 %)**, 179 at raw ≥ 0.7 · both same 170 · theirs only 40 (the interleaved marginalia) |
 | **C2 hand census (2026-10-08)** | of 296,587 lines with a Textart: author's own hand **40.1 %**, **Leibniz's own hand 25.7 %** (fair 1.7 · light 8.3 · heavy 35.8 · scrap 18.2 %) |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
@@ -2071,8 +2105,10 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**P1 (2026-10-08), operator — Task 2's four runs, in this order, on the
-desktop in WSL with `UV_PROJECT_ENVIRONMENT=.venv-w3` after `git pull`:**
+**P1 (2026-10-08): Task 2 ran on the store** (`9c85f0a`); a later `compare`
+rerun adds the coverage section to the report (optional, minutes). Task 3
+waits for the new RF-DETR model. Merge order unchanged: after the PHILIUMM
+team has seen the numbers. The four runs, for the record:
 
 1. `uv run leibniz align philiumm-vi4 fetch` — the Hub listing and the 735
    noisy PAGE files into `data/philiumm/noisy/` at one request a second

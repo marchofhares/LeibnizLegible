@@ -293,9 +293,16 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
     assert v2.htr == "folium sequens v2"
     cs = V.compare_summary(matches, rows)
     assert cs["total"]["agree"] == 1 and cs["by_stratum"]["heavy_revision"]["disagree"] == 1
+    cov = cs["coverage"]
+    assert cov["files"] == 2 and cov["files_without_mint_list"] == ["LH_1_20_0064r"]
+    assert cov["their_lines_on_files_without_mint"] == 1 and cov["by_shelfmark"]["LH_1_20"] == {
+        "files": 2,
+        "without_mint": 1,
+    }
     assert cs["witness_disagree"]["ours_closer"] == 1  # the HTR reads "prima linea dextra"
     md = V.render(matches, rows, cs, listing=json.loads((dest / V.LISTING_NAME).read_text()))
     assert "**6 paired**" in md and "| noisy | 4 | 2 | 0 |" in md and "did not resolve" in md
+    assert "On 1 of the 2 judged files this project minted no line at all" in md
     assert V.write_judged(rows, tmp_path / "j.csv") == 6
     sample = V.disagreement_sample(rows, n=10)
     assert [r.bucket for r in sample] == ["disagree", "near"]

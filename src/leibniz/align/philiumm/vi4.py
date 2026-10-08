@@ -529,6 +529,7 @@ def match_file(
         fm.pairs_at[label] = len(pairs)
     assert best is not None
     fm.layout, fm.pairs = best[1], best[2]
+    fm.status = "matched"  # a shared key is a note, not a failure, once lines are paired
     chosen = next(pl for label, pl in candidates if label == best[1])
     for t in IOU_SENSITIVITY:
         fm.pairs_at[f"iou≥{t}"] = len(pair_lines(doc.lines, chosen, ours, threshold=t))
@@ -790,9 +791,41 @@ def witness(rows: Sequence[Judged], bucket: str = "disagree") -> tuple[int, int,
     return ours, theirs, tie
 
 
+def coverage(rows: Sequence[Judged]) -> dict:
+    """Files on which this project minted nothing at all, against files where it
+    minted something: the share of *theirs only* that is coverage, not alignment."""
+    by_file: dict[str, dict[str, int]] = tally(rows, lambda r: r.file)
+    minted = {
+        f: c["agree"] + c["near"] + c["disagree"] + c["ours_only"] for f, c in by_file.items()
+    }
+    none = sorted(f for f in by_file if minted[f] == 0)
+    some = sorted(f for f in by_file if minted[f] > 0)
+    prefix = lambda f: "_".join(f.split("_")[:3])  # noqa: E731  (LH_1_3 …)
+    by_prefix: dict[str, dict[str, int]] = {}
+    for f in by_file:
+        d = by_prefix.setdefault(prefix(f), {"files": 0, "without_mint": 0})
+        d["files"] += 1
+        d["without_mint"] += int(minted[f] == 0)
+    return {
+        "files": len(by_file),
+        "files_without_mint": len(none),
+        "their_lines_on_files_without_mint": sum(
+            by_file[f]["agree"]
+            + by_file[f]["near"]
+            + by_file[f]["disagree"]
+            + by_file[f]["theirs_only"]
+            for f in none
+        ),
+        "on_files_with_mint": {b: sum(by_file[f][b] for f in some) for b in BUCKETS},
+        "by_shelfmark": dict(sorted(by_prefix.items())),
+        "files_without_mint_list": none,
+    }
+
+
 def compare_summary(matches: Sequence[FileMatch], rows: Sequence[Judged]) -> dict:
     total = {b: sum(1 for r in rows if r.bucket == b) for b in BUCKETS}
     return {
+        "coverage": coverage(rows),
         "match": match_summary(matches),
         "judged": len(rows),
         "total": total,
@@ -960,6 +993,28 @@ def render(
         f"witness, not a judge."
     )
     A("")
+    cov = summ.get("coverage")
+    if cov:
+        A("")
+        A("## Coverage: pages where this project minted nothing")
+        A("")
+        A(
+            f"On {cov['files_without_mint']} of the {cov['files']} judged files this project minted no "
+            f"line at all; their text covers {cov['their_lines_on_files_without_mint']:,} paired lines "
+            f"there, all counted *theirs only* above. That part of the gap is coverage — a piece the "
+            f"C2 factory did not localize, had no edition text for, or declined whole — not "
+            f"alignment. On the files where it minted something: "
+            + ", ".join(f"{b} {cov['on_files_with_mint'][b]:,}" for b in BUCKETS)
+            + "."
+        )
+        A("")
+        A("| shelfmark | files | without a minted line |")
+        A("|---|---:|---:|")
+        for k, d in cov["by_shelfmark"].items():
+            A(
+                f"| {k.replace('_', ' ', 1).replace('_', ', ')} | {d['files']} | {d['without_mint']} |"
+            )
+    A("")
     A(
         "What agreement does not prove: both aligners were fed the same edition text, so a shared "
         "reading is the edition's, not the page's, and a shared mistake looks like agreement. "
@@ -1030,6 +1085,7 @@ __all__ = [
     "bbox",
     "build_disagreement_sheet",
     "compare_summary",
+    "coverage",
     "disagreement_sample",
     "fetch_listing",
     "fetch_noisy",
