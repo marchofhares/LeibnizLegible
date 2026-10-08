@@ -4,12 +4,12 @@
   "by_split_status": {
    "noisy": {
     "matched": 732,
-    "no_page": 3
+    "ambiguous_work": 3
    },
    "clean": {
     "unparsed": 6,
-    "resolved": 226,
-    "no_page": 16
+    "resolved": 233,
+    "no_page": 9
    },
    "val": {
     "unparsed": 2,
@@ -17,15 +17,15 @@
     "no_page": 2
    }
   },
-  "resolved": 981,
+  "resolved": 991,
   "noisy_matched": 732,
   "their_lines": 93021,
   "our_lines": 131457,
-  "pairs": 62113,
+  "pairs": 62114,
   "pairs_by_iou": {
-   "iou≥0.3": 68353,
-   "iou≥0.5": 62113,
-   "iou≥0.7": 54493
+   "iou≥0.3": 68351,
+   "iou≥0.5": 62114,
+   "iou≥0.7": 54492
   },
   "layouts": {
    "single": 312,
@@ -1185,33 +1185,6 @@
   ],
   "unresolved": [
    {
-    "name": "LH_4_5_10_0048r",
-    "split": "noisy",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 48r"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0051r",
-    "split": "noisy",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 51r"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0051v",
-    "split": "noisy",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 51v"
-    ]
-   },
-   {
     "name": "0001_page_12210614_docId_307926",
     "split": "clean",
     "status": "unparsed",
@@ -1260,29 +1233,11 @@
     ]
    },
    {
-    "name": "LH_35_15_1_0014r",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 14r"
-    ]
-   },
-   {
-    "name": "LH_35_15_1_0017r",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 17r"
-    ]
-   },
-   {
     "name": "LH_35_1_1_0018r",
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 18r"
+     "no page labelled 18r; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1290,7 +1245,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 18v"
+     "no page labelled 18v; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1298,7 +1253,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 20r"
+     "no page labelled 20r; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1306,7 +1261,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 20v"
+     "no page labelled 20v; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1314,7 +1269,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 22v"
+     "no page labelled 22v; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1322,7 +1277,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 24r"
+     "no page labelled 24r; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1330,7 +1285,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 24v"
+     "no page labelled 24v; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1338,7 +1293,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 25r"
+     "no page labelled 25r; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1346,52 +1301,7 @@
     "split": "clean",
     "status": "no_page",
     "notes": [
-     "no page labelled 25v"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0002r",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 2r"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0011r",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 11r"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0011v",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 11v"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0025r",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 25r"
-    ]
-   },
-   {
-    "name": "LH_4_5_10_0025v",
-    "split": "clean",
-    "status": "no_page",
-    "notes": [
-     "2 works share the key",
-     "no page labelled 25v"
+     "no page labelled 25v; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1415,7 +1325,7 @@
     "split": "val",
     "status": "no_page",
     "notes": [
-     "no page labelled 17r"
+     "no page labelled 17r; 00067960 has no folio labels on its 54 pages"
     ]
    },
    {
@@ -1423,19 +1333,19 @@
     "split": "val",
     "status": "no_page",
     "notes": [
-     "no page labelled 22r"
+     "no page labelled 22r; 00067960 has no folio labels on its 54 pages"
     ]
    }
   ]
  },
- "judged": 62113,
+ "judged": 62114,
  "total": {
-  "agree": 7048,
-  "near": 2229,
-  "disagree": 604,
-  "ours_only": 4050,
-  "theirs_only": 25034,
-  "neither": 23148
+  "agree": 9307,
+  "near": 2886,
+  "disagree": 771,
+  "ours_only": 5145,
+  "theirs_only": 21949,
+  "neither": 22056
  },
  "by_stratum": {
   "unminted": {
@@ -1443,14 +1353,14 @@
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 25034,
-   "neither": 23148
+   "theirs_only": 21949,
+   "neither": 22056
   },
   "heavy_revision": {
-   "agree": 6996,
-   "near": 2215,
-   "disagree": 597,
-   "ours_only": 4011,
+   "agree": 9255,
+   "near": 2872,
+   "disagree": 764,
+   "ours_only": 5106,
    "theirs_only": 0,
    "neither": 0
   },
@@ -1465,20 +1375,20 @@
  },
  "by_zone": {
   "MarginTextZone": {
-   "agree": 173,
-   "near": 49,
-   "disagree": 14,
-   "ours_only": 149,
-   "theirs_only": 4719,
-   "neither": 5028
+   "agree": 295,
+   "near": 86,
+   "disagree": 19,
+   "ours_only": 196,
+   "theirs_only": 4554,
+   "neither": 4978
   },
   "MainZone": {
-   "agree": 6875,
-   "near": 2180,
-   "disagree": 590,
-   "ours_only": 3901,
-   "theirs_only": 20313,
-   "neither": 18101
+   "agree": 9012,
+   "near": 2800,
+   "disagree": 752,
+   "ours_only": 4949,
+   "theirs_only": 17393,
+   "neither": 17059
   },
   "NumberingZone": {
    "agree": 0,
@@ -1515,12 +1425,12 @@
    "neither": 28
   },
   "LH_1_12_2_0125r-0124v": {
-   "agree": 6,
-   "near": 1,
+   "agree": 15,
+   "near": 6,
    "disagree": 0,
    "ours_only": 3,
-   "theirs_only": 39,
-   "neither": 32
+   "theirs_only": 25,
+   "neither": 33
   },
   "LH_1_1_4_0072r": {
    "agree": 0,
@@ -1547,20 +1457,20 @@
    "neither": 26
   },
   "LH_1_20_0065r-0064v": {
-   "agree": 17,
-   "near": 0,
+   "agree": 28,
+   "near": 10,
    "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 64,
-   "neither": 22
+   "ours_only": 4,
+   "theirs_only": 43,
+   "neither": 25
   },
   "LH_1_20_0067r-0066v": {
-   "agree": 6,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 60,
-   "neither": 45
+   "agree": 34,
+   "near": 6,
+   "disagree": 1,
+   "ours_only": 21,
+   "theirs_only": 27,
+   "neither": 32
   },
   "LH_1_20_0067v-0066r": {
    "agree": 20,
@@ -1579,12 +1489,12 @@
    "neither": 42
   },
   "LH_1_20_0070v-0069r": {
-   "agree": 11,
-   "near": 4,
-   "disagree": 1,
-   "ours_only": 7,
-   "theirs_only": 51,
-   "neither": 43
+   "agree": 19,
+   "near": 5,
+   "disagree": 0,
+   "ours_only": 8,
+   "theirs_only": 43,
+   "neither": 42
   },
   "LH_1_20_0071r": {
    "agree": 27,
@@ -1659,12 +1569,12 @@
    "neither": 5
   },
   "LH_1_20_0164r-0163v": {
-   "agree": 6,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 44,
-   "neither": 29
+   "agree": 19,
+   "near": 9,
+   "disagree": 1,
+   "ours_only": 4,
+   "theirs_only": 23,
+   "neither": 27
   },
   "LH_1_20_0164v-0163r": {
    "agree": 15,
@@ -1683,12 +1593,12 @@
    "neither": 29
   },
   "LH_1_20_0169v-0168r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 41,
-   "neither": 24
+   "agree": 12,
+   "near": 7,
+   "disagree": 5,
+   "ours_only": 5,
+   "theirs_only": 17,
+   "neither": 19
   },
   "LH_1_20_0207r": {
    "agree": 0,
@@ -1747,11 +1657,11 @@
    "neither": 19
   },
   "LH_1_20_0261v-0260r": {
-   "agree": 12,
-   "near": 5,
+   "agree": 18,
+   "near": 4,
    "disagree": 0,
    "ours_only": 3,
-   "theirs_only": 38,
+   "theirs_only": 33,
    "neither": 17
   },
   "LH_1_20_0270r": {
@@ -2195,12 +2105,12 @@
    "neither": 26
   },
   "LH_1_2_1_0025r-0024v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 94,
-   "neither": 46
+   "agree": 17,
+   "near": 9,
+   "disagree": 3,
+   "ours_only": 7,
+   "theirs_only": 65,
+   "neither": 40
   },
   "LH_1_2_1_0025v-0024r": {
    "agree": 17,
@@ -2344,7 +2254,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 84,
-   "neither": 76
+   "neither": 75
   },
   "LH_1_3_1_0008v-0007r": {
    "agree": 0,
@@ -2395,12 +2305,12 @@
    "neither": 11
   },
   "LH_1_3_4_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 81,
-   "neither": 17
+   "agree": 37,
+   "near": 9,
+   "disagree": 1,
+   "ours_only": 6,
+   "theirs_only": 34,
+   "neither": 11
   },
   "LH_1_3_4_0003r": {
    "agree": 0,
@@ -2427,12 +2337,12 @@
    "neither": 23
   },
   "LH_1_3_4_0009r-0006v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 66,
-   "neither": 60
+   "agree": 34,
+   "near": 4,
+   "disagree": 5,
+   "ours_only": 8,
+   "theirs_only": 23,
+   "neither": 52
   },
   "LH_1_3_4_0009v-0006r": {
    "agree": 0,
@@ -2447,7 +2357,7 @@
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 72,
+   "theirs_only": 70,
    "neither": 55
   },
   "LH_1_3_4_0011v-0010r": {
@@ -2472,7 +2382,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 70,
-   "neither": 58
+   "neither": 59
   },
   "LH_1_3_7_A_0001r": {
    "agree": 7,
@@ -2547,12 +2457,12 @@
    "neither": 7
   },
   "LH_1_3_7_C_0002r-0001v": {
-   "agree": 18,
-   "near": 8,
+   "agree": 30,
+   "near": 10,
    "disagree": 1,
-   "ours_only": 5,
-   "theirs_only": 59,
-   "neither": 45
+   "ours_only": 12,
+   "theirs_only": 45,
+   "neither": 38
   },
   "LH_1_3_7_C_0002v-0001r": {
    "agree": 22,
@@ -2563,12 +2473,12 @@
    "neither": 48
   },
   "LH_1_3_7_D_0002r-0001v": {
-   "agree": 12,
-   "near": 4,
+   "agree": 37,
+   "near": 5,
    "disagree": 1,
-   "ours_only": 5,
-   "theirs_only": 86,
-   "neither": 36
+   "ours_only": 9,
+   "theirs_only": 60,
+   "neither": 32
   },
   "LH_1_3_7_D_0002v-0001r": {
    "agree": 13,
@@ -2595,28 +2505,28 @@
    "neither": 13
   },
   "LH_1_3_7_K_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 25,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 31,
-   "neither": 15
+   "ours_only": 13,
+   "theirs_only": 4,
+   "neither": 2
   },
   "LH_1_3_8b_0068r-0067v": {
-   "agree": 0,
-   "near": 0,
+   "agree": 11,
+   "near": 5,
    "disagree": 0,
-   "ours_only": 11,
-   "theirs_only": 33,
-   "neither": 37
+   "ours_only": 7,
+   "theirs_only": 17,
+   "neither": 41
   },
   "LH_1_3_8b_0068v-0067r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 32,
-   "neither": 16
+   "agree": 13,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 2,
+   "theirs_only": 14,
+   "neither": 14
   },
   "LH_1_4_1_0002r-0001v": {
    "agree": 0,
@@ -2683,20 +2593,20 @@
    "neither": 14
   },
   "LH_1_4_4_0003r-0002v": {
-   "agree": 5,
-   "near": 3,
-   "disagree": 0,
-   "ours_only": 4,
-   "theirs_only": 49,
-   "neither": 16
+   "agree": 28,
+   "near": 8,
+   "disagree": 1,
+   "ours_only": 7,
+   "theirs_only": 20,
+   "neither": 13
   },
   "LH_1_4_4_0003v-0002r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 19,
+   "near": 4,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 26,
-   "neither": 18
+   "ours_only": 11,
+   "theirs_only": 3,
+   "neither": 7
   },
   "LH_1_4_7_0015r-0014v": {
    "agree": 15,
@@ -2710,17 +2620,17 @@
    "agree": 22,
    "near": 4,
    "disagree": 1,
-   "ours_only": 8,
+   "ours_only": 9,
    "theirs_only": 1,
-   "neither": 7
+   "neither": 6
   },
   "LH_1_4_8_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 23,
-   "neither": 7
+   "agree": 17,
+   "near": 2,
+   "disagree": 3,
+   "ours_only": 5,
+   "theirs_only": 1,
+   "neither": 2
   },
   "LH_1_4_8_0016r-0015v": {
    "agree": 19,
@@ -2731,11 +2641,11 @@
    "neither": 50
   },
   "LH_1_4_8_0016v-0015r": {
-   "agree": 26,
-   "near": 0,
-   "disagree": 1,
+   "agree": 24,
+   "near": 5,
+   "disagree": 0,
    "ours_only": 25,
-   "theirs_only": 39,
+   "theirs_only": 37,
    "neither": 50
   },
   "LH_1_4_8_0018r-0017v": {
@@ -2747,12 +2657,12 @@
    "neither": 11
   },
   "LH_1_4_8_0018v-0017r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 42,
-   "neither": 19
+   "agree": 36,
+   "near": 1,
+   "disagree": 2,
+   "ours_only": 17,
+   "theirs_only": 3,
+   "neither": 2
   },
   "LH_1_6_11_0002r-0001v": {
    "agree": 15,
@@ -2795,12 +2705,12 @@
    "neither": 18
   },
   "LH_1_6_17_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 14,
+   "near": 5,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 20,
-   "neither": 15
+   "ours_only": 8,
+   "theirs_only": 1,
+   "neither": 7
   },
   "LH_1_6_2_0002r-0001v": {
    "agree": 0,
@@ -2808,7 +2718,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 69,
-   "neither": 41
+   "neither": 42
   },
   "LH_1_6_2_0002v-0001r": {
    "agree": 0,
@@ -2891,20 +2801,20 @@
    "neither": 50
   },
   "LH_1_6_4_0004r-0003v": {
-   "agree": 7,
-   "near": 0,
+   "agree": 33,
+   "near": 10,
    "disagree": 1,
-   "ours_only": 1,
-   "theirs_only": 63,
-   "neither": 57
+   "ours_only": 14,
+   "theirs_only": 27,
+   "neither": 44
   },
   "LH_1_6_4_0004v-0003r": {
-   "agree": 13,
+   "agree": 17,
    "near": 1,
    "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 60,
-   "neither": 73
+   "ours_only": 5,
+   "theirs_only": 56,
+   "neither": 76
   },
   "LH_1_6_4_0006r-0005v": {
    "agree": 11,
@@ -2915,28 +2825,28 @@
    "neither": 34
   },
   "LH_1_6_4_0006v-0005r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 22,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 26,
-   "theirs_only": 35,
-   "neither": 62
+   "ours_only": 7,
+   "theirs_only": 6,
+   "neither": 81
   },
   "LH_1_6_4_0008r-0007v": {
-   "agree": 2,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 3,
-   "theirs_only": 50,
-   "neither": 69
+   "agree": 26,
+   "near": 12,
+   "disagree": 2,
+   "ours_only": 19,
+   "theirs_only": 14,
+   "neither": 53
   },
   "LH_1_6_4_0008v-0007r": {
-   "agree": 15,
-   "near": 2,
-   "disagree": 1,
-   "ours_only": 8,
-   "theirs_only": 49,
-   "neither": 39
+   "agree": 27,
+   "near": 0,
+   "disagree": 2,
+   "ours_only": 5,
+   "theirs_only": 38,
+   "neither": 43
   },
   "LH_1_6_4_0010r-0009v": {
    "agree": 13,
@@ -2955,19 +2865,19 @@
    "neither": 58
   },
   "LH_1_6_4_0012r-0011v": {
-   "agree": 6,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 72,
-   "neither": 52
+   "agree": 35,
+   "near": 7,
+   "disagree": 2,
+   "ours_only": 16,
+   "theirs_only": 34,
+   "neither": 43
   },
   "LH_1_6_4_0012v-0011r": {
-   "agree": 14,
-   "near": 6,
+   "agree": 22,
+   "near": 3,
    "disagree": 0,
    "ours_only": 11,
-   "theirs_only": 35,
+   "theirs_only": 30,
    "neither": 29
   },
   "LH_1_6_4_0014r-0013v": {
@@ -2980,10 +2890,10 @@
   },
   "LH_1_6_4_0014v-0013r": {
    "agree": 14,
-   "near": 4,
-   "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 31,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 9,
+   "theirs_only": 29,
    "neither": 35
   },
   "LH_1_6_4_0016r-0015v": {
@@ -3003,28 +2913,28 @@
    "neither": 51
   },
   "LH_1_6_4_0018v-0017r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 21,
-   "theirs_only": 27,
-   "neither": 74
+   "agree": 18,
+   "near": 3,
+   "disagree": 1,
+   "ours_only": 13,
+   "theirs_only": 5,
+   "neither": 82
   },
   "LH_1_6_6_0002r-0001v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 50,
-   "neither": 38
+   "agree": 34,
+   "near": 9,
+   "disagree": 1,
+   "ours_only": 16,
+   "theirs_only": 6,
+   "neither": 22
   },
   "LH_1_6_6_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 124,
-   "neither": 51
+   "agree": 8,
+   "near": 2,
+   "disagree": 1,
+   "ours_only": 2,
+   "theirs_only": 113,
+   "neither": 50
   },
   "LH_1_7_5_0065r-0064v": {
    "agree": 26,
@@ -3083,12 +2993,12 @@
    "neither": 34
   },
   "LH_1_7_6_0012v-0011r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 17,
+   "near": 5,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 28,
-   "neither": 23
+   "ours_only": 10,
+   "theirs_only": 6,
+   "neither": 13
   },
   "LH_1_7_6_0041r-0040v": {
    "agree": 20,
@@ -3099,20 +3009,20 @@
    "neither": 39
   },
   "LH_1_7_6_0041v-0040r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 28,
-   "neither": 26
+   "agree": 18,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 9,
+   "theirs_only": 5,
+   "neither": 17
   },
   "LH_1_7_6_0043r-0042v": {
    "agree": 1,
-   "near": 1,
+   "near": 0,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 23,
-   "neither": 89
+   "ours_only": 4,
+   "theirs_only": 24,
+   "neither": 85
   },
   "LH_1_7_6_0043v-0042r": {
    "agree": 5,
@@ -3131,12 +3041,12 @@
    "neither": 10
   },
   "LH_2_3_1_0002v-0001r": {
-   "agree": 1,
-   "near": 1,
+   "agree": 3,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 19,
-   "neither": 37
+   "ours_only": 10,
+   "theirs_only": 16,
+   "neither": 30
   },
   "LH_2_3_1_0004r-0003v": {
    "agree": 5,
@@ -3155,20 +3065,20 @@
    "neither": 20
   },
   "LH_2_3_1_0006r-0005v": {
-   "agree": 0,
-   "near": 1,
+   "agree": 9,
+   "near": 3,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 36,
-   "neither": 20
+   "ours_only": 4,
+   "theirs_only": 25,
+   "neither": 17
   },
   "LH_2_3_1_0006v-0005r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 12,
-   "neither": 25
+   "agree": 2,
+   "near": 1,
+   "disagree": 4,
+   "ours_only": 10,
+   "theirs_only": 5,
+   "neither": 15
   },
   "LH_2_3_1_0018r-0017v": {
    "agree": 8,
@@ -3179,28 +3089,28 @@
    "neither": 37
   },
   "LH_2_3_1_0018v-0017r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 15,
-   "neither": 30
+   "agree": 3,
+   "near": 6,
+   "disagree": 1,
+   "ours_only": 13,
+   "theirs_only": 5,
+   "neither": 17
   },
   "LH_2_3_1_0026r-0025v": {
-   "agree": 0,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 24,
-   "neither": 76
+   "agree": 3,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 13,
+   "theirs_only": 16,
+   "neither": 71
   },
   "LH_2_3_1_0026v-0025r": {
    "agree": 0,
    "near": 0,
    "disagree": 0,
-   "ours_only": 0,
+   "ours_only": 1,
    "theirs_only": 21,
-   "neither": 32
+   "neither": 31
   },
   "LH_2_3_1_0051r-0050v": {
    "agree": 0,
@@ -3208,23 +3118,23 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 65,
-   "neither": 65
+   "neither": 64
   },
   "LH_2_3_1_0051v-0050r": {
    "agree": 0,
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 37,
+   "theirs_only": 36,
    "neither": 54
   },
   "LH_2_3_1_0054r-0053v": {
-   "agree": 3,
-   "near": 0,
+   "agree": 17,
+   "near": 8,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 72,
-   "neither": 63
+   "ours_only": 13,
+   "theirs_only": 50,
+   "neither": 51
   },
   "LH_2_3_1_0054v-0053r": {
    "agree": 7,
@@ -3256,7 +3166,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 66,
-   "neither": 97
+   "neither": 96
   },
   "LH_2_3_1_0058v-0057r": {
    "agree": 0,
@@ -3302,9 +3212,9 @@
    "agree": 30,
    "near": 5,
    "disagree": 0,
-   "ours_only": 26,
+   "ours_only": 27,
    "theirs_only": 24,
-   "neither": 29
+   "neither": 28
   },
   "LH_2_3_1_0065v-0062r": {
    "agree": 30,
@@ -3331,12 +3241,12 @@
    "neither": 41
   },
   "LH_2_3_3_0002r-0001v": {
-   "agree": 11,
-   "near": 2,
-   "disagree": 1,
+   "agree": 18,
+   "near": 5,
+   "disagree": 0,
    "ours_only": 4,
-   "theirs_only": 60,
-   "neither": 60
+   "theirs_only": 51,
+   "neither": 59
   },
   "LH_2_3_3_0002v-0001r": {
    "agree": 25,
@@ -3371,12 +3281,12 @@
    "neither": 1
   },
   "LH_2_3_3_0029v-0028r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 24,
+   "near": 3,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 39,
-   "neither": 19
+   "ours_only": 8,
+   "theirs_only": 12,
+   "neither": 11
   },
   "LH_2_3_3_0032r-0031v": {
    "agree": 42,
@@ -3387,28 +3297,28 @@
    "neither": 18
   },
   "LH_2_3_3_0032v-0031r": {
-   "agree": 18,
-   "near": 7,
+   "agree": 19,
+   "near": 1,
    "disagree": 2,
-   "ours_only": 8,
-   "theirs_only": 24,
-   "neither": 37
+   "ours_only": 17,
+   "theirs_only": 29,
+   "neither": 28
   },
   "LH_2_3_3_0048r-0047v": {
-   "agree": 2,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 41,
-   "neither": 65
-  },
-  "LH_2_3_3_0048v-0047r": {
    "agree": 24,
    "near": 5,
    "disagree": 0,
-   "ours_only": 10,
+   "ours_only": 33,
+   "theirs_only": 14,
+   "neither": 34
+  },
+  "LH_2_3_3_0048v-0047r": {
+   "agree": 27,
+   "near": 2,
+   "disagree": 0,
+   "ours_only": 20,
    "theirs_only": 42,
-   "neither": 39
+   "neither": 29
   },
   "LH_2_3_3_0050r-0049v": {
    "agree": 26,
@@ -3419,28 +3329,28 @@
    "neither": 17
   },
   "LH_2_3_3_0050v-0049r": {
-   "agree": 21,
-   "near": 1,
+   "agree": 31,
+   "near": 3,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 44,
-   "neither": 21
+   "ours_only": 11,
+   "theirs_only": 32,
+   "neither": 11
   },
   "LH_2_3_3_0051r-0046v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 90,
-   "neither": 27
+   "agree": 57,
+   "near": 19,
+   "disagree": 3,
+   "ours_only": 12,
+   "theirs_only": 11,
+   "neither": 15
   },
   "LH_2_3_3_0051v-0046r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 72,
-   "neither": 76
+   "agree": 5,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 15,
+   "theirs_only": 61,
+   "neither": 61
   },
   "LH_2_3_3_0054r-0053v": {
    "agree": 21,
@@ -3451,28 +3361,28 @@
    "neither": 7
   },
   "LH_2_3_3_0054v-0053r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 39,
-   "neither": 13
+   "agree": 34,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 10,
+   "theirs_only": 0,
+   "neither": 3
   },
   "LH_2_3_4_0090r-0089v": {
-   "agree": 9,
-   "near": 3,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 44,
-   "neither": 25
+   "agree": 12,
+   "near": 1,
+   "disagree": 1,
+   "ours_only": 4,
+   "theirs_only": 42,
+   "neither": 23
   },
   "LH_2_3_4_0090v-0089r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 50,
-   "neither": 31
+   "agree": 21,
+   "near": 13,
+   "disagree": 4,
+   "ours_only": 9,
+   "theirs_only": 12,
+   "neither": 21
   },
   "LH_2_6_0029r-0028v": {
    "agree": 21,
@@ -3483,12 +3393,12 @@
    "neither": 58
   },
   "LH_2_6_0029v-0028r": {
-   "agree": 4,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 33,
-   "neither": 34
+   "agree": 8,
+   "near": 4,
+   "disagree": 2,
+   "ours_only": 5,
+   "theirs_only": 24,
+   "neither": 31
   },
   "LH_2_6_0030r": {
    "agree": 1,
@@ -3515,36 +3425,36 @@
    "neither": 14
   },
   "LH_35_10_19_0002r-0001v": {
-   "agree": 2,
-   "near": 3,
-   "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 106,
-   "neither": 48
-  },
-  "LH_35_10_19_0002v-0001r": {
-   "agree": 9,
+   "agree": 27,
    "near": 4,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 63,
-   "neither": 30
+   "ours_only": 5,
+   "theirs_only": 80,
+   "neither": 45
+  },
+  "LH_35_10_19_0002v-0001r": {
+   "agree": 20,
+   "near": 8,
+   "disagree": 4,
+   "ours_only": 14,
+   "theirs_only": 45,
+   "neither": 17
   },
   "LH_35_11_14_0012r-0011v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 1,
-   "ours_only": 0,
-   "theirs_only": 36,
-   "neither": 26
+   "agree": 18,
+   "near": 12,
+   "disagree": 0,
+   "ours_only": 12,
+   "theirs_only": 7,
+   "neither": 14
   },
   "LH_35_11_14_0012v-0011r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 6,
+   "near": 4,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 16,
-   "neither": 17
+   "ours_only": 3,
+   "theirs_only": 6,
+   "neither": 14
   },
   "LH_35_11_14_0013r": {
    "agree": 8,
@@ -3635,12 +3545,12 @@
    "neither": 47
   },
   "LH_35_12_1_0074v-0073r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 5,
+   "near": 3,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 12,
-   "neither": 56
+   "ours_only": 12,
+   "theirs_only": 4,
+   "neither": 44
   },
   "LH_35_12_2_0022r": {
    "agree": 0,
@@ -3651,12 +3561,12 @@
    "neither": 9
   },
   "LH_35_13_1_0428r-0427v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 27,
-   "neither": 34
+   "agree": 14,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 4,
+   "theirs_only": 8,
+   "neither": 30
   },
   "LH_35_1_14_0037r": {
    "agree": 24,
@@ -3683,12 +3593,12 @@
    "neither": 21
   },
   "LH_35_1_26_0004v-0003r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 1,
+   "near": 1,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 17,
-   "neither": 31
+   "ours_only": 7,
+   "theirs_only": 15,
+   "neither": 24
   },
   "LH_35_1_26_0008r-0007v": {
    "agree": 23,
@@ -3755,12 +3665,12 @@
    "neither": 12
   },
   "LH_35_1_28_0002r-0001v": {
-   "agree": 0,
-   "near": 0,
+   "agree": 36,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 66,
-   "neither": 45
+   "ours_only": 12,
+   "theirs_only": 23,
+   "neither": 33
   },
   "LH_35_1_28_0002v-0001r": {
    "agree": 12,
@@ -3771,11 +3681,11 @@
    "neither": 80
   },
   "LH_35_1_2_0003r-0002v": {
-   "agree": 8,
-   "near": 7,
-   "disagree": 3,
+   "agree": 16,
+   "near": 3,
+   "disagree": 0,
    "ours_only": 4,
-   "theirs_only": 62,
+   "theirs_only": 61,
    "neither": 60
   },
   "LH_35_1_2_0003v-0002r": {
@@ -3803,12 +3713,12 @@
    "neither": 29
   },
   "LH_35_1_2_0011r-0010v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 60,
-   "neither": 47
+   "agree": 31,
+   "near": 11,
+   "disagree": 2,
+   "ours_only": 19,
+   "theirs_only": 16,
+   "neither": 28
   },
   "LH_35_1_2_0011v-0010r": {
    "agree": 10,
@@ -3928,7 +3838,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 101,
-   "neither": 37
+   "neither": 36
   },
   "LH_37_3_0006v-0005r": {
    "agree": 0,
@@ -3963,20 +3873,20 @@
    "neither": 74
   },
   "LH_37_3_0010r-0009v": {
-   "agree": 7,
-   "near": 3,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 68,
-   "neither": 47
+   "agree": 28,
+   "near": 16,
+   "disagree": 2,
+   "ours_only": 13,
+   "theirs_only": 32,
+   "neither": 34
   },
   "LH_37_3_0010v-0009r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 21,
-   "neither": 27
+   "agree": 11,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 16,
+   "theirs_only": 5,
+   "neither": 11
   },
   "LH_37_4_0005r": {
    "agree": 4,
@@ -4043,12 +3953,12 @@
    "neither": 46
   },
   "LH_37_4_0165v-0164r": {
-   "agree": 0,
+   "agree": 5,
    "near": 0,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 10,
-   "neither": 17
+   "ours_only": 10,
+   "theirs_only": 5,
+   "neither": 7
   },
   "LH_37_5_0014r-0013v": {
    "agree": 8,
@@ -4059,12 +3969,12 @@
    "neither": 28
   },
   "LH_37_5_0014v-0013r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 6,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 20,
-   "neither": 25
+   "ours_only": 6,
+   "theirs_only": 6,
+   "neither": 19
   },
   "LH_37_5_0122v": {
    "agree": 0,
@@ -4075,20 +3985,20 @@
    "neither": 19
   },
   "LH_37_5_0165r-0164v": {
-   "agree": 3,
-   "near": 1,
+   "agree": 7,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 19,
-   "neither": 17
+   "ours_only": 3,
+   "theirs_only": 9,
+   "neither": 15
   },
   "LH_37_5_0165v-0164r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 25,
-   "neither": 59
+   "agree": 5,
+   "near": 1,
+   "disagree": 2,
+   "ours_only": 4,
+   "theirs_only": 17,
+   "neither": 55
   },
   "LH_37_5_0167r-0166v": {
    "agree": 34,
@@ -4107,12 +4017,12 @@
    "neither": 5
   },
   "LH_37_5_0169r-0168v": {
-   "agree": 2,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 70,
-   "neither": 89
+   "agree": 13,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 7,
+   "theirs_only": 55,
+   "neither": 84
   },
   "LH_37_5_0169v-0168r": {
    "agree": 10,
@@ -4147,12 +4057,12 @@
    "neither": 7
   },
   "LH_4_1_14c_0005r-0004v": {
-   "agree": 2,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 41,
-   "neither": 38
+   "agree": 10,
+   "near": 12,
+   "disagree": 7,
+   "ours_only": 8,
+   "theirs_only": 14,
+   "neither": 32
   },
   "LH_4_1_14c_0005v-0004r": {
    "agree": 9,
@@ -4228,11 +4138,11 @@
   },
   "LH_4_1_4d_0002v-0001r": {
    "agree": 0,
-   "near": 0,
+   "near": 1,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 40,
-   "neither": 115
+   "theirs_only": 39,
+   "neither": 113
   },
   "LH_4_1_4k_0025r": {
    "agree": 0,
@@ -4280,7 +4190,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 12,
-   "neither": 63
+   "neither": 62
   },
   "LH_4_2_11_0013r-0012v": {
    "agree": 0,
@@ -4355,12 +4265,12 @@
    "neither": 10
   },
   "LH_4_4_8_0002r-0001v": {
-   "agree": 12,
-   "near": 1,
+   "agree": 9,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 24,
-   "neither": 65
+   "ours_only": 27,
+   "theirs_only": 26,
+   "neither": 46
   },
   "LH_4_4_8_0002v-0001r": {
    "agree": 15,
@@ -4371,12 +4281,12 @@
    "neither": 80
   },
   "LH_4_5_3_0002r-0001v": {
-   "agree": 1,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 54,
-   "neither": 16
+   "agree": 22,
+   "near": 10,
+   "disagree": 2,
+   "ours_only": 1,
+   "theirs_only": 21,
+   "neither": 15
   },
   "LH_4_5_3_0002v-0001r": {
    "agree": 12,
@@ -4403,12 +4313,12 @@
    "neither": 1
   },
   "LH_4_5_5_0002r-0001v": {
-   "agree": 9,
-   "near": 2,
-   "disagree": 1,
-   "ours_only": 6,
-   "theirs_only": 81,
-   "neither": 63
+   "agree": 32,
+   "near": 12,
+   "disagree": 3,
+   "ours_only": 10,
+   "theirs_only": 46,
+   "neither": 59
   },
   "LH_4_5_5_0002v-0001r": {
    "agree": 24,
@@ -4427,12 +4337,12 @@
    "neither": 35
   },
   "LH_4_5_5_0004v-0003r": {
-   "agree": 5,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 68,
-   "neither": 54
+   "agree": 18,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 14,
+   "theirs_only": 52,
+   "neither": 42
   },
   "LH_4_5_6_0018r": {
    "agree": 6,
@@ -4459,12 +4369,12 @@
    "neither": 26
   },
   "LH_4_5_8_0005v-0004r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 73,
-   "neither": 60
+   "agree": 15,
+   "near": 10,
+   "disagree": 2,
+   "ours_only": 7,
+   "theirs_only": 46,
+   "neither": 53
   },
   "LH_4_5_8_0007r-0006v": {
    "agree": 37,
@@ -4478,33 +4388,33 @@
    "agree": 0,
    "near": 0,
    "disagree": 0,
-   "ours_only": 0,
+   "ours_only": 2,
    "theirs_only": 51,
-   "neither": 37
+   "neither": 35
   },
   "LH_4_5_8_0008r-0002v": {
-   "agree": 0,
-   "near": 0,
+   "agree": 13,
+   "near": 4,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 71,
-   "neither": 39
+   "ours_only": 3,
+   "theirs_only": 54,
+   "neither": 36
   },
   "LH_4_5_8_0008v-0002r": {
-   "agree": 0,
+   "agree": 9,
    "near": 0,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 14,
-   "neither": 85
+   "ours_only": 22,
+   "theirs_only": 5,
+   "neither": 63
   },
   "LH_4_5_8_0010r-0009v": {
-   "agree": 12,
+   "agree": 11,
    "near": 0,
-   "disagree": 1,
-   "ours_only": 1,
-   "theirs_only": 85,
-   "neither": 42
+   "disagree": 0,
+   "ours_only": 7,
+   "theirs_only": 87,
+   "neither": 36
   },
   "LH_4_5_8_0010v-0009r": {
    "agree": 22,
@@ -4523,20 +4433,20 @@
    "neither": 52
   },
   "LH_4_5_8_0012v-0011r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 19,
+   "near": 8,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 33,
-   "neither": 22
+   "ours_only": 7,
+   "theirs_only": 6,
+   "neither": 15
   },
   "LH_4_5_8_0014r-0013v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 63,
-   "neither": 44
+   "agree": 35,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 13,
+   "theirs_only": 20,
+   "neither": 31
   },
   "LH_4_5_8_0014v-0013r": {
    "agree": 15,
@@ -4555,20 +4465,20 @@
    "neither": 41
   },
   "LH_4_5_8_0016v-0015r": {
-   "agree": 21,
-   "near": 0,
+   "agree": 29,
+   "near": 9,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 87,
-   "neither": 60
+   "ours_only": 4,
+   "theirs_only": 70,
+   "neither": 57
   },
   "LH_4_5_8_0018r-0017v": {
-   "agree": 5,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 3,
-   "theirs_only": 59,
-   "neither": 49
+   "agree": 20,
+   "near": 6,
+   "disagree": 3,
+   "ours_only": 13,
+   "theirs_only": 36,
+   "neither": 39
   },
   "LH_4_5_8_0018v-0017r": {
    "agree": 26,
@@ -4579,12 +4489,12 @@
    "neither": 29
   },
   "LH_4_5_8_0020r-0019v": {
-   "agree": 4,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 11,
-   "theirs_only": 84,
-   "neither": 43
+   "agree": 45,
+   "near": 4,
+   "disagree": 2,
+   "ours_only": 6,
+   "theirs_only": 38,
+   "neither": 48
   },
   "LH_4_5_8_0020v-0019r": {
    "agree": 19,
@@ -4595,27 +4505,27 @@
    "neither": 52
   },
   "LH_4_5_8_0025r-0024v": {
-   "agree": 3,
-   "near": 4,
-   "disagree": 1,
-   "ours_only": 5,
-   "theirs_only": 56,
-   "neither": 40
-  },
-  "LH_4_5_8_0025v-0024r": {
-   "agree": 15,
-   "near": 3,
+   "agree": 35,
+   "near": 6,
    "disagree": 2,
    "ours_only": 10,
-   "theirs_only": 38,
-   "neither": 24
+   "theirs_only": 21,
+   "neither": 35
+  },
+  "LH_4_5_8_0025v-0024r": {
+   "agree": 25,
+   "near": 2,
+   "disagree": 1,
+   "ours_only": 6,
+   "theirs_only": 30,
+   "neither": 28
   },
   "LH_4_5_8_0027v-0026r": {
-   "agree": 0,
+   "agree": 11,
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 36,
+   "theirs_only": 24,
    "neither": 14
   },
   "LH_4_5_8_0029r-0028v": {
@@ -4627,28 +4537,28 @@
    "neither": 51
   },
   "LH_4_5_8_0029v-0028r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 18,
-   "neither": 67
+   "agree": 6,
+   "near": 1,
+   "disagree": 1,
+   "ours_only": 18,
+   "theirs_only": 10,
+   "neither": 49
   },
   "LH_4_6_11_0002r-0001v": {
-   "agree": 8,
-   "near": 3,
-   "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 51,
-   "neither": 28
+   "agree": 23,
+   "near": 10,
+   "disagree": 2,
+   "ours_only": 8,
+   "theirs_only": 27,
+   "neither": 27
   },
   "LH_4_6_11_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 34,
-   "neither": 15
+   "agree": 24,
+   "near": 5,
+   "disagree": 2,
+   "ours_only": 10,
+   "theirs_only": 3,
+   "neither": 5
   },
   "LH_4_6_11_0004r-0003r": {
    "agree": 0,
@@ -4667,12 +4577,12 @@
    "neither": 4
   },
   "LH_4_6_11_0006r-0005v": {
-   "agree": 17,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 64,
-   "neither": 21
+   "agree": 27,
+   "near": 8,
+   "disagree": 1,
+   "ours_only": 3,
+   "theirs_only": 46,
+   "neither": 20
   },
   "LH_4_6_12a_0001r": {
    "agree": 7,
@@ -4851,12 +4761,12 @@
    "neither": 16
   },
   "LH_4_6_13_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 19,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 37,
-   "neither": 9
+   "ours_only": 2,
+   "theirs_only": 11,
+   "neither": 7
   },
   "LH_4_6_15_0005r": {
    "agree": 6,
@@ -4987,12 +4897,12 @@
    "neither": 10
   },
   "LH_4_7A_0005r-0004v": {
-   "agree": 0,
-   "near": 1,
+   "agree": 13,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 12,
-   "theirs_only": 42,
-   "neither": 72
+   "ours_only": 17,
+   "theirs_only": 28,
+   "neither": 67
   },
   "LH_4_7A_0005v-0004r": {
    "agree": 5,
@@ -5083,12 +4993,12 @@
    "neither": 18
   },
   "LH_4_7A_0018v-0017r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 23,
-   "neither": 8
+   "agree": 14,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 3,
+   "theirs_only": 1,
+   "neither": 5
   },
   "LH_4_7A_0020r-0019v": {
    "agree": 45,
@@ -5099,12 +5009,12 @@
    "neither": 22
   },
   "LH_4_7A_0020v-0019r": {
-   "agree": 16,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 34,
-   "neither": 27
+   "agree": 17,
+   "near": 7,
+   "disagree": 2,
+   "ours_only": 9,
+   "theirs_only": 26,
+   "neither": 25
   },
   "LH_4_7A_0021r": {
    "agree": 18,
@@ -5131,12 +5041,12 @@
    "neither": 15
   },
   "LH_4_7A_0023v-0022r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 41,
-   "neither": 17
+   "agree": 19,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 6,
+   "theirs_only": 14,
+   "neither": 11
   },
   "LH_4_7A_0025r-0024v": {
    "agree": 12,
@@ -5155,11 +5065,11 @@
    "neither": 55
   },
   "LH_4_7A_0027r-0026v": {
-   "agree": 26,
-   "near": 10,
-   "disagree": 1,
+   "agree": 28,
+   "near": 9,
+   "disagree": 2,
    "ours_only": 7,
-   "theirs_only": 70,
+   "theirs_only": 68,
    "neither": 51
   },
   "LH_4_7A_0027v-0026r": {
@@ -5172,19 +5082,19 @@
   },
   "LH_4_7A_0029r-0028v": {
    "agree": 2,
-   "near": 0,
+   "near": 3,
    "disagree": 0,
    "ours_only": 1,
-   "theirs_only": 21,
+   "theirs_only": 18,
    "neither": 36
   },
   "LH_4_7A_0029v-0028r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 8,
+   "near": 1,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 35,
-   "neither": 60
+   "ours_only": 16,
+   "theirs_only": 25,
+   "neither": 44
   },
   "LH_4_7A_0030r": {
    "agree": 20,
@@ -5227,12 +5137,12 @@
    "neither": 38
   },
   "LH_4_7A_0034v-0033r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 38,
-   "neither": 18
+   "agree": 19,
+   "near": 7,
+   "disagree": 2,
+   "ours_only": 4,
+   "theirs_only": 10,
+   "neither": 14
   },
   "LH_4_7A_0036r-0035v": {
    "agree": 25,
@@ -5267,12 +5177,12 @@
    "neither": 56
   },
   "LH_4_7A_0040r-0039v": {
-   "agree": 6,
-   "near": 1,
+   "agree": 14,
+   "near": 5,
    "disagree": 2,
    "ours_only": 5,
-   "theirs_only": 76,
-   "neither": 62
+   "theirs_only": 64,
+   "neither": 61
   },
   "LH_4_7A_0040v-0039r": {
    "agree": 18,
@@ -5323,12 +5233,12 @@
    "neither": 52
   },
   "LH_4_7A_0046v-0045r": {
-   "agree": 12,
-   "near": 6,
-   "disagree": 1,
-   "ours_only": 6,
-   "theirs_only": 52,
-   "neither": 49
+   "agree": 17,
+   "near": 8,
+   "disagree": 0,
+   "ours_only": 4,
+   "theirs_only": 46,
+   "neither": 51
   },
   "LH_4_7A_0047r": {
    "agree": 13,
@@ -5363,20 +5273,20 @@
    "neither": 29
   },
   "LH_4_7A_0050r-0049v": {
-   "agree": 6,
-   "near": 7,
+   "agree": 28,
+   "near": 1,
    "disagree": 1,
-   "ours_only": 5,
-   "theirs_only": 70,
-   "neither": 64
+   "ours_only": 10,
+   "theirs_only": 54,
+   "neither": 59
   },
   "LH_4_7A_0050v-0049r": {
-   "agree": 18,
-   "near": 7,
-   "disagree": 2,
-   "ours_only": 4,
-   "theirs_only": 57,
-   "neither": 47
+   "agree": 19,
+   "near": 8,
+   "disagree": 1,
+   "ours_only": 6,
+   "theirs_only": 56,
+   "neither": 45
   },
   "LH_4_7A_0052r-0051v": {
    "agree": 0,
@@ -5387,12 +5297,12 @@
    "neither": 16
   },
   "LH_4_7A_0052v-0051r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 26,
-   "neither": 54
+   "agree": 7,
+   "near": 3,
+   "disagree": 2,
+   "ours_only": 8,
+   "theirs_only": 14,
+   "neither": 46
   },
   "LH_4_7A_0053r": {
    "agree": 11,
@@ -5411,28 +5321,28 @@
    "neither": 11
   },
   "LH_4_7B_1_0002r-0001v": {
-   "agree": 9,
-   "near": 5,
-   "disagree": 1,
+   "agree": 20,
+   "near": 3,
+   "disagree": 0,
    "ours_only": 7,
-   "theirs_only": 69,
-   "neither": 66
+   "theirs_only": 61,
+   "neither": 67
   },
   "LH_4_7B_1_0002v-0001r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 22,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 51,
-   "neither": 27
+   "ours_only": 7,
+   "theirs_only": 22,
+   "neither": 20
   },
   "LH_4_7B_1_0004r-0003v": {
-   "agree": 2,
-   "near": 1,
+   "agree": 49,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 66,
-   "neither": 50
+   "ours_only": 27,
+   "theirs_only": 18,
+   "neither": 24
   },
   "LH_4_7B_1_0004v-0003r": {
    "agree": 13,
@@ -5451,44 +5361,44 @@
    "neither": 46
   },
   "LH_4_7B_1_0006v-0005r": {
-   "agree": 5,
-   "near": 4,
-   "disagree": 0,
-   "ours_only": 11,
-   "theirs_only": 57,
-   "neither": 52
+   "agree": 21,
+   "near": 7,
+   "disagree": 1,
+   "ours_only": 12,
+   "theirs_only": 37,
+   "neither": 51
   },
   "LH_4_7B_1_0008r-0007v": {
-   "agree": 17,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 5,
-   "theirs_only": 71,
-   "neither": 40
+   "agree": 45,
+   "near": 7,
+   "disagree": 1,
+   "ours_only": 19,
+   "theirs_only": 36,
+   "neither": 26
   },
   "LH_4_7B_1_0008v-0007r": {
-   "agree": 23,
-   "near": 3,
-   "disagree": 1,
+   "agree": 41,
+   "near": 5,
+   "disagree": 0,
    "ours_only": 8,
-   "theirs_only": 73,
+   "theirs_only": 54,
    "neither": 32
   },
   "LH_4_7B_1_0010r-0009v": {
-   "agree": 28,
+   "agree": 31,
    "near": 6,
-   "disagree": 0,
+   "disagree": 2,
    "ours_only": 8,
-   "theirs_only": 56,
+   "theirs_only": 51,
    "neither": 24
   },
   "LH_4_7B_1_0010v-0009r": {
-   "agree": 13,
-   "near": 5,
-   "disagree": 0,
-   "ours_only": 23,
-   "theirs_only": 61,
-   "neither": 27
+   "agree": 31,
+   "near": 6,
+   "disagree": 3,
+   "ours_only": 9,
+   "theirs_only": 39,
+   "neither": 41
   },
   "LH_4_7B_2_0005r": {
    "agree": 10,
@@ -5523,12 +5433,12 @@
    "neither": 86
   },
   "LH_4_7B_2_0009r-0008v": {
-   "agree": 13,
-   "near": 4,
+   "agree": 19,
+   "near": 6,
    "disagree": 1,
-   "ours_only": 5,
-   "theirs_only": 60,
-   "neither": 37
+   "ours_only": 4,
+   "theirs_only": 52,
+   "neither": 38
   },
   "LH_4_7B_2_0009v-0008r": {
    "agree": 19,
@@ -5548,11 +5458,11 @@
   },
   "LH_4_7B_2_0011v-0010r": {
    "agree": 14,
-   "near": 1,
+   "near": 3,
    "disagree": 1,
-   "ours_only": 4,
-   "theirs_only": 41,
-   "neither": 54
+   "ours_only": 3,
+   "theirs_only": 39,
+   "neither": 55
   },
   "LH_4_7B_2_0013r-0012v": {
    "agree": 36,
@@ -5563,12 +5473,12 @@
    "neither": 13
   },
   "LH_4_7B_2_0013v-0012r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 22,
+   "near": 4,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 33,
-   "neither": 23
+   "ours_only": 10,
+   "theirs_only": 7,
+   "neither": 13
   },
   "LH_4_7B_2_0015r-0014v": {
    "agree": 0,
@@ -5579,12 +5489,12 @@
    "neither": 9
   },
   "LH_4_7B_2_0015v-0014r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 34,
-   "neither": 61
+   "agree": 22,
+   "near": 1,
+   "disagree": 2,
+   "ours_only": 4,
+   "theirs_only": 9,
+   "neither": 57
   },
   "LH_4_7B_2_0016r": {
    "agree": 13,
@@ -5603,20 +5513,20 @@
    "neither": 34
   },
   "LH_4_7B_2_0021r-0020v": {
-   "agree": 33,
-   "near": 4,
-   "disagree": 0,
+   "agree": 46,
+   "near": 3,
+   "disagree": 2,
    "ours_only": 12,
-   "theirs_only": 74,
+   "theirs_only": 60,
    "neither": 32
   },
   "LH_4_7B_2_0021v-0020r": {
-   "agree": 9,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 6,
-   "theirs_only": 107,
-   "neither": 54
+   "agree": 16,
+   "near": 2,
+   "disagree": 1,
+   "ours_only": 2,
+   "theirs_only": 98,
+   "neither": 58
   },
   "LH_4_7B_2_0022r": {
    "agree": 20,
@@ -5651,12 +5561,12 @@
    "neither": 1
   },
   "LH_4_7B_2_0026r-0025v": {
-   "agree": 8,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 48,
-   "neither": 37
+   "agree": 19,
+   "near": 2,
+   "disagree": 4,
+   "ours_only": 16,
+   "theirs_only": 31,
+   "neither": 28
   },
   "LH_4_7B_2_0026v-0025r": {
    "agree": 0,
@@ -5707,12 +5617,12 @@
    "neither": 32
   },
   "LH_4_7B_2_0035v-0034r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 39,
-   "neither": 27
+   "agree": 20,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 12,
+   "theirs_only": 14,
+   "neither": 15
   },
   "LH_4_7B_2_0036r": {
    "agree": 16,
@@ -5779,36 +5689,36 @@
    "neither": 16
   },
   "LH_4_7B_2_0048v-0047r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 7,
+   "near": 6,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 38,
-   "neither": 31
+   "ours_only": 5,
+   "theirs_only": 26,
+   "neither": 26
   },
   "LH_4_7B_2_0050r-0049v": {
-   "agree": 2,
-   "near": 2,
+   "agree": 12,
+   "near": 1,
    "disagree": 1,
-   "ours_only": 6,
-   "theirs_only": 26,
-   "neither": 18
+   "ours_only": 8,
+   "theirs_only": 17,
+   "neither": 16
   },
   "LH_4_7B_2_0050v-0049r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 20,
-   "neither": 11
+   "agree": 5,
+   "near": 5,
+   "disagree": 2,
+   "ours_only": 6,
+   "theirs_only": 8,
+   "neither": 5
   },
   "LH_4_7B_2_0052r-0051v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 27,
-   "neither": 55
+   "agree": 12,
+   "near": 2,
+   "disagree": 1,
+   "ours_only": 12,
+   "theirs_only": 12,
+   "neither": 44
   },
   "LH_4_7B_2_0052v-0051r": {
    "agree": 16,
@@ -5843,12 +5753,12 @@
    "neither": 36
   },
   "LH_4_7B_2_0056v-0055r": {
-   "agree": 4,
-   "near": 7,
-   "disagree": 0,
-   "ours_only": 4,
-   "theirs_only": 53,
-   "neither": 53
+   "agree": 9,
+   "near": 4,
+   "disagree": 1,
+   "ours_only": 8,
+   "theirs_only": 50,
+   "neither": 49
   },
   "LH_4_7B_2_0059r": {
    "agree": 20,
@@ -5867,19 +5777,19 @@
    "neither": 5
   },
   "LH_4_7B_2_0061r-0060v": {
-   "agree": 5,
+   "agree": 7,
    "near": 2,
    "disagree": 0,
-   "ours_only": 10,
-   "theirs_only": 41,
-   "neither": 79
+   "ours_only": 14,
+   "theirs_only": 39,
+   "neither": 75
   },
   "LH_4_7B_2_0061v-0060r": {
-   "agree": 10,
-   "near": 2,
-   "disagree": 0,
+   "agree": 14,
+   "near": 3,
+   "disagree": 2,
    "ours_only": 6,
-   "theirs_only": 52,
+   "theirs_only": 45,
    "neither": 77
   },
   "LH_4_7B_2_0063r-0062v": {
@@ -5891,28 +5801,28 @@
    "neither": 32
   },
   "LH_4_7B_2_0063v-0062r": {
-   "agree": 11,
-   "near": 3,
-   "disagree": 3,
-   "ours_only": 11,
-   "theirs_only": 43,
-   "neither": 64
+   "agree": 7,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 13,
+   "theirs_only": 47,
+   "neither": 62
   },
   "LH_4_7B_2_0065r-0064v": {
-   "agree": 10,
-   "near": 2,
+   "agree": 13,
+   "near": 3,
    "disagree": 1,
-   "ours_only": 6,
-   "theirs_only": 50,
-   "neither": 77
+   "ours_only": 10,
+   "theirs_only": 46,
+   "neither": 73
   },
   "LH_4_7B_2_0065v-0064r": {
-   "agree": 0,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 41,
-   "neither": 49
+   "agree": 8,
+   "near": 4,
+   "disagree": 4,
+   "ours_only": 14,
+   "theirs_only": 26,
+   "neither": 35
   },
   "LH_4_7B_2_0068r-0067v": {
    "agree": 4,
@@ -5923,12 +5833,12 @@
    "neither": 65
   },
   "LH_4_7B_2_0068v-0067r": {
-   "agree": 3,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 12,
-   "theirs_only": 66,
-   "neither": 73
+   "agree": 6,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 10,
+   "theirs_only": 59,
+   "neither": 75
   },
   "LH_4_7B_2_0069r-0066v": {
    "agree": 4,
@@ -5951,7 +5861,7 @@
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 31,
+   "theirs_only": 33,
    "neither": 20
   },
   "LH_4_7B_2_0071v-0070r": {
@@ -6075,20 +5985,20 @@
    "neither": 74
   },
   "LH_4_7B_3_0018v-0017r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 3,
+   "near": 1,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 13,
-   "neither": 33
+   "ours_only": 7,
+   "theirs_only": 9,
+   "neither": 26
   },
   "LH_4_7B_3_0022r-0021v": {
-   "agree": 11,
+   "agree": 9,
    "near": 11,
-   "disagree": 3,
-   "ours_only": 10,
-   "theirs_only": 74,
-   "neither": 43
+   "disagree": 6,
+   "ours_only": 11,
+   "theirs_only": 73,
+   "neither": 42
   },
   "LH_4_7B_3_0022v-0021r": {
    "agree": 15,
@@ -6099,36 +6009,36 @@
    "neither": 48
   },
   "LH_4_7B_3_0024r-0023v": {
-   "agree": 3,
-   "near": 1,
-   "disagree": 1,
-   "ours_only": 0,
-   "theirs_only": 37,
-   "neither": 21
+   "agree": 17,
+   "near": 8,
+   "disagree": 2,
+   "ours_only": 9,
+   "theirs_only": 15,
+   "neither": 12
   },
   "LH_4_7B_3_0024v-0023r": {
-   "agree": 12,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 44,
-   "neither": 21
+   "agree": 27,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 7,
+   "theirs_only": 21,
+   "neither": 15
   },
   "LH_4_7B_3_0026r-0025v": {
-   "agree": 11,
-   "near": 3,
-   "disagree": 1,
-   "ours_only": 2,
-   "theirs_only": 78,
-   "neither": 20
+   "agree": 57,
+   "near": 7,
+   "disagree": 0,
+   "ours_only": 8,
+   "theirs_only": 29,
+   "neither": 14
   },
   "LH_4_7B_3_0026v-0025r": {
-   "agree": 15,
-   "near": 2,
-   "disagree": 1,
-   "ours_only": 13,
-   "theirs_only": 44,
-   "neither": 17
+   "agree": 27,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 2,
+   "theirs_only": 27,
+   "neither": 28
   },
   "LH_4_7B_3_0027r": {
    "agree": 5,
@@ -6139,36 +6049,36 @@
    "neither": 8
   },
   "LH_4_7B_3_0041r-0040v": {
-   "agree": 16,
-   "near": 9,
-   "disagree": 2,
-   "ours_only": 5,
+   "agree": 19,
+   "near": 7,
+   "disagree": 1,
+   "ours_only": 13,
    "theirs_only": 50,
-   "neither": 47
+   "neither": 39
   },
   "LH_4_7B_3_0041v-0040r": {
    "agree": 20,
-   "near": 5,
-   "disagree": 0,
-   "ours_only": 9,
-   "theirs_only": 49,
-   "neither": 30
+   "near": 8,
+   "disagree": 2,
+   "ours_only": 13,
+   "theirs_only": 44,
+   "neither": 27
   },
   "LH_4_7B_3_0043r-0042v": {
-   "agree": 18,
-   "near": 0,
-   "disagree": 1,
-   "ours_only": 3,
-   "theirs_only": 69,
-   "neither": 24
+   "agree": 38,
+   "near": 14,
+   "disagree": 2,
+   "ours_only": 13,
+   "theirs_only": 34,
+   "neither": 14
   },
   "LH_4_7B_3_0043v-0042r": {
-   "agree": 20,
-   "near": 4,
-   "disagree": 1,
-   "ours_only": 11,
-   "theirs_only": 44,
-   "neither": 45
+   "agree": 19,
+   "near": 9,
+   "disagree": 2,
+   "ours_only": 16,
+   "theirs_only": 39,
+   "neither": 40
   },
   "LH_4_7B_3_0045r-0044v": {
    "agree": 30,
@@ -6179,20 +6089,20 @@
    "neither": 56
   },
   "LH_4_7B_3_0045v-0044r": {
-   "agree": 13,
-   "near": 5,
+   "agree": 26,
+   "near": 8,
    "disagree": 2,
-   "ours_only": 4,
-   "theirs_only": 63,
-   "neither": 33
+   "ours_only": 8,
+   "theirs_only": 47,
+   "neither": 29
   },
   "LH_4_7B_3_0047r-0046v": {
-   "agree": 1,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 66,
-   "neither": 38
+   "agree": 27,
+   "near": 16,
+   "disagree": 5,
+   "ours_only": 19,
+   "theirs_only": 19,
+   "neither": 19
   },
   "LH_4_7B_3_0047v-0046r": {
    "agree": 21,
@@ -6203,20 +6113,20 @@
    "neither": 30
   },
   "LH_4_7B_3_0049r-0048v": {
-   "agree": 13,
-   "near": 1,
+   "agree": 29,
+   "near": 10,
    "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 52,
-   "neither": 32
+   "ours_only": 15,
+   "theirs_only": 27,
+   "neither": 25
   },
   "LH_4_7B_3_0049v-0048r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 29,
-   "neither": 45
+   "agree": 11,
+   "near": 7,
+   "disagree": 4,
+   "ours_only": 11,
+   "theirs_only": 7,
+   "neither": 34
   },
   "LH_4_7B_3_0060r-0059v": {
    "agree": 13,
@@ -6235,20 +6145,20 @@
    "neither": 44
   },
   "LH_4_7B_3_0062r-0061v": {
-   "agree": 22,
-   "near": 5,
+   "agree": 21,
+   "near": 9,
    "disagree": 0,
-   "ours_only": 9,
-   "theirs_only": 47,
-   "neither": 29
+   "ours_only": 11,
+   "theirs_only": 44,
+   "neither": 27
   },
   "LH_4_7B_3_0062v-0061r": {
    "agree": 17,
-   "near": 3,
-   "disagree": 1,
-   "ours_only": 10,
-   "theirs_only": 51,
-   "neither": 40
+   "near": 8,
+   "disagree": 3,
+   "ours_only": 4,
+   "theirs_only": 44,
+   "neither": 46
   },
   "LH_4_7B_3_0064r-0063v": {
    "agree": 13,
@@ -6259,12 +6169,12 @@
    "neither": 31
   },
   "LH_4_7B_3_0064v-0063r": {
-   "agree": 10,
-   "near": 4,
+   "agree": 14,
+   "near": 9,
    "disagree": 1,
-   "ours_only": 3,
-   "theirs_only": 37,
-   "neither": 44
+   "ours_only": 13,
+   "theirs_only": 28,
+   "neither": 34
   },
   "LH_4_7B_4_0014r-0013v": {
    "agree": 12,
@@ -6275,12 +6185,12 @@
    "neither": 46
   },
   "LH_4_7B_4_0014v-0013r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 26,
+   "near": 7,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 40,
-   "neither": 26
+   "ours_only": 15,
+   "theirs_only": 7,
+   "neither": 11
   },
   "LH_4_7B_4_0016r": {
    "agree": 4,
@@ -6376,7 +6286,7 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 112,
-   "neither": 33
+   "neither": 34
   },
   "LH_4_7B_5_0008v-0007r": {
    "agree": 0,
@@ -6400,47 +6310,47 @@
    "disagree": 0,
    "ours_only": 0,
    "theirs_only": 63,
-   "neither": 51
+   "neither": 52
   },
   "LH_4_7B_5_0013r-0012v": {
-   "agree": 7,
+   "agree": 31,
    "near": 4,
    "disagree": 1,
-   "ours_only": 3,
-   "theirs_only": 72,
-   "neither": 62
+   "ours_only": 11,
+   "theirs_only": 48,
+   "neither": 54
   },
   "LH_4_7B_5_0013v-0012r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 54,
-   "neither": 70
+   "agree": 9,
+   "near": 2,
+   "disagree": 3,
+   "ours_only": 6,
+   "theirs_only": 40,
+   "neither": 63
   },
   "LH_4_7B_6_0002r-0001v": {
-   "agree": 6,
-   "near": 3,
-   "disagree": 1,
-   "ours_only": 6,
-   "theirs_only": 43,
-   "neither": 75
+   "agree": 14,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 17,
+   "theirs_only": 31,
+   "neither": 64
   },
   "LH_4_7B_6_0002v-0001r": {
-   "agree": 0,
+   "agree": 2,
    "near": 0,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 10,
-   "neither": 73
+   "ours_only": 14,
+   "theirs_only": 8,
+   "neither": 60
   },
   "LH_4_7B_6_0004r-0003v": {
-   "agree": 4,
-   "near": 4,
-   "disagree": 0,
-   "ours_only": 3,
-   "theirs_only": 67,
-   "neither": 59
+   "agree": 22,
+   "near": 8,
+   "disagree": 1,
+   "ours_only": 12,
+   "theirs_only": 44,
+   "neither": 50
   },
   "LH_4_7B_6_0004v-0003r": {
    "agree": 18,
@@ -6467,20 +6377,20 @@
    "neither": 43
   },
   "LH_4_7B_6_0008r-0007v": {
-   "agree": 5,
-   "near": 3,
+   "agree": 10,
+   "near": 4,
    "disagree": 1,
-   "ours_only": 12,
-   "theirs_only": 30,
-   "neither": 41
+   "ours_only": 6,
+   "theirs_only": 24,
+   "neither": 47
   },
   "LH_4_7B_6_0008v-0007r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 41,
-   "neither": 31
+   "agree": 15,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 4,
+   "theirs_only": 18,
+   "neither": 27
   },
   "LH_4_7B_6_0010v-0009r": {
    "agree": 30,
@@ -6555,28 +6465,28 @@
    "neither": 35
   },
   "LH_4_7C_0021v-0020r": {
-   "agree": 12,
-   "near": 7,
-   "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 68,
-   "neither": 49
+   "agree": 17,
+   "near": 8,
+   "disagree": 4,
+   "ours_only": 12,
+   "theirs_only": 58,
+   "neither": 45
   },
   "LH_4_7C_0023r-0022v": {
-   "agree": 9,
-   "near": 3,
+   "agree": 19,
+   "near": 5,
    "disagree": 1,
-   "ours_only": 8,
-   "theirs_only": 74,
-   "neither": 69
+   "ours_only": 12,
+   "theirs_only": 62,
+   "neither": 65
   },
   "LH_4_7C_0023v-0022r": {
-   "agree": 10,
-   "near": 2,
-   "disagree": 2,
-   "ours_only": 4,
-   "theirs_only": 60,
-   "neither": 76
+   "agree": 7,
+   "near": 0,
+   "disagree": 1,
+   "ours_only": 11,
+   "theirs_only": 66,
+   "neither": 70
   },
   "LH_4_7C_0024r": {
    "agree": 27,
@@ -6611,12 +6521,12 @@
    "neither": 47
   },
   "LH_4_7C_0027v-0026r": {
-   "agree": 12,
-   "near": 7,
-   "disagree": 0,
-   "ours_only": 2,
-   "theirs_only": 57,
-   "neither": 34
+   "agree": 10,
+   "near": 5,
+   "disagree": 1,
+   "ours_only": 10,
+   "theirs_only": 60,
+   "neither": 26
   },
   "LH_4_7C_0029r-0028v": {
    "agree": 22,
@@ -6643,12 +6553,12 @@
    "neither": 68
   },
   "LH_4_7C_0031v-0030r": {
-   "agree": 14,
-   "near": 6,
+   "agree": 17,
+   "near": 13,
    "disagree": 2,
-   "ours_only": 3,
-   "theirs_only": 69,
-   "neither": 45
+   "ours_only": 11,
+   "theirs_only": 59,
+   "neither": 37
   },
   "LH_4_7C_0032r": {
    "agree": 5,
@@ -6659,12 +6569,12 @@
    "neither": 17
   },
   "LH_4_7C_0046r-0045v": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 62,
-   "neither": 65
+   "agree": 27,
+   "near": 7,
+   "disagree": 6,
+   "ours_only": 37,
+   "theirs_only": 22,
+   "neither": 28
   },
   "LH_4_7C_0047r": {
    "agree": 9,
@@ -6675,12 +6585,12 @@
    "neither": 21
   },
   "LH_4_7C_0049r-0048v": {
-   "agree": 6,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 19,
-   "theirs_only": 39,
-   "neither": 66
+   "agree": 14,
+   "near": 4,
+   "disagree": 2,
+   "ours_only": 28,
+   "theirs_only": 26,
+   "neither": 57
   },
   "LH_4_7C_0050r": {
    "agree": 0,
@@ -6819,12 +6729,12 @@
    "neither": 5
   },
   "LH_4_7C_0072v-0071r": {
-   "agree": 0,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 28,
-   "neither": 60
+   "agree": 3,
+   "near": 3,
+   "disagree": 2,
+   "ours_only": 7,
+   "theirs_only": 20,
+   "neither": 54
   },
   "LH_4_7C_0074r-0073v": {
    "agree": 1,
@@ -6835,12 +6745,12 @@
    "neither": 24
   },
   "LH_4_7C_0074v-0073r": {
-   "agree": 2,
-   "near": 1,
-   "disagree": 0,
-   "ours_only": 8,
-   "theirs_only": 31,
-   "neither": 49
+   "agree": 9,
+   "near": 6,
+   "disagree": 2,
+   "ours_only": 12,
+   "theirs_only": 17,
+   "neither": 45
   },
   "LH_4_7C_0079r": {
    "agree": 7,
@@ -6883,12 +6793,12 @@
    "neither": 16
   },
   "LH_4_7C_0100v-0099r": {
-   "agree": 16,
-   "near": 9,
-   "disagree": 0,
-   "ours_only": 7,
-   "theirs_only": 87,
-   "neither": 49
+   "agree": 34,
+   "near": 11,
+   "disagree": 4,
+   "ours_only": 11,
+   "theirs_only": 63,
+   "neither": 45
   },
   "LH_4_7C_0101r": {
    "agree": 31,
@@ -6939,20 +6849,20 @@
    "neither": 38
   },
   "LH_4_7C_0106r-0105v": {
-   "agree": 7,
-   "near": 0,
-   "disagree": 0,
-   "ours_only": 4,
-   "theirs_only": 54,
-   "neither": 77
+   "agree": 13,
+   "near": 6,
+   "disagree": 3,
+   "ours_only": 31,
+   "theirs_only": 39,
+   "neither": 50
   },
   "LH_4_7C_0106v-0105r": {
-   "agree": 22,
-   "near": 6,
+   "agree": 15,
+   "near": 9,
    "disagree": 0,
-   "ours_only": 12,
-   "theirs_only": 43,
-   "neither": 54
+   "ours_only": 17,
+   "theirs_only": 47,
+   "neither": 49
   },
   "LH_4_7C_0110r-0109v": {
    "agree": 5,
@@ -6963,12 +6873,12 @@
    "neither": 36
   },
   "LH_4_7C_0110v-0109r": {
-   "agree": 0,
-   "near": 0,
+   "agree": 10,
+   "near": 2,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 36,
-   "neither": 10
+   "ours_only": 2,
+   "theirs_only": 24,
+   "neither": 8
   },
   "LH_4_7C_0111r": {
    "agree": 0,
@@ -6999,7 +6909,7 @@
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 70,
+   "theirs_only": 69,
    "neither": 30
   },
   "LH_4_7C_0114v-0113r": {
@@ -7059,12 +6969,12 @@
    "neither": 2
   },
   "LH_4_7D_1_0012r-0011v": {
-   "agree": 2,
-   "near": 1,
+   "agree": 33,
+   "near": 14,
    "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 73,
-   "neither": 27
+   "ours_only": 12,
+   "theirs_only": 32,
+   "neither": 15
   },
   "LH_4_7D_1_0012v-0011r": {
    "agree": 16,
@@ -7155,12 +7065,12 @@
    "neither": 48
   },
   "LH_4_8_0005r-0004v": {
-   "agree": 14,
-   "near": 6,
+   "agree": 17,
+   "near": 3,
    "disagree": 1,
-   "ours_only": 2,
+   "ours_only": 9,
    "theirs_only": 89,
-   "neither": 73
+   "neither": 66
   },
   "LH_4_8_0005v-0004r": {
    "agree": 28,
@@ -7183,7 +7093,7 @@
    "near": 0,
    "disagree": 0,
    "ours_only": 0,
-   "theirs_only": 87,
+   "theirs_only": 86,
    "neither": 64
   },
   "LH_4_8_0009r-0008v": {
@@ -7275,12 +7185,12 @@
    "neither": 60
   },
   "LH_4_8_0044r-0043v": {
-   "agree": 1,
-   "near": 2,
-   "disagree": 0,
-   "ours_only": 0,
-   "theirs_only": 82,
-   "neither": 34
+   "agree": 34,
+   "near": 12,
+   "disagree": 1,
+   "ours_only": 7,
+   "theirs_only": 38,
+   "neither": 27
   },
   "LH_4_8_0044v-0043r": {
    "agree": 13,
@@ -7307,12 +7217,12 @@
    "neither": 59
   },
   "LH_4_8_0059r-0058v": {
-   "agree": 0,
-   "near": 0,
+   "agree": 10,
+   "near": 5,
    "disagree": 0,
-   "ours_only": 1,
-   "theirs_only": 73,
-   "neither": 68
+   "ours_only": 21,
+   "theirs_only": 57,
+   "neither": 48
   },
   "LH_4_8_0059v-0058r": {
    "agree": 8,
@@ -7356,13 +7266,13 @@
   }
  },
  "witness_disagree": {
-  "ours_closer": 303,
-  "theirs_closer": 295,
-  "tie": 6
+  "ours_closer": 383,
+  "theirs_closer": 381,
+  "tie": 7
  },
  "witness_near": {
-  "ours_closer": 904,
-  "theirs_closer": 1290,
-  "tie": 35
+  "ours_closer": 1159,
+  "theirs_closer": 1682,
+  "tie": 45
  }
 }

@@ -3,12 +3,12 @@
  "by_split_status": {
   "noisy": {
    "matched": 732,
-   "no_page": 3
+   "ambiguous_work": 3
   },
   "clean": {
    "unparsed": 6,
-   "resolved": 226,
-   "no_page": 16
+   "resolved": 233,
+   "no_page": 9
   },
   "val": {
    "unparsed": 2,
@@ -16,15 +16,15 @@
    "no_page": 2
   }
  },
- "resolved": 981,
+ "resolved": 991,
  "noisy_matched": 732,
  "their_lines": 93021,
  "our_lines": 131457,
- "pairs": 62113,
+ "pairs": 62114,
  "pairs_by_iou": {
-  "iou≥0.3": 68353,
-  "iou≥0.5": 62113,
-  "iou≥0.7": 54493
+  "iou≥0.3": 68351,
+  "iou≥0.5": 62114,
+  "iou≥0.7": 54492
  },
  "layouts": {
   "single": 312,
@@ -1184,33 +1184,6 @@
  ],
  "unresolved": [
   {
-   "name": "LH_4_5_10_0048r",
-   "split": "noisy",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 48r"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0051r",
-   "split": "noisy",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 51r"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0051v",
-   "split": "noisy",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 51v"
-   ]
-  },
-  {
    "name": "0001_page_12210614_docId_307926",
    "split": "clean",
    "status": "unparsed",
@@ -1259,29 +1232,11 @@
    ]
   },
   {
-   "name": "LH_35_15_1_0014r",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 14r"
-   ]
-  },
-  {
-   "name": "LH_35_15_1_0017r",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 17r"
-   ]
-  },
-  {
    "name": "LH_35_1_1_0018r",
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 18r"
+    "no page labelled 18r; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1289,7 +1244,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 18v"
+    "no page labelled 18v; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1297,7 +1252,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 20r"
+    "no page labelled 20r; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1305,7 +1260,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 20v"
+    "no page labelled 20v; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1313,7 +1268,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 22v"
+    "no page labelled 22v; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1321,7 +1276,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 24r"
+    "no page labelled 24r; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1329,7 +1284,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 24v"
+    "no page labelled 24v; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1337,7 +1292,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 25r"
+    "no page labelled 25r; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1345,52 +1300,7 @@
    "split": "clean",
    "status": "no_page",
    "notes": [
-    "no page labelled 25v"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0002r",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 2r"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0011r",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 11r"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0011v",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 11v"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0025r",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 25r"
-   ]
-  },
-  {
-   "name": "LH_4_5_10_0025v",
-   "split": "clean",
-   "status": "no_page",
-   "notes": [
-    "2 works share the key",
-    "no page labelled 25v"
+    "no page labelled 25v; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1414,7 +1324,7 @@
    "split": "val",
    "status": "no_page",
    "notes": [
-    "no page labelled 17r"
+    "no page labelled 17r; 00067960 has no folio labels on its 54 pages"
    ]
   },
   {
@@ -1422,7 +1332,7 @@
    "split": "val",
    "status": "no_page",
    "notes": [
-    "no page labelled 22r"
+    "no page labelled 22r; 00067960 has no folio labels on its 54 pages"
    ]
   }
  ]
