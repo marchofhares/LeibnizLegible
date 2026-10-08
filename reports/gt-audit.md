@@ -1,6 +1,6 @@
 # GT hand audit — C2 precision gate
 
-Verdicts from `gt-audit-verdicts-philiumm.csv` (200 sheet lines); stratum weights from the C2 mint of 2026-09-16 (STATUS.md C2 log; reports/gt-factory.md) (fair_copy 9,913, light_revision 96,175, heavy_revision 190,162, scrap 1,174).
+Verdicts from `gt-audit-verdicts-philiumm.csv` (200 sheet lines); stratum weights from `data/inventory.sqlite`.
 
 **200 lines on the sheet · 199 judged · 1 left blank · 14 unreadable.**
 
