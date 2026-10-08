@@ -7,8 +7,11 @@
 //   GET /api/pages/{page_id}
 //   GET /api/stats
 //   GET /manifests/{work_id}     (linked to, never fetched here)
-//   GET /api/pages/{page_id}/text, GET /api/works/{work_id}/text
-//                                (plain-text downloads; linked to, never fetched)
+//   GET /api/pages/{page_id}/text, GET /api/works/{work_id}/text,
+//   GET /api/records/{record_id}/text
+//                                (plain-text downloads; linked to, never fetched;
+//                                 a work's katalog entries carry `text_url` where
+//                                 the piece can be placed on the scan)
 // 404s answer `{"detail": "..."}` with status 404.
 //
 // Nothing else is fetched from our own origin. The only other network traffic

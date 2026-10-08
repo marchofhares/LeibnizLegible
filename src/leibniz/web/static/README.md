@@ -75,8 +75,8 @@ def spa(...): return FileResponse(STATIC_DIR / "index.html")
 | `i18n.js` | the whole EN + DE string table and `t()` |
 | `style.css` | design tokens, light + dark themes, every component |
 | `views/search.js` | grouped results, filters, pagination, empty/error states |
-| `views/work.js` | identity, catalogue records, canvas strip |
-| `views/page.js` | OpenSeadragon, the SVG line overlay, the line panel, provenance |
+| `views/work.js` | identity, catalogue records (each with the piece's text where it can be placed), canvas strip |
+| `views/page.js` | OpenSeadragon, the SVG line overlay, the line panel, provenance, the text block with Copy and download |
 | `views/about.js` | the honest page; live figures from `/api/stats` |
 | `views/common.js` | shared fragments: honesty banner, loading, error, not-found |
 | `vendor/openseadragon/` | OpenSeadragon 5.0.1, BSD-3-Clause — see its `VERSION` |

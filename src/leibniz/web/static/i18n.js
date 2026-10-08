@@ -151,6 +151,10 @@ const STRINGS = {
     'work.katalog.match.manual': 'Linked by hand · confidence {conf}',
     'work.katalog.match': 'Link: {method}, confidence {conf}',
     'work.katalog.record': 'Record in the Leibniz-Katalog',
+    // The piece's machine text across its folios, offered where the record's
+    // shelfmark names a folio range the scan's labels can place; {range} is the
+    // catalogue's own "Bl. 1–2", the same in both languages.
+    'work.katalog.text': 'Text of this piece ({range})',
     'work.katalog.attr':
       'Catalogue data from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, used under CC BY 4.0.',
     'work.pages': 'Page images',
@@ -183,12 +187,27 @@ const STRINGS = {
     'page.lines.count': '{n} lines · mean confidence {c}',
     'page.noLines': 'No lines were recognised on this page.',
     'page.linesHelp':
-      'Select a line to highlight it on the image. Arrow keys move between lines.',
+      'Select a line to highlight it on the image; arrow keys move between lines. Drag across the text to select it, or copy the whole page from the Text block below.',
     'page.line': 'Line {n}',
     'page.lineEmpty': '(empty line)',
     'page.mirador': 'Open in Mirador or another IIIF viewer',
-    'page.download': 'Download text',
     'page.report': 'Report an error',
+    // ---- the text block: the page's lines as one piece of selectable text
+    'page.textLink': 'Text of this page',
+    'page.text': 'Text',
+    'page.text.help':
+      'The recognised lines as one piece of text in reading order, to select and copy; status and confidence are in the line list above.',
+    'page.text.copy': 'Copy the text',
+    'page.text.copied': 'Copied: {n} lines.',
+    'page.text.copied.one': 'Copied: {n} line.',
+    'page.text.copyRefused':
+      'The browser did not allow the clipboard. The text is selected: press Ctrl+C (⌘C on a Mac) to copy it.',
+    'page.text.download': 'Download this page as text',
+    'page.text.prov':
+      'Machine transcription: {runs}. Quote it as “the machine reads it as …”, never as “Leibniz wrote”.',
+    'page.text.run': '{model}, run of {date}',
+    'page.text.noModel': 'model not recorded',
+    'page.text.noDate': 'date not recorded',
     'page.provenance': 'Provenance',
     'page.prov.model': 'Model',
     'page.prov.run': 'Run',
@@ -290,7 +309,7 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
     'about.license.transcriptions.h': 'Transcriptions',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Machine output. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it.',
+      'Leibniz Legible, CC BY 4.0. Machine output. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
     'about.license.code.h': 'Code',
     'about.license.code.p': 'Apache-2.0, in the project repository.',
 
@@ -486,6 +505,7 @@ const STRINGS = {
     'work.katalog.match.manual': 'Von Hand zugeordnet · Konfidenz {conf}',
     'work.katalog.match': 'Zuordnung: {method}, Konfidenz {conf}',
     'work.katalog.record': 'Datensatz im Leibniz-Katalog',
+    'work.katalog.text': 'Text dieses Stücks ({range})',
     'work.katalog.attr':
       'Katalogdaten aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, genutzt unter CC BY 4.0.',
     'work.pages': 'Seitenbilder',
@@ -518,12 +538,27 @@ const STRINGS = {
     'page.lines.count': '{n} Zeilen · mittlere Konfidenz {c}',
     'page.noLines': 'Auf dieser Seite wurden keine Zeilen erkannt.',
     'page.linesHelp':
-      'Wählen Sie eine Zeile, um sie im Bild hervorzuheben. Mit den Pfeiltasten wechseln Sie zwischen den Zeilen.',
+      'Wählen Sie eine Zeile, um sie im Bild hervorzuheben; mit den Pfeiltasten wechseln Sie zwischen den Zeilen. Ziehen Sie über den Text, um ihn zu markieren, oder kopieren Sie die ganze Seite aus dem Textblock darunter.',
     'page.line': 'Zeile {n}',
     'page.lineEmpty': '(leere Zeile)',
     'page.mirador': 'In Mirador oder einem anderen IIIF-Viewer öffnen',
-    'page.download': 'Text herunterladen',
     'page.report': 'Fehler melden',
+    // ---- der Textblock
+    'page.textLink': 'Text dieser Seite',
+    'page.text': 'Text',
+    'page.text.help':
+      'Die erkannten Zeilen als ein zusammenhängender Text in Lesereihenfolge, zum Markieren und Kopieren; Status und Konfidenz stehen in der Zeilenliste darüber.',
+    'page.text.copy': 'Text kopieren',
+    'page.text.copied': 'Kopiert: {n} Zeilen.',
+    'page.text.copied.one': 'Kopiert: {n} Zeile.',
+    'page.text.copyRefused':
+      'Der Browser hat den Zugriff auf die Zwischenablage nicht erlaubt. Der Text ist markiert: Drücken Sie Strg+C (⌘C auf dem Mac), um ihn zu kopieren.',
+    'page.text.download': 'Diese Seite als Text herunterladen',
+    'page.text.prov':
+      'Maschinelle Transkription: {runs}. Zitieren Sie sie als „die Maschine liest …“, nie als „Leibniz schrieb“.',
+    'page.text.run': '{model}, Lauf vom {date}',
+    'page.text.noModel': 'Modell nicht erfasst',
+    'page.text.noDate': 'Datum nicht erfasst',
     'page.provenance': 'Provenienz',
     'page.prov.model': 'Modell',
     'page.prov.run': 'Lauf',
@@ -625,7 +660,7 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
     'about.license.transcriptions.h': 'Transkriptionen',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit.',
+      'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',
     'about.license.code.h': 'Quellcode',
     'about.license.code.p': 'Apache-2.0, im Projekt-Repositorium.',
 

@@ -1167,6 +1167,13 @@ select {
   stroke-width: 2.5px;
 }
 
+/* The right column: the line list, then the text block under it. */
+.page-side {
+  display: grid;
+  gap: 1.2rem;
+  min-width: 0;
+}
+
 .page-lines .hint {
   margin-bottom: 0.6rem;
 }
@@ -1217,6 +1224,12 @@ select {
   text-align: right;
 }
 
+/* The line's text sits inside the button that selects the line, and a
+   button's text cannot be dragged over in Chromium (W4, measured on the live
+   site: a drag selected nothing and counted as a click). `user-select: text`
+   on the text alone lets a selection start there; the number, the badges and
+   the hidden labels around it are `none`, so a drag across lines takes the
+   text and nothing else. page.js leaves a click alone while text is selected. */
 .line__text {
   flex: 1 1 auto;
   min-width: 0;
@@ -1224,6 +1237,16 @@ select {
   font-size: 1.02rem;
   line-height: 1.5;
   overflow-wrap: break-word;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.line__seq,
+.line__btn .sr-only,
+.line__meta,
+.prov summary {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .line__text--empty {
@@ -1265,6 +1288,52 @@ select {
 .prov__pair {
   display: inline-block;
   margin-right: 0.6rem;
+}
+
+/* The text block: the page's lines as one piece of selectable text, with the
+   Copy button and the download in a toolbar above and one line of provenance
+   above the block itself. */
+.page-text__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+  margin: 0.6rem 0;
+}
+
+.page-text__status {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.page-text__prov {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.page-text__block {
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  background: var(--bg-sunken);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* The piece's text, under its catalogue record on the work page. */
+.katalog__text {
+  margin: 0.35rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.9rem;
 }
 
 /* -------------------------------------------------------------- about view */
