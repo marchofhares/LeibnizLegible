@@ -459,7 +459,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### P1 — PHILIUMM cross-checks: Task 1, their aligner's worked example (2026-10-08) ✅ Task 1 · ⏳ Task 2 (code next, runs on the store) · ⏸ Task 3 (waits for the layout model)
+### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 built, ⏳ its four runs on the store · ⏸ Task 3 (waits for the layout model)
 
 - **Setting.** Run in the cloud session on the C2b branch (no store needed for
   Task 1). Their alignment repository was read at commit `9d2ee4e500e0`
@@ -519,6 +519,28 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   thereby wrong; the HTR witness is a noisy reader. The example is one
   heavily revised draft (LH I 3,4, a Konzept with marginalia); Task 2 measures
   the same question on 735 pages.
+- **Task 2, built and tested, not yet run** (`align/philiumm/vi4.py`, `leibniz
+  align philiumm-vi4 fetch | match | compare | sheet`; +5 tests, 621). The
+  Hub lists 1,010 PAGE files (735 noisy, 248 clean, 27 val; revision
+  `b53f531c…`, licence `cc-by-4.0` as listed): 999 names read as shelfmark +
+  folio (`LH_1_12_2_0124r`), 483 of them openings, 8 are eScriptorium ids
+  with no shelfmark, 3 lack a side letter. *match* finds the work by the
+  shelfmark's signature keys (the store spells `LH 1, 3, 7 A` and `LH 1, 3,
+  7a`; both tried, letter parts joined or split), the page by the C2
+  resolver's folio index, and pairs lines by bounding-box IoU ≥ 0.5 (0.3 and
+  0.7 reported), greedy and one to one; an opening is laid out as two canvases
+  side by side in whichever order pairs more area, or as one scan when both
+  labels point at the same file; `reports/philiumm/heldout_pages.csv` gets
+  every resolved page of every split for C3. *compare* buckets each paired
+  line (agree ≥ 0.9, near 0.7–0.9, disagree, ours only, theirs only, neither)
+  per stratum, zone and file, with the HTR witness on the disagreements;
+  *sheet* writes `data/philiumm/philiumm-disagreements.html` through the C2
+  crop machinery, which now takes explicit refs and shows PHILIUMM's text
+  under the minted one (`audit.lines_for_refs`, `write_sheet`; the sampled
+  sheet unchanged). The dataset constant and the site's attribution follow
+  the Hub's rename to `DenisaBumba/…`. Expect, from Task 1: disagreements
+  concentrated on pages with margin zones; `no_layout` where their image
+  is not the GWLB derivative at a uniform scale — the report counts both.
 
 ### C2b — the audit closed and read (2026-10-07) ✅ score · ✅ patterns · ✅ hyphen fix · ⏳ reach census (operator's run)
 
@@ -1741,7 +1763,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **616** (2026-10-08, P1 Task 1; 606 after C2b; with the `gt` + `web` + `release` extras) |
+| Tests passing | **621** (2026-10-08, P1 Task 2; 616 after Task 1, 606 after C2b; with the `gt` + `web` + `release` extras) |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -2049,10 +2071,27 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**P1 (2026-10-08), in progress on the same branch:** Task 1 is done
-(`reports/philiumm/alignment-sample.md`); Task 2's code comes next, its four
-runs against the store are the operator's; Task 3 waits for the new RF-DETR
-model. Merge order unchanged: after the PHILIUMM team has seen the numbers.
+**P1 (2026-10-08), operator — Task 2's four runs, in this order, on the
+desktop in WSL with `UV_PROJECT_ENVIRONMENT=.venv-w3` after `git pull`:**
+
+1. `uv run leibniz align philiumm-vi4 fetch` — the Hub listing and the 735
+   noisy PAGE files into `data/philiumm/noisy/` at one request a second
+   (about fifteen minutes; resumable: run it again if it stops).
+2. `uv run leibniz align philiumm-vi4 match` — read-only on the store;
+   prints files matched per split, pairs at IoU 0.3/0.5/0.7 and the layouts
+   chosen; writes `reports/philiumm/heldout_pages.csv` and
+   `vi4-match-summary.json`. Look at the unresolved list: a shelfmark
+   spelling the matcher does not try is a one-line fix here.
+3. `uv run leibniz align philiumm-vi4 compare` — writes
+   `reports/philiumm/vi4-crosscheck.md`, `vi4-summary.json` and
+   `vi4-disagreements-sample.csv`; the full CSVs stay under `data/philiumm/`.
+4. `uv run leibniz align philiumm-vi4 sheet --images /mnt/d/leibniz-images`
+   — `data/philiumm/philiumm-disagreements.html`, 300 lines with both
+   texts, verdicts downloadable in the C2 CSV shape: the second sheet to
+   offer the PHILIUMM team.
+Then `git add reports/philiumm && git commit && git push`, and paste the
+console summaries here. Task 3 waits for the new RF-DETR model. Merge order
+unchanged: after the PHILIUMM team has seen the numbers.
 
 **C2b (2026-10-07), operator — in this order:**
 

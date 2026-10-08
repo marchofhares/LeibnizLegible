@@ -705,3 +705,257 @@ https://github.com/marchofhares/leibnizlegible/compare/main...c2-audit-closeout?
 and a five-line summary of the verdict for the operator to send to the PHILIUMM
 team. Do not merge.
 ~~~~
+
+
+### Phase P1 — PHILIUMM cross-checks (Tasks 1 and 2 built 2026-10-08; Task 3 waits for the layout model)
+
+~~~~text
+Phase P1 — PHILIUMM cross-checks: their aligner sample, the A VI,4 cross-comparison,
+and a layout-zone census. One local session on the operator's desktop (WSL2
+Ubuntu), with the data, the store and the GPU at hand.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. Write the "P1 — PHILIUMM cross-checks"
+entry in STATUS.md after every task. If STATUS.md already carries a P1 entry,
+continue from its first unfinished task; if that entry says the branch was
+merged, create `philiumm-layout-census` from main and continue there.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible, the one the C1 corpus run, the C2 mint and W3 used.
+Facts, to verify in Task 0 rather than assume:
+- data/inventory.sqlite is the MASTER store (16 GB: 13.5M v1 lines, 297k
+  gt_lines). Open it read-only only: `uv run leibniz …` commands open it
+  mode=ro; your own Python uses a `file:…?mode=ro` URI. Never write to it, never
+  VACUUM or move it, never delete anything under data/. This phase writes
+  nothing to the store.
+- The page-image cache is /mnt/d/leibniz-images (the D: drive); the runbooks
+  pass it as `--images /mnt/d/leibniz-images`, and pages.local_path is relative
+  to that root (see align/audit.py attach_images).
+- `.venv` is the pipeline environment (kraken, torch with CUDA): never run
+  `uv sync` against it and never install into it. Use the side environment W3
+  made, `.venv-w3` (web, gt and release extras; gt brings Pillow for crops):
+  export UV_PROJECT_ENVIRONMENT=.venv-w3 in your shell for every `uv` command.
+  This phase adds no Python dependency to the project; PHILIUMM's pipeline gets
+  its own environment under data/philiumm/ (Task 3).
+- The GPU is a GTX 1660 Ti (6 GB) reachable from WSL2. Task 3 may use it;
+  nothing else here needs it.
+- Long jobs run under nohup with a log under logs/ (gitignored); poll the log,
+  print its tail when done. Ask the operator for a go before: cloning and
+  installing their pipeline, running it, a download over 1 GB, a job expected
+  to run over an hour, and installing any software (apt, npm).
+- Every result lives in reports/philiumm/ and reports/layout/ as small
+  committed files (Markdown, JSON, CSV of at most a few thousand rows),
+  rendered by code from data, prose templated. Bulky artefacts (downloads,
+  crops, HTML sheets, models, full CSVs) go under data/ (gitignored) and are
+  described, not committed. Never write a number you did not produce.
+- The operator merges, and only after the numbers have been shared with the
+  PHILIUMM team: the repo is public, so a merge is a publication. You push the
+  branch and hand over; you never merge. Nothing is deployed. Branch:
+  `philiumm-crosschecks`, created from main.
+- Their two GitLab repositories have no licence file, and on 2026-10-06 they
+  said they are considering CC BY-NC for their dataset and models as well. Read
+  their code, run their pipeline locally under data/, copy nothing from either
+  repository into this one, and record the commit SHAs you used.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files (logs, *.log, resume-run.sh, .python-version, reports/gt-audit/
+   gt-audit.html and the like; leave them alone). `git rev-parse --abbrev-ref
+   HEAD` is main; `git pull --ff-only origin main`; confirm the remote.
+2. `df -h data /mnt/d`; `uv --version`; `git lfs version` (Task 3 needs it;
+   if missing, ask before `sudo apt-get install -y git-lfs`); `nvidia-smi`.
+3. Baseline in .venv-w3: `uv run ruff check .`, `uv run ruff format --check .`,
+   `uv run pytest -q`. Record the counts.
+4. Ask the operator two things and wait: whether PHILIUMM's new RF-DETR model
+   has been published (the gate before Task 3), and whether Task 3 should run
+   on the current bundled model regardless, for the 13 October call.
+5. Print a short plan with the steps you expect, their durations and what
+   needs a go, and wait for the operator's "go".
+
+## Background (all you need)
+The ERC PHILIUMM project (David Rabouin, Denisa-Florina Bumba; Laboratoire SPHERE,
+Université Paris Cité – CNRS) built the Leibniz HTR model this project runs
+(FoNDUE-GD_v2_ft_Leibniz, Zenodo 10.5281/zenodo.21457538, CC BY 4.0 as obtained)
+and the baseline segmentation model of the v1 corpus run (Zenodo
+10.5281/zenodo.21537859, CC BY 4.0). In an email exchange from 2026-09-28 they
+offered to collaborate; Denisa pointed to three things (below); she and David
+then judged the 200-line ground-truth audit sheet and returned it on
+2026-10-07 (scored in a separate session, not here); and a call is set for
+2026-10-13. The owner brings three cross-checks of their three things to that
+call. On 2026-10-07 David also noted that their model was not trained on
+printed material (the Marginalien), on hands other than Leibniz's, or on
+Kurrent; Task 3's sample takes the first of these into account.
+1. Their alignment code (PASSIM `seriatim --linewise` + a filter + a sliding-window
+   second pass):
+   https://gitlab.com/eman8/scripts/htr-ocr/alignement-verite-de-terrain-et-transcriptions
+   (branch main; raw files at .../-/raw/main/<path>). Worked example in the repo:
+   GT/LH_1_3_4_0001-0002_1.txt (edition reading text for LH I 3,4 Bl. 1–2, from
+   A VI,4); HTR/LH_1_3_4_0002r-0001v.xml and HTR/LH_1_3_4_0002v-0001r.xml (PAGE XML
+   with HTR lines; each image is an opening with two folios); htr_replaced_gt/ (the
+   same files with aligned GT written into each line's <Unicode>, blank where
+   nothing aligned); alignment_report.csv with columns
+   filename,nb_htr_lines,nb_gt_aligned,pct_gt_aligned,nb_low_conf,pct_low_conf,
+   nb_ratio_too_low,pct_ratio_too_low,nb_ratio_too_high,pct_ratio_too_high,
+   nb_no_alignment,pct_no_alignment,nb_window_passages,nb_fallback_lines.
+   Their totals on the sample, read from that committed CSV: 257 HTR lines, 230
+   aligned (89.5 %). Settings: the README's defaults are conf_threshold 0.0,
+   min_token_ratio 0.4, max_token_ratio 2.5 and min_sim 0.5, and its usage
+   example runs --conf_threshold 0.7; the dataset card states the noisy split was
+   filtered at Levenshtein ≥ 0.7. Treat 0.7 as the comparable per-line threshold
+   and say where each number comes from; do not state any other setting without
+   a source. Record the commit SHA you fetched.
+2. Their dataset, Hugging Face DenisaBumba/htr_leibniz_dataset_v1 (CC BY 4.0 as
+   obtained; the former name DenisaB/… redirects to it; Zenodo twin
+   10.5281/zenodo.21622297, whose data.zip is 4.2 GB, do not fetch it).
+   train/noisy/ = 735 PAGE XML + JPG pages whose lines carry edition text aligned
+   from A VI,4 by the code above (blank <Unicode> where unaligned; 43,372 aligned
+   lines); train/clean/ = 248 hand-corrected pages; val/ = 27 pages (used by this
+   project's B1 reproduction). The Hub lists 1,966 files under train/ and 54
+   under val/, consistent with those counts. Names are shelfmark + folio:
+   LH_1_12_2_0124r.xml = LH I 12, 2 Bl. 124r; LH_1_20_0063r-0062v.xml = an
+   opening showing 63r and 62v. List files via
+   https://huggingface.co/api/datasets/DenisaBumba/htr_leibniz_dataset_v1 (the
+   siblings array); fetch with
+   https://huggingface.co/datasets/DenisaBumba/htr_leibniz_dataset_v1/resolve/main/<path>.
+   Only XML files are needed. Update HF_DATASET in src/leibniz/htr/artifacts.py
+   and its attribution line to the new name. The model this project runs trained
+   on the noisy and clean pages, so those 1,010 pages must be excluded from any
+   future evaluation set (Phase C3).
+3. Their layout pipeline:
+   https://gitlab.com/eman8/scripts/htr-ocr/scripts-pour-le-pretraitement-des-corpus-pour-escriptorium
+   (branch main; models in Git LFS: `git lfs install`, clone, `git lfs pull`).
+   The README gives two installation paths; the Linux one is a single Python 3.12
+   environment (supervision requires 3.12) with `pip install -r requirements.txt`
+   (rfdetr, supervision, kraken 7), marked "should work, not tested"; a uv venv
+   is an acceptable substitute for their conda command. Run:
+   `python main_pipeline.py --input <images> --output <results> --config
+   config_local.json` (no API key; the local config names their last best model
+   and a detection confidence of 0.4). Steps: RF-DETR zone prediction (MainZone,
+   MarginTextZone, DigitizationArtefactZone, GraphicZone-figure, NumberingZone;
+   formula classes GraphicZone-formula{,-inline,-strikethrough,-complex} masked if
+   emitted), COCO → PAGE XML regions (03_regions_xml), masks over figure and
+   formula zones, binarisation, masked image, Kraken baselines inside text zones
+   (06_baselines_and_htr), merge, polygon simplification, overlap fixes, line
+   splitting; final PAGE XML in 10_fixed_lines. Bundles
+   models/segmentation/baselines/best_0.4750.safetensors, apparently the same
+   checkpoint as this project's v1 segmenter (blla_ft_leibniz_v1_0.4750): verify
+   by checksum, and if so the only difference from v1 lines is masking plus
+   region merge. Denisa expects to publish a new RF-DETR model, fine-tuned on
+   corrected formula polygons and compared with D-FINE, by mid to late October
+   2026; Task 3 is gated on it unless the operator said otherwise in Task 0.
+
+## Task 1 — This project's aligner on their sample (needs no local data)
+- Add src/leibniz/align/pagexml.py: PAGE XML TextLines in reading order (region
+  order, then line order) with id, Coords polygon, Baseline, and <Unicode> text
+  (may be empty). Offline test on a trimmed fixture.
+- Fetch the sample files (cache-first, polite UA) into data/philiumm/sample/.
+- Run align_piece (src/leibniz/align/align.py; inputs HtrLine(ref, text)) with the
+  full GT text against each HTR file separately with free_edition_ends=True,
+  mirroring their per-file run; also try the two page concatenation orders and
+  report the best. Use the default threshold and also a threshold you argue is
+  comparable to their 0.7 rule.
+- Produce their CSV columns from this project's result (nb_gt_aligned = minted,
+  nb_no_alignment = declined, filter columns N/A) and a line-by-line comparison
+  against their htr_replaced_gt output with this project's normalizer
+  (src/leibniz/align/normalize.py) and folded similarity (src/leibniz/align/dp.py,
+  as audit.py uses it): both aligned and same text (≥ 0.9), both aligned but
+  different, this project only, theirs only, neither. Print the differing pairs.
+- CLI `leibniz align philiumm-sample`; report reports/philiumm/alignment-sample.md.
+  Commit. CHECKPOINT A: update the STATUS.md entry and commit.
+
+## Task 2 — Cross-compare A VI,4 (run here)
+Build, with offline tests on fixtures, one CLI with subcommands, then run them
+in order on the store:
+- `leibniz align philiumm-vi4 fetch`: the 735 train/noisy XML files into
+  data/philiumm/noisy/, cache-first, resumable, at most one request per second
+  (about fifteen minutes).
+- `leibniz align philiumm-vi4 match`: file name → shelfmark + folio(s); works via
+  works.shelfmarks and src/leibniz/catalog/shelfmarks.py (Roman numerals likely;
+  write the parser to inspect real shelfmark strings and report unparsed names);
+  canvases via pages.label with src/leibniz/align/resolve.py; openings may map to
+  one canvas or two, handle both, report ambiguities. Lines by geometry: scale
+  their Coords from imageWidth/imageHeight to pages.width/height, greedy
+  one-to-one by polygon IoU (report threshold and sensitivity). The lines table
+  may hold several runs per page: use the run that produced the recognised text.
+  gt_lines.line_image_ref carries the canonical line id "{page_id}:{line_seq:03d}"
+  for factory-minted rows (align/pairs.py; audit.split_ref parses it); the test
+  store's seeded gt_lines rows use an older "#xywh" form, so assert the real
+  form on the store before relying on it.
+- `leibniz align philiumm-vi4 compare`: their aligned text vs gt_lines.text for the
+  matched line, lines.text as third witness; normalizer + folded similarity;
+  buckets agree (≥ 0.9), near (0.7–0.9), disagree (< 0.7), this project only,
+  theirs only, neither; per stratum and per page. State what agreement does not
+  prove (two aligners fed the same edition text can share a mistake).
+  Writes: reports/philiumm/vi4-crosscheck.md; reports/philiumm/vi4-summary.json;
+  reports/philiumm/heldout_pages.csv (this project's page_ids for all 1,010 of
+  their pages, for C3); reports/philiumm/vi4-disagreements-sample.csv (at most
+  500 rows); full disagreement and double-witnessed CSVs under data/philiumm/.
+- `leibniz align philiumm-vi4 sheet`: a second audit sheet of disagreements,
+  data/philiumm/philiumm-disagreements.html, through the crop machinery in
+  src/leibniz/align/audit.py. That machinery must accept an explicit list of
+  line refs; if K1 has already landed that refactor on main, reuse it, else do
+  it here without changing the existing sheet's behaviour or tests. The sheet
+  downloads verdicts in the same CSV shape as the C2 sheet (ref, stratum,
+  verdict, note), so the PHILIUMM team could judge it the way they judged the
+  first. Never touch reports/gt-audit/gt-audit-lines.csv or
+  gt-audit-verdicts*.csv.
+Every subcommand ends with a compact printed summary. Run fetch, match, compare
+and sheet here (crops from /mnt/d/leibniz-images), read the results, commit
+reports/philiumm. CHECKPOINT B: update the STATUS.md entry and commit.
+GATE for Task 3: per the operator's Task 0 answers. If the new model is out, or
+the operator asked for the census on the current model, continue. Otherwise
+state in STATUS.md that Task 3 waits for the model, commit, and go to the
+hand-over; a later session resumes at Task 3 with this prompt.
+
+## Task 3 — Layout-zone census (run here, with a go)
+Build, with fixtures:
+- `leibniz layout sample --n 400 --seed 0`: equal numbers per stratum
+  (page_stats.stratum_heuristic; fall back to set/work if NULL, which it is
+  under C1) plus 100 pages from LH 35 (find via works.shelfmarks) and 100 pages
+  from the Marginalien set as a separate block (printed body with marginal
+  notes, the case David raised), reproducible; symlink or copy cached JPEGs
+  from /mnt/d/leibniz-images into data/philiumm/layout-sample/images/ named by
+  page_id; write the sample list to reports/layout/sample.csv.
+- tools/philiumm-layout-env.sh: creates a separate Python 3.12 environment under
+  data/philiumm/rfdetr-env/ (uv venv or python -m venv), clones their pipeline
+  with LFS into data/philiumm/rfdetr-pipeline/ (record the commit SHA and the
+  checksums of the model files), installs requirements, and prints a diagnosis
+  on failure. tools/philiumm-layout-run.sh: runs main_pipeline.py on the sample
+  with config_local.json under nohup, logging to logs/. Never modify their
+  repo; keep any local patch as a .patch file under data/philiumm/.
+- src/leibniz/layout/zones.py (pure, tested): parse 03_regions_xml zones by class
+  with polygons and 10_fixed_lines lines; geometry via
+  src/leibniz/pipeline/geometry.py or plain Python, no new heavy dependency.
+- `leibniz layout zone-census`: per page and per stratum, the LH 35 and the
+  Marginalien blocks separate: zones per class; share of pages with any figure,
+  formula, margin zone; v1 lines whose polygon lies mostly inside a figure or
+  formula zone, count and share; on the Marginalien block, v1 lines inside
+  MainZone (the printed body) vs MarginTextZone (the notes); v1 line count vs
+  their final line count; matched-line comparison by IoU. Writes
+  reports/layout/zone-census.md, reports/layout/zone-census-summary.json,
+  reports/layout/zone-census-per-page.csv (the sample is small enough to commit).
+Ask for a go, run the environment script, the sample, the pipeline (hours, GPU
+optional) and the census here; if the environment cannot be made to work on
+this machine, say so in STATUS.md and stop the task honestly. Commit
+reports/layout. CHECKPOINT C: update the STATUS.md entry and commit.
+
+## Finish and hand-over
+Complete STATUS.md's "P1 — PHILIUMM cross-checks" entry: what was built, key
+numbers, what is unmeasured and why, open questions (opening vs folio canvas
+mapping; class coverage of the bundled checkpoint; flagging v1 lines inside
+non-text zones in the viewer now; a v2 zones table with SegmOnto type, polygon
+and a LaTeX field; the printed-body share of Marginalien lines), next steps
+(rerun Task 3 with each later PHILIUMM model; use heldout_pages.csv in C3;
+the licence change PHILIUMM is considering, with the fact that this project's
+copies were obtained under CC BY 4.0, for the lawyer memo). Append this prompt
+verbatim to PROMPTS.md under "Follow-up phases (2026-10)". ruff + pytest clean,
+all tests offline. Commit in sensible pieces and `git push -u origin
+philiumm-crosschecks`. Then hand over: print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...philiumm-crosschecks?expand=1,
+a plain-language summary of the cross-checks for the operator to bring to the
+call (what agrees, what differs, what it does not prove), and the reminder
+that the PR is merged only after the PHILIUMM team has seen the numbers. Do
+not merge.
+~~~~
