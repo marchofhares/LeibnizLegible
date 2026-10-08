@@ -768,6 +768,182 @@ def philiumm_sample(
         )
 
 
+vi4_app = typer.Typer(help="P1 Task 2: A VI,4 under PHILIUMM's aligner and this project's.")
+app.add_typer(vi4_app, name="philiumm-vi4")
+VI4_DEST = Path("data/philiumm")
+VI4_REPORTS = Path("reports/philiumm")
+
+
+@vi4_app.command(name="fetch")
+def vi4_fetch(
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    limit: int = typer.Option(None, "--limit", help="Fetch at most this many files (a trial)."),
+) -> None:
+    """Their noisy split's PAGE XML files and the Hub listing, cache-first, 1 request/s."""
+    from leibniz.align.philiumm import vi4 as V
+
+    listing = V.fetch_listing(dest)
+    n_noisy = len(V.split_files(listing, "noisy"))
+    _console.print(
+        f"[bold]listing[/bold] {listing['dataset']} @ {(listing.get('sha') or '?')[:12]}: "
+        f"{len(listing['files'])} files, {n_noisy} noisy XML"
+    )
+
+    def progress(k: int, n: int, rel: str) -> None:
+        if k == 1 or k % 25 == 0 or k == n:
+            _console.print(f"[dim]{k}/{n} {rel}[/dim]")
+
+    fetched, present = V.fetch_noisy(dest, listing=listing, progress=progress, limit=limit)
+    _console.print(
+        f"[bold]fetch[/bold] {fetched} fetched, {present}/{n_noisy} present under {dest / 'noisy'}"
+    )
+
+
+@vi4_app.command(name="match")
+def vi4_match(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    reports: Path = typer.Option(VI4_REPORTS, "--reports", help="Report directory."),
+    threshold: float = typer.Option(None, "--iou", help="Bounding-box IoU to pair lines."),
+) -> None:
+    """File names → works and pages; their lines → this project's lines by geometry."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    thr = V.IOU_DEFAULT if threshold is None else threshold
+    conn = open_readonly(db_path)
+    try:
+        matches = V.run_match(
+            conn,
+            dest,
+            threshold=thr,
+            progress=lambda k, n, rel: (
+                (k % 100 == 0 or k == n) and _console.print(f"[dim]{k}/{n}[/dim]")
+            ),
+        )
+    finally:
+        conn.close()
+    V.write_match(matches, dest / V.MATCH_NAME)
+    n_held = V.write_heldout(matches, reports / "heldout_pages.csv")
+    summ = V.match_summary(matches)
+    (reports / "vi4-match-summary.json").parent.mkdir(parents=True, exist_ok=True)
+    (reports / "vi4-match-summary.json").write_text(
+        json.dumps(summ, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    _console.print(
+        f"[bold]match[/bold] {summ['files']} files: "
+        + "; ".join(
+            f"{split} " + ", ".join(f"{k} {v}" for k, v in sorted(c.items()))
+            for split, c in summ["by_split_status"].items()
+        )
+    )
+    _console.print(
+        f"  noisy: {summ['their_lines']:,} of their lines vs {summ['our_lines']:,} of ours on "
+        f"{summ['noisy_matched']} files → {summ['pairs']:,} pairs at IoU ≥ {thr} "
+        f"({', '.join(f'{k} {v:,}' for k, v in summ['pairs_by_iou'].items())}); "
+        f"layouts {summ['layouts']}"
+    )
+    _console.print(
+        f"  {len(summ['pages'])} held-out pages → {reports / 'heldout_pages.csv'} ({n_held} rows); "
+        f"{len(summ['unresolved'])} files unresolved (see {reports / 'vi4-match-summary.json'})"
+    )
+
+
+@vi4_app.command(name="compare")
+def vi4_compare(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    reports: Path = typer.Option(VI4_REPORTS, "--reports", help="Report directory."),
+    sample_rows: int = typer.Option(500, "--sample-rows", help="Rows in the committed sample CSV."),
+) -> None:
+    """Their aligned text vs this project's minted text on every paired line."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    matches = V.read_match(dest / V.MATCH_NAME)
+    listing = json.loads((dest / V.LISTING_NAME).read_text(encoding="utf-8"))
+    conn = open_readonly(db_path)
+    try:
+        rows = V.judge(conn, matches, dest)
+    finally:
+        conn.close()
+    summ = V.compare_summary(matches, rows)
+    reports.mkdir(parents=True, exist_ok=True)
+    (reports / "vi4-crosscheck.md").write_text(
+        V.render(matches, rows, summ, listing=listing), encoding="utf-8"
+    )
+    (reports / "vi4-summary.json").write_text(
+        json.dumps(summ, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    V.write_judged(rows, dest / "vi4-judged.csv")
+    dis = [r for r in rows if r.bucket in ("disagree", "near", "ours_only", "theirs_only")]
+    V.write_judged(dis, dest / "vi4-disagreements.csv")
+    sample = V.disagreement_sample(rows, n=sample_rows)
+    V.write_judged(sample, reports / "vi4-disagreements-sample.csv")
+    V.write_judged([r for r in rows if r.ours and r.theirs], dest / "vi4-double-witnessed.csv")
+    t = summ["total"]
+    _console.print(
+        f"[bold]compare[/bold] {summ['judged']:,} paired lines: "
+        + ", ".join(f"{b} {t[b]:,}" for b in V.BUCKETS)
+    )
+    w = summ["witness_disagree"]
+    _console.print(
+        f"  on the disagreements the HTR is closer to ours {w['ours_closer']}, to theirs "
+        f"{w['theirs_closer']}, tie {w['tie']} → {reports / 'vi4-crosscheck.md'}"
+    )
+
+
+@vi4_app.command(name="sheet")
+def vi4_sheet(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    images_root: Path = typer.Option(
+        DEFAULT_IMAGES_ROOT, "--images", help="Local image cache root (the C1 pipeline's --images)."
+    ),
+    n: int = typer.Option(300, "--n", help="Lines on the sheet."),
+    seed: int = typer.Option(0, "--seed", help="Sampling seed."),
+) -> None:
+    """A hand-audit sheet of the disagreements (both texts shown), crops from the cache."""
+    import csv as _csv
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    with (dest / "vi4-disagreements.csv").open(newline="", encoding="utf-8") as fh:
+        raw = list(_csv.DictReader(fh))
+    rows = [
+        V.Judged(
+            r["file"],
+            r["ref"],
+            r["their_id"],
+            r["zone"] or None,
+            float(r["iou"] or 0),
+            r["stratum"],
+            r["htr"],
+            r["ours"],
+            r["theirs"],
+            r["bucket"],
+            float(r["sim"]) if r["sim"] else None,
+            float(r["sim_htr_ours"]) if r["sim_htr_ours"] else None,
+            float(r["sim_htr_theirs"]) if r["sim_htr_theirs"] else None,
+            float(r["align_conf"]) if r["align_conf"] else None,
+        )
+        for r in raw
+    ]
+    conn = open_readonly(db_path)
+    try:
+        html_path, with_crops = V.build_disagreement_sheet(
+            conn, rows, images_root=images_root, out_dir=dest, n=n, seed=seed
+        )
+    finally:
+        conn.close()
+    _console.print(f"[bold]sheet[/bold] → {html_path} ({with_crops} lines with image strips)")
+
+
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the
 # ``eval`` output (its §1 numbers) plus this session's live-run facts, using the
 # renderers in ``leibniz.align.report``; it is a curated report (like census.md /

@@ -5,7 +5,7 @@ Three CC BY 4.0 artifacts, cached under ``data/`` (gitignored):
 * the **HTR model** — Zenodo record ``21457538``
   (``FoNDUE-GD_v2_ft_Leibniz.safetensors`` + its ketos configs / file lists),
 * the **validation ground truth** — the ``val`` split of HuggingFace
-  ``DenisaB/htr_leibniz_dataset_v1`` (1,878 pre-extracted line/text pairs, one
+  ``DenisaBumba/htr_leibniz_dataset_v1`` (1,878 pre-extracted line/text pairs, one
   parquet file),
 * the **segmentation model** — Zenodo record ``21537859`` (not needed to score
   pre-segmented lines, but fetched/recorded for provenance and Phase B2/C1).
@@ -29,7 +29,7 @@ from leibniz.net import default_user_agent
 
 ZENODO_HTR_RECORD = "21457538"
 ZENODO_SEG_RECORD = "21537859"
-HF_DATASET = "DenisaB/htr_leibniz_dataset_v1"
+HF_DATASET = "DenisaBumba/htr_leibniz_dataset_v1"  # the former DenisaB/… redirects here
 
 MODELS_DIR = Path("data/models/philiumm-htr")
 SEG_DIR = Path("data/models/philiumm-seg")
@@ -53,7 +53,7 @@ ATTRIBUTION = (
     "(Denisa-Florina Bumba, Laboratoire SPHERE, Université Paris Cité – CNRS; "
     "ERC grant 101020985), CC BY 4.0. Model: doi:10.5281/zenodo.21457538; "
     "segmentation: doi:10.5281/zenodo.21537859; ground truth: "
-    "huggingface.co/datasets/DenisaB/htr_leibniz_dataset_v1."
+    "huggingface.co/datasets/DenisaBumba/htr_leibniz_dataset_v1."
 )
 
 

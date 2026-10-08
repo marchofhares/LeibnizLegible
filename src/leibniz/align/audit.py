@@ -72,6 +72,8 @@ class AuditLine:
     label: str | None = None  # folio label of the page
     crop_png: bytes | None = None
     image_note: str = ""
+    alt_text: str | None = None  # a second reading to show (P1: PHILIUMM's aligned text)
+    alt_label: str = ""  # how to name it on the sheet
 
 
 @dataclass(slots=True)
@@ -253,22 +255,55 @@ def attach_images(conn: sqlite3.Connection, lines: Sequence[AuditLine], images_r
             ln.image_note = "line geometry outside the image"
 
 
-def build_sheet(
+def lines_for_refs(conn: sqlite3.Connection, refs: Sequence[str]) -> list[AuditLine]:
+    """Audit lines for explicit canonical refs, minted or not (P1 and K1 sheets).
+
+    A ref with a ``gt_lines`` row carries its minted text and stratum; one
+    without (a line the factory declined) carries an empty text and the
+    stratum ``unminted``. The crop and the HTR text come from
+    :func:`attach_images` as for the sampled sheet.
+    """
+    out: list[AuditLine] = []
+    for ref in refs:
+        page_id, seq = split_ref(ref)
+        row = conn.execute(
+            "SELECT text, source, stratum, align_conf FROM gt_lines WHERE line_image_ref = ? "
+            "ORDER BY id DESC LIMIT 1",
+            (ref,),
+        ).fetchone()
+        out.append(
+            AuditLine(
+                ref=ref,
+                page_id=page_id,
+                line_seq=seq,
+                stratum=(row["stratum"] or "unknown") if row is not None else "unminted",
+                align_conf=row["align_conf"] if row is not None else None,
+                gt_text=row["text"] if row is not None else "",
+                htr_text=None,
+                source=row["source"] if row is not None else "not minted",
+            )
+        )
+    return out
+
+
+def write_sheet(
     conn: sqlite3.Connection,
+    lines: list[AuditLine],
     *,
     images_root: Path,
     out_dir: Path,
-    n: int = DEFAULT_N,
+    html_name: str = "gt-audit.html",
+    csv_name: str = "gt-audit-lines.csv",
     seed: int = 0,
+    title: str = "Ground-truth hand audit",
 ) -> AuditSheet:
-    """Sample, crop, and write ``gt-audit.html`` + ``gt-audit-lines.csv`` into ``out_dir``."""
-    lines = sample_lines(conn, n, seed=seed)
+    """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``."""
     attach_images(conn, lines, images_root)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    html_path = out_dir / "gt-audit.html"
-    csv_path = out_dir / "gt-audit-lines.csv"
-    html_path.write_text(render_sheet(lines, seed=seed), encoding="utf-8")
+    html_path = out_dir / html_name
+    csv_path = out_dir / csv_name
+    html_path.write_text(render_sheet(lines, seed=seed, title=title), encoding="utf-8")
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image"])
@@ -288,6 +323,19 @@ def build_sheet(
     for ln in lines:
         by_stratum[ln.stratum] = by_stratum.get(ln.stratum, 0) + 1
     return AuditSheet(lines=lines, html_path=html_path, csv_path=csv_path, by_stratum=by_stratum)
+
+
+def build_sheet(
+    conn: sqlite3.Connection,
+    *,
+    images_root: Path,
+    out_dir: Path,
+    n: int = DEFAULT_N,
+    seed: int = 0,
+) -> AuditSheet:
+    """Sample, crop, and write ``gt-audit.html`` + ``gt-audit-lines.csv`` into ``out_dir``."""
+    lines = sample_lines(conn, n, seed=seed)
+    return write_sheet(conn, lines, images_root=images_root, out_dir=out_dir, seed=seed)
 
 
 _SHEET_CSS = """
@@ -362,14 +410,16 @@ restore();
 """
 
 
-def render_sheet(lines: Sequence[AuditLine], *, seed: int = 0) -> str:
+def render_sheet(
+    lines: Sequence[AuditLine], *, seed: int = 0, title: str = "Ground-truth hand audit"
+) -> str:
     """The self-contained audit page (crops inlined as data URIs)."""
     parts: list[str] = []
     A = parts.append
     A("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
-    A("<title>Leibniz Legible — GT hand audit</title>")
+    A(f"<title>Leibniz Legible — {html.escape(title)}</title>")
     A(f"<style>{_SHEET_CSS}</style></head><body data-seed='{seed}'>")
-    A("<h1>Ground-truth hand audit</h1>")
+    A(f"<h1>{html.escape(title)}</h1>")
     A(
         "<div class='help'>For each line, compare the <b>minted text</b> with the "
         "<b>image strip</b> and pick one:<br>"
@@ -399,6 +449,11 @@ def render_sheet(lines: Sequence[AuditLine], *, seed: int = 0) -> str:
         else:
             A(f"<div class='noimg'>no image: {html.escape(ln.image_note or 'unknown')}</div>")
         A(f"<div class='gt'>{html.escape(ln.gt_text)}</div>")
+        if ln.alt_text is not None:
+            A(
+                f"<div class='htr'>{html.escape(ln.alt_label or 'other')}: "
+                f"{html.escape(ln.alt_text or '—')}</div>"
+            )
         A(f"<div class='htr'>HTR: {html.escape(ln.htr_text or '—')}</div>")
         A("<div class='verdicts'>")
         for v in VERDICTS:
@@ -797,6 +852,7 @@ __all__ = [
     "allocate",
     "build_sheet",
     "crop_box",
+    "lines_for_refs",
     "read_verdicts",
     "render_agreement",
     "render_score",
@@ -806,4 +862,5 @@ __all__ = [
     "text_evidence",
     "verdict_agreement",
     "wilson",
+    "write_sheet",
 ]

@@ -5,7 +5,8 @@ loader's whole job is to produce that list from whatever a GT set ships as. Two
 formats matter for Phase B1:
 
 * **HuggingFace parquet** (:func:`load_parquet_pairs`) — the PHILIUMM
-  ``DenisaB/htr_leibniz_dataset_v1`` splits are parquet with a ``text`` string
+  ``DenisaBumba/htr_leibniz_dataset_v1`` (formerly ``DenisaB/…``) splits are parquet with a
+  ``text`` string
   column and an ``image`` column (an HF ``Image`` feature: a struct of
   ``{bytes, path}``). Each row is one *already-extracted* (polygon-cropped,
   dewarped) line — exactly what a recogniser consumes. Needs ``pyarrow`` (lazy
