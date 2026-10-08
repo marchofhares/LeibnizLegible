@@ -52,6 +52,46 @@ For each paired line, their aligned text against this project's minted text unde
 
 On the *disagree* lines the HTR reading of the strip is closer to this project's text on 383, to theirs on 381, equally close on 7; on the *near* lines 1159 / 1682 / 45. The HTR is a noisy witness, not a judge.
 
+
+## Coverage: pages where this project minted nothing
+
+On 161 of the 731 judged files this project minted no line at all; their text covers 7,838 paired lines there, all counted *theirs only* above. That part of the gap is coverage — a piece the C2 factory did not localize, had no edition text for, or declined whole — not alignment. On the files where it minted something: agree 9,307, near 2,886, disagree 771, ours_only 5,145, theirs_only 14,111, neither 16,763.
+
+| shelfmark | files | without a minted line |
+|---|---:|---:|
+| LH 1, 1 | 1 | 1 |
+| LH 1, 12 | 2 | 0 |
+| LH 1, 2 | 56 | 0 |
+| LH 1, 20 | 38 | 14 |
+| LH 1, 3 | 42 | 20 |
+| LH 1, 4 | 17 | 6 |
+| LH 1, 6 | 34 | 9 |
+| LH 1, 7 | 12 | 4 |
+| LH 2, 3 | 44 | 6 |
+| LH 2, 6 | 3 | 0 |
+| LH 35, 1 | 22 | 3 |
+| LH 35, 10 | 4 | 0 |
+| LH 35, 11 | 13 | 9 |
+| LH 35, 12 | 2 | 1 |
+| LH 35, 13 | 1 | 0 |
+| LH 35, 3 | 2 | 0 |
+| LH 35, 8 | 1 | 0 |
+| LH 35, 9 | 4 | 0 |
+| LH 37, 3 | 11 | 5 |
+| LH 37, 4 | 9 | 0 |
+| LH 37, 5 | 10 | 2 |
+| LH 4, 1 | 17 | 13 |
+| LH 4, 2 | 3 | 3 |
+| LH 4, 3 | 6 | 5 |
+| LH 4, 4 | 4 | 0 |
+| LH 4, 5 | 33 | 0 |
+| LH 4, 6 | 42 | 14 |
+| LH 4, 7A | 55 | 1 |
+| LH 4, 7B | 136 | 18 |
+| LH 4, 7C | 70 | 11 |
+| LH 4, 7D | 7 | 1 |
+| LH 4, 8 | 30 | 15 |
+
 What agreement does not prove: both aligners were fed the same edition text, so a shared reading is the edition's, not the page's, and a shared mistake looks like agreement. A line both leave blank is not thereby wrong. The disagreements are the lines worth a person's look (`philiumm-disagreements.html`, verdicts in the C2 CSV shape).
 
 ## Per file
