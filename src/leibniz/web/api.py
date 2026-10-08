@@ -13,6 +13,9 @@ Routes (all read-only; the store is opened per request, read-only):
   ``?format=tsv``) download, its provenance in a ``# `` comment header
 * ``GET /api/works/{id}/text`` — every page of a work in canvas order, streamed,
   one ``## Folio …`` block per page
+* ``GET /api/records/{id}/text`` — a catalogue piece across the folios its
+  shelfmark names, placed by the C2 resolver (:mod:`leibniz.web.pieces`), in
+  the work export's layout under a header naming the record
 * ``GET /api/stats``           — corpus counts for the About page
 * ``GET /manifests/{work}``    — IIIF Presentation 3 manifest (D7)
 * ``GET /annotations/{page}``  — W3C AnnotationPage with the page's lines (D7)
@@ -64,7 +67,7 @@ from leibniz.search.documents import (
     line_summaries_by_page,
 )
 from leibniz.web import attribution as attr
-from leibniz.web import browse, iiif
+from leibniz.web import browse, iiif, pieces
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
 from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
@@ -117,6 +120,17 @@ TEXT_RESPONSES: dict = {
         "content": {"text/tab-separated-values": {"schema": {"type": "string"}}},
     },
     404: {"description": "No such id."},
+}
+RECORD_RESPONSES: dict = {
+    200: TEXT_RESPONSES[200],
+    404: {
+        "description": (
+            "No such record, or a record that cannot be placed on the scan; the `detail` "
+            "says which: the record is not linked to a digitized work, its shelfmark names "
+            "no folio (`Bl.`) range, or no page of the work carries a folio label in that "
+            "range."
+        )
+    },
 }
 
 # The proxy lets browsers cache /static/* for an hour (deploy/Caddyfile), so
@@ -202,7 +216,43 @@ def _people(meta: dict) -> dict:
     }
 
 
-def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
+def _record_dict(rec: db.KatalogRecord) -> dict:
+    """What the API says about a catalogue record, before its placement."""
+    meta, aa_refs = rec.metadata, rec.aa_refs
+    return {
+        "record_id": rec.record_id,
+        "title": meta.get("title") or meta.get("titel"),
+        "incipit": meta.get("incipit"),
+        "date": meta.get("datum") or meta.get("date"),
+        **_people(meta),
+        "place": meta.get("ort"),
+        "textart": meta.get("textart"),
+        "shelfmarks": list(rec.shelfmark_refs),
+        "aa_refs": aa_refs,
+        "aa_labels": [lab for ref in aa_refs if (lab := aa_ref_label(ref))],
+        # A series without a volume is the katalog's "assigned to Reihe N,
+        # not yet published there" — the honest signal for "unprinted in
+        # the AA", to be read together with ``drucke`` (other printings).
+        "aa_planned": sorted(
+            {
+                f"AA {ROMAN.get(int(r['series']), str(r['series']))}"
+                for r in aa_refs
+                if r.get("series") is not None and r.get("volume") is None
+            }
+        ),
+        "drucke": meta.get("drucke") or None,
+        "url": meta.get("url") or meta.get("record_url"),
+    }
+
+
+def _katalog_for_work(
+    conn: sqlite3.Connection, work_id: str, pages: list[db.Page] | None = None
+) -> list[dict]:
+    """A work's catalogue records with their crosswalk link and, where the C2
+    resolver places a record on the work's folios (:mod:`leibniz.web.pieces`),
+    ``text_url``, ``folio_label``, ``folio_range`` and ``n_pages``; a record
+    that cannot be placed carries none of the four. ``pages`` spares a second
+    read of the work's pages when the caller has them."""
     rows = conn.execute(
         """
         SELECT c.katalog_record_id, c.match_method, c.match_conf, c.page_range,
@@ -212,39 +262,39 @@ def _katalog_for_work(conn: sqlite3.Connection, work_id: str) -> list[dict]:
         """,
         (work_id,),
     ).fetchall()
-    out: list[dict] = []
-    for r in rows:
-        meta = json.loads(r["metadata"]) if r["metadata"] else {}
-        aa_refs = json.loads(r["aa_refs"]) if r["aa_refs"] else []
-        out.append(
-            {
-                "record_id": r["katalog_record_id"],
-                "title": meta.get("title") or meta.get("titel"),
-                "incipit": meta.get("incipit"),
-                "date": meta.get("datum") or meta.get("date"),
-                **_people(meta),
-                "place": meta.get("ort"),
-                "textart": meta.get("textart"),
-                "shelfmarks": json.loads(r["shelfmark_refs"]) if r["shelfmark_refs"] else [],
-                "aa_refs": aa_refs,
-                "aa_labels": [lab for ref in aa_refs if (lab := aa_ref_label(ref))],
-                # A series without a volume is the katalog's "assigned to Reihe N,
-                # not yet published there" — the honest signal for "unprinted in
-                # the AA", to be read together with ``drucke`` (other printings).
-                "aa_planned": sorted(
-                    {
-                        f"AA {ROMAN.get(int(r['series']), str(r['series']))}"
-                        for r in aa_refs
-                        if r.get("series") is not None and r.get("volume") is None
-                    }
-                ),
-                "drucke": meta.get("drucke") or None,
-                "url": meta.get("url") or meta.get("record_url"),
-                "match_method": r["match_method"],
-                "match_conf": r["match_conf"],
-                "page_range": r["page_range"],
-            }
+    if not rows:
+        return []
+    records = [
+        db.KatalogRecord(
+            record_id=r["katalog_record_id"],
+            metadata=json.loads(r["metadata"]) if r["metadata"] else {},
+            shelfmark_refs=json.loads(r["shelfmark_refs"]) if r["shelfmark_refs"] else [],
+            aa_refs=json.loads(r["aa_refs"]) if r["aa_refs"] else [],
         )
+        for r in rows
+    ]
+    placed = pieces.place_all(
+        work_id, db.get_pages(conn, work_id) if pages is None else pages, records
+    )
+    out: list[dict] = []
+    for r, rec in zip(rows, records, strict=True):
+        entry = {
+            **_record_dict(rec),
+            "match_method": r["match_method"],
+            "match_conf": r["match_conf"],
+            "page_range": r["page_range"],
+        }
+        where = placed[rec.record_id]
+        if isinstance(where, pieces.Placement):
+            entry.update(
+                {
+                    "text_url": f"/api/records/{rec.record_id}/text",
+                    "folio_label": where.folio_label,
+                    "folio_range": [where.folio_lo, where.folio_hi],
+                    "n_pages": len(where.pages),
+                }
+            )
+        out.append(entry)
     return out
 
 
@@ -381,7 +431,13 @@ def _ssr_work(
                 bits.append(", ".join(rec["aa_planned"]) + " (assigned, not yet published)")
             if rec.get("drucke"):
                 bits.append("Other printings: " + str(rec["drucke"]))
-            items.append(f"<li>{_esc(' · '.join(b for b in bits if b))}</li>")
+            text = (
+                f' · <a href="{_esc(rec["text_url"])}" download>Text of this piece '
+                f"({_esc(rec['folio_label'])})</a>"
+                if rec.get("text_url")
+                else ""
+            )
+            items.append(f"<li>{_esc(' · '.join(b for b in bits if b))}{text}</li>")
         parts.append("<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>")
         parts.append("<ul>" + "".join(items) + "</ul>")
     if pages:
@@ -658,39 +714,25 @@ def _page_text(
     return _head(rows, fmt) + "".join(f"{row}\n" for row in _text_rows(lines, fmt))
 
 
-def _work_text(
-    db_path: str | Path,
-    site: str,
-    work: db.Work,
-    pages: list[db.Page],
-    summaries: dict[str, tuple[int, float | None]],
-    fmt: str,
-) -> Iterator[str]:
-    """A work's export, one chunk per page in canvas order.
+def _pages_count_row(pages: list[db.Page], summaries: dict[str, tuple[int, float | None]]) -> str:
+    """``Lines: n recognised on k of m pages, mean confidence c`` over the pages
+    given, from the per-page summaries (``n`` and ``c`` weighted by lines)."""
+    found = [summaries[p.id] for p in pages if p.id in summaries]
+    n_lines = sum(n for n, _ in found)
+    weighted = [(n, c) for n, c in found if c is not None]
+    total = sum(n for n, _ in weighted)
+    mean = sum(n * c for n, c in weighted) / total if total else None
+    return _count_row(n_lines, mean, f" on {len(found):,} of {len(pages):,} pages")
 
-    The header comes from the one :func:`line_summaries_by_page` query; each
-    page is then read with :func:`latest_lines` as it is sent, so a convolute
+
+def _page_chunks(db_path: str | Path, pages: list[db.Page], fmt: str) -> Iterator[str]:
+    """The body of a streamed export, one chunk per page in the order given.
+
+    Each page is read with :func:`latest_lines` as it is sent, so a convolute
     of thousands of pages never sits in memory. The generator opens its own
     connection (Starlette steps it from worker threads) and closes it at the
     end, or when the client goes away and the generator is discarded.
     """
-    n_lines = sum(n for n, _ in summaries.values())
-    weighted = [(n, c) for n, c in summaries.values() if c is not None]
-    total = sum(n for n, _ in weighted)
-    mean = sum(n * c for n, c in weighted) / total if total else None
-    rows = [
-        f"{attr.PROJECT_NAME} — {site}",
-        f"Work: {site}/work/{work.gwlb_object_id}",
-        _title_row(work, work.gwlb_object_id),
-        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)}",
-        _count_row(n_lines, mean, f" on {len(summaries):,} of {len(pages):,} pages"),
-        attr.HONESTY,
-        attr.TEXT_LICENCE,
-        attr.WORDING_RULE,
-        WORK_LAYOUT,
-        *([TSV_LAYOUT] if fmt == "tsv" else []),
-    ]
-    yield _head(rows, fmt)
     conn = _open(db_path, any_thread=True)
     try:
         runs: dict[int | None, dict | None] = {}
@@ -708,6 +750,96 @@ def _work_text(
             yield ("\n" if i else "") + "".join(f"{row}\n" for row in block)
     finally:
         conn.close()
+
+
+def _work_text(
+    db_path: str | Path,
+    site: str,
+    work: db.Work,
+    pages: list[db.Page],
+    summaries: dict[str, tuple[int, float | None]],
+    fmt: str,
+) -> Iterator[str]:
+    """A work's export: the header from the one :func:`line_summaries_by_page`
+    query, then :func:`_page_chunks` over every page in canvas order."""
+    rows = [
+        f"{attr.PROJECT_NAME} — {site}",
+        f"Work: {site}/work/{work.gwlb_object_id}",
+        _title_row(work, work.gwlb_object_id),
+        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)}",
+        _pages_count_row(pages, summaries),
+        attr.HONESTY,
+        attr.TEXT_LICENCE,
+        attr.WORDING_RULE,
+        WORK_LAYOUT,
+        *([TSV_LAYOUT] if fmt == "tsv" else []),
+    ]
+    yield _head(rows, fmt)
+    yield from _page_chunks(db_path, pages, fmt)
+
+
+def _record_rows(rec: dict) -> list[str]:
+    """The header rows that describe a catalogue record: what the catalogue
+    says about the piece, as the work page shows it."""
+    rows = [f"Catalogue record: {rec['record_id']} — {rec.get('title') or 'no title'}"]
+    if rec.get("incipit"):
+        rows.append(f"Incipit: {rec['incipit']}")
+    if rec.get("date"):
+        rows.append(f"Date: {rec['date']}")
+    people = [
+        f"{label} {'; '.join(names)}"
+        for label, names in (("Sender:", rec.get("sender")), ("Addressee:", rec.get("addressee")))
+        if names
+    ]
+    if people:
+        rows.append(" — ".join(people))
+    if rec.get("aa_labels"):
+        rows.append(f"Akademie-Ausgabe: {', '.join(rec['aa_labels'])}")
+    elif rec.get("aa_planned"):
+        rows.append(
+            f"Akademie-Ausgabe: {', '.join(rec['aa_planned'])} (assigned, not yet published)"
+        )
+    if rec.get("drucke"):
+        rows.append(f"Other printings: {rec['drucke']}")
+    if rec.get("url"):
+        rows.append(f"Record in the Leibniz-Katalog: {rec['url']}")
+    return rows
+
+
+def _record_text(
+    db_path: str | Path,
+    site: str,
+    rec: dict,
+    placed: pieces.Placement,
+    work: db.Work | None,
+    summaries: dict[str, tuple[int, float | None]],
+    fmt: str,
+) -> Iterator[str]:
+    """A catalogue piece's export: the record, the work, the folio range and the
+    canvases in the header, then :func:`_page_chunks` over the placed pages."""
+    pages = placed.pages
+    seqs = [p.seq for p in pages]
+    span = f"canvas {seqs[0]}" if len(seqs) == 1 else f"canvases {seqs[0]}–{seqs[-1]}"
+    rows = [
+        f"{attr.PROJECT_NAME} — {site}",
+        f"Piece: {site}/api/records/{placed.record_id}/text",
+        *_record_rows(rec),
+        f"Work: {site}/work/{placed.work_id}",
+        _title_row(work, placed.work_id),
+        f"Folios: {placed.folio_label} (from the shelfmark {placed.signature}): "
+        f"{len(pages):,} page{'' if len(pages) == 1 else 's'}, {span}, "
+        f"page ids {pages[0].id} to {pages[-1].id}",
+        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=placed.work_id)}",
+        _pages_count_row(pages, summaries),
+        attr.KATALOG,
+        attr.HONESTY,
+        attr.TEXT_LICENCE,
+        attr.WORDING_RULE,
+        WORK_LAYOUT,
+        *([TSV_LAYOUT] if fmt == "tsv" else []),
+    ]
+    yield _head(rows, fmt)
+    yield from _page_chunks(db_path, pages, fmt)
 
 
 def create_app(
@@ -928,7 +1060,7 @@ def create_app(
                 "n_canvases": work.n_canvases,
                 "iiif_manifest": f"/manifests/{work.gwlb_object_id}",
                 "pages": [_page_summary(images.resolve(p), summaries.get(p.id)) for p in pages],
-                "katalog": _katalog_for_work(conn, work_id),
+                "katalog": _katalog_for_work(conn, work_id, pages),
                 "attribution": attr.attribution(images.mirrored),
             }
         finally:
@@ -1045,6 +1177,43 @@ def create_app(
             _work_text(db_path, site, work, pages, summaries, fmt),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(work.gwlb_object_id, fmt),
+        )
+
+    # A catalogue record names a piece; its shelfmark's ``Bl.`` range places it
+    # on the work's folios (leibniz.web.pieces). The route has no JSON sibling:
+    # the records themselves travel with their work (/api/works/{work_id}).
+    @app.get(
+        "/api/records/{record_id}/text",
+        summary="The text of a catalogue piece across its folios",
+        description=(
+            "The machine transcription of one piece of the Arbeitskatalog — a letter, a "
+            "draft, a treatise — across the folios its shelfmark names, as a download in "
+            "the work export's layout: a `# ` header naming the record (title, date, sender "
+            "and addressee, Akademie-Ausgabe reference where known), the work, the folio "
+            "range and the canvases, then one `## Folio <label> — <page_id>` block per page. "
+            "The work's `katalog` entries in `/api/works/{work_id}` carry `text_url` where "
+            "a record can be placed; a record that cannot be answers 404 with the reason."
+        ),
+        response_class=PlainTextResponse,
+        responses=RECORD_RESPONSES,
+    )
+    def api_record_text(record_id: str, fmt: TextFormat = "txt") -> StreamingResponse:
+        conn = _open(db_path)
+        try:
+            record = db.get_katalog_record(conn, record_id)
+            if record is None:
+                raise HTTPException(404, f"record {record_id} not found")
+            placed = pieces.place_record(conn, record)
+            if isinstance(placed, pieces.Unplaced):
+                raise HTTPException(404, placed.reason)
+            work = db.get_work(conn, placed.work_id)
+            summaries = line_summaries_by_page(conn, placed.work_id)
+        finally:
+            conn.close()
+        return StreamingResponse(
+            _record_text(db_path, site, _record_dict(record), placed, work, summaries, fmt),
+            media_type=TEXT_MEDIA[fmt],
+            headers=_text_headers(f"record-{record_id}", fmt),
         )
 
     # ---- IIIF (D7) -------------------------------------------------------- #
@@ -1169,7 +1338,7 @@ def create_app(
                     )
                     return respond(request, body, status=404)
                 pages = db.get_pages(conn, work_id)
-                katalog = _katalog_for_work(conn, work_id)
+                katalog = _katalog_for_work(conn, work_id, pages)
             finally:
                 conn.close()
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)

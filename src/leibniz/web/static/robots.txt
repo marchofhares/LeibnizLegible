@@ -1,7 +1,8 @@
 # Leibniz Legible — https://github.com/marchofhares/leibnizlegible
 #
-# The human pages, the search API and the page/work JSON are open to crawlers
-# and to AI agents (see /llms.txt for how to use them and how to quote them).
+# The human pages, the search API, the page/work JSON and the plain-text
+# exports (per page, per work, per catalogue piece) are open to crawlers and
+# to AI agents (see /llms.txt for how to use them and how to quote them).
 # The IIIF manifests and annotation pages are for viewers that ask for them,
 # not for blind crawling: a crawler walking /manifests/ would request the page
 # image of every canvas of every work for nothing.
@@ -10,6 +11,7 @@ Allow: /api/search
 Allow: /api/works
 Allow: /api/works/
 Allow: /api/pages/
+Allow: /api/records/
 Allow: /api/stats
 Allow: /openapi.json
 Disallow: /api/
