@@ -999,9 +999,10 @@ def render(
         A("## Coverage: pages where this project minted nothing")
         A("")
         A(
-            f"On {cov['files_without_mint']} of the {cov['files']} judged files this project minted no "
-            f"line at all; their text covers {cov['their_lines_on_files_without_mint']:,} paired lines "
-            f"there, all counted *theirs only* above. That part of the gap is coverage — a piece the "
+            f"On {cov['files_without_mint']} of the {cov['files']} judged files this project "
+            f"minted no line at all; their text covers "
+            f"{cov['their_lines_on_files_without_mint']:,} paired lines there, all counted "
+            f"*theirs only* above. That part of the gap is coverage — a piece the "
             f"C2 factory did not localize, had no edition text for, or declined whole — not "
             f"alignment. On the files where it minted something: "
             + ", ".join(f"{b} {cov['on_files_with_mint'][b]:,}" for b in BUCKETS)
@@ -1012,7 +1013,8 @@ def render(
         A("|---|---:|---:|")
         for k, d in cov["by_shelfmark"].items():
             A(
-                f"| {k.replace('_', ' ', 1).replace('_', ', ')} | {d['files']} | {d['without_mint']} |"
+                f"| {k.replace('_', ' ', 1).replace('_', ', ')} | {d['files']} | "
+                f"{d['without_mint']} |"
             )
     A("")
     A(
