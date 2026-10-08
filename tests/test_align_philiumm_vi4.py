@@ -52,6 +52,11 @@ def _seed(root: Path) -> tuple[Path, Path, Path]:
         conn,
         db.Work("00099002", "LeibnizHandschriften", shelfmarks=["LH 1, 3, 7 A", "LH 1, 3, 7a"]),
     )
+    # two works share the key LH 4,5,10: the folio is found in the second one
+    db.upsert_work(conn, db.Work("00099003", "LeibnizHandschriften", shelfmarks=["LH 4, 5, 10"]))
+    db.upsert_work(conn, db.Work("00099004", "LeibnizHandschriften", shelfmarks=["LH 4, 5, 10"]))
+    db.upsert_page(conn, db.Page(work_id="00099003", seq=1, label="3r", status="recognized"))
+    db.upsert_page(conn, db.Page(work_id="00099004", seq=1, label="48r", status="recognized"))
     from PIL import Image
 
     (images / W).mkdir(parents=True)
@@ -167,6 +172,8 @@ def _seed(root: Path) -> tuple[Path, Path, Path]:
             "train/clean/LH_1_20_0062v.xml",
             "val/0001_page_12210614_docId_307926.xml",  # unparsed
             "val/LH_1_3_7_A_0004v-0003r.xml",  # the letter-part work, no pages
+            "val/LH_4_5_10_0048r.xml",  # shared key: the folio sits in the second work
+            "val/LH_4_5_10_0099r.xml",  # shared key, no such folio anywhere
         ],
     }
     (dest / V.LISTING_NAME).write_text(json.dumps(listing), encoding="utf-8")
@@ -236,6 +243,13 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
     assert by["LH_1_3_7_A_0004v-0003r"].status == "no_page" and by[
         "LH_1_3_7_A_0004v-0003r"
     ].work_ids == ["00099002"]
+    assert "00099002 has no folio labels" in "; ".join(by["LH_1_3_7_A_0004v-0003r"].notes)
+    shared = by["LH_4_5_10_0048r"]
+    assert shared.status == "resolved" and shared.page_ids == ["00099004:0001"]
+    assert shared.work_ids == ["00099003", "00099004"]
+    missing = by["LH_4_5_10_0099r"]
+    assert missing.status == "no_page" and "00099003 has folios 3–3" in "; ".join(missing.notes)
+    assert "00099004 has folios 48–48 on 1 of 1 pages" in "; ".join(missing.notes)
     assert by["LH_1_20_0062v"].status == "resolved" and by["LH_1_20_0062v"].page_ids == [
         f"{W}:0001"
     ]
@@ -247,17 +261,19 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
     n = V.write_heldout(matches, tmp_path / "heldout.csv")
     with (tmp_path / "heldout.csv").open(encoding="utf-8") as fh:
         held = list(csv.DictReader(fh))
-    assert n == len(held) == 4 and {h["page_id"] for h in held} == {
+    assert n == len(held) == 5 and {h["page_id"] for h in held} == {
         f"{W}:0001",
         f"{W}:0002",
         f"{W}:0003",
+        "00099004:0001",
     }
     summ = V.match_summary(matches)
-    assert summ["resolved"] == 3 and {u["name"] for u in summ["unresolved"]} == {
+    assert summ["resolved"] == 4 and {u["name"] for u in summ["unresolved"]} == {
         "LH_1_20_0099r",
         "LH_9_9_0001r",
         "0001_page_12210614_docId_307926",
         "LH_1_3_7_A_0004v-0003r",
+        "LH_4_5_10_0099r",
     }
     assert (
         summ["noisy_matched"] == 2
