@@ -116,6 +116,12 @@ def test_scripts_parse_and_agree_with_the_examples() -> None:
     assert "__STAGING_USER__" in install and "__STAGING_HASH__" in install
     assert "caddy hash-password" in install and "--plaintext" not in install
     assert "systemctl reload caddy" in install and "systemctl restart caddy" not in install
+    # the access log is created for the caddy user before the reload: Caddy opens it
+    # then, as that user, and cannot create it in a directory it does not own
+    assert "LOG_FILE=/var/log/caddy/leibniz-legible-staging.log" in install
+    assert (
+        'chown caddy:caddy "$LOG_FILE"' in install and "chown caddy:caddy /var/log/caddy" in install
+    )
     # the index build goes through the CLI option Task 1 added, with the master key
     assert 'index build --backend meili --meili-index "$STAGING_INDEX"' in deploy
     assert (

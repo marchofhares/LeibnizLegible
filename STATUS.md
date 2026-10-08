@@ -534,12 +534,20 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   production directives plus its two additions, and the scripts to `bash
   -n` (shellcheck where installed) and to the same domain, port, paths and
   index names as the examples.
-- **Unverified, by construction.** Nothing ran on a box. The piped `caddy
-  hash-password`, `systemd-run --remain-after-exit` with `--setenv`, and
-  the read of the key's scope (`GET /keys/{key}`) are standard but
-  untested here; the first install is the test. Whatever fails is fixed in
-  the kit on the branch and the install re-run, never patched by hand on
-  the box.
+- **The first run on the box (2026-10-08, 13:16 UTC) stopped at the Caddy
+  reload:** `open /var/log/caddy/leibniz-legible-staging.log: permission
+  denied`. Caddy, as its own user, could not create the staging access log
+  in a directory it may not write to; `caddy validate` had passed because
+  it runs as root and opens no log. The live site stayed up (a refused
+  reload keeps the running configuration), and everything before that step
+  was in place: the checkout, the unit file, `staging.env`, the site block
+  with the hash (the password typed once, kept by the re-run). Fix in the
+  kit: the installer owns `/var/log/caddy` for the caddy user, as
+  `install.sh` does, with `mkdir -p` rather than `install -d` (which resets
+  an existing directory's mode), and creates the log file before the
+  reload. The piped `caddy hash-password` worked (the hash is in the
+  block); `systemd-run --remain-after-exit` with `--setenv` and the read of
+  the key's scope (`GET /keys/{key}`) are still untested.
 - **Open.** The operator wrote that an unlisted host would do without a
   password. The kit keeps basic auth: the certificate Caddy obtains puts
   the host name in the public certificate-transparency logs the moment the
@@ -2222,8 +2230,11 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    `ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'`
 2. DNS: ✅ the `staging` A record exists, DNS only; an AAAA record too if the
    box has IPv6.
-3. The install, in your own terminal (the password prompt needs one), with
-   NAME the user name you choose:
+3. ⏳ Run once on 2026-10-08 (user `evanatlas`); stopped at the Caddy
+   reload (the S1 log says why); the kit is fixed. The re-run, which keeps
+   the password:
+   `ssh -t root@49.13.13.213 'sudo git -C /opt/leibniz-legible-kit pull --ff-only && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user evanatlas --branch claude/dazzling-hopper-uxji2x'`
+   The first run's line, for the record, with NAME the user name:
    `ssh -t <target> 'sudo git clone --branch claude/dazzling-hopper-uxji2x --depth 1 https://github.com/marchofhares/LeibnizLegible /opt/leibniz-legible-kit && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user NAME --branch claude/dazzling-hopper-uxji2x'`
    Expected, in order: no precondition message; `cloned … (claude/dazzling-hopper-uxji2x)`;
    `wrote /etc/leibniz-legible/staging.env …` with seven lines under it;

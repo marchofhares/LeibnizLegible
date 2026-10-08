@@ -29,6 +29,7 @@ STAGING_DOMAIN=staging.leibnizlegible.com
 STAGING_PORT=8001
 UNIT=leibniz-legible-staging
 SITE_FILE=/etc/caddy/conf.d/staging.caddy
+LOG_FILE=/var/log/caddy/leibniz-legible-staging.log   # as staging.caddy.example names it
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
@@ -154,7 +155,17 @@ fi
 
 # -- the Caddy site block: write, validate, reload ---------------------------- #
 say "caddy: $SITE_FILE ($AUTH_DIRECTIVE, user $USER_NAME)"
-install -d /etc/caddy/conf.d /var/log/caddy
+install -d /etc/caddy/conf.d
+# Caddy opens the access log at the reload, as the caddy user, and can create
+# it only in a directory that user may write to; `caddy validate` opens no
+# log and runs as root, so it cannot catch this. Own the directory for the
+# caddy user, as deploy/install.sh does (mkdir -p, not install -d, which
+# would reset an existing directory's mode), and create the file first, so
+# the reload has nothing to create. An existing log is left as it is.
+mkdir -p /var/log/caddy
+chown caddy:caddy /var/log/caddy
+if [[ ! -e "$LOG_FILE" ]]; then touch "$LOG_FILE"; chmod 0640 "$LOG_FILE"; fi
+chown caddy:caddy "$LOG_FILE"
 block="$(<"$KIT_DIR/staging.caddy.example")"
 block="${block//"basic_auth {"/"$AUTH_DIRECTIVE {"}"
 block="${block//__STAGING_USER__/$USER_NAME}"
@@ -203,7 +214,7 @@ Staging is installed.
   address      https://$STAGING_DOMAIN/   user '$USER_NAME', the password you typed
   checkout     $STAGING_DIR on $BRANCH
   unit         $UNIT on 127.0.0.1:$STAGING_PORT, env $CONF_DIR/staging.env
-  site block   $SITE_FILE, log /var/log/caddy/leibniz-legible-staging.log
+  site block   $SITE_FILE, log $LOG_FILE
 
   a branch on staging     sudo $STAGING_DIR/deploy/staging.sh BRANCH
   back to main            sudo $STAGING_DIR/deploy/staging.sh --main

@@ -630,10 +630,15 @@ site exists so that you see things first.
    Then: the checkout and its venv as the service user; the unit; the env
    file from the example, with the store path, the search key and the image
    origin copied over from the live `/etc/leibniz-legible/env` (an existing
-   `staging.env` is left alone); the site block, validated against the
+   `staging.env` is left alone); the access log file, created for the
+   `caddy` user before the reload (Caddy opens it at the reload as that
+   user and cannot create it in a directory it does not own, which is what
+   stopped the first install); the site block, validated against the
    whole Caddy configuration before `systemctl reload caddy` (a failed
    validate puts the previous block back and reloads nothing; the live site
-   never stops); then `staging.sh BRANCH` for the first deploy. On a Caddy
+   never stops, and neither does it when the reload itself is refused: Caddy
+   keeps the configuration it runs); then `staging.sh BRANCH` for the first
+   deploy. On a Caddy
    older than 2.8 the directive is written as `basicauth`. The clone under
    `/opt/leibniz-legible-kit` can go afterwards: the staging checkout
    carries the kit, and `main` does after the merge.
