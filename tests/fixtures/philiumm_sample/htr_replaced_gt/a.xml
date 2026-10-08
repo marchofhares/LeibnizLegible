@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Page imageFilename="a.jpg" imageWidth="1000" imageHeight="800">
+    <TextRegion id="r0" custom="structure {type:DigitizationArtefactZone;}">
+      <TextLine id="stamp"><TextEquiv><Unicode></Unicode></TextEquiv></TextLine>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MainZone;}">
+      <TextLine id="a1"><TextEquiv conf="0.93"><Unicode>Mechanici scriptores plerique olim, non nisi</Unicode></TextEquiv></TextLine>
+      <TextLine id="a2"><TextEquiv conf="0.71"><Unicode>Machinis Fundamentalibus, ut Vectem, Trochleam</Unicode></TextEquiv></TextLine>
+      <TextLine id="a3"><TextEquiv><Unicode></Unicode></TextEquiv></TextLine>
+      <TextLine id="a4"><TextEquiv><Unicode></Unicode></TextEquiv></TextLine>
+    </TextRegion>
+  </Page>
+</PcGts>

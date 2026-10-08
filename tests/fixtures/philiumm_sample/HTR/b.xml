@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Page imageFilename="b.jpg" imageWidth="1000" imageHeight="800">
+    <TextRegion id="r0" custom="structure {type:MainZone;}">
+      <Coords points="0,0 0,600 1000,600 1000,0"/>
+      <TextLine id="b1">
+        <Coords points="10,10 900,10 900,60 10,60"/>
+        <Baseline points="10,50 900,50"/>
+        <TextEquiv conf="0.9"><Unicode>et Axem in peritrochio diſſeruerunt</Unicode></TextEquiv>
+      </TextLine>
+      <TextLine id="b2">
+        <Coords points="10,70 900,70 900,120 10,120"/>
+        <Baseline points="10,110 900,110"/>
+        <TextEquiv conf="0.9"><Unicode>finis libri secundi</Unicode></TextEquiv>
+      </TextLine>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MarginTextZone;}">
+      <Coords points="0,610 0,690 1000,690 1000,610"/>
+      <TextLine id="b3">
+        <Coords points="10,620 900,620 900,680 10,680"/>
+        <TextEquiv conf="0.6"><Unicode>quae omnia ad unum principium reuocari poſſunt</Unicode></TextEquiv>
+      </TextLine>
+    </TextRegion>
+  </Page>
+</PcGts>

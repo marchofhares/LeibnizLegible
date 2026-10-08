@@ -709,6 +709,65 @@ def audit_reach(
     )
 
 
+@app.command(name="philiumm-sample")
+def philiumm_sample(
+    dest: Path = typer.Option(
+        Path("data/philiumm/sample"), "--dest", help="Where their worked example is cached."
+    ),
+    out: Path = typer.Option(
+        Path("reports/philiumm/alignment-sample.md"), "--out", help="Markdown report path."
+    ),
+    threshold: float = typer.Option(
+        None, "--threshold", help="align_conf to mint (default: the aligner's)."
+    ),
+    offline: bool = typer.Option(
+        False, "--offline", help="Use what is under --dest; fetch nothing."
+    ),
+    max_pairs: int = typer.Option(40, "--max-pairs", help="Differing lines listed per block."),
+) -> None:
+    """P1 Task 1: this project's aligner on PHILIUMM's worked example, against theirs."""
+    from leibniz.align import philiumm as _ph  # noqa: F401  (package)
+    from leibniz.align.align import DEFAULT_THRESHOLD
+    from leibniz.align.philiumm import sample as S
+    from leibniz.align.philiumm.fetch import fetch_sample
+
+    thr = DEFAULT_THRESHOLD if threshold is None else threshold
+    if not offline:
+        fetch_sample(dest, progress=lambda m: _console.print(f"[dim]{m}[/dim]"))
+    sample = S.load_sample(dest)
+    confs = S.run_configurations(sample, threshold=thr)
+    comps = [S.compare(c, sample) for c in confs]
+    csv_path = dest / "comparison.csv"
+    best = max(comps, key=lambda k: k.total("both_same") + k.total("ours_only"))
+    S.write_comparison_csv(best, csv_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        S.render(sample, confs, comps, threshold=thr, max_pairs=max_pairs, comparison_csv=csv_path),
+        encoding="utf-8",
+    )
+    S.write_summary(S.summary(sample, confs, comps, threshold=thr), out.with_suffix(".json"))
+    tt = S.their_totals(sample)
+    if tt:
+        _console.print(
+            f"[bold]theirs[/bold] {tt['nb_htr_lines']} lines, {tt['nb_gt_aligned']} aligned "
+            f"({tt['pct_gt_aligned']} %) — alignment_report.csv at {sample.commit or '?'}"
+        )
+    for c, k in zip(confs, comps, strict=True):
+        _console.print(
+            f"[bold]{c.label}[/bold] {c.n_minted}/{c.n_lines} minted "
+            f"({100 * c.n_minted / max(1, c.n_lines):.1f} %), raw ≥ 0.7: "
+            f"{c.n_minted_above(S.THEIR_FILTER_SIM)} · vs theirs: "
+            + ", ".join(f"{b} {k.total(b)}" for b in S.BUCKETS)
+        )
+    _console.print(f"→ {out}, {out.with_suffix('.json')}, {csv_path} (the {best.label} pairs)")
+    diff = [p for p in best.pairs if p.bucket in ("both_different", "ours_only", "theirs_only")]
+    for p in diff[:max_pairs]:
+        _console.print(
+            f"  [{p.bucket}] {p.file.replace('.xml', '')}#{p.index} HTR: {p.htr_text[:60]!r}\n"
+            f"      ours:   {p.ours[:70]!r}\n      theirs: {p.theirs[:70]!r}"
+        )
+
+
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the
 # ``eval`` output (its §1 numbers) plus this session's live-run facts, using the
 # renderers in ``leibniz.align.report``; it is a curated report (like census.md /

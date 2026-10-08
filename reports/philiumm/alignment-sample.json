@@ -1,0 +1,387 @@
+{
+  "commit": "9d2ee4e500e049ea3a9767d695bde6c24d1c31d7",
+  "threshold": 0.6,
+  "gt_chars": 9415,
+  "files": {
+    "LH_1_3_4_0002r-0001v.xml": 142,
+    "LH_1_3_4_0002v-0001r.xml": 115
+  },
+  "theirs": {
+    "filename": "TOTAL",
+    "nb_htr_lines": 257,
+    "nb_gt_aligned": 230,
+    "pct_gt_aligned": 89.5,
+    "nb_low_conf": 0,
+    "pct_low_conf": 0.0,
+    "nb_ratio_too_low": 1,
+    "pct_ratio_too_low": 0.4,
+    "nb_ratio_too_high": 0,
+    "pct_ratio_too_high": 0.0,
+    "nb_no_alignment": 26,
+    "pct_no_alignment": 10.1,
+    "nb_window_passages": 206,
+    "nb_fallback_lines": 27
+  },
+  "their_aligned_scored": 230,
+  "their_aligned_raw_ge_0_7": 212,
+  "their_aligned_raw_ge_0_5": 230,
+  "configurations": [
+    {
+      "label": "file:LH_1_3_4_0002r-0001v.xml",
+      "n_lines": 142,
+      "n_minted": 121,
+      "n_minted_raw_ge_0_7": 112,
+      "n_minted_raw_ge_0_5": 119,
+      "their_columns": [
+        {
+          "filename": "LH_1_3_4_0002r-0001v.xml",
+          "nb_htr_lines": 142,
+          "nb_gt_aligned": 121,
+          "pct_gt_aligned": 85.2,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 21,
+          "pct_no_alignment": 14.8,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "TOTAL",
+          "nb_htr_lines": 142,
+          "nb_gt_aligned": 121,
+          "pct_gt_aligned": 85.2,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 21,
+          "pct_no_alignment": 14.8,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        }
+      ]
+    },
+    {
+      "label": "file:LH_1_3_4_0002v-0001r.xml",
+      "n_lines": 115,
+      "n_minted": 51,
+      "n_minted_raw_ge_0_7": 47,
+      "n_minted_raw_ge_0_5": 50,
+      "their_columns": [
+        {
+          "filename": "LH_1_3_4_0002v-0001r.xml",
+          "nb_htr_lines": 115,
+          "nb_gt_aligned": 51,
+          "pct_gt_aligned": 44.3,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 64,
+          "pct_no_alignment": 55.7,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "TOTAL",
+          "nb_htr_lines": 115,
+          "nb_gt_aligned": 51,
+          "pct_gt_aligned": 44.3,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 64,
+          "pct_no_alignment": 55.7,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        }
+      ]
+    },
+    {
+      "label": "concat:LH_1_3_4_0002r-0001v.xml + LH_1_3_4_0002v-0001r.xml",
+      "n_lines": 257,
+      "n_minted": 108,
+      "n_minted_raw_ge_0_7": 98,
+      "n_minted_raw_ge_0_5": 106,
+      "their_columns": [
+        {
+          "filename": "LH_1_3_4_0002r-0001v.xml",
+          "nb_htr_lines": 142,
+          "nb_gt_aligned": 106,
+          "pct_gt_aligned": 74.6,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 36,
+          "pct_no_alignment": 25.4,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "LH_1_3_4_0002v-0001r.xml",
+          "nb_htr_lines": 115,
+          "nb_gt_aligned": 2,
+          "pct_gt_aligned": 1.7,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 113,
+          "pct_no_alignment": 98.3,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "TOTAL",
+          "nb_htr_lines": 257,
+          "nb_gt_aligned": 108,
+          "pct_gt_aligned": 42.0,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 149,
+          "pct_no_alignment": 58.0,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        }
+      ]
+    },
+    {
+      "label": "concat:LH_1_3_4_0002v-0001r.xml + LH_1_3_4_0002r-0001v.xml",
+      "n_lines": 257,
+      "n_minted": 173,
+      "n_minted_raw_ge_0_7": 158,
+      "n_minted_raw_ge_0_5": 169,
+      "their_columns": [
+        {
+          "filename": "LH_1_3_4_0002r-0001v.xml",
+          "nb_htr_lines": 142,
+          "nb_gt_aligned": 121,
+          "pct_gt_aligned": 85.2,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 21,
+          "pct_no_alignment": 14.8,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "LH_1_3_4_0002v-0001r.xml",
+          "nb_htr_lines": 115,
+          "nb_gt_aligned": 52,
+          "pct_gt_aligned": 45.2,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 63,
+          "pct_no_alignment": 54.8,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "TOTAL",
+          "nb_htr_lines": 257,
+          "nb_gt_aligned": 173,
+          "pct_gt_aligned": 67.3,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 84,
+          "pct_no_alignment": 32.7,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        }
+      ]
+    },
+    {
+      "label": "regions",
+      "n_lines": 257,
+      "n_minted": 194,
+      "n_minted_raw_ge_0_7": 179,
+      "n_minted_raw_ge_0_5": 192,
+      "their_columns": [
+        {
+          "filename": "LH_1_3_4_0002r-0001v.xml",
+          "nb_htr_lines": 142,
+          "nb_gt_aligned": 122,
+          "pct_gt_aligned": 85.9,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 20,
+          "pct_no_alignment": 14.1,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "LH_1_3_4_0002v-0001r.xml",
+          "nb_htr_lines": 115,
+          "nb_gt_aligned": 72,
+          "pct_gt_aligned": 62.6,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 43,
+          "pct_no_alignment": 37.4,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        },
+        {
+          "filename": "TOTAL",
+          "nb_htr_lines": 257,
+          "nb_gt_aligned": 194,
+          "pct_gt_aligned": 75.5,
+          "nb_low_conf": "n/a",
+          "nb_ratio_too_low": "n/a",
+          "nb_ratio_too_high": "n/a",
+          "nb_no_alignment": 63,
+          "pct_no_alignment": 24.5,
+          "nb_window_passages": "n/a",
+          "nb_fallback_lines": "n/a"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "label": "file:LH_1_3_4_0002r-0001v.xml",
+      "by_file": {
+        "LH_1_3_4_0002r-0001v.xml": {
+          "both_same": 111,
+          "both_different": 9,
+          "ours_only": 1,
+          "theirs_only": 12,
+          "neither": 9
+        }
+      },
+      "total": {
+        "both_same": 111,
+        "both_different": 9,
+        "ours_only": 1,
+        "theirs_only": 12,
+        "neither": 9
+      },
+      "both_different_witness": {
+        "ours_closer": 4,
+        "theirs_closer": 5,
+        "tie": 0
+      }
+    },
+    {
+      "label": "file:LH_1_3_4_0002v-0001r.xml",
+      "by_file": {
+        "LH_1_3_4_0002v-0001r.xml": {
+          "both_same": 39,
+          "both_different": 11,
+          "ours_only": 1,
+          "theirs_only": 48,
+          "neither": 16
+        }
+      },
+      "total": {
+        "both_same": 39,
+        "both_different": 11,
+        "ours_only": 1,
+        "theirs_only": 48,
+        "neither": 16
+      },
+      "both_different_witness": {
+        "ours_closer": 3,
+        "theirs_closer": 8,
+        "tie": 0
+      }
+    },
+    {
+      "label": "concat:LH_1_3_4_0002r-0001v.xml + LH_1_3_4_0002v-0001r.xml",
+      "by_file": {
+        "LH_1_3_4_0002r-0001v.xml": {
+          "both_same": 97,
+          "both_different": 7,
+          "ours_only": 2,
+          "theirs_only": 28,
+          "neither": 8
+        },
+        "LH_1_3_4_0002v-0001r.xml": {
+          "both_same": 0,
+          "both_different": 0,
+          "ours_only": 2,
+          "theirs_only": 98,
+          "neither": 15
+        }
+      },
+      "total": {
+        "both_same": 97,
+        "both_different": 7,
+        "ours_only": 4,
+        "theirs_only": 126,
+        "neither": 23
+      },
+      "both_different_witness": {
+        "ours_closer": 4,
+        "theirs_closer": 3,
+        "tie": 0
+      }
+    },
+    {
+      "label": "concat:LH_1_3_4_0002v-0001r.xml + LH_1_3_4_0002r-0001v.xml",
+      "by_file": {
+        "LH_1_3_4_0002v-0001r.xml": {
+          "both_same": 38,
+          "both_different": 12,
+          "ours_only": 2,
+          "theirs_only": 48,
+          "neither": 15
+        },
+        "LH_1_3_4_0002r-0001v.xml": {
+          "both_same": 111,
+          "both_different": 9,
+          "ours_only": 1,
+          "theirs_only": 12,
+          "neither": 9
+        }
+      },
+      "total": {
+        "both_same": 149,
+        "both_different": 21,
+        "ours_only": 3,
+        "theirs_only": 60,
+        "neither": 24
+      },
+      "both_different_witness": {
+        "ours_closer": 7,
+        "theirs_closer": 14,
+        "tie": 0
+      }
+    },
+    {
+      "label": "regions",
+      "by_file": {
+        "LH_1_3_4_0002r-0001v.xml": {
+          "both_same": 112,
+          "both_different": 8,
+          "ours_only": 2,
+          "theirs_only": 12,
+          "neither": 8
+        },
+        "LH_1_3_4_0002v-0001r.xml": {
+          "both_same": 58,
+          "both_different": 12,
+          "ours_only": 2,
+          "theirs_only": 28,
+          "neither": 15
+        }
+      },
+      "total": {
+        "both_same": 170,
+        "both_different": 20,
+        "ours_only": 4,
+        "theirs_only": 40,
+        "neither": 23
+      },
+      "both_different_witness": {
+        "ours_closer": 9,
+        "theirs_closer": 11,
+        "tie": 0
+      }
+    }
+  ]
+}

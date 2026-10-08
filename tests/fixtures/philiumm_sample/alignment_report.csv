@@ -1,0 +1,4 @@
+filename,nb_htr_lines,nb_gt_aligned,pct_gt_aligned,nb_low_conf,pct_low_conf,nb_ratio_too_low,pct_ratio_too_low,nb_ratio_too_high,pct_ratio_too_high,nb_no_alignment,pct_no_alignment,nb_window_passages,nb_fallback_lines
+a.xml,5,2,40.0,0,0.0,0,0.0,0,0.0,3,60.0,2,0
+b.xml,3,3,100.0,0,0.0,0,0.0,0,0.0,0,0.0,2,1
+TOTAL,8,5,62.5,0,0.0,0,0.0,0,0.0,3,37.5,4,1
