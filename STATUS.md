@@ -55,7 +55,7 @@ scroll, no console errors, axe-core 0 violations on the page and work views
 in both languages and at phone width). On staging the same evening, the
 operator's six HTTP checks answered as designed, the first run of the piece
 text on the real store (record 41800: 84 lines on its 2 pages, mean
-confidence 0.96); the look in the browser is theirs (Next). Branch
+confidence 0.96), and their look in the browser was good. Branch
 `claude/dazzling-hopper-uxji2x`; nothing merged, nothing deployed.
 
 **2026-10-08: S1 — the staging kit is on the branch; the install on the box
@@ -534,7 +534,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted · ⏳ the browser look
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good
 
 - **Setting.** A cloud session, no store, on the plan's one branch under the
   preamble's evening revision (see Divergences): the code and the tests
@@ -667,12 +667,11 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   **84 recognised lines on its 2 pages, mean confidence 0.96**, the first
   run of the piece text on the real store; the work's records carry
   `text_url` for 41800 and 59095 and no other; an unknown record answers
-  404; `robots.txt` allows `/api/records/`. What remains is the look in the
-  browser (the Text block, Copy, the copy from the line list, the piece
-  downloads, DE, About).
-- **Next.** The browser look on staging (Next, W4), then the three
-  sentences for David (`scratchpad/david-text-access.md` in the session;
-  the hand-over has them).
+  404; `robots.txt` allows `/api/records/`. The look in the browser followed
+  the same evening: good, the operator said. W4 is closed on this branch.
+- **Next.** The three sentences for David (the hand-over has them; also
+  `scratchpad/david-text-access.md` in the session); the merge as the plan
+  says, after the emails and the call; K1 on the desktop.
 
 ### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
 
@@ -2489,7 +2488,7 @@ not here.
    - `curl -su USER -o /dev/null -w '%{http_code}\n' https://staging.leibnizlegible.com/api/records/nope/text` → `404`;
    - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep records` → `Allow: /api/records/`;
    - `curl -su USER https://staging.leibnizlegible.com/llms.txt | grep -c '/api/records/{record_id}/text'` → `1`.
-3. ⏳ In the browser, with the password: `/page/00068221:0043` — the Text block
+3. ✅ Done the same evening, the browser look good. In the browser, with the password: `/page/00068221:0043` — the Text block
    under the line list, Copy (then paste somewhere: 108 lines, nothing
    else), "Download this page as text", "Text of this page" in the header;
    drag across two lines of the line list and copy: the two lines alone;
