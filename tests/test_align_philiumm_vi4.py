@@ -405,6 +405,20 @@ def test_opening_registered_twice_is_one_scan(tmp_path: Path) -> None:
         )
     conn.execute("DELETE FROM lines WHERE page_id IN (?, ?)", (f"{W}:0001", f"{W}:0002"))
     conn.execute("DELETE FROM gt_lines")
+    # the factory minted the passage on the 62v registration (seq 1), not the first-named 63r
+    insert_gt_pairs(
+        conn,
+        [
+            GtPair(
+                f"{W}:0001:001",
+                "linea secunda",
+                "AA VI,4 N.1 (…; katalog k-1)",
+                "fair_copy",
+                0.9,
+                "open",
+            )
+        ],
+    )
     seg = db.start_run(conn, "segment", model="seg")
     rec = db.start_run(conn, "recognize", model="htr@v1")
     for pid in (f"{W}:0001", f"{W}:0002"):
@@ -433,5 +447,6 @@ def test_opening_registered_twice_is_one_scan(tmp_path: Path) -> None:
     ro.close()
     m = by["LH_1_20_0063r-0062v"]
     assert m.status == "matched" and m.layout.startswith("one scan")
-    # the first-named folio's page (63r, seq 2) carries the lines of both halves
-    assert {p.ref for p in m.pairs} == {f"{W}:0002:000", f"{W}:0002:001", f"{W}:0002:002"}
+    # the registration that carries the minted lines (62v, seq 1) is the one paired
+    assert {p.ref for p in m.pairs} == {f"{W}:0001:000", f"{W}:0001:001", f"{W}:0001:002"}
+    assert any("00099001:0001 carries 1 minted lines" in n for n in m.notes)

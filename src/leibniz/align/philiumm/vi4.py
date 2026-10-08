@@ -418,6 +418,15 @@ def resolve_pages(conn: sqlite3.Connection, fn: FileName, index: dict[str, list[
     return fm
 
 
+def minted_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    """``page_id -> open-bucket minted lines`` over the whole store, in one pass."""
+    out: dict[str, int] = {}
+    for row in conn.execute("SELECT line_image_ref FROM gt_lines WHERE license_bucket = 'open'"):
+        page_id = row[0].rpartition(":")[0]
+        out[page_id] = out.get(page_id, 0) + 1
+    return out
+
+
 def match_file(
     conn: sqlite3.Connection,
     fn: FileName,
@@ -425,6 +434,7 @@ def match_file(
     index: dict[str, list[str]],
     *,
     threshold: float = IOU_DEFAULT,
+    minted: dict[str, int] | None = None,
 ) -> FileMatch:
     fm = resolve_pages(conn, fn, index)
     if fm.status in ("unparsed", "no_work", "no_page"):
@@ -439,12 +449,21 @@ def match_file(
     their_w, their_h = doc.width or 0, doc.height or 0
     candidates: list[tuple[str, list[Placement]]] = []
     if len(pages) == 2 and (_same_scan(pages[0], pages[1]) or _same_size(pages[0], pages[1])):
-        # the store registers the sheet scan once per folio label (Open Q #19): their
-        # opening is that scan, so one page carries every line of both folios
-        pl = placements_for(their_w, their_h, pages[:1], order=[0])
+        # The store registers the sheet scan once per folio label (Open Q #19): their
+        # opening is that scan, so one page carries every line of both folios. The C2
+        # factory saw the twin registrations as duplicate lines and minted each passage
+        # on one of them: take the registration that carries the minted lines (ties:
+        # the lower canvas sequence), or the comparison counts its empty twin.
+        counts = {p.id: (minted or {}).get(p.id, 0) for p in pages}
+        pick = max(pages, key=lambda p: (counts[p.id], -p.seq))
+        pl = placements_for(their_w, their_h, [pick], order=[0])
         if pl:
             candidates.append(("one scan (registered under both labels)", pl))
-            fm.notes.append("both folio labels point at the same scan; the first page taken")
+            fm.notes.append(
+                "both folio labels point at the same scan; "
+                + ", ".join(f"{p.id} carries {counts[p.id]} minted lines" for p in pages)
+                + f"; {pick.id} taken"
+            )
     if len(pages) == 2 and not candidates:
         for order, label in (
             ([0, 1], "two canvases (first|second)"),
@@ -512,6 +531,7 @@ def run_match(
     """Match every file of every split (the noisy XML read when present)."""
     listing = json.loads((Path(dest) / LISTING_NAME).read_text(encoding="utf-8"))
     index = work_index(conn)
+    minted = minted_counts(conn)
     out: list[FileMatch] = []
     todo: list[tuple[str, str]] = []
     for split in ("noisy", "clean", "val"):
@@ -525,7 +545,7 @@ def run_match(
             xml = Path(dest) / "noisy" / Path(rel).name
             if xml.exists():
                 doc = parse_page_xml(xml)
-        out.append(match_file(conn, fn, doc, index, threshold=threshold))
+        out.append(match_file(conn, fn, doc, index, threshold=threshold, minted=minted))
     return out
 
 
@@ -994,6 +1014,7 @@ __all__ = [
     "judge",
     "match_file",
     "match_summary",
+    "minted_counts",
     "pair_lines",
     "parse_name",
     "placements_for",
