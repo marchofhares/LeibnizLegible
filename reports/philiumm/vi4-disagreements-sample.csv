@@ -1,0 +1,737 @@
+file,ref,their_id,zone,iou,stratum,bucket,sim,sim_htr_ours,sim_htr_theirs,align_conf,htr,ours,theirs
+LH_1_12_2_0124r,00068371:0219:045,82d3d3e4-742e-434b-852e-f3dd7ca7a903,MainZone,0.938,heavy_revision,near,0.837,1.000,0.837,1.000,tantaque orbis christiani mala conse-,tantaque orbis Christiani mala conse,tantaque orbis Christiani mala consequantur.
+LH_1_20_0063v-0062r,00068378:0126:005,227f1eee-9c49-47dc-b548-da90c9eac759,MainZone,0.869,heavy_revision,near,0.730,0.694,0.973,0.722,pour un asses sans qu’ony appercoive,res sans qu'on y appercoive,pour un assés sans qu’on y appercoive
+LH_1_20_0063v-0062r,00068378:0126:039,96006c92-6c4a-41aa-a491-e235e27d75d4,MainZone,0.920,heavy_revision,near,0.848,0.848,1.000,1.000,pouvoit estre fait de mille façons mais,"pouvoit estre fait de mille autres façons, mais","pouvoit estre fait de mille façons, mais"
+LH_1_20_0067v-0066r,00068378:0134:025,485ce775-891a-4ca7-a8ae-84776381807b,MainZone,0.982,heavy_revision,near,0.886,0.969,0.914,0.969,multiplient d’une certaine façon ,multiplient d'une certaine faco,"multiplient d’une certaine façon, il"
+LH_1_20_0070v-0069r,00068378:0140:054,926c55c3-0607-4cae-bcbd-e3278edf9846,MainZone,0.822,heavy_revision,near,0.766,0.818,0.915,0.818,gueres de reformateurs qui  qui entreprennent,"gueres de
+reformateurs qui entrepren",gueres de reformateurs qui reussi entreprennent
+LH_1_20_0071v,00068378:0142:051,26dfc5e1-7f67-4169-86a3-131518a2ebce,MainZone,0.928,heavy_revision,near,0.896,0.915,0.875,0.915,accorde une infinité de choses nouvelles et peu,ade une infinité de choses nouvelles et peu,persuade une infinité de choses nouvelles et peu
+LH_1_20_0164v-0163r,00068378:0328:007,7eef32a6-5a3c-4e3d-ad61-ac5614c55665,MainZone,0.920,heavy_revision,near,0.864,0.955,0.864,0.955,pimiles esse. Corruptos,similes esse corruptos.,iles esse corruptos.
+LH_1_20_0164v-0163r,00068378:0328:018,50a5433f-d52f-4ac0-bafb-e03e13925448,MainZone,0.591,heavy_revision,disagree,0.696,0.884,0.746,0.968,raras fuisseci Epiphanium fuisse adhuc prisci instituti refinen–,"raras fuisse videri, Epiphanium fuisse adhuc prisci instituti retinent",Epiphanium fuisse adhuc prisci instituti retinen
+LH_1_20_0164v-0163r,00068378:0328:035,36835a18-fb99-4f04-ae38-59cb294315f7,MainZone,0.950,heavy_revision,near,0.860,0.860,1.000,0.895,"fregisse imagines Christi et sanctorum, ante ipsum serenum","fregisse
+imagines Christi et Sanctorum ante Serenum E",fregisse imagines Christi et Sanctorum ante ipsum Serenum
+LH_1_20_0169r-0168v,00068378:0337:048,37b99dff-3f64-4ae3-a1c1-0b4f49428807,MainZone,0.935,heavy_revision,near,0.836,0.741,0.891,0.759,tempora incidipet aut nosras seculi lux feti profectus.,"tempora incidisset, aut nostri seculi
+profectus","tempora incidisset, aut nostri seculi lux feli profectus"
+LH_1_20_0228r-0227v,00068378:0455:032,a6f4583d-8f33-46cb-9ae0-32b75dfb9fad,MainZone,0.959,heavy_revision,near,0.878,0.854,0.951,0.854, punius dintius puritatem servasse constet,s diutius puritatem servasse constet;,purius diutius puritatem servasse constet;
+LH_1_20_0228v-0227r,00068378:0456:018,4a5944d5-0043-4317-823d-b83c853cc20c,MainZone,0.905,heavy_revision,near,0.742,0.742,1.000,0.742,fidelium connecterentur. Nam ita,fidelium connecterentur.,fidelium connecterentur. Nam ita
+LH_1_20_0228v-0227r,00068378:0456:032,2f03b7e6-73e0-4659-8cbf-3452d40e71cf,MainZone,0.953,heavy_revision,near,0.867,0.800,0.933,0.800,necessitatis cosus excipi posse demus datomus.,"necessitatis casus excipi posse daremus,","necessitatis casus excipi posse demus daremus,"
+LH_1_20_0229v,00068378:0458:015,965291e2-6f81-4960-a1cd-a83483d5c997,MainZone,0.807,heavy_revision,near,0.838,0.969,0.838,0.969,Videmus ex his quo usque praecor,Videmus ex his quo usque praeco,Videmus ex his quo usque praeconcepta
+LH_1_20_0261r-0260v,00068378:0521:069,c4f39433-1217-4cb7-941c-231581770108,MainZone,0.955,heavy_revision,near,0.831,0.831,0.966,0.831,nec sit praeter Romanum Pontificem cui tribuniur ascribatur,"nec sit praeter Romanum
+Pontificem cui ascribatur",", nec sit praeter Romanum Pontificem cui tribuatur ascribatur"
+LH_1_20_0261v-0260r,00068378:0522:014,bdee7a76-6b4f-45ba-b29b-98b59269d75d,MainZone,0.859,heavy_revision,near,0.760,0.776,0.920,0.775,auxilis smale ordinariorum auxiliorum supplementa,"bus
+ordinariorum auxiliorum supplementa",auxilii supple ordinariorum auxiliorum supplementa
+LH_1_20_0300v,00068378:0600:021,fa5e41aa-cbdd-49f6-9bd9-c23ea5567bed,MainZone,0.872,heavy_revision,near,0.794,0.765,0.963,0.963,"in truncu unimur, cujus viva","in
+trunco unimur, cujus viva membra","in trunco unimur, cujus viva"
+LH_1_2_1_0002r,00068282:0003:007,3615d134-fb3f-454e-a71a-e92f312b3723,MainZone,0.507,heavy_revision,disagree,0.577,0.817,0.689,0.967,animi infeliatatem  a proinde ut ita dicam damnant semet ipsos,animi infelicitatem incidunt ac proinde ut ita dicam damnant semet ipso,ac proinde ut ita dicam damnant semet ipsos.
+LH_1_2_1_0002r,00068282:0003:019,0be9ac48-2a9e-440a-99b9-197aa078f747,MainZone,0.918,heavy_revision,disagree,0.511,0.578,0.750,0.929,nisericordia sua diguum inet,"misericordia sua, dignum innarrabili sapientia","misericordia sua, dignum"
+LH_1_2_1_0002v,00068282:0004:030,e1e2b0e4-caf5-45ca-978d-a8ef1bb72f9d,MainZone,0.948,heavy_revision,near,0.811,0.774,0.936,0.894,Porro si miracula hujusmodus olim facta diuntur,Porro si miracula hujusmodi olim facta iis argumentis,Porro si miracula hujusmodi olim facta dicuntur
+LH_1_2_1_0003r,00068282:0005:049,51e6b968-e6a9-439f-ab9f-6908d902d482,MainZone,0.943,heavy_revision,near,0.843,0.824,0.961,0.824,est autem Desus cognomento christus tanquam Massias,"est autem Jesus cognomento Christus
+tanquam",est autem Jesus cognomento Christus tanquam Messias
+LH_1_2_1_0003v,00068282:0006:031,3890861b-43f3-46f1-80d7-8e2d860b6a87,MainZone,0.911,heavy_revision,near,0.852,0.852,1.000,0.960,hominem profitebatur. Quod quantum abest a Mahomete,hominem profitebatur; quod tamen quantum abest a Mahome,hominem profitebatur; quod quantum abest a Mahomete!
+LH_1_2_1_0003v,00068282:0006:044,2266fc75-f9d3-46e1-b359-08c0d8a666d0,MainZone,0.931,heavy_revision,near,0.814,0.795,0.977,0.795,interea ipsix humanitati ex unione cum verbo,in se humanitati ex unione cum verbo,Interea ipsi humanitati ex unione cum verbo
+LH_1_2_1_0003v,00068282:0006:089,2e222a73-1b3b-4ca4-83b3-323453dc819f,MarginTextZone,0.541,heavy_revision,disagree,0.652,0.957,0.682,1.000,animataper Christum ex,"animata, per Christum ex",per Christum ex
+LH_1_2_1_0004v,00068282:0008:001,541ac6bf-c7ec-41a2-be90-16a9a060e8c3,MainZone,0.816,heavy_revision,near,0.784,0.763,0.947,0.763,diviram salvandi homines voluntatem et,am salvandi homines voluntate,divinam salvandi homines voluntatem e
+LH_1_2_1_0004v,00068282:0008:019,95894216-10bf-4d98-8bd0-4857bc226144,MainZone,0.887,heavy_revision,near,0.894,0.913,0.979,0.913,"est, eum sat acceptam a Deo gratiam, et spiritus","est, eum acceptam a Deo gratiam, et Spiritus","est, eum stat acceptam a Deo gratiam, et Spiritus"
+LH_1_2_1_0004v,00068282:0008:110,24b29762-a379-4b1b-8ea1-e7787a29f61e,MarginTextZone,0.589,heavy_revision,near,0.800,0.700,0.889,0.889,cinter im tenendum:),Interim tenendum est,Interim tenendum
+LH_1_2_1_0005r,00068282:0009:009,dd70df72-38d9-42b3-bdb8-3c83f47142f9,MainZone,0.959,heavy_revision,near,0.761,0.844,0.870,0.844,"Videntur autem nognulli eorum, qui Fidem totam","Videntur autem nonnulli eorum, qui totam","Videntur autem nonnulli eorum, qui Fidem justif"
+LH_1_2_1_0005v,00068282:0010:071,c714f03c-03e4-4a72-b93d-2f198fc15210,MainZone,0.982,heavy_revision,near,0.724,0.792,0.776,0.811,"ett il di pcollocemus, ex parte quidem, si illa finitae","collocemus, ex parte
+quidem, si illa finitae","et perfectionem collocemus, ex parte quidem, si illa finitae"
+LH_1_2_1_0006v,00068282:0012:016,4f04d4d6-211e-4343-bb67-bcfb1630d2a7,MainZone,0.954,heavy_revision,near,0.782,0.778,0.964,0.778,Sanquini salvatoris non cedat. tanquam si concupisentia,"Sanguini Salvatoris non cedat,
+tanquam si in","Sanguini Salvatoris non cedat, tanquam si concupiscentia"
+LH_1_2_1_0006v,00068282:0012:078,ae3114eb-02e0-44e6-957b-90bd77523f7e,MainZone,0.972,heavy_revision,disagree,0.613,0.625,0.815,0.769,"Christus praescripsit, ut atres frabes ditia ac proximum diligamus","Christus praescripsit etiam Ethnicorum applausu celebratam, ut proximum
+diligamus","Christus praescripsit, ut fratres diliga proximum diligamus"
+LH_1_2_1_0007r,00068282:0013:062,c7777aeb-f134-4fea-9077-2f527fd5b8f9,MainZone,0.947,heavy_revision,near,0.759,0.768,0.948,0.768,"damnatis aegrotis, in squalore, in viuculis, in pereginis e","damnatis, aegrotis, in
+squalore, in vinculis, in","damnatis, aegrotis, in squalore, in vinculis, in peregrinis te"
+LH_1_2_1_0007r,00068282:0013:064,bc0426d9-da7c-4a04-a2ea-1b4dd9c93268,MainZone,0.964,heavy_revision,near,0.884,0.930,0.831,0.930,metu ub effusae caritatis officio deterreri. Quacuaque haec ignorant aut,metu ab effusae caritatis officio deterreri: quicunque haec ignorant a,metu ab effusae caritatis officio deterreri: quicunque haec spernu
+LH_1_2_1_0007v,00068282:0014:045,fe669e66-c11f-43ca-b716-c60864da82af,MainZone,0.887,heavy_revision,near,0.744,0.962,0.734,0.962,"non absolute quidem et ex sola justitiae consideratione, (si promissior ejungatur)",non absolute quidem et ex sola justitiae consideratione (si promissio sejungatu,"non absolute quidem et ex sola justitiae consideratione, se"
+LH_1_2_1_0007v,00068282:0014:055,ac352e5a-5ce2-4c04-af79-9b1896b6e612,MainZone,0.755,heavy_revision,disagree,0.457,0.500,0.875,0.979,"posse videtur, et jus aliquod nobis mascitur. Deus","posse videtur, et jus aliquod plenius nobis nascitur secundum commutativae
+justitiae leges. Deus","posse videtur, et jus aliquod nobis nascitur."
+LH_1_2_1_0009r,00068282:0017:025,cfc70052-892c-4b65-9659-79cf035f485e,MainZone,0.970,heavy_revision,near,0.865,0.846,0.923,0.865,jam corrumpitur sincea devotio superflais ormamentis.,"jam corrumpitur
+sincera devotio profanis ornamentis.",jam corrumpitur sincera devotio superfluis ornamenti
+LH_1_2_1_0009r,00068282:0017:033,294408d1-0cec-4e32-8119-069f71b95047,MainZone,0.951,heavy_revision,near,0.852,0.873,0.873,0.873,"et imagines pletatis incitatrices, nec axchitecturae ges","t imagines pietatis incitatrices, nec architecturae","imagines pietatis incitatrices, nec architecturae leges"
+LH_1_2_1_0009v,00068282:0018:019,5be4a36f-800f-4545-bd31-ba0744e8d9ca,MainZone,0.700,heavy_revision,near,0.818,0.837,0.659,0.837,Judaei autem et saraceni inter alias causas,"Judaei autem
+et Saraceni inter alias",amissae. Judaei autem et Saraceni inter alias
+LH_1_2_1_0010v,00068282:0020:058,7a78f60c-506d-47e8-bc2f-7d1c3329890d,MainZone,0.896,heavy_revision,near,0.893,0.860,0.965,0.860,"metu superstitionis diu inde abstinnisse Chhristianos, cum",metu superstitionis diu inde abstinuisse Christian,"metu superstitionis diu inde abstinuisse Christianos, cum"
+LH_1_2_1_0010v,00068282:0020:067,5fe06e51-3290-44b1-9c03-2bf4dcfe1f6c,MainZone,0.864,heavy_revision,near,0.879,0.850,0.967,0.850,incitatementum a divino cultu excluderentur Fluctuatum tamen,incitamentum a cultu excluderentur. Fluctuatum tamen,incitamentum a divino cultu excluderentur. Fluctuatum tamen
+LH_1_2_1_0011r,00068282:0021:013,b0c5fb0f-c0c2-4ecb-b102-72742269ff34,MainZone,0.979,heavy_revision,near,0.897,0.841,0.750,0.841,"prristum adorare. Et revera nihi id ipsum est,","Christum adorare. Et revera id ipsum est,",Christum adorare. Et revera id ipsum
+LH_1_2_1_0012r,00068282:0023:000,11113e1c-be9a-49d7-a405-1738a660fd90,MainZone,0.916,heavy_revision,near,0.756,0.721,0.953,0.721,"adcultu adorari quo ipse Christus Deus, quia",cultu adorari quo ipse Christus,"cultu adorari quo ipse Christus Deus, quia"
+LH_1_2_1_0012v,00068282:0024:072,899a48de-c90d-4e9f-bccc-d497b970fa67,MainZone,0.928,heavy_revision,near,0.776,0.746,0.963,0.963,"quod honori divino sit e adversum, cum nullum periculum","quod honori divino sit adversum, cum his temporibus nullum
+periculum","quod honori divino sit adversum, cum nullum periculum"
+LH_1_2_1_0013r,00068282:0025:056,3e49ca7b-8343-40ab-8ff6-6fc1b5baa97d,MainZone,0.863,heavy_revision,near,0.810,0.756,0.933,0.756,"imagines diximus, huc quoque referri debent.  Ms","imagines diximus, huc quoque referr","imagines diximus, huc quoque referri debent,"
+LH_1_2_1_0013v,00068282:0026:002,155a5a8f-6a6c-4d6b-a7ea-ad33b20f2ba9,MainZone,0.909,heavy_revision,near,0.898,0.898,1.000,0.898,amici tui Deus; et Laudate dominum in sanctis ejus-,"amici tui, Deus; et
+laudate Dominum in Sanctis","amici tui, Deus; et laudate Dominum in Sanctis ejus."
+LH_1_2_1_0013v,00068282:0026:062,cdc5875a-f72f-4a41-877c-c1981f0bce81,MainZone,0.694,heavy_revision,near,0.796,0.686,0.745,0.726,i mtta sols decas immedintum est mentis obijectiuus,solus Deus immediatum est mentis object,notitia solus Deus immediatum est mentis objectum
+LH_1_2_1_0014r,00068282:0027:048,3a2f30ca-33fb-415f-b52c-1b3a5638ff12,MainZone,0.950,heavy_revision,near,0.870,0.849,0.981,0.868,obtuu animum adhibet? Qvia igitur mens multis pluribus,"obtutu
+animum adhibet? Quia igitur mens pluribus",obtutu animum adhibet? Quia igitur mens multis pluribus
+LH_1_2_1_0014v,00068282:0028:050,f8ddde91-87a3-4c85-a24a-7b08311cea26,MainZone,0.741,heavy_revision,near,0.857,0.796,0.905,0.929,"caltus imaginum, ita invocationis sanctoice","cultus imaginum, ita invocationis sanctorum exempl","cultus imaginum, ita invocationis sanctorum"
+LH_1_2_1_0015r,00068282:0029:030,fbcc2afa-8f5e-4b39-8cd1-eba86bddf432,MainZone,0.966,heavy_revision,near,0.864,0.884,0.977,0.884,"hristum Deum, promissis tam largum erga suam",hristum promissis tam largum erga suam,Christum Deum promissis tam largum erga suam
+LH_1_2_1_0015r,00068282:0029:037,6108782b-0b30-4080-a8b8-0eabde74d22e,MainZone,0.922,heavy_revision,disagree,0.683,0.730,0.854,0.958,cum indaicum et Mahometanam videamus tot seculis,cum Judaicam et Mahometanam religionem videamus tot seculis sat,cum Judaicam et Mahometanam videamus tot annis
+LH_1_2_1_0015v,00068282:0030:019,a7eba371-2c38-4875-956b-01ac1e0ade8c,MainZone,0.932,heavy_revision,near,0.853,0.831,0.907,0.845,"pertabet, et tritieo noceat. Sequandumque est in leviobustolerabilioribus","perturbet, et
+tritico noceat. Sequendumque est in tolerabilioribus","perturbet, et tritico noceat. Sequendumque est in levioribus tolerabilioribus"
+LH_1_2_1_0016v,00068282:0032:003,4a174bec-1b3e-416d-a32d-a2f171fb167a,MainZone,0.896,heavy_revision,near,0.852,0.926,0.852,0.926,"debetur, et qui sanctis exhibetur, quorum illum AATCEpar","debetur, et qui Sanctis exhibetur quorum illum Aotpeíav,","debetur, et qui Sanctis exhibetur quorum illum λατρει"
+LH_1_2_1_0016v,00068282:0032:005,3ad1324e-c13d-4f03-99b1-d026f6d09906,MainZone,0.970,heavy_revision,near,0.828,0.828,0.882,0.941,"vocant etiam externis signis, quoad licet ostendatur","um animis, sed etiam externis signis, quoad licet,
+ostendatur.","sed etiam externis signis, quoad licet, ostendatur."
+LH_1_2_1_0018r,00068282:0035:041,de181772-b91f-4c0b-9650-c383ab8d2ae4,MainZone,0.966,heavy_revision,near,0.863,0.898,0.961,0.898,Interea smpr tutissimum est ab ordinario ministro,Interea tutissimum est ab ordinario ministro,Interea semper tutissimum est ab ordinario ministro
+LH_1_2_1_0018r,00068282:0035:045,c1530204-ccd1-4a1f-a623-27838c0533e2,MainZone,0.951,heavy_revision,near,0.880,0.860,0.980,0.878,"actum exercere velint, non videntur baptieasse, aut","actum exercere constet, non videntur baptizasse, aut","actum exercere velint, non videntur baptizasse, aut"
+LH_1_2_1_0018v,00068282:0036:023,22f403b2-004a-44d3-9261-8b66d9acc521,MainZone,0.982,heavy_revision,near,0.898,0.940,0.880,0.940,nomissionum  erga eos qui fidem et caritatem habent,romissionum erga eos qui fidem et caritatem habe,promissionum erga eos qui fidem et caritatem sunt
+LH_1_2_1_0018v,00068282:0036:029,6886fc8e-41e2-4fea-93cf-729dee031e62,MainZone,0.970,heavy_revision,near,0.870,1.000,0.870,1.000,"gandi et respondendi forma, ut adeo dici posset","gandi et respondendi forma, ut adeo
+dici posset","et respondendi forma, ut adeo dici posset"
+LH_1_2_1_0019v,00068282:0038:003,26b8c205-cb26-419f-9bd9-97cfda18b5d9,MarginTextZone,0.902,heavy_revision,near,0.884,0.884,0.977,0.884,"impletiona consistere, utique cum verum vero","implemento consistere,
+utique cum verum vero","impletione consistere, utique cum verum vero"
+LH_1_2_1_0019v,00068282:0038:035,44d53277-8676-4ccd-8144-20ec600df720,MainZone,0.945,heavy_revision,near,0.788,0.788,1.000,0.788,"Sunt qui praesentia reali admissa, quandam ut appella","Sunt qui praesentia reali admissa, quandam","Sunt qui praesentia reali admissa, quandam ut appella"
+LH_1_2_1_0019v,00068282:0038:071,90f059af-a2c4-45db-b032-adca5603c318,MainZone,0.942,heavy_revision,near,0.855,0.836,0.981,0.852,"rem fragilem, rotundam, tennem albicantem; et corpus item","rem fragilem,
+rotundam, tenuem, albicantem; sequeretur item","rem fragilem, rotundam, tenuem, albicantem; et corpus item"
+LH_1_2_1_0020r,00068282:0039:030,ad853db4-beba-4bfc-983b-655c853a995e,MainZone,0.970,heavy_revision,near,0.860,0.843,0.961,0.843,"enim nullum decretum Ecclesiae, nullam legem, efficet","enim nullum decretum Ecclesiae, nullam
+legem,","enim nullum decretum Ecclesiae, nullam legemefficer,"
+LH_1_2_1_0020r,00068282:0039:056,477653e9-35fc-46af-8065-8509c0ac1043,MainZone,0.947,heavy_revision,near,0.840,0.820,0.980,0.820,differt etiam matenia differet ab extensione. Omnes,"differt, etiam materia differet ab
+dimensiones","differt, etiam materia differet ab extensione. Omnes"
+LH_1_2_1_0020v,00068282:0040:076,47b9cd1d-94bc-4ab1-a986-198e844675b3,MainZone,0.676,heavy_revision,near,0.851,0.930,0.789,0.930,"separari, et quidem ita ut vel alteratirum subsistat si altero destructo","separari,
+et quidem ita ut vel alterutrum subsistat altero destructo","separari, et quidem ita ut vel alterutrum subsistat altero"
+LH_1_2_1_0020v,00068282:0040:084,5b4e67cf-87c5-4247-90d2-94d797c899b7,MainZone,0.950,heavy_revision,disagree,0.500,0.490,0.983,0.850,denique re sive potentia ossentia sublata poterit sustentare,"dem accidens reale ad diversas substantias pertineat, denique re sive
+essentia sublata poterit sustentare",denique re sive potentia essentia sublata poterit sustentare
+LH_1_2_1_0021r,00068282:0041:001,78e2bf2b-df5c-4840-afe2-07daff1835e1,MainZone,0.690,heavy_revision,near,0.759,0.741,0.860,0.956,"Explicato, quantum fert captus noster cmolieud","Explicato, quantum fert captus noster, et quantum amoliendae","Explicato, quantum fert captus noster, amoliendamque"
+LH_1_2_1_0021r,00068282:0041:013,4fa760a7-e3e1-4ec0-a104-f2185b822bb7,MainZone,0.911,heavy_revision,disagree,0.644,0.658,0.979,1.000,"paulus, et frequentavit primitiva Ecclesiat donec","Paulus, et frequentavit primitiva
+Ecclesia ut Orientalis nunc quoque, donec","Paulus, et frequentavit primitiva Ecclesia, donec"
+LH_1_2_1_0021r,00068282:0041:040,9518cdd1-c5fc-48be-9a57-6039e94ccd21,MainZone,0.986,heavy_revision,near,0.818,0.814,0.818,0.814,"agerent e agerent, quibus deprehendendis Leo","ta agerent, quibus
+deprehendendis Leo","semper ita agerent, quibus deprehendendis Leo"
+LH_1_2_1_0021v,00068282:0042:060,7ea16441-1e25-4dee-9a21-0d85aa7a88e6,MainZone,0.898,heavy_revision,near,0.750,0.750,1.000,0.892,rationes quas tot principes et populi,"rationes
+quas tot principes et nationes alle",rationes quas tot principes et populi
+LH_1_2_1_0022r,00068282:0043:012,fe38f9c4-76f1-4011-9cb6-b0e5cab6f34a,MainZone,0.956,heavy_revision,near,0.857,0.947,0.807,0.965,et si forte peccarent Rectores. Ecclesiae nimia severitate,si forte peccarent Rectores Ecclesiae nimia severitate,si forte peccarent Rectores Ecclesiae nimia difficultate
+LH_1_2_1_0022r,00068282:0043:039,1a8838f6-547b-424f-b15b-ceafe70f8874,MainZone,0.927,heavy_revision,near,0.850,0.833,0.967,0.833,"non potest, intus enim animi vera pietate ardetant flograbant","non potest, intus enim animi vera pietate flagrabant.","non potest, intus enim animi vera pietate ardebant. flagrabant"
+LH_1_2_1_0022v,00068282:0044:011,a2637a95-a86d-47d8-837c-4c2a3e2eac3f,MainZone,0.902,heavy_revision,near,0.850,0.923,0.831,0.923,chisti cujus nos omnes participes fecit. Itaque Eucharistia semper,"i, cujus nos omnes participes fecit. Itaque Eucharistia semper","sui, cujus nos omnes participes fecit. Itaque Eucharistia"
+LH_1_2_1_0022v,00068282:0044:066,83dd1a14-8a50-4ab0-b841-b907a016a0d3,MainZone,0.922,heavy_revision,near,0.859,0.718,0.737,0.737,multo minus ipsa albedo aut rotunditas.  Etsi autem contingeret conserrationem,"gestrichen: in hoc negotio
+aut rotunditas. Etsi autem contingeret consecrationem",in hoc negotio aut rotunditas. Etsi autem contingeret consecrationem
+LH_1_2_1_0023r,00068282:0045:023,69b88789-be19-4cda-a19c-e1e3cd86a9b7,MainZone,0.961,heavy_revision,near,0.865,0.895,0.789,0.895,exccutionem commodare promittit; quae magno schismaticorum,executionem commodare promittit; magno schismaticorum,onem commodare promittit; magno schismaticorum
+LH_1_2_1_0023r,00068282:0045:033,636efc1f-f544-4d39-aac6-2f57f1bb28de,MainZone,0.916,heavy_revision,near,0.855,0.855,0.910,0.970,"et sacerdotis judicio aliqua castigationem habeat, quae admonitionis","et subinde
+sacerdotis judicio aliquam castigationem subeat, quae admonitionis","sacerdotis judicio aliquam castigationem subeat, quae admonitionis"
+LH_1_2_1_0023v,00068282:0046:035,e2540a0c-224a-44fc-b212-b8902077b66f,MainZone,0.969,heavy_revision,disagree,0.646,0.622,0.930,0.911,saciamento accedere ipsam gratiam hoc est haetem infusum,"Sacramento accedere ipsam gratiam, hoc est radium infusum gratiae divinae caritatis,","Sacramento accedere ipsam gratiam, hoc est habitum infusum"
+LH_1_2_1_0023v,00068282:0046:037,b6c1b881-a93e-46f4-bdd8-9f4bb105eff7,MainZone,0.846,heavy_revision,near,0.717,0.787,0.868,0.787,itatis qui virtate meriti Christi peccata delet,"t virtute meriti Christi peccata delet,","caritatis, qui, et virtute meriti Christi peccata delet,"
+LH_1_2_1_0023v,00068282:0046:048,b9b43f6d-00c1-42f1-b961-8b13233215d5,MainZone,0.966,heavy_revision,disagree,0.656,0.656,1.000,1.000,"castigationem mitigent, quae sive in hac vita, sive postea ex","castigationem mitigent, quae sive in hac vita, sive postea
+ex justitiae rationibus irrogatur.","castigationem mitigent, quae sive in hac vita, sive postea ex"
+LH_1_2_1_0026r,00068282:0051:001,fd94e81f-f7d2-481e-a7c6-f20b2a56ab52,MainZone,0.963,heavy_revision,near,0.897,0.729,0.771,0.729,vatenus a jure divino proficiscatur multum inter,uatenus a jure divino proficiscatur,"quatenus a jure divino proficiscatur, in"
+LH_1_2_1_0026r,00068282:0051:004,9d8d3a77-b417-464f-a234-e729dcf12594,MainZone,0.864,heavy_revision,near,0.811,0.811,1.000,0.811,"contra Ecclesiam contendunt, sed et inter se. Et quidem","contra Ecclesiam contendunt, sed et inter se.","contra Ecclesiam contendunt, sed et inter se. Et quidem"
+LH_1_2_1_0026r,00068282:0051:024,0276f6bf-acff-470a-9e81-977912f94d56,MainZone,0.899,heavy_revision,disagree,0.571,0.778,0.847,0.778,ab Ecclesiastica ab Eclesia recepta potestas autem spiritualis ordinaria,"ab Ecclesia recepta, potestas
+autem spiritualis ordinaria","ab Ecclesiastica ab Ecclesia recepta, potestas autem spiritualis"
+LH_1_2_1_0026r,00068282:0051:083,840c8c67-4778-4abb-a0ad-f5bcfeab18e3,MarginTextZone,0.605,heavy_revision,disagree,0.636,0.636,1.000,1.000,tutissimum est,"tutissimum est
+a linea",tutissimum est
+LH_1_2_1_0026v,00068282:0052:038,6a511b4e-fd21-4261-9c85-bffa90b606e9,MainZone,0.943,heavy_revision,near,0.891,0.913,0.891,0.913,Dvor de divortio frequentius inter Christianos,"stat.
+De divortio frequentius inter Christianos",De divortio frequentius inter Christianos
+LH_1_2_1_0027v,00068282:0054:066,e6e90847-1121-45f7-bfaf-fc71e40e9526,MainZone,0.961,heavy_revision,near,0.816,0.803,0.986,0.918,"illos esse dissolutos, et mali exempli; nemo mirum non est tot animas etiam","illos esse dissolutos, improbos, et mali exempli; mirum non est tot animas etia","illos esse dissolutos, et mali exempli; nemo mirum non est tot animas etia"
+LH_1_2_1_0027v,00068282:0054:080,4b5da0cc-03ac-4a0e-969e-e76720891114,MainZone,0.914,heavy_revision,near,0.796,0.816,0.860,0.935,"tum improdentia objiciuntur. Interea manet verissimum, quod superius alia occusione dissernimus","t male Zelosorum
+imprudentia objiciuntur. Interea manet verissimum, quod superius alia occasione disnibus","imprudentia objiciuntur. Interea manet verissimum, quod superius alia occasione diss"
+LH_1_2_1_0028r,00068282:0055:053,88f09662-9863-478f-87e2-3081787730ff,MainZone,0.764,heavy_revision,near,0.881,0.837,0.735,0.837,"ipse Hierongmus, etiam quando contra velut coactus","ipse Hieronymus, etiam quando velut coactus","Hieronymus, etiam quando velut coactus"
+LH_1_2_1_0028r,00068282:0055:054,fd95b65d-3796-44d6-b56e-c904d058c4a1,MainZone,0.939,heavy_revision,near,0.847,0.831,0.983,0.881,"co tradicit, tamen mollius loquitur, atque eo saltem inclinat","contradicit, mollius
+loquitur, atque eo saltem inclinat ut","contradicit, tamen mollius loquitur, atque eo saltem inclinat"
+LH_1_2_1_0028r,00068282:0055:057,fa5c9c5a-d86f-412f-b3e9-96b8d97f5e20,MainZone,0.883,heavy_revision,near,0.885,0.852,0.963,0.981,sclicet nullus Christianus aeternum perine possit. Sed,"scilicet nullus saltem
+Christianus aeternum perire possit; sed",scilicet nullus Christianus aeternum perire possit; sed
+LH_1_2_1_0028v,00068282:0056:048,949aa19f-d056-4c88-a376-6e92217ac805,MainZone,0.968,heavy_revision,near,0.808,0.945,0.764,0.946,Resurrectionem Corporum inter difficiliores Christianae,Resurrectio Corporum inter difficiliores Christianae,Resurrectio Corporum inter difficiliores C
+LH_1_2_1_0029r,00068282:0057:002,ee2151e0-76d2-48fc-af00-69b830b1fdff,MainZone,0.878,heavy_revision,near,0.875,0.952,0.875,0.976,posthanc vitam. protestantes enim sentiunto,post hanc vitam. Protestantes enim sentiunt,post hanc vitam. Protestantes enim sentiunt eorum
+LH_1_2_1_0029r,00068282:0057:004,afc6008a-8357-4252-98c9-1bd3e0f6779e,MainZone,0.894,heavy_revision,near,0.854,0.980,0.837,0.980,"statim aut ad aeternam feclicitatem pervenire, aut","statim
+aut ad aeternam felicitatem pervenire, aut","aut ad aeternam felicitatem pervenire, aut"
+LH_1_2_1_0029r,00068282:0057:018,b14316f4-eb58-4076-bee6-6ac6ab5028f8,MainZone,0.922,heavy_revision,near,0.824,0.800,0.971,0.971,poena haeredes vitae aeternae effecti sin subinde ad huc castigationem,"poena haeredes vitae aeternae effecti sint, subinde adhuc pro peccatis
+castigationem a","poena haeredes vitae aeternae effecti sint, subinde adhuc castigationem"
+LH_1_2_1_0029r,00068282:0057:036,d4a2ceaf-be93-43b8-9cd2-a535fadbbc93,MainZone,0.952,heavy_revision,near,0.736,0.736,0.981,0.736,"sit per ignem, etiam sunctis, sed eos tantum amburendos","sit per ignem,
+sed eos tantum amburendos","sit per ignem, etiam sanctis, sed eos tantum amburendos"
+LH_1_2_4_0001r,00068288:0001:008,50209429-8f29-4eb4-aaa3-f65ba4b5cfce,MainZone,0.908,heavy_revision,disagree,0.652,0.652,1.000,1.000,Deum esse rem albam rotundam; nam negari non potest hostiam,"Deum esse rem albam ac rotundam; nam negari non potest hostiam esse
+rem albam, rotundam, etc.","Deum esse rem albam, rotundam; nam negari non potest hostiam"
+LH_1_3_4_0002r-0001v,00068292:0003:020,da2cf6dc-35e4-4096-b2d9-f5a27782174d,MainZone,0.948,heavy_revision,disagree,0.643,0.730,0.833,0.730,eam  quae tamen scripturam cum veterum,"a, quae tamen
+Scripturam cum",cum trad quae tamen Scripturam cum veterum
+LH_1_3_4_0002r-0001v,00068292:0003:065,1a4e7eb2-c624-44d6-a677-c60052a54cd6,MainZone,0.873,heavy_revision,disagree,0.680,0.680,1.000,0.720,persona autem divinitatis,autem divinitatis,Persona autem divinitatis
+LH_1_3_7_A_0001r,00068295:0001:017,06f8b318-f0cb-4c97-b1db-b5e4e84caba7,MainZone,0.931,heavy_revision,near,0.887,0.984,0.871,0.984,"Ecclesia est multitudo fidelium communicantium, sive se fraties","Ecclesia est multitudo fidelium communicantium, sive se fratres","a est multitudo fidelium communicantium, sive se fratres"
+LH_1_3_7_A_0004r-0003v,00068295:0007:043,75f58ee6-42f3-45fb-acbb-de90f48d81c4,MainZone,0.908,heavy_revision,near,0.853,0.750,0.820,0.853,Truditio est argums itum ad ipsam scriplurum faciam probandom,Traditio est argumentum ad ipsam scripturam sacram probandam satis v,aditio est argumentum ad ipsam scripturam sacram probandam
+LH_1_3_7_B_0001r,00068298:0001:011,c13dd6f3-8232-4e3a-8c76-54b5cf687a5e,MainZone,0.901,heavy_revision,near,0.818,0.795,0.977,0.795,judicio eundem Deum et naturae rerum autorem,indicio eundem Deum et naturae rerum,indicio eundem Deum et naturae rerum autorem
+LH_1_3_7_B_0002r,00068298:0003:043,8bc03c0b-bb61-42ab-a23b-1ddab6121472,MainZone,0.881,heavy_revision,near,0.761,0.826,0.913,0.848,"subsistentia, qualis revera est omnium formatum,","subsistentia, qualis
+revera est omnium substant","sistentia, qualis revera est omnium formarum,"
+LH_1_3_7_B_0002r,00068298:0003:045,330ad3de-ee84-4cac-880a-c816c4da7703,MainZone,0.876,heavy_revision,near,0.894,0.851,0.891,0.976,quae non pereunt sed istu) sed et perpetua,"quae non pereunt sed immutantur), sed et perpetua","(quae non pereunt sed miscentur), sed et perpetua"
+LH_1_3_7_B_0002r,00068298:0003:058,725b7244-611c-4587-80d1-995dd7c19152,MainZone,0.945,heavy_revision,near,0.844,0.844,1.000,1.000,Eucharistici aperta est via.,"Eucharistici aperta est via.
+Scio",Eucharistici aperta est via.
+LH_1_3_7_C_0001,00068299:0001:120,849634f2-5823-4b1f-9f74-0bcf65cb1bab,MainZone,0.703,heavy_revision,disagree,0.200,0.979,0.200,0.979,"clavis distincti, facileus sibi persuadebit solem","clavis
+distincti, facilius sibi persuadebit solem","ut cum Martiano Capella loquar, ultramundanam, cujus"
+LH_1_3_7_C_0001,00068299:0001:126,a78b0ff4-48e3-48dc-8cd0-eaf8d260d2b6,MainZone,0.606,heavy_revision,disagree,0.188,0.984,0.172,0.984,esse in Mundo corpus primarium agnoscet Deum esse intellegentiam,"esse in
+Mundo corpus primarium, agnoscet Deum esse intelligentiam","cujus membra sint alia omnia corpora, quo inclinare videntur qui"
+LH_1_3_7_C_0001,00068299:0001:132,753016cb-79e2-491b-97ed-f53226e8a8f3,MainZone,0.760,heavy_revision,disagree,0.262,0.982,0.262,0.982,"et si enim in loco non sit tamen praesens est, et liceat","etsi enim in
+loco non sit tamen praesens est, et liceat",Itaque Deus semper erit aliquid extra supraque corporum aggregata.
+LH_1_3_7_C_0002,00068299:0005:023,8a53500f-0ec9-4466-9329-0aa55d7259ea,MainZone,0.701,heavy_revision,disagree,0.303,0.880,0.288,0.900,nelliori vitae servaturus. Qui vero cum Momo putant,meliori vitae servaturus. Qui autem cum Momo putant,Itaque tantum abest ut Materia sit aeterna ut contra in momentaneo
+LH_1_3_7_C_0002,00068299:0005:049,3d8b156d-d291-4e51-b6ba-8109eb2d1848,MainZone,0.715,heavy_revision,disagree,0.254,0.886,0.238,0.886,"divinae bonitatis, omnia in melius dirigentis.","divinae
+bonitatis, omnia in melius dirig","oeconomiam, deprehensuros esse, neminem jure posse queri, nihilque"
+LH_1_3_7_C_0002,00068299:0005:136,7d0a1e9e-8641-43d9-ac86-1a3afbf5d2eb,MainZone,0.869,heavy_revision,disagree,0.227,0.893,0.227,0.893,summi viri et sanctitate et doctiina celebres Angustinus,s viri et sanctitate et doctrina celebres Augustinus,"quod aliquos exemit, quam culpam impingendam quod caeteros reliquit."
+LH_1_3_7_C_0002v-0001r,00068299:0006:021,7a1d42f5-b3fb-4b9c-b7f9-3f58de8129c8,MainZone,0.957,heavy_revision,near,0.843,0.870,0.870,0.870,"tadine praejudicandum esse, nihil nisi justissime atque","entia praejudicandum esse, nihil nisi justissime atq","praejudicandum esse, nihil nisi justissime atque"
+LH_1_3_7_C_0002v-0001r,00068299:0006:153,46d037b7-1c04-4373-97f9-9689d7b59e8c,MarginTextZone,0.804,heavy_revision,near,0.733,0.733,1.000,0.846,prona est ad judicandum de,prona sit ad judicandum ex pau,prona est ad judicandum de
+LH_1_3_7_K_0001v,00068306:0002:013,ad3342cb-bf7b-4537-bba6-41e982bc045d,MainZone,0.561,heavy_revision,near,0.820,0.814,0.678,0.814,exeutere aliisque controversiam de relicione publice movere,"excutere; controversiam de religione publice movere,","controversiam de religione publice movere,"
+LH_1_3_7_K_0002r,00068306:0003:096,c27fa1fa-0a2d-48a0-859e-855a7c07a446,MainZone,0.619,heavy_revision,near,0.764,0.982,0.750,0.982,infallibilis. In fallibilitas pendere potest aut a divina,infallibilis. Infallibilitas pendere potest aut a divina,Infallibilitas pendere potest aut a divina
+LH_1_4_4_0001r,00068327:0001:035,34091f9b-cf7b-47ef-a121-b5b3f9b9e3fa,MainZone,0.648,heavy_revision,near,0.775,0.867,0.711,0.878,rem maris manisessi exprimere. per placet explicatio Grotii de animali edique vulnus anatum,"rem nimis manifeste exprimere. Perplacet explicatio Grotii de
+animali cujus vulnus sanatum.",exprimere. Perplacet explicatio Grotii de animali cujus vulnus sanatum.
+LH_1_4_4_0001v,00068327:0002:021,d7f7d8b8-014f-4c00-b200-b1563662440b,MainZone,0.673,heavy_revision,near,0.804,0.895,0.743,0.905,"cscidise de coelo cui data clavis abyssi, intellig 1X, 1 intelligo de aliquo magno doctore haereseos autore","cecidisse de coelo, cui data
+clavis abyssi, IX, 1 intelligo de aliquo magno doctore, haereseos autore,","cui data clavis abyssi, IX, 1 intelligo de aliquo magno doctore, haereseos autore,"
+LH_1_4_8_0016v-0015r,00068331:0032:032,e6402d0d-793c-4227-b10a-b21a2c220759,MainZone,0.969,heavy_revision,disagree,0.685,0.685,1.000,1.000,"tresor, dont il se rejouira grandement qui ne l’entendra point se peut donner","tresor, dont il se rejouira grandement: qui ne l'entendra point aprés y avoir pensé
+plusieurs fois, se peut donner","tresor, dont il se rejouira grandement: qui ne l’entendra point se peut donner"
+LH_1_6_11_0002r-0001v,00068346:0003:048,32ac68b6-58e4-4257-aa85-bd26858c776f,MainZone,0.899,heavy_revision,disagree,0.512,0.512,0.822,0.978,"en ignovet vel saltem futura conditionata, quo","ea ignoret (ut Aristoteles sentire
+visus est), vel saltem futura conditionata; quo inclina","visus est), vel saltem futura conditionata; quo"
+LH_1_6_11_0002r-0001v,00068346:0003:062,8423c4d6-d6e6-45e2-acdd-8b550c1b9f57,MainZone,0.948,heavy_revision,disagree,0.508,0.467,0.806,0.919,"cnius sententia videntur fuisse Hobbes et spinosa, qui videntir","hujus sententiae videntur fuisse Hobbes et Spinosa, quorum ille omnia
+fecit corporea, hic nihil aliud esse putavit Deum quam","hujus sententiae videntur fuisse Hobbes et Spinosa, quorum ille"
+LH_1_6_11_0002v-0001r,00068346:0004:010,cc3c5e8e-9d26-450a-b1ec-b1e0d3e35e62,MainZone,0.535,heavy_revision,disagree,0.676,1.000,0.676,1.000,exprimente. de Angelorum corporibus,exprimente. De Angelorum corporibus,De Angelorum corporibus
+LH_1_6_11_0003v,00068346:0006:004,3b8bd371-8262-40f6-a837-92be87de2518,MainZone,0.884,heavy_revision,disagree,0.679,0.726,0.758,0.939,"jus constitueriat, an potius juqu naturale et divinum seu moralitas","jus constituerit, Pufendorf,
+Pufendorf.
+an potius jus naturale et divinum seu moralitas",Pufendorf. an potius jus naturale et divinum seu moralitas
+LH_1_6_4_0002r-0001v,00068339:0003:052,83f0bbc2-261c-46e4-ae20-a7c1065c30df,MainZone,0.893,heavy_revision,near,0.846,0.846,1.000,0.846,s’emparent des ess esprits,s'emparent des esprits,s’emparent des ess esprits
+LH_1_6_4_0002r-0001v,00068339:0003:077,eb01f24f-6659-4639-8134-ee7e2a522eeb,MainZone,0.923,heavy_revision,near,0.738,0.754,0.885,0.754,"un recueil de tous les défant des papes et de queqes papes, et","un recueil de tous les défauts de
+quelques Papes, et","recueil de tous les défauts des Papes, et de quelques Papes, et"
+LH_1_6_4_0002r-0001v,00068339:0003:081,b6518a6d-9912-409b-a646-120dad55fd9c,MainZone,0.912,heavy_revision,near,0.775,0.775,0.975,0.775,à son épouse de la seinteté pureté de sa,"à son épouse, de la pureté de sa","à son épouse, de la sainteté pureté de sa"
+LH_1_6_4_0002v-0001r,00068339:0004:010,09377d90-7c53-4b5b-acba-f805f5c1a318,MainZone,0.921,heavy_revision,disagree,0.639,0.672,0.953,1.000,impieté lors même qu’ils disent la verite,"impiété lors méme qu'ils
+disent la vérité.”
+Il y a des commodit",l’impiété lors même qu’ils disent la vérité.
+LH_1_6_4_0002v-0001r,00068339:0004:024,2b3ddcef-e710-428b-ba2a-6c6c295f3a93,MainZone,0.914,heavy_revision,near,0.861,0.730,0.811,0.784,la patience de en faire le tour et de,la patience de faire la tour de la c,la patience de faire la tour de
+LH_1_6_4_0004r-0003v,00068339:0007:111,fd2ccb4c-49b1-4af6-95a2-57c80156f3ac,MainZone,0.697,heavy_revision,disagree,0.375,1.000,0.375,1.000, qui,qui,voix qui
+LH_1_6_4_0004v-0003r,00068339:0008:028,b2fa656a-fb26-49f7-814f-9a7687e3268d,MainZone,0.818,heavy_revision,near,0.852,0.885,0.926,0.885,f. ces sont des grands mots,P. Ces sont des grands mo,"il Ces sont des grands mots,"
+LH_1_6_4_0006r-0005v,00068339:0011:059,846335c4-f54b-4d3f-9560-2eb1776616cb,MainZone,0.894,heavy_revision,near,0.711,0.711,0.974,0.737,que vous n accordies quelque chose par,'accordiés quelque chose par,que vous m’accordiés quelque chose par
+LH_1_6_4_0006r-0005v,00068339:0011:073,ecd42e0c-2ac4-4add-bbf8-990aeb25421c,MainZone,0.904,heavy_revision,near,0.892,0.805,0.707,0.829,les gens du monde. C’est qu’ils simaginent,"les gens du monde. Car ils
+s'imaginent,","gens du monde. Car ils s’imaginent,"
+LH_1_6_4_0008v-0007r,00068339:0016:003,2382b193-155b-4137-8f17-570967cc79c0,MainZone,0.785,heavy_revision,disagree,0.648,0.730,0.887,0.730,Ce que je veux est juste: c’est une autre cela n’est pas si seur,ce que je veux est juste: cela n'est pas si seu,ce que je veux est juste: c’est une autre affaire cela n’est pas si seur.
+LH_1_6_4_0010v-0009r,00068339:0020:018,f75febde-2977-4e11-91b8-6442ac74f812,MainZone,0.709,heavy_revision,near,0.806,0.944,0.750,0.944,"velque accident, et entre r’espece ba","uelque accident et entre l'espece
+la",accident et entre l’espece la
+LH_1_6_4_0010v-0009r,00068339:0020:026,391c6eb1-b8e3-41dd-b311-4b361523f9b5,MainZone,0.516,heavy_revision,disagree,0.606,0.648,0.672,0.734,allois necessairement qu’il y en adai eu des aussi des bieufaits,"alloit necessairement qu’il y en eût aussi
+quelques-uns bien faits, ou q",falloit necessairement qu’il y en aie de ait eu
+LH_1_6_4_0010v-0009r,00068339:0020:032,a034f790-c4dd-413e-af8b-9fa458c37f29,MainZone,0.900,heavy_revision,near,0.825,0.969,0.846,0.969,vous avoue que c’est la le dernier rétranchement de l’Epicureisme,vous avoue que c'est là le dernier retranchement de l'Epicurism,vous avoue que c’est là le dernier retranchement du libertinage
+LH_1_6_4_0014r-0013v,00068339:0027:006,f23dafdd-0c42-4dbe-ae7e-3c79fc567889,MainZone,0.865,heavy_revision,near,0.796,0.926,0.852,0.926,eru de voir un precipice: qui est ce qui ne tache pas d,rü voir un precipice: qui est ce qui ne tache pas d,crû de voir un precipice: qui est ce qui n’évite pas ne
+LH_1_6_4_0014r-0013v,00068339:0027:015,25a80447-dce3-4a86-8e8b-ab8ed0d59f87,MainZone,0.929,heavy_revision,near,0.788,0.827,0.886,0.977,et qui ne fasse pont quelque effort pouriluy,"et
+qui ne fasse point quelque effort pour luy plaire.",et qui ne fasse point quelque effort pour
+LH_1_6_4_0014v-0013r,00068339:0028:038,bcca1c1b-8439-4e10-a15e-09f764fd9582,MainZone,0.517,heavy_revision,near,0.860,0.784,0.674,0.967,noint decreature plus henreuse,"n'y a point de
+creature plus heureuse",qu’il n’y a point de creature plus heureuse
+LH_1_6_4_0016r-0015v,00068339:0031:016,e3347818-ef12-48ca-8918-8eab02e698fc,MainZone,0.968,heavy_revision,near,0.897,0.903,0.839,0.903, voir à quoy on a manqué; et qu’n,voir à quoy on a manqué; et en,voir à quoy on a manqué; et
+LH_1_6_4_0016r-0015v,00068339:0031:055,9721cfff-51d7-4b40-b611-63814043351b,MainZone,0.867,heavy_revision,near,0.806,0.919,0.811,0.919,n par apues suivant les matieres dans,a par aprés suivant les matieres dan,après suivant les matieres dans
+LH_1_6_4_0016r-0015v,00068339:0031:068,b6a79227-4a58-4d79-b4ef-ad7409469b4a,MainZone,0.521,heavy_revision,disagree,0.667,0.872,0.676,0.919,jemosen de vers: a quoy les bullesques ,"le moyen des vers: à quoy les
+burlesques",vers: à quoy les burlesques
+LH_1_6_4_0016r-0015v,00068339:0031:069,1f47d867-2aae-4973-afdb-f71a656af9e9,MainZone,0.981,heavy_revision,near,0.895,0.825,0.900,0.825,seroient admihablement propres. Mais cela,seroient admirablement propres. Mai,seroient admirablement propres. Mais il
+LH_1_6_4_0016r-0015v,00068339:0031:091,7670634c-997a-41f0-aac5-68647d98481b,MainZone,0.916,heavy_revision,near,0.846,0.865,0.846,0.865,l’une tristesse naturelle et fait dut,"d'une
+tristesse naturelle et fait",d’une tristesse naturelle et fait grand
+LH_1_6_4_0016r-0015v,00068339:0031:097,f1f70aa4-0f74-4c9d-a74b-02fe6a3f3be1,MainZone,0.617,heavy_revision,disagree,0.354,0.538,0.584,0.948,ne consiste que dans une esperance beren fondée. par ce que les autres jos p p,"ne
+consiste que dans une esperance bien fondée, parceque les autres joyes sont passageres et
+celle de l'esperance est continuelle. P","ne consiste que dans une esperance bien fondée,"
+LH_1_6_4_0016r-0015v,00068339:0031:101,e324a385-9c1b-4bdb-9be1-3b9a7fe1d8c5,MainZone,0.973,heavy_revision,disagree,0.647,0.627,0.970,0.970,"des chagiins  par des maladies, par","des chagrins, par
+la vieillesse, par des maladies, par","des chagrins, par des maladies, par"
+LH_1_7_5_0065r-0064v,00068364:0123:093,49ec8649-2d72-441d-8bc9-16b7f03c33c0,MainZone,0.934,heavy_revision,near,0.820,0.800,0.855,0.800,"ad hc nempe fides, tidem adeo ut indigni non participant",a nempe fides adeo ut indigni non participent,nempe fides itidem adeo ut indigni non participent
+LH_1_7_5_0065v-0064r,00068364:0124:010,3700186d-e221-4f9b-ac02-ed7cde8f92f5,MainZone,0.971,heavy_revision,near,0.804,0.804,1.000,0.804,"ubi carnis suae manducationem nobis commendat, nempe vera","suae manducationem nobis commendat, nempe vera","ubi carnis suae manducationem nobis commendat, nempe vera"
+LH_1_7_5_0065v-0064r,00068364:0124:025,33f91ce2-cca4-4d25-ba72-9f82aba334ee,MainZone,0.897,heavy_revision,near,0.870,0.935,0.831,0.935,"et manducationem istam fider esse non opis indicaret. Quod neque ipse argo, sed","ut manducationem istam fidei esse non oris indicaret. Quod
+neque ipse nego, sed",ut manducationem istam fidei esse non oris indicaret. Quod neque ips
+LH_1_7_5_0065v-0064r,00068364:0124:072,3c659577-44d7-437f-b5be-f6e16ca4ef21,MainZone,0.685,heavy_revision,disagree,0.191,0.984,0.191,0.984,"ipsum affigat, nec in panem includat nec ullo modo circumsiribat","ipsum affigat, nec in panem includat, nec ullo modo circumscribat;","Christi praesentiam in coena statuere oportet, quae nec panis element"
+LH_1_7_6_0012r-0011v,00068365:0023:110,bbfd880b-bed9-499f-8449-617a3791ba8b,MainZone,0.675,heavy_revision,disagree,0.660,0.660,0.818,0.727,nec propter bonum puldhrumve operatur sed ui,"nec propter
+bonum pulchrumve aliumve finem oper",nec propter bonum pulchrumve operatur
+LH_1_7_6_0041r-0040v,00068365:0081:066,7882e3ed-ab14-4f25-bf96-100a43c8eeb4,MainZone,0.935,heavy_revision,near,0.755,0.755,0.981,0.755,de lisce judicium harum utilitatem expendi suffecerit.,"te agitantur, harum utilitatem expendi suffecerit.",de hisce judicium harum utilitatem expendi suffecerit.
+LH_1_7_6_0041r-0040v,00068365:0081:081,fdb8a0c9-f4b4-4e2e-891f-c5bea0b38398,MainZone,0.837,heavy_revision,disagree,0.671,0.671,1.000,1.000,alia magis in re quam Caritatis laesione constare.,"alia magis in re quam caritatis laesione constare. Ante omnia
+ergo de vera",alia magis in re quam caritatis laesione constare.
+LH_2_3_1_0004v-0003r,00068398:0008:047,23032e9b-78fa-4fba-8352-17556774b406,MainZone,0.863,heavy_revision,near,0.784,0.868,0.763,0.921,"sequitur, di debitum est, seu nemo miser","sequitur, debitum est, seu nemo miser e","ur, debitum est, seu nemo miser"
+LH_2_3_1_0004v-0003r,00068398:0008:071,73f3ddc6-50d5-42fd-a442-749ce70a00c7,MainZone,0.897,heavy_revision,near,0.763,0.763,1.000,0.763,Ex quo sequitur miseria universalis id,Ex quo sequitur miseria communis id,Ex quo sequitur miseria universalis id
+LH_2_3_1_0018r-0017v,00068398:0035:082,7845f1b0-a730-4920-9fd2-9bc786bee442,MainZone,0.861,heavy_revision,near,0.878,0.878,1.000,0.878,"Nam solent regulae esse exceptionibus obnoxiae, et",Nam solent regulae esse exceptionibus obnox,"Nam solent regulae esse exceptionibus obnoxiae, et"
+LH_2_3_1_0026r-0025v,00068398:0051:089,22ea8a5d-3ef0-4cc1-9f5c-15c326a807af,MainZone,0.929,heavy_revision,near,0.881,0.857,0.976,0.905,"Neminem laedere fat est reparabiliter, nisi",Neminem laedere fas est irreparabiliter n,"Neminem laedere fas est, reparabiliter, nisi"
+LH_2_3_1_0054v-0053r,00068398:0108:007,31971e45-79b0-4b65-9f76-26297136888b,MainZone,0.901,heavy_revision,near,0.727,0.774,0.790,0.774,"suum inquam, id est non ut antia, quod ei sine quod stricto jure","Suum inquam, id est non ut antea, quod
+stricto jure","Suum inquam, id est non ut antea, quod ei sine injustitia"
+LH_2_3_1_0054v-0053r,00068398:0108:047,fa2e0c62-93b8-46f7-8785-c7ee3988ad14,MainZone,0.620,heavy_revision,disagree,0.620,0.873,0.635,0.946,"visii sed et daliarum circumstantiarum ratio habenda est, sinri enim potest","vitii sed et aliarum circumstantiarum ratio
+habenda est, fieri enim potest ut mi","aliarum circumstantiarum ratio habenda est, ut minus vitium"
+LH_2_3_1_0056r-0055v,00068398:0111:027,2dc82f81-5df1-4238-b6b3-67ad2d388d27,MainZone,0.946,heavy_revision,near,0.796,0.848,0.939,0.848,"datum certus viaque designata, ut nisi volentes","datum viaque designata, ut nisi volentes","datum certusque viaque designata, ut nisi volentes"
+LH_2_3_1_0056r-0055v,00068398:0111:074,e0f1ef86-0c0a-4121-93c2-b0b043293ee1,MainZone,0.966,heavy_revision,near,0.822,0.822,1.000,0.822,juri societatis  non modo societatis praecepta,ietatis non modo societatis praecepta,juri societatis non modo societatis praecepta
+LH_2_3_1_0056r-0055v,00068398:0111:084,4950424c-92fe-4508-835a-e9fc423d1d66,MainZone,0.962,heavy_revision,near,0.875,1.000,0.875,1.000,"violemus, quo nihil periculosius intelligi potest","violemus, quo nihil periculosius intelligi potest,","violemus, quo nihil periculosius intelligit"
+LH_2_3_1_0056r-0055v,00068398:0111:093,b75d7027-30d0-4322-a5d5-e6b965d0ec28,MainZone,0.678,heavy_revision,disagree,0.444,0.735,0.694,0.735,"dirigimus, nihil homine felicius fingi potest erit","dirigimus, nihil homine
+felicius erit.",nihil homine felicius fingi potest:
+LH_2_3_1_0056r-0055v,00068398:0111:094,6884c4ef-4252-4249-956f-c99298e98218,MainZone,0.840,heavy_revision,near,0.894,0.824,0.902,0.824,"immortalit enim anima est, et Mundus sub DEo Rectore","Immortalis enim anima est, et Mundus sub Deo","Immortalis enim anima est, et Mundus sub Rectore"
+LH_2_3_1_0056r-0055v,00068398:0111:098,b330bbfb-c460-4723-b00e-0385413ddbf4,MainZone,0.731,heavy_revision,disagree,0.582,0.918,0.699,0.918,"ne fingi quidem aliud aliquid optabilius posse, quam quae Deus praeparavit","ne fingi quidem aliquid
+optabilius posse, quam quae Deus praeparavit","ne fingi quidem aliud aliquid optabilius posse, his quos"
+LH_2_3_1_0056r-0055v,00068398:0111:099,fb83016e-c6b2-44c0-ab85-85ff7784d267,MainZone,0.644,heavy_revision,near,0.750,0.975,0.750,0.975,his quos amat et quibus amatur. Quod ergo,his quos amat et quibus amatur. Quid ergo,his quos amat et quibus amatur.
+LH_2_3_1_0056v-0055r,00068398:0112:008,3ca02901-6103-40fd-a48f-474081834afa,MainZone,0.950,heavy_revision,near,0.861,0.756,0.732,0.780,"sunt, et fum sel nihil esse felicia potest","sunt, et nihil esse felicius potest",summa fel nihil esse felicius potest
+LH_2_3_1_0056v-0055r,00068398:0112:054,621ea202-0729-4420-9277-c232ef81f5fd,MainZone,0.788,heavy_revision,near,0.850,0.850,1.000,0.850,perpetuae consulamus.,perpetuae consula,perpetuae consulamus.
+LH_2_3_1_0065v-0062r,00068398:0130:013,bf4caee6-dde5-4745-9df6-faeba5edc021,MainZone,0.521,heavy_revision,disagree,0.690,1.000,0.690,1.000, ejus velut coercetur. Sed quia,ejus velut coercetur. Sed quia,ejus velut coercetur.
+LH_2_3_1_0065v-0062r,00068398:0130:056,6975aaac-3f93-4af8-8cd0-838b2c7c1f4e,MainZone,0.961,heavy_revision,near,0.818,0.818,1.000,0.818,percipio enim me unum omnes illas,"io enim me
+unum omnes illas",Percipio enim me unum omnes illas
+LH_2_3_1_0069r-0068v,00068398:0137:047,e6455af3-17c8-4cbd-b8b7-a2df24596369,MainZone,0.775,heavy_revision,near,0.880,0.864,0.760,0.864,"ad simpilas res, sed et","ad singulas res, sed et","ad singulas res, sed et ad"
+LH_2_3_1_0069r-0068v,00068398:0137:049,83e872fd-43a2-421a-aaec-a4122d94dfad,MainZone,0.869,heavy_revision,disagree,0.542,0.542,1.000,1.000,certam definitamque massam,certam definitamque massam plerumque se extendit (:,certam definitamque massam
+LH_2_3_1_0069v-0068r,00068398:0138:065,9628df70-bf84-4f3e-aa68-99b2890d6b03,MainZone,0.896,heavy_revision,disagree,0.538,0.538,0.780,0.878,bono impaimis maxiniae necessitati p pose,"bono, imprimis maximae necessitati post habendum.
+Qui secus agit vi","bono, ma imprimis maximae necessitati post"
+LH_2_3_3_0002v-0001r,00068400:0004:041,983e8129-1339-47b2-af5b-93fad86a4bb7,MainZone,0.927,heavy_revision,near,0.810,0.732,0.929,0.756,"habet, saltem possibile damnum Mepa damnum","habet, saltem possibile damnum culp","habet, saltem possibile damnum culpa damnum"
+LH_2_3_3_0002v-0001r,00068400:0004:089,c9dd5c87-2d6a-4c58-b153-7a0f699c6bf7,MarginTextZone,0.875,heavy_revision,near,0.786,0.805,0.976,0.854,"jure fit , quodcunque nemini incommodum est",Jure fit 1) quodcunque nemini incommod,Jure fit quodcunque nemini incommodum est2
+LH_2_3_3_0004r-0003v,00068400:0007:026,cfcd124f-f39c-429e-a6bf-174abf782517,MainZone,0.925,heavy_revision,disagree,0.500,0.615,0.814,1.000,humanam dirigit et conservat. Quo sensu jus est vel naturale,"humanam dirigit et conservat. Quo sensu (qui in hoc titulo
+praevalere videtur) jus est vel naturale,","igit et conservat. Quo sensu jus est vel naturale,"
+LH_2_3_3_0004r-0003v,00068400:0007:031,a36002b2-4a21-4b42-9413-88fd8c8705d2,MainZone,0.632,heavy_revision,near,0.828,0.933,0.767,0.950,hac si negligant homines sunt bestiis deteriores. Jus Gentium,"Haec si negligant homines sunt bestiis deteriores.
+Jus Gent",aec si negligant homines sunt bestiis deteriores.
+LH_2_3_3_0004v-0003r,00068400:0008:053,f828ab45-870d-4e6d-aec4-833de46e6cd5,MainZone,0.924,heavy_revision,near,0.829,0.934,0.849,0.973,dirigitur ad perfectionem ipsius civitatis quatenus livitas esitant extra,"dirigitur ad perfectionem ipsius civitatis quatenus civitas est, ita ut extra","dirigitur ad perfectionem ipsius civitatis quatenus civitas est,"
+LH_2_3_3_0004v-0003r,00068400:0008:061,9abaad1e-2fda-4b62-92c7-a4be54a11edf,MainZone,0.930,heavy_revision,near,0.889,0.812,0.899,0.812,est non tantum privatum sed et publicum vel na turale vel tivile esse,est non tantum privatum sed et publicum vel naturale vel,est non tantum privatum sed et publicum vel naturale vel civile
+LH_2_3_3_0029r-0028v,00068400:0057:053,1b1c99f5-c9bb-4446-8ca8-631f7afb9e29,MainZone,0.706,heavy_revision,near,0.850,1.000,0.850,1.000,De rerum repetitione.,De rerum repetitione.,rerum repetitione.
+LH_2_3_3_0032r-0031v,00068400:0063:118,47ead7e8-5f8b-467c-b83d-543c14758cb0,MainZone,0.978,heavy_revision,near,0.881,0.881,0.854,0.927,Mur in murorum violatore spoena capitalis,"ur +).
+In murorum violatores poena capitalis 1",). In murorum violatores poena capitalis
+LH_2_3_3_0032v-0031r,00068400:0064:015,4a41ff59-aa08-434d-b9a6-2d4d49f329a5,MainZone,0.992,heavy_revision,disagree,0.541,0.649,0.708,1.000,l. majorem 8- D. depactis. . fin. C. qui bon ced. poss. et,"l. majorem 8. D. de pactis, 1.
+fin. C. qui bonis cedere possunt et 8. quod si nemo","l. majorem 8. D. de pactis, l. fin. C. qui bonis"
+LH_2_3_3_0032v-0031r,00068400:0064:046,71c05297-5fce-4510-ae8f-8496fe9ff7b3,MainZone,0.936,heavy_revision,near,0.830,0.811,0.981,0.865,praeses Magistratus seipsum praesidemdare non potest,"praesidis
+Magistratus seipsum judicem dare non potest",Praeses Magistratus seipsum praesidem dare non potest
+LH_2_3_3_0048v-0047r,00068400:0096:030,ac08826f-740b-493b-9a84-5a2f49514aa4,MainZone,0.523,heavy_revision,near,0.794,1.000,0.794,1.000,Corpus aut res incorporalis. Corpus,"Corpus aut res incorporalis.
+Corpus",Corpus aut res incorporalis.
+LH_2_3_3_0050r-0049v,00068400:0099:046,10678274-e5f6-4362-b022-a7a12e183590,MainZone,0.653,heavy_revision,near,0.816,1.000,0.816,1.000,in rem. Facultati in personam respondet,"in rem. Facultati in personam
+respondet",Facultati in personam respondet
+LH_2_3_3_0054r-0053v,00068400:0107:035,e992e40b-60b3-4e3c-9d36-776a49ae103d,MainZone,0.963,heavy_revision,near,0.896,1.000,0.896,1.000,videtur enim rationis esse ut distinguatur inter,videtur enim rationis esse ut distinguatur inter,ur enim rationis esse ut distinguatur inter
+LH_2_6_0029r-0028v,00068659:0057:033,3972947c-145d-4630-9c2f-86e5373221bb,MainZone,0.906,heavy_revision,near,0.838,0.949,0.795,0.949,"daretur nihil aliud spectandum esset in jurisprudentia, quam distributio, id est","daretur, nihil aliud spectandum esset in Jurisprudentia, quam distributio, id","daretur, nihil aliud spectandum esset in Jurisprudentia, quam ut"
+LH_2_6_0029r-0028v,00068659:0057:123,ffdd142a-c56f-4da6-b4d8-389043096b0a,MainZone,0.957,heavy_revision,near,0.826,0.826,1.000,0.826,quae cum uni tribuuntur alteri decedunt. In his,"quae cum uni tribuuntur, alteri decedun","quae cum uni tribuuntur, alteri decedunt. In his"
+LH_2_6_0030r,00068659:0059:045,9cec63b7-8f14-4868-b839-8f5cd657965a,MainZone,0.987,heavy_revision,near,0.783,0.767,0.870,0.767,"e aeterorum interest, ut equ sim felix ut quantum in issis est, edo sim felix; mea, ut quantum","caeterorum interest, ut quantum in ipsis est, ego sim felix; mea, ut quantum","Quare caeterorum interest, ut ego sim felix quantum in ipsis est, ego sim felix; mea, ut quantum"
+LH_35_10_12_0025r,00068165:0049:050,bbabde86-5cd2-4d92-b4c1-c310295c5a75,MainZone,0.906,heavy_revision,near,0.897,0.897,1.000,1.000,"vim reassurgendi, usque ad C. per suppos. 1 hoc est vim","vim reassurgendi
+B e ,E usque ad C, per suppos. 1, hoc est, vim","vim reassurgendi usque ad C, per suppos. 1, hoc est, vim"
+LH_35_10_19_0002r-0001v,00068173:0003:150,090ccf7a-fb3d-4a66-855a-a2121f7ead1a,MainZone,0.961,heavy_revision,near,0.786,0.786,1.000,0.786,physicae dogmata deducantur. Hoc jam praeclare a socrate in commentario,"Physicae dogmata deducantur. Hoc jam
+praeclare a Socrate",Physicae dogmata deducantur. Hoc jam praeclare a Socrate in Commentario
+LH_35_10_19_0002v-0001r,00068173:0004:010,93b5bb28-2c84-4e82-ae6f-f649dfa97571,MainZone,0.844,heavy_revision,near,0.897,1.000,0.897,1.000, instrumenta cum causa vera.,"instrumenta cum causa
+vera.",et instrumenta cum causa vera.
+LH_35_1_14_0037r,00067976:0073:041,9e9cbda8-47a8-4e7d-8c7a-1dd820c3901c,MainZone,0.770,heavy_revision,near,0.816,0.723,0.918,0.808,tantumque variationesq omnes faciamus possibile,variationesque omnes faciamus possibiles,antumque variationesque omnes faciamus possibiles
+LH_35_1_26_0004r-0003v,00067988:0007:059,cba203c0-936e-4ac8-bcd5-6a122b20265c,MainZone,0.849,heavy_revision,near,0.775,0.761,0.982,0.982,"vel exacte, vel saltem per appropinquationem, sine certam","vel exacte, vel saltem per appropinquationem,
+quantum volumus, sive certam","vel exacte, vel saltem per appropinquationem, sive certam"
+LH_35_1_26_0008r-0007v,00067988:0015:032,bc80d3f7-8f24-461a-a9a4-cf727ac27790,MainZone,0.953,heavy_revision,near,0.746,0.746,1.000,1.000,"de comparatione qualitatum, sive de similitudine","de
+comparatione qualitatum, sive de similitudine ut cum duos quo","de comparatione qualitatum, sive de similitudine"
+LH_35_1_26_0008r-0007v,00067988:0015:086,6ce28177-ee61-4fc0-afaf-1fba2e21144d,MainZone,0.646,heavy_revision,near,0.778,0.764,0.782,0.764,succedere eodem modo nullumque inde prrucipium reperiet,succedere nullumque inde principium reperiet,eodem modo nullumque inde principium reperiet
+LH_35_1_26_0008v-0007r,00067988:0016:010,58d97fef-e0db-4dfa-8a3a-570d2b2188cd,MainZone,0.647,heavy_revision,near,0.731,0.985,0.716,0.985,Aequalia sunt quae in congrua transmusari possunt. similia sunt quae,"Aequalia sunt quae in congrua transmutari possunt, similia sunt
+quae","Aequalia sunt quae in congrua transmutari possunt,"
+LH_35_1_26_0009r,00067988:0017:002,02e7da36-ac14-4b5c-bf0c-0ca9b45a4700,MainZone,0.560,heavy_revision,disagree,0.697,0.939,0.636,0.939,xy valere aabcde. recum in calculo,xy valere aabcde. Verum in calculo,aabcde. Verum in calculo
+LH_35_1_26_0011r,00067988:0021:006,2d340e93-7de9-4afb-822c-1e57f347c11e,MainZone,0.752,heavy_revision,near,0.783,0.783,1.000,1.000,dum alia problemata ad ista solennia reducuntur.,"dum alia problemata ad ista solennia reducuntur.
+Data veterum",dum alia problemata ad ista solennia reducuntur.
+LH_35_1_27_0014r,00067989:0027:010,0d38c305-4f0f-4817-9cc7-7c275ce58f5d,MainZone,0.652,heavy_revision,near,0.761,0.915,0.761,0.944,comittit. De arte observandi aliquid Curiosum ex oblatis Tabulis. Fiepter,omittit. De arte observandi aliquid Curiosum ex oblatis Tabulis. Keplerus,De arte observandi aliquid Curiosum ex oblatis Tabulis
+LH_35_1_27_0014r,00067989:0027:037,a86409c1-8379-46e5-aa1b-bde87a9e7d48,MainZone,0.916,heavy_revision,near,0.784,0.750,0.855,0.855,"degitis prestitis Analysis  ubi semel reperta est, solam requirit attentriinem, qualis","les presbitis. Analysis ubi semel reperta est, solam requirit
+attentionem seu firmitatem m","resbitis. Analysis ubi semel reperta est, solam requirit attentionem, qualis"
+LH_35_1_27_0014r,00067989:0027:054,e3b0f1a7-14aa-43f5-8c80-6d27caccb6a4,MainZone,0.707,heavy_revision,near,0.841,0.795,0.863,0.836,potest. Ex arte eandem inquisitione rei ejusdem per diversas vias efflores,"potest. Ex inquisitione rei ejusdem per diversas vias
+efflorescit",Ex arte eandem inquisitione rei ejusdem per diversas vias efflorescit
+LH_35_1_2_0003r-0002v,00067961:0005:084,a3fde551-b96b-4560-aa6d-d8c6ebf00388,MainZone,0.645,heavy_revision,disagree,0.600,0.733,0.733,0.933,"sum eidem rei eodem congruant, eodem modo eorum quantitas per","numquodque eidem rei totum semel congruat, eodem modo eorum
+quantitas per co","semel congruat, eodem modo eorum quantitas per"
+LH_35_1_2_0003r-0002v,00067961:0005:102,263cc8e0-bd33-4a58-a737-bc6dffb90add,MainZone,0.945,heavy_revision,near,0.885,0.869,0.982,0.982,"Hinc quae eidem tota simul congruunt, aequalia sunte nam","Hinc quae eidem toti tota simul congruunt aequalia sunt, nam n","Hinc quae eidem tota simul congruunt aequalia sunt, nam"
+LH_35_1_2_0003r-0002v,00067961:0005:117,a8e73556-724f-4ac4-b845-397919387e07,MainZone,0.940,heavy_revision,near,0.868,0.815,0.785,0.815,Extima sunt puncta quae in quibus nullum punctum designari potest,"Extima sunt in quibus nullum punctum designari potest,","ncta quae in quibus nullum punctum designari potest,"
+LH_35_1_2_0005r-0004v,00067961:0009:082,73f6ac5b-1bdf-46b0-9842-6f1f85f97955,MainZone,0.866,heavy_revision,disagree,0.500,0.586,0.754,0.806,Recta linea est quae perripi best duobus punctis perceptis simul eo,Recta linea est quae duobus punctis perceptis simul eo ipso percipitur.,Recta linea est quae statim percipi potest punctis perceptis simul eo
+LH_35_1_2_0005v-0004r,00067961:0010:009,f1a605f2-9115-4ff0-89f2-abe54975762a,MainZone,0.658,heavy_revision,near,0.806,1.000,0.806,1.000,seu Linea est locus punctorum quotcunque communem proprietatem habentium,"seu Linea est locus punctorum
+quotcunque communem proprietatem habentium.",locus punctorum quotcunque communem proprietatem habentium.
+LH_35_1_5_0032v,00067964:0064:014,d056d737-5cc4-4e6d-a40b-369f3afb90af,MainZone,0.514,heavy_revision,disagree,0.650,0.975,0.650,0.975,"exlensio est in duabus lineis, duratio in","extensio est in duabus lineis, duratio in","ensio est in duabus lineis,"
+LH_35_9_16_0012r,00068140:0023:003,bf287ae8-8c70-4101-b0c8-3aa854608711,MainZone,0.540,heavy_revision,disagree,0.596,0.894,0.636,0.977,pondus ad tantam altitudinem; ten dendi arcum,pondus ad tantam altitudinem; vel tendendi arcum,pondus ad tantam altitudinem;
+LH_35_9_16_0012r,00068140:0023:030,5f601549-9423-4779-bfbc-9f9a1c89b733,MainZone,0.580,heavy_revision,disagree,0.522,0.808,0.731,0.827,"Conatus est libram ponderis in statera, impetas grans","Conatus est ponderis in statera, impetus gravis","Conatus est libram ponderis in statera,"
+LH_35_9_16_0012v,00068140:0024:007,41f376f5-4912-40d7-95b7-58390b2c2ce3,MainZone,0.945,heavy_revision,near,0.864,0.818,0.818,0.818,ualiet et ipsis distribulat semper manel pro-,"a, et ipsis distributa semper manet pro",manet et ipsis distributa semper manet propo
+LH_37_3_0008r,00068532:0015:054,09eb599c-d21c-4a1d-b86e-223923e6bc29,MainZone,0.903,heavy_revision,near,0.868,0.868,1.000,1.000,"si duo corpora, ejusdem materiae diversae magni",si duo corpora gravia ejusdem materiae diversae magni,si duo corpora ejusdem materiae diversae magni
+LH_37_3_0010r-0009v,00068532:0019:133,923fee65-6f1f-467d-a5f1-daaeca93a8bb,MainZone,0.720,heavy_revision,near,0.793,0.894,0.765,0.929,"xcitare posse, vel sensu vel ratione constat radios lucis rfect in superficiem aliquam","xcitare posse, et vel sensu vel ratione constat radios lucis in superficiem aliquam",vel sensu vel ratione constat radios lucis in superficiem aliquam
+LH_37_4_0005r,00068606:0009:103,e9772c21-daee-4571-b0bb-9ddda42c3199,MainZone,0.922,heavy_revision,near,0.837,0.898,0.851,0.936,insecendentes tol oportet esse aequationes à se,"independentes, tot oportet
+esse aequationes a se i","ndentes, tot oportet esse aequationes a se"
+LH_37_4_0086v-0085r,00068606:0176:008,f52352de-23ff-48ed-82d8-d6bc7d6f95e2,MainZone,0.972,heavy_revision,near,0.868,0.684,0.816,0.842,"celeritatiminori, cum unum tardus celerius incurrit intardius. Nam impingit in","celeritati minori, cum celerius incurrit
+A B AB AB in tardius. Nam impingit in","celeritati minori, cum celerius incurrit in tardius. Nam impingit in"
+LH_37_4_0086v-0085r,00068606:0176:112,9d825de5-97ef-4b12-a1ce-4005b40e38ac,MarginTextZone,0.652,heavy_revision,disagree,0.524,0.524,0.778,0.786,in causa motus,ione intrinseca [motus],sed in causa motus
+LH_37_4_0088v,00068606:0180:005,c579710d-6dd8-45d4-adac-1025dcf43b33,MainZone,0.561,heavy_revision,near,0.889,0.896,0.875,0.917,S.N. T. His positis sit navis LMN. in qua duo globi,"B B His positis sit navis LMN, in qua
+do globi","His positis sit navis LMN, in qua duo globi"
+LH_37_4_0088v,00068606:0180:011,c7733ea9-c90a-4c85-8a44-169ff22d799d,MainZone,0.938,heavy_revision,near,0.788,0.879,0.903,0.935,bili. in M autem concurrentia si,bili. In M autem concurrentia haec,"ili. In M autem concurrentes, si"
+LH_37_4_0088v,00068606:0180:014,f891408a-1758-4f93-bae6-3178590c3e75,MainZone,0.913,heavy_revision,near,0.857,1.000,0.857,1.000,fecte capacia sint,fecte capacia sint,perfecte capacia sint
+LH_37_4_0088v,00068606:0180:026,54538651-e236-4f83-b9a3-1cfc546c9027,MainZone,0.830,heavy_revision,near,0.796,0.852,0.804,0.922,"navis initio motus globulorum sit in loco iL1M1N, Eb","navis initio motus globulorum sit in loco ,L, M, N,
+A AB B","in initio motus globulorum sit in loco L M N,"
+LH_37_5_0167r-0166v,00068534:0329:094,2b4dd090-8b3a-4fa0-b293-ee38a615745f,MainZone,0.939,heavy_revision,near,0.783,0.804,0.913,0.907,alcunde constet ra ecundum rigorem vera non,"aliunde constet secundum rigorem
+vera non esse,",aliunde constet vera secundum rigorem vera non
+LH_37_5_0167r-0166v,00068534:0329:178,9b520401-7f3e-4b31-b347-61b74e106ec9,MainZone,0.709,heavy_revision,near,0.725,0.902,0.804,1.000,"mutati situs est, seu quod agit, utique corpus e.","mutati situs est, seu quod agit, utique corpus e move","mutati situs est, seu quod agit, utique"
+LH_4_5_3_0002v-0001r,00068616:0004:013,4bd83da8-1c73-4b4e-8ed7-ffe9cd067516,MainZone,0.805,heavy_revision,disagree,0.384,0.506,0.710,0.892,"culculis explicasti analysi, uti et si diversiimodis characteribus diversae appareant facilius","calculis
+explicasti in granulis aliave materia numerabili exequaris, semper enim idem proveniet.
+Et in analysi, etsi diversis characteribus diversae appareant facilius","analysi, etsi diversis modis characteribus diversae appareant facilius"
+LH_4_5_3_0003r,00068616:0005:015,294a2b60-db33-4c9c-9925-b23eced00582,MainZone,0.683,heavy_revision,near,0.806,1.000,0.806,1.000,existit. Seu Veritas propositionum necessariarum semper existit. Ergo,"existit.
+Seu Veritas propositionum necessariarum semper existit. Ergo",Seu Veritas propositionum necessariarum semper existit.
+LH_4_5_5_0002v-0001r,00068618:0004:015,1998dab8-89ea-434f-8b7e-d9140ab8c81e,MainZone,0.941,heavy_revision,near,0.889,0.829,0.854,0.829,"pas encor d’assez des graces du ciel, nede",pas encor assez des grâces du ciel,as encor assez des graces du ciel ny
+LH_4_5_5_0002v-0001r,00068618:0004:052,8359a23e-4d5e-41b2-a788-ab5f3b8b666b,MainZone,0.994,heavy_revision,near,0.811,0.811,1.000,0.811,"utiles en deux sortes, sçavoir en celles qui sont déja","utiles en deux sortes, sçavoir en celles qui","utiles en deux sortes, sçavoir en celles qui sont déjà"
+LH_4_5_5_0004r-0003v,00068618:0007:015,9a7c8038-2fc9-4f3d-afd4-49832d79a8e3,MainZone,0.961,heavy_revision,near,0.717,0.809,0.787,0.808,"geat tout d’un coup, dans un sycteme regle, satis","ge
+tout d’un coup, dans un système réglé,","tout d’un coup, dans un systeme reglé, satisfait"
+LH_4_5_5_0004r-0003v,00068618:0007:043,e1c74e64-6a47-46d4-b75d-f8eddae02ffc,MainZone,0.936,heavy_revision,disagree,0.505,0.505,1.000,1.000,a exercer leur esprit dans des objets solides et,"à exercer leur esprit dans des objets
+solides et reels à l'avantage du public. Les chasseurs, les",à exercer leur esprit dans des objets solides et
+LH_4_5_5_0004r-0003v,00068618:0007:087,15ca3265-5ce0-44d8-bbec-a2ce90672618,MainZone,0.982,heavy_revision,near,0.864,0.833,0.933,0.850,"profiter, il est constant neant moins, que le plus omportantes","profiter, il est constant neantmoins, que les plus cons","profiter, il est constant neantmoins, que les plus importante"
+LH_4_5_5_0004v-0003r,00068618:0008:008,fe69e5f0-e440-43e9-b9cc-d08af979e623,MainZone,0.903,heavy_revision,near,0.734,0.773,0.742,0.864,"ne contenantn’estant qu’un catalogue des Termes aux, et des maximes","ne contenant qu’un catalogue
+is des Termes vagues, et des maximes","n’estant qu’un catalogue des Termes generaux, et des maximes"
+LH_4_5_5_0004v-0003r,00068618:0008:009,f1b73f1f-3205-4c6d-adeb-dd2f431dd0b0,MainZone,0.907,heavy_revision,near,0.792,1.000,0.792,1.000,"apparentes communement receues, j’avoue que leur usage","apparentes communément receues. J’avoue que leur
+usage",communement receues. J’avoue que leur usage
+LH_4_5_6_0019r,00068619:0037:006,c3340d24-adf4-4c9c-a3c0-8de8057efb0d,MainZone,0.711,heavy_revision,near,0.797,0.952,0.758,0.952,ea quae nondum satis percepere ut falsa rejicere; qu aliaque id,"ea quae
+nondum satis percepere ut falsa rejicere; aliaque id",ea quae nondum satis percepere ut falsa rejicer
+LH_4_5_6_0019r,00068619:0037:007,6546f429-5e5e-4910-96bb-9b6468590b31,MainZone,0.669,heavy_revision,near,0.781,0.932,0.838,1.000,"genus, quae hominum animos, turbant, variisque difficultatibus materiam","genus, quae hominum animos turbant,
+variisque difficultatibus materiam prae","hominum animos turbant, variisque difficultatibus materiam"
+LH_4_5_6_0019r,00068619:0037:022,73034698-e130-460a-986b-782e862bb4d2,MainZone,0.622,heavy_revision,near,0.854,0.923,0.788,0.942,"Egi igitur veritatis criteria postulo, quae non magis","igitur veritatis criteria postulo, quae non magis","veritatis criteria postulo, quae non magis"
+LH_4_5_6_0019r,00068619:0037:029,c3fffa54-120b-4956-b01a-ff4e364d9144,MainZone,0.651,heavy_revision,disagree,0.690,0.775,0.787,0.951,"percipiatur, cm opus enim est notus clari et distincti, quoniam","percipiatur, opus
+enim est notis palpabilibus clari et distincti, quoniam","ur, opus enim est notis clari et distincti, quoniam"
+LH_4_5_8_0007r-0006v,00068621:0013:083,8d7eb9b8-b308-420e-a28c-a7d41d11fa67,MainZone,0.872,heavy_revision,near,0.879,0.879,1.000,1.000,autem fieri potest ut simul plures ejusmodi literae,autem fieri potest ut simul plures duabus ejusmodi literae,autem fieri potest ut simul plures ejusmodi literae
+LH_4_5_8_0007r-0006v,00068621:0013:173,cbf3e3b8-84cf-4c1a-a75b-c515c2715cc1,MarginTextZone,0.577,heavy_revision,near,0.724,1.000,0.724,1.000,parum aptum tametsi 3 hic pro,"parum aptum, tametsi 3 hic pro","parum aptum, tametsi 3"
+LH_4_5_8_0010r-0009v,00068621:0019:118,347ec3a0-228f-45a8-944f-efcd9537f9d4,MainZone,0.636,heavy_revision,disagree,0.500,0.839,0.742,0.839,"ut Homo et brutum, animalis natu","ut Homo et
+brutum animalis",et brutum animalis natu
+LH_4_5_8_0012r-0011v,00068621:0023:125,9e1f5d0a-a946-415d-aaad-2ea3ddd72c06,MainZone,0.780,heavy_revision,near,0.760,0.880,0.864,1.000,"Imo est paralogismus, e","Imo est paralogismus, et s",Imo est paralogismu
+LH_4_5_8_0014v-0013r,00068621:0028:097,8ce93fb5-db59-4364-8edd-3aac898a1bfd,MainZone,0.845,heavy_revision,disagree,0.684,0.895,0.765,1.000,praedicatum fieri,praedicatum fieri d,praedicatum f
+LH_4_5_8_0016r-0015v,00068621:0031:038,c63d4e85-8b8e-41ac-ad63-b96d63914bd3,MainZone,0.858,heavy_revision,disagree,0.467,0.694,0.796,0.755,jam in omni propositione affinmativa nihil refert,Jam in omni propositione nihil refert [an],a est b propositione affirmativa nihil refert
+LH_4_5_8_0016r-0015v,00068621:0031:101,2366a136-aac4-46f5-8130-50f13c13ba2e,MainZone,0.898,heavy_revision,near,0.893,0.893,1.000,1.000,est fossile ductilissimum.,est fossile ductilissimum. Ex,est fossile ductilissimum.
+LH_4_5_8_0016r-0015v,00068621:0031:124,4ed0fcf9-eced-42fb-b0ec-f429bcc680d6,MainZone,0.778,heavy_revision,near,0.880,0.957,0.840,0.957,et generis genus in est,"et generis genus inest,","ei et generis genus inest,"
+LH_4_5_8_0018v-0017r,00068621:0036:040,2d2c63fc-f7e3-4aba-ad48-85febc4f27b8,MainZone,0.764,heavy_revision,near,0.848,0.966,0.879,0.966,Verum in eo hic est discrimem,Verum in eo hic est discrime,"Verum in eo hic est discrimen, nam"
+LH_4_5_8_0018v-0017r,00068621:0036:046,7dac8144-75a3-4393-9c20-a93e56e410e8,MainZone,0.894,heavy_revision,near,0.880,0.840,0.957,0.957,non in de facies justum..,"non inde facies justum.
+Si",non inde facies justum.
+LH_4_5_8_0020v-0019r,00068621:0040:089,0ccf1572-fb61-4583-a683-41e3033e3e44,MarginTextZone,0.748,heavy_revision,near,0.739,0.941,0.696,0.941,ationibus omnibus.,itionibus omnibus,propositionibus omnibus.
+LH_4_6_11_0002r-0001v,00068634:0003:085,d8677baf-db82-4b6c-a246-434478306c45,MainZone,0.644,heavy_revision,near,0.713,0.940,0.667,0.941,"à tout le monde, ou que qu’on apprenne en écrivant on en parlant. Comme en effect ceux","à tout le monde, ou
+qu’on apprenne en écrivant ou en parlant. Comme en effect ceux","tout le monde, ou qu’on apprenne en écrivant ou en parlant."
+LH_4_6_11_0005r,00068634:0009:029,92da6dd8-02d1-4490-ad9b-8424a3c7edf7,MainZone,0.872,heavy_revision,near,0.763,0.763,1.000,1.000,"dio agere, quam aedes mediocres ingredi mallet","dio agere, quam aedes mediocres ingredi
+mallet.
+una popularis","dio agere, quam aedes mediocres ingredi mallet."
+LH_4_6_12a_0001v,00068635:0002:028,db59f7b3-dad1-464b-8681-498d2705069b,MainZone,0.926,heavy_revision,near,0.897,0.757,0.757,0.757,"ungumenti prodidisset, in quo sperabam","sum prodisset, in quo sperabam","et prodisset, in quo sperabam"
+LH_4_6_12a_0003r,00068635:0005:015,6cf5dfc0-69e9-4c97-bbc7-389835befc51,MainZone,0.876,heavy_revision,near,0.735,0.755,0.949,0.949,intrinseca probari impossibile est. Cali,"intrinseca probari impossibile est. Percipio
+autem",intrinseca probari impossibile est. Tal
+LH_4_6_12a_0003v,00068635:0006:018,025a11e4-e9a4-4c92-9775-123faea49828,MainZone,0.951,heavy_revision,near,0.800,0.691,0.855,0.727,"potius synthesin exertabit, nec ullas quaestiones facile","potius synthesin prosequetur, nec quaestiones facil",potius synthesin exercebit nec quaestiones facile
+LH_4_6_12a_0003v,00068635:0006:026,8fa6855e-5661-4070-8e4b-acde21f6ad39,MainZone,0.688,heavy_revision,near,0.884,0.736,0.698,0.755,Errant ergo qui putunt analytice scribene se cum supr,Errant vero qui putant analytice scribi cum,Errant vero qui putant analytice scribere
+LH_4_6_12f_0017v-0016r,00068636:0034:011,1b9e9ace-76bb-4ab3-bd45-3d672ba0a754,MainZone,0.651,heavy_revision,near,0.757,0.946,0.750,0.972,circuli et in analysi periade est ac,"circulis ; et in analysi,
+perinde est, ac","et in analysi, perinde est, ac"
+LH_4_6_12f_0017v-0016r,00068636:0034:031,cdeb2521-b709-40a1-ac9e-bc09f5328046,MainZone,0.900,heavy_revision,near,0.889,0.865,0.919,0.865,inqueedietur per obliquitatem obliqui,edietur per obliquitatem obliqui,ingredietur per obliquitatem obliqui
+LH_4_6_12f_0017v-0016r,00068636:0034:034,c8906b17-eb49-4f85-bb85-17bd85d97c5e,MainZone,0.926,heavy_revision,near,0.765,0.788,0.971,0.788,Ex his intelligitur Thema tractar,Ex his intelligitur Thema simplex,Ex his intelligitur Thema tractare
+LH_4_6_12f_0017v-0016r,00068636:0034:041,9d548b82-b972-42f1-beaf-ea8e08b53061,MainZone,0.957,heavy_revision,near,0.829,0.906,0.857,0.906,"hoc Thema, set ideo rurem pendere",hoc Thema et ideo rem pendere,hoc Thema et ideo rerum rem pendere
+LH_4_6_12f_0017v-0016r,00068636:0034:058,35fc5fb2-b6fa-4b3b-bff0-9feaf547a129,MainZone,0.774,heavy_revision,near,0.854,0.951,0.805,0.951,per modum concensionis vel praemissae vel,"per modum conclusionis vel praemissae, vel",per modum conclusionis vel praemiss
+LH_4_6_12f_0018r,00068636:0035:018,e31c1b20-717d-4e90-a86f-cb49eec096e4,MainZone,0.689,heavy_revision,near,0.709,0.909,0.722,0.944,"ut motui corporis perdito ex ictus in molle, ubi impelu","t motui corporis perdito ex ictu
+i0 in molle, ubi impetu","motui corporis perdito ex ictu in molle,"
+LH_4_6_12f_0018r,00068636:0035:039,7a133f68-a782-4dc3-89b0-20f990694c58,MainZone,0.632,heavy_revision,near,0.824,0.791,0.651,0.791,ebroque  cogitandi atque agendi usu terminia,"ebroque
+cogitandi atque agendi usu",crebroque cogitandi atque agendi
+LH_4_6_12f_0025r,00068636:0049:009,3936b6c0-3a36-4198-a535-247f5776d9dc,MainZone,0.673,heavy_revision,near,0.700,1.000,0.700,1.000,nihil minus quam analysin sive principia,nihil minus quam analysin sive principia,quam analysin sive principia
+LH_4_6_12f_0025v,00068636:0050:009,200cae8a-4b6a-4324-bd18-405a951fc119,MainZone,0.950,heavy_revision,near,0.812,0.833,0.975,1.000,"strare non possent, coacti sunt monere, ut","strare non possent,
+coacti sunt monere, ut si alii","trare non possent, coacti sunt monere, ut"
+LH_4_6_12f_0025v,00068636:0050:033,774de34d-cf10-481c-b629-224160434c88,MainZone,0.677,heavy_revision,near,0.773,0.955,0.727,0.955,Alii iisdem principris,Alii iisdem principiis,iisdem principiis
+LH_4_6_12f_0026r,00068636:0051:001,039cf274-f5f0-465d-b269-61b642cfdd43,MainZone,0.767,heavy_revision,near,0.815,0.778,0.963,0.778,Phyticae arcanum in hoc uno,physicae arcanum in ho,physicae arcanum in hoc uno
+LH_4_6_12f_0026r,00068636:0051:018,0f2cd408-7ba6-4b1d-831a-85ee15623895,MainZone,0.837,heavy_revision,near,0.754,0.965,0.737,0.965,"est etiam qualitates contusas ex tali structura resullare,","est etiam qualitates confusas ex tali structura resultare,",etiam qualitates confusas ex tali structura
+LH_4_6_13_0002r-0001v,00068637:0003:066,031bd8af-4b32-4c5d-aa3d-fb18d641ead3,MainZone,0.850,heavy_revision,disagree,0.554,0.554,1.000,1.000,"Sed semper aliqua ejus ratio reddi potest, quae","sed semper aliqua ejus ratio (inclinans tamen, non vero necessitans) reddi potest, quae","sed semper aliqua ejus ratio reddi potest, quae"
+LH_4_6_15_0005r,00068639:0009:014,c8e46947-3c27-4387-b6c7-8c8569323c76,MainZone,0.902,heavy_revision,near,0.867,0.867,1.000,0.900, uno ex praemissa ad praemissam,ex praemissa ad praemissam,"uno ex praemissa ad praemissam,"
+LH_4_6_15_0005r,00068639:0009:063,987f3f5b-895c-4506-875e-903daf1c5914,MainZone,0.634,heavy_revision,near,0.800,0.943,0.771,0.943,"quiato ex EIO, fit EAO, Hinc in prime",Quinto ex EIO fit EAO. Hinc in prima,ex EIO fit EAO. Hinc in prima
+LH_4_6_18_0001r,00068642:0001:002,99c46085-38fc-4016-a97e-a36e41a83606,MainZone,0.877,heavy_revision,near,0.898,0.881,0.981,0.982,ucognitionis consideranti in mentem venit exercitus in,"cognitionis consideranti in mentem
+venit imago exercitus, in","cognitionis consideranti in mentem venit exercitus, in"
+LH_4_6_18_0001r,00068642:0001:019,a48b3bc3-e2e9-4402-98ee-8a5a5fee64aa,MainZone,0.959,heavy_revision,near,0.790,0.787,0.968,0.787,"turbari immutarique indies necesse sit, quod parum diligentibi,","turbari immutarique indies necesse sit, quod promtis quidem,","turbari immutarique indies necesse sit, quod parum diligentibus"
+LH_4_6_18_0001r,00068642:0001:028,09714e98-ca32-4f4a-b77f-c7cf9f383a3c,MainZone,0.952,heavy_revision,near,0.768,0.900,0.833,0.917,"librorum molt, eadem reciprocantium moles, de qua atius deinde","librorum
+eadem reciprocantium moles, de qua latius deinde","librorum moles eadem reciprocantium moles, de qua latius"
+LH_4_6_18_0001r,00068642:0001:034,0980f1ba-41c4-4f0c-a8f5-66c37f44e777,MainZone,0.924,heavy_revision,near,0.855,0.839,0.984,0.839,"omnem Naturae et vitae artisque, et quicquid sensu At relatione","omnem Naturae artisque, et quicquid sensu
+et relatione","omnem Naturae et vitae artisque, et quicquid sensu et relatione"
+LH_4_6_19_0012r,00068643:0023:018,3afa7571-59b6-44a7-8323-b85f14749e49,MainZone,0.978,heavy_revision,near,0.771,0.750,0.973,1.000,quia eju ope decidi possunt quaestio,quia ejus ope decidi possunt quaestiones positiv,quia ejus ope decidi possunt quaestio
+LH_4_6_19_0012r,00068643:0023:032,e47b17c0-03b1-441d-aa07-3f70d05d1978,MainZone,0.583,heavy_revision,disagree,0.657,0.971,0.657,0.971,dandum esse quod probari non potest,"gandum
+esse quod probari non potest",quod probari non potest
+LH_4_7A_0007v-0006r,00068644:0014:018,07e2fce8-4a68-4294-8e8d-3f0682de53e2,MainZone,0.800,heavy_revision,near,0.889,0.889,1.000,1.000,de Terris et re minerali,"De Terris et re minerali.
+30)",De Terris et re minerali.
+LH_4_7A_0007v-0006r,00068644:0014:027,2451777a-f092-487c-809a-51193408530a,MainZone,0.778,heavy_revision,near,0.827,0.930,0.788,0.954, de sufficientia rerum et Commereis ac manud-,De Sufficientia rerum et Commerciis ac manu,et De Sufficientia rerum et Commerciis ac manuficiis
+LH_4_7A_0013v,00068644:0026:003,bb87d9c2-f6b1-4b65-8355-2bccc7182031,MainZone,0.729,heavy_revision,near,0.848,0.837,0.848,0.923,sunt experimenta nostrarum cogitationum,que) esse experimenta nostrarum cogitationum,quoque sunt experimenta nostrarum cogitationum
+LH_4_7A_0014r,00068644:0027:003,0a1b40bc-e1cb-429d-a738-d9c214e13354,MainZone,0.836,heavy_revision,disagree,0.478,0.735,0.776,0.735,animi plurimis ad bene beateque vivendum notitiis,"animi plurimis ad bene beateque
+vive",efficacibus ad bene beateque vivendum notitiis
+LH_4_7A_0014r,00068644:0027:016,1fdd1760-06c5-42f2-b8ad-f468ca3a7a44,MainZone,0.929,heavy_revision,near,0.848,0.848,1.000,0.848,nobis pati possunt; sed omnium maxime expetenda,nobis pati possunt; sed maxime expetenda,nobis pati possunt; sed omnium maxime expetenda
+LH_4_7A_0015r,00068644:0029:018,e71f194a-f66e-4da6-a98d-4100b2bf9bcc,MainZone,0.969,heavy_revision,near,0.853,1.000,0.853,1.000,mentium denique de natura corporea,"mentium, denique de natura corporea,","atque denique de natura corporea,"
+LH_4_7A_0016v,00068644:0032:016,08f1ce83-d2d5-4a12-b1ff-1e9992b9e76e,MainZone,0.578,heavy_revision,near,0.735,1.000,0.735,1.000,proportiones ascribendae. addendis explicationibus,"proportiones ascribendae, addendis explicationibus","ascribendae, addendis explicationibus."
+LH_4_7A_0016v,00068644:0032:025,1e3a0e44-58ce-47ef-b515-ab6903aab244,MainZone,0.639,heavy_revision,near,0.795,0.744,0.703,0.784,"emnl in hoc magnali, ut possint exurqu","erunt in hoc manuali, ut possint eximi.
+P","in hoc manuali, ut possint eximi."
+LH_4_7A_0018r-0017v,00068644:0035:041,b5d267ba-6f03-4abc-ae9c-5ab7776d7004,MainZone,0.958,heavy_revision,near,0.896,0.935,0.938,0.935,"est natura tum corporis nostri, tum anvicinorum,","est natura tum corporis nostri, tum vicinoru","est natura tum corporis nostri, tum ali vicinorum,"
+LH_4_7A_0020r-0019v,00068644:0039:049,923d6915-f629-4a62-adbf-7d4ed304ce57,MainZone,0.897,heavy_revision,near,0.846,1.000,0.846,1.000,"nobis possit demonstrari, ex illis.  solis","nobis possit demonstrari,
+ex illis solis","possit demonstrari, ex illis solis"
+LH_4_7A_0020r-0019v,00068644:0039:057,090ce051-05d0-4468-bec6-db47261e2fd7,MainZone,0.888,heavy_revision,near,0.738,0.738,1.000,0.738,"Cujus rei ratio brevis est, quod aggregatum","Cujus rei ratio brevis est, quod","Cujus rei ratio brevis est, quod aggregatum"
+LH_4_7A_0021r,00068644:0041:023,5bb0ff5d-9df4-45bd-90bf-8402bcb333fc,MainZone,0.835,heavy_revision,near,0.815,0.895,0.733,0.907,"tradit, quam incertirum quibus Algetra occupatur, calculu omnis novis artibus perficitur","tradit,
+quam incertorum quibus Algebra occupatur, calculus omnis novis artibus perf","tradit, quam incertorum quibus Algebra occupatur, calculus omnis ad pau"
+LH_4_7A_0021r,00068644:0041:043,4178f90f-385c-4e45-8b61-a5a7697dfc7a,MainZone,0.912,heavy_revision,near,0.767,1.000,0.767,1.000,Aequationes Algebraicas transcendant; itaque,"Aequationes Algebraicas transcendant;
+itaque",t Algebraicas transcendant; itaque
+LH_4_7A_0027r-0026v,00068644:0053:162,d3aa0fe6-096e-480e-afda-4317e591c68d,MainZone,0.866,heavy_revision,near,0.792,0.792,1.000,1.000,"ad publicam autem si opibus mediocribus, et","ad publicam autem tum maxime si opibus mediocribus, et","ad publicam autem si opibus mediocribus, et"
+LH_4_7A_0027v-0026r,00068644:0054:013,b926d143-461f-4438-a768-f1eca605b181,MainZone,0.932,heavy_revision,near,0.863,0.863,1.000,1.000,"vindicare velit, quod alii Novarum Methodorum",vindicare velit; quod alii quidam Novarum Methodorum,vindicare velit; quod alii Novarum Methodorum
+LH_4_7A_0027v-0026r,00068644:0054:042,9f97c045-12ec-49a1-96f3-76a9b6f6f355,MainZone,0.913,heavy_revision,near,0.756,0.756,1.000,0.756,non ita tamen ut tollatur plane. Unde hanc,"non ita tamen ut
+tollatur plane.",non ita tamen ut tollatur plane. Unde hanc
+LH_4_7A_0030v,00068644:0060:021,9b9a5252-cb68-4422-a56d-459271451154,MainZone,0.942,heavy_revision,near,0.836,0.973,0.838,0.973,"Coctoria. Huc coctiones vitrioli, salis petiae, salis, communis, aluminis, sacca","Coctoria. Huc coctiones vitrioli, salis petrae, salis communis, aluminis, sacc","Huc coctiones vitrioli, salis petrae, salis communis, aluminis, saccari,"
+LH_4_7A_0030v,00068644:0060:025,2892e833-4c63-4829-8333-7716015a21fb,MainZone,0.873,heavy_revision,near,0.882,0.943,0.849,0.943,Ommes chymicae operationes et Chymicorum instirumenta.,Omnes chymicae operationes et chymicorum instrument,chymicae operationes et chymicorum instrument
+LH_4_7A_0032r-0031v,00068644:0063:073,2f28b5c4-7209-4513-9abf-c4984c3e8076,MainZone,0.955,heavy_revision,disagree,0.672,0.825,0.857,0.825,quem veleribus non plane ignotum fuisse satis ex ipso Apollonio,"quem veteribus non plane ignotum fuisse
+satis ex Diophanto",ribus non plane ignotum fuisse satis ex ipso Apollonio
+LH_4_7A_0032r-0031v,00068644:0063:087,c19b6da2-dddf-48be-b039-1a917dd2bba6,MainZone,0.949,heavy_revision,near,0.833,0.800,0.900,0.800,Sed inputinis applicatio Geometiisae ad Mechanicen,Sed et applicatio Geometriae ad Mechanicen,Sed inprimis applicatio Geometriae ad Mechanicen
+LH_4_7A_0032r-0031v,00068644:0063:102,923318ab-a8ac-45f9-8662-49120e66a5c0,MainZone,0.962,heavy_revision,disagree,0.582,0.567,0.942,0.780,experimenta laperent ac noscomia qua observationum,"experimenta caperent ac nosocomia, laboratoria, officinas,
+mineras, ali","experimenta caperent ac nosocomia, quae observationum"
+LH_4_7A_0032v-0031r,00068644:0064:001,d71bdb78-a3fd-409c-99c1-3d671943d247,MainZone,0.830,heavy_revision,near,0.812,0.812,1.000,0.812,certas ob causas,certas ob cau,certas ob causas
+LH_4_7A_0032v-0031r,00068644:0064:019,ad5999b2-3ef1-4a3c-949a-78f33229d600,MainZone,0.581,heavy_revision,disagree,0.607,0.875,0.679,0.962,instructissima ordine atque inventario carere. Et quid,instructissima ordine atque inventario careret. Quid enim,ordine atque inventario careret. Et qui
+LH_4_7A_0034r-0033v,00068644:0067:048,89258ace-2a52-4f8d-9b4d-11b04f90af53,MainZone,0.912,heavy_revision,disagree,0.652,0.768,0.758,0.779,instellinopes de Criticans diplomatum aliorumque hujus modi documentorum nupera instello oeptam,"tantia indicari. Criticam diplomatum aliorumque hujusmodi documentorum nuper a
+Justello et",Justelli opus de Critica diplomatum aliorumque hujusmodi documentorum Criticam...
+LH_4_7A_0034r-0033v,00068644:0067:111,37aadbc1-d91d-431e-843b-85136242dd95,MainZone,0.951,heavy_revision,near,0.724,0.697,0.964,0.964,"abtingere deberem, jus publicum imperii aliorum reguorum","attingere deberem, qui jus publicum imperii tradidere, qui aliorum
+regnorum in","attingere deberem, jus publicum imperii, aliorum regnorum"
+LH_4_7A_0034r-0033v,00068644:0067:117,970ae479-9d3a-43cd-b67a-e68349fd32fe,MainZone,0.734,heavy_revision,near,0.860,0.884,0.949,0.974,"e de novo codice, de corpore juris recon","m, de novo Codice, de corpore juris reconcinn","de novo Codice, de corpore juris recon"
+LH_4_7A_0036r-0035v,00068644:0071:016,5ca6d69d-d9aa-47b8-be33-df3addfcadc4,MainZone,0.959,heavy_revision,near,0.860,0.860,1.000,0.860,"conspirantibus naturae et religioni credendum est, felices","conspirantibus naturae et religioni credendum est,","conspirantibus naturae et religioni credendum est, felices"
+LH_4_7A_0036r-0035v,00068644:0071:048,a622b0c9-1a06-4321-a728-0f69ca3a8c66,MainZone,0.808,heavy_revision,near,0.800,0.750,0.938,0.750,"deprehensum est, demonstr aliquid, ad ad earum vim","deprehensum est, aliquid ad earum vim","deprehensum est, demonstr aliquid ad earum vim"
+LH_4_7A_0036r-0035v,00068644:0071:072,d8cee587-1747-49a2-93ca-6c2a599ea1e5,MainZone,0.990,heavy_revision,near,0.722,0.722,1.000,0.722,atque aestimandi; ut summa subducta comparatis utrinque,"atque
+aestimandi; ut comparatis utrinque",atque aestimandi; ut summa subducta comparatis utrinque
+LH_4_7A_0036v-0035r,00068644:0072:041,a3fc8828-30b1-48b2-9ec5-e57cea7260f9,MainZone,0.922,heavy_revision,near,0.804,0.896,0.917,0.896,"aedium Lexico utebar, nam evolvendi taedium festi","nec Lexico utebar, nam evolvendi taedium festi","taedium Lexico utebar, nam evolvendi taedium fe"
+LH_4_7A_0038r-0037v,00068644:0075:045,06e1b29e-9fb0-44a2-b055-ae502466ab16,MainZone,0.884,heavy_revision,near,0.768,0.768,1.000,0.839,"atque invisa reddiderunt. Huic malo tandem occurretur, cum",atque invisa reddiderunt. Huic malo non melius occurretu,"atque invisa reddiderunt. Huic malo tandem occurretur, cum"
+LH_4_7A_0040r-0039v,00068644:0079:002,22bdbca0-47c2-4765-a75c-cadfaa07eeb9,MarginTextZone,0.738,heavy_revision,disagree,0.636,0.758,0.692,0.962,edunt quam parum in hausto,"edunt, quam parum in haustis illis",quam parum in haustis
+LH_4_7A_0042r-0041v,00068644:0083:088,610bbeee-2f92-4fe1-8d5a-cf4013797bd8,MainZone,0.633,heavy_revision,disagree,0.607,0.857,0.600,0.857,incertitudinis atque improbitatis feruutur. Praesertim ubi sacum vident,"incertitudinis
+atque improbitatis feruntur. Praesertim ubi vid",improbitatis feruntur. Praesertim ubi vident
+LH_4_7A_0044v-0043r,00068644:0088:007,73ca214f-6fc9-4f9e-a1d3-2b2b85c1a8c2,MainZone,0.968,heavy_revision,disagree,0.529,0.445,0.841,0.917,"trematicisue, inventoru admirabilium machmatum ut in physicis,","thematicis, inventoremque admirabilium machinarum ut in physicis, sed et
+Mentium Regem in hac Universali Republica sese o","thematicis, inventoremque admirabilium machinarum ut in physicis,"
+LH_4_7A_0044v-0043r,00068644:0088:035,e3a542da-eb0f-46fe-83e6-4b32e93b0be9,MainZone,0.977,heavy_revision,near,0.877,0.800,0.844,0.800,"duer interris clocuerat, occaso suo expiavit, seque parissimum Patri sacrificium obtulit. Sed","us docuerat, occasu suo expiavit, seque purissimum Patri sacrificium obtulit.
+R","in terris docuerat, occasu suo expiavit, seque purissimum Patri sacrificium obtulit."
+LH_4_7A_0046r-0045v,00068644:0091:043,561642a1-e55c-499b-9d39-f611abfb0100,MainZone,0.941,heavy_revision,near,0.838,0.838,0.884,0.899,"nova illis subsidia summissa, dubiam nostris victoriam fecere; quin imo","nova illis subsidia summissa, dubiam nostris victoriam fecere; restabat scil","nova illis subsidia summissa, dubiam nostris victoriam fecere; r"
+LH_4_7A_0046r-0045v,00068644:0091:049,f75a9c82-ff3b-4614-8922-249e2a30e277,MainZone,0.945,heavy_revision,near,0.806,0.791,0.985,0.791,vitaeque mollioris cultu a majorum robore descixissent. impares fort,"vitaeque
+mollioris cultu a majorum robore descivissent;",vitaeque mollioris cultu a majorum robore descivissent; impares fort
+LH_4_7A_0046v-0045r,00068644:0092:066,111305eb-9772-488d-bb0c-826740c468d1,MainZone,0.923,heavy_revision,near,0.817,0.730,0.889,0.730,"ad tantum bonum generi, red Christiamo orbi procurandam boncmolu","ad tantum bonum Christiano orbi
+procurandum bonam",ad tantum bonum generi rei Christiano orbi procurandum bonam
+LH_4_7A_0047r,00068644:0093:006,fa8f4c0e-262b-449a-9b93-b1a5d871d1c1,MainZone,0.919,heavy_revision,near,0.857,0.887,0.900,0.887,"eloquentia, quid poesi quae divinior quaedam eloquentia et quasi Deorum Augerorum","eloquentia, quid poësi, quae divinior quaedam eloquentia et quasi Angelorum","eloquentia, quid poësi, quae divinior quaedam eloquentia et quasi Deorum lingua"
+LH_4_7A_0047r,00068644:0093:059,ec89980e-40ae-4361-9972-a85c84d2b2ce,MainZone,0.991,heavy_revision,disagree,0.633,0.783,0.845,0.810,"aliquando visum fuerit dolendum, veras sententias, non satis","aliquando visum fuerit dolendum,
+sententias optimas non satis","quando visum fuerit dolendum, veras sententias sententi"
+LH_4_7A_0047r,00068644:0093:060,b6d70880-9ff2-453c-a864-3b815dc61562,MainZone,0.637,heavy_revision,near,0.722,1.000,0.722,1.000,"cognitas fuisse homini, qui egregie adeo et exponere et","cognitas fuisse homini, qui egregie adeo et exponere et","cognitas fuisse homini, qui egregie adeo"
+LH_4_7A_0048r,00068644:0095:032,5914f8dc-f86f-4253-b044-210ed725d47c,MainZone,0.971,heavy_revision,near,0.744,0.859,0.853,0.985,"agere boluit, de Anima Mundi, de ideis subsistentibus, de purgationibus","agere voluit, de
+Anima Mundi, de ideis subsistentibus extra res, de purgationibus","it, de Anima Mundi, de ideis subsistentibus, de purgationibus"
+LH_4_7A_0048r,00068644:0095:040,f16acd55-7a4c-42e4-84f5-f4cac06408ca,MainZone,0.963,heavy_revision,near,0.825,0.800,0.938,0.863,"neslro quom superstitionibus dediti traut et miracula jactabant, sive vitio animi","ne superstitionibus dediti erant et miracula jactabant, sive vitio
+animi sive","nescio quem superstitionibus dediti erant et miracula jactabant, sive vitio animi"
+LH_4_7A_0048v,00068644:0096:022,36839470-69ac-4794-9e1f-468ceaa4b843,MainZone,0.931,heavy_revision,near,0.833,0.819,0.983,1.000,"rerum essentias repraesentent, ideoque scientiam nostram ese","rerum universales essentias repraesentent,
+ideoque scientiam nostram esse","rerum essentias repraesentent, ideoque scientiam nostram esse"
+LH_4_7A_0050r-0049v,00068644:0099:071,b59d4096-8d3d-45a4-9cd1-4d2b719e33a5,MainZone,0.632,heavy_revision,near,0.758,0.959,0.774,0.959,"differt, ab illa tranquillitate animi, quam Epicums.","differt, ab illa tranquillitate animi, quam Epicu","differt, ab illa tranquillitate animi, quam Epicurus commendavit"
+LH_4_7A_0050r-0049v,00068644:0099:092,3c99f9c4-c274-4e22-bb6c-a78017e749c3,MainZone,0.916,heavy_revision,disagree,0.631,0.656,0.938,0.766,"quoque interiora inspexisse, et de Deo de Mente, de undi sydlemale","quoque interiora inspexisse, et Platonem de Deo, mente et ideis,","quoque interiora inspexisse, et de Deo de Mente, de Mundi Systemate"
+LH_4_7A_0050r-0049v,00068644:0099:114,69bbc43e-e31c-43d6-88c8-0348e954e0c9,MainZone,0.950,heavy_revision,near,0.762,0.762,1.000,0.778,libros legend philosophorum libros legendo volitare non  admodum,philosophorum libros legendo volitare non admodu,libros legend philosophorum libros legendo volitare non admodum
+LH_4_7A_0050v-0049r,00068644:0100:021,81c85b00-a9ff-40a2-a54d-288fff37b5d2,MainZone,0.869,heavy_revision,near,0.703,0.875,0.721,0.951,daeet altiores lineas negligentiis tractavere. At s peculiarem,"dae essent, altiores lineas negligentius tractavere. At peculiarem",altiores lineas negligentius tractavere. At pe
+LH_4_7B_1_0002r-0001v,00068645:0003:050,7e310bfa-34dd-4417-b6cc-97f85b89af07,MainZone,0.930,heavy_revision,near,0.772,0.737,0.955,0.977,"neessaires aux commes, pour profiter de leur","necessaires aux hommes, pour profiter de leur
+avantages, et","necessaires aux hommes, pour profiter de leur"
+LH_4_7B_1_0006r-0005v,00068645:0011:036,9f8bd3a1-4e3d-4fc0-b075-3551bd446212,MainZone,0.850,heavy_revision,near,0.894,0.882,0.824,0.882,"pour faire negliger les ostudes, il faudroit que les","pour faire négliger
+les estudes, il faudrait que","pour faire negliger les estudes, il faudroit"
+LH_4_7B_1_0006r-0005v,00068645:0011:054,e60e130c-81dd-4847-82f1-5b579ce8643a,MainZone,0.646,heavy_revision,disagree,0.600,0.911,0.567,0.922,"fragmens des leurs Excerptes qui nous restent, et non sanss’estre attire la maledistion des","fragmens des Excerptes qui nous restent, et
+non sans s’estre attiré la malédiction des","fragmens des Excerptes qui nous restent, et non sans"
+LH_4_7B_1_0010v-0009r,00068645:0020:007,080160d7-1635-4685-bbd3-28fee5a1ddff,MainZone,0.935,heavy_revision,near,0.811,0.811,1.000,0.811,vulgaire leurs manieres communes. Mais ,"e
+leurs maniérés communes. Mais",vulgaire leurs manieres communes. Mais
+LH_4_7B_1_0010v-0009r,00068645:0020:025,3da52d58-7f80-4519-948c-c017020e8e97,MainZone,0.836,heavy_revision,near,0.875,0.864,0.939,0.864,pins que les pieces fermes qui doivent soutenir les preces parties,pas que les pièces fermes qui doivent soutenir les parties,as que les pieces fermes qui doivent soutenir les pieces parties
+LH_4_7B_2_0006r,00068646:0011:011,183bad0b-dd3c-4abc-a9c8-eed113074039,MainZone,0.903,heavy_revision,near,0.800,0.800,1.000,0.800,Unum exemplum sufficiat nunc quidem:,Unum exemplum sufficiat nunc,Unum exemplum sufficiat nunc quidem:
+LH_4_7B_2_0006r,00068646:0011:057,9df0b65c-ba93-48fd-a642-2e117afc1b9c,MainZone,0.569,heavy_revision,disagree,0.613,0.900,0.600,0.960,melius quam siholae formulis utemm. itaque quemamodum rideretur qui monere t,melius quam scholae formulis utemur. Itaque quemadmodum rideretur qui moneret mer,melius quam scholae formulis utemur. Itaque quemad
+LH_4_7B_2_0009r-0008v,00068646:0017:091,0c6f6b29-f255-4b34-9a1c-a02c4b9903f9,MainZone,0.972,heavy_revision,disagree,0.697,0.806,0.879,0.806,Terminus primitivus seu attrtum,Terminus primitivus seu r,erminus primitivus seu attributum
+LH_4_7B_2_0009r-0008v,00068646:0017:093,c87af953-7c1c-4ce9-b4d3-c5ce6fda6cd9,MainZone,0.920,heavy_revision,near,0.739,0.739,1.000,0.739,"concipitur, seu quod alio requisito non indiget","concipitur, seu quod
+alio requisito","concipitur, seu quod alio requisito non indiget"
+LH_4_7B_2_0009r-0008v,00068646:0017:103,b783e920-c99b-44da-b176-29902b04f0fe,MainZone,0.901,heavy_revision,near,0.786,0.786,1.000,0.786,esset varietas in compositis,esset varietas in comp,esset varietas in compositis.
+LH_4_7B_2_0011r-0010v,00068646:0021:036,c5c670e8-9f98-4d72-b1c1-7a5bb76b74ae,MainZone,0.935,heavy_revision,near,0.875,1.000,0.875,1.000,ergo falsae erunt hae propositiones: Ergo,ergo falsae erunt hae propositiones: Ergo,falsae erunt hae propositiones: Ergo
+LH_4_7B_2_0011r-0010v,00068646:0021:042,8c1b194e-e358-4405-8a60-a13d5ea6cea1,MainZone,0.896,heavy_revision,near,0.800,0.860,0.930,1.000,falsum est d esse b d contra hypothesin has,"falsum est d esse b, quod est contra hypothesin, has","falsum est d esse b, contra hypothesin, ha"
+LH_4_7B_2_0011r-0010v,00068646:0021:046,1c1d61c5-416a-4680-abee-4e64f51e2c65,MainZone,0.927,heavy_revision,near,0.872,1.000,0.872,1.000,adem sunt quorum unum in alterius locum,adem sunt quorum unum in alterius locum,sunt quorum unum in alterius locum
+LH_4_7B_2_0013r-0012v,00068646:0025:051,fa0cbf85-a39a-434a-8917-1ff8a64628ff,MainZone,0.626,heavy_revision,near,0.796,1.000,0.796,1.000,constantis. Itaque definitio est propositio cujus ratio,"constantis.
+Itaque definitio est propositio cujus ratio",Itaque definitio est propositio cujus ratio
+LH_4_7B_2_0016r,00068646:0031:101,8e6d2f01-9593-4ab4-8073-d1216af2c15a,MainZone,0.817,heavy_revision,near,0.897,0.862,0.931,0.862,erit vel l vel A major quam L.,erit vel / vel X major quam 1.,erit vel l vel λ major quam 1.
+LH_4_7B_2_0017v,00068646:0034:055,aedaba61-9e90-4841-a00d-764b8f3ca246,MainZone,0.868,heavy_revision,near,0.833,0.833,0.833,0.833, aequ a,aequ. v,aequ. 1
+LH_4_7B_2_0021r-0020v,00068646:0041:123,a73c0277-fe7f-42b6-823e-73fbcf06a17c,MarginTextZone,0.560,heavy_revision,near,0.700,1.000,0.700,1.000,a esse C. vel d esse b. Ut omnis,"a esse c, vel d esse b. Ut
+omnis","a esse c, vel d esse b."
+LH_4_7B_2_0022r,00068646:0043:022,eaf8b245-89c1-4e1b-9c0b-88ea93a646a3,MainZone,0.874,heavy_revision,near,0.719,0.738,0.985,0.739,"Ut quae semel vel experiundo vel ratiocinando, comperta sunt eorum","ut quae semel vel experiundo vel ratiocinando de
+C","t quae semel vel experiundo vel ratiocinando comperta sunt, eorum"
+LH_4_7B_2_0022r,00068646:0043:033,dae20b8a-20c4-4422-b017-f9edd0b5ae72,MainZone,0.825,heavy_revision,near,0.833,0.833,1.000,0.833,"magis notionem rei signatae exprimunt, ita ut non tantum memori rei","magis
+notionem rei signatae exprimunt, ita ut non tantum","magis notionem rei signatae exprimunt, ita ut non tantum memori rei"
+LH_4_7B_2_0022v,00068646:0044:044,13a1d1cf-9f9b-4806-b84b-65379c2d2d0a,MainZone,0.946,heavy_revision,disagree,0.412,0.600,0.773,0.773,formulas (sub quibus comprehendere ice simplicissimas nempe ipsos caracteres),"formulas (sub quibus tanquam
+simplicissimas licet comprehendere ipsos characteres)",formulas (sub quibus comprehendere licet simplicissimas nempe tanquam
+LH_4_7B_2_0023r,00068646:0045:003,25b37b3c-ae34-40e2-ada3-7cf2f6383496,MainZone,0.644,heavy_revision,near,0.700,0.762,0.580,0.884,"unum ex ipsis (quod libuerit) tumi possit pro recto, reliqua pro obliquo","unum ex ipsis (quod libuerit) sumi possit
+pro absoluto, reliqua pro modificato. Tale","d libuerit) sumi possit pro absoluto, reliqua pro obliquo.. Tale"
+LH_4_7B_2_0032v,00068646:0064:022,d56b0472-5c95-40ed-82e5-ce2dbb123d94,MainZone,0.665,heavy_revision,disagree,0.676,1.000,0.676,1.000,Molior Calculum quendam Analyticum,Molior Calculum quendam Analyticum,Molior Calculum quendam
+LH_4_7B_2_0035r-0034v,00068646:0069:019,1d0a6bba-2088-4a5f-b71d-48e94cf57ba6,MarginTextZone,0.882,heavy_revision,near,0.857,0.828,0.828,0.828,"maneant, quae aliud inexistens","ma, quae aliud inexistens","minima, quae aliud inexistens"
+LH_4_7B_2_0035r-0034v,00068646:0069:093,084f12b0-92f6-422f-96d5-d5a336826fca,MainZone,0.603,heavy_revision,near,0.759,1.000,0.759,1.000,"sunt similia, et praeterea dici non potest utrum potius","sunt similia, et praeterea dici non potest utrum potius",et praeterea dici non potest utrum potius
+LH_4_7B_2_0036r,00068646:0071:033,ccda7f74-aff6-4454-9962-247f5dbb0fe7,MainZone,0.952,heavy_revision,near,0.840,0.840,1.000,0.840,"appareat lex progressionis, non amplius necesse est )","appareat lex progressionis, non amplius nec","appareat lex progressionis, non amplius necesse est:)."
+LH_4_7B_2_0036v,00068646:0072:012,a422f0e9-d243-4c81-a8ce-670e205f3f3c,MainZone,0.518,heavy_revision,near,0.827,0.963,0.796,0.963,appareat) F itaque demonstratio possibilitatis ipsius A,"appareat :). (: Itaque
+demonstratio possibilitatis ipsius A",Itaque demonstratio possibilitatis ipsius A
+LH_4_7B_2_0040r,00068646:0079:015,31c90f4b-cadd-48c5-b8f6-5f85c50f02c8,MainZone,0.971,light_revision,disagree,0.694,0.694,1.000,0.694,involvit contradictionem. Hoc est Si pro A ponatur,"involvit
+contradictionem. Hoc est s",involvit contradictionem. Hoc est si pro A ponatur
+LH_4_7B_2_0041v,00068646:0082:000,1a296e94-37eb-4093-aaa8-e87f2a029d7a,MainZone,0.694,heavy_revision,near,0.826,1.000,0.826,1.000,Omnis id est nullus non,Omnis id est nullus non.,Omnis id est nullus
+LH_4_7B_2_0043r,00068646:0085:021,acd2ea97-3bfa-4df3-96cd-3794e01d9e3a,MainZone,0.565,light_revision,disagree,0.600,0.975,0.600,0.975,Derivatirum est quod resolutione in alia,Derivativum est quod resolutione in alia,quod resolutione in alia
+LH_4_7B_2_0043r,00068646:0085:026,22699e89-9d28-409c-92f3-86e7384786b5,MainZone,0.643,light_revision,near,0.714,1.000,0.714,1.000,rius natura est quod minus derivativum est,"rius natura est quod minus derivativum est[,]","est quod minus derivativum est[,]"
+LH_4_7B_2_0046r,00068646:0091:032,ff77e6de-588c-4ed7-97b8-596d39ec382d,MainZone,0.777,heavy_revision,disagree,0.667,0.548,0.812,0.867,ioaque bonis ludiniagistris se,"aque bonis ludimagistris saepe fit injuria,",Itaque bonis ludimagistris saepe
+LH_4_7B_2_0048r-0047v,00068646:0095:032,a05c3362-dad0-49a7-978d-ed1c2e553e2a,MainZone,0.892,heavy_revision,near,0.878,0.918,0.959,0.959,"quando A et B sunt res, tunc posito A non esse A∞B","quando A et B sunt res,
+tunc posito non esse Aco B,","quando A et B sunt res, tunc posito A non esse A"
+LH_4_7B_2_0050r-0049v,00068646:0099:005,1cec355b-37ae-474a-81af-c95d6fe936e1,MainZone,0.973,heavy_revision,near,0.797,0.780,0.979,0.979,modo secundum actionem principalis se  accommodet,modo secundum actionem voluntariam principalis se accommode,modo secundum actionem principalis se accommode
+LH_4_7B_2_0050r-0049v,00068646:0099:007,6497de80-e55f-4b9e-94b7-196e2f63f9c0,MainZone,0.565,heavy_revision,disagree,0.667,0.951,0.732,0.951,"Conservare, est impedire destructionem  seu",Conservare est impedire destructionem s,est impedire destructionem seu
+LH_4_7B_2_0054r,00068646:0107:046,d586d298-20ee-43bf-9397-5bfe558be326,MainZone,0.796,heavy_revision,near,0.841,0.878,0.892,0.878,"Sine ulta illatione dicuntur illa plura constituentia, sec constitutum; illa","sine ulla illatione,
+dicuntur illa constituentia, hoc constitutum; illa","sine ulla illatione, dicuntur illa plura constituentia, hoc constitutum;"
+LH_4_7B_2_0054r,00068646:0107:057,504a43ac-cd1d-4937-a8d0-ac61ac3469d5,MainZone,0.901,heavy_revision,near,0.857,0.857,1.000,1.000,essent certa,essent certa r,essent certa
+LH_4_7B_2_0056r-0055v,00068646:0111:047,db51b8a6-f344-4014-a10a-e26416fd1e98,MainZone,0.525,heavy_revision,near,0.758,1.000,0.758,1.000,"novi componitur primum si binae quaevis se habeant, ut continens et","novi componitur, primum si binae quaevis se
+habeant, ut continens et","primum si binae quaevis se habeant, ut continens et"
+LH_4_7B_2_0056r-0055v,00068646:0111:136,02a97160-0bc3-47b4-93aa-a6365eaeaa3b,MainZone,0.758,heavy_revision,near,0.863,0.800,0.709,0.861,"additum cuivis eorum au non est, componat quodvis eorum cui in est, unde necs est","additum cuivis eorum cui non [in]est,
+componat quidvis eorum cui inest, D ® C co L et £ ®","cuivis eorum cui non [in]est, componat quidvis eorum cui inest, D. C # L et"
+LH_4_7B_2_0056v-0055r,00068646:0112:023,2b42d1f7-87ff-4861-8cdb-32c2b0608608,MainZone,0.920,heavy_revision,near,0.780,0.730,0.784,0.730,binattoresp possibiles ex omnibus terminis istis fiant omnes compinationes,"N, P\ ex omnibus terminis istis fiant omnes combinationes",possibiles ex omnibus terminis istis fiant omnes combinatio
+LH_4_7B_2_0056v-0055r,00068646:0112:037,1dc38145-5e02-4e99-ba78-1a69519033ad,MainZone,0.904,heavy_revision,near,0.812,0.775,0.889,0.889,et 10. 22. 34. sed tamen haec considerando ut tolidem series mexis continne,"et 10.22.34. Sed tamen haec considerando ut totidem series continue
+inexistentium,",et 10.22.34. Sed tamen haec considerando ut totidem series inexist cont
+LH_4_7B_2_0059r,00068646:0117:005,6b8077a2-fe46-43af-8e84-b763d7216365,MainZone,0.633,heavy_revision,near,0.768,0.918,0.776,0.929,"aggregationem. Eodem modo patet nec tempus ins esse, sed Entia quibus nem unum imposita","aggregationem. Eodem modo patet nec tempus Ens esse, sed Entia
+quibus unum impositum","Eodem modo patet nec tempus Ens esse, sed Entia quibus idem unum impositum"
+LH_4_7B_2_0059r,00068646:0117:017,5b8ef766-0d4c-4599-abf1-1f0f4c0f81a7,MainZone,0.967,heavy_revision,disagree,0.699,0.670,0.958,0.972,cum suml videmus ambo tunc non difficulter res tistinguimus; altera enim,"cum simul videmus ambo, tunc non
+difficulter res distinguimus; altera enim erga alteram velut mensura est.","cum simul videmus ambo, tunc non difficulter res distinguimus; altera enim"
+LH_4_7B_2_0059v,00068646:0118:026,1c9c080a-5216-4d6f-8444-9df99d7db105,MainZone,0.964,heavy_revision,near,0.800,0.735,0.765,0.750,"pedibus itaautem reperias conguere diagonali quadrati, perti ex ligno",ut si partem reperias congruere diagonali quadrati certi ex,pedibus et partem reperias congruere diagonali quadrati cert
+LH_4_7B_2_0059v,00068646:0118:029,7e4dea81-9a41-480d-a5d0-4aa3fff019b9,MainZone,0.906,heavy_revision,near,0.875,0.825,0.923,0.897,ocichatco formati; alterum partem lateri,"ichalco formati; alteram partem lateri.
+Ce",orichalco formati; alteram partem lateri.
+LH_4_7B_2_0063r-0062v,00068646:0125:037,a4b9c54d-8f2f-40dd-8214-d53c34c21283,MainZone,0.755,heavy_revision,near,0.882,0.882,1.000,0.882,quod est absurdum.,quod est absurd,quod est absurdum
+LH_4_7B_2_0065r-0064v,00068646:0129:118,c0662921-d227-4088-aefb-76448c63a18e,MainZone,0.960,heavy_revision,disagree,0.435,0.429,0.973,0.853,insunt etiam ex ipsis cointegantibus constitutum in est. Nam quia M est in C,"inest L, non erit B in M.
+4 1 )6 Si M est in C et N est in C erit M + N in C, seu cui singula insunt etiam ex ipsis
+constitutum inest. Nam quia M est in C,","insunt etiam ex ipsis cointegrantibus constitutum inest. Nam quia M est in C,"
+LH_4_7B_2_0073r,00068646:0145:019,0381d7de-ee2f-45d8-8ed7-c15affe1f66e,MainZone,0.963,heavy_revision,near,0.882,0.896,0.941,0.895,"dicatur, seu si nec u neque A sit B, neque B sit A neque A sit C, et c.","dicatur, seu si neque A sit
+B , neque B sit A, neque A sit C, etc.","dicatur, seu si nec non neque A sit B, neque B sit A, neque A sit C, etc."
+LH_4_7B_3_0004r,00068647:0007:002,c34a78f1-cc53-4664-b992-81196627410b,MainZone,0.626,heavy_revision,near,0.794,1.000,0.794,1.000,hominibus; itaque talis esse potest,"hominibus; itaque talis esse potest,",hominibus; itaque talis esse
+LH_4_7B_3_0004r,00068647:0007:036,07d14c31-4dce-4e9b-8ded-3363fd764369,MainZone,0.533,heavy_revision,near,0.719,0.875,0.667,0.933,"sic efforman, ut facile milibet","sic
+efformari, ut facile cuilibet","sic efformari, ut facile"
+LH_4_7B_3_0005r,00068647:0009:038,87e5c30f-86f6-4ace-b0d6-1a50aae9196e,MainZone,0.554,heavy_revision,disagree,0.667,1.000,0.667,1.000,in se invicem exhibere compositas notiones,in se invicem exhibere compositas notiones,exhibere compositas notiones
+LH_4_7B_3_0005v,00068647:0010:013,b2502f2e-221b-4f32-9770-54044ab60aea,MainZone,0.926,heavy_revision,near,0.787,0.771,0.958,0.771,"sitiones, sed generales seu indefinitas, tae nempe","sitiones, sed generales seu indefinita","sitiones, sed generales seu indefinitas, tan nemp"
+LH_4_7B_3_0005v,00068647:0010:018,17860e4c-a108-4304-adf7-36c2eaa3ba39,MainZone,0.930,heavy_revision,near,0.750,0.750,1.000,0.750,"sitiones ingredientes notionem, ex quibus","sitiones ingredientes notionem,","sitiones ingredientes notionem, ex quibus"
+LH_4_7B_3_0005v,00068647:0010:024,67355ddd-446e-4ae7-b20b-026945e1b816,MainZone,0.942,heavy_revision,near,0.870,0.804,0.881,0.902,"aterae asporatae, quae quadummodo duplices","iterae aspiratae, quae quodammodo duplices sunt.","literae aspiratae, quae quodammodo duplices"
+LH_4_7B_3_0007r,00068647:0013:058,e6a11b2c-80ae-4fb9-85ce-5b18bf8f3528,MainZone,0.710,heavy_revision,near,0.849,0.959,0.811,0.960,"numeris sumamus novis voces alias hominum vel atrimalium, easque constanter","numeris sumamus nobis
+voces alias hominum vel animalium, easque constanter","numeris sumamus nobis voces alias hominum vel animalium, easque"
+LH_4_7B_3_0008r,00068647:0015:042,30f2ee5b-6d2a-42c9-8bae-34d14ed4118b,MainZone,0.584,heavy_revision,near,0.714,0.857,0.714,0.857,to spectare ludos. num,"xo spectare ludos.
+Tem",το spectare ludos.
+LH_4_7B_3_0018r-0017v,00068647:0035:093,54f45cfd-f494-41d1-9246-780d7d5fdb05,MainZone,0.967,heavy_revision,near,0.702,0.774,0.903,0.806,dcens si praedeterminans et praedeterminatum sint res diversae,"dum est si
+praedeterminans et praedeterminatum sint eadem",Si praedeterminans et praedeterminatum sint res diversae
+LH_4_7B_3_0018r-0017v,00068647:0035:115,1e069357-cdc9-4d6e-8d92-fe79c123a1ee,MainZone,0.900,heavy_revision,near,0.815,0.791,0.970,0.791,imipellit causa est effect motus impulsi moti si nihil resistat. Ita,"impellit causa est impulsi moti, si nihil resistat. Ita","impellit causa est effec motus impulsi moti, si nihil resistat. Ita"
+LH_4_7B_3_0022r-0021v,00068647:0043:033,3d22ad59-d23b-4375-97d7-4ebd4871abc5,MainZone,0.522,heavy_revision,disagree,0.661,0.922,0.625,0.922,"vel ungulati, et jingula solida vel bisulca Sersulca quaedam sunt","vel ungulati, et ungula solida vel bisulca.
+Bisulca quaedam sunt","vel ungulati, et ungula solida vel bisulca."
+LH_4_7B_3_0022v-0021r,00068647:0044:010,18d7b7ea-b8e1-4a73-a68e-afc18ee1ddd4,MainZone,0.921,heavy_revision,near,0.807,0.821,0.877,0.923,"provesu esse lucidum, renebrosum, prtransparens opacum;","Pro visu esse
+lucidum, tenebrosum, transparens opacum; esse","Pro visu esse lucidum, tenebrosum, persp transparens opacum;"
+LH_4_7B_3_0022v-0021r,00068647:0044:074,e0960584-8791-4aee-aeb2-617d79b74a0d,MainZone,0.916,heavy_revision,near,0.746,0.725,0.942,0.725,"caeremoniam obire, civilem vel rusticum esse, jocarii ntonctare negotia","caeremoniam obire, civilem vel
+rusticum esse, jocari;","caeremoniam obire, civilem vel rusticum esse, jocari; tractare negotia,"
+LH_4_7B_3_0024r-0023v,00068647:0047:073,bd12416f-caaa-4819-a04f-c607f1324a03,MainZone,0.682,heavy_revision,near,0.793,1.000,0.793,1.000,"facile esse Linguam, et characterem Mutum comminisci. Itaque","facile
+esse Linguam et characterem mutum comminisci. Itaque",Linguam et characterem mutum comminisci. Itaque
+LH_4_7B_3_0027r,00068647:0053:021,c5d77c63-6843-4ad3-9a1c-e1d2df9b2fb4,MainZone,0.578,heavy_revision,near,0.756,0.833,0.657,0.833,"semper intelligi potest locum aliquis communis ipsius ipsorum A, D, E, tatis, ut qui sit B a quo si adimas","semper intelligi potest locus aliquis communis ipsorum A, D,
+E, qui sit B, a quo si adimas","semper intelligi potest locus aliquis communis ipsorum A, D, E, talis, ut"
+LH_4_7B_3_0041r-0040v,00068647:0081:035,4a5e08b1-1152-4fd2-a1a3-2ed58aab5b1d,MainZone,0.933,heavy_revision,near,0.863,0.860,0.754,0.860,"ridicularam, seu piuxisse ridiculare, id est ridicule quoad","turam seu pinxisse ridiculare, id est ridicule quoad","seu pinxisse ridiculure, id est ridicule quoad"
+LH_4_7B_3_0041r-0040v,00068647:0081:050,08da2b6e-dace-492b-91e8-000b885aafe1,MainZone,0.819,heavy_revision,near,0.733,0.733,1.000,0.733,"communia, neutra.","communia, ne","communia, neutra."
+LH_4_7B_3_0041r-0040v,00068647:0081:107,f199efd7-346f-4908-aa2b-83b383842b07,MainZone,0.540,heavy_revision,disagree,0.647,0.725,0.594,0.725,reti innumera fieri possunt nondo substantiva combinatione vel vitita,Uti innumera fieri possunt substantiva combinatione,fieri possunt nomi substantiva combinatione
+LH_4_7B_3_0041v-0040r,00068647:0082:004,9f57c815-32f2-4421-ae07-279cc25166e5,MainZone,0.928,heavy_revision,near,0.818,0.818,1.000,0.818,"procedere licet, nam si humanitas est res aliqua, poterit","procedere licet, nam si humanitas est res aliq","procedere licet, nam si humanitas est res aliqua, poterit"
+LH_4_7B_3_0041v-0040r,00068647:0082:052,90bc8ffc-197d-4073-905d-5ff146098640,MainZone,0.974,heavy_revision,near,0.769,0.808,0.720,0.860,certo vocis tono observato: im aufanus sutot simnel,"certo vocis tono observato: im anfang
+hat Gott Himmel",certo vocis tono observato: im anfang hat
+LH_4_7B_3_0045r-0044v,00068647:0089:046,217169c1-e1bb-48db-8e10-7a3b3ec43db6,MainZone,0.650,heavy_revision,near,0.769,0.981,0.784,1.000,hitur an magis in ejus partes penetremus. Cur dicimu,"hitur an magis in ejus partes penetremus. Cur
+dicimus",hitur an magis in ejus partes penetremus.
+LH_4_7B_3_0045r-0044v,00068647:0089:108,9fffcb3f-0c49-4b42-9c42-7da83397d562,MainZone,0.858,heavy_revision,disagree,0.634,0.742,0.766,0.909,est actionis requisitum vel cconcurrens. Accusativus est opus subicctum operis,"est actionis
+requisitum vel concurrens. Accusativus est subjectum operis seu objectum actionis.",est actionis requisitum vel concurrens. Accusativus est opus.
+LH_4_7B_3_0047v-0046r,00068647:0094:042,6c336f07-b070-4b65-a774-1c249b6facc8,MainZone,0.979,heavy_revision,near,0.889,0.923,0.963,0.923,loctu Sum locutus fui locutus eram locutus tria sunt,"t.
+Sum locutus, fui locutus, eram locutus tria sunt","locutus Sum locutus, fui locutus, eram locutus tria sunt"
+LH_4_7B_3_0060r-0059v,00068647:0119:047,9e21fab6-d20b-4935-b6dc-b9dce817a361,MainZone,0.875,heavy_revision,near,0.803,0.893,0.920,0.893,status fluit ex nostro statu. Et tala penes nos seu in nostra potestate esse,"status fluit ex nostro statu.
+Penes nos seu in nostra potestate esse",status fluit ex nostro statu. Et talia Penes nos seu in nostra potestate
+LH_4_7B_3_0060v-0059r,00068647:0120:037,6476f62e-6d38-4182-b449-fd5bf8734ea8,MainZone,0.945,heavy_revision,near,0.896,0.875,0.950,0.875,enuntiatio quatenus circulus est subjectum Reparavi domum quate in quantum resta,"enuntiatio quatenus circulus est
+subjectum. Reparavi domum in quantum r",enuntiatio quatenus circulus est subjectum. Reparavi domum quaten quantum repa
+LH_4_7B_3_0062r-0061v,00068647:0123:064,48b3ae61-e7a1-40cd-870f-9fe5b290813a,MainZone,0.966,heavy_revision,near,0.868,0.800,0.909,0.800,"contibulae primo, secundo tertio, eci ultimo, quae initium,","o, primo, secundo, tertio, etc. ultimo, quae initium,","continua primo, secundo, tertio, etc. ultimo, quae initium,"
+LH_4_7B_3_0062r-0061v,00068647:0123:096,dc34787e-7375-4b2d-ba1b-3361a0565b50,MainZone,0.945,heavy_revision,near,0.702,0.684,0.975,0.975,"verbi gratra: ita est, ut dixi, seu sic est","Verbi gratia: ita est, ut dixi, seu sic est. U t Johannes est","Verbi gratia: ita est, ut dixi, seu sic est."
+LH_4_7B_3_0064r-0063v,00068647:0127:104,953ae946-9371-4a0c-af9b-d8d6fa39f85a,MainZone,0.749,heavy_revision,near,0.889,1.000,0.889,1.000,Aliter. Velut et ita. Quatenus. Hactenus. Eatenus. Circiter. Cur. quia.,"Aliter. Velut et ita.
+Quatenus. Hactenus. Eatenus. Circiter. Cur. Quia.",Velut et ita. Quatenus. Hactenus. Eatenus. Circiter. Cur. Quia.
+LH_4_7B_4_0016r,00068648:0031:065,fc819c44-7361-41fc-8b00-3951a3887ab2,MainZone,0.915,heavy_revision,near,0.853,0.853,1.000,0.853,"vera est propositio affirmativa, ut",vera est propositio affirmati,"vera est propositio affirmativa, ut"
+LH_4_7B_6_0004r-0003v,00068650:0007:103,b99e4d50-1485-43a5-b89c-22c08e3fed4c,MainZone,0.799,heavy_revision,near,0.891,0.891,0.891,0.891,Asseverari igitur potest praeter defectumTetam,Asseverari igitur potest praeter defectum seri,Asseverari igitur potest praeter defectum
+LH_4_7B_6_0004v-0003r,00068650:0008:017,85d83d55-78e4-4129-9396-88ab3607e1cd,MainZone,0.889,heavy_revision,near,0.837,0.837,1.000,1.000,"in haec tempora servatum, nunc primum","in haec
+tempora servatum, nunc primum prodit.","in haec tempora servatum, nunc primum"
+LH_4_7B_6_0004v-0003r,00068650:0008:048,877d4364-b992-44a4-a01d-59b265df4638,MainZone,0.913,heavy_revision,near,0.886,0.975,0.909,0.975,"asi severius agas, probari posse, quae non","si severius agas, probari posse, quae non","accu si severius agas, probari posse, quae non"
+LH_4_7B_6_0006r-0005v,00068650:0011:021,bef4dfe2-cb5c-4411-8385-6302cec911d8,MainZone,0.727,heavy_revision,near,0.763,1.000,0.763,1.000,et scitu dignissimas atque in exemplum,"et scitu dignissimas, atque in exemplum","dignissimas, atque in exemplum"
+LH_4_7B_6_0006r-0005v,00068650:0011:071,4402dca5-f825-4c42-a419-f566f36eb6a2,MainZone,0.951,heavy_revision,near,0.843,0.857,0.984,1.000,llis substantialibus vel accidentalibus particularia naturae,llis substantialibus vel accidentalibus adhibitis particularia naturae,illis substantialibus vel accidentalibus particularia naturae
+LH_4_7B_6_0006r-0005v,00068650:0011:142,ba36b99b-97fd-46e8-b1df-98f32553cd5e,MainZone,0.560,heavy_revision,near,0.895,0.747,0.667,0.747,factum est philosophis quam quadratulam circuli Guometris teitare Geometris,factum est philosophis quam quadraturam circuli Geometris,factum est philosophis quam quadraturam circuli Geo
+LH_4_7B_6_0006v-0005r,00068650:0012:016,b4ca74e7-12bc-4ebd-9a27-3a88eb632b2d,MainZone,0.964,heavy_revision,disagree,0.689,0.721,0.911,0.721,non contemnendi quidem ueni sed tamen longe,"non contemnendi quidem, sed tame","non contemnendi quidemingenii, sed tamen longe"
+LH_4_7B_6_0010v-0009r,00068650:0020:037,e24c3557-7e47-44aa-b172-2f5ebe14391a,MarginTextZone,0.585,heavy_revision,disagree,0.677,1.000,0.677,1.000,simile exempli gratia sint tres,"simile, exempli gratia sint tres","simile, exempli gratia"
+LH_4_7B_6_0016r,00068650:0031:003,8476c04a-6f16-470e-8905-1795c765011d,MainZone,0.876,heavy_revision,near,0.898,0.908,0.908,0.908,Ut scilicet nihil amplius utrinque dici possit quod non vel imbet,"Ut scilicet nihil amplius utrinque dici possit, quod non vel","scilicet nihil amplius utrinque dici possit, quod non vel im"
+LH_4_7B_6_0016r,00068650:0031:006,accb90f7-6b6a-4e8f-a956-b1427dd1afdd,MainZone,0.928,heavy_revision,near,0.857,0.824,0.962,0.975,"prodest in omni deliberatione, e in referendo ex Actis, in finiendis controversis","prodest in omni deliberatione, in
+referendo ex Actis judicialibus, in finiendis controversiis","prodest in omni deliberatione, in referendo ex Actis, in finiendis controversiis"
+LH_4_7C_0009r,00068652:0017:013,1f2bc7fa-684c-4e69-94ce-c470f08228a8,MainZone,0.757,heavy_revision,near,0.857,1.000,0.857,1.000,tamen inter se non coincidant) substituamus. Utique,tamen inter se non coincidant) substituamus. Utique,tamen inter se non coincidant) substituamus.
+LH_4_7C_0009v,00068652:0018:007,e92412f1-7e38-4238-be38-3fd3e0e976b7,MainZone,0.785,heavy_revision,near,0.877,0.949,0.831,0.949,"Quonium autem variae sunt hominum linguae, et nulla fere est","Quoniam autem variae sunt hominum linguae, et nulla fere e","Quoniam autem variae sunt hominum linguae, et nulla"
+LH_4_7C_0010v,00068652:0020:014,3fd5d378-25aa-4c0f-ba7e-053f3440aac6,MainZone,0.904,heavy_revision,near,0.849,1.000,0.849,1.000,substitutionem oriatur. id est ostenditur modus plures,substitutionem oriatur: id est ostenditur modus plures,substitutionem oriatur: id est ostenditur modu
+LH_4_7C_0010v,00068652:0020:021,7d082683-b8e9-4f8b-8c71-f5998c2802b4,MainZone,0.862,heavy_revision,near,0.837,0.756,0.911,0.778,"occurrut. Inde ad Mathematica progrediendum, ac",occurrunt. Inde ad Mathematica progre,occurrunt. Inde ad Mathematica progrediendum
+LH_4_7C_0017r,00068652:0033:033,df6872f6-77f3-4609-8dac-7a3bca9aed0e,MainZone,0.570,heavy_revision,near,0.706,0.965,0.687,0.988,"de ea pradicari possunt. Cum vero substantiam rationalem deo, caetera quidem dico per","de ea
+praedicari possunt. Cum vero substantiam rationalem dico, caetera quidem dico per","Cum vero substantiam rationalem dico, caetera quidem dico per"
+LH_4_7C_0017r,00068652:0033:035,27de8646-0e81-4bda-83d0-ca8099e12624,MainZone,0.938,heavy_revision,near,0.852,0.838,0.988,0.850,"Porro pradicatum est vel imperfectum simplex, vel compositum. Et compositum vel in",Porro praedicatum est vel simplex vel compositum. Et compositum vel in,Porro praedicatum est vel imperfectum simplex vel compositum. Et compositum vel in
+LH_4_7C_0021r-0020v,00068652:0041:109,baf1c060-dfcc-41f8-939a-9a571b24788d,MainZone,0.897,heavy_revision,disagree,0.536,0.522,0.919,0.973,"ferentiales, poteret designari colores","ferentiales, poterunt designari colores varii. Fortasse tamen
+coloratum","erentiales, poterunt designari colores"
+LH_4_7C_0021v-0020r,00068652:0042:007,aff702db-6bed-41bb-8c69-22167e8f6608,MainZone,0.909,heavy_revision,near,0.857,0.788,0.923,0.788,"oictor darii, et item planum triangulum et trilaterum","victor Darii ; item triangulum, et
+trilaterum,","victor Darii; item planum triangulum, et trilaterum,"
+LH_4_7C_0021v-0020r,00068652:0042:024,8bfa8d6c-cb04-48a9-b4bd-1a0474f4b64e,MainZone,0.912,heavy_revision,near,0.844,0.938,0.900,1.000,fiunt substituendo definitionem in locum definiti vel contra,"fiunt substituendo definitionem in locum
+definiti vel contra. Hin",substituendo definitionem in locum definiti vel contra.
+LH_4_7C_0023v-0022r,00068652:0046:016,18d8f82d-3a6c-44d1-bc2a-8ea846b04b62,MainZone,0.937,heavy_revision,near,0.720,0.720,1.000,0.720,seu AB non continet non B,seu AB non contine,seu AB non continet non-B.
+LH_4_7C_0025r-0024v,00068652:0049:060,67e1740d-d8b9-45cd-a9ac-4deef178b26f,MainZone,0.694,heavy_revision,near,0.846,1.000,0.846,1.000,existit. Ut si dicam de re existente A est B idem est,"existit. Ut si dicam de re
+existente A est B , idem est","Ut si dicam de re existente A est B, idem est"
+LH_4_7C_0025v,00068652:0050:018,a8b87cf1-5ae3-438c-999e-7ee9335d021c,MainZone,0.778,heavy_revision,disagree,0.606,0.652,0.814,0.864,"sint A, B C, d et aliquod unum ex ipsis sit eligendum, et sint","sint A , B,
+C, D, et unum ex ipsis sit eligendum, et sint B, C, D per omni","D, et aliquod unum ex ipsis sit eligendum, et sint"
+LH_4_7C_0025v,00068652:0050:030,4c55db99-70d8-4e34-94e7-44fb82da439a,MainZone,0.880,heavy_revision,near,0.776,0.776,1.000,0.775,"Ut si dico petrus abnegat, intelligendo propositio","Ut si dico
+Petrus abnegat , intelligendo","Ut si dico Petrus abnegat, intelligendo propositio"
+LH_4_7C_0027r-0026v,00068652:0053:096,55870fd3-c991-4ca6-971a-830301ac88e0,MainZone,0.629,heavy_revision,near,0.717,0.846,0.635,0.846,utrum dicat sit affirmativa an negativa dec. extremum,"utrum sit affirmativa an negativa, etc., extremum","utrum sit affirmativa an negativa,"
+LH_4_7C_0027r-0026v,00068652:0053:115,be1540e7-ed5e-4fff-9b5a-5b7127f9aba9,MainZone,0.715,heavy_revision,disagree,0.695,0.814,0.854,1.000,"posset in numeris observari talis ordo, ut semper","Posset in numeris observari talis ordo,
+ut semper incipiatur","in numeris observari talis ordo, ut semper"
+LH_4_7C_0027r-0026v,00068652:0053:119,090bf603-8aac-4551-b840-e1f09e130327,MainZone,0.788,heavy_revision,near,0.780,0.938,0.732,0.938,"incomplexa propronibus, ut si sit ",incomplexa propioribus ut si sit,incomplexa propioribus ut si sit 13 14 15
+LH_4_7C_0027v-0026r,00068652:0054:005,eac1176b-112a-4f05-a5d7-f8e227080dd1,MainZone,0.527,heavy_revision,near,0.739,0.957,0.717,0.957,serviuit ad universalissimas condendas enantia,"serviunt ad
+universalissimas condendas enuntia",universalissimas condendas enuntia
+LH_4_7C_0027v-0026r,00068652:0054:051,561381e9-95fb-4ab6-87ff-85a4b3f3f07b,MainZone,0.951,heavy_revision,near,0.772,0.860,0.825,0.860,"praecedentis proposutionis, est idem cum dicto prae","praecedentis propositionis, est idem cum prae","praecedentis propositionis, est idem cum praedicato dictae"
+LH_4_7C_0029r-0028v,00068652:0057:113,7a6bccab-e6ab-42cc-9f8a-16192b272424,MainZone,0.620,heavy_revision,near,0.807,0.947,0.754,0.947,conceptuum quae bota sit simul apud ipsum. Unde  ille novis,"conceptuum, quae tota fit simul apud ipsum. Unde ille
+novit",quae tota fit simul apud ipsum. Unde ille novit
+LH_4_7C_0029r-0028v,00068652:0057:125,242f6888-5758-439f-a304-58333c190491,MainZone,0.872,heavy_revision,near,0.730,0.955,0.730,0.978,"ad identicas, vel oppositae reductione ad contradictorias. unde opposita dictu impossibilis","ad identicas, vel oppositae
+reductione ad contradictorias; unde opposita dicitur impossibil","ad identicas, vel oppositae reductione ad contradictorias; § 134) Propositio"
+LH_4_7C_0029v-0028r,00068652:0058:012,24da33d5-2013-4286-b606-23fa6a174ca2,MainZone,0.554,heavy_revision,near,0.721,0.869,0.754,0.930,est D. tunc  inde fit nova propositio talis. 20 A este B est,"est C], tunc inde fit nova propositio talis: xô A esse B est vel",inde fit nova propositio talis: το A esse B est
+LH_4_7C_0029v-0028r,00068652:0058:042,74013637-6ca8-47d1-b41a-9d716ed75117,MainZone,0.958,heavy_revision,near,0.852,0.812,0.766,0.812,"143) Illud tntu jam videndum est, nes an cum abstracto rum praedus","143) Illud jam videndum est, an cum abstractorum praedic","143) Illud jam videndum est, quomodo an cum abstractorum praedi"
+LH_4_7C_0031v-0030r,00068652:0062:074,e2693471-46bb-472f-b05e-4e2bd9a98af0,MainZone,0.614,heavy_revision,near,0.712,0.881,0.692,0.881,"P. A. et U.N. opponuntur, item Uaet P. N et U. A.","P. A. et U. N. opponuntur, item P. N. et U. A.","P. A. et U. N. opponuntur, item P. N. et U. A. Patet etiam in"
+LH_4_7C_0032r,00068652:0063:062,fc5dfc02-1a8e-4bef-be45-f86a35c988ad,MainZone,0.905,heavy_revision,near,0.755,0.827,0.942,0.827,seu est linea qua corpus penetrat facile penetrat in,"seu est linea qua corpus facile
+penetrat in",seu est linea qua corpus penetrat facile penetrat
+LH_4_7C_0047r,00068652:0093:037,2d308a91-db3c-4663-a634-be6683b31d27,MainZone,0.612,heavy_revision,disagree,0.642,0.821,0.782,1.000,Causa est praerequisitum alterius quod dicitur Effectus,Causa est praerequisitum existentiae alterius quod dicitur Effectus.,praerequisitum alterius quod dicitur Effect
+LH_4_7C_0059r,00068652:0121:034,0eeda656-c3af-45b8-83b4-41f8b6601193,MainZone,0.957,heavy_revision,near,0.842,0.950,0.835,0.990,"mutatio, imul continetur. sed est tamen aliquid praeterea unde mutaoi exteusionis seu tensionis (sub","mutatio simul continetur; sed est tamen aliquid praeterea, unde mutationi extensionis seu tensionis (sub","mutatio simul continetur; sed est tamen aliquid praeterea, unde mutationi extensionis t"
+LH_4_7C_0059r,00068652:0121:036,3d9524fc-1dc1-41ae-a4bd-95cbf5e411f6,MainZone,0.953,heavy_revision,near,0.888,0.897,0.990,0.897,"resistunt ut aqua, quaedam cedunt, ut aer, et et plerumque recuperare nituntur priorem statum, ut aer","resistunt ut
+aqua, quaedam cedunt, et plerumque recuperare nituntur priorem statum, ut aër.","resistunt ut aqua, quaedam cedunt, ut aër, etc. et plerumque recuperare nituntur priorem statum, ut aër."
+LH_4_7C_0059r,00068652:0121:065,c549940f-1313-4298-ad60-5350499a9cef,MainZone,0.941,heavy_revision,disagree,0.576,0.565,0.895,0.903,"nam quid prohibet esse automa machimas natarae sui non propngativas? Interim revera oi substantia est autonata, quia","nam
+quid prohibet esse machinas naturae sui non propagativas? Interim revera omnis substantia est automata, quia tamen hoc initio praevideri non potest, licebit sic definire.","nam quid prohibet esse automa machinas naturae sui non propagativas? Interim revera omnis substantia est automata,"
+LH_4_7C_0059r,00068652:0121:075,c47ba5fb-e51e-44a0-8f66-a68c35d3d86f,MainZone,0.809,heavy_revision,disagree,0.557,0.584,0.750,0.837,"sisunt sine ope minus aequale constitutivum seu quod immediate inest: pars. totum continuum. situm, extensum","Simplex, aggregatum, idem, diversum. Unum. Plura. Congruum, constitutivum seu
+quod immediate inest. Pars.6 totum. Majus, minus, aequale, continuum, situm, extensum","Congruum. constitutivum seu quod immediate inest. Pars. totum., continuum. situm, extensum"
+LH_4_7C_0060r,00068652:0123:005,513a57e0-dadc-4269-a88b-aecf71fc641b,MainZone,0.561,heavy_revision,near,0.750,0.972,0.750,0.972,paradoxa: Parudoxa enim etiam praeter,paradoxa. Paradoxa enim etiam praeter,Paradoxa enim etiam praeter
+LH_4_7C_0062r,00068652:0127:024,aeb3b93e-801d-4b25-877b-0d2908a28736,MainZone,0.915,heavy_revision,near,0.844,0.844,0.875,0.844,"affirmativa, altera negativa. Unde","affirmativa, altera negativa","affirmativa, altera negativa. Atqu"
+LH_4_7C_0063r,00068652:0129:035,2cf6581c-4e9d-4cdb-841d-dc82c7c906fb,MainZone,0.681,heavy_revision,near,0.763,0.950,0.725,0.975,n loco varietatem. propositionum prosequi,loco varietatem propositionum prosequi,loco varietatem propositionum
+LH_4_7C_0066r,00068652:0135:015,27bf5168-9d7e-45b7-bd87-f7ec4eb989a8,MainZone,0.600,heavy_revision,near,0.735,0.971,0.714,0.971,"differre sola magnitudine, quia dluo","differre sola
+magnitudine, quia duo","differre sola magnitudine,"
+LH_4_7C_0066r,00068652:0135:040,297ab388-0281-4341-bdf0-002484da7ceb,MainZone,0.655,heavy_revision,near,0.721,0.744,0.795,0.846,"aut jsoabi ipso, id est quod sit aequale","nitudine ab
+ipso, id est quod sit aequale.
+! Na","ab ipso, id est quod sit aequale."
+LH_4_7C_0070r,00068652:0143:027,b12b0e04-75fa-4bc3-b347-b9929d4eeb19,MainZone,0.834,heavy_revision,near,0.793,0.724,0.840,0.935,"noouss esset, si mundus finitus esset et animam","uod posterius verum esset, si mundus finitus esset et anima","quod verum esset, si mundus finitus esset et animam"
+LH_4_7C_0070r,00068652:0143:072,aa8a90b8-ca25-40a4-8699-1be61e7a76f1,MainZone,0.875,heavy_revision,disagree,0.642,0.642,1.000,0.806,de eodem dici possunt duae propositiones contradictoriae sunt verae,"de eodem duae propositiones contradictoriae sunt verae et
+is tunc",de eodem dici possunt duae propositiones contradictoriae sunt verae
+LH_4_7C_0070v,00068652:0144:034,bba22b81-6037-4240-9cd4-4b9ccc3f5055,MainZone,0.865,heavy_revision,near,0.804,0.839,0.636,0.855,posteria. Si enim duo sint guenu numus altero sit natura,"posterior. Si enim duo
+sint quorum unum altero sit natura",posterior. Si enim duo sint quorum unum altero
+LH_4_7C_0074r-0073v,00068652:0151:061,a107377d-43d8-4bee-b769-84f11785ed6d,MainZone,0.624,heavy_revision,disagree,0.566,0.737,0.609,0.841,"veritas duplex est n contragentie seu existentiae, et, neressitatis seu","verbum. Et duplex est, contingendae seu existentiae, et necessitatis seu essent","Est duplex est, contingentiae seu existentiae, et"
+LH_4_7C_0074r-0073v,00068652:0151:064,d9a5d20b-a73e-444a-9527-d371d769f2bf,MainZone,0.872,heavy_revision,near,0.860,0.900,0.872,0.900,Seatiam et utraque est vel explicabilis vel in explicabilis rationis scilicelvel,"dentiam et utraque est vel explicabilis vel
+inexplicabilis, rationis scilic","coincidentiam et utraque est vel explicabilis vel inexplicabilis, rationis scilicet vel"
+LH_4_7C_0079r,00068652:0161:025,0792c052-ef46-437c-b6ee-98d4ff1fdc98,MainZone,0.900,heavy_revision,near,0.867,0.886,0.978,0.909,cu A in A existentem  non possit dari aliquod,"in A existentem, non possit dari aliquod","cum A in A existentem, non possit dari aliquod"
+LH_4_7C_0081r,00068652:0165:000,689c75c8-8023-473f-9e4d-058bf704c9e8,MainZone,0.697,heavy_revision,near,0.889,1.000,0.889,1.000,Cum Medicina plurimum adhuc Empirica,Cum Medicina plurimum adhuc Empirica,Medicina plurimum adhuc Empirica
+LH_4_7C_0081r,00068652:0165:024,26daa145-0f56-4eb5-9d2b-8113907ce823,MainZone,0.513,heavy_revision,near,0.722,1.000,0.722,1.000,Exempli causa. esto,Exempli causa: Esto,Exempli causa:
+LH_4_7C_0098r,00068652:0199:007,4014d91e-5f77-4b8d-a34c-779c51286c55,MainZone,0.929,heavy_revision,near,0.830,0.962,0.835,0.990,"Dantur Loca Terminorum simplicium, Enuntiationum argumentationum, tractationum seumethodi sivetansitionim","Dantur Loca Terminorum Simplicium, Enuntiationum, argumentationum, tractationum seu methodi sive Transitionum.","Dantur Loca Terminorum Simplicium, Enuntiationum, argumentationum, tractationum seu methodi"
+LH_4_7C_0098r,00068652:0199:037,fbc941d6-6cce-4675-be63-0cb24cd3a638,MainZone,0.903,heavy_revision,near,0.897,0.829,0.913,0.854,"sorpe Termini sumplices incomples involvunt enuntrationes, v.g. perrus Apostolus seu petrus mistus a Christa cripsi Epistolas","pe Termini incomplexi involvunt enuntiationes, v.g. Petrus Apostolus seu Petrus
+missus a Christo scripsit Epistolas.","Saepe Termini simplices incomplexi involvunt enuntiationes, v.g. Petrus Apostolus seu Petrus missus a Christo scripsit Epistolas."
+LH_4_7C_0098r,00068652:0199:046,f9f0c2ab-53c8-4d93-8edd-b5ee52369adc,MainZone,0.919,heavy_revision,disagree,0.648,0.781,0.766,0.806,"priu, est ange tam anelus quam brutum, secundum est brutum tertium est ursa major vel minor apud poetas, quartum homo it brutum","brutum apud eos qui angelis dant corpora, secundum
+est brutum, tertium est ursa major vel minor apud poetas, quartum homo et brutum.","Primum est tam angelus quam brutum, secundum est brutum, tertium est ursa major vel minor apud poetas, q"
+LH_4_7C_0100r-0099v,00068652:0203:044,18e28cae-3d53-4505-89f5-039d45139741,MainZone,0.913,heavy_revision,near,0.851,0.851,1.000,1.000,absolutam immediate requiri ad limitatam.,"absolutam immediate requiri ad
+limitatam. Itaque",absolutam immediate requiri ad limitatam.
+LH_4_7C_0100r-0099v,00068652:0203:050,1680d66e-ca7b-4f84-863b-05a1938baef4,MainZone,0.961,heavy_revision,near,0.883,0.828,0.938,0.844,"eo res constituentes diversae inter se, cum intell ea quae in vol-",res constituentes diversae inter se; cum ea quae invol,res constituentes diversae inter se; cum intell ea quae invol
+LH_4_7C_0100r-0099v,00068652:0203:096,e94de265-d256-4425-835b-229b0deee439,MainZone,0.984,heavy_revision,near,0.857,1.000,0.857,1.000,dicari potest  cras non potest. Exempli gratia quod,"dicari potest, cras non potest. Exempli gratia quod","potest, cras non potest. Exempli gratia quod"
+LH_4_7C_0100r-0099v,00068652:0203:117,5cb2db54-fe4f-4800-85f5-dc0aa2f2023a,MainZone,0.967,heavy_revision,near,0.714,0.768,0.717,0.811,"ita paulus non raponam arbitiatus est c0 16or qra, BEc.","ita Paulus non rapinam arbitratus est xô ÏGOV
+eivat 0ecp.",ita Paulus non rapinam arbitratus est το ι σ
+LH_4_7C_0100v-0099r,00068652:0204:001,5276a860-05c7-4a4d-b7ad-69fe0d267f11,MainZone,0.976,heavy_revision,near,0.828,0.806,0.922,0.806,Coneretorum Tam ad abstratta phaosophoum quam ad abstracta mea,Concretorum tam ad abstracta Scholarum quam ad abstracta m,Concretorum tam ad abstracta philosophorum quam ad abstracta mea.
+LH_4_7C_0100v-0099r,00068652:0204:035,e3955419-0af5-47ef-a0e2-05ed8b95f9c5,MainZone,0.677,heavy_revision,near,0.746,0.868,0.721,0.897,"TTitium esse divitem. hoc est, saquoddam Vapientem esse est divitendem","Titium esse divitem, hoc est, quoddam sapientem esse est divitem esse.","divitem, hoc est, quoddam sapientem esse est divitem"
+LH_4_7C_0100v-0099r,00068652:0204:059,be708030-10c7-4079-82e0-48f189ac82c1,MainZone,0.935,heavy_revision,near,0.741,0.889,0.833,1.000,"igitur rursus dividi in Qualitatem strictiorem,  successivum, et Relationem","igitur rursus dividi in Qualitatem strictiorem, accidens
+successivum, et Relationem,","igitur rursus dividi in Qualitatem strictiorem, successivam, Ens"
+LH_4_7C_0101v,00068652:0206:010,900b4e87-c324-480b-8fc5-2327cb8de9fa,MainZone,0.941,heavy_revision,disagree,0.608,0.595,0.887,0.979,omnia praedicate sui subjecti involvit  (seu omnis,"omnia praedicata
+is sui subiecti seu omnia sua compraedicata involvit (seu omnis",omnia praedicata sui subiecti involvit erit (seu omnis
+LH_4_7C_0102r,00068652:0207:021,caea23f2-9167-45a3-a5ff-f7e79edceb32,MainZone,0.959,heavy_revision,near,0.854,0.854,1.000,0.854,"partem mutabilem volunt, incidunt revera in eorum","partem mutabilem volunt, incidunt in eorum","partem mutabilem volunt, incidunt revera in eorum"
+LH_4_7C_0102r,00068652:0207:038,4c042bb2-ee72-409d-ba6f-3adbd13a4e33,MainZone,0.980,heavy_revision,near,0.891,0.891,1.000,0.891,"in dogmata spinosae et veter Averroistarum, et quorundam","in dogmata Spinosae et Averroistarum, et quorundam","in dogmata Spinosae et veter Averroistarum, et quorundam"
+LH_4_7C_0102r,00068652:0207:041,b421ca7f-3427-46e2-97bb-ccbde7a8a804,MainZone,0.931,heavy_revision,near,0.721,0.738,0.930,0.738,quam ut Dei modos considerant Verum nec te,"quam
+ut Dei modos habent. Verum nec",quam ut Dei modos considerant.. Verum nec sic
+LH_4_7C_0102v,00068652:0208:010,39f69574-f197-4977-9c21-ce95f9a251ac,MainZone,0.931,heavy_revision,near,0.800,0.800,0.960,0.800,"reparet; nam ex nihilo fit nihil, seu ac in ac nihil","reparet; nam ex
+nihilo fit nihil, ac nihil","reparet; nam ex nihilo fit nihil, seu ac ni ac nihil"
+LH_4_7C_0102v,00068652:0208:033,04445a45-ec8a-406b-b6cb-d3a1382bee83,MainZone,0.950,heavy_revision,near,0.833,0.833,0.952,0.833,quod si deique negemus realitatem ullam in,Quodsi autem negemus realitatem ullam in,Quodsi denique negemus realitatem ullam in
+LH_4_7C_0102v,00068652:0208:040,fe17bab8-42d9-4d20-91f4-cee08403386a,MainZone,0.934,heavy_revision,near,0.885,0.885,1.000,1.000,"Nec hactenus, video modum evitandi hos scopulos","Nec hactenus alium video modum evitandi hos scopulos,","Nec hactenus video modum evitandi hos scopulos,"
+LH_4_7C_0104r-0103v,00068652:0211:031,ccd5f029-a6b7-4342-9f9f-347d21b9a3ce,MainZone,0.939,heavy_revision,disagree,0.667,0.667,1.000,0.833,conceptu ista omnia inferuntur et robustus et Rex et dux et Victor,conceptu inferuntur et robustus et Rex et dux et victor. Et talem q,conceptu ista omnia inferuntur et robustus et Rex et dux et victor.
+LH_4_7C_0104r-0103v,00068652:0211:048,d959a70f-4416-4647-974e-558b7212bea7,MainZone,0.951,heavy_revision,near,0.790,0.794,0.873,0.794,"veneratorum sibi similes procreantium, ut speciem hominum, specie","um rerum sibi
+similes procreantium, ut speciem hominum","generatarum, sibi similes procreantium, ut speciem hominum, canum,"
+LH_4_7C_0104v-0103r,00068652:0212:020,022c5374-0845-434b-bc5c-02a8f00bddd1,MainZone,0.943,heavy_revision,disagree,0.523,0.523,0.852,0.803,"FormdeHumana antura suam propriam habet realitatem, adeo ut ne","consistat, ea mutata non est idem, sed Anima Humana
+suam propriam habet realitatem, adeo ut","Forma Humana suam propriam habet realitatem, adeo ut ne"
+LH_4_7C_0104v-0103r,00068652:0212:030,2a10c18a-b541-40ce-84f7-53ac417ec8fc,MainZone,0.971,heavy_revision,near,0.821,0.821,0.955,0.821,"Mutatio est aggregatum duorum statuum, apposibotum contradictoriorum",Mutatio est aggregatum duorum statuum contradictoriorum.,Mutatio est aggregatum duorum statuum oppositorum contradictoriorum.
+LH_4_7C_0104v-0103r,00068652:0212:038,83ca0f3e-dd68-4258-b81d-5104f8d103fc,MainZone,0.646,heavy_revision,near,0.836,0.807,0.807,0.842,"de Et quidem mutatio quae imperfectionem involvit, pueicat","; et quidem mutatio quae imperfectionem involvit, Deo trib","et quidem mutatio quae imperfectionem involvit,"
+LH_4_7C_0104v-0103r,00068652:0212:048,41b50754-6fe8-4652-9672-0ff05b457c8b,MainZone,0.914,heavy_revision,near,0.784,1.000,0.784,1.000,"quemadmodum omnis conatus exigit motum  vel effectum,","quemadmodum omnis conatus exigit motum, vel effectum,","quemadmodum omnis conatus exigit motum, omnisque"
+LH_4_7C_0104v-0103r,00068652:0212:061,6c4334c3-5fb9-4d39-bd01-59af181b3eac,MainZone,0.952,heavy_revision,near,0.890,0.877,0.985,0.985,divina. neque enim propria vi sed decreto Dei existentiam ootinere,divina; neque enim propria vi sed decreto Dei existentiam obtinere possunt.,divina; neque enim propria vi sed decreto Dei existentiam obtinere
+LH_4_7C_0106v-0105r,00068652:0216:007,587f3e15-6978-4437-b885-d2b45769cf5e,MainZone,0.952,heavy_revision,near,0.784,0.841,0.892,0.841,Quod omnia requisita involvit) ut se habet infrnt cad  illatio certa ad,"quod omnia requisita involvit), ut se habet illatio certa
+ad","(quod omnia requisita involvit), ut se habet inferens ad con illatio certa ad"
+LH_4_7C_0106v-0105r,00068652:0216:044,6d736e42-9222-4603-b7e1-a5ca23b7f5e1,MainZone,0.620,heavy_revision,near,0.740,0.935,0.688,0.935,ellam spatium abstrahendo animum ab his quae sunt in ipso. Hinc tale continumm,"ipsum
+spatium abstrahendo animum ab his quae sunt in ipso. Hinc tale continuum",ipsum spatium abstrahendo animum ab his quae sunt in ipso.
+LH_4_7C_0157r-0156v,00068652:0317:013,65f97bf3-596a-4fb1-b810-20770637c6f1,MainZone,0.901,heavy_revision,near,0.896,0.896,1.000,0.896,et hoc rursum ita: ac proinde tum demum actu ipso,"et hoc rursum ita: ac
+proinde tum demum actu",et hoc rursum ita: ac proinde tum demum actu ipso
+LH_4_7C_0157r-0156v,00068652:0317:017,491858e0-87cb-4ead-b20d-1bd89c8c3432,MainZone,0.863,heavy_revision,near,0.771,0.771,1.000,0.800,Exemplo Similitudine rem illustrabo.,".
+Similitudine rem illustrabo.",Exemplo Similitudine rem illustrabo.
+LH_4_7C_0157v-0156r,00068652:0318:040,93fea603-ce37-49dd-851d-69c93f29b8d0,MainZone,0.924,heavy_revision,near,0.744,0.860,0.865,1.000,in alias ideas per quas concipit etsi,"in alias ideas, per quas concipi potest, etsi","in alias ideas, per quas concipitur,"
+LH_4_7C_0159r-0158v,00068652:0321:053,46bb7098-218e-426a-abf0-a220358a7f11,MainZone,0.921,heavy_revision,near,0.714,0.786,0.879,1.000,etiam negligi potest nam onnomina,"etiam negligi potest, nam non tantum
+nomina","etiam negligi potest, nam omnia"
+LH_4_7C_0159v-0158r,00068652:0322:042,2a56a430-dd58-4694-a759-48980c54da14,MainZone,0.590,heavy_revision,near,0.714,1.000,0.714,1.000,"praepositio, gloria cum virtute est efficax.","praepositio, gloria cum virtute est efficax,","gloria cum virtute est efficax,"
+LH_4_7D_1_0012r-0011v,00068653:0023:109,b2231cf3-acdf-47e2-af7f-a4a56decb2d9,MainZone,0.593,heavy_revision,near,0.780,0.891,0.695,0.911,"eriorem eruditis, forte timen hasc coeiliantur","priorem eruditis, forte tamen haec conciliantur","priorem eruditis, forte tamen haec conciliantur, ut sit prior"
+LH_4_7D_1_0013r,00068653:0025:000,5fa5f211-bc2f-4c5f-aff2-e1557a7b02b2,MainZone,0.613,heavy_revision,near,0.744,0.949,0.692,0.949,Operae pretium auit rectionis et casuum,Operae pretium erit rectionis et casuum,Operae pretium erit rectionis
+LH_4_7D_1_0013r,00068653:0025:041,c8f94463-9dc4-4728-9c15-a57866192d48,MainZone,0.760,heavy_revision,near,0.743,0.972,0.750,0.972,"si A BC, se habeant, sic ut A sit ad B","Si ABC, se habeant sic ut A sit ad B","A B C, se habeant sic ut A sit"
+LH_4_7D_1_0013v,00068653:0026:040,6ae81d55-f2b4-408e-b5c3-4b30d02fe62c,MainZone,0.705,heavy_revision,disagree,0.444,0.556,0.857,0.833,et non,eu non da,est non
+LH_4_7D_1_0015v,00068653:0030:045,6283a869-3445-4436-9edd-50e584cf7894,MainZone,0.940,heavy_revision,disagree,0.558,0.615,0.791,0.955,"intus est adverbium contractum ex praepositione e casu, 1. intra recu.","Intus est adverbium contractum ex praepositione et casu; id est intra rem.
+Extra
+Extra id est non-intra.
+Ab",s est adverbium contractum ex praepositione et casu; id est
+LH_4_7D_1_0015v,00068653:0030:046,e7d3957f-4b55-4154-940e-5e3c771431ef,MainZone,0.954,heavy_revision,near,0.894,0.936,0.955,1.000,"si B sit prius apud A, postea alibi erit ab A","Si B sit prius apud A, postea alibi, erit ab A.
+Ex","Si B sit prius apud A, postea alibi, erit a b"
+LH_4_8_0001v,00068703:0002:060,6244d2e8-d293-4fbb-9c3d-164e04806b59,MainZone,0.718,heavy_revision,near,0.773,0.955,0.750,0.955,"possumus habere, nisi ope conceptas primitivr","possumus habere, nisi ope conceptus primitivi","possumus habere, nisi ope conceptus"
+LH_4_8_0001v,00068703:0002:067,3f3647c9-799d-4893-9f67-44fc9ed32e14,MainZone,0.907,heavy_revision,near,0.870,0.833,0.958,0.958,satis distincte agnoscatuus in quo consisteret a,"satis distincte agnoscamus, in quo consisteret analysis","satis distincte agnoscamus, in quo consisteret a"
+LH_4_8_0002r,00068703:0003:000,06e737d7-d16b-4a82-a395-8ad198272396,MainZone,0.636,heavy_revision,disagree,0.684,0.974,0.718,0.974,"Complexum est vel Enuntiatio, vel compoi–","Complexum est vel Enuntiatio, vel compo","est vel Enuntiatio, vel composi"
+LH_4_8_0002r,00068703:0003:010,3024c884-56d5-4871-871d-a6e09e26f2aa,MainZone,0.864,heavy_revision,near,0.821,0.929,0.846,1.000,Enuntiatio omnis estAfirma,Enuntiatio omnis est Affirma,Enuntiatio omnis est vera
+LH_4_8_0002r,00068703:0003:054,77bf118e-624a-4f2a-9b19-e22dc8f38da1,MarginTextZone,0.503,heavy_revision,disagree,0.375,0.750,0.500,0.750,vera,ver,est vera
+LH_4_8_0002v,00068703:0004:006,e8264df0-a0d3-4ba5-84c2-df267f2ce5fe,MainZone,0.785,heavy_revision,near,0.892,1.000,0.892,1.000,et omnia apparentia credendi nisi sit,"et omnia apparentia
+credendi nisi sit",et omnia apparentia credendi nisi
+LH_4_8_0002v,00068703:0004:023,5d8ea532-608e-484f-851d-f2bb849bacd7,MainZone,0.917,heavy_revision,near,0.768,0.786,0.933,0.978,tivas indemonstrabiles etaque huic potissimum,"tivas indemonstrabiles; itaque huic potissimum
+incumbamus.",vas indemonstrabiles; itaque huic potissimum
+LH_4_8_0002v,00068703:0004:048,9b6b2541-22da-40b9-9154-d41031ead331,MainZone,0.663,heavy_revision,near,0.784,1.000,0.784,1.000,patitur et non agit unquam sed agitur,patitur et non agit unquam sed agitur,atitur et non agit unquam sed
+LH_4_8_0005v-0004r,00068703:0010:001,3c9c4fcf-a590-4580-a27a-7325ad42a7be,MainZone,0.933,heavy_revision,near,0.815,0.785,0.962,0.981,"bestiis feroeibus, quando rationibus et officis vinci","bestiis ferocibus;
+quando rationibus et officiis vinci non possunt.",bestiis ferocibus; quando rationibus et officiis vinci
+LH_4_8_0005v-0004r,00068703:0010:006,1c23d4e8-9e26-4dc1-90ba-7cc116b8a605,MainZone,0.945,heavy_revision,near,0.740,0.771,0.940,0.771,"leves licet suspiciones sufficiant, ut prevemendo","leves
+licet suspiciones sufficiant, ut","leves licet suspiciones sufficiant, ut praeveniendo"
+LH_4_8_0005v-0004r,00068703:0010:016,6f851306-3155-46e5-957c-b17adb395909,MainZone,0.819,heavy_revision,near,0.870,0.963,0.887,0.981,vindictae periculum absit. De caetero feliciorescrimus,"vindictae periculum absit. De
+caetero feliciores erimus",vindictae periculum absit. De caetero feliciores
+LH_4_8_0005v-0004r,00068703:0010:021,17e14320-fcf7-4c2c-9f02-b9890aa37ffd,MainZone,0.940,heavy_revision,disagree,0.697,0.815,0.727,0.815,multa aliter aremus; nam aru,multa aliter agemus: nam,multa aliter agemus: nam et aliena
+LH_4_8_0005v-0004r,00068703:0010:166,63dce4b5-d0a4-4c43-9133-184ff52d2eda,MarginTextZone,0.900,heavy_revision,near,0.714,0.595,0.833,0.962,grada perfectionis quam cu,gradu perfectionis quam cuique earum dedit.,gradu perfectionis quam cuique
+LH_4_8_0037v,00068703:0074:036,80a2a255-43fe-47bd-8048-f1c9ac0abd0b,MainZone,0.925,heavy_revision,near,0.792,0.774,0.809,0.872,"natram non possumus tuto uti ad concludendum, an","onibus non possumus tuto uti ad
+concludendum, antequam","non possumus tuto uti ad concludendum, ante"
+LH_4_8_0038r,00068703:0075:009,a3d8d404-ac23-419d-882f-e73ce8910214,MainZone,0.841,heavy_revision,near,0.849,0.880,0.925,0.880,"experientia dedicisse, unde postea alias componimus","experientia didicisse, unde postea alias compo","experientia didicisse, unde postea alias componimus ad"
+LH_4_8_0044v-0043r,00068703:0088:010,3bc72e11-1b08-47a6-8c7a-2930501d2275,MainZone,0.966,heavy_revision,near,0.811,0.757,0.784,0.838," non ad usum voce neque docere possunt,","non ad usum veniunt, neque docere poss","q non ad usum vocent, neque docere pos"
+LH_4_8_0044v-0043r,00068703:0088:150,d7ad9444-2400-4fb6-971e-22bf3ed58902,MainZone,0.706,heavy_revision,near,0.764,0.772,0.776,0.836,", et voculas quasdam domesticas ignoretoistoriam et politices legumque studia contrmnere non nesmaris opificia pt quid","et voculas quasdam domesticas ignoret. Porro Historiam et
+politices legumque studia contemnere non nisi imperiti esse potest.",et voculas quasdam domesticas ignoret. Historiam et politices legumque studia contemnere non ni
+LH_4_8_0059v-0058r,00068703:0118:007,cbe47025-c60c-421d-9d24-6ecb741238a4,MainZone,0.840,heavy_revision,near,0.836,0.791,0.889,0.889,atque et in universum societatis humanae rite ondinandae pracer,atque in universum societatis humanae rite ordinandae et formandoru,atque in universum societatis humanae rite ordinandae praecept
+LH_4_8_0059v-0058r,00068703:0118:055,8f3c259b-6da8-4baa-a568-3b7fb73db621,MainZone,0.881,heavy_revision,disagree,0.679,0.642,0.944,0.944,Faleor mognam hoc seculo cupiditatem,"Fateor
+magnam et late patentem hoc seculo cupiditatem",Fateor magnam hoc seculo cupiditatem
