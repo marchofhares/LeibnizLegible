@@ -9,6 +9,53 @@ _Last updated: 2026-10-08 (**S1, the staging site: built, installed and verified
 
 ## Current state
 
+**2026-10-08 (evening): W4 — text access: a copyable text block on every
+page view, the text of a catalogue piece across its folios, the downloads
+where readers look.** David Rabouin's first point of 7 October: "as it
+stands, one cannot copy the transcription", and a reader wants the text of
+the whole page or passage. Measured first on the live page view (headless
+Chromium, `/page/00068221:0043`, 108 lines): each line's text sits inside the
+`<button>` that selects the line, so a drag across lines selects nothing, a
+drag within a line selects nothing and counts as a click (the image zooms
+to the line), a double-click selects nothing; select-all then copy does
+work and takes the whole page with it, 11,828 characters of chrome, badges
+and provenance summaries around the lines. Now, under the line list, a
+**Text** block holds the page's recognised lines as one piece of selectable
+text in reading order, one line per line, with **Copy the text** (the
+clipboard API from inside the click; where the browser refuses, the block
+is selected and a status line says to press Ctrl+C), the per-page download
+beside it as "Download this page as text", and one line of provenance
+above the block (the model and run date behind the lines, the wording
+rule); the header's link list points at the block ("Text of this page")
+instead of carrying the download. The line list is unblocked as well: its
+text is `user-select: text`, the badges, the number and the hidden labels
+`none`, a click does nothing while a selection stands in the list, and a
+`copy` whose selection lies in the list hands the clipboard the selected
+parts of the lines, one per line, and nothing else (Chromium alone copied
+the two lines with a blank line between them). **`GET
+/api/records/{record_id}/text`**: the text of a catalogue piece — a letter,
+a draft — across the folios its shelfmark's `Bl.` range names, placed by the
+C2 resolver the way the factory localized its pieces (`web/pieces.py`: the
+record's shelfmark with a range, its best crosswalk link), in the work
+export's layout under a header naming the record (title, incipit, date,
+sender and addressee, AA reference, the katalog URL), the work, the folio
+range, the canvases and the catalogue's licence; `?format=tsv`; 404 for an
+unknown record and, with the reason in `detail`, for a record not linked to
+a work, without a folio range, or whose folios no page label carries. The
+work API's `katalog` entries carry `text_url`, `folio_label`, `folio_range`
+and `n_pages` only where a record is placed; the work page shows "Text of
+this piece (Bl. 1–2)" under each such record, server-rendered too;
+`robots.txt` allows `/api/records/`; `llms.txt` and the README document it;
+the About page's transcriptions paragraph says text comes per page, per
+work and per piece. EN and DE throughout. **644 tests** (634 → 644), ruff
+clean; against the app on the fixture store in headless Chromium, **39
+checks** pass (selection and copy on the block and in the line list, the
+piece's download from the work page, EN and DE, 390 px without horizontal
+scroll, no console errors, axe-core 0 violations on the page and work views
+in both languages and at phone width). Not run on the master store and not
+yet on staging: that look is the operator's (Next). Branch
+`claude/dazzling-hopper-uxji2x`; nothing merged, nothing deployed.
+
 **2026-10-08: S1 — the staging kit is on the branch; the install on the box
 is the operator's.** A second copy of the site at
 `https://staging.leibnizlegible.com`, behind HTTP basic auth, running any
@@ -484,6 +531,133 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ⏳ the staging look
+
+- **Setting.** A cloud session, no store, on the plan's one branch under the
+  preamble's evening revision (see Divergences): the code and the tests
+  here, the browser checks against the app on the fixture store, the look
+  at the live page through the container's proxy (the W1 Playwright recipe:
+  `executablePath` the preinstalled Chromium, `proxy` from `HTTPS_PROXY`,
+  the egress CA pinned by SPKI), the staging checks handed over.
+- **Task 0, what a reader could select today** (the live page view
+  `/page/00068221:0043`, 108 lines, headless Chromium, 2026-10-08). The
+  line's text is inside the `<button class="line__btn">` that selects the
+  line (`user-select` `auto` on both): a drag across three lines left the
+  selection collapsed; a drag within one line selected nothing and counted
+  as a click (the line highlighted, the image zoomed to it); a double-click
+  on a word selected nothing; a plain click highlighted its line, as
+  designed. Select-all then copy did reach the clipboard: 11,752 characters
+  selected, 11,828 copied, starting "Skip to main content / Leibniz Legible
+  / Machine transcription of the Leibniz Nachlass / Search / Browse / About
+  / EN / DE …", every badge ("machine. HTR output, unreviewed."), every
+  confidence chip and every "Provenance" summary between the lines. With
+  `user-select: text` injected on the button and the text, a drag across
+  lines selected, and took the badges and the hidden "Line 2" labels with
+  it; a drag within a line still counted as a click. No `user-select` rule
+  existed in `style.css`; no handler cancelled a selection, the button did.
+  Baseline 634 tests, ruff and format clean.
+- **Task 1, the text block** (`views/page.js`, `style.css`, `i18n.js`). The
+  right column is now `.page-side`: the line list, then `<section
+  id="page-text">` with a heading "Text", a help line, a toolbar (`<button
+  id="copy-text">` "Copy the text", the download as a button-styled link
+  "Download this page as text", a `role="status"` live region), one line of
+  provenance — "Machine transcription: {model}, run of {date}; … Quote it
+  as “the machine reads it as …”, never as “Leibniz wrote”." with one entry
+  per recognition run behind the lines, newest first, from the lines'
+  `model`, `run_id` and `run_at` — and a `<pre class="page-text__block">`
+  with the lines' texts joined by newlines (a line break inside a text
+  becomes a space, as the export writes it; `white-space: pre-wrap`, so a
+  long line wraps on screen and copies as one line). Copy calls
+  `navigator.clipboard.writeText` inside the click handler (the user's
+  gesture is current there) and reports "Copied: N lines."; on rejection,
+  or without the API, it selects the block and says "The browser did not
+  allow the clipboard. The text is selected: press Ctrl+C (⌘C on a Mac) to
+  copy it." A page without text has no block. The header's link list no
+  longer carries "Download text"; it carries "Text of this page", an
+  in-page anchor to the block that the router leaves to the browser. **The
+  line list unblocked:** `.line__text { user-select: text }`, the number,
+  the badges, the button's hidden label and the provenance summary `none`;
+  `onListClick` returns while a non-collapsed selection stands inside the
+  list (a drag within a line, the second click of a double-click), so
+  taking text never zooms the image; and a `copy` event whose selection
+  lies inside the list is answered by page.js with the selected part of
+  each line's text, one per line (Chromium honours `user-select: none` in
+  the copy but leaves a blank line in the chrome's place and reports the
+  chrome in `Selection.toString()`; other browsers draw the line elsewhere;
+  the handler makes the result the same everywhere). The help line says
+  how. Keyboard: Copy is a button, the download a link, the jump an anchor;
+  Tab, Enter.
+- **Task 2, the text of a catalogue piece.** `web/pieces.py` places a
+  record the way `align/volumes.py` enumerated the factory's pieces: the
+  first of its shelfmarks that carries a `Bl.` range
+  (`resolve.folio_range_from_signature`), the work its best crosswalk link
+  names (`db.crosswalk_for_record`, by confidence, `gwlb_link` before a
+  shelfmark guess), the range selected over the work's folio labels
+  (`resolve.index_pages` + `resolve.select_folios`, split out of
+  `resolve_canvases` so one index serves every record of a work; the
+  factory's path is unchanged). `Placement` carries the pages, the range,
+  the shelfmark; `Unplaced` carries the reason in words: "record X is not
+  linked to a digitized work", "… its shelfmark 'LH IV, 6, 18' names no
+  folio (Bl.) range", "… carries no shelfmark", "… 'LH IV, 6, 18 Bl. 9'
+  names folios Bl. 9, but no page of work W carries a folio label in that
+  range (3 of its pages carry folio labels)". Where a record links several
+  works, the best link is tried first and the next where it cannot place
+  it. `GET /api/records/{record_id}/text` (summary "The text of a catalogue
+  piece across its folios"; `RECORD_RESPONSES` documents the 404 cases):
+  the `# ` header — the project line, `Piece:` (the route's own URL; a
+  piece has no page of its own), `Catalogue record: id — title`, incipit,
+  date, sender and addressee where the record is a letter, the AA reference
+  or "assigned, not yet published", other printings, the katalog URL,
+  `Work:`, the title row, `Folios: Bl. 1–2 (from the shelfmark …): n pages,
+  canvases a–b, page ids … to …`, the GWLB original, the line count over
+  the placed pages, `attr.KATALOG` (catalogue data travels in the file),
+  honesty, licence, wording rule, the work layout line — then the pages in
+  canvas order through `_page_chunks`, the generator `_work_text` now
+  shares (one connection per stream, as W1 built it). Download name
+  `leibniz-legible_record-<id>.txt`. `_katalog_for_work` builds one folio
+  index per work (from the pages the caller already read) and adds
+  `text_url`, `folio_label`, `folio_range`, `n_pages` to the placed
+  records; `_ssr_work` renders the same link; `views/work.js` shows "Text
+  of this piece ({range})" / "Text dieses Stücks ({range})" under the
+  record. `robots.txt`: `Allow: /api/records/` before `Disallow: /api/`;
+  `llms.txt` and the README describe the route and `text_url`.
+- **Task 3.** The page view's download lives in the block's toolbar; the
+  work view keeps "Download the text of this work". The About page's
+  transcriptions paragraph (EN and DE) says the text can be taken away per
+  page, per work and per catalogue piece, each file with its provenance.
+- **Task 4, verified.** Tests +10 (644): `select_folios` against
+  `resolve_canvases` over one index; the placements and every reason; the
+  record export's header order and body (the fixture's k-109, `Bl. 1-2`,
+  places on **three** pages — 1r, 1v and 2r, the last skipped and reported
+  as the one-line note — not the "two of three" the prompt expected), the
+  TSV rows, the 404s and their wording, the OpenAPI entry, robots, llms,
+  the server-rendered link only where a record is placed, and the viewer's
+  strings in both languages with `page.download` gone. Then `leibniz serve
+  --backend none` on the fixture store and 39 Playwright checks in headless
+  Chromium (the GWLB image requests answered with a stub JPEG and a level-0
+  `info.json`; axe-core served from the app's own origin because the CSP
+  is `script-src 'self'`): the block's text equals the page's lines; a drag
+  over it selects; Copy fills the clipboard and the status line, by mouse
+  and by Enter; the jump link; in the line list a drag across two lines
+  selects without a click, Ctrl+C copies exactly "line\nline", a partial
+  selection copies the selected parts, a drag within a line never zooms, a
+  plain click still chooses the line, a double-click selects a word; the
+  work page's piece link downloads `leibniz-legible_record-k-109.txt` with
+  its three folios; a skipped page has no block; About in EN and DE; the
+  whole block and the piece link in DE; the clipboard refused and absent;
+  390 px without horizontal scroll on page, work and About; no console or
+  page errors; axe-core 0 violations on the page view (EN, DE, 390 px) and
+  the work view (EN, DE). Screenshots in the session's scratchpad.
+- **Not measured here.** Firefox and Safari were not run (only Chromium is
+  installed): the line list's selection rests on `user-select: text`
+  inside a `<button>`, which the CSS UI spec allows and both browsers
+  support, and the copy handler is plain DOM; the operator's look on staging
+  in their own browser is the test. The master store was not opened; the
+  staging checks under Next are the real-data run.
+- **Next.** The staging look (Next, W4), then the three sentences for David
+  (`scratchpad/david-text-access.md` in the session; the hand-over has
+  them).
 
 ### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
 
@@ -1920,7 +2094,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **621** (2026-10-08, P1 Task 2; 616 after Task 1, 606 after C2b; with the `gt` + `web` + `release` extras) |
+| Tests passing | **644** (2026-10-08, W4; 634 after S1, 621 after P1 Task 2, 606 after C2b; with the `gt` + `web` + `release` extras) |
+| **W4 text access (2026-10-08)** | the live page view before: a drag in the line list selected 0 characters, select-all copied 11,828 with the chrome; after, on the fixture store: **39/39** browser checks, axe-core 0 violations ×5, 390 px without horizontal scroll |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -2100,6 +2275,35 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-08 — W4, departures from the prompt and from the plan's
+  preamble.** (1) *Where it ran.* A cloud session with no store: Task 0's
+  look at the live page ran here (headless Chromium through the proxy), the
+  browser checks of Task 4 ran against the fixture store, and the real-store
+  and staging checks are handed over (Next); the operator asked for the
+  step to be completed in one session, so Task 0's "wait for go" was not
+  waited for and its findings are recorded instead. (2) *Branch.*
+  `claude/dazzling-hopper-uxji2x`, the plan's one branch, not
+  `web-text-access`; no "merged"; Task 5 replaced by `staging.sh` and the
+  checks against staging, as the plan's amendment says. (3) *The line
+  list.* Beyond unblocking the selection, page.js answers a `copy` whose
+  selection lies in the list with the lines' selected text alone: Chromium
+  left a blank line where the badges were, and `Selection.toString()`
+  still reported them. (4) The header's link list gained "Text of this
+  page", an anchor to the block, in place of the download it lost; the
+  prompt names neither. (5) A record is placed from the *first of its
+  shelfmarks that carries a folio range* (the factory reads the first
+  shelfmark only) and from its best crosswalk link, then the next link where
+  the best cannot place it. (6) The piece's download is named
+  `leibniz-legible_record-<id>.txt`, so a record id can never be read as a
+  work id. (7) The record header carries `attr.KATALOG` beside the
+  project's own licence line, since catalogue data travels in the file. (8)
+  The fixture's k-109 resolves to three pages, not the prompt's "two of
+  three": `Bl. 1-2` includes folio 2's recto, the skipped third page; the
+  tests state it. (9) The string `page.download` is gone;
+  `page.text.download` names the moved link. (10) `resolve.py` gained
+  `index_pages` and `select_folios`, and `db.py` `crosswalk_for_record`,
+  beyond the prompt's list of files.
+
 - **2026-10-08 — S1, departures from the prompt and from the plan's
   preamble.** (1) *Where it ran.* A cloud session with no SSH: Task 0's
   look at the box and Task 4's install are handed over as commands (Next),
@@ -2250,6 +2454,38 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**W4 (2026-10-08), operator — the staging look, in WSL, before anything
+merges.** The SSH target and the staging user name are on the plan page,
+not here.
+
+1. Put the branch on staging:
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (it fetches, syncs the venv, restarts the staging unit, prints `/healthz`
+   and the address; paste the output back).
+2. Over HTTP, each line asks for the password once; the expected answer is
+   after the arrow:
+   - `curl -su USER https://staging.leibnizlegible.com/page/00068221:0043 | grep -c 'The machine reads it as'` → `1` (the server-rendered text is still there);
+   - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | head -16` → a `# ` header beginning `# Leibniz Legible`, with `# Catalogue record: 41800 — [Praefatio operis ad instaurationem scientiarum]`, `# Akademie-Ausgabe: AA VI,4 N. 109`, `# Work: https://staging.leibnizlegible.com/work/00068642`, `# Folios: Bl. 1 (from the shelfmark LH 4, 6, 18 Bl. 1): 2 pages, canvases 1–2, …` (the live work's records, read from the live API on 2026-10-08: 41800 is on Bl. 1, 59095 "De cognitione" on Bl. 2);
+   - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | grep -c '^## Folio'` → `2`;
+   - `curl -su USER 'https://staging.leibnizlegible.com/api/records/41800/text?format=tsv' | sed -n '/^line_id/p'` → the TSV column row;
+   - `curl -su USER https://staging.leibnizlegible.com/api/works/00068642 | grep -o '"text_url": *"[^"]*"'` → two `text_url` values, `/api/records/41800/text` and `/api/records/59095/text`;
+   - `curl -su USER -o /dev/null -w '%{http_code}\n' https://staging.leibnizlegible.com/api/records/nope/text` → `404`;
+   - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep records` → `Allow: /api/records/`;
+   - `curl -su USER https://staging.leibnizlegible.com/llms.txt | grep -c '/api/records/{record_id}/text'` → `1`.
+3. In the browser, with the password: `/page/00068221:0043` — the Text block
+   under the line list, Copy (then paste somewhere: 108 lines, nothing
+   else), "Download this page as text", "Text of this page" in the header;
+   drag across two lines of the line list and copy: the two lines alone;
+   `/work/00068642` — "Text of this piece (Bl. 1)" under the Praefatio
+   record and "(Bl. 2)" under De cognitione, each a download; DE; `/about`,
+   the transcriptions paragraph. Phone width if a phone is at hand.
+4. Anything wrong: say so in a session; it fixes it on the branch and the
+   `staging.sh` line runs again. Nothing merges here; the final merge is
+   the plan's own step, after the emails and this look.
+5. The three sentences for David are in the hand-over (and in the session's
+   `scratchpad/david-text-access.md`); say "on a preview" or nothing about
+   where.
 
 **S1 (2026-10-08): ✅ staging installed and verified** (the S1 log has the
 run, the first failure and the fix). Standing, for every web step from now

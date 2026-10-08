@@ -1162,3 +1162,200 @@ they differ, this preamble wins.
    (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
    carry the ones produced so far.
 ~~~~
+
+
+### Phase W4 — Text access (run 2026-10-08)
+
+_Run in a cloud session under the 8 October plan's session preamble, in its
+evening revision (below the prompt): one branch (`claude/dazzling-hopper-uxji2x`,
+not `web-text-access`), no wait for "merged", Task 5 replaced by the staging
+site; the browser checks ran against the fixture store, the staging checks are
+handed to the operator. The departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase W4 — Text access: a copyable text panel on the page view, the text of a
+catalogue piece across its folios, and downloads where readers look. One local
+session on the operator's desktop (WSL2 Ubuntu); pre-flight, build, verify on
+the real store, hand over, deploy, verify live.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. This phase is W4: W1 (overlay toggle,
+text export), W2 (search operators) and W3 (the browse index, then the
+versioned-modules fix) exist in STATUS.md. Do not reuse their labels.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. data/inventory.sqlite is the MASTER store (16 GB):
+open it read-only only (`uv run leibniz …` opens it mode=ro); never write,
+VACUUM or move it; never delete anything under data/. `.venv` is the pipeline
+environment (never run `uv sync` against it); use `.venv-w3` (export
+UV_PROJECT_ENVIRONMENT=.venv-w3 for every `uv` command). Long-running checks
+run against a local server on a spare port. The operator merges; you push and
+hand over; you never merge. The VPS: nothing runs there without the operator's
+explicit yes for the exact command shown, and nothing but the §9 "Update the
+app" block from deploy/README.md. Email: you draft; the operator sends.
+Branch: `web-text-access`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files; HEAD is main; `git pull --ff-only origin main`; confirm the remote.
+2. `node --version` (Playwright; if absent, the browser checks are the
+   operator's, by the checklist you print). Baseline: `uv run ruff check .`,
+   `uv run ruff format --check .`, `uv run pytest -q`; record the counts.
+3. Look at the live page before changing anything: in headless Chromium (or
+   by asking the operator to try in their browser) open
+   https://leibnizlegible.com/page/00068221:0043, select text in the line panel
+   and read the selection; read static/style.css for user-select rules and
+   views/page.js for click handlers that cancel selection. Record what a reader
+   can and cannot select today.
+4. Print a short plan and wait for "go".
+
+## Context
+David Rabouin (PHILIUMM, 2026-10-07): "I think it would be very useful for your
+reader to have access to a text version of the all page in which an expression
+occurs. As it stands, one cannot copy the transcription and one can imagine
+that a student or a colleague would like to quote the whole passage in which
+an expression occurs." W1 (2026-10-02) added GET /api/pages/{id}/text and
+/api/works/{id}/text, plain text with a `# ` provenance header (and ?format=tsv),
+linked as "Download text" on the page and work views. A whole passage, however,
+is a catalogue piece (a letter, a draft) that spans folios, and nothing serves
+that; and a reader who wants to quote selects text on the page rather than
+downloading a file.
+The web layer is src/leibniz/web/: api.py (create_app; _page_text and
+_work_text render the plain-text format; _ssr_page carries the machine text for
+crawlers; _katalog_for_work returns a work's catalogue records with sender,
+addressee, date, aa_labels and shelfmarks), static/views/page.js and work.js,
+static/i18n.js (EN and DE), static/api.js. Since W3's fix the shell loads the
+viewer's modules from /static/m/<build>/, hashed as a set, so a changed module
+reaches returning readers at once; nothing to do for that. The piece→canvas
+resolver is src/leibniz/align/resolve.py: resolve_piece(conn, work_id,
+signature) places a catalogue record's shelfmark with a Bl. range onto canvases
+(pages.label holds folio labels); C2 localized 11,595 pieces with it. The
+fixture store (tests/conftest.py) has record k-109 on work 00068642 with
+shelfmark "LH IV, 6, 18 Bl. 1-2", which resolves to two of its three pages.
+
+## Task 1 — The text panel on the page view
+Under the line panel (or as a tab beside it), a "Text" section showing the
+page's recognised lines as one block of selectable text in reading order, one
+line per line, with a Copy button (navigator.clipboard.writeText inside the
+click handler; on rejection select the block and say so) and the existing
+per-page download beside it, named plainly ("Download this page as text" /
+"Diese Seite als Text herunterladen"). Status and confidence stay with the
+line panel; the block carries one line of provenance above it (model, run date,
+the wording rule from attribution.py). If Task 0 found that selection in the
+line panel is blocked, unblock it as well. EN and DE; keyboard reachable; the
+server-rendered page keeps carrying the text for crawlers.
+
+## Task 2 — The text of a catalogue piece
+GET /api/records/{record_id}/text: for a catalogue record linked to a work
+whose shelfmark the resolver can place, the lines of those canvases in order,
+in the W1 plain-text format with a header naming the record (title, date,
+sender and addressee, AA reference where known), the work, the folio range and
+the canvases; ?format=tsv as for W1; 404 for an unknown record; for a record
+that cannot be placed, a 404 whose detail says so (document it in the OpenAPI
+summary). On the work page, every catalogue record that can be placed gets a
+link "Text of this piece (Bl. 1–2)" / "Text dieses Stücks (Bl. 1–2)"; the API's
+records carry `text_url` only where it resolves. robots.txt: Allow
+/api/records/. llms.txt and the README document it. Tests on the fixture store:
+k-109 resolves and streams two pages; a record without a folio range answers
+404 with the reason; TSV; robots.
+
+## Task 3 — Downloads where readers look
+On the page view and the work view, the download links move from the link list
+into the text panel's toolbar (the work view keeps "Download the text of this
+work"). The About page's section on the text says that text is available per
+page, per work and per catalogue piece.
+
+## Task 4 — Verify against the real store, record, hand over
+Tests; ruff. `uv run leibniz serve --backend none --port 8765` on the master
+store (read-only; search answers 503 by design). Over HTTP: a page with text;
+a record text for a work with placed records (find one through /api/works);
+a record that cannot be placed; TSV; robots; llms. In a browser (Playwright
+from npm in scratchpad/pw if Node is present, plain chromium.launch(); else
+the operator by your checklist at http://127.0.0.1:8765): select and copy on
+the panel, the piece link from a work page, EN and DE, phone width (390 px,
+no horizontal scroll), no console errors, axe-core zero violations. Stop the
+server. STATUS.md: a "W4" entry (Current state, Phase log, Key numbers, Next)
+including what Task 0 found about selection. Append this prompt verbatim to
+PROMPTS.md under "Follow-up phases (2026-10)". Commit in sensible pieces,
+`git push -u origin web-text-access`, print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...web-text-access?expand=1,
+and ask the operator to say "merged". Wait.
+
+## Task 5 — Deploy, only after "merged", only with a yes
+Ask for the SSH target and whether to run the deploy from this session. Show
+the exact command first and run it only on an explicit yes; it is the §9 block
+and nothing else (the remote shell is bash; if the login user is not root,
+prefix systemctl with sudo):
+
+    ssh <target> "sudo -u leibniz -H git -C /opt/leibniz-legible pull --ff-only && sudo -u leibniz -H env UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python uv sync --project /opt/leibniz-legible --frozen --no-dev --extra web && systemctl restart leibniz-legible && sleep 2 && curl -s http://127.0.0.1:8000/healthz"
+
+Code only: no index rebuild, no Meilisearch restart. Then verify live over
+HTTP: a page view's server-rendered text, a record text URL, robots.txt with
+the new Allow line, llms.txt. Ask the operator to open a page view in the
+browser they used before the deploy, without a hard reload, and confirm the
+panel and the Copy button work (the versioned-modules fix is what makes this
+safe; say so if anything looks stale). If anything fails live, say exactly
+what, propose the fix as a new branch, and do not patch anything on the
+server.
+
+## Task 6 — Three sentences for the operator's reply to David
+In scratchpad/david-text-access.md and in chat: the page text panel with Copy,
+the text of a catalogue piece across its folios from the work page, and that
+per-page and per-work downloads have existed since 2 October. No numbers you
+did not measure. Do not send anything.
+~~~~
+
+The session preamble of the 8 October plan, in the revision given to this
+session (the S1 entry above carries the earlier wording):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull`,
+   commit there, `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (the staging site of step S1 exists; until the final merge the script
+   runs from the staging checkout, afterwards from
+   /opt/leibniz-legible/deploy/staging.sh). The operator runs that line and
+   pastes the output. Then the checks against
+   https://staging.leibnizlegible.com: without credentials it answers 401 to
+   everything, which is the one check you can run yourself; the rest you
+   hand the operator as `curl -su USER …` lines to run and paste back. The
+   password never reaches you; the SSH target and the user name are on the
+   operator's plan page, not in the repo, so never write them into STATUS.md
+   or PROMPTS.md. Checks that need no box can run against a local server on
+   a spare port. The live site changes only at the operator's final merge.
+   Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "S1",
+   "C2b" and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environment is .venv-w3 on the desktop; in the cloud
+   make your own (.venv-cloud, with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far.
+~~~~
