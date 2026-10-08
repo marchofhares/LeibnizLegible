@@ -46,6 +46,7 @@ def _seed(path: Path) -> None:
     line("W1:0001", 2, "plain")
     line("W2:0001", 0, "etwas-")  # mark, but the minted text ends in a digit
     line("W2:0001", 1, "zwei")
+    line("W2:0001", 2, "drei")
     line("M1:0001", 0, "marg")
     # a later run re-read W1 line 2 without a hyphen; the census takes the latest text
     conn.execute(
@@ -62,7 +63,20 @@ def _seed(path: Path) -> None:
     db.upsert_katalog_record(
         conn,
         db.KatalogRecord(
-            "k-1", metadata={"textart": "Konzept, eigh."}, shelfmark_refs=[], aa_refs=[]
+            "k-1",
+            metadata={"textart": "Konzept, eigh.", "absender": "Leibniz, Gottfried Wilhelm"},
+            shelfmark_refs=[],
+            aa_refs=[],
+        ),
+    )
+    # a letter Leibniz received, in the correspondent's own hand
+    db.upsert_katalog_record(
+        conn,
+        db.KatalogRecord(
+            "k-4",
+            metadata={"textart": "Abfertigung, eigh.", "absender": "Bernoulli, Johann"},
+            shelfmark_refs=[],
+            aa_refs=[],
         ),
     )
     db.upsert_katalog_record(
@@ -75,6 +89,7 @@ def _seed(path: Path) -> None:
     src1 = "AA III,3 N.12 (§70-expired AA reading text; katalog k-1)"
     src2 = "AA I,7 N. 3 (§70-expired AA reading text; katalog k-2)"
     src3 = "AA VI,4 N.109 (§70-expired AA reading text; katalog k-3)"
+    src4 = "AA I,8 N.5 (§70-expired AA reading text; katalog k-4)"
     insert_gt_pairs(
         conn,
         [
@@ -83,6 +98,7 @@ def _seed(path: Path) -> None:
             GtPair("W1:0001:002", "plain words", src1, "scrap", 0.9, "open"),
             GtPair("W2:0001:000", "anno 1691", src2, "fair_copy", 0.9, "open"),
             GtPair("W2:0001:001", "droit[e] zwei", src2, "fair_copy", 0.9, "open"),
+            GtPair("W2:0001:002", "drei", src4, "fair_copy", 0.9, "open"),
             GtPair("M1:0001:000", "marg", src3, "light_revision", 0.9, "open"),
             GtPair("M1:0001:000", "nc text", "transkriptionspool", "light_revision", 0.9, "nc"),
             # an older reference form (the B2 prototype's): skipped and counted, not a crash
@@ -120,24 +136,27 @@ def test_census_flags(tmp_path: Path) -> None:
     c = R.census(conn)
     conn.close()
     flags = {ln.ref: set(ln.flags) for ln in c.lines}
-    assert c.n == 6 and c.n_pages == 3 and c.n_records == 3 and c.n_records_with_textart == 2
+    assert c.n == 7 and c.n_pages == 3 and c.n_records == 4 and c.n_records_with_textart == 3
     assert c.n_skipped == 1
-    assert flags["W1:0001:000"] == {"hyphen", "eigh", "lh35"}
-    assert flags["W1:0001:001"] == {"math", "eigh", "lh35"}
-    assert flags["W1:0001:002"] == {"hyphen", "eigh", "lh35"}  # the v2 reading ends in a hyphen
+    assert flags["W1:0001:000"] == {"hyphen", "eigh", "leibniz", "lh35"}
+    assert flags["W1:0001:001"] == {"math", "eigh", "leibniz", "lh35"}
+    # the v2 reading ends in a hyphen
+    assert flags["W1:0001:002"] == {"hyphen", "eigh", "leibniz", "lh35"}
     assert flags["W2:0001:000"] == {"addition"}  # the page's overlap fraction, not the line
     assert flags["W2:0001:001"] == {"addition", "bracket"}
+    assert flags["W2:0001:002"] == {"addition", "eigh"}  # Bernoulli's hand, not Leibniz's
     assert flags["M1:0001:000"] == {"marginalien"}
     eigh = {ln.ref: ln.eigh for ln in c.lines}
     assert (
         eigh["W1:0001:000"] is True and eigh["W2:0001:000"] is False and eigh["M1:0001:000"] is None
     )
     s = R.summary(c, strata=("fair_copy", "light_revision", "heavy_revision", "scrap"))
-    # eigh share is of the 5 lines whose record carries a Textart (k-1 and k-2), not of all 6
-    assert s["all"]["hyphen"] == 2 and s["all"]["with_textart"] == 5
-    assert s["all"]["eigh"] == 3 and s["all"]["eigh_share"] == 0.6
+    # hand shares are of the 6 lines whose record carries a Textart (k-1, k-2, k-4), not of all 7
+    assert s["all"]["hyphen"] == 2 and s["all"]["with_textart"] == 6
+    assert s["all"]["eigh"] == 4 and s["all"]["leibniz"] == 3 and s["all"]["leibniz_share"] == 0.5
     by_vol = {r["key"]: r for r in s["by_volume"]}
     assert by_vol["III,3"]["math"] == 1 and by_vol["I,7"]["addition"] == 2
+    assert by_vol["I,8"]["eigh"] == 1 and by_vol["I,8"]["leibniz"] == 0
     md = R.render(c, strata=("fair_copy",), flags_path=Path("data/gt/flags.jsonl"))
     assert "| III,3 | 3 |" in md and "marginalien" in md and "1 open-bucket rows carry" in md
 
@@ -152,10 +171,10 @@ def test_audit_reach_cli(tmp_path: Path) -> None:
     )
     assert res.exit_code == 0, res.stdout
     flat = " ".join(res.stdout.split())  # the console wraps long lines
-    assert "6 lines on 3 pages" in flat and "1 rows with a non-canonical" in flat
+    assert "7 lines on 3 pages" in flat and "1 rows with a non-canonical" in flat
     rows = [json.loads(line) for line in flags.read_text(encoding="utf-8").splitlines()]
-    assert len(rows) == 6 and rows[0]["ref"] == "W1:0001:000" and "hyphen" in rows[0]["flags"]
+    assert len(rows) == 7 and rows[0]["ref"] == "W1:0001:000" and "hyphen" in rows[0]["flags"]
     summ = json.loads((out / "reach-summary.json").read_text(encoding="utf-8"))
-    assert summ["n_lines"] == 6 and (out / "reach.md").exists()
+    assert summ["n_lines"] == 7 and (out / "reach.md").exists()
     res2 = runner.invoke(app, ["align", "audit-reach", "--db", str(tmp_path / "missing.sqlite")])
     assert res2.exit_code != 0

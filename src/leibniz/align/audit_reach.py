@@ -16,8 +16,12 @@ store already holds — no image, no model:
   additions rendered inline *on such pages*; the proxy marks the pages, not
   the lines.
 * **hand** — the catalogue record the line was minted from carries ``eigh.``
-  in its ``Textart`` (Leibniz's own hand); shares per stratum and per volume.
-  ``None`` where the record has no Textart.
+  (*eigenhändig*) in its ``Textart``: the piece is in its author's own hand.
+  For a letter the author is the sender, so ``eigh`` alone counts a
+  correspondent's hand on a letter Leibniz received; ``leibniz`` narrows it to
+  the lines whose record names no sender (a writing) or names Leibniz as the
+  sender (his own draft or letter). Shares per stratum and per volume are of
+  the lines whose record has a Textart.
 * **Marginalien** — the line's work is in the Marginalien set (annotated
   printed books), where the body text is print, not Leibniz.
 * **bracket** — the minted text carries an editorial bracket, the leak the
@@ -46,7 +50,8 @@ from leibniz.align.audit_patterns import (
 from leibniz.align.stratum import HEAVY_MIN_OVERLAP_FRAC, HEAVY_MIN_SHORT_FRAC
 from leibniz.catalog.shelfmarks import normalize_signature
 
-FLAGS = ("hyphen", "math", "addition", "eigh", "marginalien", "bracket", "lh35")
+FLAGS = ("hyphen", "math", "addition", "eigh", "leibniz", "marginalien", "bracket", "lh35")
+HAND_FLAGS = ("eigh", "leibniz")  # shares of the lines whose record has a Textart
 MARGINALIEN_SET = "LeibnizMarginalien"
 
 # "AA VI,4 N.109 (§70-expired AA reading text; katalog k-109)"; the audit's test
@@ -129,7 +134,7 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
     htr_cache: dict[str, dict[int, str]] = {}
     page_flags: dict[str, bool] = {}
     work_info: dict[str, tuple[bool, bool]] = {}
-    textart: dict[str, str | None] = {}
+    textart: dict[str, tuple[str | None, str | None]] = {}  # record -> (Textart, sender)
     out: list[ReachLine] = []
     skipped = 0
     for r in rows:
@@ -161,10 +166,12 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
             flags.append("math")
         if page_flags[page_id]:
             flags.append("addition")
-        ta = textart.get(rec) if rec is not None else None
+        ta, sender = textart.get(rec, (None, None)) if rec is not None else (None, None)
         eigh = None if not ta else ("eigh." in ta.lower())
         if eigh:
             flags.append("eigh")
+            if not sender or "leibniz" in sender.lower():
+                flags.append("leibniz")
         marg, lh35 = work_info[work_id]
         if marg:
             flags.append("marginalien")
@@ -177,7 +184,7 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
         lines=out,
         n_pages=len(htr_cache),
         n_records=len(textart),
-        n_records_with_textart=sum(1 for v in textart.values() if v),
+        n_records_with_textart=sum(1 for v in textart.values() if v[0]),
         n_skipped=skipped,
     )
 
@@ -218,15 +225,16 @@ def _work_flags(conn: sqlite3.Connection, work_id: str) -> tuple[bool, bool]:
     return row["set_name"] == MARGINALIEN_SET, is_lh35(shelfmarks)
 
 
-def _textart(conn: sqlite3.Connection, record_id: str) -> str | None:
+def _textart(conn: sqlite3.Connection, record_id: str) -> tuple[str | None, str | None]:
+    """The record's ``(Textart, Absender)``; ``None`` for a missing field."""
     row = conn.execute(
         "SELECT metadata FROM katalog_records WHERE record_id = ?", (record_id,)
     ).fetchone()
     if row is None or not row["metadata"]:
-        return None
+        return None, None
     meta = json.loads(row["metadata"])
-    ta = meta.get("textart")
-    return str(ta) if ta else None
+    ta, sender = meta.get("textart"), meta.get("absender")
+    return (str(ta) if ta else None), (str(sender) if sender else None)
 
 
 # --------------------------------------------------------------------------- #
@@ -247,7 +255,7 @@ def _table(groups: dict[str, list[ReachLine]], *, order: Sequence[str] | None = 
         for f in FLAGS:
             c = sum(1 for ln in ls if f in ln.flags)
             row[f] = c
-            denom = with_ta if f == "eigh" else n
+            denom = with_ta if f in HAND_FLAGS else n
             row[f + "_share"] = (c / denom) if denom else None
         rows.append(row)
     return rows
@@ -297,8 +305,11 @@ def render(c: ReachCensus, *, strata: Sequence[str], flags_path: Path | None) ->
         "with `keep_hyphen` changes). *math*: the audit's density cut (misses inline algebra in "
         "prose). *addition*: a proxy — the line's page has an overlap or short-line fraction at "
         "the heavy-revision cut; it marks pages where inline additions were seen, not the "
-        "lines. *eigh*: the record's Textart says Leibniz's own hand; its share is of the lines "
-        "whose record has a Textart. *marginalien*: the work is an annotated printed book. "
+        "lines. *eigh*: the record's Textart says the piece is in its author's own hand — on a "
+        "letter Leibniz received, the correspondent's. *leibniz*: of those, the records that name "
+        "no sender (a writing) or Leibniz as the sender (his draft or letter): Leibniz's own "
+        "hand. Both shares are of the lines whose record has a Textart. *marginalien*: the work "
+        "is an annotated printed book. "
         "*bracket*: an editorial bracket in the minted text. *lh35*: the work's shelfmark is "
         "LH 35."
     )
