@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-07 (**C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-08 (**C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -35,10 +35,20 @@ minted text, give the first sample of the normalization tax on real
 lines: 3.1 % character distance as written on the accent-and-comma
 lines, 0.0 % under the aligner's fold — the fold hides exactly what a
 diplomatic scorer charges. A read-only census (`leibniz align
-audit-reach`) measures every pattern across the 297k minted lines, plus
-Leibniz's own hand from the catalogue's Textart and the Marginalien set;
-built and tested here, **to be run on the master store** (minutes). The
-C3 prompt carries Amendment 2: train on the re-minted lines with hyphens
+audit-reach`, run by the operator on the store on 2026-10-08,
+`reports/gt-audit/reach.md`) measures every pattern across the 297,424
+minted lines: **7,822 (2.6 %) lose their hyphen to the mint** (7.7 % of
+fair copies), what the re-mint changes; 4,338 (1.5 %) carry an editorial
+bracket; the density cut flags 249 formula lines (0.1 %), two thirds of
+them in Reihe III, a floor; the addition proxy marks 82.7 % of lines and
+99.3 % of heavy revision, i.e. it restates the stratum and is no use as a
+filter; no minted line is from a Marginalien work. **The hand census: of
+the 296,587 lines whose record has a Textart, 40.1 % are in their
+author's own hand and 25.7 % in Leibniz's** — 1.7 % of fair copies (the
+secretaries' Abfertigungen), 8.3 % of light revision, 35.8 % of heavy
+revision (his drafts), 18.2 % of scraps; the rest of the own-hand share
+is correspondents' hands on letters he received. The C3 prompt carries
+Amendment 2: train on the re-minted lines with hyphens
 kept, exclude formula and Marginalien lines, hold out PHILIUMM's pages,
 stratify by hand, keep the 199 judged lines as a sanity set. The
 operator's own 20 verdicts of 16 September agree with PHILIUMM's on 11:
@@ -520,9 +530,36 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   Marginalien (the work's set), bracket, LH 35. Writes
   `reports/gt-audit/reach.md`, `reach-summary.json` and
   `data/gt/flags.jsonl` for C3; opens the store `mode=ro` + `query_only`.
-  Built and tested on a seeded store; **the hand census and every reach
-  number wait for the operator's run** — nothing here is a number this
-  session produced.
+  Built and tested on a seeded store in the cloud session; run by the
+  operator on the master store on 2026-10-08 (minutes; the local
+  `audit-score` against the store reproduced 72.3 %).
+- **Reach, measured (2026-10-08, `reports/gt-audit/reach.md`).** 297,424
+  open-bucket lines on 16,843 pages from 5,526 records (5,513 with a
+  Textart; 0 rows skipped). *Hyphen* 7,822 (2.6 %): fair_copy 7.7 % ·
+  light 4.0 % · heavy 1.7 % · scrap 2.0 %; by volume up to 6.5 % (IV,1)
+  and 7.3 % (VI,1); the sheet's mechanical rate was 6/199 = 3 %, so the
+  mint-wide figure is as expected and is the exact set the re-mint
+  changes. *Bracket* 4,338 (1.5 %; IV,3 4.3 %, VI,3 2.4 %): C3 should
+  drop or clean them (the flag is in `flags.jsonl`). *Math* 249 (0.1 %):
+  III,1 72 (1.3 %) · III,3 55 · III,4 39 — two thirds in Reihe III, as a
+  precise-but-blind cut should; the sheet's rate from the notes was 2.5 %,
+  so the flag is a floor and the layout-zone census (P1 Task 3) is the
+  instrument. *Addition* 246,003 (82.7 %; heavy 99.3 %, light 58.2 %,
+  fair 2.0 %): the page-layout proxy restates the stratum heuristic and
+  must not be used as a filter — the audit found inline additions on 1 %
+  of lines; the honest route is Denisa's apparatus-reinsertion script.
+  *Marginalien* 0, *LH 35* 9,145 (3.1 %; III,1 57 %).
+- **The hand census (2026-10-08).** Of the 296,587 minted lines whose
+  record has a Textart, **118,928 (40.1 %) are in their author's own hand
+  (`eigh.`) and 76,147 (25.7 %) in Leibniz's** (own hand, and the record
+  names no sender or Leibniz as sender). By stratum, Leibniz's hand:
+  fair_copy 1.7 % · light_revision 8.3 % · heavy_revision 35.8 % · scrap
+  18.2 %. By volume: IV,2 98 %, VI,4 65 %, VI,6 55 %, III,1 46 %, I,7
+  36 %, IV,1 35 %, I,3 29 %, I,12 28 %; IV,3 6 %, VI,3 10 %, III,3 4 %.
+  The gap between the two figures is the correspondents' own hands on
+  letters he received, largest in Reihe I (I,3: 82 % own hand, 29 %
+  Leibniz's). For the call: three quarters of this ground truth is hands
+  other than Leibniz's — David's point that their model saw only his.
 - **Tooling:** `audit-score --weights/--weights-source` (no store needed;
   refuses to create an empty store when `--db` is missing), `--compare`
   (+ `--compare-labels`), `--patterns/--no-patterns`, `--overrides`,
@@ -1663,6 +1700,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | **C2 hand audit (PHILIUMM, 2026-10-07)** | 199/200 judged: 136 correct · 33 boundary · 16 wrong · 14 unreadable → **weighted precision 72.3 % (FAIL at 95 %)**, usable **92.2 %**; per stratum 84.0 / 86.7 / 64.6 / 57.1 %; **1 misaligned line in 185 scored**; patterns: boundary-letter 35 · normalization 16 · hyphen 13 · bracket 7 · math 5 · reading 4 · addition 2 |
 | C2 normalization tax, first sample | 46 corrections, 45 placed: 9.4 % as written / 7.9 % folded; on the accent-and-comma lines **3.1 % / 0.0 %** |
 | C2 audit agreement | the operator's 20 (2026-09-16) vs PHILIUMM: 11/20 |
+| **C2 reach census (2026-10-08)** | 297,424 lines · hyphen **7,822 (2.6 %)** · bracket 4,338 (1.5 %) · math 249 (0.1 %, a floor) · addition proxy 82.7 % (useless) · Marginalien 0 · LH 35 9,145 |
+| **C2 hand census (2026-10-08)** | of 296,587 lines with a Textart: author's own hand **40.1 %**, **Leibniz's own hand 25.7 %** (fair 1.7 · light 8.3 · heavy 35.8 · scrap 18.2 %) |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
 | **C2 extraction QA (live, real Leibniz print)** | `gpt-4o` reading-text extract, head/page-no dropped; 2-model QA flagged **1/2**, agreement **0.67** |
@@ -1824,10 +1863,10 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   this session ran in a cloud container on a fresh clone with no store, in
   a side environment `.venv-cloud` (`gt` + `web` + `release` extras). So
   the stratum weights for `audit-score` came from the committed C2 mint
-  counts (`--weights`, named in the report; the operator's local run
-  against the store must reproduce 72.3 %), Task 3's reach census was
-  built and tested on a seeded store but **not run**, and the hand census
-  it carries is unmeasured. (2) *Branch.* `claude/dazzling-hopper-uxji2x`,
+  counts (`--weights`, named in the report), and Task 3's reach census was
+  built and tested on a seeded store only. The operator then ran both on
+  the master store on 2026-10-08: the score reproduced 72.3 % and the
+  census numbers are in the C2b log. (2) *Branch.* `claude/dazzling-hopper-uxji2x`,
   the session's designated branch, not `c2-audit-closeout`. (3) *Pattern
   names.* `bracket`, `normalization` and `reading` were added to the
   prompt's list (see the C2b log for why). (4) *Precedence.* A *boundary*
@@ -1950,17 +1989,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 **C2b (2026-10-07), operator — in this order:**
 
-1. On the desktop, in WSL: `git fetch origin claude/dazzling-hopper-uxji2x
-   && git checkout claude/dazzling-hopper-uxji2x`, then with
-   `UV_PROJECT_ENVIRONMENT=.venv-w3`:
-   `uv run leibniz align audit-score reports/gt-audit/gt-audit-verdicts-philiumm.csv --compare reports/gt-audit/gt-audit-verdicts.csv --compare-labels "PHILIUMM (2026-10-07),the operator's preliminary pass (2026-09-16)"`
-   — weights from the store this time; it must print **72.3 %** (if not,
-   the mint changed since 2026-09-16: say so in STATUS). Then
-   `uv run leibniz align audit-reach` (minutes, read-only): writes
-   `reports/gt-audit/reach.md`, `reach-summary.json` and
-   `data/gt/flags.jsonl`. Read reach.md — the hyphen share is the size of
-   the re-mint's change, the `eigh` share the hand census for the call —
-   and commit the two reports to the branch.
+1. ✅ Done 2026-10-08: the score against the store reproduced 72.3 %; the
+   reach census ran (minutes) and its reports are committed (`bd01eef`).
 2. Send Denisa and David the five-line summary (the session's hand-over)
    with `reports/gt-audit.md` attached; then merge. They judged the lines;
    they see the score first.
