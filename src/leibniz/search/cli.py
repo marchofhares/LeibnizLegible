@@ -28,7 +28,7 @@ from leibniz.search.backend import SearchQuery
 from leibniz.search.bench import DEFAULT_QUERIES, DEFAULT_RATE, bench_search
 from leibniz.search.documents import corpus_stats, iter_page_docs
 from leibniz.search.fts5 import DEFAULT_INDEX_PATH
-from leibniz.search.meili import DEFAULT_MEILI_URL
+from leibniz.search.meili import DEFAULT_INDEX_UID, DEFAULT_MEILI_URL
 
 app = typer.Typer(help="Search index (D1): SQLite FTS5 or Meilisearch.", no_args_is_help=True)
 console = Console()
@@ -40,9 +40,20 @@ MEILI_URL_OPT = typer.Option(None, "--meili-url", help="Meilisearch URL (env MEI
 MEILI_KEY_OPT = typer.Option(
     None, "--meili-key", help="Meilisearch API key (env MEILI_MASTER_KEY, else MEILI_API_KEY)."
 )
+MEILI_INDEX_OPT = typer.Option(
+    None,
+    "--meili-index",
+    help=f"Meilisearch index uid (env LEIBNIZ_MEILI_INDEX; default {DEFAULT_INDEX_UID}).",
+)
 
 
-def _backend(backend: str, index: Path, meili_url: str | None, meili_key: str | None):
+def _backend(
+    backend: str,
+    index: Path,
+    meili_url: str | None,
+    meili_key: str | None,
+    meili_index: str | None = None,
+):
     return open_backend(
         backend,
         path=str(index),
@@ -50,6 +61,7 @@ def _backend(backend: str, index: Path, meili_url: str | None, meili_key: str | 
         meili_key=meili_key
         or os.environ.get("MEILI_MASTER_KEY")
         or os.environ.get("MEILI_API_KEY"),
+        meili_index=meili_index or os.environ.get("LEIBNIZ_MEILI_INDEX") or DEFAULT_INDEX_UID,
     )
 
 
@@ -60,13 +72,14 @@ def build(
     index: Path = INDEX_OPT,
     meili_url: str | None = MEILI_URL_OPT,
     meili_key: str | None = MEILI_KEY_OPT,
+    meili_index: str | None = MEILI_INDEX_OPT,
     set_name: str | None = typer.Option(None, "--set", help="Index one OAI set only."),
     work: str | None = typer.Option(None, "--work", help="Index one work only."),
     limit: int | None = typer.Option(None, "--limit", help="Cap the number of pages (dev)."),
     no_stats: bool = typer.Option(False, "--no-stats", help="Skip the corpus statistics scan."),
 ) -> None:
     """(Re)build the search index from the store."""
-    be = _backend(backend, index, meili_url, meili_key)
+    be = _backend(backend, index, meili_url, meili_key, meili_index)
     conn = db.init_db(db_path)
     try:
         meta = {"db": str(db_path), "git_sha": db.git_sha()}
@@ -88,11 +101,13 @@ def status(
     index: Path = INDEX_OPT,
     meili_url: str | None = MEILI_URL_OPT,
     meili_key: str | None = MEILI_KEY_OPT,
+    meili_index: str | None = MEILI_INDEX_OPT,
 ) -> None:
     """Print the index's build metadata and document count."""
-    be = _backend(backend, index, meili_url, meili_key)
+    be = _backend(backend, index, meili_url, meili_key, meili_index)
     meta = be.meta()
-    console.print(f"backend: {be.name}   documents: {be.count():,}")
+    where = f" ({be.index_uid})" if hasattr(be, "index_uid") else ""
+    console.print(f"backend: {be.name}{where}   documents: {be.count():,}")
     for k in ("built_at", "n_docs", "git_sha", "db"):
         if k in meta:
             console.print(f"{k}: {meta[k]}")
@@ -111,6 +126,7 @@ def query(
     index: Path = INDEX_OPT,
     meili_url: str | None = MEILI_URL_OPT,
     meili_key: str | None = MEILI_KEY_OPT,
+    meili_index: str | None = MEILI_INDEX_OPT,
     set_name: str | None = typer.Option(None, "--set"),
     lang: str | None = typer.Option(None, "--lang"),
     stratum: str | None = typer.Option(None, "--stratum"),
@@ -118,7 +134,7 @@ def query(
     limit: int = typer.Option(10, "--limit"),
 ) -> None:
     """Run a query and print the hits."""
-    be = _backend(backend, index, meili_url, meili_key)
+    be = _backend(backend, index, meili_url, meili_key, meili_index)
     res = be.search(
         SearchQuery(
             q=q, set_name=set_name, lang=lang, stratum=stratum, min_conf=min_conf, limit=limit

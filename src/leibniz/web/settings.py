@@ -14,6 +14,7 @@ application from scratch: the CLI exports its options with :meth:`to_env` and
 | ``LEIBNIZ_INDEX_PATH``    | ``index_path`` | ``data/search.sqlite``        |
 | ``MEILI_URL``             | ``meili_url``  | ``http://127.0.0.1:7700``     |
 | ``MEILI_API_KEY``         | ``meili_key``  | (``MEILI_MASTER_KEY`` fallback)|
+| ``LEIBNIZ_MEILI_INDEX``   | ``meili_index``| ``leibniz_pages``             |
 | ``LEIBNIZ_HOST``          | ``host``       | ``127.0.0.1``                 |
 | ``LEIBNIZ_PORT``          | ``port``       | ``8000``                      |
 | ``LEIBNIZ_BASE_URL``      | ``base_url``   | from the request              |
@@ -36,7 +37,7 @@ from leibniz import db
 from leibniz.search import open_backend
 from leibniz.search.backend import SearchBackend
 from leibniz.search.fts5 import DEFAULT_INDEX_PATH
-from leibniz.search.meili import DEFAULT_MEILI_URL
+from leibniz.search.meili import DEFAULT_INDEX_UID, DEFAULT_MEILI_URL
 
 if TYPE_CHECKING:  # pragma: no cover
     from fastapi import FastAPI
@@ -55,6 +56,7 @@ ENV: dict[str, str] = {
     "index_path": "LEIBNIZ_INDEX_PATH",
     "meili_url": "MEILI_URL",
     "meili_key": "MEILI_API_KEY",
+    "meili_index": "LEIBNIZ_MEILI_INDEX",
     "host": "LEIBNIZ_HOST",
     "port": "LEIBNIZ_PORT",
     "base_url": "LEIBNIZ_BASE_URL",
@@ -76,6 +78,7 @@ class ServeSettings:
     index_path: Path = Path(DEFAULT_INDEX_PATH)
     meili_url: str = DEFAULT_MEILI_URL
     meili_key: str | None = None
+    meili_index: str = DEFAULT_INDEX_UID  # the index uid; a staging site may name another
     host: str = "127.0.0.1"
     port: int = 8000
     base_url: str | None = None
@@ -93,6 +96,7 @@ class ServeSettings:
             )
         self.db_path = Path(self.db_path)
         self.index_path = Path(self.index_path)
+        self.meili_index = (self.meili_index or "").strip() or DEFAULT_INDEX_UID
         self.workers = max(1, int(self.workers))
         self.rate_limit = max(0.0, float(self.rate_limit))
         self.rate_burst = max(1, int(self.rate_burst))
@@ -115,6 +119,7 @@ class ServeSettings:
             index_path=Path(str(get("index_path", DEFAULT_INDEX_PATH))),
             meili_url=str(get("meili_url", DEFAULT_MEILI_URL)),
             meili_key=e.get(ENV["meili_key"]) or e.get(MEILI_KEY_FALLBACK) or None,
+            meili_index=str(get("meili_index", DEFAULT_INDEX_UID)),
             host=str(get("host", "127.0.0.1")),
             port=int(str(get("port", 8000))),
             base_url=e.get(ENV["base_url"]) or None,
@@ -132,6 +137,7 @@ class ServeSettings:
             ENV["backend"]: self.backend,
             ENV["index_path"]: str(self.index_path),
             ENV["meili_url"]: self.meili_url,
+            ENV["meili_index"]: self.meili_index,
             ENV["host"]: self.host,
             ENV["port"]: str(self.port),
             ENV["workers"]: str(self.workers),
@@ -162,6 +168,7 @@ class ServeSettings:
             path=str(self.index_path),
             meili_url=self.meili_url,
             meili_key=self.meili_key,
+            meili_index=self.meili_index,
         )
 
     def build_app(self) -> FastAPI:

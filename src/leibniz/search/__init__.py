@@ -29,14 +29,22 @@ def open_backend(
     path: str | None = None,
     meili_url: str | None = None,
     meili_key: str | None = None,
+    meili_index: str | None = None,
 ) -> SearchBackend:
-    """Instantiate a backend by name (``fts5`` or ``meili``)."""
+    """Instantiate a backend by name (``fts5`` or ``meili``).
+
+    ``meili_index`` is the Meilisearch index uid (default ``leibniz_pages``);
+    a second index on the same server, for a staging site or a rebuild beside
+    the live index, is just another name here.
+    """
     if kind == "fts5":
         from leibniz.search.fts5 import DEFAULT_INDEX_PATH, Fts5Backend
 
         return Fts5Backend(path or DEFAULT_INDEX_PATH)
     if kind == "meili":
-        from leibniz.search.meili import DEFAULT_MEILI_URL, MeiliBackend
+        from leibniz.search.meili import DEFAULT_INDEX_UID, DEFAULT_MEILI_URL, MeiliBackend
 
-        return MeiliBackend(meili_url or DEFAULT_MEILI_URL, meili_key)
+        return MeiliBackend(
+            meili_url or DEFAULT_MEILI_URL, meili_key, index_uid=meili_index or DEFAULT_INDEX_UID
+        )
     raise ValueError(f"unknown search backend {kind!r} (expected 'fts5' or 'meili')")

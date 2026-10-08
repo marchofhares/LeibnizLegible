@@ -27,6 +27,7 @@ services:
       LEIBNIZ_INDEX_PATH: /srv/leibniz/data/search.sqlite
       MEILI_URL: http://meilisearch:7700
       MEILI_API_KEY: ${MEILI_API_KEY:?set MEILI_API_KEY (deploy/meili-search-key.sh)}
+      LEIBNIZ_MEILI_INDEX: ${LEIBNIZ_MEILI_INDEX:-leibniz_pages}
       LEIBNIZ_HOST: 0.0.0.0
       LEIBNIZ_PORT: "8000"
       LEIBNIZ_BASE_URL: ${LEIBNIZ_BASE_URL:?set LEIBNIZ_BASE_URL, e.g. https://leibniz.example.org}
