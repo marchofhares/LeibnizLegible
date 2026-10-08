@@ -55,9 +55,10 @@ www.{$LEIBNIZ_DOMAIN:localhost} {
 	redir https://{$LEIBNIZ_DOMAIN:localhost}{uri} permanent
 }
 
-# Sibling apps on this host — Calculemus (calculemus.leibnizlegible.com) —
-# keep their own site blocks in /etc/caddy/conf.d/, one file each, written by
-# their own deployment kits (deploy/README.md §13). Each block names its domain
+# Sibling sites on this host — Calculemus (calculemus.leibnizlegible.com, its
+# own kit, deploy/README.md §13) and the staging site (staging.leibnizlegible.com,
+# deploy/staging.caddy.example, §14) — keep their own site blocks in
+# /etc/caddy/conf.d/, one file each. Each block names its domain
 # literally, never as a {$VAR:localhost} fallback: with the variable absent (as
 # under `caddy validate` from a shell) that would repeat this file's fallback
 # address, and Caddy refuses a configuration that defines a site twice. A glob

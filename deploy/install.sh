@@ -122,8 +122,8 @@ fi
 [[ -f "$CONF_DIR/caddy.env" ]] || install -m 0644 "$APP_DIR/deploy/caddy.env.example" "$CONF_DIR/caddy.env"
 install -d /etc/systemd/system/caddy.service.d /var/log/caddy
 chown caddy:caddy /var/log/caddy
-# Site blocks of sibling apps on this host (Calculemus; README §13): their kits
-# write here, and the Caddyfile imports /etc/caddy/conf.d/*.caddy.
+# Site blocks of sibling sites on this host (Calculemus, README §13; the staging
+# site, §14): their kits write here, and the Caddyfile imports /etc/caddy/conf.d/*.caddy.
 install -d /etc/caddy/conf.d
 cat > /etc/systemd/system/caddy.service.d/leibniz.conf <<UNIT
 [Service]
