@@ -396,26 +396,50 @@ def resolve_pages(conn: sqlite3.Connection, fn: FileName, index: dict[str, list[
         return fm
     if len(works) > 1:
         fm.status = "ambiguous_work"
-        fm.notes.append(f"{len(works)} works share the key")
+        fm.notes.append(f"{len(works)} works share the key; each is tried for the folio")
     fm.work_ids = works
-    folio_index = build_folio_index(conn, works[0])
+    indexes = {w: build_folio_index(conn, w) for w in works}
     for num, side in fn.folios:
-        pages = folio_index.get(num, [])
-        if side:
-            pages = [
-                p
-                for p in pages
-                if (parse_folio_label(p.label) or parse_folio_label("0")).side == side
-            ] or pages
-        if not pages:
-            fm.notes.append(f"no page labelled {num}{side}")
+        found: list[db.Page] = []
+        for w in works:
+            pages = indexes[w].get(num, [])
+            if side:
+                pages = [p for p in pages if _side(p.label) == side] or pages
+            if pages:
+                found = pages
+                break
+        if not found:
+            fm.notes.append(
+                f"no page labelled {num}{side}; " + _folio_coverage(conn, works, indexes)
+            )
             continue
-        if len(pages) > 1:
-            fm.notes.append(f"{len(pages)} pages labelled {num}{side}; the first taken")
-        fm.page_ids.append(pages[0].id)
+        if len(found) > 1:
+            fm.notes.append(f"{len(found)} pages labelled {num}{side}; the first taken")
+        fm.page_ids.append(found[0].id)
     if not fm.page_ids:
         fm.status = "no_page"
     return fm
+
+
+def _side(label: str | None) -> str:
+    ref = parse_folio_label(label)
+    return ref.side if ref else ""
+
+
+def _folio_coverage(
+    conn: sqlite3.Connection, works: Sequence[str], indexes: dict[str, dict[int, list[db.Page]]]
+) -> str:
+    """What folios the candidate works do carry, for the report's unresolved list."""
+    parts: list[str] = []
+    for w in works:
+        idx = indexes[w]
+        n_pages = len(db.get_pages(conn, w))
+        labelled = sum(len(v) for v in idx.values())
+        if idx:
+            parts.append(f"{w} has folios {min(idx)}–{max(idx)} on {labelled} of {n_pages} pages")
+        else:
+            parts.append(f"{w} has no folio labels on its {n_pages} pages")
+    return "; ".join(parts)
 
 
 def minted_counts(conn: sqlite3.Connection) -> dict[str, int]:
