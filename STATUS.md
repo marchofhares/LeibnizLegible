@@ -536,18 +536,23 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   index names as the examples.
 - **The first run on the box (2026-10-08, 13:16 UTC) stopped at the Caddy
   reload:** `open /var/log/caddy/leibniz-legible-staging.log: permission
-  denied`. Caddy, as its own user, could not create the staging access log
-  in a directory it may not write to; `caddy validate` had passed because
-  it runs as root and opens no log. The live site stayed up (a refused
-  reload keeps the running configuration), and everything before that step
-  was in place: the checkout, the unit file, `staging.env`, the site block
-  with the hash (the password typed once, kept by the re-run). Fix in the
-  kit: the installer owns `/var/log/caddy` for the caddy user, as
-  `install.sh` does, with `mkdir -p` rather than `install -d` (which resets
-  an existing directory's mode), and creates the log file before the
-  reload. The piped `caddy hash-password` worked (the hash is in the
-  block); `systemd-run --remain-after-exit` with `--setenv` and the read of
-  the key's scope (`GET /keys/{key}`) are still untested.
+  denied`. The directory was Caddy's own (`drwxr-xr-x caddy caddy`); the
+  file was not: `caddy validate`, run as root a moment earlier, provisions
+  the log writers and had created the missing log as `root:root 0600`, and
+  the reload, as the caddy user, could not open it. The live site stayed up
+  (a refused reload keeps the running configuration), and everything before
+  that step was in place: the checkout, the unit file, `staging.env`, the
+  site block with the hash (the password typed once, kept by the re-run).
+  Fix in the kit: the installer creates the log file and gives it to the
+  caddy user before validate runs, and owns the directory for that user as
+  `install.sh` does (`mkdir -p`, not `install -d`, which resets an existing
+  directory's mode). **The re-run at 13:25 UTC went through:** validate,
+  reload, the unit, the venv (24 packages, the system CPython 3.12.3 as on
+  the live checkout), `/healthz` ok with search ok, staging on `2f7a362`;
+  the certificate was not yet issued at the script's last check. The piped
+  `caddy hash-password` worked (the hash is in the block, the password
+  survived the re-run); `systemd-run --remain-after-exit` with `--setenv`
+  and the read of the key's scope (`GET /keys/{key}`) are still untested.
 - **Open.** The operator wrote that an unlisted host would do without a
   password. The kit keeps basic auth: the certificate Caddy obtains puts
   the host name in the public certificate-transparency logs the moment the
@@ -2230,9 +2235,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
    `ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'`
 2. DNS: ✅ the `staging` A record exists, DNS only; an AAAA record too if the
    box has IPv6.
-3. ⏳ Run once on 2026-10-08 (user `evanatlas`); stopped at the Caddy
-   reload (the S1 log says why); the kit is fixed. The re-run, which keeps
-   the password:
+3. ✅ Installed 2026-10-08 (user `evanatlas`): the first run stopped at the
+   Caddy reload (the S1 log says why), the re-run with the fixed kit went
+   through. The re-run line, which keeps the password:
    `ssh -t root@49.13.13.213 'sudo git -C /opt/leibniz-legible-kit pull --ff-only && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user evanatlas --branch claude/dazzling-hopper-uxji2x'`
    The first run's line, for the record, with NAME the user name:
    `ssh -t <target> 'sudo git clone --branch claude/dazzling-hopper-uxji2x --depth 1 https://github.com/marchofhares/LeibnizLegible /opt/leibniz-legible-kit && sudo /opt/leibniz-legible-kit/deploy/staging-install.sh --user NAME --branch claude/dazzling-hopper-uxji2x'`

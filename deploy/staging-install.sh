@@ -156,12 +156,13 @@ fi
 # -- the Caddy site block: write, validate, reload ---------------------------- #
 say "caddy: $SITE_FILE ($AUTH_DIRECTIVE, user $USER_NAME)"
 install -d /etc/caddy/conf.d
-# Caddy opens the access log at the reload, as the caddy user, and can create
-# it only in a directory that user may write to; `caddy validate` opens no
-# log and runs as root, so it cannot catch this. Own the directory for the
-# caddy user, as deploy/install.sh does (mkdir -p, not install -d, which
-# would reset an existing directory's mode), and create the file first, so
-# the reload has nothing to create. An existing log is left as it is.
+# `caddy validate` below runs as root and provisions the log writers, so a
+# missing access log is created by root, mode 0600; the reload, as the caddy
+# user, then cannot open it ("permission denied", the first install's
+# failure). So the file exists and belongs to the caddy user before validate
+# runs. The directory is owned for that user as deploy/install.sh does
+# (mkdir -p, not install -d, which would reset an existing directory's
+# mode). An existing log is left as it is.
 mkdir -p /var/log/caddy
 chown caddy:caddy /var/log/caddy
 if [[ ! -e "$LOG_FILE" ]]; then touch "$LOG_FILE"; chmod 0640 "$LOG_FILE"; fi

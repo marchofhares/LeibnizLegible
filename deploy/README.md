@@ -631,9 +631,10 @@ site exists so that you see things first.
    file from the example, with the store path, the search key and the image
    origin copied over from the live `/etc/leibniz-legible/env` (an existing
    `staging.env` is left alone); the access log file, created for the
-   `caddy` user before the reload (Caddy opens it at the reload as that
-   user and cannot create it in a directory it does not own, which is what
-   stopped the first install); the site block, validated against the
+   `caddy` user before anything opens it (`caddy validate` runs as root
+   and provisions the log writers, so it would create a missing log as
+   root, and the reload, as the caddy user, could not open it: what stopped
+   the first install); the site block, validated against the
    whole Caddy configuration before `systemctl reload caddy` (a failed
    validate puts the previous block back and reloads nothing; the live site
    never stops, and neither does it when the reload itself is refused: Caddy

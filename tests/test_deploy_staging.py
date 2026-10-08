@@ -116,8 +116,8 @@ def test_scripts_parse_and_agree_with_the_examples() -> None:
     assert "__STAGING_USER__" in install and "__STAGING_HASH__" in install
     assert "caddy hash-password" in install and "--plaintext" not in install
     assert "systemctl reload caddy" in install and "systemctl restart caddy" not in install
-    # the access log is created for the caddy user before the reload: Caddy opens it
-    # then, as that user, and cannot create it in a directory it does not own
+    # the access log is created for the caddy user before `caddy validate`, which runs
+    # as root and would otherwise create it as root; the reload, as caddy, cannot open that
     assert "LOG_FILE=/var/log/caddy/leibniz-legible-staging.log" in install
     assert (
         'chown caddy:caddy "$LOG_FILE"' in install and "chown caddy:caddy /var/log/caddy" in install
