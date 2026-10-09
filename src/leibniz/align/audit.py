@@ -211,22 +211,62 @@ def crop_box(
 
 
 def crop_line(
-    image_path: Path, polygon: Sequence | None, baseline: Sequence | None
+    image_path: Path,
+    polygon: Sequence | None,
+    baseline: Sequence | None,
+    *,
+    pad: int = CROP_PAD,
+    max_width: int | None = CROP_MAX_WIDTH,
+    mask_polygon: bool = False,
 ) -> bytes | None:
-    """PNG bytes of the line's crop from the cached page image (``None`` if impossible)."""
+    """PNG bytes of the line's crop from the cached page image (``None`` if impossible).
+
+    The defaults are the audit sheet's: ``pad`` pixels of context, the crop
+    downscaled to ``max_width`` so a page of crops stays light. A reader wants
+    the pixels as they are (``max_width=None``) and, with ``mask_polygon``, the
+    neighbouring lines' strokes painted white outside the line's polygon — the
+    shape the recognisers were trained on (K1's pilot reads lines this way).
+    Opens the page image for one line; a caller with many lines on one page
+    opens it once and calls :func:`crop_from_image`.
+    """
     from PIL import Image  # kraken's dependency; imported here so the store code stays light
 
     with Image.open(image_path) as im:
-        box = crop_box(polygon, baseline, width=im.width, height=im.height)
-        if box is None:
-            return None
-        crop = im.crop(box)
-        if crop.width > CROP_MAX_WIDTH:
-            scale = CROP_MAX_WIDTH / crop.width
-            crop = crop.resize((CROP_MAX_WIDTH, max(1, int(crop.height * scale))))
-        buf = io.BytesIO()
-        crop.convert("RGB").save(buf, format="PNG", optimize=True)
-        return buf.getvalue()
+        return crop_from_image(
+            im, polygon, baseline, pad=pad, max_width=max_width, mask_polygon=mask_polygon
+        )
+
+
+def crop_from_image(
+    im,
+    polygon: Sequence | None,
+    baseline: Sequence | None,
+    *,
+    pad: int = CROP_PAD,
+    max_width: int | None = CROP_MAX_WIDTH,
+    mask_polygon: bool = False,
+) -> bytes | None:
+    """:func:`crop_line` over an opened PIL page image (decoded once per page)."""
+    from PIL import Image
+
+    box = crop_box(polygon, baseline, width=im.width, height=im.height, pad=pad)
+    if box is None:
+        return None
+    crop = im.crop(box).convert("RGB")
+    pts = [(float(p[0]), float(p[1])) for p in (polygon or []) if len(p) >= 2]
+    if mask_polygon and len(pts) >= 3:
+        from PIL import ImageDraw
+
+        left, top = box[0], box[1]
+        mask = Image.new("L", crop.size, 0)
+        ImageDraw.Draw(mask).polygon([(x - left, y - top) for x, y in pts], fill=255)
+        crop = Image.composite(crop, Image.new("RGB", crop.size, (255, 255, 255)), mask)
+    if max_width is not None and crop.width > max_width:
+        scale = max_width / crop.width
+        crop = crop.resize((max_width, max(1, int(crop.height * scale))))
+    buf = io.BytesIO()
+    crop.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
 
 
 def attach_images(conn: sqlite3.Connection, lines: Sequence[AuditLine], images_root: Path) -> None:

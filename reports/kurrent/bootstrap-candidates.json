@@ -1,0 +1,574 @@
+{
+ "generated": "2026-10-09",
+ "package_dir": "data/external/kurrent-trace/Kurrent-Trace-v0.1",
+ "n_lines": 383,
+ "n_pages": 20,
+ "device": "cuda",
+ "cuda": true,
+ "package_info": {
+  "name": "Kurrent Trace",
+  "version": "0.1.0",
+  "date": "2026-09-30",
+  "newness": "New derivative audit package and Leibniz review selections; no newly adjudicated human transcriptions",
+  "published_gt_lines": 383,
+  "published_gt_pages": 20,
+  "published_gt_unicode_codepoints": 12396,
+  "published_gt_whitespace_tokens": 1917,
+  "leibniz_candidate_segments": 180,
+  "leibniz_pages": 2,
+  "catalogue_reference_snippets": 2,
+  "new_human_adjudicated_lines": 0,
+  "train_validation_test_split": null,
+  "split_reason": "Only one published-GT manuscript; writer separation and prior training exposure unknown.",
+  "source_license_conflict": "Dresden README/description: CC BY-NC-SA 4.0; API metadata: CC BY 4.0. More restrictive terms applied.",
+  "per_gt_page": [
+   {
+    "page_id": "dresden1673-0001_00000007",
+    "lines": 13,
+    "characters": 522
+   },
+   {
+    "page_id": "dresden1673-0002_00000008",
+    "lines": 21,
+    "characters": 867
+   },
+   {
+    "page_id": "dresden1673-0003_00000009",
+    "lines": 20,
+    "characters": 675
+   },
+   {
+    "page_id": "dresden1673-0004_00000010",
+    "lines": 11,
+    "characters": 365
+   },
+   {
+    "page_id": "dresden1673-0005_00000011",
+    "lines": 15,
+    "characters": 580
+   },
+   {
+    "page_id": "dresden1673-0006_00000012",
+    "lines": 20,
+    "characters": 684
+   },
+   {
+    "page_id": "dresden1673-0007_00000013",
+    "lines": 22,
+    "characters": 679
+   },
+   {
+    "page_id": "dresden1673-0008_00000014",
+    "lines": 24,
+    "characters": 763
+   },
+   {
+    "page_id": "dresden1673-0009_00000015",
+    "lines": 24,
+    "characters": 677
+   },
+   {
+    "page_id": "dresden1673-0010_00000016",
+    "lines": 16,
+    "characters": 602
+   },
+   {
+    "page_id": "dresden1673-0033_00000039",
+    "lines": 26,
+    "characters": 593
+   },
+   {
+    "page_id": "dresden1673-0041_00000047",
+    "lines": 17,
+    "characters": 629
+   },
+   {
+    "page_id": "dresden1673-0042_00000048",
+    "lines": 21,
+    "characters": 627
+   },
+   {
+    "page_id": "dresden1673-0043_00000049",
+    "lines": 21,
+    "characters": 722
+   },
+   {
+    "page_id": "dresden1673-0045_00000051",
+    "lines": 15,
+    "characters": 418
+   },
+   {
+    "page_id": "dresden1673-0076_00000082",
+    "lines": 25,
+    "characters": 839
+   },
+   {
+    "page_id": "dresden1673-0102_00000108",
+    "lines": 15,
+    "characters": 449
+   },
+   {
+    "page_id": "dresden1673-0103_00000109",
+    "lines": 24,
+    "characters": 740
+   },
+   {
+    "page_id": "dresden1673-0104_00000110",
+    "lines": 11,
+    "characters": 281
+   },
+   {
+    "page_id": "dresden1673-0105_00000111",
+    "lines": 22,
+    "characters": 684
+   }
+  ],
+  "gt_quality_flag_counts": {
+   "source_edge_whitespace": 16,
+   "source_nonbreaking_space": 17
+  }
+ },
+ "results": [
+  {
+   "key": "philiumm",
+   "kind": "kraken",
+   "source": "data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors",
+   "licence": "CC BY 4.0",
+   "origin": "Zenodo 10.5281/zenodo.21457538",
+   "note": "the project's baseline: FoNDUE-GD_v2 fine-tuned on Leibniz's Latin and French",
+   "engine_name": "kraken",
+   "engine_version": "philiumm",
+   "device": "cuda",
+   "n_lines": 383,
+   "seconds": 13.08166620099928,
+   "cached": true,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.8098378312588489,
+   "scores": {
+    "philiumm": {
+     "cer": 0.2952762209767814,
+     "cer_lo": 0.2824251115360102,
+     "cer_hi": 0.3093216913250869,
+     "wer": 0.7918622848200313,
+     "wer_lo": 0.7704741379310345,
+     "wer_hi": 0.8148925013109596,
+     "macro_cer": 0.28495990688763545
+    },
+    "lenient": {
+     "cer": 0.2629844026370799,
+     "cer_lo": 0.24993870044953004,
+     "cer_hi": 0.27670906200317963,
+     "wer": 0.7579551382368284,
+     "wer_lo": 0.7344900105152471,
+     "wer_hi": 0.7832384893947232,
+     "macro_cer": 0.2546217026426437
+    },
+    "strict": {
+     "cer": 0.2950726978998385,
+     "cer_lo": 0.2819776976057724,
+     "cer_hi": 0.30913560016386726,
+     "wer": 0.7918622848200313,
+     "wer_lo": 0.7704741379310345,
+     "wer_hi": 0.8148925013109596,
+     "macro_cer": 0.285037681381125
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.29590190383994835,
+     "wer": 0.7918622848200313,
+     "exact_lines": 12,
+     "character_edits": 3668,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.2811793214862682,
+     "wer": 0.7746478873239436,
+     "exact_lines": 15,
+     "character_edits": 3481,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 3668,
+      "reference_characters": 12396,
+      "cer": 0.29590190383994835,
+      "word_edits": 1518,
+      "reference_words": 1917,
+      "wer": 0.7918622848200313,
+      "exact_lines": 12
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 3481,
+      "reference_characters": 12380,
+      "cer": 0.2811793214862682,
+      "word_edits": 1485,
+      "reference_words": 1917,
+      "wer": 0.7746478873239436,
+      "exact_lines": 15
+     }
+    }
+   },
+   "ms_per_line": 34.15578642558559
+  },
+  {
+   "key": "mccatmus",
+   "kind": "kraken",
+   "source": "data/models/mccatmus/McCATMuS_nfd_nofix_V1.mlmodel",
+   "licence": "CC BY 4.0",
+   "origin": "Zenodo 10.5281/zenodo.13788177",
+   "note": "McCATMuS v1: 22 datasets, mostly French, some German; 16th–21st c.; CoreML",
+   "engine_name": "kraken",
+   "engine_version": "mccatmus",
+   "device": "cuda",
+   "n_lines": 383,
+   "seconds": 7.164719766000417,
+   "cached": true,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.8066828037359044,
+   "scores": {
+    "philiumm": {
+     "cer": 0.5167333867093675,
+     "cer_lo": 0.5017343904856293,
+     "cer_hi": 0.5316059682335954,
+     "wer": 1.0083463745435577,
+     "wer_lo": 0.9886889460154241,
+     "wer_hi": 1.0265170831208568,
+     "macro_cer": 0.49416897069350896
+    },
+    "lenient": {
+     "cer": 0.4947740794339926,
+     "cer_lo": 0.4794509552095039,
+     "cer_hi": 0.510140660778541,
+     "wer": 0.9947835159102765,
+     "wer_lo": 0.9732844421162913,
+     "wer_hi": 1.0143408714837285,
+     "macro_cer": 0.47375606047080615
+    },
+    "strict": {
+     "cer": 0.5169628432956381,
+     "cer_lo": 0.5017854244440838,
+     "cer_hi": 0.5317933229940413,
+     "wer": 1.0083463745435577,
+     "wer_lo": 0.9886889460154241,
+     "wer_hi": 1.0265170831208568,
+     "macro_cer": 0.4952163356405547
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.5176669893514037,
+     "wer": 1.0083463745435577,
+     "exact_lines": 5,
+     "character_edits": 6417,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.509935379644588,
+     "wer": 1.0041731872717787,
+     "exact_lines": 6,
+     "character_edits": 6313,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 6417,
+      "reference_characters": 12396,
+      "cer": 0.5176669893514037,
+      "word_edits": 1933,
+      "reference_words": 1917,
+      "wer": 1.0083463745435577,
+      "exact_lines": 5
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 6313,
+      "reference_characters": 12380,
+      "cer": 0.509935379644588,
+      "word_edits": 1925,
+      "reference_words": 1917,
+      "wer": 1.0041731872717787,
+      "exact_lines": 6
+     }
+    }
+   },
+   "ms_per_line": 18.706840120105525
+  },
+  {
+   "key": "trocr-kurrent-xvi-xvii",
+   "kind": "trocr",
+   "source": "dh-unibe/trocr-kurrent-XVI-XVII",
+   "licence": "MIT",
+   "origin": "https://huggingface.co/dh-unibe/trocr-kurrent-XVI-XVII",
+   "note": "German Kurrent of the 16th–18th c., Swiss-biased; the card reports test CER 5.4 %",
+   "engine_name": "trocr",
+   "engine_version": "dh-unibe/trocr-kurrent-XVI-XVII",
+   "device": "cuda:0",
+   "n_lines": 383,
+   "seconds": 127.80325580800036,
+   "cached": false,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.963476377428296,
+   "scores": {
+    "philiumm": {
+     "cer": 0.07429943955164131,
+     "cer_lo": 0.06701528559935639,
+     "cer_hi": 0.08209733023330394,
+     "wer": 0.3615023474178404,
+     "wer_lo": 0.3331545064377682,
+     "wer_hi": 0.3912122816304923,
+     "macro_cer": 0.07588137678792835
+    },
+    "lenient": {
+     "cer": 0.05242000321595112,
+     "cer_lo": 0.04520093798010835,
+     "cer_hi": 0.05996835443037975,
+     "wer": 0.25508607198748046,
+     "wer_lo": 0.22630761263593993,
+     "wer_hi": 0.2818471337579618,
+     "macro_cer": 0.05381700617758203
+    },
+    "strict": {
+     "cer": 0.07495961227786753,
+     "cer_lo": 0.06771844660194175,
+     "cer_hi": 0.08276436303080766,
+     "wer": 0.3615023474178404,
+     "wer_lo": 0.3331545064377682,
+     "wer_hi": 0.3912122816304923,
+     "macro_cer": 0.07646723324323756
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.07615359793481769,
+     "wer": 0.3615023474178404,
+     "exact_lines": 74,
+     "character_edits": 944,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.05880452342487884,
+     "wer": 0.2853416797078769,
+     "exact_lines": 120,
+     "character_edits": 728,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 944,
+      "reference_characters": 12396,
+      "cer": 0.07615359793481769,
+      "word_edits": 693,
+      "reference_words": 1917,
+      "wer": 0.3615023474178404,
+      "exact_lines": 74
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 728,
+      "reference_characters": 12380,
+      "cer": 0.05880452342487884,
+      "word_edits": 547,
+      "reference_words": 1917,
+      "wer": 0.2853416797078769,
+      "exact_lines": 120
+     }
+    }
+   },
+   "ms_per_line": 333.6899629451707
+  },
+  {
+   "key": "trocr-hanse-xvii",
+   "kind": "trocr",
+   "source": "fgho/trocr-hanseXVII-kurrent",
+   "licence": "none stated",
+   "origin": "https://huggingface.co/fgho/trocr-hanseXVII-kurrent",
+   "note": "17th-c. north German administrative records; from the Bern model; evaluate only",
+   "engine_name": "trocr",
+   "engine_version": "fgho/trocr-hanseXVII-kurrent",
+   "device": "cuda:0",
+   "n_lines": 383,
+   "seconds": 129.21310360199914,
+   "cached": false,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.9410812501611874,
+   "scores": {
+    "philiumm": {
+     "cer": 0.10856685348278623,
+     "cer_lo": 0.10038947619426118,
+     "cer_hi": 0.11629195693476885,
+     "wer": 0.45800730307772564,
+     "wer_lo": 0.43018480492813144,
+     "wer_hi": 0.4849126521969296,
+     "macro_cer": 0.11304329595890734
+    },
+    "lenient": {
+     "cer": 0.085383502170767,
+     "cer_lo": 0.07704841713221601,
+     "cer_hi": 0.09295682689953481,
+     "wer": 0.3667188315075639,
+     "wer_lo": 0.3391812865497076,
+     "wer_hi": 0.39154786150712834,
+     "macro_cer": 0.09077846664869096
+    },
+    "strict": {
+     "cer": 0.10936995153473344,
+     "cer_lo": 0.10119970619440137,
+     "cer_hi": 0.11704509114166933,
+     "wer": 0.45800730307772564,
+     "wer_lo": 0.43018480492813144,
+     "wer_hi": 0.4849126521969296,
+     "macro_cer": 0.11387521461491508
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.11051952242658922,
+     "wer": 0.45800730307772564,
+     "exact_lines": 38,
+     "character_edits": 1370,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.09305331179321487,
+     "wer": 0.4001043296817945,
+     "exact_lines": 55,
+     "character_edits": 1152,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 1370,
+      "reference_characters": 12396,
+      "cer": 0.11051952242658922,
+      "word_edits": 878,
+      "reference_words": 1917,
+      "wer": 0.45800730307772564,
+      "exact_lines": 38
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 1152,
+      "reference_characters": 12380,
+      "cer": 0.09305331179321487,
+      "word_edits": 767,
+      "reference_words": 1917,
+      "wer": 0.4001043296817945,
+      "exact_lines": 55
+     }
+    }
+   },
+   "ms_per_line": 337.3710276814599
+  },
+  {
+   "key": "trocr-hanse-xvi",
+   "kind": "trocr",
+   "source": "fgho/trocr-hanseXVI-kurrent",
+   "licence": "none stated",
+   "origin": "https://huggingface.co/fgho/trocr-hanseXVI-kurrent",
+   "note": "16th-c. north German administrative records; from the Bern model; evaluate only",
+   "engine_name": "trocr",
+   "engine_version": "fgho/trocr-hanseXVI-kurrent",
+   "device": "cuda:0",
+   "n_lines": 383,
+   "seconds": 79.98565830500047,
+   "cached": false,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.9270426304150565,
+   "scores": {
+    "philiumm": {
+     "cer": 0.08903122497998399,
+     "cer_lo": 0.0818694857324537,
+     "cer_hi": 0.09625078764965343,
+     "wer": 0.4016692749087115,
+     "wer_lo": 0.37596699329551314,
+     "wer_hi": 0.42732408834103747,
+     "macro_cer": 0.09066786109014818
+    },
+    "lenient": {
+     "cer": 0.06665058691107895,
+     "cer_lo": 0.05995166445778436,
+     "cer_hi": 0.07330054027900976,
+     "wer": 0.3046426708398539,
+     "wer_lo": 0.27932667017359286,
+     "wer_hi": 0.32962374138844724,
+     "macro_cer": 0.06883097250277549
+    },
+    "strict": {
+     "cer": 0.08974151857835218,
+     "cer_lo": 0.08250825082508251,
+     "cer_hi": 0.09687152612355089,
+     "wer": 0.4016692749087115,
+     "wer_lo": 0.37596699329551314,
+     "wer_hi": 0.42732408834103747,
+     "macro_cer": 0.09123878789461881
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.0909164246531139,
+     "wer": 0.4016692749087115,
+     "exact_lines": 63,
+     "character_edits": 1127,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.07334410339256867,
+     "wer": 0.33229003651538863,
+     "exact_lines": 88,
+     "character_edits": 908,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 1127,
+      "reference_characters": 12396,
+      "cer": 0.0909164246531139,
+      "word_edits": 770,
+      "reference_words": 1917,
+      "wer": 0.4016692749087115,
+      "exact_lines": 63
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 908,
+      "reference_characters": 12380,
+      "cer": 0.07334410339256867,
+      "word_edits": 637,
+      "reference_words": 1917,
+      "wer": 0.33229003651538863,
+      "exact_lines": 88
+     }
+    }
+   },
+   "ms_per_line": 208.8398389164503
+  }
+ ],
+ "vision": null
+}

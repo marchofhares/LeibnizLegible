@@ -59,6 +59,18 @@ web = [
 release = [
     "pyarrow>=15",
 ]
+# The Kurrent track (Phase K1): TrOCR line readers from the Hugging Face Hub as
+# bootstrap candidates for German Kurrent (`leibniz bench kurrent-smoke`, the
+# K1 pilot). transformers needs torch, which comes from kraken in the `bench`
+# extra — install both: `uv sync --extra bench --extra gt --extra kurrent`.
+# 5.12 is the last transformers release that accepts the safetensors kraken
+# 7.0.3 pins (<0.8; 5.13+ need >=0.8); its torch floor (2.4) is under the
+# locked torch, which is never bumped here. Imported lazily by
+# leibniz.htr.trocr; the tests run on a stub without it.
+kurrent = [
+    "transformers>=5.12,<5.13",  # TrOCR (VisionEncoderDecoderModel) + its processor
+    "pillow>=10",                # decode the line crops
+]
 
 [build-system]
 requires = ["hatchling"]
