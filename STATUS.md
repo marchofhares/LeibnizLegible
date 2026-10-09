@@ -3,11 +3,134 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-06 (later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-08 (**S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-08 (evening): W4 — text access: a copyable text block on every
+page view, the text of a catalogue piece across its folios, the downloads
+where readers look.** David Rabouin's first point of 7 October: "as it
+stands, one cannot copy the transcription", and a reader wants the text of
+the whole page or passage. Measured first on the live page view (headless
+Chromium, `/page/00068221:0043`, 108 lines): each line's text sits inside the
+`<button>` that selects the line, so a drag across lines selects nothing, a
+drag within a line selects nothing and counts as a click (the image zooms
+to the line), a double-click selects nothing; select-all then copy does
+work and takes the whole page with it, 11,828 characters of chrome, badges
+and provenance summaries around the lines. Now, under the line list, a
+**Text** block holds the page's recognised lines as one piece of selectable
+text in reading order, one line per line, with **Copy the text** (the
+clipboard API from inside the click; where the browser refuses, the block
+is selected and a status line says to press Ctrl+C), the per-page download
+beside it as "Download this page as text", and one line of provenance
+above the block (the model and run date behind the lines, the wording
+rule); the header's link list points at the block ("Text of this page")
+instead of carrying the download. The line list is unblocked as well: its
+text is `user-select: text`, the badges, the number and the hidden labels
+`none`, a click does nothing while a selection stands in the list, and a
+`copy` whose selection lies in the list hands the clipboard the selected
+parts of the lines, one per line, and nothing else (Chromium alone copied
+the two lines with a blank line between them). **`GET
+/api/records/{record_id}/text`**: the text of a catalogue piece — a letter,
+a draft — across the folios its shelfmark's `Bl.` range names, placed by the
+C2 resolver the way the factory localized its pieces (`web/pieces.py`: the
+record's shelfmark with a range, its best crosswalk link), in the work
+export's layout under a header naming the record (title, incipit, date,
+sender and addressee, AA reference, the katalog URL), the work, the folio
+range, the canvases and the catalogue's licence; `?format=tsv`; 404 for an
+unknown record and, with the reason in `detail`, for a record not linked to
+a work, without a folio range, or whose folios no page label carries. The
+work API's `katalog` entries carry `text_url`, `folio_label`, `folio_range`
+and `n_pages` only where a record is placed; the work page shows "Text of
+this piece (Bl. 1–2)" under each such record, server-rendered too;
+`robots.txt` allows `/api/records/`; `llms.txt` and the README document it;
+the About page's transcriptions paragraph says text comes per page, per
+work and per piece. EN and DE throughout. **644 tests** (634 → 644), ruff
+clean; against the app on the fixture store in headless Chromium, **39
+checks** pass (selection and copy on the block and in the line list, the
+piece's download from the work page, EN and DE, 390 px without horizontal
+scroll, no console errors, axe-core 0 violations on the page and work views
+in both languages and at phone width). On staging the same evening, the
+operator's six HTTP checks answered as designed, the first run of the piece
+text on the real store (record 41800: 84 lines on its 2 pages, mean
+confidence 0.96), and their look in the browser was good. Branch
+`claude/dazzling-hopper-uxji2x`; nothing merged, nothing deployed.
+
+**2026-10-08: S1 — the staging kit is on the branch; the install on the box
+is the operator's.** A second copy of the site at
+`https://staging.leibnizlegible.com`, behind HTTP basic auth, running any
+pushed branch against the live serving store and the live search index, so
+that every later web change (W4, L1, later M1) is looked at on the real
+server before it is merged. Built in a cloud session, so nothing ran on the
+box: `deploy/leibniz-legible-staging.service`, `staging.env.example`,
+`staging.caddy.example`, `staging-install.sh` (root, once, idempotent; the
+password typed on the box and hashed by `caddy hash-password`; the site
+block validated over the whole Caddy configuration before a `reload`, never
+a restart) and `staging.sh` (`BRANCH`, `--main`, `--status`, `--index`,
+`--drop-index`), with runbook §14 and a test that holds each file to its
+production counterpart. One code change: the Meilisearch index name comes
+from the environment (`LEIBNIZ_MEILI_INDEX`; `leibniz serve --meili-index`;
+`leibniz index build|status|query --meili-index`; the default is the live
+name, so production is unchanged), which is what lets a staging index be
+built beside the live one. 634 tests, ruff clean. **Installed on the box
+the same day and verified by the operator:** the first run stopped at the
+Caddy reload over a log file that `caddy validate` had created as root (the
+S1 log has it; the fixed kit's re-run went through); then the page opens
+with the password, `/browse` matches the live site, `/api/stats` reports
+the same figures from the same index, and every authenticated response
+carries HSTS and `X-Robots-Tag: noindex, nofollow` without a `Server`
+header. From here on, every web change on the branch is one `staging.sh`
+line and a look before anything is merged.
+
+**2026-10-07: C2b — the audit closed and read.** On 7 October Denisa-Florina
+Bumba and David Rabouin (PHILIUMM) returned the 200-line hand-audit sheet
+with 199 verdicts and 86 notes. Scored (`reports/gt-audit.md`): **corpus-
+weighted precision 72.3 %** against the 95 % gate — **FAIL as written**, in
+every stratum (fair copies 84.0 %, light revision 86.7 %, heavy revision
+64.6 %, scraps 57.1 %); counting boundary-off lines as usable, **92.2 %**.
+Read line by line, the failure is not the one the gate was written for.
+One pattern per judged line, from the verdict, the note, the minted text
+and the HTR reading (`align/audit_patterns.py`): of the 16 *wrong*
+verdicts, **one is a wrong line** (a fragment of *vérité* on a strip that
+reads *serviteur*); the other fifteen are the right line with the
+edition's text differing from the page — five formula lines, three
+accents or commas the edition regularises, three disputed readings
+(*Casal* for *Casai*), two editorial brackets leaked from the apparatus
+(`droit[e]`, `[l'j`), two interlinear additions rendered inline. The 33
+*boundary* verdicts are a letter or a short word off at an end, as the
+auditors said. On 14 of the *correct* lines the note names a missing
+line-end hyphen: the word was split by the scribe, the mint rejoined it
+and cut it bare. That one is fixed: `align_piece(keep_hyphen=True)`, now
+the default, puts the scribe's own mark back on the earlier line (an `=`
+stays an `=`); it reaches the 6 lines whose HTR read the mark, not the 8
+where the HTR dropped it too. The notes' 46 corrections, placed in the
+minted text, give the first sample of the normalization tax on real
+lines: 3.1 % character distance as written on the accent-and-comma
+lines, 0.0 % under the aligner's fold — the fold hides exactly what a
+diplomatic scorer charges. A read-only census (`leibniz align
+audit-reach`, run by the operator on the store on 2026-10-08,
+`reports/gt-audit/reach.md`) measures every pattern across the 297,424
+minted lines: **7,822 (2.6 %) lose their hyphen to the mint** (7.7 % of
+fair copies), what the re-mint changes; 4,338 (1.5 %) carry an editorial
+bracket; the density cut flags 249 formula lines (0.1 %), two thirds of
+them in Reihe III, a floor; the addition proxy marks 82.7 % of lines and
+99.3 % of heavy revision, i.e. it restates the stratum and is no use as a
+filter; no minted line is from a Marginalien work. **The hand census: of
+the 296,587 lines whose record has a Textart, 40.1 % are in their
+author's own hand and 25.7 % in Leibniz's** — 1.7 % of fair copies (the
+secretaries' Abfertigungen), 8.3 % of light revision, 35.8 % of heavy
+revision (his drafts), 18.2 % of scraps; the rest of the own-hand share
+is correspondents' hands on letters he received. The C3 prompt carries
+Amendment 2: train on the re-minted lines with hyphens
+kept, exclude formula and Marginalien lines, hold out PHILIUMM's pages,
+stratify by hand, keep the 199 judged lines as a sanity set. The
+operator's own 20 verdicts of 16 September agree with PHILIUMM's on 11:
+four lines the operator called wrong they call correct, as the second
+witness had predicted. 606 tests, ruff clean. Branch
+`claude/dazzling-hopper-uxji2x` (see Divergences); merge after the
+PHILIUMM team has seen the scored report.
 
 **2026-10-06 (later): W3 fix — a deploy no longer mixes new and old viewer
 modules.** Minutes after W3 went live the operator opened `/browse` and saw
@@ -410,6 +533,467 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good
+
+- **Setting.** A cloud session, no store, on the plan's one branch under the
+  preamble's evening revision (see Divergences): the code and the tests
+  here, the browser checks against the app on the fixture store, the look
+  at the live page through the container's proxy (the W1 Playwright recipe:
+  `executablePath` the preinstalled Chromium, `proxy` from `HTTPS_PROXY`,
+  the egress CA pinned by SPKI), the staging checks handed over.
+- **Task 0, what a reader could select today** (the live page view
+  `/page/00068221:0043`, 108 lines, headless Chromium, 2026-10-08). The
+  line's text is inside the `<button class="line__btn">` that selects the
+  line (`user-select` `auto` on both): a drag across three lines left the
+  selection collapsed; a drag within one line selected nothing and counted
+  as a click (the line highlighted, the image zoomed to it); a double-click
+  on a word selected nothing; a plain click highlighted its line, as
+  designed. Select-all then copy did reach the clipboard: 11,752 characters
+  selected, 11,828 copied, starting "Skip to main content / Leibniz Legible
+  / Machine transcription of the Leibniz Nachlass / Search / Browse / About
+  / EN / DE …", every badge ("machine. HTR output, unreviewed."), every
+  confidence chip and every "Provenance" summary between the lines. With
+  `user-select: text` injected on the button and the text, a drag across
+  lines selected, and took the badges and the hidden "Line 2" labels with
+  it; a drag within a line still counted as a click. No `user-select` rule
+  existed in `style.css`; no handler cancelled a selection, the button did.
+  Baseline 634 tests, ruff and format clean.
+- **Task 1, the text block** (`views/page.js`, `style.css`, `i18n.js`). The
+  right column is now `.page-side`: the line list, then `<section
+  id="page-text">` with a heading "Text", a help line, a toolbar (`<button
+  id="copy-text">` "Copy the text", the download as a button-styled link
+  "Download this page as text", a `role="status"` live region), one line of
+  provenance — "Machine transcription: {model}, run of {date}; … Quote it
+  as “the machine reads it as …”, never as “Leibniz wrote”." with one entry
+  per recognition run behind the lines, newest first, from the lines'
+  `model`, `run_id` and `run_at` — and a `<pre class="page-text__block">`
+  with the lines' texts joined by newlines (a line break inside a text
+  becomes a space, as the export writes it; `white-space: pre-wrap`, so a
+  long line wraps on screen and copies as one line). Copy calls
+  `navigator.clipboard.writeText` inside the click handler (the user's
+  gesture is current there) and reports "Copied: N lines."; on rejection,
+  or without the API, it selects the block and says "The browser did not
+  allow the clipboard. The text is selected: press Ctrl+C (⌘C on a Mac) to
+  copy it." A page without text has no block. The header's link list no
+  longer carries "Download text"; it carries "Text of this page", an
+  in-page anchor to the block that the router leaves to the browser. **The
+  line list unblocked:** `.line__text { user-select: text }`, the number,
+  the badges, the button's hidden label and the provenance summary `none`;
+  `onListClick` returns while a non-collapsed selection stands inside the
+  list (a drag within a line, the second click of a double-click), so
+  taking text never zooms the image; and a `copy` event whose selection
+  lies inside the list is answered by page.js with the selected part of
+  each line's text, one per line (Chromium honours `user-select: none` in
+  the copy but leaves a blank line in the chrome's place and reports the
+  chrome in `Selection.toString()`; other browsers draw the line elsewhere;
+  the handler makes the result the same everywhere). The help line says
+  how. Keyboard: Copy is a button, the download a link, the jump an anchor;
+  Tab, Enter.
+- **Task 2, the text of a catalogue piece.** `web/pieces.py` places a
+  record the way `align/volumes.py` enumerated the factory's pieces: the
+  first of its shelfmarks that carries a `Bl.` range
+  (`resolve.folio_range_from_signature`), the work its best crosswalk link
+  names (`db.crosswalk_for_record`, by confidence, `gwlb_link` before a
+  shelfmark guess), the range selected over the work's folio labels
+  (`resolve.index_pages` + `resolve.select_folios`, split out of
+  `resolve_canvases` so one index serves every record of a work; the
+  factory's path is unchanged). `Placement` carries the pages, the range,
+  the shelfmark; `Unplaced` carries the reason in words: "record X is not
+  linked to a digitized work", "… its shelfmark 'LH IV, 6, 18' names no
+  folio (Bl.) range", "… carries no shelfmark", "… 'LH IV, 6, 18 Bl. 9'
+  names folios Bl. 9, but no page of work W carries a folio label in that
+  range (3 of its pages carry folio labels)". Where a record links several
+  works, the best link is tried first and the next where it cannot place
+  it. `GET /api/records/{record_id}/text` (summary "The text of a catalogue
+  piece across its folios"; `RECORD_RESPONSES` documents the 404 cases):
+  the `# ` header — the project line, `Piece:` (the route's own URL; a
+  piece has no page of its own), `Catalogue record: id — title`, incipit,
+  date, sender and addressee where the record is a letter, the AA reference
+  or "assigned, not yet published", other printings, the katalog URL,
+  `Work:`, the title row, `Folios: Bl. 1–2 (from the shelfmark …): n pages,
+  canvases a–b, page ids … to …`, the GWLB original, the line count over
+  the placed pages, `attr.KATALOG` (catalogue data travels in the file),
+  honesty, licence, wording rule, the work layout line — then the pages in
+  canvas order through `_page_chunks`, the generator `_work_text` now
+  shares (one connection per stream, as W1 built it). Download name
+  `leibniz-legible_record-<id>.txt`. `_katalog_for_work` builds one folio
+  index per work (from the pages the caller already read) and adds
+  `text_url`, `folio_label`, `folio_range`, `n_pages` to the placed
+  records; `_ssr_work` renders the same link; `views/work.js` shows "Text
+  of this piece ({range})" / "Text dieses Stücks ({range})" under the
+  record. `robots.txt`: `Allow: /api/records/` before `Disallow: /api/`;
+  `llms.txt` and the README describe the route and `text_url`.
+- **Task 3.** The page view's download lives in the block's toolbar; the
+  work view keeps "Download the text of this work". The About page's
+  transcriptions paragraph (EN and DE) says the text can be taken away per
+  page, per work and per catalogue piece, each file with its provenance.
+- **Task 4, verified.** Tests +10 (644): `select_folios` against
+  `resolve_canvases` over one index; the placements and every reason; the
+  record export's header order and body (the fixture's k-109, `Bl. 1-2`,
+  places on **three** pages — 1r, 1v and 2r, the last skipped and reported
+  as the one-line note — not the "two of three" the prompt expected), the
+  TSV rows, the 404s and their wording, the OpenAPI entry, robots, llms,
+  the server-rendered link only where a record is placed, and the viewer's
+  strings in both languages with `page.download` gone. Then `leibniz serve
+  --backend none` on the fixture store and 39 Playwright checks in headless
+  Chromium (the GWLB image requests answered with a stub JPEG and a level-0
+  `info.json`; axe-core served from the app's own origin because the CSP
+  is `script-src 'self'`): the block's text equals the page's lines; a drag
+  over it selects; Copy fills the clipboard and the status line, by mouse
+  and by Enter; the jump link; in the line list a drag across two lines
+  selects without a click, Ctrl+C copies exactly "line\nline", a partial
+  selection copies the selected parts, a drag within a line never zooms, a
+  plain click still chooses the line, a double-click selects a word; the
+  work page's piece link downloads `leibniz-legible_record-k-109.txt` with
+  its three folios; a skipped page has no block; About in EN and DE; the
+  whole block and the piece link in DE; the clipboard refused and absent;
+  390 px without horizontal scroll on page, work and About; no console or
+  page errors; axe-core 0 violations on the page view (EN, DE, 390 px) and
+  the work view (EN, DE). Screenshots in the session's scratchpad.
+- **Not measured here.** Firefox and Safari were not run (only Chromium is
+  installed): the line list's selection rests on `user-select: text`
+  inside a `<button>`, which the CSS UI spec allows and both browsers
+  support, and the copy handler is plain DOM; the operator's look on staging
+  in their own browser is the test. The master store was not opened; the
+  staging checks under Next are the real-data run.
+- **On staging, verified by the operator the same evening.** `staging.sh`
+  put the branch on staging and the six HTTP checks came back as designed:
+  the server-rendered page view still carries its text; `GET
+  /api/records/41800/text` answers the header as built — the record's
+  title, incipit, date (1682), AA VI,4 N. 109, its other printing, the work,
+  `Folios: Bl. 1 (from the shelfmark LH 4, 6, 18 Bl. 1): 2 pages, canvases
+  1–2`, the catalogue's licence line — then two `## Folio` blocks, and
+  **84 recognised lines on its 2 pages, mean confidence 0.96**, the first
+  run of the piece text on the real store; the work's records carry
+  `text_url` for 41800 and 59095 and no other; an unknown record answers
+  404; `robots.txt` allows `/api/records/`. The look in the browser followed
+  the same evening: good, the operator said. W4 is closed on this branch.
+- **Next.** The three sentences for David (the hand-over has them; also
+  `scratchpad/david-text-access.md` in the session); the merge as the plan
+  says, after the emails and the call; K1 on the desktop.
+
+### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
+
+- **Setting.** A cloud session, no SSH and no store, on the plan's one branch
+  (the preamble; see Divergences). Task 0's look at the box (memory, disk,
+  the Caddy version, the `import` line) could not run here; the scripts
+  check the two facts they depend on themselves: the Caddy version decides
+  `basic_auth` against `basicauth` (renamed in 2.8), and a Caddyfile without
+  the §13 import line stops the install before it changes anything. The
+  rest is handed over as commands under Next. **The operator's look at the
+  box, pasted back the same day:** 3,814 MB of RAM with 3,118 MB available
+  and 3,223 MB in the page cache, 618 MB of the 4 GB swap in use; one 75 GB
+  disk with 33 GB free; the app, Meilisearch and Caddy active; Caddy
+  v2.11.4, so the directive is `basic_auth`; the import line in place with
+  `calculemus.caddy` beside it. Nothing in it changes the kit.
+- **Task 1, the index name from the environment.** `LEIBNIZ_MEILI_INDEX`
+  (default `leibniz_pages`) in `web/settings.py` (`ServeSettings.meili_index`,
+  through `to_env`/`from_env` so worker processes get it), `leibniz serve
+  --meili-index`, `leibniz index build|status|query --meili-index` (the
+  option, else the variable, else the default; `index status` prints the
+  uid), `open_backend(meili_index=)` into `MeiliBackend(index_uid=)`, which
+  already existed; `deploy/env.example` and the compose file carry the
+  variable. Nothing changes for production.
+- **Task 2, the kit** (`deploy/`, runbook §14). The unit is the production
+  unit with its own checkout `/opt/leibniz-legible-staging`,
+  `EnvironmentFile=/etc/leibniz-legible/staging.env` and venv, the same
+  sandbox and `ReadWritePaths`. The env is `env.example` with
+  `LEIBNIZ_PORT=8001`, `LEIBNIZ_WORKERS=1`,
+  `LEIBNIZ_BASE_URL=https://staging.leibnizlegible.com`,
+  `LEIBNIZ_RATE_LIMIT=0`. The site block is the production block plus
+  `basic_auth` (one user, a bcrypt hash) and `X-Robots-Tag "noindex,
+  nofollow"`, the domain named literally, its own JSON log kept 168 h.
+  `staging-install.sh` (root, once, idempotent): the preconditions first,
+  then the checkout and venv as `leibniz` with the live checkout's uv
+  caches; the unit; `staging.env` from the example with the live env's
+  store path, search key, image origin and proxy address copied in (an
+  existing file is left alone); the site block rendered from the example
+  with the hash from `caddy hash-password` (the password read on the
+  terminal and piped, never on a command line); `caddy validate` over the
+  whole configuration, then `systemctl reload caddy` (a failed validate
+  puts the previous block back and reloads nothing); `systemctl enable`;
+  then `staging.sh BRANCH`. A re-run keeps the password unless
+  `--password`; `--user` renames. `staging.sh BRANCH` (root, any time):
+  fetch, `checkout -B staging origin/BRANCH`, `uv sync --frozen`, restart,
+  `/healthz`, the address; `--main`; `--status`; `--index` builds
+  `leibniz_pages_staging` as a transient systemd unit with the master key
+  after saying what it costs and asking, the staging unit stopped meanwhile
+  and the serving key's scope checked first (`meili-search-key.sh` scopes
+  it to `leibniz_pages*`, which covers the name); `--drop-index`. Both
+  scripts `bash -n` and shellcheck clean.
+- **Tests.** +12 (634): the settings and both CLIs take the index name (a
+  fake Meilisearch records that a build touches only the named index and
+  its `_meta`); `tests/test_deploy_staging.py` holds the unit to four
+  changed lines, the env to four changed values, the Caddy block to the
+  production directives plus its two additions, and the scripts to `bash
+  -n` (shellcheck where installed) and to the same domain, port, paths and
+  index names as the examples.
+- **The first run on the box (2026-10-08, 13:16 UTC) stopped at the Caddy
+  reload:** `open /var/log/caddy/leibniz-legible-staging.log: permission
+  denied`. The directory was Caddy's own (`drwxr-xr-x caddy caddy`); the
+  file was not: `caddy validate`, run as root a moment earlier, provisions
+  the log writers and had created the missing log as `root:root 0600`, and
+  the reload, as the caddy user, could not open it. The live site stayed up
+  (a refused reload keeps the running configuration), and everything before
+  that step was in place: the checkout, the unit file, `staging.env`, the
+  site block with the hash (the password typed once, kept by the re-run).
+  Fix in the kit: the installer creates the log file and gives it to the
+  caddy user before validate runs, and owns the directory for that user as
+  `install.sh` does (`mkdir -p`, not `install -d`, which resets an existing
+  directory's mode). **The re-run at 13:25 UTC went through:** validate,
+  reload, the unit, the venv (24 packages, the system CPython 3.12.3 as on
+  the live checkout), `/healthz` ok with search ok, staging on `2f7a362`;
+  the certificate was not yet issued at the script's last check. Minutes
+  later, from the cloud session: `https://staging.leibnizlegible.com/`
+  answers `401` over a valid certificate with `WWW-Authenticate: Basic
+  realm="restricted"`, the live site `200`. One detail for the record: the
+  401 itself carries `Server: Caddy` and neither the HSTS nor the
+  `X-Robots-Tag` header, because Caddy writes its own error responses
+  outside the `header` directive's wrapper; every response that passes the
+  password goes through the proxy and carries them, as the live site's
+  `200` and its app-served `404` show (HSTS present, no `Server`). A 401 is
+  not indexable content, so nothing is lost. The piped `caddy
+  hash-password` worked (the hash is in the block, the password survived
+  the re-run); `systemd-run --remain-after-exit` with `--setenv` and the
+  read of the key's scope (`GET /keys/{key}`) are still untested.
+- **Open.** The operator wrote that an unlisted host would do without a
+  password. The kit keeps basic auth: the certificate Caddy obtains puts
+  the host name in the public certificate-transparency logs the moment the
+  site exists, so "not findable" is not available, and the password is what
+  keeps the site private. Dropping it is a small change if wanted.
+- **Verified by the operator, 2026-10-08.** The page opens in the browser
+  with the password; `/browse` matches the live site; an authenticated
+  `GET /` answers `200` with HSTS and `X-Robots-Tag: noindex, nofollow` and
+  no `Server` header; `/api/stats` is identical on both sites (2,225 works,
+  236,795 pages, 13,508,625 lines, the same confidence histogram), as it
+  must be, both reading the same index.
+- **Next.** W4, text access, on this branch, verified on staging with
+  `staging.sh claude/dazzling-hopper-uxji2x` before anything is merged.
+
+### P1 — PHILIUMM cross-checks (2026-10-08) ✅ Task 1 · ✅ Task 2 run on the store · ⏸ Task 3 (waits for the layout model)
+
+- **Setting.** Run in the cloud session on the C2b branch (no store needed for
+  Task 1). Their alignment repository was read at commit `9d2ee4e500e0`
+  (main, "Delete temporary files", 2026-09-21): no licence file; nothing copied,
+  the worked example fetched cache-first by raw URL into `data/philiumm/sample/`
+  (`align/philiumm/fetch.py`, the commit pinned in a `COMMIT` marker). Task 0's
+  two questions: the new RF-DETR model is not out (Denisa expects it mid-to-late
+  October), and Task 3 waits for it.
+- **What was built.** `align/pagexml.py` (PAGE XML lines in document order, with
+  zone type, geometry, text and their per-line attributes; tested on a fixture);
+  `align/philiumm/sample.py` + `leibniz align philiumm-sample` (fetch, align
+  under four configurations, their CSV columns, the line-by-line comparison,
+  the HTR-witness tally, `reports/philiumm/alignment-sample.md` + `.json`,
+  the full pairs in `data/philiumm/sample/comparison.csv`); +10 tests (616).
+- **Their run** (`alignment_report.csv`): 257 HTR lines, 230 replaced
+  (89.5 %), 26 without a match; no per-line gate
+  (`--conf_threshold 0.0`, `nb_low_conf` = 0), `--min_sim 0.5`; their score is
+  `1 − Levenshtein ÷ max(len)` on raw text between the HTR line and the best
+  window of whole edition words. Their output carries it per line:
+  212 of 230 aligned lines reach 0.7, 230 reach 0.5.
+- **This project's aligner on the same files** (`align_piece`, free edition
+  ends, threshold 0.60; *raw ≥ 0.7* = their formula and the dataset card's cut
+  on the HTR line vs the minted slice):
+  per file 121/142 (85.2 %) and 51/115 (44.3 %) —
+  each image is a bifolium side, and `0002v-0001r` holds 2v and 1r, the end
+  and the start of the passage, which one monotone alignment cannot both
+  place; both files as one piece 108/257 and 173/257 by order;
+  **per region (each zone its own piece) 194/257 (75.5 %), 179 at
+  raw ≥ 0.7 (69.6 %)** against their 230 (89.5 %) with no gate and
+  212 at ≥ 0.7.
+- **Line by line, per region vs theirs:** both same 170 (66.1 %),
+  both different 20, this project only 4, theirs only 40, neither 23.
+  By zone: MainZone 131/184 same, 27 theirs only; MarginTextZone
+  39/64 same, 13 theirs only; the 6 library-stamp lines and the page
+  numbers are *neither* on both sides. On the 20 lines both aligned
+  differently, the HTR reading of the strip is closer to this project's slice
+  on 9 and to their window on 11: the usual shape is a slice running on past
+  a window where the HTR reads more words (`Brentius in prolegomenis contra
+  Petrum` vs `… contra`), or a window reaching into the next line.
+- **Why the 40 *theirs only* lines (22 of them with their score ≥ 0.9).** The
+  edition text interleaves the marginal notes at their textual position
+  (`Am Rande:` blocks of several hundred characters) and passages the page
+  puts elsewhere, so a main zone's monotone alignment meets long edition-only
+  insertions: the exact DP prefers to mis-match the lines that follow (file
+  B's main zone, lines 2–8 `Tutius est statuere…` and 55–65, placed on the
+  margin text at confidence 0.2–0.4), or the insertions land on a line and
+  sink it (file A, lines 79–82) or trip the burst guard (line 108, 63 inserted
+  characters). Forcing the anchor-guided path for every size gives 191, the
+  same block lost. Their Passim windows are order-free and immune. **This is
+  the same mechanism C2b saw in the mint** (additions rendered inline, the
+  edition's order against the page's), now measured on their example: a
+  monotone aligner needs the marginalia separated from the main text before
+  alignment (Denisa's apparatus-reinsertion script, or the edition's own
+  markup), or an order-free fallback for the lines it declines.
+- **What it does not prove.** Agreement is not correctness: both aligners read
+  the same edition text and can share a mistake; a line both decline is not
+  thereby wrong; the HTR witness is a noisy reader. The example is one
+  heavily revised draft (LH I 3,4, a Konzept with marginalia); Task 2 measures
+  the same question on 735 pages.
+- **Task 2, built and tested, not yet run** (`align/philiumm/vi4.py`, `leibniz
+  align philiumm-vi4 fetch | match | compare | sheet`; +5 tests, 621). The
+  Hub lists 1,010 PAGE files (735 noisy, 248 clean, 27 val; revision
+  `b53f531c…`, licence `cc-by-4.0` as listed): 999 names read as shelfmark +
+  folio (`LH_1_12_2_0124r`), 483 of them openings, 8 are eScriptorium ids
+  with no shelfmark, 3 lack a side letter. *match* finds the work by the
+  shelfmark's signature keys (the store spells `LH 1, 3, 7 A` and `LH 1, 3,
+  7a`; both tried, letter parts joined or split), the page by the C2
+  resolver's folio index, and pairs lines by bounding-box IoU ≥ 0.5 (0.3 and
+  0.7 reported), greedy and one to one; an opening is laid out as two canvases
+  side by side in whichever order pairs more area, or as one scan when both
+  labels point at the same file; `reports/philiumm/heldout_pages.csv` gets
+  every resolved page of every split for C3. *compare* buckets each paired
+  line (agree ≥ 0.9, near 0.7–0.9, disagree, ours only, theirs only, neither)
+  per stratum, zone and file, with the HTR witness on the disagreements;
+  *sheet* writes `data/philiumm/philiumm-disagreements.html` through the C2
+  crop machinery, which now takes explicit refs and shows PHILIUMM's text
+  under the minted one (`audit.lines_for_refs`, `write_sheet`; the sampled
+  sheet unchanged). The dataset constant and the site's attribution follow
+  the Hub's rename to `DenisaBumba/…`. Expect, from Task 1: disagreements
+  concentrated on pages with margin zones; `no_layout` where their image
+  is not the GWLB derivative at a uniform scale — the report counts both.
+- **Task 2, run on the store (2026-10-08, `reports/philiumm/vi4-crosscheck.md`,
+  `vi4-summary.json`, `vi4-match-summary.json`, `heldout_pages.csv`).** Of the
+  1,010 files, 735 noisy matched with lines paired and
+  233 clean + 23 val resolved to pages; 19 did not: 8 eScriptorium
+  ids with no shelfmark in the name, and 11 folios of LH 35, 1, 1 whose work
+  (`00067960`) carries no folio label on any of its 54 pages — the same class
+  the C2 resolver cannot localize. **1,149 distinct pages are held out for C3.**
+  On the matched noisy files 93,021 of their lines met 62,114 of this project's
+  at bounding-box IoU ≥ 0.5 (68,351 at 0.3, 54,492 at 0.7); 419 openings
+  were the sheet scan the store registers under both folio labels, paired
+  against the registration that carries the minted lines.
+- **The paired lines, judged** (62,114): agree 9,307 (15.0 %) · near 2,886 ·
+  disagree 771 · this project only 5,145 · theirs only 21,949 ·
+  neither 22,056. This project minted text on 18,109 of the paired lines
+  (29.2 %), theirs on 34,913 (56.2 %); where both have text
+  (12,964), they agree at ≥ 0.9 on 71.8 % and differ at < 0.7 on 5.9 %.
+  Every minted pair is heavy revision bar 112: these are drafts, held to the 0.72
+  threshold, against a run with no per-line gate. On the 771 *disagree* lines the
+  HTR reading is closer to this project's text on 383 and to theirs on 381
+  (near: 1159 / 1682): a coin toss, as two sound aligners on one edition should
+  give; the sample shows mostly line-start and line-end slips of a word (their
+  whole-word window against this project's slice), the audit's boundary pattern.
+- **Where the gap is.** 161 of the 731 judged files carry no minted line at all;
+  their text covers 7,838 paired lines there — coverage (pieces the factory did
+  not localize, had no edition text for, or declined whole), not alignment.
+  On the 570 files with some mint: theirs only 14,111 against this project
+  only 5,145. By zone: main zones, this project 17,513 lines with text to
+  their 29,957; **margin zones 596 to 4,954** — the marginalia the monotone
+  aligner cannot place (Task 1's finding, at scale). What agreement does not
+  prove: both read the same edition; a shared reading is the edition's, not
+  the page's. The sheet (`data/philiumm/philiumm-disagreements.html`, 300
+  lines, both texts, verdicts in the C2 CSV shape) is the second thing to
+  offer the PHILIUMM team.
+
+### C2b — the audit closed and read (2026-10-07) ✅ score · ✅ patterns · ✅ hyphen fix · ⏳ reach census (operator's run)
+
+- **What arrived.** `reports/gt-audit/gt-audit-verdicts-philiumm.csv`: the
+  sheet of 2026-09-16 (`audit-sheet --seed 0`, 50 lines per stratum) judged
+  by the PHILIUMM team — 136 correct · 33 boundary · 16 wrong · 14
+  unreadable · 1 blank ("we cannot decipher"); 86 notes in English, with
+  corrections in quotes. Their own summary, in substance: they marked
+  *correct* when the alignment was right and the issues minor; the
+  line-end hyphen is very often missing on words cut at the line end;
+  *boundary* was used for a letter missing at the start or added at the
+  end; sections with mathematical expressions are generally wrong, as in
+  their own HTR; additions appear inline because the edition renders the
+  final state; overall the alignments are very good.
+- **Score** (`audit-score`, `reports/gt-audit.md`). Precision = correct ÷
+  (correct + boundary + wrong): fair_copy 42/50 = 84.0 % (Wilson 71–92),
+  light_revision 39/45 = 86.7 % (74–94), heavy_revision 31/48 = 64.6 %
+  (50–77), scrap 24/42 = 57.1 % (42–71); pooled 136/185 = 73.5 %;
+  **corpus-weighted 72.3 %, FAIL at ≥ 95 %**, every stratum below the gate.
+  *Usable* (boundary included): 88.0 / 97.8 / 89.6 / 90.5 %, **weighted
+  92.2 %**. Weights are the C2 mint's stratum counts (9,913 · 96,175 ·
+  190,162 · 1,174), passed on the command line because this session had no
+  store; the report names the source. The second witness now skips strips
+  under four folded characters (the 14 unreadables are mostly one letter)
+  and lists 9 verdicts, all *wrong* lines whose HTR reading agrees with the
+  minted text at 0.82–0.98: the right line, read differently.
+- **Agreement with the operator's preliminary pass** (20 lines, fair copies):
+  11/20. PHILIUMM calls *correct* four lines the operator called *wrong*
+  (all four were on the 2026-09-16 re-check list) and three the operator
+  could not read; they call *wrong* two the operator passed (*Casal* /
+  *Casai*; a capital and an accent).
+- **Patterns** (`align/audit_patterns.py`, rules and precedence in its
+  docstring and in the report; per-line CSV
+  `gt-audit-verdicts-philiumm-patterns.csv`; 3 lines settled by hand in
+  `gt-audit-pattern-overrides.csv`). Over the 199 judged lines: correct
+  102 · boundary-letter 35 · normalization 16 · unreadable 14 · hyphen 13 ·
+  bracket 7 · math 5 · reading 4 · addition 2 · other 1. By verdict: the 16
+  *wrong* are math 5, reading 3, normalization 3, addition 2, bracket 2,
+  **other 1 — the one misaligned line** (`DE-611-HS-959288:0086:029`,
+  minted *érité*, strip *serviteur*). The 136 *correct* carry 13 hyphen, 13
+  normalization, 4 boundary-letter, 3 bracket, 1 reading notes: the
+  auditors' "corrected in the comment but assigned correct". The prompt
+  named seven patterns; *bracket*, *normalization* and *reading* were
+  added because without them fifteen of the sixteen *wrong* verdicts
+  would read *other*, and none of those fifteen is a wrong line.
+- **Hyphens.** 14 lines carry the signal; 6 have an HTR line ending in a
+  hyphen mark (what the fix restores), 8 a note saying the hyphen is on the
+  page while the HTR read none. The mint's stored text is stripped, so the
+  census can see only the first kind; the second is a C3 question (the
+  re-mint cannot invent a mark the HTR did not read).
+- **Corrections** (`gt-audit-verdicts-philiumm-corrections.csv`): 46 notes
+  spell out an edit, 45 placed in the minted text. Mean character distance
+  minted → corrected, as written / under the aligner's fold: all 9.4 / 7.9 %;
+  boundary-letter 8.6 / 7.9 %; **normalization 3.1 / 0.0 %**; reading
+  3.3 / 3.4 %; bracket 8.0 / 6.3 %; the addition 32.1 / 32.7 %. Word-level
+  corrections, so floors.
+- **The fix** (`align/align.py`): `keep_hyphen=True` by default; the
+  earlier line's slice ends with the HTR line's own mark when the cut falls
+  inside a word; `AlignedLine.kept_hyphen` records it; a dash the
+  projection leaves at a word boundary stays dropped. Off, the slices are
+  byte-identical to the C2 mint's (tested). The B2 harness takes the knob
+  through `EvalConfig` and gives the same numbers either way: its grade
+  folds punctuation away. **Not applied to the store**: the re-mint runs
+  once, before C3 (Next).
+- **Reach census** (`align/audit_reach.py`, `leibniz align audit-reach`):
+  per open-bucket minted line — hyphen (HTR mark + minted letter), math
+  (the audit's density cut, which misses inline algebra in prose: `ia yy x
+  2ax —` is 4 %), addition (a proxy: the page's overlap or short-line
+  fraction at the heavy-revision cut), eigh. (the record's Textart),
+  Marginalien (the work's set), bracket, LH 35. Writes
+  `reports/gt-audit/reach.md`, `reach-summary.json` and
+  `data/gt/flags.jsonl` for C3; opens the store `mode=ro` + `query_only`.
+  Built and tested on a seeded store in the cloud session; run by the
+  operator on the master store on 2026-10-08 (minutes; the local
+  `audit-score` against the store reproduced 72.3 %).
+- **Reach, measured (2026-10-08, `reports/gt-audit/reach.md`).** 297,424
+  open-bucket lines on 16,843 pages from 5,526 records (5,513 with a
+  Textart; 0 rows skipped). *Hyphen* 7,822 (2.6 %): fair_copy 7.7 % ·
+  light 4.0 % · heavy 1.7 % · scrap 2.0 %; by volume up to 6.5 % (IV,1)
+  and 7.3 % (VI,1); the sheet's mechanical rate was 6/199 = 3 %, so the
+  mint-wide figure is as expected and is the exact set the re-mint
+  changes. *Bracket* 4,338 (1.5 %; IV,3 4.3 %, VI,3 2.4 %): C3 should
+  drop or clean them (the flag is in `flags.jsonl`). *Math* 249 (0.1 %):
+  III,1 72 (1.3 %) · III,3 55 · III,4 39 — two thirds in Reihe III, as a
+  precise-but-blind cut should; the sheet's rate from the notes was 2.5 %,
+  so the flag is a floor and the layout-zone census (P1 Task 3) is the
+  instrument. *Addition* 246,003 (82.7 %; heavy 99.3 %, light 58.2 %,
+  fair 2.0 %): the page-layout proxy restates the stratum heuristic and
+  must not be used as a filter — the audit found inline additions on 1 %
+  of lines; the honest route is Denisa's apparatus-reinsertion script.
+  *Marginalien* 0, *LH 35* 9,145 (3.1 %; III,1 57 %).
+- **The hand census (2026-10-08).** Of the 296,587 minted lines whose
+  record has a Textart, **118,928 (40.1 %) are in their author's own hand
+  (`eigh.`) and 76,147 (25.7 %) in Leibniz's** (own hand, and the record
+  names no sender or Leibniz as sender). By stratum, Leibniz's hand:
+  fair_copy 1.7 % · light_revision 8.3 % · heavy_revision 35.8 % · scrap
+  18.2 %. By volume: IV,2 98 %, VI,4 65 %, VI,6 55 %, III,1 46 %, I,7
+  36 %, IV,1 35 %, I,3 29 %, I,12 28 %; IV,3 6 %, VI,3 10 %, III,3 4 %.
+  The gap between the two figures is the correspondents' own hands on
+  letters he received, largest in Reihe I (I,3: 82 % own hand, 29 %
+  Leibniz's). For the call: three quarters of this ground truth is hands
+  other than Leibniz's — David's point that their model saw only his.
+- **Tooling:** `audit-score --weights/--weights-source` (no store needed;
+  refuses to create an empty store when `--db` is missing), `--compare`
+  (+ `--compare-labels`), `--patterns/--no-patterns`, `--overrides`,
+  `--patterns-out`, `--corrections-out`; `audit-reach`. +33 tests (606).
+- **C3 amendment 2** in PROMPTS.md (six points); the C2b prompt appended
+  under "Follow-up phases (2026-10)".
 
 ### W3 fix — the viewer's modules as one versioned set (2026-10-06) ✅
 
@@ -1524,7 +2108,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **573** (2026-10-06, W3 fix; with the `gt` + `release` extras; 569 after W3, 545 after W2) |
+| Tests passing | **644** (2026-10-08, W4; 634 after S1, 621 after P1 Task 2, 606 after C2b; with the `gt` + `web` + `release` extras) |
+| **W4 text access (2026-10-08)** | the live page view before: a drag in the line list selected 0 characters, select-all copied 11,828 with the chrome; after, on the fixture store: **39/39** browser checks, axe-core 0 violations ×5, 390 px without horizontal scroll; on staging (operator, the same evening): record 41800 answers **84 lines on 2 pages, mean confidence 0.96** |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
 | W3 `/api/works` on the corpus store | 0.64 s first call, 2 ms after; 781 KB, 84 KB gzipped · `/browse` HTML 187 KB, 43 KB gzipped |
@@ -1541,7 +2126,13 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | C2 banded aligner | O(len·band) NW + traceback; **0 mismatches vs full DP** (exactness-tested) |
 | **C2 anchored aligner (2026-09-15)** | k-gram chain → chunked band; crash shape **44 MB / 1.9 s** (was ~6 GB, OOM-killed); 300k-char treatise 112 MB / 46 s |
 | **C2 mint (2026-09-16)** | **297,424 open-bucket GT lines** (fair 9,913 · light 96,175 · heavy 190,162 · scrap 1,174) from 6,383 pieces; 5.9× target; ~2 h on 6 workers |
-| C2 hand audit | **preliminary**: 20/200 judged (fair copies only) — 12 correct · 5 wrong · 3 unreadable; all 5 "wrong" agree with the HTR reading at 0.82–0.98 (likely misjudged); gate **deferred** to C3's ablation |
+| **C2 hand audit (PHILIUMM, 2026-10-07)** | 199/200 judged: 136 correct · 33 boundary · 16 wrong · 14 unreadable → **weighted precision 72.3 % (FAIL at 95 %)**, usable **92.2 %**; per stratum 84.0 / 86.7 / 64.6 / 57.1 %; **1 misaligned line in 185 scored**; patterns: boundary-letter 35 · normalization 16 · hyphen 13 · bracket 7 · math 5 · reading 4 · addition 2 |
+| C2 normalization tax, first sample | 46 corrections, 45 placed: 9.4 % as written / 7.9 % folded; on the accent-and-comma lines **3.1 % / 0.0 %** |
+| C2 audit agreement | the operator's 20 (2026-09-16) vs PHILIUMM: 11/20 |
+| **C2 reach census (2026-10-08)** | 297,424 lines · hyphen **7,822 (2.6 %)** · bracket 4,338 (1.5 %) · math 249 (0.1 %, a floor) · addition proxy 82.7 % (useless) · Marginalien 0 · LH 35 9,145 |
+| **P1 Task 2: A VI,4 under two aligners (2026-10-08)** | 62,114 paired lines on 735 pages: agree 9,307 · near 2,886 · disagree 771 · ours only 5,145 · theirs only 21,949 (7,838 on 161 pages with no mint at all) · neither 22,056; HTR witness on disagreements 383 / 381; **1,149 held-out pages** |
+| **P1 Task 1: their aligner's example (2026-10-08)** | theirs 230/257 (89.5 %, no gate; 212 at ≥ 0.7) · this project per region **194/257 (75.5 %)**, 179 at raw ≥ 0.7 · both same 170 · theirs only 40 (the interleaved marginalia) |
+| **C2 hand census (2026-10-08)** | of 296,587 lines with a Textart: author's own hand **40.1 %**, **Leibniz's own hand 25.7 %** (fair 1.7 · light 8.3 · heavy 35.8 · scrap 18.2 %) |
 | C2 edition texts | 10,029 records: median 2.5k chars · p90 15k · **186 over 100k** (VI,6 N. 2 = 754k) |
 | C2 stratum thresholds | fair_copy 0.55 · light 0.62 · heavy 0.72 · scrap 0.80 (drafts held higher) |
 | **C2 extraction QA (live, real Leibniz print)** | `gpt-4o` reading-text extract, head/page-no dropped; 2-model QA flagged **1/2**, agreement **0.67** |
@@ -1659,17 +2250,29 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     corpus-wide after the `140d58d`/token-layout fixes). They are ready to gate
     search and the UI.
 
-18. **(C2) Precision of the minted GT: audit preliminary, gate deferred.**
-    Yield is 5.9× target, but B2's 97.5 % precision was measured on
-    favourable material against PHILIUMM's diplomatic GT; the corpus mint has
-    no reference. The operator judged 20/200 (fair copies): 12 correct, 5
-    wrong, 3 unreadable — and all five "wrong" sit on lines whose HTR reading
-    agrees with the minted text at 0.82–0.98, i.e. likely misjudged (C2
-    close-out log). Open until someone who reads the hands finishes the sheet
-    (`reports/gt-audit/`), or C3's ablation (PHILIUMM GT alone vs + C2 GT on
-    the held-out set) settles the question empirically — the latter is now
-    the plan. If a stratum then fails, the levers are its threshold
-    (`STRATUM_THRESHOLDS`), the burst/overhang guards, and Q #17.
+18. **(C2) Precision of the minted GT — audited 2026-10-07, restated.** The
+    PHILIUMM team judged 199 of the 200 lines: **weighted precision 72.3 %
+    as written, FAIL at 95 % in every stratum; 92.2 % with boundary slips
+    counted usable** (`reports/gt-audit.md`, C2b log). Read by pattern, the
+    gate as written measures three different things at once. (a) *Does the
+    mint pick the right line?* Yes: one misaligned line in 185 scored. (b)
+    *Does the slice start and end where the line does?* Not always: 35 lines
+    are a letter or a short word off at an end (18 %, worst in scraps and
+    heavy revision), and 13 lost the scribe's line-end hyphen (fixed in the
+    aligner; the re-mint before C3 applies it). (c) *Is the edition's text
+    the page's text?* No, by design: accents, capitals and commas the
+    edition regularises (16 lines), disputed readings (4), editorial brackets
+    leaked from the apparatus (7), formulae (5) and inline additions (2) are
+    the reading text being a reading text. The levers, in order: the
+    re-mint with hyphens kept; the C3 exclusions (math, Marginalien, bracket
+    lines — Amendment 2); Denisa's apparatus-reinsertion script for the
+    additions (Standing items); and for the boundary slips Q #17's edge
+    scatter plus a one-letter cut at line ends that is as much the segmenter's
+    crop as the aligner's. What stays open: a second judging round on a fresh
+    200 after the re-mint (the sheet and the CSV shape are theirs to reuse),
+    and C3's ablation as the empirical test. The threshold levers
+    (`STRATUM_THRESHOLDS`) would not have helped: the failing lines are
+    well-aligned.
 17. **(C2) Edge-of-passage scatter under unit costs.** With the HTR ends not
     free (the piece's lines must all be consumed) and the edition ends free,
     the DP is indifferent between matching the passage's last few characters
@@ -1685,6 +2288,79 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-10-08 — W4, departures from the prompt and from the plan's
+  preamble.** (1) *Where it ran.* A cloud session with no store: Task 0's
+  look at the live page ran here (headless Chromium through the proxy), the
+  browser checks of Task 4 ran against the fixture store, and the real-store
+  and staging checks are handed over (Next); the operator asked for the
+  step to be completed in one session, so Task 0's "wait for go" was not
+  waited for and its findings are recorded instead. (2) *Branch.*
+  `claude/dazzling-hopper-uxji2x`, the plan's one branch, not
+  `web-text-access`; no "merged"; Task 5 replaced by `staging.sh` and the
+  checks against staging, as the plan's amendment says. (3) *The line
+  list.* Beyond unblocking the selection, page.js answers a `copy` whose
+  selection lies in the list with the lines' selected text alone: Chromium
+  left a blank line where the badges were, and `Selection.toString()`
+  still reported them. (4) The header's link list gained "Text of this
+  page", an anchor to the block, in place of the download it lost; the
+  prompt names neither. (5) A record is placed from the *first of its
+  shelfmarks that carries a folio range* (the factory reads the first
+  shelfmark only) and from its best crosswalk link, then the next link where
+  the best cannot place it. (6) The piece's download is named
+  `leibniz-legible_record-<id>.txt`, so a record id can never be read as a
+  work id. (7) The record header carries `attr.KATALOG` beside the
+  project's own licence line, since catalogue data travels in the file. (8)
+  The fixture's k-109 resolves to three pages, not the prompt's "two of
+  three": `Bl. 1-2` includes folio 2's recto, the skipped third page; the
+  tests state it. (9) The string `page.download` is gone;
+  `page.text.download` names the moved link. (10) `resolve.py` gained
+  `index_pages` and `select_folios`, and `db.py` `crosswalk_for_record`,
+  beyond the prompt's list of files.
+
+- **2026-10-08 — S1, departures from the prompt and from the plan's
+  preamble.** (1) *Where it ran.* A cloud session with no SSH: Task 0's
+  look at the box and Task 4's install are handed over as commands (Next),
+  as the C2b and P1 sessions did with the store. (2) *Branch.*
+  `claude/dazzling-hopper-uxji2x`, the plan's one branch, not
+  `deploy-staging` and not the session's own designated branch; no wait for
+  "merged"; no §9 production update: the kit is installed from a clone of
+  the branch, as the plan's amendment says. (3) The install folds Task 4's
+  step 3 in: `staging-install.sh --branch BRANCH` ends by running
+  `staging.sh BRANCH`. (4) `staging.sh` has `--status` and `--drop-index`
+  beyond the prompt's `--main` and `--index`. (5) The user name is asked
+  for on the terminal when `--user` is not given (the prompt had the
+  session ask the operator; nobody could answer here). (6) The staging
+  index is `leibniz_pages_staging` and the key's scope is checked, not
+  widened: `meili-search-key.sh` already scopes the key to
+  `leibniz_pages*`. (7) `staging.env` is installed from the example with
+  the live env's store path, key, image origin and proxy address copied in,
+  since the example cannot carry the key. (8) The password stays although
+  the operator said an unlisted host would do (the S1 log says why). (9)
+  `--index` and §14 cite §5's measured 5 h 33 m for the live build; no new
+  figure was produced.
+
+- **2026-10-07 — C2b, departures from the prompt.** (1) *Where it ran.* The
+  prompt assumed the WSL2 checkout with the master store and `.venv-w3`;
+  this session ran in a cloud container on a fresh clone with no store, in
+  a side environment `.venv-cloud` (`gt` + `web` + `release` extras). So
+  the stratum weights for `audit-score` came from the committed C2 mint
+  counts (`--weights`, named in the report), and Task 3's reach census was
+  built and tested on a seeded store only. The operator then ran both on
+  the master store on 2026-10-08: the score reproduced 72.3 % and the
+  census numbers are in the C2b log. (2) *Branch.* `claude/dazzling-hopper-uxji2x`,
+  the session's designated branch, not `c2-audit-closeout`. (3) *Pattern
+  names.* `bracket`, `normalization` and `reading` were added to the
+  prompt's list (see the C2b log for why). (4) *Precedence.* A *boundary*
+  verdict names its line before the hyphen signal; the prompt had the
+  hyphen rule first. (5) *The override file* was written by this session
+  from the notes (three lines), not settled by the operator in chat; the
+  `why` column says so and the operator may change it and re-run. (6)
+  *Second witness.* Strips under four folded characters are no longer
+  listed for re-checking (a rule change to the 2026-09-16 tooling). (7)
+  `audit-score` without `--weights` now refuses a missing store instead of
+  creating an empty one (the old behaviour would have scored with equal
+  weights, silently).
 
 - **2026-10-06 — W3, departures from the prompt.** (1) *Where it ran.* The
   prompt assumed a Windows checkout (Windows uv, `.venv-win`, the suite's
@@ -1792,6 +2468,103 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**The final merge is unblocked (2026-10-08, late evening):** the scored
+audit has gone to the PHILIUMM team and the staging look is done. The order
+is the plan page's "final merge" section: merge the pull request, `git
+checkout main && git pull --ff-only origin main` on the desktop, the §9
+update on the box (code only), the same checks on the live site, then
+`staging.sh --main`. Deploying before the call of 13 October makes the Text
+block clickable on the call.
+
+**W4 (2026-10-08), operator — the staging look, in WSL, before anything
+merges.** The SSH target and the staging user name are on the plan page,
+not here.
+
+1. ✅ Done 2026-10-08, evening. Put the branch on staging:
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (it fetches, syncs the venv, restarts the staging unit, prints `/healthz`
+   and the address; paste the output back).
+2. ✅ Done the same evening, every answer as expected (record 41800: 84
+   recognised lines on its 2 pages, mean confidence 0.96). Over HTTP, each
+   line asks for the password once; the expected answer is after the arrow:
+   - `curl -su USER https://staging.leibnizlegible.com/page/00068221:0043 | grep -c 'The machine reads it as'` → `1` (the server-rendered text is still there);
+   - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | head -16` → a `# ` header beginning `# Leibniz Legible`, with `# Catalogue record: 41800 — [Praefatio operis ad instaurationem scientiarum]`, `# Akademie-Ausgabe: AA VI,4 N. 109`, `# Work: https://staging.leibnizlegible.com/work/00068642`, `# Folios: Bl. 1 (from the shelfmark LH 4, 6, 18 Bl. 1): 2 pages, canvases 1–2, …` (the live work's records, read from the live API on 2026-10-08: 41800 is on Bl. 1, 59095 "De cognitione" on Bl. 2);
+   - `curl -su USER https://staging.leibnizlegible.com/api/records/41800/text | grep -c '^## Folio'` → `2`;
+   - `curl -su USER 'https://staging.leibnizlegible.com/api/records/41800/text?format=tsv' | sed -n '/^line_id/p'` → the TSV column row;
+   - `curl -su USER https://staging.leibnizlegible.com/api/works/00068642 | grep -o '"text_url": *"[^"]*"'` → two `text_url` values, `/api/records/41800/text` and `/api/records/59095/text`;
+   - `curl -su USER -o /dev/null -w '%{http_code}\n' https://staging.leibnizlegible.com/api/records/nope/text` → `404`;
+   - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep records` → `Allow: /api/records/`;
+   - `curl -su USER https://staging.leibnizlegible.com/llms.txt | grep -c '/api/records/{record_id}/text'` → `1`.
+3. ✅ Done the same evening, the browser look good. In the browser, with the password: `/page/00068221:0043` — the Text block
+   under the line list, Copy (then paste somewhere: 108 lines, nothing
+   else), "Download this page as text", "Text of this page" in the header;
+   drag across two lines of the line list and copy: the two lines alone;
+   `/work/00068642` — "Text of this piece (Bl. 1)" under the Praefatio
+   record and "(Bl. 2)" under De cognitione, each a download; DE; `/about`,
+   the transcriptions paragraph. Phone width if a phone is at hand.
+4. Anything wrong: say so in a session; it fixes it on the branch and the
+   `staging.sh` line runs again. Nothing merges here; the final merge is
+   the plan's own step, after the emails and this look.
+5. The three sentences for David are in the hand-over (and in the session's
+   `scratchpad/david-text-access.md`); say "on a preview" or nothing about
+   where.
+
+**S1 (2026-10-08): ✅ staging installed and verified** (the S1 log has the
+run, the first failure and the fix). Standing, for every web step from now
+on: push the branch, then
+`ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+(after the final merge, `/opt/leibniz-legible/deploy/staging.sh`), look at
+`https://staging.leibnizlegible.com` with the password, and only then merge;
+`staging.sh --main` after the merge. A new password:
+`/opt/leibniz-legible-staging/deploy/staging-install.sh --password`. The
+kit clone `/opt/leibniz-legible-kit` is no longer needed (`rm -rf`). Never
+send a staging link to anyone. Next step of the plan: W4, text access, on
+this branch.
+
+**P1 (2026-10-08): Task 2 ran on the store** (`9c85f0a`); a later `compare`
+rerun adds the coverage section to the report (optional, minutes). Task 3
+waits for the new RF-DETR model. Merge order unchanged: after the PHILIUMM
+team has seen the numbers. The four runs, for the record:
+
+1. `uv run leibniz align philiumm-vi4 fetch` — the Hub listing and the 735
+   noisy PAGE files into `data/philiumm/noisy/` at one request a second
+   (about fifteen minutes; resumable: run it again if it stops).
+2. `uv run leibniz align philiumm-vi4 match` — read-only on the store;
+   prints files matched per split, pairs at IoU 0.3/0.5/0.7 and the layouts
+   chosen; writes `reports/philiumm/heldout_pages.csv` and
+   `vi4-match-summary.json`. Look at the unresolved list: a shelfmark
+   spelling the matcher does not try is a one-line fix here.
+3. `uv run leibniz align philiumm-vi4 compare` — writes
+   `reports/philiumm/vi4-crosscheck.md`, `vi4-summary.json` and
+   `vi4-disagreements-sample.csv`; the full CSVs stay under `data/philiumm/`.
+4. `uv run leibniz align philiumm-vi4 sheet --images /mnt/d/leibniz-images`
+   — `data/philiumm/philiumm-disagreements.html`, 300 lines with both
+   texts, verdicts downloadable in the C2 CSV shape: the second sheet to
+   offer the PHILIUMM team.
+Then `git add reports/philiumm && git commit && git push`, and paste the
+console summaries here. Task 3 waits for the new RF-DETR model. Merge order
+unchanged: after the PHILIUMM team has seen the numbers.
+
+**C2b (2026-10-07), operator — in this order:**
+
+1. ✅ Done 2026-10-08: the score against the store reproduced 72.3 %; the
+   reach census ran (minutes) and its reports are committed (`bd01eef`).
+2. ✅ Done 2026-10-08, evening: the scored report (`reports/gt-audit.md`)
+   went to Denisa and David with the reply to their notes of 7 October.
+   They have seen the score first, so the merge is no longer held by it.
+3. **Before C3, once:** the re-mint with hyphens kept. The factory is
+   idempotent and the aligner's default is now `keep_hyphen=True`, so it is
+   the C2 runbook line **without `--resume`** (resume skips every piece
+   already minted): six shards of
+   `uv run leibniz align factory data/gt/edition_cache.jsonl --shard $i/6`
+   under nohup, about two hours; then `leibniz align gt-report` and
+   `leibniz align audit-reach` again (the hyphen share should drop to the
+   lines whose HTR read no mark). Do it after P1 has produced
+   `reports/philiumm/heldout_pages.csv`, so one re-mint carries every C2b
+   flag.
+4. Offer PHILIUMM a second judging round on a fresh 200 of the re-minted
+   lines (`audit-sheet --seed 1`), same CSV shape.
 
 **W3 fix (2026-10-06), operator:** merge `web-versioned-modules`, then the §9
 update on the VPS — code only. Then, over HTTP: the shell of any page names

@@ -188,6 +188,14 @@ _Depends on: C2._
 > 4. **Add character n-gram language-model decoding** (Tarride et al. 2024: −12% relative CER across 12 datasets in PyLaia). Kraken does not ship one as far as verified; implement over the CTC logits (torchaudio `ctc_decoder` + KenLM). Train the LM on *diplomatic* GT, never on edition text, or it will push toward expansions. Report with and without.
 >
 > Two honesty notes for the model card: (a) the ablation is a weaker test of GT precision than STATUS assumed — a flat result is consistent with Bullinger even at good precision, so the hand audit (Q #18) still matters; (b) the PHILIUMM transcription conventions are on an access-controlled wiki, so any published claim of "diplomatic" fidelity must state what was verified. Also measure, once v2 exists, the number nobody has: on the val split, the fraction of v1/v2 *disagreements* where either reading is exactly right, per stratum — it decides whether Calculemus's A/B mechanic has the truth in the pair.
+>
+> **Amendment 2 (2026-10-07, from the audit — see STATUS.md "C2b").** The PHILIUMM team judged the 200-line sheet (199 verdicts); the patterns behind the non-*correct* verdicts and their reach across the mint are in `reports/gt-audit.md` and `reports/gt-audit/reach.md`. Six consequences for C3:
+> 1. **Train on the re-minted lines with hyphens kept** (`align_piece(keep_hyphen=True)`, the default since C2b): the missing line-end hyphen was the most frequent fault of the minted text. The re-mint runs once, before C3, with every C2b flag in place (the factory is idempotent; about two hours on six shards).
+> 2. **Exclude lines flagged `math`** (`data/gt/flags.jsonl` from `leibniz align audit-reach`) **and lines from Marginalien works**: formula lines are wrong in the mint and in the HTR alike, and the Marginalien body is print, not Leibniz.
+> 3. **Exclude PHILIUMM's 1,010 pages from the held-out set** (`reports/philiumm/heldout_pages.csv`, once P1 has produced it): the model this project runs trained on them.
+> 4. **Stratify the held-out set by stratum, language and hand** (`eigh.` in the record's Textart, the `eigh` flag of the reach census).
+> 5. **Keep the 199 PHILIUMM-judged lines and their corrections out of training** (`reports/gt-audit/gt-audit-verdicts-philiumm.csv`, `…-corrections.csv`) and use them as a sanity set: a model that gets them wrong where the auditors read them is not better.
+> 6. **Report CER by hand** as well as by stratum and language.
 
 ---
 
@@ -558,4 +566,796 @@ numbers in the draft that the session did not measure. Do not send anything.
 A closing summary in chat: what is merged and live, the LBr label share, the
 pre-existing Windows test failures if any, what [the reader]'s reply would unlock, and
 that the next phase is K1 from a fresh session on the merged main.
+~~~~
+
+
+### Phase C2b — Close the C2 audit and learn from it (run 2026-10-07)
+
+~~~~text
+Phase C2b — Close the C2 audit and learn from it: score the PHILIUMM verdicts,
+name the failure patterns, measure their reach across the mint, build the cheap
+fix. One local session on the operator's desktop (WSL2 Ubuntu).
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md, in particular the C2 close-out of 2026-09-16 and Open
+question #18. If this prompt conflicts with the repo, the repo + STATUS.md win;
+record the divergence in STATUS.md. Write the "C2b — audit close-out" entry in
+STATUS.md after every task; if one exists, continue from its first unfinished
+task on the existing branch.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. data/inventory.sqlite is the MASTER store (16 GB:
+13.5M v1 lines, 297k gt_lines): open it read-only only (`uv run leibniz …`
+commands open it mode=ro; your own Python uses a `file:…?mode=ro` URI); never
+write, VACUUM or move it. The page-image cache is /mnt/d/leibniz-images.
+`.venv` is the pipeline environment (never run `uv sync` against it); use the
+side environment `.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3 for every
+`uv` command; its extras are web, gt and release). This phase writes nothing to
+the store: the fix it builds is applied by a re-mint scheduled before C3, not
+here. Every result lives in reports/ as small committed files rendered by code
+from data; never write a number you did not produce. The operator merges, after
+the PHILIUMM team has seen the scored result (the repo is public). You push the
+branch and hand over. Branch: `c2-audit-closeout`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+`git status --porcelain` shows nothing but the operator's own untracked files
+(logs, *.log, resume-run.sh, .python-version, reports/gt-audit/gt-audit.html
+and the like; leave them alone); HEAD is main; `git pull --ff-only origin
+main`. Confirm reports/gt-audit/gt-audit-verdicts-philiumm.csv exists with the
+columns ref, stratum, verdict, note and about 200 rows; if not, ask for its
+path. Baseline: `uv run ruff check .`, `uv run ruff format --check .`,
+`uv run pytest -q`; record the counts. Print a short plan and wait for "go".
+
+## What arrived
+On 2026-10-07 Denisa-Florina Bumba and David Rabouin (PHILIUMM) returned the
+200-line audit sheet (reports/gt-audit/gt-audit.html, built 2026-09-16 by
+`leibniz align audit-sheet --seed 0`, equal numbers per stratum; its lines are
+in reports/gt-audit/gt-audit-lines.csv with gt_text and htr_text per ref) with
+199 of 200 lines judged. Their summary, in substance: they sometimes corrected
+the transcription in the note but still marked "correct" when the alignment
+was right and the issues minor; one line they could not decipher; very often
+the end-of-line hyphen is missing on words cut at the line end while the word
+slice itself is right; "boundary" was used for small boundary issues, a letter
+missing at the start or one added at the end; sections with mathematical
+expressions are generally wrong, as in their own HTR; additions appear inline
+because the edition renders the final state, although visually they do not
+belong to the line; overall the alignments are very good. The operator's own
+preliminary 20-line pass (12 correct, 5 wrong, 3 unreadable, fair copies only)
+is reports/gt-audit/gt-audit-verdicts.csv with reports/gt-audit.md; its
+second-witness check found all five "wrong" verdicts contradicted by the
+machine reading.
+
+## Task 1 — Score
+`uv run leibniz align audit-score reports/gt-audit/gt-audit-verdicts-philiumm.csv`
+regenerates reports/gt-audit.md: precision per stratum with Wilson intervals,
+the corpus-weighted figure against the 95 % gate, the second-witness list.
+Read it. Also compute agreement between the operator's 20 verdicts and theirs
+on the same refs and put it in the report. Record the verdict, PASS or FAIL,
+per stratum and weighted, and what "usable" (boundary included) gives. Commit.
+
+## Task 2 — Name the patterns
+Add src/leibniz/align/audit_patterns.py (pure, tested on synthetic rows): for
+each judged row, from verdict, note, gt_text, htr_text, the folded similarity
+and the HTR line's last character, assign one pattern:
+- hyphen: the HTR line ends in one of the aligner's hyphen characters
+  (align.py _HYPHENS) and the minted text ends in a letter;
+- boundary-letter: verdict boundary, or a one-character difference at either
+  end between the minted text and a correction given in the note;
+- math: digits, operators, Greek or bracket density above a cut you state, or
+  the note says so;
+- addition: the note says so, or the minted text exceeds the HTR reading in
+  folded length by more than the aligner's insertion floor;
+- unreadable; correct; other.
+Notes are free text in English or French: match conservatively and keep a
+committed override CSV (ref, pattern, why) for rows the rules cannot decide;
+print those rows and ask the operator to settle them in chat. Where a note
+carries a corrected transcription, store (ref, minted text, correction) in
+reports/gt-audit/gt-audit-philiumm-corrections.csv and compute the folded
+similarity between minted and corrected text: the first measured sample of the
+normalization tax on real lines. Extend reports/gt-audit.md with a pattern
+table per stratum and the corrections table (render through audit.py's
+report code, prose templated). Commit.
+
+## Task 3 — Reach across the mint (read-only)
+`leibniz align audit-reach`, over all open-bucket gt_lines joined to the v1
+lines (line_image_ref is the canonical "{page_id}:{line_seq:03d}"; take the
+recognised row as audit.line_geometry does):
+- hyphen: minted lines whose HTR text ends in a hyphen character while the
+  minted text ends in a letter; count and share per stratum and per volume;
+- math: the Task 2 density score per minted line, plus the piece's volume
+  (Reihe III and the mathematical LH 35 pieces); counts above the cut;
+- additions: minted lines on pages whose page_stats overlap or short-line
+  fractions exceed the heavy-revision cuts in align/stratum.py (a proxy; say so);
+- hand: per minted line, whether the piece's catalogue textart carries "eigh."
+  (Leibniz's own hand; gt_lines.source names the record id, katalog_records
+  holds textart); shares per stratum and per volume;
+- Marginalien: minted lines whose work is in the Marginalien set (expected
+  near zero; measure).
+Writes reports/gt-audit/reach.md and reach-summary.json; per-line flags to
+data/gt/flags.jsonl (ref, flags) for C3, with a committed count table. Run it
+here (minutes). Commit.
+
+## Task 4 — The cheap fix, built and tested, not applied
+In src/leibniz/align/align.py add keep_hyphen (default True for new mints):
+when dehyphenation joined a word across a line break, the earlier line's
+minted slice ends with the very hyphen character the HTR line showed ("=" stays
+"="), and the next line's slice starts with the rest of the word as now.
+AlignedLine records that it happened. Tests; the B2 evaluate harness gives the
+same numbers with the option off. Do not re-mint: the re-mint runs once, before
+C3, with every C2b flag in place (STATUS.md's Next records it with the runbook
+line: the factory is idempotent, about two hours on six shards). Commit.
+
+## Task 5 — Amend C3
+In PROMPTS.md, under the C3 prompt's 2026-09-16 amendment, add "Amendment 2
+(2026-10, from the audit)": train on re-minted lines with hyphens kept; exclude
+lines flagged math and lines from Marginalien works; exclude PHILIUMM's 1,010
+pages from the held-out set (reports/philiumm/heldout_pages.csv once P1 has
+produced it); stratify the held-out set by stratum, language and hand (eigh.);
+keep the 199 PHILIUMM-judged lines and their corrections out of training and
+use them as a sanity set; report CER by hand. Commit.
+
+## Finish and hand-over
+STATUS.md: the C2 gate verdict with its numbers; Open question #18 closed or
+restated; the patterns and their reach; the hand census; under Next, the
+re-mint before C3. Append this prompt verbatim to PROMPTS.md under "Follow-up
+phases (2026-10)". ruff + pytest clean. `git push -u origin c2-audit-closeout`,
+print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...c2-audit-closeout?expand=1
+and a five-line summary of the verdict for the operator to send to the PHILIUMM
+team. Do not merge.
+~~~~
+
+
+### Phase P1 — PHILIUMM cross-checks (Tasks 1 and 2 built 2026-10-08; Task 3 waits for the layout model)
+
+~~~~text
+Phase P1 — PHILIUMM cross-checks: their aligner sample, the A VI,4 cross-comparison,
+and a layout-zone census. One local session on the operator's desktop (WSL2
+Ubuntu), with the data, the store and the GPU at hand.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. Write the "P1 — PHILIUMM cross-checks"
+entry in STATUS.md after every task. If STATUS.md already carries a P1 entry,
+continue from its first unfinished task; if that entry says the branch was
+merged, create `philiumm-layout-census` from main and continue there.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible, the one the C1 corpus run, the C2 mint and W3 used.
+Facts, to verify in Task 0 rather than assume:
+- data/inventory.sqlite is the MASTER store (16 GB: 13.5M v1 lines, 297k
+  gt_lines). Open it read-only only: `uv run leibniz …` commands open it
+  mode=ro; your own Python uses a `file:…?mode=ro` URI. Never write to it, never
+  VACUUM or move it, never delete anything under data/. This phase writes
+  nothing to the store.
+- The page-image cache is /mnt/d/leibniz-images (the D: drive); the runbooks
+  pass it as `--images /mnt/d/leibniz-images`, and pages.local_path is relative
+  to that root (see align/audit.py attach_images).
+- `.venv` is the pipeline environment (kraken, torch with CUDA): never run
+  `uv sync` against it and never install into it. Use the side environment W3
+  made, `.venv-w3` (web, gt and release extras; gt brings Pillow for crops):
+  export UV_PROJECT_ENVIRONMENT=.venv-w3 in your shell for every `uv` command.
+  This phase adds no Python dependency to the project; PHILIUMM's pipeline gets
+  its own environment under data/philiumm/ (Task 3).
+- The GPU is a GTX 1660 Ti (6 GB) reachable from WSL2. Task 3 may use it;
+  nothing else here needs it.
+- Long jobs run under nohup with a log under logs/ (gitignored); poll the log,
+  print its tail when done. Ask the operator for a go before: cloning and
+  installing their pipeline, running it, a download over 1 GB, a job expected
+  to run over an hour, and installing any software (apt, npm).
+- Every result lives in reports/philiumm/ and reports/layout/ as small
+  committed files (Markdown, JSON, CSV of at most a few thousand rows),
+  rendered by code from data, prose templated. Bulky artefacts (downloads,
+  crops, HTML sheets, models, full CSVs) go under data/ (gitignored) and are
+  described, not committed. Never write a number you did not produce.
+- The operator merges, and only after the numbers have been shared with the
+  PHILIUMM team: the repo is public, so a merge is a publication. You push the
+  branch and hand over; you never merge. Nothing is deployed. Branch:
+  `philiumm-crosschecks`, created from main.
+- Their two GitLab repositories have no licence file, and on 2026-10-06 they
+  said they are considering CC BY-NC for their dataset and models as well. Read
+  their code, run their pipeline locally under data/, copy nothing from either
+  repository into this one, and record the commit SHAs you used.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files (logs, *.log, resume-run.sh, .python-version, reports/gt-audit/
+   gt-audit.html and the like; leave them alone). `git rev-parse --abbrev-ref
+   HEAD` is main; `git pull --ff-only origin main`; confirm the remote.
+2. `df -h data /mnt/d`; `uv --version`; `git lfs version` (Task 3 needs it;
+   if missing, ask before `sudo apt-get install -y git-lfs`); `nvidia-smi`.
+3. Baseline in .venv-w3: `uv run ruff check .`, `uv run ruff format --check .`,
+   `uv run pytest -q`. Record the counts.
+4. Ask the operator two things and wait: whether PHILIUMM's new RF-DETR model
+   has been published (the gate before Task 3), and whether Task 3 should run
+   on the current bundled model regardless, for the 13 October call.
+5. Print a short plan with the steps you expect, their durations and what
+   needs a go, and wait for the operator's "go".
+
+## Background (all you need)
+The ERC PHILIUMM project (David Rabouin, Denisa-Florina Bumba; Laboratoire SPHERE,
+Université Paris Cité – CNRS) built the Leibniz HTR model this project runs
+(FoNDUE-GD_v2_ft_Leibniz, Zenodo 10.5281/zenodo.21457538, CC BY 4.0 as obtained)
+and the baseline segmentation model of the v1 corpus run (Zenodo
+10.5281/zenodo.21537859, CC BY 4.0). In an email exchange from 2026-09-28 they
+offered to collaborate; Denisa pointed to three things (below); she and David
+then judged the 200-line ground-truth audit sheet and returned it on
+2026-10-07 (scored in a separate session, not here); and a call is set for
+2026-10-13. The owner brings three cross-checks of their three things to that
+call. On 2026-10-07 David also noted that their model was not trained on
+printed material (the Marginalien), on hands other than Leibniz's, or on
+Kurrent; Task 3's sample takes the first of these into account.
+1. Their alignment code (PASSIM `seriatim --linewise` + a filter + a sliding-window
+   second pass):
+   https://gitlab.com/eman8/scripts/htr-ocr/alignement-verite-de-terrain-et-transcriptions
+   (branch main; raw files at .../-/raw/main/<path>). Worked example in the repo:
+   GT/LH_1_3_4_0001-0002_1.txt (edition reading text for LH I 3,4 Bl. 1–2, from
+   A VI,4); HTR/LH_1_3_4_0002r-0001v.xml and HTR/LH_1_3_4_0002v-0001r.xml (PAGE XML
+   with HTR lines; each image is an opening with two folios); htr_replaced_gt/ (the
+   same files with aligned GT written into each line's <Unicode>, blank where
+   nothing aligned); alignment_report.csv with columns
+   filename,nb_htr_lines,nb_gt_aligned,pct_gt_aligned,nb_low_conf,pct_low_conf,
+   nb_ratio_too_low,pct_ratio_too_low,nb_ratio_too_high,pct_ratio_too_high,
+   nb_no_alignment,pct_no_alignment,nb_window_passages,nb_fallback_lines.
+   Their totals on the sample, read from that committed CSV: 257 HTR lines, 230
+   aligned (89.5 %). Settings: the README's defaults are conf_threshold 0.0,
+   min_token_ratio 0.4, max_token_ratio 2.5 and min_sim 0.5, and its usage
+   example runs --conf_threshold 0.7; the dataset card states the noisy split was
+   filtered at Levenshtein ≥ 0.7. Treat 0.7 as the comparable per-line threshold
+   and say where each number comes from; do not state any other setting without
+   a source. Record the commit SHA you fetched.
+2. Their dataset, Hugging Face DenisaBumba/htr_leibniz_dataset_v1 (CC BY 4.0 as
+   obtained; the former name DenisaB/… redirects to it; Zenodo twin
+   10.5281/zenodo.21622297, whose data.zip is 4.2 GB, do not fetch it).
+   train/noisy/ = 735 PAGE XML + JPG pages whose lines carry edition text aligned
+   from A VI,4 by the code above (blank <Unicode> where unaligned; 43,372 aligned
+   lines); train/clean/ = 248 hand-corrected pages; val/ = 27 pages (used by this
+   project's B1 reproduction). The Hub lists 1,966 files under train/ and 54
+   under val/, consistent with those counts. Names are shelfmark + folio:
+   LH_1_12_2_0124r.xml = LH I 12, 2 Bl. 124r; LH_1_20_0063r-0062v.xml = an
+   opening showing 63r and 62v. List files via
+   https://huggingface.co/api/datasets/DenisaBumba/htr_leibniz_dataset_v1 (the
+   siblings array); fetch with
+   https://huggingface.co/datasets/DenisaBumba/htr_leibniz_dataset_v1/resolve/main/<path>.
+   Only XML files are needed. Update HF_DATASET in src/leibniz/htr/artifacts.py
+   and its attribution line to the new name. The model this project runs trained
+   on the noisy and clean pages, so those 1,010 pages must be excluded from any
+   future evaluation set (Phase C3).
+3. Their layout pipeline:
+   https://gitlab.com/eman8/scripts/htr-ocr/scripts-pour-le-pretraitement-des-corpus-pour-escriptorium
+   (branch main; models in Git LFS: `git lfs install`, clone, `git lfs pull`).
+   The README gives two installation paths; the Linux one is a single Python 3.12
+   environment (supervision requires 3.12) with `pip install -r requirements.txt`
+   (rfdetr, supervision, kraken 7), marked "should work, not tested"; a uv venv
+   is an acceptable substitute for their conda command. Run:
+   `python main_pipeline.py --input <images> --output <results> --config
+   config_local.json` (no API key; the local config names their last best model
+   and a detection confidence of 0.4). Steps: RF-DETR zone prediction (MainZone,
+   MarginTextZone, DigitizationArtefactZone, GraphicZone-figure, NumberingZone;
+   formula classes GraphicZone-formula{,-inline,-strikethrough,-complex} masked if
+   emitted), COCO → PAGE XML regions (03_regions_xml), masks over figure and
+   formula zones, binarisation, masked image, Kraken baselines inside text zones
+   (06_baselines_and_htr), merge, polygon simplification, overlap fixes, line
+   splitting; final PAGE XML in 10_fixed_lines. Bundles
+   models/segmentation/baselines/best_0.4750.safetensors, apparently the same
+   checkpoint as this project's v1 segmenter (blla_ft_leibniz_v1_0.4750): verify
+   by checksum, and if so the only difference from v1 lines is masking plus
+   region merge. Denisa expects to publish a new RF-DETR model, fine-tuned on
+   corrected formula polygons and compared with D-FINE, by mid to late October
+   2026; Task 3 is gated on it unless the operator said otherwise in Task 0.
+
+## Task 1 — This project's aligner on their sample (needs no local data)
+- Add src/leibniz/align/pagexml.py: PAGE XML TextLines in reading order (region
+  order, then line order) with id, Coords polygon, Baseline, and <Unicode> text
+  (may be empty). Offline test on a trimmed fixture.
+- Fetch the sample files (cache-first, polite UA) into data/philiumm/sample/.
+- Run align_piece (src/leibniz/align/align.py; inputs HtrLine(ref, text)) with the
+  full GT text against each HTR file separately with free_edition_ends=True,
+  mirroring their per-file run; also try the two page concatenation orders and
+  report the best. Use the default threshold and also a threshold you argue is
+  comparable to their 0.7 rule.
+- Produce their CSV columns from this project's result (nb_gt_aligned = minted,
+  nb_no_alignment = declined, filter columns N/A) and a line-by-line comparison
+  against their htr_replaced_gt output with this project's normalizer
+  (src/leibniz/align/normalize.py) and folded similarity (src/leibniz/align/dp.py,
+  as audit.py uses it): both aligned and same text (≥ 0.9), both aligned but
+  different, this project only, theirs only, neither. Print the differing pairs.
+- CLI `leibniz align philiumm-sample`; report reports/philiumm/alignment-sample.md.
+  Commit. CHECKPOINT A: update the STATUS.md entry and commit.
+
+## Task 2 — Cross-compare A VI,4 (run here)
+Build, with offline tests on fixtures, one CLI with subcommands, then run them
+in order on the store:
+- `leibniz align philiumm-vi4 fetch`: the 735 train/noisy XML files into
+  data/philiumm/noisy/, cache-first, resumable, at most one request per second
+  (about fifteen minutes).
+- `leibniz align philiumm-vi4 match`: file name → shelfmark + folio(s); works via
+  works.shelfmarks and src/leibniz/catalog/shelfmarks.py (Roman numerals likely;
+  write the parser to inspect real shelfmark strings and report unparsed names);
+  canvases via pages.label with src/leibniz/align/resolve.py; openings may map to
+  one canvas or two, handle both, report ambiguities. Lines by geometry: scale
+  their Coords from imageWidth/imageHeight to pages.width/height, greedy
+  one-to-one by polygon IoU (report threshold and sensitivity). The lines table
+  may hold several runs per page: use the run that produced the recognised text.
+  gt_lines.line_image_ref carries the canonical line id "{page_id}:{line_seq:03d}"
+  for factory-minted rows (align/pairs.py; audit.split_ref parses it); the test
+  store's seeded gt_lines rows use an older "#xywh" form, so assert the real
+  form on the store before relying on it.
+- `leibniz align philiumm-vi4 compare`: their aligned text vs gt_lines.text for the
+  matched line, lines.text as third witness; normalizer + folded similarity;
+  buckets agree (≥ 0.9), near (0.7–0.9), disagree (< 0.7), this project only,
+  theirs only, neither; per stratum and per page. State what agreement does not
+  prove (two aligners fed the same edition text can share a mistake).
+  Writes: reports/philiumm/vi4-crosscheck.md; reports/philiumm/vi4-summary.json;
+  reports/philiumm/heldout_pages.csv (this project's page_ids for all 1,010 of
+  their pages, for C3); reports/philiumm/vi4-disagreements-sample.csv (at most
+  500 rows); full disagreement and double-witnessed CSVs under data/philiumm/.
+- `leibniz align philiumm-vi4 sheet`: a second audit sheet of disagreements,
+  data/philiumm/philiumm-disagreements.html, through the crop machinery in
+  src/leibniz/align/audit.py. That machinery must accept an explicit list of
+  line refs; if K1 has already landed that refactor on main, reuse it, else do
+  it here without changing the existing sheet's behaviour or tests. The sheet
+  downloads verdicts in the same CSV shape as the C2 sheet (ref, stratum,
+  verdict, note), so the PHILIUMM team could judge it the way they judged the
+  first. Never touch reports/gt-audit/gt-audit-lines.csv or
+  gt-audit-verdicts*.csv.
+Every subcommand ends with a compact printed summary. Run fetch, match, compare
+and sheet here (crops from /mnt/d/leibniz-images), read the results, commit
+reports/philiumm. CHECKPOINT B: update the STATUS.md entry and commit.
+GATE for Task 3: per the operator's Task 0 answers. If the new model is out, or
+the operator asked for the census on the current model, continue. Otherwise
+state in STATUS.md that Task 3 waits for the model, commit, and go to the
+hand-over; a later session resumes at Task 3 with this prompt.
+
+## Task 3 — Layout-zone census (run here, with a go)
+Build, with fixtures:
+- `leibniz layout sample --n 400 --seed 0`: equal numbers per stratum
+  (page_stats.stratum_heuristic; fall back to set/work if NULL, which it is
+  under C1) plus 100 pages from LH 35 (find via works.shelfmarks) and 100 pages
+  from the Marginalien set as a separate block (printed body with marginal
+  notes, the case David raised), reproducible; symlink or copy cached JPEGs
+  from /mnt/d/leibniz-images into data/philiumm/layout-sample/images/ named by
+  page_id; write the sample list to reports/layout/sample.csv.
+- tools/philiumm-layout-env.sh: creates a separate Python 3.12 environment under
+  data/philiumm/rfdetr-env/ (uv venv or python -m venv), clones their pipeline
+  with LFS into data/philiumm/rfdetr-pipeline/ (record the commit SHA and the
+  checksums of the model files), installs requirements, and prints a diagnosis
+  on failure. tools/philiumm-layout-run.sh: runs main_pipeline.py on the sample
+  with config_local.json under nohup, logging to logs/. Never modify their
+  repo; keep any local patch as a .patch file under data/philiumm/.
+- src/leibniz/layout/zones.py (pure, tested): parse 03_regions_xml zones by class
+  with polygons and 10_fixed_lines lines; geometry via
+  src/leibniz/pipeline/geometry.py or plain Python, no new heavy dependency.
+- `leibniz layout zone-census`: per page and per stratum, the LH 35 and the
+  Marginalien blocks separate: zones per class; share of pages with any figure,
+  formula, margin zone; v1 lines whose polygon lies mostly inside a figure or
+  formula zone, count and share; on the Marginalien block, v1 lines inside
+  MainZone (the printed body) vs MarginTextZone (the notes); v1 line count vs
+  their final line count; matched-line comparison by IoU. Writes
+  reports/layout/zone-census.md, reports/layout/zone-census-summary.json,
+  reports/layout/zone-census-per-page.csv (the sample is small enough to commit).
+Ask for a go, run the environment script, the sample, the pipeline (hours, GPU
+optional) and the census here; if the environment cannot be made to work on
+this machine, say so in STATUS.md and stop the task honestly. Commit
+reports/layout. CHECKPOINT C: update the STATUS.md entry and commit.
+
+## Finish and hand-over
+Complete STATUS.md's "P1 — PHILIUMM cross-checks" entry: what was built, key
+numbers, what is unmeasured and why, open questions (opening vs folio canvas
+mapping; class coverage of the bundled checkpoint; flagging v1 lines inside
+non-text zones in the viewer now; a v2 zones table with SegmOnto type, polygon
+and a LaTeX field; the printed-body share of Marginalien lines), next steps
+(rerun Task 3 with each later PHILIUMM model; use heldout_pages.csv in C3;
+the licence change PHILIUMM is considering, with the fact that this project's
+copies were obtained under CC BY 4.0, for the lawyer memo). Append this prompt
+verbatim to PROMPTS.md under "Follow-up phases (2026-10)". ruff + pytest clean,
+all tests offline. Commit in sensible pieces and `git push -u origin
+philiumm-crosschecks`. Then hand over: print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...philiumm-crosschecks?expand=1,
+a plain-language summary of the cross-checks for the operator to bring to the
+call (what agrees, what differs, what it does not prove), and the reminder
+that the PR is merged only after the PHILIUMM team has seen the numbers. Do
+not merge.
+~~~~
+
+
+### Phase S1 — A staging site on the VPS (built 2026-10-08; the install is the operator's)
+
+_Run in a cloud session under the 8 October plan's session preamble: one branch
+(`claude/dazzling-hopper-uxji2x`, not `deploy-staging`), no merge, no §9
+production update, the kit installed on the box from a clone of the branch and
+`staging.sh` run from that clone or from the staging checkout. The preamble's
+text is below the prompt, once; the departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase S1 — A staging site on the VPS: see a branch on the real server, behind a
+password, before anyone else does. One local session on the operator's desktop
+(WSL2 Ubuntu) for the code and the runbook; the installation on the box over
+SSH, each step shown and run only on the operator's yes.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md, STATUS.md, and deploy/README.md in full (§1, §3 to §5, §8, §9 and §13
+above all), deploy/Caddyfile, deploy/leibniz-legible.service, deploy/env.example
+and deploy/install.sh. If this prompt conflicts with the repo, the repo +
+STATUS.md win; record the divergence in STATUS.md. Write the "S1 — staging site"
+entry in STATUS.md at the end.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. Nothing here touches data/ or the master store; use
+`.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3). The operator merges; you
+push and hand over. The VPS: nothing runs there without the operator's explicit
+yes for the exact command shown, and every command you run there is one of this
+phase's own scripts, the §9 block, or a one-line read-only check. Never edit a
+file on the box by hand: a fix goes into the kit, on a branch. Branch:
+`deploy-staging`, created from main.
+
+## What exists on the box (from the runbook; verify the few facts Task 0 names)
+A 2 vCPU / 4 GB Hetzner VPS. The app: system user `leibniz`, checkout
+/opt/leibniz-legible with its own .venv made by uv with
+UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache and
+UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python; unit
+leibniz-legible.service (hardened sandbox; WorkingDirectory the checkout;
+EnvironmentFile /etc/leibniz-legible/env; ExecStart .venv/bin/leibniz serve;
+ReadWritePaths /var/lib/leibniz-legible), listening on 127.0.0.1:8000 with two
+workers. The serving store /var/lib/leibniz-legible/inventory.sqlite is a
+rollback-journal copy the app opens read-only. Meilisearch on 127.0.0.1:7700,
+master key in /etc/meilisearch/env (root:meilisearch, 0640), a restricted
+search key in the app's env (deploy/meili-search-key.sh made it; read that
+script to learn which indexes the key is scoped to). The index uid is
+leibniz_pages with leibniz_pages_meta beside it (search/meili.py
+DEFAULT_INDEX_UID; MeiliBackend takes index_uid, but nothing sets it from the
+environment yet). Caddy: /etc/caddy/Caddyfile from deploy/Caddyfile with
+LEIBNIZ_DOMAIN from /etc/leibniz-legible/caddy.env, and
+`import /etc/caddy/conf.d/*.caddy` at its end, present on the live box since
+Calculemus (§13 item 2 says how it was added by hand); each sibling block names
+its domain literally, never as a {$VAR} fallback. DNS is on Cloudflare; a host
+Caddy must get a certificate for is DNS-only (grey cloud) before its block goes
+live (§1, §13). Calculemus runs on 127.0.0.1:3000 under its own user. Memory
+is the constraint (§13 item 4): Meilisearch relies on the page cache for its
+p95.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+Clean tree on main (the operator's own untracked files aside); `git pull
+--ff-only origin main`; baseline ruff + pytest. Ask the operator and wait: the
+SSH target; whether the DNS record `staging` (A, and AAAA if the box has IPv6)
+is in place as DNS-only; the user name they want for the password prompt (the
+password itself is typed on the box, never in chat). Then, with a yes, one
+read-only check on the box:
+    ssh <target> 'free -m; df -h /var/lib/leibniz-legible /var/lib/meilisearch /opt; systemctl is-active leibniz-legible meilisearch caddy; caddy version; tail -2 /etc/caddy/Caddyfile; ls /etc/caddy/conf.d'
+Record memory and disk, the Caddy version (the directive is basic_auth from
+Caddy 2.8, basicauth before) and that the import line is there. Print a plan
+and wait for "go".
+
+## Task 1 — One small code change: the index name from the environment
+web/settings.py: LEIBNIZ_MEILI_INDEX (default leibniz_pages) passed to
+MeiliBackend as index_uid; `leibniz serve --meili-index`; `leibniz index
+build|status|query --meili-index` likewise; deploy/env.example documents it.
+Tests in tests/test_web_settings.py and the search CLI tests. Nothing changes
+for production: the default is the current name.
+
+## Task 2 — The staging kit (deploy/, documented in a new runbook §14)
+- deploy/leibniz-legible-staging.service: the production unit with
+  WorkingDirectory=/opt/leibniz-legible-staging,
+  EnvironmentFile=/etc/leibniz-legible/staging.env,
+  ExecStart=/opt/leibniz-legible-staging/.venv/bin/leibniz serve, the same
+  sandbox lines, the same ReadWritePaths.
+- deploy/staging.env.example: the production env with LEIBNIZ_PORT=8001,
+  LEIBNIZ_WORKERS=1, LEIBNIZ_BASE_URL=https://staging.leibnizlegible.com, the
+  same LEIBNIZ_DB_PATH (both processes open the copy read-only), the same
+  MEILI_URL and search key, LEIBNIZ_MEILI_INDEX=leibniz_pages (production's
+  index, read only) with a comment on when to point it at a staging index,
+  LEIBNIZ_RATE_LIMIT=0 (one reader behind a password), the same image base URL.
+- deploy/staging.caddy.example: a site block for staging.leibnizlegible.com,
+  named literally: basic_auth (or basicauth, per Task 0) with one user and a
+  bcrypt hash placeholder; encode zstd gzip; the production headers plus
+  X-Robots-Tag "noindex, nofollow"; reverse_proxy 127.0.0.1:8001; its own JSON
+  access log under /var/log/caddy with roll_keep_for 168h. Installed as
+  /etc/caddy/conf.d/staging.caddy. Basic auth already turns every crawler away
+  with 401; the header is belt and braces.
+- deploy/staging-install.sh, run once as root on the box: creates
+  /opt/leibniz-legible-staging as a clone of the public repository owned by
+  leibniz (https, no credentials); `uv sync --frozen --no-dev --extra web` into
+  its own .venv with the shared cache and interpreter directories; installs the
+  unit; installs staging.env from the example if absent, else leaves it;
+  asks for the password on the terminal and writes the Caddy block with the
+  hash from `caddy hash-password` (the plaintext never leaves the terminal);
+  `caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile`, then
+  `systemctl reload caddy` (reload, never restart; the apex stays up; a failed
+  validate changes nothing); `systemctl enable --now leibniz-legible-staging`;
+  `curl -s http://127.0.0.1:8001/healthz`. Idempotent: a re-run updates in
+  place and keeps the existing password unless asked.
+- deploy/staging.sh <branch>, as root, any time: as leibniz,
+  `git -C /opt/leibniz-legible-staging fetch origin && git checkout -B
+  staging origin/<branch>`; uv sync as above; restart the staging unit;
+  healthz; print https://staging.leibnizlegible.com. Options: `--main` puts
+  staging back on main; `--index` builds a staging Meilisearch index named
+  leibniz_pages_staging with the master key from /etc/meilisearch/env and
+  points staging.env at it, for a branch that changes what the index holds
+  (M1): an hour or more, double the index's disk, and the staging unit
+  stopped meanwhile; the script says so and asks before building. If the
+  search key is scoped to named indexes, the script widens it or makes a
+  second one with the master key; read deploy/meili-search-key.sh first.
+- deploy/README.md §14 "Staging site": what it is for; the one-time setup
+  (the DNS record, staging-install.sh); daily use (push a branch,
+  staging.sh <branch>, look, merge, §9, staging.sh --main); what is shared
+  (the store copy, Meilisearch, the uv caches) and what is not (the base URL
+  embedded in staging's manifests, which are never to be shared); the data
+  caveat (a branch that needs a new serving copy, as M1 does, needs that copy
+  uploaded to a second path and LEIBNIZ_DB_PATH in staging.env pointed at it:
+  §2 and a 15 GB transfer); memory (one worker, about 150 MB RSS; stop the
+  staging unit during an index build); the password (one user; change it by
+  re-running the install script); teardown (disable the unit, remove the block,
+  reload Caddy, remove the checkout).
+Tests: a test reads the staging unit, env and Caddy examples beside their
+production counterparts and asserts the intended differences and nothing else;
+shell scripts pass `bash -n`, and shellcheck if it is installed.
+
+## Task 3 — Record, push, hand over
+STATUS.md "S1 — staging site" entry; append this prompt verbatim to PROMPTS.md
+under "Follow-up phases (2026-10)". ruff + pytest. `git push -u origin
+deploy-staging`; print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...deploy-staging?expand=1;
+wait for "merged".
+
+## Task 4 — Install on the box, each step with a yes
+1. The production §9 update (the exact command as in W4; code only), so the
+   box holds the kit and the settings change; healthz on 8000.
+2. The install: `ssh -t <target> sudo /opt/leibniz-legible/deploy/staging-install.sh`,
+   run by the operator in their own terminal because of the password prompt
+   (print the line for them), or by you with `ssh -t` if they prefer to type
+   the password into your terminal. Then your checks, read-only:
+   `systemctl is-active leibniz-legible-staging`; healthz on 8001;
+   `curl -sI https://staging.leibnizlegible.com/` answers 401 without
+   credentials; the operator confirms the page opens with the password in
+   their browser.
+3. A first use: `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh main`;
+   then /browse on staging matches production, and `/api/stats` on both report
+   the same build.
+If anything fails, say exactly what, fix it in the kit on a new branch, and
+never patch anything on the box by hand.
+~~~~
+
+The session preamble of the 8 October plan, pasted before this prompt (and
+before every later one of that plan):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull`,
+   commit there, `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (once the staging kit of step S1 exists on the box); run the live checks
+   against https://staging.leibnizlegible.com with the operator's password,
+   or against a local server on a spare port. The live site changes only at
+   the operator's final merge. Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "C2b"
+   and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environment is .venv-w3 on the desktop; in the cloud
+   make your own (.venv-cloud, with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far.
+~~~~
+
+
+### Phase W4 — Text access (run 2026-10-08)
+
+_Run in a cloud session under the 8 October plan's session preamble, in its
+evening revision (below the prompt): one branch (`claude/dazzling-hopper-uxji2x`,
+not `web-text-access`), no wait for "merged", Task 5 replaced by the staging
+site; the browser checks ran against the fixture store, the staging checks are
+handed to the operator. The departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase W4 — Text access: a copyable text panel on the page view, the text of a
+catalogue piece across its folios, and downloads where readers look. One local
+session on the operator's desktop (WSL2 Ubuntu); pre-flight, build, verify on
+the real store, hand over, deploy, verify live.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. This phase is W4: W1 (overlay toggle,
+text export), W2 (search operators) and W3 (the browse index, then the
+versioned-modules fix) exist in STATUS.md. Do not reuse their labels.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. data/inventory.sqlite is the MASTER store (16 GB):
+open it read-only only (`uv run leibniz …` opens it mode=ro); never write,
+VACUUM or move it; never delete anything under data/. `.venv` is the pipeline
+environment (never run `uv sync` against it); use `.venv-w3` (export
+UV_PROJECT_ENVIRONMENT=.venv-w3 for every `uv` command). Long-running checks
+run against a local server on a spare port. The operator merges; you push and
+hand over; you never merge. The VPS: nothing runs there without the operator's
+explicit yes for the exact command shown, and nothing but the §9 "Update the
+app" block from deploy/README.md. Email: you draft; the operator sends.
+Branch: `web-text-access`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files; HEAD is main; `git pull --ff-only origin main`; confirm the remote.
+2. `node --version` (Playwright; if absent, the browser checks are the
+   operator's, by the checklist you print). Baseline: `uv run ruff check .`,
+   `uv run ruff format --check .`, `uv run pytest -q`; record the counts.
+3. Look at the live page before changing anything: in headless Chromium (or
+   by asking the operator to try in their browser) open
+   https://leibnizlegible.com/page/00068221:0043, select text in the line panel
+   and read the selection; read static/style.css for user-select rules and
+   views/page.js for click handlers that cancel selection. Record what a reader
+   can and cannot select today.
+4. Print a short plan and wait for "go".
+
+## Context
+David Rabouin (PHILIUMM, 2026-10-07): "I think it would be very useful for your
+reader to have access to a text version of the all page in which an expression
+occurs. As it stands, one cannot copy the transcription and one can imagine
+that a student or a colleague would like to quote the whole passage in which
+an expression occurs." W1 (2026-10-02) added GET /api/pages/{id}/text and
+/api/works/{id}/text, plain text with a `# ` provenance header (and ?format=tsv),
+linked as "Download text" on the page and work views. A whole passage, however,
+is a catalogue piece (a letter, a draft) that spans folios, and nothing serves
+that; and a reader who wants to quote selects text on the page rather than
+downloading a file.
+The web layer is src/leibniz/web/: api.py (create_app; _page_text and
+_work_text render the plain-text format; _ssr_page carries the machine text for
+crawlers; _katalog_for_work returns a work's catalogue records with sender,
+addressee, date, aa_labels and shelfmarks), static/views/page.js and work.js,
+static/i18n.js (EN and DE), static/api.js. Since W3's fix the shell loads the
+viewer's modules from /static/m/<build>/, hashed as a set, so a changed module
+reaches returning readers at once; nothing to do for that. The piece→canvas
+resolver is src/leibniz/align/resolve.py: resolve_piece(conn, work_id,
+signature) places a catalogue record's shelfmark with a Bl. range onto canvases
+(pages.label holds folio labels); C2 localized 11,595 pieces with it. The
+fixture store (tests/conftest.py) has record k-109 on work 00068642 with
+shelfmark "LH IV, 6, 18 Bl. 1-2", which resolves to two of its three pages.
+
+## Task 1 — The text panel on the page view
+Under the line panel (or as a tab beside it), a "Text" section showing the
+page's recognised lines as one block of selectable text in reading order, one
+line per line, with a Copy button (navigator.clipboard.writeText inside the
+click handler; on rejection select the block and say so) and the existing
+per-page download beside it, named plainly ("Download this page as text" /
+"Diese Seite als Text herunterladen"). Status and confidence stay with the
+line panel; the block carries one line of provenance above it (model, run date,
+the wording rule from attribution.py). If Task 0 found that selection in the
+line panel is blocked, unblock it as well. EN and DE; keyboard reachable; the
+server-rendered page keeps carrying the text for crawlers.
+
+## Task 2 — The text of a catalogue piece
+GET /api/records/{record_id}/text: for a catalogue record linked to a work
+whose shelfmark the resolver can place, the lines of those canvases in order,
+in the W1 plain-text format with a header naming the record (title, date,
+sender and addressee, AA reference where known), the work, the folio range and
+the canvases; ?format=tsv as for W1; 404 for an unknown record; for a record
+that cannot be placed, a 404 whose detail says so (document it in the OpenAPI
+summary). On the work page, every catalogue record that can be placed gets a
+link "Text of this piece (Bl. 1–2)" / "Text dieses Stücks (Bl. 1–2)"; the API's
+records carry `text_url` only where it resolves. robots.txt: Allow
+/api/records/. llms.txt and the README document it. Tests on the fixture store:
+k-109 resolves and streams two pages; a record without a folio range answers
+404 with the reason; TSV; robots.
+
+## Task 3 — Downloads where readers look
+On the page view and the work view, the download links move from the link list
+into the text panel's toolbar (the work view keeps "Download the text of this
+work"). The About page's section on the text says that text is available per
+page, per work and per catalogue piece.
+
+## Task 4 — Verify against the real store, record, hand over
+Tests; ruff. `uv run leibniz serve --backend none --port 8765` on the master
+store (read-only; search answers 503 by design). Over HTTP: a page with text;
+a record text for a work with placed records (find one through /api/works);
+a record that cannot be placed; TSV; robots; llms. In a browser (Playwright
+from npm in scratchpad/pw if Node is present, plain chromium.launch(); else
+the operator by your checklist at http://127.0.0.1:8765): select and copy on
+the panel, the piece link from a work page, EN and DE, phone width (390 px,
+no horizontal scroll), no console errors, axe-core zero violations. Stop the
+server. STATUS.md: a "W4" entry (Current state, Phase log, Key numbers, Next)
+including what Task 0 found about selection. Append this prompt verbatim to
+PROMPTS.md under "Follow-up phases (2026-10)". Commit in sensible pieces,
+`git push -u origin web-text-access`, print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...web-text-access?expand=1,
+and ask the operator to say "merged". Wait.
+
+## Task 5 — Deploy, only after "merged", only with a yes
+Ask for the SSH target and whether to run the deploy from this session. Show
+the exact command first and run it only on an explicit yes; it is the §9 block
+and nothing else (the remote shell is bash; if the login user is not root,
+prefix systemctl with sudo):
+
+    ssh <target> "sudo -u leibniz -H git -C /opt/leibniz-legible pull --ff-only && sudo -u leibniz -H env UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python uv sync --project /opt/leibniz-legible --frozen --no-dev --extra web && systemctl restart leibniz-legible && sleep 2 && curl -s http://127.0.0.1:8000/healthz"
+
+Code only: no index rebuild, no Meilisearch restart. Then verify live over
+HTTP: a page view's server-rendered text, a record text URL, robots.txt with
+the new Allow line, llms.txt. Ask the operator to open a page view in the
+browser they used before the deploy, without a hard reload, and confirm the
+panel and the Copy button work (the versioned-modules fix is what makes this
+safe; say so if anything looks stale). If anything fails live, say exactly
+what, propose the fix as a new branch, and do not patch anything on the
+server.
+
+## Task 6 — Three sentences for the operator's reply to David
+In scratchpad/david-text-access.md and in chat: the page text panel with Copy,
+the text of a catalogue piece across its folios from the work page, and that
+per-page and per-work downloads have existed since 2 October. No numbers you
+did not measure. Do not send anything.
+~~~~
+
+The session preamble of the 8 October plan, in the revision given to this
+session (the S1 entry above carries the earlier wording):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull`,
+   commit there, `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (the staging site of step S1 exists; until the final merge the script
+   runs from the staging checkout, afterwards from
+   /opt/leibniz-legible/deploy/staging.sh). The operator runs that line and
+   pastes the output. Then the checks against
+   https://staging.leibnizlegible.com: without credentials it answers 401 to
+   everything, which is the one check you can run yourself; the rest you
+   hand the operator as `curl -su USER …` lines to run and paste back. The
+   password never reaches you; the SSH target and the user name are on the
+   operator's plan page, not in the repo, so never write them into STATUS.md
+   or PROMPTS.md. Checks that need no box can run against a local server on
+   a spare port. The live site changes only at the operator's final merge.
+   Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "S1",
+   "C2b" and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environment is .venv-w3 on the desktop; in the cloud
+   make your own (.venv-cloud, with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far.
 ~~~~

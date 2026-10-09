@@ -485,6 +485,22 @@ def audit_sheet(
         )
 
 
+def _parse_weights(spec: str) -> dict[str, int]:
+    """``fair_copy=9913,light_revision=96175,…`` → ``{stratum: count}``."""
+    out: dict[str, int] = {}
+    for part in spec.split(","):
+        if not part.strip():
+            continue
+        try:
+            k, v = part.split("=", 1)
+            out[k.strip()] = int(v.strip().replace("_", "").replace(" ", ""))
+        except ValueError:
+            raise typer.BadParameter(f"--weights wants stratum=count pairs, got {part!r}") from None
+    if not out:
+        raise typer.BadParameter("--weights is empty")
+    return out
+
+
 @app.command(name="audit-score")
 def audit_score(
     verdicts: Path = typer.Argument(..., help="The downloaded gt-audit-verdicts.csv."),
@@ -498,27 +514,132 @@ def audit_score(
         help="The sheet's gt-audit-lines.csv (default: next to the verdicts) — "
         "cross-checks every verdict against the HTR reading of the strip.",
     ),
+    weights: str = typer.Option(
+        None,
+        "--weights",
+        help="Stratum line counts as stratum=count pairs, for a machine without the store "
+        "(e.g. the C2 mint's counts from reports/gt-factory.md); the store is then not opened.",
+    ),
+    weights_source: str = typer.Option(
+        None, "--weights-source", help="Where the --weights counts come from (named in the report)."
+    ),
+    compare: Path = typer.Option(
+        None,
+        "--compare",
+        help="A second verdict CSV on the same sheet (another auditor): the report gains "
+        "an agreement section on the lines both judged.",
+    ),
+    compare_labels: str = typer.Option(
+        "these verdicts,the other auditor", "--compare-labels", help="Two labels, comma-separated."
+    ),
+    patterns: bool = typer.Option(
+        True,
+        "--patterns/--no-patterns",
+        help="Name a failure pattern per judged line (needs --lines).",
+    ),
+    overrides: Path = typer.Option(
+        None,
+        "--overrides",
+        help="Override CSV (ref, pattern, why) for lines the rules cannot decide "
+        "(default: gt-audit-pattern-overrides.csv next to the verdicts; written with the "
+        "undecided refs when absent).",
+    ),
+    patterns_out: Path = typer.Option(
+        None, "--patterns-out", help="Per-line pattern CSV (default: <verdicts stem>-patterns.csv)."
+    ),
+    corrections_out: Path = typer.Option(
+        None,
+        "--corrections-out",
+        help="Corrections CSV (default: <verdicts stem>-corrections.csv).",
+    ),
 ) -> None:
     """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
-    from leibniz.align.audit import read_verdicts, render_score, score_verdicts, text_evidence
+    from leibniz.align import audit_patterns as P
+    from leibniz.align.audit import (
+        STRATA,
+        read_verdicts,
+        render_agreement,
+        render_score,
+        score_verdicts,
+        text_evidence,
+        verdict_agreement,
+    )
     from leibniz.db import open_db
 
     rows = read_verdicts(verdicts)
     if lines_csv is None and (verdicts.parent / "gt-audit-lines.csv").exists():
         lines_csv = verdicts.parent / "gt-audit-lines.csv"
     evidence = text_evidence(rows, lines_csv) if lines_csv is not None else []
-    with open_db(db_path) as conn:
-        weights = {
-            (r[0] or "unknown"): r[1]
-            for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
-        }
-    score = score_verdicts(rows, weights)
-    note = (
-        f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); "
-        f"stratum weights from `{db_path}`."
-    )
+    if weights is not None:
+        weight_counts = _parse_weights(weights)
+        src = weights_source or "the command line"
+        weight_note = (
+            "stratum weights from "
+            + src
+            + " ("
+            + ", ".join(f"{k} {v:,}" for k, v in weight_counts.items())
+            + ")"
+        )
+    else:
+        if not Path(db_path).exists():
+            raise typer.BadParameter(
+                f"store not found at {db_path}; pass --db, or --weights for a machine without it"
+            )
+        with open_db(db_path) as conn:
+            weight_counts = {
+                (r[0] or "unknown"): r[1]
+                for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+            }
+        weight_note = f"stratum weights from `{db_path}`"
+    score = score_verdicts(rows, weight_counts)
+    note = f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); {weight_note}."
+    sections: list[list[str]] = []
+    if compare is not None:
+        la, _, lb = compare_labels.partition(",")
+        agr = verdict_agreement(
+            rows, read_verdicts(compare), label_a=la.strip() or "A", label_b=lb.strip() or "B"
+        )
+        sections.append(render_agreement(agr))
+        _console.print(
+            f"[bold]agreement[/bold] with {compare.name}: {agr.n_same}/{agr.n} on the lines "
+            "both judged"
+        )
+    n_undecided = 0
+    if patterns and lines_csv is not None:
+        prow = P.classify_rows(rows, P.read_lines_csv(lines_csv))
+        ov_path = overrides or verdicts.parent / "gt-audit-pattern-overrides.csv"
+        n_over = P.apply_overrides(prow, P.read_overrides(ov_path))
+        n_undecided = P.write_override_template(prow, ov_path)
+        p_out = patterns_out or verdicts.with_name(verdicts.stem + "-patterns.csv")
+        c_out = corrections_out or verdicts.with_name(verdicts.stem + "-corrections.csv")
+        P.write_patterns_csv(prow, p_out)
+        table = P.corrections_table(prow)
+        P.write_corrections_csv(table, c_out)
+        sections.append(P.render_patterns(prow, strata=STRATA))
+        sections.append(P.render_corrections(table))
+        counts = P.pattern_counts(prow).get("all", {})
+        _console.print(
+            "[bold]patterns[/bold] "
+            + ", ".join(f"{k} {v}" for k, v in sorted(counts.items(), key=lambda kv: -kv[1]))
+            + f" → {p_out}; {len(table)} corrections → {c_out}; {n_over} overrides from "
+            + ov_path.name
+        )
+        for r in prow:
+            if r.undecided:
+                _console.print(
+                    f"[yellow]undecided[/yellow] {r.ref} ({r.stratum}, {r.verdict}): "
+                    f"{r.note or 'no note'!s:.90}"
+                )
+        if n_undecided:
+            _console.print(
+                f"[yellow]{n_undecided} lines the rules cannot decide — settle them in {ov_path} "
+                f"(ref, pattern, why) and re-run[/yellow]"
+            )
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_score(score, sheet_note=note, evidence=evidence), encoding="utf-8")
+    out.write_text(
+        render_score(score, sheet_note=note, evidence=evidence, extra_sections=sections),
+        encoding="utf-8",
+    )
     flagged = sum(1 for e in evidence if e.recheck)
     if flagged:
         _console.print(
@@ -534,6 +655,293 @@ def audit_score(
             f"[bold {colour}]weighted precision {100 * wp:.1f} % ({gate})[/bold {colour}] "
             f"· {score.pooled.n_judged} judged, {score.n_unjudged} blank → {out}"
         )
+
+
+@app.command(name="audit-reach")
+def audit_reach(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    out_dir: Path = typer.Option(
+        Path("reports/gt-audit"), "--out", help="Directory for reach.md + reach-summary.json."
+    ),
+    flags_out: Path = typer.Option(
+        Path("data/gt/flags.jsonl"),
+        "--flags-out",
+        help="Per-line flags for C3 (JSONL, gitignored).",
+    ),
+) -> None:
+    """Measure the audit's failure patterns across every open-bucket minted line (read-only)."""
+    import json
+
+    from leibniz.align import audit_reach as R
+    from leibniz.align.audit import STRATA
+
+    conn = R.open_readonly(db_path)
+    try:
+        c = R.census(conn)
+    finally:
+        conn.close()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    n_flags = R.write_flags(c, flags_out)
+    (out_dir / "reach.md").write_text(
+        R.render(c, strata=STRATA, flags_path=flags_out), encoding="utf-8"
+    )
+    summ = R.summary(c, strata=STRATA)
+    (out_dir / "reach-summary.json").write_text(
+        json.dumps(summ, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    a = summ["all"]
+    _console.print(
+        f"[bold]audit-reach[/bold] {c.n:,} lines on {c.n_pages:,} pages → {out_dir / 'reach.md'}; "
+        f"{n_flags:,} flag rows → {flags_out}"
+    )
+    if c.n_skipped:
+        _console.print(
+            f"[yellow]{c.n_skipped:,} rows with a non-canonical reference skipped[/yellow]"
+        )
+    _console.print(
+        "  "
+        + " · ".join(
+            f"{f} {a[f]:,} ({'—' if a[f + '_share'] is None else f'{100 * a[f + "_share"]:.1f} %'})"
+            for f in R.FLAGS
+        )
+    )
+
+
+@app.command(name="philiumm-sample")
+def philiumm_sample(
+    dest: Path = typer.Option(
+        Path("data/philiumm/sample"), "--dest", help="Where their worked example is cached."
+    ),
+    out: Path = typer.Option(
+        Path("reports/philiumm/alignment-sample.md"), "--out", help="Markdown report path."
+    ),
+    threshold: float = typer.Option(
+        None, "--threshold", help="align_conf to mint (default: the aligner's)."
+    ),
+    offline: bool = typer.Option(
+        False, "--offline", help="Use what is under --dest; fetch nothing."
+    ),
+    max_pairs: int = typer.Option(40, "--max-pairs", help="Differing lines listed per block."),
+) -> None:
+    """P1 Task 1: this project's aligner on PHILIUMM's worked example, against theirs."""
+    from leibniz.align import philiumm as _ph  # noqa: F401  (package)
+    from leibniz.align.align import DEFAULT_THRESHOLD
+    from leibniz.align.philiumm import sample as S
+    from leibniz.align.philiumm.fetch import fetch_sample
+
+    thr = DEFAULT_THRESHOLD if threshold is None else threshold
+    if not offline:
+        fetch_sample(dest, progress=lambda m: _console.print(f"[dim]{m}[/dim]"))
+    sample = S.load_sample(dest)
+    confs = S.run_configurations(sample, threshold=thr)
+    comps = [S.compare(c, sample) for c in confs]
+    csv_path = dest / "comparison.csv"
+    best = max(comps, key=lambda k: k.total("both_same") + k.total("ours_only"))
+    S.write_comparison_csv(best, csv_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        S.render(sample, confs, comps, threshold=thr, max_pairs=max_pairs, comparison_csv=csv_path),
+        encoding="utf-8",
+    )
+    S.write_summary(S.summary(sample, confs, comps, threshold=thr), out.with_suffix(".json"))
+    tt = S.their_totals(sample)
+    if tt:
+        _console.print(
+            f"[bold]theirs[/bold] {tt['nb_htr_lines']} lines, {tt['nb_gt_aligned']} aligned "
+            f"({tt['pct_gt_aligned']} %) — alignment_report.csv at {sample.commit or '?'}"
+        )
+    for c, k in zip(confs, comps, strict=True):
+        _console.print(
+            f"[bold]{c.label}[/bold] {c.n_minted}/{c.n_lines} minted "
+            f"({100 * c.n_minted / max(1, c.n_lines):.1f} %), raw ≥ 0.7: "
+            f"{c.n_minted_above(S.THEIR_FILTER_SIM)} · vs theirs: "
+            + ", ".join(f"{b} {k.total(b)}" for b in S.BUCKETS)
+        )
+    _console.print(f"→ {out}, {out.with_suffix('.json')}, {csv_path} (the {best.label} pairs)")
+    diff = [p for p in best.pairs if p.bucket in ("both_different", "ours_only", "theirs_only")]
+    for p in diff[:max_pairs]:
+        _console.print(
+            f"  [{p.bucket}] {p.file.replace('.xml', '')}#{p.index} HTR: {p.htr_text[:60]!r}\n"
+            f"      ours:   {p.ours[:70]!r}\n      theirs: {p.theirs[:70]!r}"
+        )
+
+
+vi4_app = typer.Typer(help="P1 Task 2: A VI,4 under PHILIUMM's aligner and this project's.")
+app.add_typer(vi4_app, name="philiumm-vi4")
+VI4_DEST = Path("data/philiumm")
+VI4_REPORTS = Path("reports/philiumm")
+
+
+@vi4_app.command(name="fetch")
+def vi4_fetch(
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    limit: int = typer.Option(None, "--limit", help="Fetch at most this many files (a trial)."),
+) -> None:
+    """Their noisy split's PAGE XML files and the Hub listing, cache-first, 1 request/s."""
+    from leibniz.align.philiumm import vi4 as V
+
+    listing = V.fetch_listing(dest)
+    n_noisy = len(V.split_files(listing, "noisy"))
+    _console.print(
+        f"[bold]listing[/bold] {listing['dataset']} @ {(listing.get('sha') or '?')[:12]}: "
+        f"{len(listing['files'])} files, {n_noisy} noisy XML"
+    )
+
+    def progress(k: int, n: int, rel: str) -> None:
+        if k == 1 or k % 25 == 0 or k == n:
+            _console.print(f"[dim]{k}/{n} {rel}[/dim]")
+
+    fetched, present = V.fetch_noisy(dest, listing=listing, progress=progress, limit=limit)
+    _console.print(
+        f"[bold]fetch[/bold] {fetched} fetched, {present}/{n_noisy} present under {dest / 'noisy'}"
+    )
+
+
+@vi4_app.command(name="match")
+def vi4_match(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    reports: Path = typer.Option(VI4_REPORTS, "--reports", help="Report directory."),
+    threshold: float = typer.Option(None, "--iou", help="Bounding-box IoU to pair lines."),
+) -> None:
+    """File names → works and pages; their lines → this project's lines by geometry."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    thr = V.IOU_DEFAULT if threshold is None else threshold
+    conn = open_readonly(db_path)
+    try:
+        matches = V.run_match(
+            conn,
+            dest,
+            threshold=thr,
+            progress=lambda k, n, rel: (
+                (k % 100 == 0 or k == n) and _console.print(f"[dim]{k}/{n}[/dim]")
+            ),
+        )
+    finally:
+        conn.close()
+    V.write_match(matches, dest / V.MATCH_NAME)
+    n_held = V.write_heldout(matches, reports / "heldout_pages.csv")
+    summ = V.match_summary(matches)
+    (reports / "vi4-match-summary.json").parent.mkdir(parents=True, exist_ok=True)
+    (reports / "vi4-match-summary.json").write_text(
+        json.dumps(summ, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    _console.print(
+        f"[bold]match[/bold] {summ['files']} files: "
+        + "; ".join(
+            f"{split} " + ", ".join(f"{k} {v}" for k, v in sorted(c.items()))
+            for split, c in summ["by_split_status"].items()
+        )
+    )
+    _console.print(
+        f"  noisy: {summ['their_lines']:,} of their lines vs {summ['our_lines']:,} of ours on "
+        f"{summ['noisy_matched']} files → {summ['pairs']:,} pairs at IoU ≥ {thr} "
+        f"({', '.join(f'{k} {v:,}' for k, v in summ['pairs_by_iou'].items())}); "
+        f"layouts {summ['layouts']}"
+    )
+    _console.print(
+        f"  {len(summ['pages'])} held-out pages → {reports / 'heldout_pages.csv'} ({n_held} rows); "
+        f"{len(summ['unresolved'])} files unresolved (see {reports / 'vi4-match-summary.json'})"
+    )
+
+
+@vi4_app.command(name="compare")
+def vi4_compare(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    reports: Path = typer.Option(VI4_REPORTS, "--reports", help="Report directory."),
+    sample_rows: int = typer.Option(500, "--sample-rows", help="Rows in the committed sample CSV."),
+) -> None:
+    """Their aligned text vs this project's minted text on every paired line."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    matches = V.read_match(dest / V.MATCH_NAME)
+    listing = json.loads((dest / V.LISTING_NAME).read_text(encoding="utf-8"))
+    conn = open_readonly(db_path)
+    try:
+        rows = V.judge(conn, matches, dest)
+    finally:
+        conn.close()
+    summ = V.compare_summary(matches, rows)
+    reports.mkdir(parents=True, exist_ok=True)
+    (reports / "vi4-crosscheck.md").write_text(
+        V.render(matches, rows, summ, listing=listing), encoding="utf-8"
+    )
+    (reports / "vi4-summary.json").write_text(
+        json.dumps(summ, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    V.write_judged(rows, dest / "vi4-judged.csv")
+    dis = [r for r in rows if r.bucket in ("disagree", "near", "ours_only", "theirs_only")]
+    V.write_judged(dis, dest / "vi4-disagreements.csv")
+    sample = V.disagreement_sample(rows, n=sample_rows)
+    V.write_judged(sample, reports / "vi4-disagreements-sample.csv")
+    V.write_judged([r for r in rows if r.ours and r.theirs], dest / "vi4-double-witnessed.csv")
+    t = summ["total"]
+    _console.print(
+        f"[bold]compare[/bold] {summ['judged']:,} paired lines: "
+        + ", ".join(f"{b} {t[b]:,}" for b in V.BUCKETS)
+    )
+    w = summ["witness_disagree"]
+    _console.print(
+        f"  on the disagreements the HTR is closer to ours {w['ours_closer']}, to theirs "
+        f"{w['theirs_closer']}, tie {w['tie']} → {reports / 'vi4-crosscheck.md'}"
+    )
+
+
+@vi4_app.command(name="sheet")
+def vi4_sheet(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path (read-only)."),
+    dest: Path = typer.Option(VI4_DEST, "--dest", help="Cache directory (data/philiumm)."),
+    images_root: Path = typer.Option(
+        DEFAULT_IMAGES_ROOT, "--images", help="Local image cache root (the C1 pipeline's --images)."
+    ),
+    n: int = typer.Option(300, "--n", help="Lines on the sheet."),
+    seed: int = typer.Option(0, "--seed", help="Sampling seed."),
+) -> None:
+    """A hand-audit sheet of the disagreements (both texts shown), crops from the cache."""
+    import csv as _csv
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.philiumm import vi4 as V
+
+    with (dest / "vi4-disagreements.csv").open(newline="", encoding="utf-8") as fh:
+        raw = list(_csv.DictReader(fh))
+    rows = [
+        V.Judged(
+            r["file"],
+            r["ref"],
+            r["their_id"],
+            r["zone"] or None,
+            float(r["iou"] or 0),
+            r["stratum"],
+            r["htr"],
+            r["ours"],
+            r["theirs"],
+            r["bucket"],
+            float(r["sim"]) if r["sim"] else None,
+            float(r["sim_htr_ours"]) if r["sim_htr_ours"] else None,
+            float(r["sim_htr_theirs"]) if r["sim_htr_theirs"] else None,
+            float(r["align_conf"]) if r["align_conf"] else None,
+        )
+        for r in raw
+    ]
+    conn = open_readonly(db_path)
+    try:
+        html_path, with_crops = V.build_disagreement_sheet(
+            conn, rows, images_root=images_root, out_dir=dest, n=n, seed=seed
+        )
+    finally:
+        conn.close()
+    _console.print(f"[bold]sheet[/bold] → {html_path} ({with_crops} lines with image strips)")
 
 
 # NB: the ``reports/alignment-prototype.md`` deliverable is assembled from the

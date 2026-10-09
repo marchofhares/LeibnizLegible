@@ -97,6 +97,13 @@ function katalogRecord(record) {
       ? `<p class="katalog__match muted">${esc(matchLine(record))}</p>`
       : '';
 
+  // The piece's machine text across its folios, a download, only where the
+  // API placed the record on the scan (text_url + folio_label travel together).
+  const text = record.text_url
+    ? `<p class="katalog__text"><a href="${esc(record.text_url)}" download>` +
+      `${esc(t('work.katalog.text', { range: record.folio_label || '' }))}</a></p>`
+    : '';
+
   const link = record.url
     ? `<p><a href="${esc(record.url)}" rel="noopener">${esc(t('work.katalog.record'))}</a></p>`
     : '';
@@ -106,6 +113,7 @@ function katalogRecord(record) {
     `<li class="katalog">` +
     `<h3 class="katalog__title">${esc(title)}</h3>` +
     (body ? `<dl class="deflist">${body}</dl>` : '') +
+    text +
     link +
     match +
     `</li>`

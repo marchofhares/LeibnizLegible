@@ -277,6 +277,9 @@ What is already on, and where to turn the knobs:
 
 ## 9. Operate
 
+- **See it on staging first** (§14): `deploy/staging.sh BRANCH` puts any
+  pushed branch on `staging.leibnizlegible.com`, behind a password, against
+  the same store and index; merge and deploy once it looks right there.
 - **Update the app.** `deploy/install.sh` again (pulls, syncs the venv,
   reinstalls the units), then `systemctl restart leibniz-legible`. Or by hand,
   running git and uv as the service user as `install.sh` does (git refuses to
@@ -562,3 +565,164 @@ systemctl reload caddy
    HTML. To show the link on the About page, set
    `LEIBNIZ_CALCULEMUS_URL=https://calculemus.leibnizlegible.com` in
    `/etc/leibniz-legible/env` and `systemctl restart leibniz-legible`.
+
+## 14. The staging site
+
+A second copy of the app on this same host, at
+`https://staging.leibnizlegible.com`, behind HTTP basic auth, running
+whatever branch you point it at against the live serving store and the live
+search index. It is for seeing a change on the real server, with the real
+data, before anyone else does: push a branch, put it on staging, look, merge,
+deploy. It previews **code and pages**. A change to the data itself (a
+re-mint, a new model, a rebuilt index) reaches it only the way it reaches
+production, through a new serving copy or a new index (below).
+
+The kit is three files in `deploy/` and two scripts, and
+`tests/test_deploy_staging.py` holds each file to its production counterpart:
+
+| File | What | Differs from production in |
+| --- | --- | --- |
+| `leibniz-legible-staging.service` | the unit, same sandbox | the checkout `/opt/leibniz-legible-staging`, `EnvironmentFile=/etc/leibniz-legible/staging.env`, the venv |
+| `staging.env.example` | → `/etc/leibniz-legible/staging.env` | `LEIBNIZ_PORT=8001`, `LEIBNIZ_WORKERS=1`, `LEIBNIZ_BASE_URL=https://staging.leibnizlegible.com`, `LEIBNIZ_RATE_LIMIT=0` |
+| `staging.caddy.example` | → `/etc/caddy/conf.d/staging.caddy` | `basic_auth`, `X-Robots-Tag "noindex, nofollow"`, the upstream, its own log file |
+| `staging-install.sh` | one-time setup, idempotent | — |
+| `staging.sh` | a branch onto staging; `--main`, `--status`, `--index`, `--drop-index` | — |
+
+What is **shared** with the live site: the serving store (both processes
+open it read-only), Meilisearch and its index (read only, through the same
+restricted search key), uv's cache and interpreter under
+`/opt/leibniz-legible/.uv/`, Caddy. What is **not**: the checkout, the venv,
+the unit, the env file, the port, the access log, and the base URL, which
+is embedded in every manifest and annotation id staging serves. **Never
+send a staging link to anyone**: its ids are not the real ones, and the
+site exists so that you see things first.
+
+### One-time setup
+
+1. **DNS.** In the Cloudflare zone, an A record `staging` pointing at this
+   host, DNS only (grey cloud), and an AAAA record if the host has IPv6:
+   exactly what §1 asks for the apex and §13 for Calculemus, for the same
+   reason (Caddy's certificate challenge fails behind the orange cloud).
+   Caddy obtains the certificate at the reload below; a certificate for the
+   name appears in the public certificate-transparency logs then, which is
+   why the password, not obscurity, is what keeps the site private.
+2. **The install**, as root, with a terminal (`ssh -t`) because it asks for
+   the user name and the password; the password is hashed by `caddy
+   hash-password` on the box and only the hash is written. From the live
+   checkout, once `main` carries the kit:
+
+   ```bash
+   ssh -t root@HOST /opt/leibniz-legible/deploy/staging-install.sh --user NAME
+   ```
+
+   Before that, from a clone of the branch that carries it (the clone is
+   only the kit; the script makes the staging checkout itself, as the
+   `leibniz` user, from the public repository):
+
+   ```bash
+   ssh -t root@HOST 'git clone --branch BRANCH --depth 1 https://github.com/marchofhares/leibnizlegible /opt/leibniz-legible-kit \
+     && /opt/leibniz-legible-kit/deploy/staging-install.sh --user NAME --branch BRANCH'
+   ```
+
+   It checks its preconditions first and changes nothing if one fails (the
+   live site installed and configured, `uv` and `caddy` present, the
+   Caddyfile's `import /etc/caddy/conf.d/*.caddy` line from §13 in place).
+   Then: the checkout and its venv as the service user; the unit; the env
+   file from the example, with the store path, the search key and the image
+   origin copied over from the live `/etc/leibniz-legible/env` (an existing
+   `staging.env` is left alone); the access log file, created for the
+   `caddy` user before anything opens it (`caddy validate` runs as root
+   and provisions the log writers, so it would create a missing log as
+   root, and the reload, as the caddy user, could not open it: what stopped
+   the first install); the site block, validated against the
+   whole Caddy configuration before `systemctl reload caddy` (a failed
+   validate puts the previous block back and reloads nothing; the live site
+   never stops, and neither does it when the reload itself is refused: Caddy
+   keeps the configuration it runs); then `staging.sh BRANCH` for the first
+   deploy. On a Caddy
+   older than 2.8 the directive is written as `basicauth`. The clone under
+   `/opt/leibniz-legible-kit` can go afterwards: the staging checkout
+   carries the kit, and `main` does after the merge.
+3. **Check.** The script ends with `/healthz` on `127.0.0.1:8001` and a
+   request to the site without credentials, which must answer `401`. Then,
+   in a browser, the page opens with the user name and the password, and:
+
+   ```bash
+   curl -s https://leibnizlegible.com/api/stats | head -c 200          # the live figures …
+   curl -su NAME https://staging.leibnizlegible.com/api/stats | head -c 200   # … the same, from the same index
+   ```
+
+### Everyday use
+
+```bash
+ssh root@HOST /opt/leibniz-legible/deploy/staging.sh BRANCH     # a pushed branch onto staging
+ssh root@HOST /opt/leibniz-legible/deploy/staging.sh --status   # what runs there, and whether it answers
+ssh root@HOST /opt/leibniz-legible/deploy/staging.sh --main     # after the merge: staging and production agree again
+```
+
+`staging.sh BRANCH` fetches, checks `origin/BRANCH` out as the local branch
+`staging`, syncs the venv (`uv sync --frozen`, the shared caches), restarts
+the unit, waits for `/healthz`, prints what runs and the address. A branch
+that is not on `origin` is refused before anything changes. The sequence for
+a change to the site is then: push the branch; `staging.sh BRANCH`; look,
+with the password; merge; the §9 update on the live checkout; `staging.sh
+--main`, so an old branch never sits on staging half-forgotten. Until `main`
+carries the kit, run the script from the staging checkout instead:
+`/opt/leibniz-legible-staging/deploy/staging.sh`.
+
+### A branch that changes the data
+
+- **A new serving copy** (M1 and every C4). Staging reads the live copy, so a
+  branch whose code expects a different store needs its own: §2 on the
+  desktop into a second file, the rsync to a second path such as
+  `/var/lib/leibniz-legible/inventory-staging.sqlite` (a 15 GB transfer,
+  §2's timing), `chown leibniz:leibniz`, then `LEIBNIZ_DB_PATH` in
+  `/etc/leibniz-legible/staging.env` pointed at it and `systemctl restart
+  leibniz-legible-staging`. The directory is already writable by the service
+  user, which SQLite's `-shm` sidecar needs. Point the line back and delete
+  the file when the branch has merged and the live copy has been replaced.
+- **A new index.** `staging.sh --index` builds `leibniz_pages_staging` (with
+  `leibniz_pages_staging_meta` beside it) from the store `staging.env`
+  names, with the master key from `/etc/meilisearch/env`, as a transient
+  systemd unit `leibniz-index-staging`, and writes
+  `LEIBNIZ_MEILI_INDEX=leibniz_pages_staging` into `staging.env`. It says
+  what it will do and asks first: the live index took 5 h 33 m to build on
+  this box (§5), the second index takes about as much disk again (it prints
+  `df -h /var/lib/meilisearch`), and the staging unit is stopped for the
+  duration. The script waits; Ctrl-C leaves the build running under
+  systemd, `journalctl -fu leibniz-index-staging` watches it, and
+  `systemctl start leibniz-legible-staging` finishes the job by hand. The
+  live index is never touched: a build replaces only the index it names
+  (`leibniz index build --meili-index`, `LEIBNIZ_MEILI_INDEX` in
+  `env.example`). The serving key `meili-search-key.sh` makes is scoped to
+  `leibniz_pages*`, which covers the staging name; the script reads the
+  key's scope from Meilisearch and refuses to build if a key scoped
+  otherwise would leave staging unable to search. `staging.sh --drop-index`
+  deletes both staging indexes and points `staging.env` back at
+  `leibniz_pages`.
+
+### Memory, the password, teardown
+
+- **Memory.** The box has 4 GB and Meilisearch wants the page cache (§7,
+  §13 item 4). Staging runs one worker; what it takes is on the `Memory:`
+  line of `systemctl status leibniz-legible-staging`, and `free -m` shows
+  what is left for the cache. During any index build on this host, the
+  staging unit should be stopped (`--index` does it itself; for a live
+  rebuild under §5, `systemctl stop leibniz-legible-staging` first and
+  `start` after).
+- **The password.** One user, one password, in `/etc/caddy/conf.d/staging.caddy`
+  as a bcrypt hash. A new password: `staging-install.sh --password`; a new
+  user name: `staging-install.sh --user NAME` (the password is kept). The
+  re-run rewrites the block from the example, validates and reloads, and
+  touches nothing else that already exists.
+- **Teardown.**
+
+  ```bash
+  /opt/leibniz-legible/deploy/staging.sh --drop-index   # only if --index was ever run; first, while the unit is there
+  systemctl disable --now leibniz-legible-staging
+  rm /etc/systemd/system/leibniz-legible-staging.service && systemctl daemon-reload
+  rm /etc/caddy/conf.d/staging.caddy && caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && systemctl reload caddy
+  rm -rf /opt/leibniz-legible-staging /etc/leibniz-legible/staging.env /var/log/caddy/leibniz-legible-staging.log*
+  ```
+
+  Then remove the `staging` DNS record.

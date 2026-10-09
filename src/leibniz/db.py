@@ -1130,6 +1130,28 @@ def iter_crosswalk(conn: sqlite3.Connection) -> Iterator[CrosswalkMatch]:
         )
 
 
+def crosswalk_for_record(conn: sqlite3.Connection, record_id: str) -> list[CrosswalkMatch]:
+    """One record's work links, the most trustworthy first: by confidence, then
+    an explicit ``gwlb_link`` before a shelfmark guess, then the work id —
+    the order :func:`best_crosswalk_by_record` resolves ties in, for one record."""
+    rows = conn.execute(
+        "SELECT katalog_record_id, work_id, page_range, match_method, match_conf "
+        "FROM crosswalk WHERE katalog_record_id = ? "
+        "ORDER BY match_conf DESC, CASE match_method WHEN 'gwlb_link' THEN 0 ELSE 1 END, work_id",
+        (record_id,),
+    )
+    return [
+        CrosswalkMatch(
+            katalog_record_id=row["katalog_record_id"],
+            work_id=row["work_id"],
+            match_method=row["match_method"],
+            match_conf=row["match_conf"],
+            page_range=row["page_range"],
+        )
+        for row in rows
+    ]
+
+
 def count_crosswalk(conn: sqlite3.Connection) -> int:
     """Total number of crosswalk links."""
     return conn.execute("SELECT COUNT(*) FROM crosswalk").fetchone()[0]

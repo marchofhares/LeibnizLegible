@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from leibniz import db
 from leibniz.align.resolve import (
+    build_folio_index,
+    index_pages,
     parse_bl_range,
     parse_folio_label,
     resolve_canvases,
     resolve_piece,
+    select_folios,
 )
 
 
@@ -72,3 +75,20 @@ def test_unlabelled_pages_ignored() -> None:
     res = resolve_canvases(conn, "W", 164, 165)
     assert res.canvas_seqs == [2, 4]
     assert res.labelled_pages == 2  # only the two real folios counted
+
+
+def test_select_folios_over_a_prebuilt_index_matches_resolve_canvases() -> None:
+    """The web layer places every record of a work against one index (W4)."""
+    conn = _work_with_folios(["cover", "163v", "164r", "164v", "165r", "spine"])
+    index = index_pages(db.get_pages(conn, "W"))
+    assert index == build_folio_index(conn, "W")
+    assert sorted(index) == [163, 164, 165] and [p.seq for p in index[164]] == [3, 4]
+    for lo, hi in ((164, 165), (163, 163), (170, 171)):
+        a, b = select_folios(index, "W", lo, hi), resolve_canvases(conn, "W", lo, hi)
+        assert (a.canvas_seqs, a.labelled_pages, a.resolved) == (
+            b.canvas_seqs,
+            b.labelled_pages,
+            b.resolved,
+        )
+    assert select_folios(index, "W", 164, 165).canvas_seqs == [3, 4, 5]
+    assert not select_folios(index, "W", 170, 171).resolved

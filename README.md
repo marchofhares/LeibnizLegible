@@ -145,7 +145,15 @@ as a plain-text download (one line per recognised line under a `# ` header
 carrying page URL, source image, model, run, confidence, licence and the
 wording rule; the work's pages streamed in canvas order, each under a
 `## Folio <label> — <page id>` line; `?format=tsv` for `line_id`, `line_seq`,
-`conf`, `status`, `text` rows) — the viewer links both. `/api/works` (no id)
+`conf`, `status`, `text` rows) — the viewer links both: every page view has a
+Text block, the page's lines as one piece of selectable text with a Copy
+button and the download beside it. `/api/records/{record_id}/text` is the
+text of one catalogue piece — a letter, a draft, a treatise — across the
+folios its shelfmark names, placed on the scan by the C2 resolver
+(`web/pieces.py`), in the work export's layout under a header naming the
+record; the work page links it as "Text of this piece (Bl. 1–2)" under each
+record that can be placed, and a record that cannot be answers 404 with the
+reason. `/api/works` (no id)
 lists every work as a compact row together with the tree behind `/browse`
 (`web/browse.py`): shelfmark family → section → works, the manuscripts by LH
 section under the name the library's titles give it, the letter convolutes by

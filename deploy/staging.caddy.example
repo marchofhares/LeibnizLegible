@@ -1,0 +1,39 @@
+# /etc/caddy/conf.d/staging.caddy — the staging site (deploy/README.md §14),
+# imported by the Caddyfile's last line. deploy/staging-install.sh writes the
+# installed file from this example: the user name and the bcrypt hash go in
+# for the two placeholders, and on a Caddy older than 2.8 the directive is
+# spelled basicauth. Never edit the installed file by hand; re-run the script.
+#
+# The domain is named literally, never as a {$VAR:localhost} fallback (§13).
+# Basic auth answers every crawler with 401 before the app sees the request;
+# the X-Robots-Tag header is belt and braces on what passes the password
+# (Caddy writes the 401 itself, outside the header directive, so that one
+# response carries neither it nor HSTS; a 401 is not indexable content).
+# Everything else is the production block: compression, HSTS, no Server
+# header, the hour of caching on /static/*, a JSON access log kept for
+# seven days.
+staging.leibnizlegible.com {
+	basic_auth {
+		__STAGING_USER__ __STAGING_HASH__
+	}
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+	@static path /static/*
+	header @static Cache-Control "public, max-age=3600"
+
+	reverse_proxy 127.0.0.1:8001
+
+	log {
+		output file /var/log/caddy/leibniz-legible-staging.log {
+			roll_size 50MiB
+			roll_keep 5
+			roll_keep_for 168h
+		}
+		format json
+	}
+}

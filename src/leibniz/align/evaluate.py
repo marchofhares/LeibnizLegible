@@ -86,6 +86,10 @@ class EvalConfig:
     correct_sim: float = 0.90  # projected is 'correct' if folded sim ≥ this
     seed: int = 20260729
     norm_name: str = DEFAULT_NORM.name
+    # Re-attach the scribe's line-end hyphen to a split word (align.keep_hyphen).
+    # The grade below folds punctuation away, so the numbers are the same either
+    # way; the knob is here so a report can state which mint it measured.
+    keep_hyphen: bool = True
 
 
 # --------------------------------------------------------------------------- #
@@ -243,7 +247,9 @@ def evaluate_piece(
         seed=cfg.seed,
     )
     htr_lines = [HtrLine(ref=ln.line_id, text=htr.get(ln.line_id, "")) for ln in piece.lines]
-    result = align_piece(htr_lines, reference, norm=norm, threshold=cfg.threshold)
+    result = align_piece(
+        htr_lines, reference, norm=norm, threshold=cfg.threshold, keep_hyphen=cfg.keep_hyphen
+    )
 
     out: list[LineEval] = []
     for al, true_text, can_mint in zip(result.lines, true_lines, mintable, strict=True):

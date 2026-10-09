@@ -16,7 +16,7 @@ from rich.console import Console
 
 from leibniz import db
 from leibniz.search.fts5 import DEFAULT_INDEX_PATH
-from leibniz.search.meili import DEFAULT_MEILI_URL
+from leibniz.search.meili import DEFAULT_INDEX_UID, DEFAULT_MEILI_URL
 from leibniz.web.settings import (
     DEFAULT_RATE_BURST,
     DEFAULT_RATE_LIMIT,
@@ -70,6 +70,12 @@ def serve(
         envvar=[ENV["meili_key"], MEILI_KEY_FALLBACK],
         help="Meilisearch API key (a search-only key in production).",
     ),
+    meili_index: str = typer.Option(
+        DEFAULT_INDEX_UID,
+        "--meili-index",
+        envvar=ENV["meili_index"],
+        help="Meilisearch index uid (a staging site may serve another index).",
+    ),
     host: str = typer.Option("127.0.0.1", "--host", envvar=ENV["host"]),
     port: int = typer.Option(8000, "--port", envvar=ENV["port"]),
     base_url: str | None = typer.Option(
@@ -120,6 +126,7 @@ def serve(
             index_path=index,
             meili_url=meili_url,
             meili_key=meili_key,
+            meili_index=meili_index,
             host=host,
             port=port,
             base_url=base_url,

@@ -104,14 +104,20 @@ def build_folio_index(conn, work_id: str) -> dict[int, list[db.Page]]:
     folio number are omitted (they can never satisfy a folio range). Each folio's
     pages are ordered recto-before-verso then by canvas sequence.
     """
+    return index_pages(db.get_pages(conn, work_id))
+
+
+def index_pages(pages: list[db.Page]) -> dict[int, list[db.Page]]:
+    """:func:`build_folio_index` over pages already read (the web layer places
+    every catalogue record of a work against one index built once)."""
     index: dict[int, list[db.Page]] = {}
-    for page in db.get_pages(conn, work_id):
+    for page in pages:
         ref = parse_folio_label(page.label)
         if ref is None:
             continue
         index.setdefault(ref.num, []).append(page)
-    for pages in index.values():
-        pages.sort(key=lambda p: (_side_rank(p.label), p.seq))
+    for group in index.values():
+        group.sort(key=lambda p: (_side_rank(p.label), p.seq))
     return index
 
 
@@ -152,7 +158,15 @@ def resolve_canvases(conn, work_id: str, folio_lo: int, folio_hi: int) -> Resolv
     occupies, return the concrete pages (recto + verso of each folio), in reading
     order, ready for :mod:`leibniz.align.prototype` to fetch and segment.
     """
-    index = build_folio_index(conn, work_id)
+    return select_folios(build_folio_index(conn, work_id), work_id, folio_lo, folio_hi)
+
+
+def select_folios(
+    index: dict[int, list[db.Page]], work_id: str, folio_lo: int, folio_hi: int
+) -> ResolveResult:
+    """:func:`resolve_canvases` over a folio index already built
+    (:func:`build_folio_index` / :func:`index_pages`): the pages whose folio
+    number falls in ``[folio_lo, folio_hi]``, in canvas order."""
     labelled = sum(len(v) for v in index.values())
     pages: list[db.Page] = []
     for folio in range(folio_lo, folio_hi + 1):
@@ -186,8 +200,10 @@ __all__ = [
     "ResolveResult",
     "build_folio_index",
     "folio_range_from_signature",
+    "index_pages",
     "parse_bl_range",
     "parse_folio_label",
     "resolve_canvases",
     "resolve_piece",
+    "select_folios",
 ]

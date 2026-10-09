@@ -5,7 +5,7 @@
 // Image API service, a single static JPEG where it does not. Nothing is ever
 // proxied through this application.
 
-import { t } from '../i18n.js';
+import { t, tn } from '../i18n.js';
 import * as api from '../api.js';
 import {
   esc,
@@ -201,6 +201,59 @@ function linePanel(data) {
 }
 
 // ---------------------------------------------------------------------------
+// the text block: the page's lines as one piece of text, to select and copy
+// ---------------------------------------------------------------------------
+
+/** The lines' texts, one per line, as the plain-text export writes them: a
+ *  line break inside a text becomes a space, so one line stays one line. */
+export function textLines(data) {
+  return (data.lines || [])
+    .map((line) => String(line.text || '').replace(/\s*[\r\n]+\s*/g, ' ').trim())
+    .filter(Boolean);
+}
+
+/** One entry per recognition run behind the lines, newest first: the model
+ *  and the run's date, as the export's header names them. */
+function runsLine(data) {
+  const seen = new Map();
+  for (const line of data.lines || []) {
+    const model = line.model || (data.run && data.run.model) || '';
+    const key = `${line.run_id != null ? line.run_id : ''}|${model}`;
+    if (!seen.has(key)) seen.set(key, { run_id: line.run_id, model, at: line.run_at });
+  }
+  const runs = Array.from(seen.values()).sort((a, b) => (b.run_id || 0) - (a.run_id || 0));
+  if (!runs.length && data.run) {
+    runs.push({ model: data.run.model, at: data.run.finished_at || data.run.started_at });
+  }
+  return runs
+    .map((run) =>
+      t('page.text.run', {
+        model: run.model || t('page.text.noModel'),
+        date: run.at ? datetime(run.at) : t('page.text.noDate'),
+      }),
+    )
+    .join('; ');
+}
+
+function textPanel(data, pageId) {
+  const lines = textLines(data);
+  if (!lines.length) return '';
+  return (
+    `<section class="panel page-text" id="page-text" aria-labelledby="text-heading">` +
+    `<h2 id="text-heading">${esc(t('page.text'))}</h2>` +
+    `<p class="hint page-text__help">${esc(t('page.text.help'))}</p>` +
+    `<div class="page-text__tools">` +
+    `<button type="button" class="button button--primary" id="copy-text">${esc(t('page.text.copy'))}</button>` +
+    `<a class="button" href="${esc(api.pageTextUrl(data.page_id || pageId))}" download>${esc(t('page.text.download'))}</a>` +
+    `<span class="page-text__status" id="copy-status" role="status" aria-live="polite"></span>` +
+    `</div>` +
+    `<p class="page-text__prov">${esc(t('page.text.prov', { runs: runsLine(data) }))}</p>` +
+    `<pre class="page-text__block" id="page-text-block">${esc(lines.join('\n'))}</pre>` +
+    `</section>`
+  );
+}
+
+// ---------------------------------------------------------------------------
 // header / chrome
 // ---------------------------------------------------------------------------
 
@@ -220,10 +273,11 @@ function pageHeader(data, pageId) {
       : `<span class="button button--disabled" aria-disabled="true">${esc(t('page.next'))} &#8594;</span>`,
   ].join('');
   const manifest = data.manifest_url || api.manifestUrl(data.work_id);
-  // The plain-text export: a download (the server sends it as an attachment
-  // with its own file name), offered only when there is text to take away.
-  const download = (data.lines || []).length
-    ? `<li><a href="${esc(api.pageTextUrl(data.page_id || pageId))}" download>${esc(t('page.download'))}</a></li>`
+  // The text block, with the Copy button and the download, sits under the
+  // line list; the header points at it (an in-page anchor the router leaves
+  // to the browser) whenever there is text to take away.
+  const textLink = (data.lines || []).length
+    ? `<li><a href="#page-text">${esc(t('page.textLink'))}</a></li>`
     : '';
   return (
     `<header class="panel page-header">` +
@@ -232,7 +286,7 @@ function pageHeader(data, pageId) {
     `<p class="muted"><code>${esc(data.page_id || pageId)}</code></p>` +
     `<nav class="page-nav" aria-label="${esc(t('page.nav'))}">${nav}</nav>` +
     `<ul class="linklist linklist--inline">` +
-    download +
+    textLink +
     `<li><a href="${esc(manifest)}" rel="noopener">${esc(t('page.mirador'))}</a></li>` +
     `<li><a href="${esc(api.reportUrl(data.page_id || pageId))}" rel="noopener">${esc(t('page.report'))}</a></li>` +
     `</ul></header>`
@@ -341,7 +395,8 @@ export async function render(ctx) {
   root.innerHTML =
     honestyBanner() +
     pageHeader(data, pageId) +
-    `<div class="page-layout">${viewerPanel(data)}${linePanel(data)}</div>`;
+    `<div class="page-layout">${viewerPanel(data)}` +
+    `<div class="page-side">${linePanel(data)}${textPanel(data, pageId)}</div></div>`;
 
   return wire(root, data);
 }
@@ -419,9 +474,20 @@ function wire(root, data) {
   }
 
   // --- panel -> image ------------------------------------------------------
+  //
+  // The line's text is selectable inside its button (style.css). A drag over
+  // it ends in a click on the same button, and a double-click on a word is
+  // two clicks: while a selection stands inside the list, the reader is
+  // taking text, not choosing a line, so the click does nothing.
+  function selectionInside(el) {
+    const sel = window.getSelection ? window.getSelection() : null;
+    return Boolean(sel && !sel.isCollapsed && sel.anchorNode && el.contains(sel.anchorNode));
+  }
+
   function onListClick(event) {
     const button = event.target.closest ? event.target.closest('.line__btn') : null;
     if (!button || !list.contains(button)) return;
+    if (selectionInside(list)) return;
     const id = button.getAttribute('data-line');
     highlight(id);
     zoomTo(id);
@@ -446,9 +512,48 @@ function wire(root, data) {
     buttons[next].focus();
   }
 
+  // A selection made in the list spans, in document order, the badges, the
+  // number and the hidden label of every line between the first and the last
+  // text. They are `user-select: none` (style.css), which Chromium honours in
+  // the copy but not without a trace (measured on the fixture store: the two
+  // texts with a blank line between them, while Selection.toString() still
+  // reports "machine. HTR output, unreviewed.", "confidence 0.95", "Line 1"),
+  // and other browsers draw the line elsewhere. So a copy whose selection lies
+  // inside the list is answered here: the selected part of each line's text,
+  // one per line, and nothing else.
+  function selectedLineTexts(range) {
+    const out = [];
+    for (const el of list.querySelectorAll('.line__text')) {
+      if (!range.intersectsNode(el)) continue;
+      const part = document.createRange();
+      part.selectNodeContents(el);
+      if (range.compareBoundaryPoints(Range.START_TO_START, part) > 0) {
+        part.setStart(range.startContainer, range.startOffset);
+      }
+      if (range.compareBoundaryPoints(Range.END_TO_END, part) < 0) {
+        part.setEnd(range.endContainer, range.endOffset);
+      }
+      const text = part.toString().replace(/\s+/g, ' ').trim();
+      if (text) out.push(text);
+    }
+    return out;
+  }
+
+  function onDocumentCopy(event) {
+    const sel = window.getSelection ? window.getSelection() : null;
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !event.clipboardData) return;
+    const range = sel.getRangeAt(0);
+    if (!list.contains(range.commonAncestorContainer)) return;
+    const texts = selectedLineTexts(range);
+    if (!texts.length) return;
+    event.clipboardData.setData('text/plain', texts.join('\n'));
+    event.preventDefault();
+  }
+
   if (list) {
     list.addEventListener('click', onListClick);
     list.addEventListener('keydown', onListKeydown);
+    document.addEventListener('copy', onDocumentCopy);
   }
 
   // --- image -> panel ------------------------------------------------------
@@ -547,12 +652,59 @@ function wire(root, data) {
   }
   if (toggle) toggle.addEventListener('click', onToggle);
 
+  // --- the text block ------------------------------------------------------
+  //
+  // Copy writes the block's text to the clipboard from inside the click
+  // handler, where the browser counts the user's gesture. Where it refuses
+  // (an insecure context, a denied permission, no clipboard API), the block is
+  // selected and the status line says to press Ctrl+C.
+  const copyBtn = root.querySelector('#copy-text');
+  const block = root.querySelector('#page-text-block');
+  const copyStatus = root.querySelector('#copy-status');
+
+  function say(message) {
+    if (copyStatus) copyStatus.textContent = message;
+  }
+
+  function selectBlock() {
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(block);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch {
+      /* selection unavailable */
+    }
+  }
+
+  function refused() {
+    selectBlock();
+    say(t('page.text.copyRefused'));
+  }
+
+  function onCopy() {
+    if (!block) return;
+    const text = block.textContent;
+    const n = text ? text.split('\n').length : 0;
+    say('');
+    const clipboard = navigator.clipboard;
+    if (clipboard && typeof clipboard.writeText === 'function') {
+      clipboard.writeText(text).then(() => say(tn('page.text.copied', n)), refused);
+    } else {
+      refused();
+    }
+  }
+  if (copyBtn) copyBtn.addEventListener('click', onCopy);
+
   return function cleanup() {
     if (list) {
       list.removeEventListener('click', onListClick);
       list.removeEventListener('keydown', onListKeydown);
+      document.removeEventListener('copy', onDocumentCopy);
     }
     if (toggle) toggle.removeEventListener('click', onToggle);
+    if (copyBtn) copyBtn.removeEventListener('click', onCopy);
     if (overlaySvg) overlaySvg.removeEventListener('pointerdown', onOverlayPointerDown);
     window.removeEventListener('pointerup', onWindowPointerUp);
     window.removeEventListener('pointercancel', onWindowPointerUp);

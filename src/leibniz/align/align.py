@@ -43,6 +43,7 @@ from leibniz.align.normalize import DEFAULT_NORM, AlignNorm, normalize_indexed
 # break (so the fragments should be rejoined without a word boundary). Early-
 # modern hyphens are various; also handles the double-oblique "=" convention.
 _HYPHENS = ("-", "¬", "=", "‐", "‑", "­")
+HYPHENS = _HYPHENS  # public alias (the audit and the reach census test the same set)
 
 # Default: a line must have at least this fraction of its characters matched by
 # the alignment to be minted. Tuned on the B2 eval; overridable per call/run.
@@ -82,6 +83,9 @@ class AlignedLine:
     n_matched: int  # folded HTR chars matched exactly to the edition
     aligned: bool  # align_conf >= threshold, and no edition-only burst
     n_inserted: int = 0  # folded edition chars projected here with no HTR counterpart
+    # The hyphen character re-attached to this line's slice because the scribe
+    # split a word here and ``keep_hyphen`` was on ("" when nothing was kept).
+    kept_hyphen: str = ""
 
     @property
     def edition_text_stripped(self) -> str:
@@ -124,6 +128,7 @@ def align_piece(
     free_edition_ends: bool = True,
     free_htr_ends: bool = False,
     dehyphenate: bool = True,
+    keep_hyphen: bool = True,
 ) -> AlignmentResult:
     """Align one edition passage to an ordered list of HTR lines.
 
@@ -140,6 +145,16 @@ def align_piece(
     onto one line. Stray header/marginal HTR lines are handled by the confidence
     threshold instead, not by freeing the HTR ends. ``dehyphenate`` rejoins words
     the scribe split across a line break when the earlier line ends in a hyphen.
+
+    ``keep_hyphen`` (with ``dehyphenate``) puts the scribe's hyphen back: when
+    the rejoined word is cut between two lines by the projection, the earlier
+    line's slice ends with the very hyphen character the HTR line showed (an
+    ``=`` stays an ``=``) and the next line's slice starts with the rest of the
+    word as before. The slice then carries one character the edition does not
+    have, but the line image does — the PHILIUMM audit of 2026-10-07 found the
+    missing line-end hyphen the most frequent fault of the minted text. The
+    line records it in :attr:`AlignedLine.kept_hyphen`. Off, the behaviour is
+    the C2 mint's: the word fragment without its hyphen.
     """
     # 1. Build the folded HTR spine + a per-character line map. ``is_joiner``
     #    marks the inter-line separator spaces so they carry line context for the
@@ -215,11 +230,12 @@ def align_piece(
             end = max(line_last_orig[i] for i in range(len(htr_lines))) + 1
         slice_for[li] = (start, end)
 
+    kept = _kept_hyphens(htr_lines, edition_text, slice_for) if dehyphenate and keep_hyphen else {}
     lines: list[AlignedLine] = []
     for i, ln in enumerate(htr_lines):
         if i in slice_for:
             s, e = slice_for[i]
-            ed_slice = edition_text[s:e]
+            ed_slice = edition_text[s:e] + kept.get(i, "")
         else:
             ed_slice = ""
         denom = max(1, htr_folded_len[i])
@@ -235,6 +251,7 @@ def align_piece(
                 n_matched=n_matched[i],
                 aligned=conf >= threshold and bool(ed_slice.strip()) and not burst,
                 n_inserted=n_inserted[i],
+                kept_hyphen=kept.get(i, ""),
             )
         )
     return AlignmentResult(
@@ -290,8 +307,36 @@ def _ends_hyphenated(text: str) -> bool:
     return bool(t) and t[-1] in _HYPHENS
 
 
+def _kept_hyphens(
+    htr_lines: Sequence[HtrLine], edition_text: str, slice_for: dict[int, tuple[int, int]]
+) -> dict[int, str]:
+    """Which lines get their scribal hyphen back, and which character.
+
+    A line qualifies when its HTR text ends in a hyphen mark, it and the next
+    line both received a slice, the two slices are adjacent in the edition
+    partition, and the cut falls inside a word (a letter on both sides of it).
+    A hyphen-like mark that the projection placed at a word boundary (a dash
+    closing a sentence, a line whose last word the edition reads differently)
+    stays dropped: the slice ends in a space or punctuation there.
+    """
+    out: dict[int, str] = {}
+    for i in range(len(htr_lines) - 1):
+        if i not in slice_for or (i + 1) not in slice_for:
+            continue
+        text = htr_lines[i].text.rstrip()
+        if not _ends_hyphenated(text):
+            continue
+        s, e = slice_for[i]
+        s2, e2 = slice_for[i + 1]
+        left, right = edition_text[s:e], edition_text[s2:e2]
+        if e == s2 and left and right and left[-1].isalpha() and right[0].isalpha():
+            out[i] = text[-1]
+    return out
+
+
 __all__ = [
     "DEFAULT_THRESHOLD",
+    "HYPHENS",
     "MAX_INSERT_FLOOR",
     "AlignedLine",
     "AlignmentResult",

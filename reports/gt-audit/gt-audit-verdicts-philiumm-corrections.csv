@@ -1,0 +1,65 @@
+ref,stratum,verdict,pattern,minted_text,edits,corrected_text,sim_raw,sim_folded
+00068377:0548:015,fair_copy,wrong,bracket,"veüe, à droitfe] ny à gauche,
+mais avec toutte",'à droitfe' → 'àdroit',"veüe, àdroit] ny à gauche, mais avec toutte",0.913,0.930
+DE-611-HS-974894:0325:013,fair_copy,wrong,reading,"environs de Casai et de Pignerol, et faire",'Casai' → 'Casal',"environs de Casal et de Pignerol, et faire",0.976,0.976
+DE-611-HS-974894:0243:031,fair_copy,correct,reading,"but, qu’il seroit trop long de rapporter icy.",'icy' → 'ici',"but, qu’il seroit trop long de rapporter ici.",0.978,0.977
+00068377:1383:023,fair_copy,wrong,bracket,"tout d’un coup, et [l’jon ne revient pas aussi",−'[l’j',"tout d’un coup, et on ne revient pas aussi",0.913,0.932
+00068285:0139:040,fair_copy,boundary,boundary-letter,"eae quae a beatis funduntur,","reads 'eae, quae a beatis'","eae, quae a beatis",0.571,0.630
+00068285:0183:029,fair_copy,correct,normalization,"inter se, et cum externis consentientes.","−',' (after:inter se)",inter se et cum externis consentientes.,0.975,1.000
+00068285:0194:004,fair_copy,wrong,reading,salubriter Ecclesiae provideatur.,'provideatur' → 'praevideatur',salubriter Ecclesiae praevideatur.,0.941,0.939
+00068285:0211:023,fair_copy,boundary,boundary-letter,m divina sapientia dignum esse nega,+'hoc' (before:divina sapientia),m hoc divina sapientia dignum esse nega,0.897,0.897
+00068285:0256:015,fair_copy,wrong,reading,"indulgentiam recipere, ut quando eandem",'ut' → 'et',"indulgentiam recipere, et quando eandem",0.974,0.974
+DE-611-HS-957357:0088:009,light_revision,correct,boundary-letter,rai pas de vous communique,'communique' → 'communiquer',rai pas de vous communiquer,0.963,0.963
+DE-611-HS-867205:0001:032,light_revision,boundary,boundary-letter,tudiis cogitatio; qua ut plurimum,'tudiis' → 'Studiis',Studiis cogitatio; qua ut plurimum,0.971,0.970
+DE-611-HS-857075:0050:034,light_revision,boundary,boundary-letter,aller faire? à quo,'quo' → 'quoy',aller faire? à quoy,0.947,0.944
+DE-611-HS-959288:0086:029,light_revision,wrong,other,érité,'érité' → 'serviteur',serviteur,0.333,0.556
+DE-611-HS-866698:0001:007,light_revision,boundary,boundary-letter,"Espagnols aux Francés qu'est surprennent, car a ce
+pauure Ro",'Ro' → 'Roy',"Espagnols aux Francés qu'est surprennent, car a ce pauure Roy",0.967,0.983
+00068774:0254:026,light_revision,boundary,boundary-letter,"men könne, auf welchen fall
+objectio superior de rege orbo,",−'orbo' (end),"men könne, auf welchen fall objectio superior de rege",0.881,0.912
+00068768:0161:032,light_revision,boundary,boundary-letter,"Sed etsi aliquid restare
+supponeretur, id mari et N",−'N' (end),"Sed etsi aliquid restare supponeretur, id mari et",0.941,0.960
+DE-611-HS-868175:0015:002,heavy_revision,boundary,boundary-letter,J’ay esté en doute si j’oseroi,'oseroi' → 'oserois',J’ay esté en doute si j’oserois,0.968,0.968
+00068371:0045:027,heavy_revision,wrong,addition,"indies in melius auctam, restitui perfectè et opto
+et",−'in melius auctam',"indies , restitui perfectè et opto et",0.679,0.673
+DE-611-HS-860205:0007:021,heavy_revision,boundary,boundary-letter,chrijft dat selvige Monsr iets van de algebra heeft drucke,'chrijft' → 'Schrijft'; +'n' (end),Schrijft dat selvige Monsr iets van de algebra heeft drucken,0.967,0.967
+00068400:0010:100,heavy_revision,boundary,boundary-letter,quibus jurisconsulti vel judices per se non era,'non era' → 'non erant',quibus jurisconsulti vel judices per se non erant,0.959,0.959
+00068377:1121:043,heavy_revision,wrong,normalization,vous entretenir. Et je vous envoyé maintenant,'envoyé' → 'envoye',vous entretenir. Et je vous envoye maintenant,0.978,1.000
+00068778:0014:023,heavy_revision,boundary,boundary-letter,"ipso opere: Constantino Bonelli vescouo di citta` di
+Castello",'vescouo' → 'vescovo'; 'ipso opere' → 'in ipso opere'; 'citta`' → 'città',in ipso opere: Constantino Bonelli vescovo di città di Castello,0.889,0.952
+00068647:0042:076,heavy_revision,correct,correct,"Porro
+is Plantae varia nomina accipiunt, tum a partibus,",−'is' (after:Porro),"Porro Plantae varia nomina accipiunt, tum a partibus,",0.946,0.944
+DE-611-HS-970486:0240:012,heavy_revision,boundary,boundary-letter,"primer ses oeures en
+2 Vol. in grand Fol.; il me semble d'en avoir vû trois, si vo",'primer' → 'imprimer',"imprimer ses oeures en 2 Vol. in grand Fol.; il me semble d'en avoir vû trois, si vo",0.964,0.975
+DE-611-HS-960108:0005:046,heavy_revision,boundary,boundary-letter,bono utilissimam ad finem perducat. De,−'De' (end),bono utilissimam ad finem perducat.,0.921,0.919
+DE-611-HS-867509:0126:022,heavy_revision,wrong,math,"ia yy x 2ax
+— xx a Cartesio Geometricam dictam semper Mihi infinitas
+curvas exhibere (",'ia' → 'eg'; −'(' (end),eg yy x 2ax — xx a Cartesio Geometricam dictam semper Mihi infinitas curvas exhibere,0.930,0.975
+00068334:0033:053,heavy_revision,boundary,bracket,"hes. 2]
+7) Somnia, visiones, voces, literae, miracula non sunt formale fidei objectum, quia",−'hes. 2]' (start),"7) Somnia, visiones, voces, literae, miracula non sunt formale fidei objectum, quia",0.912,0.928
+DE-611-HS-958006:0014:030,heavy_revision,boundary,boundary-letter,"Abbé Baudrant, je
+ne manqueray pas de","'Abbé' → ""l'Abbé""","l'Abbé Baudrant, je ne manqueray pas de",0.923,0.947
+00068377:0280:017,heavy_revision,wrong,normalization,"dans un arrest, sans qu’on puisse alléguer
+contre celuy qui allégué",'celuy qui allégué' → 'celuy qui allegue',"dans un arrest, sans qu’on puisse alléguer contre celuy qui allegue",0.955,1.000
+00068377:1186:023,heavy_revision,boundary,boundary-letter,la bonne foy qu’il a,reads 'la bonne foy qu’il',la bonne foy qu’il,0.900,0.900
+00068823:0324:003,heavy_revision,correct,bracket,"n gelindigkeit und flexibilität
+erhalten werden[,]",−'n' (start),"gelindigkeit und flexibilität erhalten werden[,]",0.940,0.957
+00068823:0324:025,heavy_revision,correct,boundary-letter,Mahlzeit. (NB.) Der trunck mus nicht starck s,−'s' (end),Mahlzeit. (NB.) Der trunck mus nicht starck,0.956,0.951
+DE-611-HS-855794:0242:018,scrap,correct,boundary-letter,hiarint. Utrumque huic muneri non male praefuturum s,−'s' (end),hiarint. Utrumque huic muneri non male praefuturum,0.962,0.961
+DE-611-HS-958114:0029:034,scrap,boundary,boundary-letter,serviteur C,−'C',serviteur,0.818,0.818
+DE-611-HS-861286:0053:017,scrap,boundary,boundary-letter,"fort connu, et les Medicins pourr",'pourr' → 'pour',"fort connu, et les Medicins pour",0.970,0.969
+DE-611-HS-959414:0012:041,scrap,boundary,boundary-letter,la quiter pour suivre son altesse partout,+'de' (start),de la quiter pour suivre son altesse partout,0.932,0.932
+DE-611-HS-959414:0012:051,scrap,boundary,boundary-letter,avoir de vos nouvelles affin que sy vo,'sy vo' → 'sy vous',avoir de vos nouvelles affin que sy vous,0.950,0.950
+DE-611-HS-859609:0398:021,scrap,correct,boundary-letter,cepticos nuper miratus,'cepticos' → 'scepticos',scepticos nuper miratus,0.957,0.957
+DE-611-HS-856973:0134:011,scrap,boundary,boundary-letter,"’observatoire, elle servira pour",'’observatoire' → 'L’observatoire',"L’observatoire, elle servira pour",0.970,0.938
+DE-611-HS-3595205:0327:022,scrap,boundary,boundary-letter,"incapable d’etre rompu.
+Ce",+'et' (start); −'. Ce' (end),et incapable d’etre rompu,0.731,0.760
+DE-611-HS-3616805:0057:031,scrap,boundary,boundary-letter,su Amuletorum non facio meam. Addit,−'su' (start); −'Addit' (end),Amuletorum non facio meam.,0.743,0.735
+00068573:0003:057,scrap,boundary,boundary-letter,"honneur, et plaisirs de convenance; l’un d’estre loué; l’autre par
+exemple lecture d’une","+""l'"" (start)","l'honneur, et plaisirs de convenance; l’un d’estre loué; l’autre par exemple lecture d’une",0.967,0.977
+DE-611-HS-860722:0087:064,scrap,wrong,math,"tc., ut patebit substituendo in allatam regulam",'tc.' → '+ x',"+ x, ut patebit substituendo in allatam regulam",0.936,0.956
+00068369:0132:007,scrap,boundary,boundary-letter,"hristus secundum humanam hoc universum et in eo Ecclesiam
+gubernet vel quod o",'hristus' → 'Christus'; −'o' (end),Christus secundum humanam hoc universum et in eo Ecclesiam gubernet vel quod,0.948,0.961
+00068369:0132:035,scrap,boundary,boundary-letter,"in medio relinquitur, an autem illaeso Concilio Tridentino d",−'d' (end),"in medio relinquitur, an autem illaeso Concilio Tridentino",0.967,0.966
+DE-611-HS-3595205:0063:045,scrap,boundary,boundary-letter,"choses que vous dites, vous pouvez estre très seur quel en sera mon
+2 (Daneben",−'2 (Danebens',,,

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Metadata><Creator>escriptorium</Creator></Metadata>
+  <Page imageFilename="a.jpg" imageWidth="1000" imageHeight="800">
+    <TextRegion id="r0" custom="structure {type:DigitizationArtefactZone;}">
+      <Coords points="0,700 0,800 1000,800 1000,700"/>
+      <TextLine id="stamp">
+        <Coords points="10,710 400,710 400,760 10,760"/>
+        <Baseline points="10,750 400,750"/>
+        <TextEquiv conf="0.5"><Unicode>LEIBNIZ BIBLIOTHEK HANNOVER</Unicode></TextEquiv>
+      </TextLine>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MainZone;}">
+      <Coords points="0,0 0,600 1000,600 1000,0"/>
+      <TextLine id="a1">
+        <Coords points="10,10 900,10 900,60 10,60"/>
+        <Baseline points="10,50 900,50"/>
+        <TextEquiv conf="0.9"><Unicode>Mechanici ſcriptores plerique olim non niſi</Unicode></TextEquiv>
+      </TextLine>
+      <TextLine id="a2">
+        <Coords points="10,70 900,70 900,120 10,120"/>
+        <Baseline points="10,110 900,110"/>
+        <TextEquiv conf="0.8"><Unicode>de quinque Machinis Fundamentalibus ut</Unicode></TextEquiv>
+      </TextLine>
+      <TextLine id="a3">
+        <Coords points="10,130 900,130 900,180 10,180"/>
+        <Baseline points="10,170 900,170"/>
+        <TextEquiv conf="0.7"><Unicode>Vectem Trochleam Cuneum Cochleam</Unicode></TextEquiv>
+      </TextLine>
+      <TextLine id="a4">
+        <Coords points="10,190 900,190 900,240 10,240"/>
+        <Baseline points="10,230 900,230"/>
+        <TextEquiv><Unicode></Unicode></TextEquiv>
+      </TextLine>
+    </TextRegion>
+  </Page>
+</PcGts>

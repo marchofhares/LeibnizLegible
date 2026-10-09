@@ -516,6 +516,180 @@ def test_server_rendered_pages_link_the_text_exports(store_path, tmp_path) -> No
     assert f'<a href="/api/works/{W1}/text" download>Download the text of this work</a>' in work
 
 
+# ---- the text of a catalogue piece (W4) --------------------------------------- #
+
+
+def _link_record(
+    store_path: Path,
+    rid: str,
+    marks: list[str],
+    work_id: str = W1,
+    method: str = "gwlb_link",
+    conf: float = 1.0,
+) -> None:
+    """A catalogue record with the shelfmarks given, linked to a work."""
+    conn = db.connect(store_path)
+    db.upsert_katalog_record(
+        conn, db.KatalogRecord(record_id=rid, metadata={"titel": rid}, shelfmark_refs=marks)
+    )
+    db.upsert_crosswalk(conn, db.CrosswalkMatch(rid, work_id, method, conf))
+    conn.commit()
+    conn.close()
+
+
+def test_record_text_export(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get("/api/records/k-109/text")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "text/plain; charset=utf-8"
+    assert r.headers["content-disposition"] == (
+        'attachment; filename="leibniz-legible_record-k-109.txt"'
+    )
+    assert "content-length" not in r.headers  # streamed, like a work
+    head, body = _split(r.text)
+    assert all(row.startswith("# ") for row in head)
+    expected = [
+        "# Leibniz Legible — https://leibnizlegible.com",
+        "# Piece: https://leibnizlegible.com/api/records/k-109/text",
+        "# Catalogue record: k-109 — Praefatio operis ad instaurationem scientiarum",
+        "# Incipit: Mihi si dicendum",
+        "# Date: 1679",
+        "# Akademie-Ausgabe: AA VI,4 N. 109",
+        f"# Work: https://leibnizlegible.com/work/{W1}",
+        "# Title: LH 4,6,18 (shelfmark LH IV, 6, 18)",
+        "# Folios: Bl. 1–2 (from the shelfmark LH IV, 6, 18 Bl. 1-2): 3 pages, canvases 1–3, "
+        f"page ids {W1}:0001 to {W1}:0003",
+        f"# Original at the GWLB: https://digitale-sammlungen.gwlb.de/resolve?id={W1}",
+        "# Lines: 5 recognised on 2 of 3 pages, mean confidence 0.78",
+        f"# {attr.KATALOG}",
+        f"# {attr.HONESTY}",
+        f"# {attr.TEXT_LICENCE}",
+        f"# {attr.WORDING_RULE}",
+        "# After the first blank line, page by page:",
+    ]
+    at = [next(i for i, row in enumerate(head) if row.startswith(e)) for e in expected]
+    assert at == sorted(at)
+    assert not any(row.startswith("# Sender") for row in head)  # a writing, not a letter
+    # the folios Bl. 1-2 name: 1r, 1v and 2r, the last without text (a one-line note)
+    headings = [row for row in body if row.startswith("## ")]
+    assert headings == [
+        f"## Folio 1r — {W1}:0001",
+        f"## Folio 1v — {W1}:0002",
+        f"## Folio 2r — {W1}:0003",
+    ]
+    assert "# No recognised text on this page (skipped: no_lines)." in body
+    texts = [row for row in body if row and not row.startswith("#")]
+    assert texts == _texts(store_path, f"{W1}:0001") + _texts(store_path, f"{W1}:0002")
+    # each page carries its source image and model, as in the work export
+    assert sum(row.startswith("# Source image: ") for row in body) == 2
+    assert "# Model: leibniz-htr-v2@v2, run 3" in "\n".join(body)
+
+
+def test_record_text_export_tsv(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    r = c.get("/api/records/k-109/text", params={"format": "tsv"})
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "text/tab-separated-values; charset=utf-8"
+    assert r.headers["content-disposition"].endswith('filename="leibniz-legible_record-k-109.tsv"')
+    head, rows = _split(r.text)
+    assert head[-1].startswith("# Each recognised line is a tab-separated row")
+    assert rows[0] == "\t".join(api.TSV_COLUMNS)
+    data = [row.split("\t") for row in rows[1:] if row and not row.startswith("#")]
+    assert [row[0] for row in data] == [
+        f"{W1}:0001:000",
+        f"{W1}:0001:001",
+        f"{W1}:0001:002",
+        f"{W1}:0002:000",
+        f"{W1}:0002:001",
+    ]
+    assert [row[4] for row in data] == _texts(store_path, f"{W1}:0001") + _texts(
+        store_path, f"{W1}:0002"
+    )
+
+
+def test_record_text_404s_say_why(store_path, tmp_path) -> None:
+    _link_record(store_path, "k-nobl", ["LH IV, 6, 18"])  # no folio range
+    _link_record(store_path, "k-far", ["LH IV, 6, 18 Bl. 9"])  # folios the scan does not label
+    _link_record(store_path, "k-bare", [], work_id=W2)  # no shelfmark at all
+    conn = db.connect(store_path)  # a record linked to no work
+    db.upsert_katalog_record(
+        conn, db.KatalogRecord(record_id="k-loose", shelfmark_refs=["LH IV, 6, 18 Bl. 1"])
+    )
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path)
+    assert c.get("/api/records/nope/text").json() == {"detail": "record nope not found"}
+    assert c.get("/api/records/nope/text").status_code == 404
+    reasons = {
+        rid: c.get(f"/api/records/{rid}/text") for rid in ("k-nobl", "k-far", "k-bare", "k-loose")
+    }
+    assert {r.status_code for r in reasons.values()} == {404}
+    assert (
+        "its shelfmark 'LH IV, 6, 18' names no folio (Bl.) range"
+        in reasons["k-nobl"].json()["detail"]
+    )
+    far = reasons["k-far"].json()["detail"]
+    assert "names folios Bl. 9" in far and f"no page of work {W1} carries a folio label" in far
+    assert "carries no shelfmark" in reasons["k-bare"].json()["detail"]
+    assert "not linked to a digitized work" in reasons["k-loose"].json()["detail"]
+    assert c.get("/api/records/k-109/text", params={"format": "xml"}).status_code == 422
+    # the work's records say which can be placed, and only those carry the link
+    katalog = {k["record_id"]: k for k in c.get(f"/api/works/{W1}").json()["katalog"]}
+    placed = katalog["k-109"]
+    assert placed["text_url"] == "/api/records/k-109/text"
+    assert (placed["folio_label"], placed["folio_range"], placed["n_pages"]) == (
+        "Bl. 1–2",
+        [1, 2],
+        3,
+    )
+    for rid in ("k-nobl", "k-far"):
+        assert rid in katalog and not (
+            {"text_url", "folio_label", "folio_range", "n_pages"} & set(katalog[rid])
+        )
+
+
+def test_record_text_is_documented_crawlable_and_linked(store_path, tmp_path) -> None:
+    _link_record(store_path, "k-nobl", ["LH IV, 6, 18"])
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    get = c.get("/openapi.json").json()["paths"]["/api/records/{record_id}/text"]["get"]
+    assert get["summary"] == "The text of a catalogue piece across its folios"
+    assert "format" in [p["name"] for p in get["parameters"]]
+    assert "cannot be placed" in get["responses"]["404"]["description"]
+    assert {"text/plain", "text/tab-separated-values"} <= set(get["responses"]["200"]["content"])
+    robots = RobotFileParser()
+    robots.parse(c.get("/robots.txt").text.splitlines())
+    assert robots.can_fetch("*", "https://leibnizlegible.com/api/records/k-109/text")
+    assert not robots.can_fetch("*", "https://leibnizlegible.com/api/other")
+    llms = c.get("/llms.txt").text
+    assert "`GET /api/records/{record_id}/text`:" in llms and "`text_url`" in llms
+    # the server-rendered work page links the piece's text, and only where it resolves
+    work = c.get(f"/work/{W1}").text
+    assert '<a href="/api/records/k-109/text" download>Text of this piece (Bl. 1–2)</a>' in work
+    assert "/api/records/k-nobl/text" not in work
+    # the viewer has the words in both languages; the page view's download moved
+    # into the text block; the About page says text comes per page, work and piece
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for key in (
+        "work.katalog.text",
+        "page.textLink",
+        "page.text",
+        "page.text.copy",
+        "page.text.copied",
+        "page.text.copied.one",
+        "page.text.copyRefused",
+        "page.text.download",
+        "page.text.prov",
+    ):
+        assert strings.count(f"'{key}':") == 2, key  # EN and DE
+    assert "'page.download':" not in strings
+    assert "per catalogue piece" in strings and "je Katalogstück" in strings
+    page_js = (STATIC_DIR / "views" / "page.js").read_text(encoding="utf-8")
+    assert "page.text.download" in page_js and "page.download" not in page_js.replace(
+        "page.text.download", ""
+    )
+    assert "navigator.clipboard" in page_js
+
+
 # ---- the browse index (W3) ----------------------------------------------------- #
 
 

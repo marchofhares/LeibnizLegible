@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Page imageFilename="b.jpg" imageWidth="1000" imageHeight="800">
+    <TextRegion id="r0" custom="structure {type:MainZone;}">
+      <TextLine id="b1"><TextEquiv conf="0.9"><Unicode>et Axem in peritrochio disseruerunt.</Unicode></TextEquiv></TextLine>
+      <TextLine id="b2"><TextEquiv conf="0.52"><Unicode>Am Rande:</Unicode></TextEquiv></TextLine>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MarginTextZone;}">
+      <TextLine id="b3"><TextEquiv conf="0.88"><Unicode>quae omnia ad unum principium revocari possunt.</Unicode></TextEquiv></TextLine>
+    </TextRegion>
+  </Page>
+</PcGts>

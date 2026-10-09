@@ -1,0 +1,52 @@
+# systemd unit for the staging site (deploy/README.md §14): the production
+# unit, deploy/leibniz-legible.service, with its own checkout, environment
+# file and venv. Nothing else differs, and tests/test_deploy_staging.py holds
+# it to that. deploy/staging-install.sh installs it.
+#   install -m 0644 deploy/leibniz-legible-staging.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now leibniz-legible-staging
+# Configuration lives in /etc/leibniz-legible/staging.env (deploy/staging.env.example).
+[Unit]
+Description=Leibniz Legible staging — a branch behind a password
+Documentation=https://github.com/marchofhares/leibnizlegible
+After=network-online.target meilisearch.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=leibniz
+Group=leibniz
+WorkingDirectory=/opt/leibniz-legible-staging
+EnvironmentFile=/etc/leibniz-legible/staging.env
+ExecStart=/opt/leibniz-legible-staging/.venv/bin/leibniz serve
+Restart=always
+RestartSec=3
+TimeoutStopSec=20
+
+# The process only reads the store; it needs nothing else from the system.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+CapabilityBoundingSet=
+AmbientCapabilities=
+# SQLite keeps its shared-memory/WAL side files next to the store.
+ReadWritePaths=/var/lib/leibniz-legible
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

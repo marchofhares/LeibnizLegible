@@ -1,0 +1,200 @@
+ref,stratum,verdict,pattern,signals,why,similarity,note
+00068377:1258:008,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.947,We do not add the accent if not present in the manuscript
+DE-611-HS-974894:0332:018,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.972,"Same comment, we do not modernize ""addressés"" to ""addressez""."
+DE-611-HS-958698:0011:024,fair_copy,correct,correct,correct,correct verdict,0.877,"the crop misses out the last two letters ""re"""
+DE-611-HS-859738:0014:007,fair_copy,correct,correct,correct,correct verdict,0.981,
+DE-611-HS-508944:0229:018,fair_copy,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-862260:0064:004,fair_copy,correct,correct,correct,correct verdict,0.895,
+00068377:0548:015,fair_copy,wrong,bracket,bracket;reading;normalization,an editorial bracket in the minted text,0.860,"""àdroit"" instead of ""à droitfe""; here the spelling is not modernized"
+DE-611-HS-860628:0257:012,fair_copy,correct,correct,correct,correct verdict,0.821,
+00068369:0660:003,fair_copy,correct,correct,correct,correct verdict,0.743,
+DE-611-HS-970455:0009:006,fair_copy,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-855596:0006:012,fair_copy,correct,correct,correct,correct verdict,0.714,
+DE-611-HS-855596:0007:002,fair_copy,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-974894:0325:013,fair_copy,wrong,reading,reading,the note reads 'Casal' for 'Casai',0.976,"""Casal"" instead of ""Casai"""
+DE-611-HS-974894:0243:031,fair_copy,correct,reading,reading;correct,the note reads 'ici' for 'icy',0.977,"""ici"" instead of ""icy""..."
+00068377:1270:027,fair_copy,correct,correct,correct,correct verdict,0.931,
+DE-611-HS-974894:0350:006,fair_copy,correct,correct,correct,correct verdict,0.939,
+DE-611-HS-974894:0296:008,fair_copy,wrong,normalization,normalization,the note objects to a mark the edition regularises,0.955,"Why is there a capital for ""vous""? We expect ""que vous aurez..."". Wrong accent here: ""Il allégué"", we expect ""Il allegue""."
+DE-611-HS-974894:0313:028,fair_copy,correct,hyphen,hyphen-note;correct,the note names a missing hyphen the HTR did not read either,0.927,"I think there is a hyphen at the end of the line ""ou-"". If ""Mons"" can be considered instead of ""Mr."", it can be Mister instead."
+00068377:0959:022,fair_copy,correct,correct,correct,correct verdict,0.667,
+00068377:0963:001,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.875,"Here the ""ie"" is modernized to ""je""."
+DE-611-HS-862041:0034:013,fair_copy,correct,correct,correct,correct verdict,0.980,
+00068377:1223:026,fair_copy,correct,correct,correct,correct verdict,0.969,
+00068377:1383:023,fair_copy,wrong,bracket,bracket,an editorial bracket in the minted text,0.818,"""[l’j"" should not be there. Else, all good."
+00068285:0002:001,fair_copy,correct,correct,correct,correct verdict,1.000,
+00068285:0009:035,fair_copy,correct,correct,correct,correct verdict,1.000,
+00068285:0013:039,fair_copy,correct,correct,correct,correct verdict,0.912,
+00068285:0016:001,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.882,"there is no comma after ""temere"""
+00068285:0033:026,fair_copy,correct,correct,correct,correct verdict,1.000,
+00068285:0037:019,fair_copy,correct,correct,correct,correct verdict,0.839,
+00068285:0059:036,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.935,"no comma after ""sequatur"""
+00068285:0070:008,fair_copy,correct,correct,correct,correct verdict,0.871,
+00068285:0075:033,fair_copy,correct,correct,correct,correct verdict,1.000,
+00068285:0090:000,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,1.000,"ponctuation missed or symbol mismatch: ""pulcherrime, exprimuntur, quarum"""
+00068285:0101:040,fair_copy,correct,correct,correct,correct verdict,0.946,
+00068285:0109:025,fair_copy,correct,correct,correct,correct verdict,0.970,
+00068285:0135:034,fair_copy,correct,hyphen,hyphen-note;normalization;correct,the note names a missing hyphen the HTR did not read either,0.935,"The "";"" should be a comma; missing hyphen at the end of the line"
+00068285:0139:040,fair_copy,boundary,boundary-letter,boundary-letter,boundary verdict,0.519,"""eae, quae a beatis"""
+00068285:0140:004,fair_copy,correct,hyphen,hyphen;normalization;correct,"HTR line ends in '-', the minted text in a letter; the note says so",1.000,"""DEUS"" is written all in capital letters here; missing hyphen at the end of the line"
+00068285:0148:014,fair_copy,correct,hyphen,hyphen-note;correct,the note names a missing hyphen the HTR did not read either,0.933,"""DEUS""; missing hyphen at the end of the line"
+00068285:0157:002,fair_copy,correct,correct,correct,correct verdict,0.970,
+00068285:0166:010,fair_copy,correct,hyphen,hyphen;correct,"HTR line ends in '-', the minted text in a letter; the note says so",1.000,missing hyphen at the end of the line
+00068285:0173:037,fair_copy,correct,correct,correct,correct verdict,0.971,
+00068285:0183:029,fair_copy,correct,normalization,normalization;correct,"a mark the edition added: ','",0.974,"added "","" after ""inter se"", not present in the manuscript"
+00068285:0194:004,fair_copy,wrong,reading,reading,the note reads 'praevideatur' for 'provideatur',0.909,"We read ""praevideatur"" instead of ""provideatur""."
+00068285:0211:023,fair_copy,boundary,boundary-letter,hyphen;boundary-letter,boundary verdict,0.919,"Missing ""hoc"" before ""divina sapientia""; missing hyphen at the end of the line"
+00068285:0214:010,fair_copy,correct,correct,correct,correct verdict,1.000,
+00068285:0233:024,fair_copy,correct,hyphen,hyphen-note;correct,the note names a missing hyphen the HTR did not read either,0.919,missing hyphen at the end
+00068285:0240:010,fair_copy,correct,correct,correct,correct verdict,0.921,
+00068285:0256:015,fair_copy,wrong,reading,reading;normalization,the note reads 'et' for 'ut',0.923," ""et"" instead of ""ut"" ?; the comma is not present in the manuscript"
+00068285:0273:014,fair_copy,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.933,comma not present in the manuscript
+DE-611-HS-957395:0009:011,light_revision,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,1.000,"no comma after ""teste"""
+00068377:1246:014,light_revision,correct,correct,correct,correct verdict,0.908,
+DE-611-HS-867801:0007:039,light_revision,correct,correct,correct,correct verdict,0.952,
+DE-611-HS-867321:0021:010,light_revision,correct,correct,correct,correct verdict,0.676,
+DE-611-HS-957357:0088:009,light_revision,correct,boundary-letter,boundary-letter;correct,'communique' → 'communiquer': 1 character(s) at an end,0.852,"missing ""r"" at the end in ""communiquer"""
+DE-611-HS-960102:0009:034,light_revision,correct,correct,correct,correct verdict,0.983,
+DE-611-HS-970495:0142:001,light_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-860383:0016:000,light_revision,correct,correct,correct,correct verdict,0.875,
+DE-611-HS-867205:0001:032,light_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.781,"""Studiis"" instead of ""tudiis"""
+DE-611-HS-857075:0050:034,light_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.824,"""quoy"" instead of ""quo"""
+DE-611-HS-957317:0052:034,light_revision,correct,bracket,bracket;correct,an editorial bracket in the minted text,0.891,
+DE-611-HS-855601:0006:015,light_revision,correct,correct,correct,correct verdict,0.976,
+DE-611-HS-959288:0086:029,light_revision,wrong,other,misaligned,"override: the one misaligned line the audit found: the minted fragment ""érité"" (of vérité) sits on a strip that reads ""serviteur""; settled 2026-10-07 from the note",0.625,"""serviteur"" instead of ""érité"""
+00068369:0015:019,light_revision,correct,correct,correct,correct verdict,0.929,
+DE-611-HS-861697:0036:033,light_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-971102:0034:010,light_revision,correct,hyphen,hyphen;correct,"HTR line ends in '-', the minted text in a letter; the note says so",0.933,missing hyphen at the end of the line
+DE-611-HS-855763:0005:036,light_revision,correct,correct,correct,correct verdict,0.675,
+DE-611-HS-856369:0192:022,light_revision,correct,correct,correct,correct verdict,0.833,
+DE-611-HS-860359:0005:026,light_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-855766:0015:045,light_revision,correct,correct,correct,correct verdict,0.918,
+00068442:0051:032,light_revision,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,1.000,"no comma after ""mieux"" (another sign?)"
+DE-611-HS-973068:0082:003,light_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-974744:0053:001,light_revision,correct,correct,correct,correct verdict,0.722,
+DE-611-HS-861697:0053:007,light_revision,correct,correct,correct,correct verdict,0.943,
+DE-611-HS-970455:0043:035,light_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-971140:0064:052,light_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-866698:0001:007,light_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.814,"We read ""qu'ils surprenent""; ""Roy""  -> missing ""y"""
+DE-611-HS-958494:0036:004,light_revision,correct,correct,correct,correct verdict,0.967,
+00068778:0079:037,light_revision,correct,correct,correct,correct verdict,0.978,
+DE-611-HS-860577:0026:057,light_revision,correct,correct,correct,correct verdict,0.913,
+DE-611-HS-3595205:0073:018,light_revision,correct,correct,correct,correct verdict,0.719,
+00068768:0311:027,light_revision,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.897,"""t"" lower case for ""trajectum"""
+00068768:0384:014,light_revision,correct,hyphen,hyphen;correct,"HTR line ends in '-', the minted text in a letter; the note says so",0.957,missing hyphen at the end of the line
+00068283:0044:006,light_revision,correct,hyphen,hyphen-note;normalization;correct,the note names a missing hyphen the HTR did not read either,0.957,"""DEUM""; missing comma after ""DEUM""; missing hyphen at the end of the line"
+00068774:0253:037,light_revision,correct,correct,correct,correct verdict,0.891,
+00068774:0254:026,light_revision,boundary,boundary-letter,boundary-letter;boundary-word;normalization,boundary verdict,0.825,"""orbo"" at the end of the line not present on the crop. Also, capital letters are not respected: ""Fall"" and ""Rege""."
+00068774:0268:022,light_revision,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.917,"""Sie"" with capital ""S""."
+DE-611-HS-859609:0038:022,light_revision,correct,correct,correct,correct verdict,0.833,"first work missing the first letter: ""octobris"". Assigned correct, since HTR did not see the correct boudary either from the crop."
+DE-611-HS-974894:0263:018,light_revision,correct,correct,correct,correct verdict,1.000,
+00068774:0113:036,light_revision,correct,correct,correct,correct verdict,0.938,
+DE-611-HS-973119:0126:043,light_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-855712:0025:026,light_revision,correct,correct,correct,correct verdict,0.950,
+DE-611-HS-867437:0100:018,light_revision,correct,correct,correct,correct verdict,0.964,
+DE-611-HS-971383:0034:052,light_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+00068377:1120:009,light_revision,correct,hyphen,hyphen-note;normalization;correct,the note names a missing hyphen the HTR did not read either,0.983,"""d'admirer"" : apostrophe missing; hyphen missing at the end"
+DE-611-HS-861723:0193:021,light_revision,correct,correct,correct,correct verdict,0.979,
+00068768:0051:044,light_revision,correct,correct,correct,correct verdict,0.852,
+00068768:0127:060,light_revision,correct,correct,correct,correct verdict,0.900,
+00068768:0161:032,light_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.820,"no ""N"" at the end"
+DE-611-HS-868175:0015:002,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.763,"missing ""s"" at ""oserois"""
+DE-611-HS-971126:0001:053,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.906,"first letter missed: ""Car/Par sa foy..."""
+DE-611-HS-973068:0059:028,heavy_revision,correct,correct,correct,correct verdict,0.947,
+DE-611-HS-867205:0015:017,heavy_revision,correct,correct,correct,correct verdict,0.857,
+DE-611-HS-867145:0039:037,heavy_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-973585:0073:003,heavy_revision,correct,correct,correct,correct verdict,0.979,
+DE-611-HS-960189:0001:015,heavy_revision,correct,correct,correct,correct verdict,0.878,
+DE-611-HS-957829:0126:019,heavy_revision,correct,correct,correct,correct verdict,0.829,
+DE-611-HS-860223:0060:004,heavy_revision,correct,correct,correct,correct verdict,0.947,
+DE-611-HS-856819:0374:023,heavy_revision,correct,correct,correct,correct verdict,0.842,
+00068331:0018:002,heavy_revision,correct,correct,correct,correct verdict,0.984,
+DE-611-HS-867251:0037:049,heavy_revision,correct,correct,correct,correct verdict,0.844,
+00068371:0045:027,heavy_revision,wrong,addition,addition,the note names an addition rendered inline,0.788,"""in melius auctam"" is not on the line, it should be a separate line as it is an addition"
+DE-611-HS-957829:0186:009,heavy_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-860205:0007:021,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.690,"missing ""S"" in ""Schrijft"", missing ""n"" at the end word ""drucken"""
+00068400:0010:100,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.698,"""non era"" -> ""non erant"""
+00068377:1121:043,heavy_revision,wrong,normalization,normalization,'envoyé' and 'envoye' fold to the same word,0.889,"""envoyé"" -> ""envoye"""
+00068778:0014:023,heavy_revision,boundary,boundary-letter,boundary-letter;normalization,boundary verdict,0.983,"""ipso opere"" -> ""in ipso opere""; ""vescovo"" instead of ""vescouo""; """"citta`"" -> ""città"""
+00068703:0074:014,heavy_revision,correct,normalization,normalization;correct,the note objects to a mark the edition regularises,0.922,"""habeamus"" -> not sure we see the end of the word here... we see ""habea""; no comma after ""dicere""."
+00068378:0719:012,heavy_revision,boundary,bracket,bracket;boundary-letter;normalization,an editorial bracket in the minted text,0.914,. [p. 76] -> should not appear; no full stop visible on the manuscript crop.
+00068647:0042:076,heavy_revision,correct,correct,correct,correct verdict,0.895,"We do not see the ""is"" after ""Porro"""
+00068258:0003:037,heavy_revision,wrong,math,math,the note names a formula,0.348,2 dimension math expression -> not readable by HTR.
+00068647:0016:019,heavy_revision,correct,correct,correct,correct verdict,0.875,
+DE-611-HS-970486:0240:012,heavy_revision,boundary,boundary-letter,unreadable-note;boundary-letter,boundary verdict,0.846,"""imprimer"" instead of ""primer""; We cannot read the last word."
+DE-611-HS-960108:0005:046,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.811,"we do not see ""De"" at the end of this line crop."
+DE-611-HS-867509:0126:022,heavy_revision,wrong,math,math;misaligned;normalization,the note names a formula,0.778,"""eg"" is transcribed as ""ia"", the sign after ""yy"" is a cartesian equality sign. ""("" should not be present at the end."
+00068606:0413:117,heavy_revision,correct,correct,correct,correct verdict,0.727,
+DE-611-HS-859609:0077:056,heavy_revision,correct,correct,correct,correct verdict,0.600,
+00068753:0127:041,heavy_revision,correct,hyphen,hyphen-note;correct,the note names a missing hyphen the HTR did not read either,0.892,missing hyphen at the end of the line
+00067988:0015:064,heavy_revision,correct,correct,correct,correct verdict,0.982,
+00068334:0033:053,heavy_revision,boundary,bracket,bracket;boundary-letter;boundary-word,an editorial bracket in the minted text,0.867,"""hes. 2]"" -> should not appear at the beginning of the line"
+00068331:0043:071,heavy_revision,correct,hyphen,hyphen-note;correct,the note names a missing hyphen the HTR did not read either,0.984,missing hyphen at the end of the line
+DE-611-HS-958006:0006:009,heavy_revision,correct,correct,correct,correct verdict,0.984,
+00068768:0452:031,heavy_revision,correct,correct,correct,correct verdict,1.000,
+00068534:0333:126,heavy_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-958006:0014:030,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.861,"""l'Abbé"" instead of ""Abbé"""
+00068549:0190:011,heavy_revision,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-855399:0157:026,heavy_revision,correct,correct,correct,correct verdict,0.892,
+00068377:0280:017,heavy_revision,wrong,normalization,normalization,'celuy qui allégué' and 'celuy qui allegue' fold to the same word,0.909,"no comma after ""arrest""; wrong accents ""celuy qui allégué"" -> ""celuy qui allegue"""
+DE-611-HS-859609:0179:077,heavy_revision,correct,correct,correct,correct verdict,0.758,not sure of the boundary of the last word
+DE-611-HS-859609:0035:032,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.600,est
+00068377:1186:023,heavy_revision,boundary,boundary-letter,boundary-letter,boundary verdict,0.750,"correct boundary: ""la bonne foy qu’il""  "
+00068769:0143:109,heavy_revision,correct,correct,correct,correct verdict,0.585,
+00068433:0032:007,heavy_revision,correct,correct,correct,correct verdict,1.000,
+00068330:0046:016,heavy_revision,correct,correct,correct,correct verdict,1.000,
+DE-611-HS-856498:0038:012,heavy_revision,correct,correct,correct,correct verdict,0.896,
+00068650:0009:146,heavy_revision,correct,correct,correct,correct verdict,0.956,
+00068299:0013:068,heavy_revision,correct,correct,correct,correct verdict,0.977,
+00068823:0324:003,heavy_revision,correct,bracket,bracket;boundary-letter;correct,an editorial bracket in the minted text,0.812,"""n"" at the beginning should not appear"
+00068823:0324:025,heavy_revision,correct,boundary-letter,boundary-letter;correct,delete 's' at an end,0.707,"We do not see ""s"" at the end."
+DE-611-HS-855794:0241:045,scrap,correct,bracket,bracket;correct,an editorial bracket in the minted text,0.898,
+DE-611-HS-855794:0242:018,scrap,correct,boundary-letter,boundary-letter;correct,delete 's' at an end,0.745,"No ""s"" at the end"
+DE-611-HS-855794:0242:020,scrap,correct,correct,correct,correct verdict,0.812,
+DE-611-HS-958114:0029:034,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.818,"""serviteur"", no ""C""."
+DE-611-HS-867148:0144:081,scrap,unreadable,unreadable,unreadable;math,the auditors could not tell,1.000,"not ""d"", could be a math symbol or a ""z"""
+DE-611-HS-861286:0053:017,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.938,"""pourr"" -> ""pour"""
+DE-611-HS-861286:0054:014,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.882,"missing part of the word at the end: ""nu..."""
+DE-611-HS-867148:0168:003,scrap,correct,correct,correct,correct verdict,0.868,
+DE-611-HS-958816:0009:004,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-959414:0011:020,scrap,correct,correct,correct,correct verdict,0.909,
+DE-611-HS-959414:0012:007,scrap,correct,correct,correct,correct verdict,0.800,
+DE-611-HS-959414:0012:008,scrap,correct,correct,correct,correct verdict,0.786,
+DE-611-HS-959414:0012:041,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.780,"""de"" missing at the beginning; ""de la quitter pour..."""
+DE-611-HS-959414:0012:044,scrap,correct,correct,correct,correct verdict,0.894,
+DE-611-HS-959414:0012:051,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.842,"""sy vo"" -> ""sy vous"""
+DE-611-HS-859609:0398:013,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-859609:0398:021,scrap,correct,boundary-letter,boundary-letter;correct,'cepticos' → 'scepticos': 1 character(s) at an end,0.727,"""cepticos"" -> ""scepticos"". Assigned correct since the ""s"" is not really readable on the crop."
+00068206:0014:029,scrap,unreadable,unreadable,unreadable,the auditors could not tell,0.500,"cannot read the symbol alone, we need the context"
+00068815:0165:012,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.583,
+DE-611-HS-856973:0133:021,scrap,correct,correct,correct,correct verdict,0.767,
+DE-611-HS-856973:0134:011,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.800,"""’observatoire"" -> ""L’observatoire"""
+DE-611-HS-856973:0134:024,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-958572:0292:021,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-958572:0292:099,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-859552:0001:023,scrap,correct,correct,correct,correct verdict,0.868,
+DE-611-HS-859552:0003:009,scrap,correct,correct,correct,correct verdict,0.929,
+DE-611-HS-859552:0003:017,scrap,correct,correct,correct,correct verdict,0.958,
+DE-611-HS-859552:0004:000,scrap,correct,correct,correct,correct verdict,0.886,
+DE-611-HS-3595205:0327:022,scrap,boundary,boundary-letter,boundary-letter;boundary-word,boundary verdict,0.840,"""et"" missing at the beginning and "". Ce"" not present at the end."
+DE-611-HS-860722:0091:060,scrap,wrong,math,math,mathematical characters 23 % / with digits 54 %,0.077,x4
+DE-611-HS-860722:0092:013,scrap,wrong,math,,"override: a formula fragment (x°, etc.) judged wrong without a note; the density cut cannot see a single power sign; same manuscript as the x4 line; settled 2026-10-07",0.769,
+DE-611-HS-3616805:0057:031,scrap,boundary,boundary-letter,boundary-letter;boundary-word,boundary verdict,0.676,"no ""su"" at the beginning; no ""Addit"" at the end"
+00068573:0003:012,scrap,correct,correct,correct,correct verdict,0.957,
+00068573:0003:030,scrap,correct,correct,correct,correct verdict,0.911,
+00068573:0003:057,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.976,"missing ""l'"" at the beginning ""l'honneur"""
+DE-611-HS-3616805:0051:092,scrap,unreadable,unreadable,unreadable,the auditors could not tell,1.000,
+DE-611-HS-860722:0087:064,scrap,wrong,math,misaligned,"override: the note reads ""+ x"" where the edition prints ""tc."": a formula misread by the OCR of the edition, same manuscript as the x4 line; settled 2026-10-07",0.889,"""+ x"" instead of ""tc.""?"
+DE-611-HS-860722:0087:163,scrap,correct,correct,correct,correct verdict,0.955,
+00068369:0129:125,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.671,"right border not correct : should stop at ""manducationem"""
+00068369:0130:005,scrap,correct,correct,correct,correct verdict,1.000,
+00068369:0130:044,scrap,correct,correct,correct,correct verdict,0.909,
+00068369:0131:121,scrap,correct,correct,correct,correct verdict,0.877,
+00068369:0132:007,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.870,"""Christus"" -> ""C"" initial letter missing; last ""o"" should not be there."
+00068369:0132:009,scrap,correct,correct,correct,correct verdict,0.903,
+00068369:0132:035,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.966,"just ""d"" should not appear at the end"
+DE-611-HS-3595205:0063:045,scrap,boundary,boundary-letter,boundary-letter,boundary verdict,0.697,"""2 (Danebens"" -> shouldn't be there"
+00068377:0263:018,scrap,correct,correct,correct,correct verdict,0.982,
+00068377:0265:064,scrap,correct,correct,correct,correct verdict,0.963,
+00068774:0004:005,scrap,correct,hyphen,hyphen;correct,"HTR line ends in '-', the minted text in a letter; the note says so",0.854,missing hyphen at the end
+00068774:0004:006,scrap,wrong,addition,addition,the note names an addition rendered inline,0.735,"""könten"" is an addition, it is not visually on the same line"

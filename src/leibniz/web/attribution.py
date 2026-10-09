@@ -17,7 +17,7 @@ KATALOG_PUBLISHER = "Berlin-Brandenburgische Akademie der Wissenschaften (TELOTA
 PHILIUMM_MODEL = "FoNDUE-GD_v2_ft_Leibniz"
 PHILIUMM_MODEL_DOI = "10.5281/zenodo.21457538"
 PHILIUMM_SEG_DOI = "10.5281/zenodo.21537859"
-PHILIUMM_GT = "DenisaB/htr_leibniz_dataset_v1"
+PHILIUMM_GT = "DenisaBumba/htr_leibniz_dataset_v1"  # the former DenisaB/… redirects here
 
 PROJECT_NAME = "Leibniz Legible"
 PROJECT_URL = "https://github.com/marchofhares/leibnizlegible"

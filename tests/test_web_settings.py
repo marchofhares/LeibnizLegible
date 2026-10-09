@@ -60,6 +60,22 @@ def test_calculemus_url_is_a_switch_off_by_default() -> None:
     assert ServeSettings.from_env(s.to_env()) == s
 
 
+def test_meili_index_from_env_default_and_round_trip() -> None:
+    assert ServeSettings.from_env({}).meili_index == "leibniz_pages"
+    assert ServeSettings.from_env({"LEIBNIZ_MEILI_INDEX": ""}).meili_index == "leibniz_pages"
+    assert ServeSettings(meili_index=" ").meili_index == "leibniz_pages"
+    env = {"LEIBNIZ_SEARCH_BACKEND": "meili", "LEIBNIZ_MEILI_INDEX": "leibniz_pages_staging"}
+    s = ServeSettings.from_env(env)
+    assert s.meili_index == "leibniz_pages_staging"
+    assert s.to_env()["LEIBNIZ_MEILI_INDEX"] == "leibniz_pages_staging"
+    assert ServeSettings.from_env(s.to_env()) == s
+    # the name reaches the backend (no request is made until it is used)
+    be = s.open_search()
+    assert be is not None and be.name == "meili" and be.index_uid == "leibniz_pages_staging"
+    default = ServeSettings(backend="meili").open_search()
+    assert default is not None and default.index_uid == "leibniz_pages"
+
+
 def test_bad_backend_rejected() -> None:
     with pytest.raises(ValueError):
         ServeSettings(backend="solr")
