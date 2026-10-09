@@ -14,6 +14,8 @@ Subcommands:
                 harness over the recorded B1 machine text, corrupted to target CERs.
 * ``kurrent-census`` — the German census of the edition pieces (K1): language per
                 record, canvases, v1 lines, minted lines, stratum and hand; read-only.
+* ``kurrent-pilot`` — candidate readers on Leibniz's German as a factory dry run
+                (K1): readings to JSONL, yield at the gate, the side-by-side page.
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -201,6 +203,143 @@ def kurrent_census(
 
 def _fmt_pct(x: float | None) -> str:
     return "—" if x is None else f"{x:.1%}"
+
+
+@app.command("kurrent-pilot")
+def kurrent_pilot(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    german: Path = typer.Option(
+        Path("data/kurrent/german_pieces.jsonl"), "--german", help="The census's German pieces."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.jsonl"), "--edition-cache", help="The C2 edition cache."
+    ),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    readers: str = typer.Option(
+        None,
+        "--readers",
+        help="Comma-separated reader keys (Task 3 candidates); default: the baseline plus every "
+        "candidate at or under two thirds of its Dresden CER (bootstrap-candidates.json).",
+    ),
+    n_german: int = typer.Option(20, "--n-german", help="German pieces to read."),
+    n_control: int = typer.Option(5, "--n-control", help="Latin or French control pieces."),
+    max_pages: int = typer.Option(3, "--max-pages", help="Pages read per piece."),
+    min_lines: int = typer.Option(20, "--min-lines", help="Least recognised lines for a piece."),
+    sample: int | None = typer.Option(
+        None, "--sample", help="Read only the first N lines of each page (slow devices)."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    batch_size: int = typer.Option(8, "--batch-size", help="Lines per model call."),
+    seed: int = typer.Option(20261009, "--seed", help="Seed of the piece and line draws."),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/pilot-readings"),
+        "--readings-dir",
+        help="One resumable JSONL per reader.",
+    ),
+    side_by_side: Path = typer.Option(
+        Path("data/kurrent/pilot-side-by-side.html"), "--side-by-side", help="The operator's page."
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="pilot.md etc."
+    ),
+    operator_verdict: str = typer.Option(
+        None, "--operator-verdict", help="The operator's answer on the side-by-side page, verbatim."
+    ),
+    no_read: bool = typer.Option(
+        False, "--no-read", help="Score the readings already on disk; read nothing new."
+    ),
+) -> None:
+    """Candidate readers on Leibniz's German, as a factory dry run (K1 Task 4); nothing stored."""
+    from datetime import date
+
+    from leibniz.align import kurrent_pilot as P
+    from leibniz.align.ingest import load_edition_cache
+    from leibniz.htr import kurrent as K
+
+    t = date.fromisoformat(today) if today else date.today()
+    keys = (
+        [k.strip() for k in readers.split(",") if k.strip()]
+        if readers
+        else P.qualifying_readers(reports_dir / "bootstrap-candidates.json")
+    )
+    unknown = [k for k in keys if k not in K.CANDIDATES and k != P.V1]
+    if unknown:
+        raise typer.BadParameter(f"unknown readers {unknown}; known: {sorted(K.CANDIDATES)}")
+    dev = K.pick_device(device)
+    rows = P.load_german_pieces(german)
+    german_pieces = P.select_german(
+        rows, n=n_german, seed=seed, max_pages=max_pages, min_lines=min_lines
+    )
+    cache = load_edition_cache(edition_cache)
+    conn = P.open_readonly(db_path)
+    try:
+        controls = P.select_controls(
+            conn, cache, n=n_control, seed=seed, max_pages=max_pages, min_lines=min_lines, today=t
+        )
+        pieces = [*german_pieces, *controls]
+        _console.print(
+            f"[bold]kurrent-pilot[/bold] {len(german_pieces)} German pieces + {len(controls)} "
+            f"controls, {sum(len(p.page_ids) for p in pieces)} pages; readers {', '.join(keys)}; "
+            f"device {dev}"
+        )
+        readings: dict[str, dict[str, P.Reading]] = {}
+        for key in keys:
+            if key == P.V1:
+                continue
+            cand = K.CANDIDATES[key]
+            if no_read:
+                readings[key] = P.load_readings(readings_dir, key)
+                continue
+            readings[key] = P.read_pieces(
+                conn,
+                pieces,
+                key,
+                lambda c=cand: K.build_engine(c, device=dev, batch_size=batch_size),
+                images_root=images,
+                readings_dir=readings_dir,
+                sample=sample,
+                batch_size=batch_size,
+                log=lambda msg: _console.print(f"  {msg}"),
+            )
+        readings[P.V1] = P.v1_readings(conn, pieces, sample=sample)
+        order = [k for k in keys if k != P.V1] + [P.V1]
+        ordered = {k: readings[k] for k in order}
+        yields = P.dry_run(conn, pieces, ordered, cache, sample=sample)
+        summaries = P.summarize_readers(yields, ordered)
+        res = P.PilotResult(
+            pieces=pieces,
+            yields=yields,
+            summaries=summaries,
+            verdict=P.verdict(summaries),
+            readers=order,
+            sample=sample,
+            max_pages=max_pages,
+            operator_verdict=operator_verdict,
+        )
+        side_by_side.parent.mkdir(parents=True, exist_ok=True)
+        side_by_side.write_text(
+            P.side_by_side(conn, pieces, ordered, images_root=images, seed=seed, sample=sample),
+            encoding="utf-8",
+        )
+    finally:
+        conn.close()
+    for s_ in sorted(summaries, key=lambda s_: -(s_.german_yield or 0.0)):
+        _console.print(
+            f"  [bold]{s_.reader}[/bold]: German yield {_fmt_pct(s_.german_yield)} "
+            f"(conf {s_.german_mean_conf:.3f}) · control yield {_fmt_pct(s_.control_yield)} "
+            f"(conf {s_.control_mean_conf:.3f}) · {s_.read_lines:,} lines"
+        )
+    v = res.verdict
+    _console.print(f"  verdict: best {v.best_reader} at {_fmt_pct(v.best_german_yield)}; {v.note}")
+    paths = P.write_outputs(res, reports_dir=reports_dir)
+    for name, path in paths.items():
+        _console.print(f"  wrote {name}: {path}")
+    _console.print(f"  wrote side-by-side: {side_by_side}")
 
 
 @app.command()

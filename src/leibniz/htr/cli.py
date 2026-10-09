@@ -10,6 +10,8 @@ Subcommands:
 * ``leibniz bench repro`` — the full PHILIUMM reproduction: Kraken on the val
   split under every normalization policy, optional Claude comparison, writing
   ``reports/philiumm-repro.md`` and the STATUS.md gate verdict.
+* ``leibniz bench kurrent-smoke`` — the Kurrent bootstrap readers ranked on the
+  Dresden lines of the Kurrent Trace package (K1 Task 3).
 
 The kraken + torch stack is an optional dependency, imported lazily; ``fetch``,
 ``protocol`` and the metrics/harness all work without it.
@@ -231,6 +233,82 @@ def repro(
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
+
+
+# --------------------------------------------------------------------------- #
+# kurrent-smoke (K1 Task 3): the bootstrap readers ranked on Dresden
+# --------------------------------------------------------------------------- #
+
+
+@app.command("kurrent-smoke")
+def kurrent_smoke(
+    package: Path = typer.Option(
+        None, "--package", help="The Kurrent Trace package directory (default: data/external/…)."
+    ),
+    candidates: str = typer.Option(
+        None, "--candidates", help="Comma-separated candidate keys (default: every default one)."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    batch_size: int = typer.Option(8, "--batch-size", help="Lines per model call."),
+    limit: int | None = typer.Option(None, "--limit", help="Cap the Dresden lines (dev)."),
+    force: bool = typer.Option(False, "--force", help="Read again even where readings are cached."),
+    vision: bool = typer.Option(
+        True, "--vision/--no-vision", help="Add the zero-shot vision row when a key is set."
+    ),
+    vision_n: int = typer.Option(150, "--vision-n", help="Subsample for the vision row."),
+    smoke_dir: Path = typer.Option(None, "--smoke-dir", help="Where raw readings are cached."),
+    reports_dir: Path = typer.Option(None, "--reports-dir", help="Where the two reports go."),
+) -> None:
+    """Read the Dresden Kurrent lines with every candidate reader and rank them (K1 Task 3)."""
+    from leibniz.htr import kurrent as K
+
+    pkg = package or K.DEFAULT_PACKAGE
+    smoke = smoke_dir or K.DEFAULT_SMOKE_DIR
+    reports = reports_dir or K.DEFAULT_REPORTS_DIR
+    keys = (
+        [k.strip() for k in candidates.split(",") if k.strip()]
+        if candidates
+        else [k for k, c in K.CANDIDATES.items() if c.default]
+    )
+    unknown = [k for k in keys if k not in K.CANDIDATES]
+    if unknown:
+        raise typer.BadParameter(f"unknown candidates {unknown}; known: {sorted(K.CANDIDATES)}")
+    pairs = K.load_dresden(pkg, limit=limit)
+    dev = K.pick_device(device)
+    console.print(
+        f"[bold]kurrent-smoke[/bold] {len(pairs):,} Dresden lines from {pkg}; candidates "
+        f"{', '.join(keys)}; device {dev}"
+    )
+    res = K.run_smoke(
+        pairs,
+        [K.CANDIDATES[k] for k in keys],
+        device=dev,
+        batch_size=batch_size,
+        smoke_dir=smoke,
+        package_dir=pkg,
+        force=force,
+        vision=vision,
+        vision_n=vision_n,
+        log=lambda msg: console.print(f"  {msg}"),
+    )
+    for r in sorted(res.results, key=lambda r: r.scores.get("philiumm", {}).get("cer", 9.0)):
+        if r.status != "ok":
+            console.print(f"  [yellow]{r.key}[/yellow]: {r.status}")
+            continue
+        sc = r.scores["philiumm"]
+        console.print(
+            f"  [bold]{r.key}[/bold]: CER {sc['cer']:.1%} ({sc['cer_lo']:.1%}–{sc['cer_hi']:.1%}) "
+            f"· lenient {r.scores['lenient']['cer']:.1%} · strict {r.scores['strict']['cer']:.1%} "
+            f"· package reading {r.package['reading_long_s_and_whitespace']['cer']:.1%} "
+            f"· {r.ms_per_line:.0f} ms/line on {r.device}{' (cached)' if r.cached else ''}"
+        )
+    if res.vision is not None and res.vision.status == "ok":
+        v = res.vision
+        console.print(
+            f"  [bold]{v.key}[/bold]: CER {v.scores['philiumm']['cer']:.1%} on {v.n_lines} lines"
+        )
+    md, js = K.write_reports(res, reports)
+    console.print(f"wrote {md} and {js}")
 
 
 def _load_pairs(path: Path, *, limit: int | None) -> list[data.LinePair]:
