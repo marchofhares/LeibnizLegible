@@ -266,6 +266,29 @@ def test_pilot_end_to_end(tmp_path: Path) -> None:
     assert summ["verdict"]["best_reader"] == "good"
 
 
+def test_verdict_prefers_a_licensed_reader() -> None:
+    def summary(reader: str, german: float, control: float) -> P.ReaderSummary:
+        return P.ReaderSummary(
+            reader, 100, int(german * 100), german, 0.3, 50, int(control * 50), control, 0.4
+        )
+
+    summaries = [
+        summary("philiumm", 0.12, 0.42),
+        summary("unlicensed", 0.23, 0.30),
+        summary("licensed", 0.20, 0.24),
+        summary(P.V1, 0.16, 0.40),
+    ]
+    v = P.verdict(
+        summaries, {"philiumm": "CC BY 4.0", "unlicensed": "none stated", "licensed": "MIT"}
+    )
+    assert v.best_reader == "licensed" and v.best_german_yield == 0.20
+    assert v.best_any_reader == "unlicensed" and v.best_any_yield == 0.23
+    assert "states no licence" in v.licence_note
+    assert v.controls_consistent and v.control_winner == "philiumm"
+    # without a licence map the best by yield is chosen
+    assert P.verdict(summaries).best_reader == "unlicensed"
+
+
 def test_qualifying_readers_from_bootstrap_json(tmp_path: Path) -> None:
     path = tmp_path / "bootstrap-candidates.json"
     path.write_text(

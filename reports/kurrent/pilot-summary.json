@@ -1,0 +1,868 @@
+{
+ "generated": "2026-10-09",
+ "readers": [
+  "philiumm",
+  "trocr-kurrent-xvi-xvii",
+  "trocr-hanse-xvii",
+  "trocr-hanse-xvi",
+  "v1"
+ ],
+ "sample": null,
+ "max_pages": 2,
+ "pieces": [
+  {
+   "record_id": "42213",
+   "work_id": "DE-611-HS-974120",
+   "aa_label": "AA I,3 N.454",
+   "volume_label": "I,3",
+   "stratum": "heavy_revision",
+   "hand": "own",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-974120:0035",
+    "DE-611-HS-974120:0036"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf., eigh.",
+   "datum": "1682-03-01",
+   "titel": "Phil. Wilhelm von Hörnigk an Leibniz: P.S."
+  },
+  {
+   "record_id": "29507",
+   "work_id": "DE-611-HS-859703",
+   "aa_label": "AA I,3 N.496",
+   "volume_label": "I,3",
+   "stratum": "light_revision",
+   "hand": "own",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.8333,
+   "page_ids": [
+    "DE-611-HS-859703:0009",
+    "DE-611-HS-859703:0010"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf., eigh.",
+   "datum": "1683-01",
+   "titel": "Otto Mencke an Leibniz"
+  },
+  {
+   "record_id": "14964",
+   "work_id": "DE-611-HS-971383",
+   "aa_label": "AA I,10 N.169",
+   "volume_label": "I,10",
+   "stratum": "heavy_revision",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9867,
+   "page_ids": [
+    "DE-611-HS-971383:0045",
+    "DE-611-HS-971383:0046"
+   ],
+   "n_pages_total": 6,
+   "role": "german",
+   "textart": "Abf.; Bibl.verm.: Friese",
+   "datum": "1694-03-06 (94-02-24)",
+   "titel": "Detlev Marcus Friese an Leibniz"
+  },
+  {
+   "record_id": "58675",
+   "work_id": "00068593",
+   "aa_label": "AA VI,3 N.089",
+   "volume_label": "VI,3",
+   "stratum": "light_revision",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "mixed",
+   "score": 0.5455,
+   "page_ids": [
+    "00068593:0029",
+    "00068593:0030"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Reinschr.",
+   "datum": "1676",
+   "titel": "De vita beata. De l'usage de la meditation"
+  },
+  {
+   "record_id": "58771",
+   "work_id": "00068768",
+   "aa_label": "AA IV,1 N.029",
+   "volume_label": "IV,1",
+   "stratum": "heavy_revision",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.934,
+   "page_ids": [
+    "00068768:0631",
+    "00068768:0632"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Konz. mit wenigen eigh. Korr.",
+   "datum": "1669-12",
+   "titel": "Jetzige Bilance von Europa"
+  },
+  {
+   "record_id": "3220",
+   "work_id": "DE-611-HS-92149",
+   "aa_label": "AA I,6 N.123",
+   "volume_label": "I,6",
+   "stratum": "light_revision",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-92149:0039",
+    "DE-611-HS-92149:0040"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf.; eigh. Aufschr.",
+   "datum": "1690-10-21 (90-10-11)",
+   "titel": "Polycarp Marci an Leibniz"
+  },
+  {
+   "record_id": "42202",
+   "work_id": "00068814",
+   "aa_label": "AA III,3 N.393",
+   "volume_label": "III,3",
+   "stratum": "scrap",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "00068814:0209",
+    "00068814:0210"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf., Notiz von L'Hd",
+   "datum": "1682-08-30 (82-08-20)",
+   "titel": "Hans Linsen für Leibniz: [Quittung]"
+  },
+  {
+   "record_id": "33409",
+   "work_id": "DE-611-HS-958572",
+   "aa_label": "AA III,4 N.077",
+   "volume_label": "III,4",
+   "stratum": "scrap",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9837,
+   "page_ids": [
+    "DE-611-HS-958572:0289",
+    "DE-611-HS-958572:0290"
+   ],
+   "n_pages_total": 4,
+   "role": "german",
+   "textart": "Abf., eigh. Aufschr., Siegel, Papierverlust durch Siegel; Notiz von L'Hd",
+   "datum": "1684-12-22 (84-12-12)",
+   "titel": "Johann Daniel Crafft an Leibniz"
+  },
+  {
+   "record_id": "21453",
+   "work_id": "DE-611-HS-3614216",
+   "aa_label": "AA I,15 N.307",
+   "volume_label": "I,15",
+   "stratum": "fair_copy",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-3614216:0065",
+    "DE-611-HS-3614216:0066"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf.; Bibl.verm.",
+   "datum": "1698-04-13 (98-04-03)",
+   "titel": "Johann Just Winkelmann an Leibniz"
+  },
+  {
+   "record_id": "9429",
+   "work_id": "00068818",
+   "aa_label": "AA I,7 N.045",
+   "volume_label": "I,7",
+   "stratum": "heavy_revision",
+   "hand": "own",
+   "leibniz_hand": true,
+   "language": "de",
+   "score": 0.9928,
+   "page_ids": [
+    "00068818:0035",
+    "00068818:0036"
+   ],
+   "n_pages_total": 4,
+   "role": "german",
+   "textart": "Konz.; eigh.",
+   "datum": "1691-12",
+   "titel": "Leibniz an Herzog Ernst August"
+  },
+  {
+   "record_id": "35140",
+   "work_id": "DE-611-HS-866679",
+   "aa_label": "AA III,1 N.014",
+   "volume_label": "III,1",
+   "stratum": "light_revision",
+   "hand": "own",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-866679:0021",
+    "DE-611-HS-866679:0022"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf., eigh.",
+   "datum": "1673-04-20 (73-04-10)",
+   "titel": "Schloer an Leibniz"
+  },
+  {
+   "record_id": "16897",
+   "work_id": "DE-611-HS-866403",
+   "aa_label": "AA I,15 N.074",
+   "volume_label": "I,15",
+   "stratum": "heavy_revision",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-866403:0133",
+    "DE-611-HS-866403:0134"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf.; Siegelrest",
+   "datum": "1698-06-10 (98-05-31)",
+   "titel": "Johann Thiele Reinerding an Leibniz"
+  },
+  {
+   "record_id": "10047",
+   "work_id": "DE-611-HS-970495",
+   "aa_label": "AA I,10 N.337",
+   "volume_label": "I,10",
+   "stratum": "light_revision",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.725,
+   "page_ids": [
+    "DE-611-HS-970495:0055",
+    "DE-611-HS-970495:0056"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Abf.",
+   "datum": "1694-08-10 (94-07-31)",
+   "titel": "Hermann von der Hardt an Leibniz"
+  },
+  {
+   "record_id": "13864",
+   "work_id": "00068808",
+   "aa_label": "AA I,12 N.019",
+   "volume_label": "I,12",
+   "stratum": "heavy_revision",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9643,
+   "page_ids": [
+    "00068808:0003",
+    "00068808:0004"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Konz. mit mehreren eigh. Ändergn von L",
+   "datum": "1695-11",
+   "titel": "Leibniz an Jobst Christoph Reiche"
+  },
+  {
+   "record_id": "57924",
+   "work_id": "00068779",
+   "aa_label": "AA IV,2 N.011",
+   "volume_label": "IV,2",
+   "stratum": "light_revision",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9854,
+   "page_ids": [
+    "00068779:0241",
+    "00068779:0242"
+   ],
+   "n_pages_total": 8,
+   "role": "german",
+   "textart": "Abschr. bzw. verb.Reinschr., L5 & eigh.",
+   "datum": "1678-10",
+   "titel": "Aus: Einige Schriften den Characterem der Chur- und Fürstlichen Gesandten betreffendt: Monita ad Conclusionem collegii electoralis ([links]: 20. jun. 1678 Conclusum Collegii Electoralis [rechts]: Monita)"
+  },
+  {
+   "record_id": "55765",
+   "work_id": "00068437",
+   "aa_label": "AA IV,3 N.084",
+   "volume_label": "IV,3",
+   "stratum": "scrap",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9706,
+   "page_ids": [
+    "00068437:0013",
+    "00068437:0014"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Notiz",
+   "datum": "1677-12-21 (77-12-11)",
+   "titel": "Hans Reinicke und Berend Blumenberg contra Franz Ernst von Rheden"
+  },
+  {
+   "record_id": "59196",
+   "work_id": "00068774",
+   "aa_label": "AA IV,1 N.008",
+   "volume_label": "IV,1",
+   "stratum": "scrap",
+   "hand": "partial",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9688,
+   "page_ids": [
+    "00068774:0001",
+    "00068774:0002"
+   ],
+   "n_pages_total": 4,
+   "role": "german",
+   "textart": "Konz. mit einigen Korr. von L' & Boineburgs Hd. (eigh. Notiz von L s.Note!)",
+   "datum": "1670-08-06",
+   "titel": "Bedenken welchergestalt Securitas publica interna et externa und Status praesens im Reich auf festen Fuß zu stellen. Auszug des ersten Teiles. (Auszug Partis I_mae eines Bedencken, so de Securitate Imperii interna est externa stabilienda verfaßet.)"
+  },
+  {
+   "record_id": "11660",
+   "work_id": "00068255",
+   "aa_label": "AA I,12 N.067",
+   "volume_label": "I,12",
+   "stratum": "fair_copy",
+   "hand": "other",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9781,
+   "page_ids": [
+    "00068255:0185",
+    "00068255:0186"
+   ],
+   "n_pages_total": 2,
+   "role": "german",
+   "textart": "Teilabschr., Schr. (21c)",
+   "datum": "1696-05-18",
+   "titel": "Mira Numerorum omnium expressio per 1. et 0. repraesentans rerum originem ex deo et nihilo, seu Mysterium creationis"
+  },
+  {
+   "record_id": "30178",
+   "work_id": "00068823",
+   "aa_label": "AA IV,3 N.038",
+   "volume_label": "IV,3",
+   "stratum": "heavy_revision",
+   "hand": "own",
+   "leibniz_hand": true,
+   "language": "de",
+   "score": 0.9964,
+   "page_ids": [
+    "00068823:0437",
+    "00068823:0438"
+   ],
+   "n_pages_total": 4,
+   "role": "german",
+   "textart": "Konz.; eigh.",
+   "datum": "1685",
+   "titel": "Von gemeinen Lasten"
+  },
+  {
+   "record_id": "43865",
+   "work_id": "DE-611-HS-49877",
+   "aa_label": "AA III,3 N.315",
+   "volume_label": "III,3",
+   "stratum": "light_revision",
+   "hand": "own",
+   "leibniz_hand": false,
+   "language": "de",
+   "score": 0.9903,
+   "page_ids": [
+    "DE-611-HS-49877:0027",
+    "DE-611-HS-49877:0028"
+   ],
+   "n_pages_total": 4,
+   "role": "german",
+   "textart": "Abf., eigh.",
+   "datum": "1682-01-24 (82-01-14)",
+   "titel": "S. Scheffer an Leibniz, Hannover"
+  },
+  {
+   "record_id": "5391",
+   "work_id": "DE-611-HS-855794",
+   "aa_label": "AA I,6 N.358",
+   "volume_label": "I,6",
+   "stratum": "heavy_revision",
+   "hand": "",
+   "leibniz_hand": false,
+   "language": "la",
+   "score": 0.987,
+   "page_ids": [
+    "DE-611-HS-855794:0151",
+    "DE-611-HS-855794:0152"
+   ],
+   "n_pages_total": 4,
+   "role": "control",
+   "textart": "Abf.; L Bemerkgn",
+   "datum": "1691-05-14 (91-05-04)",
+   "titel": "Joh. Friedrich Leibniz an Leibniz"
+  },
+  {
+   "record_id": "20352",
+   "work_id": "DE-611-HS-971120",
+   "aa_label": "AA I,14 N.239",
+   "volume_label": "I,14",
+   "stratum": "heavy_revision",
+   "hand": "",
+   "leibniz_hand": false,
+   "language": "fr",
+   "score": 0.9937,
+   "page_ids": [
+    "DE-611-HS-971120:0151",
+    "DE-611-HS-971120:0152"
+   ],
+   "n_pages_total": 2,
+   "role": "control",
+   "textart": "Konz. mit zahlr. Korr.",
+   "datum": "1697-08-14 (97-08-04)",
+   "titel": "Leibniz an Bartolomeo Ortensio Mauro"
+  },
+  {
+   "record_id": "19262",
+   "work_id": "DE-611-HS-867148",
+   "aa_label": "AA I,14 N.178",
+   "volume_label": "I,14",
+   "stratum": "light_revision",
+   "hand": "",
+   "leibniz_hand": false,
+   "language": "la",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-867148:0177",
+    "DE-611-HS-867148:0178"
+   ],
+   "n_pages_total": 2,
+   "role": "control",
+   "textart": "Abf.",
+   "datum": "1697-07-02 (97-06-22)",
+   "titel": "Johann Andreas Schmidt an Leibniz"
+  },
+  {
+   "record_id": "5886",
+   "work_id": "DE-611-HS-867191",
+   "aa_label": "AA I,6 N.208",
+   "volume_label": "I,6",
+   "stratum": "light_revision",
+   "hand": "",
+   "leibniz_hand": false,
+   "language": "fr",
+   "score": 1.0,
+   "page_ids": [
+    "DE-611-HS-867191:0021",
+    "DE-611-HS-867191:0022"
+   ],
+   "n_pages_total": 4,
+   "role": "control",
+   "textart": "Abf.",
+   "datum": "1691-02-25 (91-02-15)",
+   "titel": "Chilian Schrader an Leibniz"
+  },
+  {
+   "record_id": "57598",
+   "work_id": "00068522",
+   "aa_label": "AA VI,3 N.082",
+   "volume_label": "VI,3",
+   "stratum": "heavy_revision",
+   "hand": "",
+   "leibniz_hand": false,
+   "language": "la",
+   "score": 1.0,
+   "page_ids": [
+    "00068522:0001",
+    "00068522:0002"
+   ],
+   "n_pages_total": 2,
+   "role": "control",
+   "textart": "Konz.",
+   "datum": "1676-11-18",
+   "titel": "De vita beata. Ad Ethicam Spinozae (Propositiones quarum desideratur demonstratio:)"
+  }
+ ],
+ "summaries": [
+  {
+   "reader": "philiumm",
+   "german_lines": 2288,
+   "german_aligned": 285,
+   "german_yield": 0.12456293706293706,
+   "german_mean_conf": 0.29618938552202806,
+   "control_lines": 351,
+   "control_aligned": 146,
+   "control_yield": 0.41595441595441596,
+   "control_mean_conf": 0.44727074312265624,
+   "by_stratum": {
+    "fair_copy": {
+     "pieces": 2,
+     "lines": 54,
+     "aligned": 15,
+     "yield": 0.2777777777777778,
+     "mean_conf": 0.3762910336582235
+    },
+    "heavy_revision": {
+     "pieces": 7,
+     "lines": 1119,
+     "aligned": 89,
+     "yield": 0.07953529937444147,
+     "mean_conf": 0.2674173603035739
+    },
+    "light_revision": {
+     "pieces": 7,
+     "lines": 460,
+     "aligned": 165,
+     "yield": 0.358695652173913,
+     "mean_conf": 0.4944520566327876
+    },
+    "scrap": {
+     "pieces": 4,
+     "lines": 655,
+     "aligned": 16,
+     "yield": 0.024427480916030534,
+     "mean_conf": 0.19950171912377818
+    }
+   },
+   "by_hand": {
+    "other": {
+     "pieces": 8,
+     "lines": 1095,
+     "aligned": 157,
+     "yield": 0.14337899543378996,
+     "mean_conf": 0.2517216942312359
+    },
+    "own": {
+     "pieces": 6,
+     "lines": 688,
+     "aligned": 56,
+     "yield": 0.08139534883720931,
+     "mean_conf": 0.2857707044904148
+    },
+    "partial": {
+     "pieces": 6,
+     "lines": 505,
+     "aligned": 72,
+     "yield": 0.14257425742574256,
+     "mean_conf": 0.40680359247879516
+    }
+   },
+   "read_lines": 2639,
+   "ms_per_line": 16.881697612732097,
+   "device": "cuda",
+   "model": "philiumm"
+  },
+  {
+   "reader": "trocr-kurrent-xvi-xvii",
+   "german_lines": 2288,
+   "german_aligned": 463,
+   "german_yield": 0.20236013986013987,
+   "german_mean_conf": 0.32347804957500664,
+   "control_lines": 351,
+   "control_aligned": 83,
+   "control_yield": 0.23646723646723647,
+   "control_mean_conf": 0.35758545750105125,
+   "by_stratum": {
+    "fair_copy": {
+     "pieces": 2,
+     "lines": 54,
+     "aligned": 21,
+     "yield": 0.3888888888888889,
+     "mean_conf": 0.4761743339597718
+    },
+    "heavy_revision": {
+     "pieces": 7,
+     "lines": 1119,
+     "aligned": 197,
+     "yield": 0.17605004468275245,
+     "mean_conf": 0.29104235017478236
+    },
+    "light_revision": {
+     "pieces": 7,
+     "lines": 460,
+     "aligned": 196,
+     "yield": 0.4260869565217391,
+     "mean_conf": 0.5391038653284744
+    },
+    "scrap": {
+     "pieces": 4,
+     "lines": 655,
+     "aligned": 49,
+     "yield": 0.07480916030534351,
+     "mean_conf": 0.2148705274765006
+    }
+   },
+   "by_hand": {
+    "other": {
+     "pieces": 8,
+     "lines": 1095,
+     "aligned": 148,
+     "yield": 0.13515981735159818,
+     "mean_conf": 0.2351638681716752
+    },
+    "own": {
+     "pieces": 6,
+     "lines": 688,
+     "aligned": 175,
+     "yield": 0.2543604651162791,
+     "mean_conf": 0.3629788345152563
+    },
+    "partial": {
+     "pieces": 6,
+     "lines": 505,
+     "aligned": 140,
+     "yield": 0.27722772277227725,
+     "mean_conf": 0.46115624481808837
+    }
+   },
+   "read_lines": 2639,
+   "ms_per_line": 352.7593406593407,
+   "device": "cuda",
+   "model": "dh-unibe/trocr-kurrent-XVI-XVII"
+  },
+  {
+   "reader": "trocr-hanse-xvii",
+   "german_lines": 2288,
+   "german_aligned": 471,
+   "german_yield": 0.20585664335664336,
+   "german_mean_conf": 0.3264729812226118,
+   "control_lines": 351,
+   "control_aligned": 64,
+   "control_yield": 0.18233618233618235,
+   "control_mean_conf": 0.33937318663296123,
+   "by_stratum": {
+    "fair_copy": {
+     "pieces": 2,
+     "lines": 54,
+     "aligned": 20,
+     "yield": 0.37037037037037035,
+     "mean_conf": 0.45753641814077084
+    },
+    "heavy_revision": {
+     "pieces": 7,
+     "lines": 1119,
+     "aligned": 201,
+     "yield": 0.17962466487935658,
+     "mean_conf": 0.2979259816113291
+    },
+    "light_revision": {
+     "pieces": 7,
+     "lines": 460,
+     "aligned": 200,
+     "yield": 0.43478260869565216,
+     "mean_conf": 0.5319674062988058
+    },
+    "scrap": {
+     "pieces": 4,
+     "lines": 655,
+     "aligned": 50,
+     "yield": 0.07633587786259542,
+     "mean_conf": 0.22012066280489492
+    }
+   },
+   "by_hand": {
+    "other": {
+     "pieces": 8,
+     "lines": 1095,
+     "aligned": 165,
+     "yield": 0.1506849315068493,
+     "mean_conf": 0.2458218355477696
+    },
+    "own": {
+     "pieces": 6,
+     "lines": 688,
+     "aligned": 168,
+     "yield": 0.2441860465116279,
+     "mean_conf": 0.3578633027395323
+    },
+    "partial": {
+     "pieces": 6,
+     "lines": 505,
+     "aligned": 138,
+     "yield": 0.2732673267326733,
+     "mean_conf": 0.45858478975788075
+    }
+   },
+   "read_lines": 2639,
+   "ms_per_line": 355.67139067828725,
+   "device": "cuda",
+   "model": "fgho/trocr-hanseXVII-kurrent"
+  },
+  {
+   "reader": "trocr-hanse-xvi",
+   "german_lines": 2288,
+   "german_aligned": 515,
+   "german_yield": 0.22508741258741258,
+   "german_mean_conf": 0.33493772270629296,
+   "control_lines": 351,
+   "control_aligned": 107,
+   "control_yield": 0.30484330484330485,
+   "control_mean_conf": 0.4056938878506625,
+   "by_stratum": {
+    "fair_copy": {
+     "pieces": 2,
+     "lines": 54,
+     "aligned": 22,
+     "yield": 0.4074074074074074,
+     "mean_conf": 0.49160136474746063
+    },
+    "heavy_revision": {
+     "pieces": 7,
+     "lines": 1119,
+     "aligned": 214,
+     "yield": 0.19124218051831993,
+     "mean_conf": 0.3027852381849651
+    },
+    "light_revision": {
+     "pieces": 7,
+     "lines": 460,
+     "aligned": 206,
+     "yield": 0.44782608695652176,
+     "mean_conf": 0.5358619463234423
+    },
+    "scrap": {
+     "pieces": 4,
+     "lines": 655,
+     "aligned": 73,
+     "yield": 0.11145038167938931,
+     "mean_conf": 0.23584405956927643
+    }
+   },
+   "by_hand": {
+    "other": {
+     "pieces": 8,
+     "lines": 1095,
+     "aligned": 162,
+     "yield": 0.14794520547945206,
+     "mean_conf": 0.23972659393829066
+    },
+    "own": {
+     "pieces": 6,
+     "lines": 688,
+     "aligned": 188,
+     "yield": 0.27325581395348836,
+     "mean_conf": 0.37521479590430457
+    },
+    "partial": {
+     "pieces": 6,
+     "lines": 505,
+     "aligned": 165,
+     "yield": 0.32673267326732675,
+     "mean_conf": 0.486513088331502
+    }
+   },
+   "read_lines": 2639,
+   "ms_per_line": 163.70848806366047,
+   "device": "cuda",
+   "model": "fgho/trocr-hanseXVI-kurrent"
+  },
+  {
+   "reader": "v1",
+   "german_lines": 2288,
+   "german_aligned": 375,
+   "german_yield": 0.1638986013986014,
+   "german_mean_conf": 0.3075700004571798,
+   "control_lines": 351,
+   "control_aligned": 142,
+   "control_yield": 0.4045584045584046,
+   "control_mean_conf": 0.445219301603591,
+   "by_stratum": {
+    "fair_copy": {
+     "pieces": 2,
+     "lines": 54,
+     "aligned": 18,
+     "yield": 0.3333333333333333,
+     "mean_conf": 0.3973854032851332
+    },
+    "heavy_revision": {
+     "pieces": 7,
+     "lines": 1119,
+     "aligned": 147,
+     "yield": 0.13136729222520108,
+     "mean_conf": 0.28018681414411256
+    },
+    "light_revision": {
+     "pieces": 7,
+     "lines": 460,
+     "aligned": 178,
+     "yield": 0.3869565217391304,
+     "mean_conf": 0.5023459817014462
+    },
+    "scrap": {
+     "pieces": 4,
+     "lines": 655,
+     "aligned": 32,
+     "yield": 0.04885496183206107,
+     "mean_conf": 0.21015748497511907
+    }
+   },
+   "by_hand": {
+    "other": {
+     "pieces": 8,
+     "lines": 1095,
+     "aligned": 152,
+     "yield": 0.13881278538812786,
+     "mean_conf": 0.23766925035293415
+    },
+    "own": {
+     "pieces": 6,
+     "lines": 688,
+     "aligned": 121,
+     "yield": 0.17587209302325582,
+     "mean_conf": 0.32534065290611086
+    },
+    "partial": {
+     "pieces": 6,
+     "lines": 505,
+     "aligned": 102,
+     "yield": 0.201980198019802,
+     "mean_conf": 0.4349266588320005
+    }
+   },
+   "read_lines": 2639,
+   "ms_per_line": null,
+   "device": "store",
+   "model": "v1"
+  }
+ ],
+ "verdict": {
+  "best_reader": "trocr-kurrent-xvi-xvii",
+  "best_german_yield": 0.20236013986013987,
+  "baseline_german_yield": 0.12456293706293706,
+  "controls_consistent": true,
+  "control_winner": "philiumm",
+  "note": "the Latin-trained baseline (philiumm) wins the control pieces as it must",
+  "best_any_reader": "trocr-hanse-xvi",
+  "best_any_yield": 0.22508741258741258,
+  "licence_note": "`trocr-hanse-xvi` has the highest German yield (22.5%) but states no licence (none stated): evaluated, not built on; `trocr-kurrent-xvi-xvii` (MIT) is the reader K2 may use"
+ },
+ "operator_verdict": null
+}

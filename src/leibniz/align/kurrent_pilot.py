@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import base64
 import csv
+import gc
 import html
 import json
 import random
@@ -44,7 +45,7 @@ from pathlib import Path
 
 from leibniz import db
 from leibniz.align.align import HtrLine, align_piece
-from leibniz.align.audit import CROP_PAD, crop_line
+from leibniz.align.audit import CROP_PAD, crop_from_image, crop_line
 from leibniz.align.audit_reach import open_readonly
 from leibniz.align.factory import STRATUM_THRESHOLDS, page_stats_for_pages
 from leibniz.align.resolve import index_pages, select_folios
@@ -318,6 +319,25 @@ def crop(image_path: Path, line: PilotLine) -> bytes | None:
     )
 
 
+def crop_all(image_path: Path, lines: Sequence[PilotLine]) -> list[tuple[PilotLine, bytes]]:
+    """The reader's crops for one page, the page image decoded once."""
+    from PIL import Image
+
+    out: list[tuple[PilotLine, bytes]] = []
+    with Image.open(image_path) as im:
+        im.load()
+        for ln in lines:
+            try:
+                png = crop_from_image(
+                    im, ln.polygon, ln.baseline, pad=CROP_PAD, max_width=None, mask_polygon=True
+                )
+            except OSError:
+                png = None
+            if png is not None:
+                out.append((ln, png))
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # Readings (resumable JSONL per reader)
 # --------------------------------------------------------------------------- #
@@ -401,16 +421,14 @@ def read_pieces(
                         f"{reader}: page image not cached for {page_id}; {len(lines)} lines skipped"
                     )
                 continue
-            crops: list[tuple[PilotLine, bytes]] = []
-            for ln in lines:
-                try:
-                    png = crop(path, ln)
-                except OSError:
-                    png = None
-                if png is None:
-                    n_skipped += 1
-                    continue
-                crops.append((ln, png))
+            try:
+                crops = crop_all(path, lines)
+            except OSError as exc:  # an unreadable cache file
+                n_skipped += len(lines)
+                if log:
+                    log(f"{reader}: {page_id} image unreadable ({exc}); {len(lines)} lines skipped")
+                continue
+            n_skipped += len(lines) - len(crops)
             if not crops:
                 continue
             if engine is None:
@@ -436,7 +454,33 @@ def read_pieces(
                 log(f"{reader}: {page_id} {len(rows)} lines ({len(have):,} so far)")
     if log:
         log(f"{reader}: {n_new:,} lines read now, {n_skipped:,} skipped, {len(have):,} in the file")
+    release(engine)
     return have
+
+
+def release(engine: object) -> None:
+    """Drop a reader's model and give its GPU memory back before the next reader loads.
+
+    Three TrOCR checkpoints held at once filled the 6 GB card on the first pilot
+    run; the caching allocator keeps what a dead model used until told.
+    """
+    if engine is None:
+        return
+    for attr in ("_model", "_processor"):
+        if hasattr(engine, attr):
+            try:
+                setattr(engine, attr, None)
+            except AttributeError:
+                pass
+    del engine
+    gc.collect()
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except ModuleNotFoundError:
+        pass
 
 
 def v1_readings(
@@ -621,21 +665,55 @@ def summarize_readers(
     return out
 
 
+# Licences under which a reader may be built on (K2 runs the factory with it).
+# "none stated" is evaluate-only: its number is reported, it is never chosen.
+BUILDABLE_LICENCES: frozenset[str] = frozenset({"MIT", "CC BY 4.0", "Apache-2.0", "CC0"})
+
+
 @dataclass(slots=True)
 class Verdict:
-    best_reader: str | None
+    best_reader: str | None  # the best among the readers K2 may build on
     best_german_yield: float | None
     baseline_german_yield: float | None
     controls_consistent: bool  # the baseline (or v1) wins the controls
     control_winner: str | None
     note: str
+    best_any_reader: str | None = None  # the best by yield, licence aside
+    best_any_yield: float | None = None
+    licence_note: str = ""
 
 
-def verdict(summaries: Sequence[ReaderSummary]) -> Verdict:
-    """The reader with the highest German yield, and whether the controls behave."""
+def verdict(
+    summaries: Sequence[ReaderSummary], licences: Mapping[str, str] | None = None
+) -> Verdict:
+    """The reader with the highest German yield K2 may build on, and whether the controls behave.
+
+    ``licences`` maps a reader to its licence; a reader whose licence is not in
+    :data:`BUILDABLE_LICENCES` (the two Hub models that state none) is ranked
+    but never chosen. Without the map every reader may be chosen.
+    """
     by = {s.reader: s for s in summaries}
     candidates = [s for s in summaries if s.reader != V1 and s.german_yield is not None]
-    best = max(candidates, key=lambda s: s.german_yield or 0.0, default=None)
+    best_any = max(candidates, key=lambda s: s.german_yield or 0.0, default=None)
+    buildable = [
+        s
+        for s in candidates
+        if licences is None or licences.get(s.reader, "") in BUILDABLE_LICENCES
+    ]
+    best = max(buildable, key=lambda s: s.german_yield or 0.0, default=None)
+    licence_note = ""
+    if best_any is not None and best is not None and best_any.reader != best.reader:
+        licence_note = (
+            f"`{best_any.reader}` has the highest German yield ({best_any.german_yield:.1%}) but "
+            f"states no licence ({licences.get(best_any.reader, '?') if licences else '?'}): "
+            f"evaluated, not built on; `{best.reader}` "
+            f"({licences.get(best.reader, '?') if licences else '?'}) is the reader K2 may use"
+        )
+    elif best_any is not None and best is None:
+        licence_note = (
+            f"`{best_any.reader}` has the highest German yield ({best_any.german_yield:.1%}) but "
+            "no reader with a licence to build on took part"
+        )
     with_controls = [s for s in summaries if s.control_yield is not None and s.control_lines]
     ctl_best = max(with_controls, key=lambda s: s.control_yield or 0.0, default=None)
     base = by.get(BASELINE) or by.get(V1)
@@ -657,6 +735,9 @@ def verdict(summaries: Sequence[ReaderSummary]) -> Verdict:
         controls_consistent=consistent,
         control_winner=ctl_best.reader if ctl_best else None,
         note=note,
+        best_any_reader=best_any.reader if best_any else None,
+        best_any_yield=best_any.german_yield if best_any else None,
+        licence_note=licence_note,
     )
 
 
@@ -886,12 +967,16 @@ def render_report(res: PilotResult) -> str:
     out.append("## Verdict for K2")
     out.append("")
     if v.best_reader is None:
-        out.append("No reader could be ranked.")
+        out.append(
+            "No reader with a licence to build on could be ranked."
+            + (f" {v.licence_note}." if v.licence_note else "")
+        )
     else:
         out.append(
-            f"The reader with the highest German yield is **`{v.best_reader}`** at "
+            f"The reader K2 should use is **`{v.best_reader}`** at "
             f"**{_pct(v.best_german_yield)}** of the German pieces' lines at the factory's gate "
             f"(the `{BASELINE}` baseline: {_pct(v.baseline_german_yield)}). "
+            + (f"{v.licence_note}. " if v.licence_note else "")
             + (
                 "The control pieces order as they must, so the German ordering can be trusted as "
                 "far as a ground-truth-free measure goes."

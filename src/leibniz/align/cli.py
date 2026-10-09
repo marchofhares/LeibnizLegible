@@ -315,7 +315,9 @@ def kurrent_pilot(
             pieces=pieces,
             yields=yields,
             summaries=summaries,
-            verdict=P.verdict(summaries),
+            verdict=P.verdict(
+                summaries, {k: K.CANDIDATES[k].licence for k in keys if k in K.CANDIDATES}
+            ),
             readers=order,
             sample=sample,
             max_pages=max_pages,
