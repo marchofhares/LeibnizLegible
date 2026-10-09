@@ -2856,6 +2856,36 @@ reading with v2's. Then a new serving copy and an index rebuild, as for M1;
 the search fold already maps ß to ss and drops umlauts. The About page and
 llms.txt keep calling German unmeasured until K3 measures it.
 
+**The operator's choice (2026-10-09): the letter-pool route for the honest
+German test set**, not a hand audit: the GWLB's checked transcriptions of the
+correspondence of 1708–1716 (for example "Transkriptionen des
+Leibniz-Briefwechsels 1714 für die Leibniz-Akademie-Ausgabe (überprüft)", one
+PDF a year on the Leibniz-Archiv's repository pages at gwlb.de; CC BY-NC 4.0,
+so nc bucket, internal evaluation only, SPECS §1.4 and §7.3). An audit by a
+reader of Kurrent stays possible later, as a check on the ground truth itself.
+The path is now four steps with prompts on the operator's plan page: **K2**
+(German ground truth on the edition pieces), **K2b** (the letter-pool test
+set; independent of K2), **K3** (training both candidates; the reader for K4
+is the operator's choice on K3's numbers) and **K4** (German on the site: the
+language pass, a precedence rule so that a German page's Kurrent run outlives
+C4's newer unscoped run, the re-read, a new serving copy and index). Found
+while writing them (a cloud session, nothing run on the store): (a) every pool
+letter's "Überlieferung" block names its witness's siglum (L Leibniz's own
+hand, l his scribe, K the correspondent's own hand, k the correspondent's
+scribe) and its shelfmark with leaves ("LBr. 164 Bl. 31–32"), so the C2
+resolver can place it; it also notes a second text on the same leaves ("Auf
+Bl. 4 vo L von N. 69"); the PDFs' text layer decomposes umlauts, so NFC first.
+(b) A reader tag in the factory's source string must stand before "katalog":
+`audit_reach.parse_source` reads the record id up to ")" or a space, so
+"katalog 41800; reader …" parses as "41800;" (checked). (c) The re-mint before
+C3 runs the factory without `--resume`, and `write_pairs` replaces every row
+of a piece's line refs, so a K2 mint in `gt_lines` needs a guard in the
+factory or the re-mint undoes it; the K2 prompt adds one. (d) GPU time,
+estimated: re-reading every German page (about 15 % of the 236,795 pages)
+takes a Kraken-speed model one to two days rather than under one: the model
+reads a line in 17 ms, but the C1 recogniser kept about 940 pages an hour with
+the images read from D:. The Bern reader takes more than a week.
+
 **The final merge: ✅ merged and live** (pull request #40, merge commit
 `62711b3`, the evening of 8 October in New York, 2026-10-09 UTC), after the
 scored audit had gone to the PHILIUMM team and the staging look was done.
