@@ -2619,8 +2619,23 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   (German minted at half the rate, not near zero) and the question "what did
   the factory mint on German pieces?" needed an answer without ground truth.
   (8) *The tolerance model's op mix* is substitution-heavier than the
-  recorded errors, on purpose and said so: the harder case for the gate. -
-  **2026-10-08 — W4, departures from the prompt and from the plan's
+  recorded errors, on purpose and said so: the harder case for the gate. (9) *The gos.* The operator's "go" came on the pre-flight
+  plan, which named the Task 3 downloads (which models, 4 GB) and the Task 4
+  run with their sizes as the points needing one; they were not asked for a
+  second time. (10) *TrOCR output* is tidied of the space the models set
+  before punctuation; the raw convention is the labels', not a misreading,
+  and the report says so. (11) `audit.crop_line` gained keyword options
+  (`pad`, `max_width`, `mask_polygon`); its defaults and the sheet are
+  unchanged. (12) *The pilot's size.* Pages capped at 2 per piece (the
+  prompt says "cap pages"), pieces with fewer than 20 recognised lines left
+  out, batch 16; the first launch decoded the page image once per line and
+  was stopped and resumed after the fix (the readings are resumable, nothing
+  was lost). (13) *The gate rule* was fixed before the numbers: GO when the
+  controls order correctly and the best reader beats the baseline's German
+  yield; whether it reaches half the baseline's control yield is said beside
+  it.
+
+- **2026-10-08 — W4, departures from the prompt and from the plan's
   preamble.** (1) *Where it ran.* A cloud session with no store: Task 0's
   look at the live page ran here (headless Chromium through the proxy), the
   browser checks of Task 4 ran against the fixture store, and the real-store
@@ -2647,21 +2662,7 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   state it. (9) The string `page.download` is gone; `page.text.download`
   names the moved link. (10) `resolve.py` gained `index_pages` and
   `select_folios`, and `db.py` `crosswalk_for_record`, beyond the prompt's
-  list of files. (9) *The gos.* The operator's "go" came on the pre-flight
-  plan, which named the Task 3 downloads (which models, 4 GB) and the Task 4
-  run with their sizes as the points needing one; they were not asked for a
-  second time. (10) *TrOCR output* is tidied of the space the models set
-  before punctuation; the raw convention is the labels', not a misreading,
-  and the report says so. (11) `audit.crop_line` gained keyword options
-  (`pad`, `max_width`, `mask_polygon`); its defaults and the sheet are
-  unchanged. (12) *The pilot's size.* Pages capped at 2 per piece (the
-  prompt says "cap pages"), pieces with fewer than 20 recognised lines left
-  out, batch 16; the first launch decoded the page image once per line and
-  was stopped and resumed after the fix (the readings are resumable, nothing
-  was lost). (13) *The gate rule* was fixed before the numbers: GO when the
-  controls order correctly and the best reader beats the baseline's German
-  yield; whether it reaches half the baseline's control yield is said beside
-  it.
+  list of files.
 
 - **2026-10-08 — S1, departures from the prompt and from the plan's
   preamble.** (1) *Where it ran.* A cloud session with no SSH: Task 0's
