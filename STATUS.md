@@ -57,8 +57,10 @@ operator's six HTTP checks answered as designed, the first run of the piece
 text on the real store (record 41800: 84 lines on its 2 pages, mean
 confidence 0.96), and their look in the browser was good. **Merged into
 main with the rest of the branch the same evening** (pull request #40,
-merge commit `62711b3`, 2026-10-09 UTC); the §9 update of the live site is
-the next operator step.
+merge commit `62711b3`, 2026-10-09 UTC) **and live since the same evening:**
+the §9 update on the box (no new dependency, `/healthz` ok), the seven
+checks against `https://leibnizlegible.com` as on staging, and staging back
+on main at `62711b3`.
 
 **2026-10-08: S1 — the staging kit is on the branch; the install on the box
 is the operator's.** A second copy of the site at
@@ -536,7 +538,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good · ✅ merged (#40)
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good · ✅ merged (#40) · ✅ live
 
 - **Setting.** A cloud session, no store, on the plan's one branch under the
   preamble's evening revision (see Divergences): the code and the tests
@@ -671,9 +673,21 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   `text_url` for 41800 and 59095 and no other; an unknown record answers
   404; `robots.txt` allows `/api/records/`. The look in the browser followed
   the same evening: good, the operator said. W4 is closed on this branch.
-- **Next.** The three sentences for David (the hand-over has them; also
-  `scratchpad/david-text-access.md` in the session); the merge as the plan
-  says, after the emails and the call; K1 on the desktop.
+- **Merged and live, 2026-10-09 UTC (the evening of 8 October in New
+  York).** Pull request #40 merged as `62711b3`; the desktop's main
+  fast-forwarded to it; the runbook's §9 block ran on the box as one `ssh`
+  line (24 packages checked, nothing new, restart, `/healthz` ok with
+  search ok); the seven checks against `https://leibnizlegible.com`
+  answered as on staging (the server-rendered page, record 41800's header
+  with `Work: https://leibnizlegible.com/work/00068642` and its 84 lines at
+  0.96, two `## Folio` blocks, `text_url` for 41800 and 59095, 404 for an
+  unknown record, `Allow: /api/records/`, llms.txt); `staging.sh --main`
+  put staging back on main at `62711b3`. The scored audit and the
+  cross-check reports are public with the merge; the PHILIUMM team had the
+  report first.
+- **Next.** K1 on the desktop (it continues on the branch and goes into a
+  new pull request); L1 after the call of 13 October; the three sentences
+  for David went in the email of 8 October.
 
 ### S1 — a staging site on the VPS (2026-10-08) ✅ kit · ✅ installed and verified
 
@@ -2471,15 +2485,17 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**The final merge: ✅ merged** (pull request #40, merge commit `62711b3`,
-the evening of 8 October in New York, 2026-10-09 UTC), after the scored
-audit had gone to the PHILIUMM team and the staging look was done. Next,
-in order: `git checkout main && git pull --ff-only origin main` on the
-desktop; the §9 update on the box (code only: the runbook's block as one
-`ssh` line); the same checks as on staging against the live site; a page
-view in the browser used before the deploy, without a hard reload;
-`/opt/leibniz-legible/deploy/staging.sh --main`. Later work (K1) continues
-on the same branch and goes into a new pull request.
+**The final merge: ✅ merged and live** (pull request #40, merge commit
+`62711b3`, the evening of 8 October in New York, 2026-10-09 UTC), after the
+scored audit had gone to the PHILIUMM team and the staging look was done.
+Done the same evening, in order: main fast-forwarded on the desktop; the
+§9 update on the box (code only, `/healthz` ok); the seven checks against
+the live site, as on staging; `/opt/leibniz-legible/deploy/staging.sh
+--main`, staging on main at `62711b3`. The live site now carries C2b, P1
+(Tasks 1 and 2), S1 and W4. From here: K1 on the desktop, continuing on
+`claude/dazzling-hopper-uxji2x` and into a new pull request; every later
+web step goes to staging with `/opt/leibniz-legible/deploy/staging.sh
+BRANCH` (the live checkout carries the kit now) and back with `--main`.
 
 **W4 (2026-10-08), operator — the staging look, in WSL, before anything
 merges.** The SSH target and the staging user name are on the plan page,
