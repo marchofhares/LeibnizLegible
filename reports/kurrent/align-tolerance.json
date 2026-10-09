@@ -1,0 +1,989 @@
+{
+ "source": "reports/philiumm-repro.lines.jsonl",
+ "n_lines": 1878,
+ "n_pieces": 76,
+ "lines_per_piece": 25,
+ "seed": 20261009,
+ "base_cer": 0.07953636613228605,
+ "real_op_mix": {
+  "match": 78503,
+  "substitution": 2628,
+  "deletion": 2642,
+  "insertion": 1393
+ },
+ "levels": [
+  {
+   "label": "base",
+   "target_cer": null,
+   "rate": 0.0,
+   "n_ops": 0,
+   "cer_written": 0.07953636613228605,
+   "cer_folded": 0.06890107458135589,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.9483148753637218,
+   "median_conf": 0.9803921568627451,
+   "n_correct_any": 1819,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1850,
+     "n_correct": 1804,
+     "yield_rate": 0.9850905218317358,
+     "precision": 0.9751351351351352,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 1838,
+     "n_correct": 1794,
+     "yield_rate": 0.9787007454739084,
+     "precision": 0.9760609357997824,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 1819,
+     "n_correct": 1778,
+     "yield_rate": 0.968583599574015,
+     "precision": 0.977460142935679,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 1776,
+     "n_correct": 1739,
+     "yield_rate": 0.9456869009584664,
+     "precision": 0.9791666666666666,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 1834,
+     "n_correct": 1790,
+     "yield_rate": 0.9765708200212992,
+     "precision": 0.9760087241003271,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    }
+   }
+  },
+  {
+   "label": "cer10",
+   "target_cer": 0.1,
+   "rate": 0.021484375,
+   "n_ops": 1754,
+   "cer_written": 0.09978155252885774,
+   "cer_folded": 0.08852386455848722,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.9328013064660033,
+   "median_conf": 0.9607843137254902,
+   "n_correct_any": 1815,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1848,
+     "n_correct": 1798,
+     "yield_rate": 0.9840255591054313,
+     "precision": 0.9729437229437229,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 1835,
+     "n_correct": 1787,
+     "yield_rate": 0.9771033013844516,
+     "precision": 0.973841961852861,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 1810,
+     "n_correct": 1766,
+     "yield_rate": 0.9637912673056444,
+     "precision": 0.9756906077348066,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 1768,
+     "n_correct": 1727,
+     "yield_rate": 0.9414270500532481,
+     "precision": 0.9768099547511312,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 1832,
+     "n_correct": 1784,
+     "yield_rate": 0.9755058572949947,
+     "precision": 0.9737991266375546,
+     "yield_at_gate": 0.9978700745473909,
+     "threshold_at_gate": 0.0
+    }
+   }
+  },
+  {
+   "label": "cer20",
+   "target_cer": 0.2,
+   "rate": 0.126953125,
+   "n_ops": 10474,
+   "cer_written": 0.20031513733541834,
+   "cer_folded": 0.18613372021540808,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.85723507149479,
+   "median_conf": 0.8784183296378418,
+   "n_correct_any": 1804,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1834,
+     "n_correct": 1778,
+     "yield_rate": 0.9765708200212992,
+     "precision": 0.9694656488549618,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 1814,
+     "n_correct": 1760,
+     "yield_rate": 0.9659211927582535,
+     "precision": 0.9702315325248071,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 1753,
+     "n_correct": 1706,
+     "yield_rate": 0.9334398296059638,
+     "precision": 0.9731888191671421,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 1577,
+     "n_correct": 1539,
+     "yield_rate": 0.8397231096911608,
+     "precision": 0.9759036144578314,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 1800,
+     "n_correct": 1748,
+     "yield_rate": 0.9584664536741214,
+     "precision": 0.9711111111111111,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    }
+   }
+  },
+  {
+   "label": "cer30",
+   "target_cer": 0.3,
+   "rate": 0.2353515625,
+   "n_ops": 19496,
+   "cer_written": 0.29990569753978014,
+   "cer_folded": 0.28304276194457423,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.7772633165848991,
+   "median_conf": 0.7894736842105263,
+   "n_correct_any": 1786,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1822,
+     "n_correct": 1755,
+     "yield_rate": 0.9701810436634718,
+     "precision": 0.9632272228320526,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 1765,
+     "n_correct": 1704,
+     "yield_rate": 0.9398296059637913,
+     "precision": 0.9654390934844193,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 1498,
+     "n_correct": 1452,
+     "yield_rate": 0.7976570820021299,
+     "precision": 0.9692923898531375,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 864,
+     "n_correct": 835,
+     "yield_rate": 0.46006389776357826,
+     "precision": 0.9664351851851852,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 1727,
+     "n_correct": 1670,
+     "yield_rate": 0.9195953141640043,
+     "precision": 0.9669947886508397,
+     "yield_at_gate": 0.9984025559105432,
+     "threshold_at_gate": 0.0
+    }
+   }
+  },
+  {
+   "label": "cer40",
+   "target_cer": 0.4,
+   "rate": 0.3515625,
+   "n_ops": 28946,
+   "cer_written": 0.40009310875819176,
+   "cer_folded": 0.3811567118302309,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.6894455208604272,
+   "median_conf": 0.7021276595744681,
+   "n_correct_any": 1766,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1729,
+     "n_correct": 1654,
+     "yield_rate": 0.9206602768903088,
+     "precision": 0.9566223250433776,
+     "yield_at_gate": 0.9696485623003195,
+     "threshold_at_gate": 0.44
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 1523,
+     "n_correct": 1462,
+     "yield_rate": 0.8109691160809371,
+     "precision": 0.9599474720945502,
+     "yield_at_gate": 0.9696485623003195,
+     "threshold_at_gate": 0.44
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 769,
+     "n_correct": 739,
+     "yield_rate": 0.40947816826411076,
+     "precision": 0.9609882964889467,
+     "yield_at_gate": 0.9696485623003195,
+     "threshold_at_gate": 0.44
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 208,
+     "n_correct": 197,
+     "yield_rate": 0.11075612353567625,
+     "precision": 0.9471153846153846,
+     "yield_at_gate": 0.9696485623003195,
+     "threshold_at_gate": 0.44
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 1363,
+     "n_correct": 1308,
+     "yield_rate": 0.7257720979765708,
+     "precision": 0.9596478356566398,
+     "yield_at_gate": 0.9696485623003195,
+     "threshold_at_gate": 0.44
+    }
+   }
+  },
+  {
+   "label": "cer50",
+   "target_cer": 0.5,
+   "rate": 0.4755859375,
+   "n_ops": 39281,
+   "cer_written": 0.5001969608346365,
+   "cer_folded": 0.47884033737428383,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.5959695659613686,
+   "median_conf": 0.6056618819776715,
+   "n_correct_any": 1737,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 1378,
+     "n_correct": 1315,
+     "yield_rate": 0.7337593184238551,
+     "precision": 0.9542815674891146,
+     "yield_at_gate": 0.8125665601703941,
+     "threshold_at_gate": 0.52
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 804,
+     "n_correct": 762,
+     "yield_rate": 0.4281150159744409,
+     "precision": 0.9477611940298507,
+     "yield_at_gate": 0.8125665601703941,
+     "threshold_at_gate": 0.52
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 174,
+     "n_correct": 155,
+     "yield_rate": 0.0926517571884984,
+     "precision": 0.8908045977011494,
+     "yield_at_gate": 0.8125665601703941,
+     "threshold_at_gate": 0.52
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 37,
+     "n_correct": 26,
+     "yield_rate": 0.019701810436634718,
+     "precision": 0.7027027027027027,
+     "yield_at_gate": 0.8125665601703941,
+     "threshold_at_gate": 0.52
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 566,
+     "n_correct": 533,
+     "yield_rate": 0.30138445154419596,
+     "precision": 0.941696113074205,
+     "yield_at_gate": 0.8125665601703941,
+     "threshold_at_gate": 0.52
+    }
+   }
+  },
+  {
+   "label": "cer60",
+   "target_cer": 0.6,
+   "rate": 0.607421875,
+   "n_ops": 50110,
+   "cer_written": 0.6003963090733291,
+   "cer_folded": 0.5772739567708461,
+   "n_lines": 1878,
+   "n_pieces": 76,
+   "mean_conf": 0.4997648853523209,
+   "median_conf": 0.5,
+   "n_correct_any": 1666,
+   "by_stratum": {
+    "fair_copy": {
+     "stratum": "fair_copy",
+     "threshold": 0.55,
+     "n_lines": 1878,
+     "n_minted": 566,
+     "n_correct": 516,
+     "yield_rate": 0.30138445154419596,
+     "precision": 0.911660777385159,
+     "yield_at_gate": null,
+     "threshold_at_gate": null
+    },
+    "light_revision": {
+     "stratum": "light_revision",
+     "threshold": 0.62,
+     "n_lines": 1878,
+     "n_minted": 171,
+     "n_correct": 151,
+     "yield_rate": 0.09105431309904154,
+     "precision": 0.8830409356725146,
+     "yield_at_gate": null,
+     "threshold_at_gate": null
+    },
+    "heavy_revision": {
+     "stratum": "heavy_revision",
+     "threshold": 0.72,
+     "n_lines": 1878,
+     "n_minted": 31,
+     "n_correct": 24,
+     "yield_rate": 0.01650692225772098,
+     "precision": 0.7741935483870968,
+     "yield_at_gate": null,
+     "threshold_at_gate": null
+    },
+    "scrap": {
+     "stratum": "scrap",
+     "threshold": 0.8,
+     "n_lines": 1878,
+     "n_minted": 13,
+     "n_correct": 8,
+     "yield_rate": 0.006922257720979766,
+     "precision": 0.6153846153846154,
+     "yield_at_gate": null,
+     "threshold_at_gate": null
+    },
+    "unknown": {
+     "stratum": "unknown",
+     "threshold": 0.65,
+     "n_lines": 1878,
+     "n_minted": 101,
+     "n_correct": 85,
+     "yield_rate": 0.05378061767838126,
+     "precision": 0.8415841584158416,
+     "yield_at_gate": null,
+     "threshold_at_gate": null
+    }
+   }
+  }
+ ],
+ "break_evens": [
+  {
+   "stratum": "fair_copy",
+   "threshold": 0.55,
+   "metric": "yield",
+   "floor": 0.5,
+   "cer_before": 0.5001969608346365,
+   "value_before": 0.7337593184238551,
+   "cer_at": 0.6003963090733291,
+   "value_at": 0.30138445154419596,
+   "cer_interpolated": 0.5543687759538312
+  },
+  {
+   "stratum": "fair_copy",
+   "threshold": 0.55,
+   "metric": "precision",
+   "floor": 0.95,
+   "cer_before": 0.5001969608346365,
+   "value_before": 0.9542815674891146,
+   "cer_at": 0.6003963090733291,
+   "value_at": 0.911660777385159,
+   "cer_interpolated": 0.5102627120983478
+  },
+  {
+   "stratum": "light_revision",
+   "threshold": 0.62,
+   "metric": "yield",
+   "floor": 0.5,
+   "cer_before": 0.40009310875819176,
+   "value_before": 0.8109691160809371,
+   "cer_at": 0.5001969608346365,
+   "value_at": 0.4281150159744409,
+   "cer_interpolated": 0.48140138360192436
+  },
+  {
+   "stratum": "light_revision",
+   "threshold": 0.62,
+   "metric": "precision",
+   "floor": 0.95,
+   "cer_before": 0.40009310875819176,
+   "value_before": 0.9599474720945502,
+   "cer_at": 0.5001969608346365,
+   "value_at": 0.9477611940298507,
+   "cer_interpolated": 0.48180634965099056
+  },
+  {
+   "stratum": "heavy_revision",
+   "threshold": 0.72,
+   "metric": "yield",
+   "floor": 0.5,
+   "cer_before": 0.29990569753978014,
+   "value_before": 0.7976570820021299,
+   "cer_at": 0.40009310875819176,
+   "value_at": 0.40947816826411076,
+   "cer_interpolated": 0.37672978926967327
+  },
+  {
+   "stratum": "heavy_revision",
+   "threshold": 0.72,
+   "metric": "precision",
+   "floor": 0.95,
+   "cer_before": 0.40009310875819176,
+   "value_before": 0.9609882964889467,
+   "cer_at": 0.5001969608346365,
+   "value_at": 0.8908045977011494,
+   "cer_interpolated": 0.4157658479454985
+  },
+  {
+   "stratum": "scrap",
+   "threshold": 0.8,
+   "metric": "yield",
+   "floor": 0.5,
+   "cer_before": 0.20031513733541834,
+   "value_before": 0.8397231096911608,
+   "cer_at": 0.29990569753978014,
+   "value_at": 0.46006389776357826,
+   "cer_interpolated": 0.28942983216063967
+  },
+  {
+   "stratum": "scrap",
+   "threshold": 0.8,
+   "metric": "precision",
+   "floor": 0.95,
+   "cer_before": 0.29990569753978014,
+   "value_before": 0.9664351851851852,
+   "cer_at": 0.40009310875819176,
+   "value_at": 0.9471153846153846,
+   "cer_interpolated": 0.38513425104631843
+  },
+  {
+   "stratum": "unknown",
+   "threshold": 0.65,
+   "metric": "yield",
+   "floor": 0.5,
+   "cer_before": 0.40009310875819176,
+   "value_before": 0.7257720979765708,
+   "cer_at": 0.5001969608346365,
+   "value_at": 0.30138445154419596,
+   "cer_interpolated": 0.4533478556595877
+  },
+  {
+   "stratum": "unknown",
+   "threshold": 0.65,
+   "metric": "precision",
+   "floor": 0.95,
+   "cer_before": 0.40009310875819176,
+   "value_before": 0.9596478356566398,
+   "cer_at": 0.5001969608346365,
+   "value_at": 0.941696113074205,
+   "cer_interpolated": 0.4538921527772384
+  }
+ ],
+ "generated": "2026-10-09",
+ "model": {
+  "operations": {
+   "substitute": 0.5,
+   "delete": 0.15,
+   "insert": 0.15,
+   "merge": 0.1,
+   "split_word": 0.1,
+   "space": "always a merged word space",
+   "combining_mark": "always a dropped accent"
+  },
+  "confusions": {
+   "a": [
+    "o",
+    "e",
+    "u",
+    "n"
+   ],
+   "b": [
+    "h",
+    "l",
+    "d",
+    "p"
+   ],
+   "c": [
+    "e",
+    "o",
+    "t",
+    "r"
+   ],
+   "d": [
+    "a",
+    "cl",
+    "b",
+    "o"
+   ],
+   "e": [
+    "c",
+    "o",
+    "a",
+    "i"
+   ],
+   "f": [
+    "s",
+    "l",
+    "t"
+   ],
+   "g": [
+    "q",
+    "y",
+    "s",
+    "j"
+   ],
+   "h": [
+    "b",
+    "k",
+    "li",
+    "n"
+   ],
+   "i": [
+    "l",
+    "j",
+    "t",
+    "r",
+    "e"
+   ],
+   "j": [
+    "i",
+    "g",
+    "y"
+   ],
+   "k": [
+    "h",
+    "l",
+    "b"
+   ],
+   "l": [
+    "i",
+    "t",
+    "b",
+    "f"
+   ],
+   "m": [
+    "n",
+    "in",
+    "ni",
+    "rn",
+    "nn"
+   ],
+   "n": [
+    "u",
+    "r",
+    "m",
+    "ri",
+    "ii"
+   ],
+   "o": [
+    "a",
+    "c",
+    "e",
+    "u"
+   ],
+   "p": [
+    "q",
+    "b",
+    "y"
+   ],
+   "q": [
+    "g",
+    "p",
+    "y"
+   ],
+   "r": [
+    "t",
+    "n",
+    "c",
+    "i"
+   ],
+   "s": [
+    "f",
+    "l",
+    "r",
+    "z",
+    "x"
+   ],
+   "t": [
+    "r",
+    "l",
+    "c",
+    "f"
+   ],
+   "u": [
+    "n",
+    "v",
+    "a",
+    "ii"
+   ],
+   "v": [
+    "u",
+    "b",
+    "r"
+   ],
+   "w": [
+    "vv",
+    "uu",
+    "m"
+   ],
+   "x": [
+    "z",
+    "s",
+    "r"
+   ],
+   "y": [
+    "g",
+    "j",
+    "p",
+    "ij"
+   ],
+   "z": [
+    "x",
+    "s",
+    "y"
+   ],
+   "A": [
+    "R",
+    "N",
+    "H"
+   ],
+   "B": [
+    "R",
+    "P",
+    "E"
+   ],
+   "C": [
+    "G",
+    "O",
+    "E"
+   ],
+   "D": [
+    "O",
+    "Q",
+    "P"
+   ],
+   "E": [
+    "F",
+    "B",
+    "C"
+   ],
+   "F": [
+    "E",
+    "P",
+    "T"
+   ],
+   "G": [
+    "C",
+    "O",
+    "Q"
+   ],
+   "H": [
+    "N",
+    "M",
+    "K"
+   ],
+   "I": [
+    "J",
+    "L",
+    "T"
+   ],
+   "J": [
+    "I",
+    "L",
+    "T"
+   ],
+   "K": [
+    "H",
+    "R",
+    "X"
+   ],
+   "L": [
+    "I",
+    "T",
+    "E"
+   ],
+   "M": [
+    "N",
+    "H",
+    "W"
+   ],
+   "N": [
+    "M",
+    "H",
+    "A"
+   ],
+   "O": [
+    "Q",
+    "D",
+    "C"
+   ],
+   "P": [
+    "B",
+    "R",
+    "F"
+   ],
+   "Q": [
+    "O",
+    "G",
+    "D"
+   ],
+   "R": [
+    "B",
+    "P",
+    "K"
+   ],
+   "S": [
+    "Z",
+    "G",
+    "L"
+   ],
+   "T": [
+    "I",
+    "F",
+    "L"
+   ],
+   "U": [
+    "V",
+    "W",
+    "N"
+   ],
+   "V": [
+    "U",
+    "W",
+    "Y"
+   ],
+   "W": [
+    "V",
+    "U",
+    "M"
+   ],
+   "X": [
+    "K",
+    "Y",
+    "Z"
+   ],
+   "Y": [
+    "V",
+    "X",
+    "T"
+   ],
+   "Z": [
+    "S",
+    "X",
+    "L"
+   ],
+   "0": [
+    "o",
+    "O",
+    "6"
+   ],
+   "1": [
+    "l",
+    "I",
+    "7"
+   ],
+   "2": [
+    "z",
+    "Z",
+    "7"
+   ],
+   "3": [
+    "5",
+    "8",
+    "B"
+   ],
+   "4": [
+    "9",
+    "A",
+    "1"
+   ],
+   "5": [
+    "s",
+    "S",
+    "3"
+   ],
+   "6": [
+    "0",
+    "b",
+    "G"
+   ],
+   "7": [
+    "1",
+    "T",
+    "2"
+   ],
+   "8": [
+    "3",
+    "B",
+    "0"
+   ],
+   "9": [
+    "4",
+    "g",
+    "q"
+   ]
+  },
+  "merges": {
+   "in": "m",
+   "ni": "m",
+   "rn": "m",
+   "nn": "m",
+   "ii": "u",
+   "ri": "n",
+   "cl": "d",
+   "vv": "w",
+   "uu": "w",
+   "li": "h",
+   "ij": "y"
+  },
+  "punctuation": [
+   ".",
+   ",",
+   ";",
+   ":",
+   "-",
+   "'"
+  ]
+ },
+ "floors": {
+  "yield": 0.5,
+  "precision": 0.95
+ },
+ "correct_sim": 0.9
+}

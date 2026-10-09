@@ -40,7 +40,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from leibniz.align import dp
-from leibniz.align.align import HtrLine, align_piece
+from leibniz.align.align import MAX_INSERT_FLOOR, HtrLine, align_piece
 from leibniz.align.normalize import DEFAULT_NORM, AlignNorm, normalize
 
 
@@ -73,6 +73,10 @@ class LineEval:
     correct: bool  # projected ≈ true reference for this line
     slice_sim: float  # folded similarity(projected, true)
     mintable: bool = True  # False = this line is absent from the edition text
+    # The factory's burst guard: more edition-only characters inserted into the
+    # line than max(MAX_INSERT_FLOOR, its own length). The factory refuses such a
+    # line whatever its confidence; ``summarize(factory_gate=True)`` does too.
+    burst: bool = False
 
 
 @dataclass(slots=True)
@@ -271,6 +275,7 @@ def evaluate_piece(
                 correct=correct,
                 slice_sim=sim,
                 mintable=can_mint,
+                burst=al.n_inserted > max(MAX_INSERT_FLOOR, al.n_htr_chars),
             )
         )
     return out
@@ -303,7 +308,11 @@ class EvalSummary:
 
 
 def summarize(
-    lines: Sequence[LineEval], cfg: EvalConfig, *, precision_target: float = 0.95
+    lines: Sequence[LineEval],
+    cfg: EvalConfig,
+    *,
+    precision_target: float = 0.95,
+    factory_gate: bool = False,
 ) -> EvalSummary:
     """Aggregate per-line evals into yield/precision, plus a threshold sweep.
 
@@ -314,10 +323,20 @@ def summarize(
     precision bar. ``n_false_positive`` counts minted lines the edition never
     contained (only possible under a drop condition) — the precision killers the
     confidence signal exists to suppress.
+
+    ``factory_gate`` applies the factory's whole gate rather than the B2
+    harness's (confidence and a non-empty slice): a line flagged ``burst`` is
+    never minted. Off by default so the B2 numbers stay what they were.
     """
     n = len(lines)
     n_mintable = sum(1 for ln in lines if ln.mintable)
-    aligned = [ln for ln in lines if ln.align_conf >= cfg.threshold and ln.projected.strip()]
+
+    def minted(ln: LineEval, t: float) -> bool:
+        if ln.align_conf < t or not ln.projected.strip():
+            return False
+        return not (factory_gate and ln.burst)
+
+    aligned = [ln for ln in lines if minted(ln, cfg.threshold)]
     n_aligned = len(aligned)
     n_correct = sum(1 for ln in aligned if ln.correct)
     n_false_pos = sum(1 for ln in aligned if not ln.mintable)
@@ -327,7 +346,7 @@ def summarize(
     best_t: float | None = None
     best_yield: float | None = None
     for t in [i / 100 for i in range(0, 101, 2)]:
-        sel = [ln for ln in lines if ln.align_conf >= t and ln.projected.strip()]
+        sel = [ln for ln in lines if minted(ln, t)]
         if not sel:
             continue
         prec = sum(1 for ln in sel if ln.correct) / len(sel)

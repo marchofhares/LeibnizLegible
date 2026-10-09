@@ -10,6 +10,8 @@ Subcommands:
                 Internet Archive volume scan (apparatus excluded).
 * ``run``     — the full end-to-end prototype on one piece: GWLB IIIF → segment →
                 recognise → align to an edition-text file → mint ``gt_lines``.
+* ``kurrent-tolerance`` — how much HTR noise the aligner tolerates (K1): the B2
+                harness over the recorded B1 machine text, corrupted to target CERs.
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -79,6 +81,57 @@ def eval(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summaries, ensure_ascii=False, indent=1), encoding="utf-8")
     _console.print(f"wrote {out}")
+
+
+@app.command("kurrent-tolerance")
+def kurrent_tolerance(
+    lines: Path = typer.Option(
+        Path("reports/philiumm-repro.lines.jsonl"),
+        help="The B1 reproduction dump: line_id, ref, hyp per row, in validation order.",
+    ),
+    levels: str = typer.Option("10,20,30,40,50,60", help="Target CERs in percent."),
+    lines_per_piece: int = typer.Option(25, help="Consecutive lines per synthetic piece."),
+    seed: int = typer.Option(20261009, help="Seed of the corruption streams."),
+    max_lines: int | None = typer.Option(None, help="Cap lines for a fast run."),
+    sample_every: int = typer.Option(
+        1, help="Calibrate the rate on every n-th line (the achieved CER is measured on all)."
+    ),
+    workers: int = typer.Option(0, help="Processes over levels; 0 = one per level."),
+    out_dir: Path = typer.Option(Path("reports/kurrent"), help="Where the two reports go."),
+) -> None:
+    """How much HTR noise the aligner tolerates (K1 Task 1): corrupt, align, grade."""
+    import os
+
+    from leibniz.align import tolerance as T
+
+    targets = [float(x) / 100 for x in levels.split(",") if x.strip()]
+    rows = T.load_repro_lines(lines, max_lines=max_lines)
+    n_workers = workers if workers > 0 else min(len(targets) + 1, os.cpu_count() or 1)
+    _console.print(
+        f"{len(rows)} lines from {lines}; levels {', '.join(f'{t:.0%}' for t in targets)}; "
+        f"{n_workers} worker(s)…"
+    )
+    res = T.run_tolerance(
+        rows,
+        levels=targets,
+        seed=seed,
+        lines_per_piece=lines_per_piece,
+        sample_every=sample_every,
+        workers=n_workers,
+        source=str(lines),
+    )
+    for lv in res.levels:
+        cells = "  ".join(
+            f"{s}: {o.yield_rate:.1%}/{o.precision:.1%}" for s, o in lv.by_stratum.items()
+        )
+        _console.print(
+            f"  [bold]{lv.label}[/bold] CER {lv.cer_written:.1%} (folded {lv.cer_folded:.1%}) "
+            f"conf {lv.mean_conf:.3f} — yield/precision {cells}"
+        )
+    for be in res.break_evens:
+        _console.print(f"  break-even {be.stratum} {be.metric} < {be.floor:.0%}: {be.describe()}")
+    md, js = T.write_reports(res, out_dir)
+    _console.print(f"wrote {md} and {js}")
 
 
 @app.command()
