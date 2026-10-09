@@ -55,8 +55,10 @@ scroll, no console errors, axe-core 0 violations on the page and work views
 in both languages and at phone width). On staging the same evening, the
 operator's six HTTP checks answered as designed, the first run of the piece
 text on the real store (record 41800: 84 lines on its 2 pages, mean
-confidence 0.96), and their look in the browser was good. Branch
-`claude/dazzling-hopper-uxji2x`; nothing merged, nothing deployed.
+confidence 0.96), and their look in the browser was good. **Merged into
+main with the rest of the branch the same evening** (pull request #40,
+merge commit `62711b3`, 2026-10-09 UTC); the §9 update of the live site is
+the next operator step.
 
 **2026-10-08: S1 — the staging kit is on the branch; the install on the box
 is the operator's.** A second copy of the site at
@@ -534,7 +536,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good
+### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good · ✅ merged (#40)
 
 - **Setting.** A cloud session, no store, on the plan's one branch under the
   preamble's evening revision (see Divergences): the code and the tests
@@ -2469,13 +2471,15 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**The final merge is unblocked (2026-10-08, late evening):** the scored
-audit has gone to the PHILIUMM team and the staging look is done. The order
-is the plan page's "final merge" section: merge the pull request, `git
-checkout main && git pull --ff-only origin main` on the desktop, the §9
-update on the box (code only), the same checks on the live site, then
-`staging.sh --main`. Deploying before the call of 13 October makes the Text
-block clickable on the call.
+**The final merge: ✅ merged** (pull request #40, merge commit `62711b3`,
+the evening of 8 October in New York, 2026-10-09 UTC), after the scored
+audit had gone to the PHILIUMM team and the staging look was done. Next,
+in order: `git checkout main && git pull --ff-only origin main` on the
+desktop; the §9 update on the box (code only: the runbook's block as one
+`ssh` line); the same checks as on staging against the live site; a page
+view in the browser used before the deploy, without a hard reload;
+`/opt/leibniz-legible/deploy/staging.sh --main`. Later work (K1) continues
+on the same branch and goes into a new pull request.
 
 **W4 (2026-10-08), operator — the staging look, in WSL, before anything
 merges.** The SSH target and the staging user name are on the plan page,
