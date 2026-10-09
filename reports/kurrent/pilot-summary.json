@@ -8,7 +8,7 @@
   "v1"
  ],
  "sample": null,
- "max_pages": 2,
+ "max_pages": 3,
  "pieces": [
   {
    "record_id": "42213",
@@ -62,7 +62,8 @@
    "score": 0.9867,
    "page_ids": [
     "DE-611-HS-971383:0045",
-    "DE-611-HS-971383:0046"
+    "DE-611-HS-971383:0046",
+    "DE-611-HS-971383:0047"
    ],
    "n_pages_total": 6,
    "role": "german",
@@ -162,7 +163,8 @@
    "score": 0.9837,
    "page_ids": [
     "DE-611-HS-958572:0289",
-    "DE-611-HS-958572:0290"
+    "DE-611-HS-958572:0290",
+    "DE-611-HS-958572:0291"
    ],
    "n_pages_total": 4,
    "role": "german",
@@ -202,7 +204,8 @@
    "score": 0.9928,
    "page_ids": [
     "00068818:0035",
-    "00068818:0036"
+    "00068818:0036",
+    "00068818:0037"
    ],
    "n_pages_total": 4,
    "role": "german",
@@ -302,7 +305,8 @@
    "score": 0.9854,
    "page_ids": [
     "00068779:0241",
-    "00068779:0242"
+    "00068779:0242",
+    "00068779:0243"
    ],
    "n_pages_total": 8,
    "role": "german",
@@ -342,7 +346,8 @@
    "score": 0.9688,
    "page_ids": [
     "00068774:0001",
-    "00068774:0002"
+    "00068774:0002",
+    "00068774:0003"
    ],
    "n_pages_total": 4,
    "role": "german",
@@ -382,7 +387,8 @@
    "score": 0.9964,
    "page_ids": [
     "00068823:0437",
-    "00068823:0438"
+    "00068823:0438",
+    "00068823:0439"
    ],
    "n_pages_total": 4,
    "role": "german",
@@ -402,7 +408,8 @@
    "score": 0.9903,
    "page_ids": [
     "DE-611-HS-49877:0027",
-    "DE-611-HS-49877:0028"
+    "DE-611-HS-49877:0028",
+    "DE-611-HS-49877:0029"
    ],
    "n_pages_total": 4,
    "role": "german",
@@ -422,7 +429,8 @@
    "score": 0.987,
    "page_ids": [
     "DE-611-HS-855794:0151",
-    "DE-611-HS-855794:0152"
+    "DE-611-HS-855794:0152",
+    "DE-611-HS-855794:0153"
    ],
    "n_pages_total": 4,
    "role": "control",
@@ -482,7 +490,8 @@
    "score": 1.0,
    "page_ids": [
     "DE-611-HS-867191:0021",
-    "DE-611-HS-867191:0022"
+    "DE-611-HS-867191:0022",
+    "DE-611-HS-867191:0023"
    ],
    "n_pages_total": 4,
    "role": "control",
@@ -514,14 +523,14 @@
  "summaries": [
   {
    "reader": "philiumm",
-   "german_lines": 2288,
+   "german_lines": 2794,
    "german_aligned": 285,
-   "german_yield": 0.12456293706293706,
-   "german_mean_conf": 0.29618938552202806,
-   "control_lines": 351,
+   "german_yield": 0.10200429491768075,
+   "german_mean_conf": 0.2424637348542108,
+   "control_lines": 446,
    "control_aligned": 146,
-   "control_yield": 0.41595441595441596,
-   "control_mean_conf": 0.44727074312265624,
+   "control_yield": 0.3273542600896861,
+   "control_mean_conf": 0.35200006913913084,
    "by_stratum": {
     "fair_copy": {
      "pieces": 2,
@@ -532,47 +541,47 @@
     },
     "heavy_revision": {
      "pieces": 7,
-     "lines": 1119,
+     "lines": 1410,
      "aligned": 89,
-     "yield": 0.07953529937444147,
-     "mean_conf": 0.2674173603035739
+     "yield": 0.06312056737588652,
+     "mean_conf": 0.21218709651347897
     },
     "light_revision": {
      "pieces": 7,
-     "lines": 460,
+     "lines": 547,
      "aligned": 165,
-     "yield": 0.358695652173913,
-     "mean_conf": 0.4944520566327876
+     "yield": 0.3016453382084095,
+     "mean_conf": 0.4158097734023442
     },
     "scrap": {
      "pieces": 4,
-     "lines": 655,
+     "lines": 783,
      "aligned": 16,
-     "yield": 0.024427480916030534,
-     "mean_conf": 0.19950171912377818
+     "yield": 0.020434227330779056,
+     "mean_conf": 0.16665671421460188
     }
    },
    "by_hand": {
     "other": {
      "pieces": 8,
-     "lines": 1095,
+     "lines": 1164,
      "aligned": 157,
-     "yield": 0.14337899543378996,
-     "mean_conf": 0.2517216942312359
+     "yield": 0.13487972508591065,
+     "mean_conf": 0.23675174835696694
     },
     "own": {
      "pieces": 6,
-     "lines": 688,
+     "lines": 958,
      "aligned": 56,
-     "yield": 0.08139534883720931,
-     "mean_conf": 0.2857707044904148
+     "yield": 0.05845511482254697,
+     "mean_conf": 0.20522990051086157
     },
     "partial": {
      "pieces": 6,
-     "lines": 505,
+     "lines": 672,
      "aligned": 72,
-     "yield": 0.14257425742574256,
-     "mean_conf": 0.40680359247879516
+     "yield": 0.10714285714285714,
+     "mean_conf": 0.30543808840141384
     }
    },
    "read_lines": 2639,
@@ -582,14 +591,14 @@
   },
   {
    "reader": "trocr-kurrent-xvi-xvii",
-   "german_lines": 2288,
+   "german_lines": 2794,
    "german_aligned": 463,
-   "german_yield": 0.20236013986013987,
-   "german_mean_conf": 0.32347804957500664,
-   "control_lines": 351,
+   "german_yield": 0.16571224051539013,
+   "german_mean_conf": 0.2648885277946974,
+   "control_lines": 446,
    "control_aligned": 83,
-   "control_yield": 0.23646723646723647,
-   "control_mean_conf": 0.35758545750105125,
+   "control_yield": 0.1860986547085202,
+   "control_mean_conf": 0.2814181515310964,
    "by_stratum": {
     "fair_copy": {
      "pieces": 2,
@@ -600,47 +609,47 @@
     },
     "heavy_revision": {
      "pieces": 7,
-     "lines": 1119,
+     "lines": 1410,
      "aligned": 197,
-     "yield": 0.17605004468275245,
-     "mean_conf": 0.29104235017478236
+     "yield": 0.1397163120567376,
+     "mean_conf": 0.2309625241676246
     },
     "light_revision": {
      "pieces": 7,
-     "lines": 460,
+     "lines": 547,
      "aligned": 196,
-     "yield": 0.4260869565217391,
-     "mean_conf": 0.5391038653284744
+     "yield": 0.3583180987202925,
+     "mean_conf": 0.45335974049560923
     },
     "scrap": {
      "pieces": 4,
-     "lines": 655,
+     "lines": 783,
      "aligned": 49,
-     "yield": 0.07480916030534351,
-     "mean_conf": 0.2148705274765006
+     "yield": 0.06257982120051085,
+     "mean_conf": 0.17974482183538684
     }
    },
    "by_hand": {
     "other": {
      "pieces": 8,
-     "lines": 1095,
+     "lines": 1164,
      "aligned": 148,
-     "yield": 0.13515981735159818,
-     "mean_conf": 0.2351638681716752
+     "yield": 0.12714776632302405,
+     "mean_conf": 0.2212072206862144
     },
     "own": {
      "pieces": 6,
-     "lines": 688,
+     "lines": 958,
      "aligned": 175,
-     "yield": 0.2543604651162791,
-     "mean_conf": 0.3629788345152563
+     "yield": 0.1826722338204593,
+     "mean_conf": 0.26067791038256405
     },
     "partial": {
      "pieces": 6,
-     "lines": 505,
+     "lines": 672,
      "aligned": 140,
-     "yield": 0.27722772277227725,
-     "mean_conf": 0.46115624481808837
+     "yield": 0.20833333333333334,
+     "mean_conf": 0.34655342802549793
     }
    },
    "read_lines": 2639,
@@ -650,14 +659,14 @@
   },
   {
    "reader": "trocr-hanse-xvii",
-   "german_lines": 2288,
-   "german_aligned": 471,
-   "german_yield": 0.20585664335664336,
-   "german_mean_conf": 0.3264729812226118,
-   "control_lines": 351,
-   "control_aligned": 64,
-   "control_yield": 0.18233618233618235,
-   "control_mean_conf": 0.33937318663296123,
+   "german_lines": 2794,
+   "german_aligned": 473,
+   "german_yield": 0.16929133858267717,
+   "german_mean_conf": 0.2675527594591598,
+   "control_lines": 446,
+   "control_aligned": 63,
+   "control_yield": 0.1412556053811659,
+   "control_mean_conf": 0.26712254523505846,
    "by_stratum": {
     "fair_copy": {
      "pieces": 2,
@@ -668,47 +677,47 @@
     },
     "heavy_revision": {
      "pieces": 7,
-     "lines": 1119,
+     "lines": 1410,
      "aligned": 201,
-     "yield": 0.17962466487935658,
-     "mean_conf": 0.2979259816113291
+     "yield": 0.1425531914893617,
+     "mean_conf": 0.2364252238155603
     },
     "light_revision": {
      "pieces": 7,
-     "lines": 460,
-     "aligned": 200,
-     "yield": 0.43478260869565216,
-     "mean_conf": 0.5319674062988058
+     "lines": 547,
+     "aligned": 202,
+     "yield": 0.3692870201096892,
+     "mean_conf": 0.4484402991446884
     },
     "scrap": {
      "pieces": 4,
-     "lines": 655,
+     "lines": 783,
      "aligned": 50,
-     "yield": 0.07633587786259542,
-     "mean_conf": 0.22012066280489492
+     "yield": 0.06385696040868455,
+     "mean_conf": 0.18413669749323905
     }
    },
    "by_hand": {
     "other": {
      "pieces": 8,
-     "lines": 1095,
+     "lines": 1164,
      "aligned": 165,
-     "yield": 0.1506849315068493,
-     "mean_conf": 0.2458218355477696
+     "yield": 0.14175257731958762,
+     "mean_conf": 0.23123307738975127
     },
     "own": {
      "pieces": 6,
-     "lines": 688,
+     "lines": 958,
      "aligned": 168,
-     "yield": 0.2441860465116279,
-     "mean_conf": 0.3578633027395323
+     "yield": 0.17536534446764093,
+     "mean_conf": 0.25700412555824453
     },
     "partial": {
      "pieces": 6,
-     "lines": 505,
-     "aligned": 138,
-     "yield": 0.2732673267326733,
-     "mean_conf": 0.45858478975788075
+     "lines": 672,
+     "aligned": 140,
+     "yield": 0.20833333333333334,
+     "mean_conf": 0.34550171958694
     }
    },
    "read_lines": 2639,
@@ -718,14 +727,14 @@
   },
   {
    "reader": "trocr-hanse-xvi",
-   "german_lines": 2288,
+   "german_lines": 2794,
    "german_aligned": 515,
-   "german_yield": 0.22508741258741258,
-   "german_mean_conf": 0.33493772270629296,
-   "control_lines": 351,
+   "german_yield": 0.18432355046528276,
+   "german_mean_conf": 0.2742505035747658,
+   "control_lines": 446,
    "control_aligned": 107,
-   "control_yield": 0.30484330484330485,
-   "control_mean_conf": 0.4056938878506625,
+   "control_yield": 0.2399103139013453,
+   "control_mean_conf": 0.3192792704833689,
    "by_stratum": {
     "fair_copy": {
      "pieces": 2,
@@ -736,47 +745,47 @@
     },
     "heavy_revision": {
      "pieces": 7,
-     "lines": 1119,
+     "lines": 1410,
      "aligned": 214,
-     "yield": 0.19124218051831993,
-     "mean_conf": 0.3027852381849651
+     "yield": 0.15177304964539007,
+     "mean_conf": 0.2402376446559386
     },
     "light_revision": {
      "pieces": 7,
-     "lines": 460,
+     "lines": 547,
      "aligned": 206,
-     "yield": 0.44782608695652176,
-     "mean_conf": 0.5358619463234423
+     "yield": 0.376599634369287,
+     "mean_conf": 0.45063344663397337
     },
     "scrap": {
      "pieces": 4,
-     "lines": 655,
+     "lines": 783,
      "aligned": 73,
-     "yield": 0.11145038167938931,
-     "mean_conf": 0.23584405956927643
+     "yield": 0.09323116219667944,
+     "mean_conf": 0.1972897305464573
     }
    },
    "by_hand": {
     "other": {
      "pieces": 8,
-     "lines": 1095,
+     "lines": 1164,
      "aligned": 162,
-     "yield": 0.14794520547945206,
-     "mean_conf": 0.23972659393829066
+     "yield": 0.13917525773195877,
+     "mean_conf": 0.22544589157931766
     },
     "own": {
      "pieces": 6,
-     "lines": 688,
+     "lines": 958,
      "aligned": 188,
-     "yield": 0.27325581395348836,
-     "mean_conf": 0.37521479590430457
+     "yield": 0.19624217118997914,
+     "mean_conf": 0.26946532315465715
     },
     "partial": {
      "pieces": 6,
-     "lines": 505,
+     "lines": 672,
      "aligned": 165,
-     "yield": 0.32673267326732675,
-     "mean_conf": 0.486513088331502
+     "yield": 0.24553571428571427,
+     "mean_conf": 0.3656087940586436
     }
    },
    "read_lines": 2639,
@@ -786,14 +795,14 @@
   },
   {
    "reader": "v1",
-   "german_lines": 2288,
-   "german_aligned": 375,
-   "german_yield": 0.1638986013986014,
-   "german_mean_conf": 0.3075700004571798,
-   "control_lines": 351,
-   "control_aligned": 142,
-   "control_yield": 0.4045584045584046,
-   "control_mean_conf": 0.445219301603591,
+   "german_lines": 2794,
+   "german_aligned": 387,
+   "german_yield": 0.1385110952040086,
+   "german_mean_conf": 0.2867683796593364,
+   "control_lines": 446,
+   "control_aligned": 132,
+   "control_yield": 0.29596412556053814,
+   "control_mean_conf": 0.35456672840317205,
    "by_stratum": {
     "fair_copy": {
      "pieces": 2,
@@ -804,50 +813,50 @@
     },
     "heavy_revision": {
      "pieces": 7,
-     "lines": 1119,
-     "aligned": 147,
-     "yield": 0.13136729222520108,
-     "mean_conf": 0.28018681414411256
+     "lines": 1410,
+     "aligned": 131,
+     "yield": 0.09290780141843971,
+     "mean_conf": 0.2347096706756913
     },
     "light_revision": {
      "pieces": 7,
-     "lines": 460,
-     "aligned": 178,
-     "yield": 0.3869565217391304,
-     "mean_conf": 0.5023459817014462
+     "lines": 547,
+     "aligned": 196,
+     "yield": 0.3583180987202925,
+     "mean_conf": 0.46749683844461787
     },
     "scrap": {
      "pieces": 4,
-     "lines": 655,
-     "aligned": 32,
-     "yield": 0.04885496183206107,
-     "mean_conf": 0.21015748497511907
+     "lines": 783,
+     "aligned": 42,
+     "yield": 0.05363984674329502,
+     "mean_conf": 0.24662916310198976
     }
    },
    "by_hand": {
     "other": {
      "pieces": 8,
-     "lines": 1095,
-     "aligned": 152,
-     "yield": 0.13881278538812786,
-     "mean_conf": 0.23766925035293415
+     "lines": 1164,
+     "aligned": 151,
+     "yield": 0.12972508591065293,
+     "mean_conf": 0.22991959898417885
     },
     "own": {
      "pieces": 6,
-     "lines": 688,
-     "aligned": 121,
-     "yield": 0.17587209302325582,
-     "mean_conf": 0.32534065290611086
+     "lines": 958,
+     "aligned": 102,
+     "yield": 0.10647181628392484,
+     "mean_conf": 0.2483685284859006
     },
     "partial": {
      "pieces": 6,
-     "lines": 505,
-     "aligned": 102,
-     "yield": 0.201980198019802,
-     "mean_conf": 0.4349266588320005
+     "lines": 672,
+     "aligned": 134,
+     "yield": 0.19940476190476192,
+     "mean_conf": 0.4399812340195073
     }
    },
-   "read_lines": 2639,
+   "read_lines": 3240,
    "ms_per_line": null,
    "device": "store",
    "model": "v1"
@@ -855,14 +864,14 @@
  ],
  "verdict": {
   "best_reader": "trocr-kurrent-xvi-xvii",
-  "best_german_yield": 0.20236013986013987,
-  "baseline_german_yield": 0.12456293706293706,
+  "best_german_yield": 0.16571224051539013,
+  "baseline_german_yield": 0.10200429491768075,
   "controls_consistent": true,
   "control_winner": "philiumm",
   "note": "the Latin-trained baseline (philiumm) wins the control pieces as it must",
   "best_any_reader": "trocr-hanse-xvi",
-  "best_any_yield": 0.22508741258741258,
-  "licence_note": "`trocr-hanse-xvi` has the highest German yield (22.5%) but states no licence (none stated): evaluated, not built on; `trocr-kurrent-xvi-xvii` (MIT) is the reader K2 may use"
+  "best_any_yield": 0.18432355046528276,
+  "licence_note": "`trocr-hanse-xvi` has the highest German yield (18.4%) but states no licence (none stated): evaluated, not built on; `trocr-kurrent-xvi-xvii` (MIT) is the reader K2 may use"
  },
- "operator_verdict": null
+ "operator_verdict": "Yes, Partly."
 }
