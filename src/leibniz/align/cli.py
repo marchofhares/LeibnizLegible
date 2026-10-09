@@ -12,6 +12,8 @@ Subcommands:
                 recognise → align to an edition-text file → mint ``gt_lines``.
 * ``kurrent-tolerance`` — how much HTR noise the aligner tolerates (K1): the B2
                 harness over the recorded B1 machine text, corrupted to target CERs.
+* ``kurrent-census`` — the German census of the edition pieces (K1): language per
+                record, canvases, v1 lines, minted lines, stratum and hand; read-only.
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -132,6 +134,73 @@ def kurrent_tolerance(
         _console.print(f"  break-even {be.stratum} {be.metric} < {be.floor:.0%}: {be.describe()}")
     md, js = T.write_reports(res, out_dir)
     _console.print(f"wrote {md} and {js}")
+
+
+@app.command("kurrent-census")
+def kurrent_census(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.jsonl"), "--edition-cache", help="The C2 edition cache."
+    ),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="census.md, the summary, the CSVs."
+    ),
+    data_dir: Path = typer.Option(
+        Path("data/kurrent"), "--data-dir", help="german_pieces.jsonl (gitignored)."
+    ),
+    snippets: int = typer.Option(4, help="Edition-text snippets per class in the report."),
+) -> None:
+    """German census of the edition pieces (K1 Task 2): language, place, lines, mint, hand."""
+    from datetime import date
+
+    from leibniz.align import kurrent_census as K
+    from leibniz.align.ingest import load_edition_cache
+
+    t = date.fromisoformat(today) if today else date.today()
+    cache = load_edition_cache(edition_cache)
+    _console.print(f"{len(cache):,} edition-cache records; classifying and placing the pieces…")
+    conn = K.open_readonly(db_path)
+    try:
+        res = K.census(
+            conn,
+            cache,
+            today=t,
+            progress=lambda k, n: _console.print(f"  {k:,}/{n:,} pieces"),
+        )
+    finally:
+        conn.close()
+    paths = K.write_outputs(
+        res, reports_dir=reports_dir, data_dir=data_dir, cache=cache if snippets else None
+    )
+    summ = K.summary(res)
+    g = summ["by_group"]
+    de = g.get("de", {})
+    lf = g.get("la_fr", {})
+    _console.print(
+        f"[bold]kurrent-census[/bold] {summ['pieces_with_text']:,} pieces with text "
+        f"({summ['pieces_without_text']:,} without) · cache by language "
+        + " · ".join(f"{k} {v:,}" for k, v in summ["cache_languages"].items())
+    )
+    if de:
+        _console.print(
+            f"  German: {de['pieces']:,} pieces, {de['pages']:,} pages, {de['lines']:,} lines, "
+            f"{de['minted']:,} minted (yield {_fmt_pct(de['yield'])}); "
+            f"Leibniz's hand {summ['german_leibniz_hand']:,} pieces"
+        )
+    if lf:
+        _console.print(
+            f"  Latin+French: {lf['pieces']:,} pieces, {lf['lines']:,} lines, {lf['minted']:,} "
+            f"minted (yield {_fmt_pct(lf['yield'])})"
+        )
+    for name, path in paths.items():
+        _console.print(f"  wrote {name}: {path}")
+
+
+def _fmt_pct(x: float | None) -> str:
+    return "—" if x is None else f"{x:.1%}"
 
 
 @app.command()

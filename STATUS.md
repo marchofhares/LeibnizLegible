@@ -3,11 +3,51 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-08 (**S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-09 (**K1 — the Kurrent track, in progress on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French); the bootstrap readers and the pilot follow**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-09: K1 — the Kurrent track, Tasks 0–2 done (Checkpoint A); the
+readers and the pilot follow.** The German question measured before any
+reader is chosen, on the desktop, the store read-only. (a) *How much HTR
+noise the aligner survives* (`leibniz align kurrent-tolerance`,
+`reports/kurrent/align-tolerance.md`): the B2 harness over the recorded B1
+machine text (1,878 validation lines in 76 pieces of 25, base CER 7.95 %),
+the HTR side corrupted by a confusion model of a cursive hand (look-alike
+letters, dropped and doubled minims, merged minims, merged and split word
+spaces) to 10–60 % CER against the gold, yield and precision read at the
+factory's thresholds with the factory's gate. Precision stays at or above
+95.7 % up to 40 % CER in fair copy, light and heavy revision; yield at 30 %
+CER is 97.0 % / 94.0 % / 79.8 % / 46.0 % (fair copy / light / heavy /
+scrap). Break-even by linear interpolation between the levels: **yield falls
+under 50 % at ≈ 55 / 48 / 38 / 29 % CER** (fair copy at threshold 0.55 /
+light 0.62 / heavy 0.72 / scrap 0.80), **precision under 95 % at ≈ 51 / 48 /
+42 / 39 %**. A reader at 30 % CER on Kurrent feeds the factory; one at 50 %
+does not, on drafts. (b) *The German census* (`leibniz align
+kurrent-census`, `reports/kurrent/census.md`, `enrich/langid.py` — the
+`enrich` package's first module, a stopword identifier): of the 10,029
+edition-cache records, 2,036 are German, 3,631 Latin, 3,999 French, 331
+mixed, 32 unknown. Of the 17,162 §70 pieces, 10,121 have a text; **2,173 are
+German** (German, or mixed with German leading), 1,694 localizable, 1,665
+with recognised lines on **5,874 pages, 401,394 lines**; the factory minted
+**40,915** lines on them (**yield 10.2 %**) against 252,762 on 1,328,532
+lines of the Latin and French pieces (19.0 %) — about half the rate, stratum
+for stratum (heavy revision 8.0 % vs 17.1 %, light 19.3 % vs 23.0 %), **not
+the near-zero the hypothesis expected**. Of the German-piece mint, 27,643
+lines (67.6 %) carry German stopwords in their minted text, at a mean
+confidence of 0.839 (Latin and French pieces 0.927) on machine text of 41.0
+folded characters a line (Latin and French 46.2): the PHILIUMM model is not
+reading Kurrent as noise — chance alignment gives ≈ 0.50 at 60 % CER in the
+tolerance study. Whether those lines are right is the pilot's question (Task
+4). German pieces in Leibniz's own hand: 82 (18,056 lines).
+`data/kurrent/german_pieces.jsonl` is K2's input. One rule found hollow on
+the way: the factory's Textart rule recognised a document class on 129 of
+the 10,121 pieces — the catalogue abbreviates (`Abf.`, `Konz.`) — so the C2
+stratum came from the layout alone (Open questions #23). 686 tests, ruff
+clean, in `.venv-k1`. Next: Task 3, the bootstrap readers on Dresden (the
+downloads need a go).
 
 **2026-10-08 (evening): W4 — text access: a copyable text block on every
 page view, the text of a catalogue piece across its folios, the downloads
@@ -538,6 +578,119 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
+### K1 — Kurrent track (2026-10-09) ✅ Task 0 · ✅ Task 1 tolerance · ✅ Task 2 census · ⏳ Task 3 readers · ⏳ Task 4 pilot
+
+- **Setting.** The operator's desktop: the WSL checkout
+  `/home/evana/LeibnizLegible` (the Claude Code session opened in the stale
+  Windows clone and drove WSL through `wsl.exe`; Divergences), on the plan's
+  one branch after a fast-forward to `014b3a1`; the store read-only
+  (17,061,699,584 bytes); the Kurrent Trace package present and complete
+  (383 crops, 383 labels, 383 records, a validator and a scorer that reports
+  strict NFC and a reading policy — NFC, long s to s, whitespace collapsed —
+  as micro-averaged CER and WER). `.venv-k1` from `uv sync --extra bench
+  --extra gt --extra kurrent`, built from the uv cache in seconds: torch
+  2.12.0+cu130 sees the GTX 1660 Ti (CUDA 13.0). Baseline in `.venv-w3`:
+  ruff clean, 644 tests. Task 0 also found `.venv` — the prompt's "pipeline
+  environment" — without torch or kraken (its site-packages last changed
+  2026-09-20); nothing in K1 depends on it. No API key in the environment,
+  so Task 3's vision row will be skipped unless one is exported. The go came
+  after the pre-flight. - **Task 1, the aligner's noise tolerance**
+  (`align/tolerance.py`, `leibniz align kurrent-tolerance`, +15 tests;
+  `reports/kurrent/align-tolerance.md` + `.json`). The B2 harness over the
+  recorded B1 machine text (`reports/philiumm-repro.lines.jsonl`, 1,878
+  lines in validation order, 76 pieces of 25, the gold joined as the edition
+  text), no model and no image. The HTR side is corrupted at a per-character
+  rate: a fired letter is replaced by a look-alike from a table for a
+  cursive hand (the minims u n m i r, the round letters a o e c, the long-s
+  family s f l t, b h k, g q p y, capitals, digits; multi-character targets
+  for split minims), or dropped, doubled, merged with its neighbour (*in*,
+  *ni*, *rn*, *nn* → *m* and the like) or split off by a word space; a fired
+  space is a merged word space. The rate is calibrated per level by
+  bisection (three uniforms per position, so a higher rate fires a
+  superset); the achieved CER is measured with the B1 scorer's edit
+  distance, the folded CER (after the aligner's normalisation) beside it.
+  Levels hit 10.0 %, 20.0 %, 30.0 %, 40.0 %, 50.0 %, 60.0 %. Yield and
+  precision at the five stratum thresholds with the factory's gate — the
+  harness's `LineEval` gained `burst` and `summarize` a `factory_gate`
+  option, off by default, so the B2 numbers are what they were. Results:
+  precision ≥ 95.7 % through 40 % CER in fair copy, light and heavy
+  revision; yield at 30 % CER 97.0 % / 94.0 % / 79.8 % / 46.0 %; break-even
+  yield < 50 % at ≈ 55 / 48 / 38 / 29 % CER and precision < 95 % at ≈ 51 /
+  48 / 42 / 39 % (fair / light / heavy / scrap). The recorded machine text's
+  own errors are 39.4 % substitutions, 39.7 % deletions and 20.9 %
+  insertions; the model is heavier on substitutions, and a dropped character
+  costs the confidence nothing where a substituted one counts against it, so
+  the break-even is on the conservative side. Uniform corruption is the
+  smooth middle: real errors cluster. The `kurrent` extra: transformers
+  5.12.1 (5.13 and later need safetensors ≥ 0.8; kraken 7.0.3 pins < 0.8),
+  tokenizers 0.22.2, huggingface-hub 1.16.1, hf-xet 1.7.0; torch unchanged.
+  Commit `5eb5d55`. - **Task 2, the German census** (`enrich/langid.py`,
+  `align/kurrent_census.py`, `leibniz align kurrent-census`, +28 tests;
+  `reports/kurrent/census.md`, `census-summary.json`,
+  `census-by-volume.csv`, `german_pieces_index.csv`;
+  `data/kurrent/german_pieces.jsonl` for K2; 22 s on the store, read-only).
+  *The identifier:* three disjoint stopword lists with the 17th-century
+  spellings (*vnd*, *vndt*, *daß*, *seyn*, *sey*, *alß*, *wan*, *umb*,
+  *auff*), the French elision clitics counted as French, the words two
+  languages share (*et*, *est*, *de*, *in*, *si*, *non*, *qui*, *des*,
+  *die*, *nos*, *vos*) in no list; under 8 tokens or under 2 hits → unknown
+  (stopwords are about one token in three, so eight tokens give two or three
+  hits, and two is the least that keeps a loanword or a Latin date from
+  deciding); dominance ≥ 0.65 names the language, a runner-up at ≥ 0.25
+  makes it mixed. The pieces classified `de` have dominance quartiles 0.94 /
+  0.98 / 1.00. *The join:* `enumerate_pieces` → one folio index per work →
+  the C2 resolver's pages → recognised lines (`lines.text` not null, as the
+  factory gathers them) → minted lines by the factory's `source` string →
+  the stratum by `classify_piece` over the pages' `page_stats` plus Textart.
+  *The hand:* `eigh.` on the piece itself (`Abf., eigh.`, `Konz.; eigh.`) is
+  *own*; on an address, a correction or a postscript only (`Abf.; eigh.
+  Aufschr.`) is *partial*; Leibniz's hand is *own* with no sender or Leibniz
+  as sender (the C2b rule). *Results:* cache 2,036 de · 3,631 la · 3,999 fr
+  · 331 mixed · 32 unknown; 10,121 pieces with a text (7,041 without — the
+  volumes with no free copy); German 2,173 pieces (113 of them mixed with
+  German leading), 1,694 localizable, 5,874 pages, 401,394 lines, 40,915
+  minted (10.2 %); Latin and French 7,694 pieces, 1,328,532 lines, 252,762
+  minted (19.0 %). By volume: the Reihe I volumes with a text run from 61 to
+  171 German pieces (9–22 %); III,3 373 of 567 and III,4 278 of 424 are
+  German (the Harz mining correspondence), IV,3 140 of 263; VI,4 14 of 566.
+  German pieces by stratum: heavy revision 1,124 pieces at 8.0 % yield,
+  light 507 at 19.3 %, fair copy 4, scrap 31. By hand: own 183, partial 542,
+  other 1,430; **Leibniz's own hand 82 pieces, 18,056 lines.** *The mint
+  check* (two ground-truth-free readings of the 40,915 lines the factory
+  minted on German pieces): 27,643 (67.6 %) carry German stopwords and no
+  Latin or French ones in the minted text, 3,178 (7.8 %) the reverse
+  (addresses, titles, quotations in Latin script), 7,628 neither; mean
+  confidence 0.839 against 0.927 on Latin and French pieces, on machine text
+  of 41.0 folded characters a line against 46.2. So the hypothesis — German
+  declined, not minted — holds only by half: the German yield is half the
+  Latin and French one, but what was minted is German text aligned at a
+  confidence chance cannot give. Either the PHILIUMM model reads Kurrent far
+  better than its makers expect (its FoNDUE-GD base is multilingual), or the
+  lines it accepted are the legible minority; the pilot (Task 4) measures
+  the baseline's yield on German pieces directly and the operator's look at
+  the side-by-side will say whether the words are German. *A finding on the
+  way:* `stratum_from_textart` matches full words the catalogue never writes
+  — it recognised a class on 129 of 10,121 pieces — so the C2 mint's
+  stratum, and with it the threshold, came from the layout statistics alone
+  (Open questions #23; recorded, not fixed). - **Numbers to carry.**
+  Break-even CER (yield < 50 %) ≈ 55 / 48 / 38 / 29 % and (precision < 95 %)
+  ≈ 51 / 48 / 42 / 39 % by stratum; German pieces 2,173, pages 5,874, lines
+  401,394; minted yield German 10.2 % vs Latin and French 19.0 %; Leibniz's
+  hand 82 pieces. - **Licences recorded so far.** Kurrent Trace v0.1
+  (data/external): the Dresden transcript under CC BY-NC-SA 4.0 by the
+  package (Zenodo's field says CC BY 4.0; the conflict is unresolved; nc
+  bucket, internal evaluation only), images Public Domain Mark 1.0, the
+  package's own code CC0. Candidate readers, from the Hub and Zenodo on
+  2026-10-09: dh-unibe/trocr-kurrent-XVI-XVII and dh-unibe/trocr-kurrent
+  MIT; fgho/trocr-hanseXVII-kurrent and fgho/trocr-hanseXVI-kurrent no
+  licence stated (evaluate only); McCATMuS CC BY 4.0; Bullinger HTR (GitHub)
+  CC-BY-SA-4.0. transformers (Apache-2.0) is the new dependency. - **Next.**
+  Task 3: the TrOCR engine behind the `kurrent` extra, `leibniz bench
+  kurrent-smoke` on the Dresden package, the downloads with a go (McCATMuS
+  16 MB; 1.34 GB per TrOCR model, inference files only); then Task 4, the
+  pilot on 25 pieces from `data/kurrent/german_pieces.jsonl` on the GPU,
+  with the PHILIUMM baseline, whose German yield the census already puts
+  near 10.2 % on the factory's own run.
 ### W4 — text access (2026-10-08) ✅ built and checked on the fixture store · ✅ on staging, the HTTP checks pasted and the browser look good · ✅ merged (#40) · ✅ live
 
 - **Setting.** A cloud session, no store, on the plan's one branch under the
@@ -2124,7 +2277,9 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **644** (2026-10-08, W4; 634 after S1, 621 after P1 Task 2, 606 after C2b; with the `gt` + `web` + `release` extras) |
+| Tests passing | **686** (2026-10-09, K1 Tasks 1–2, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K1 aligner noise tolerance (2026-10-09)** | 1,878 lines, 76 pieces; base CER 7.95 %; yield at 30 % CER 97.0 % / 94.0 % / 79.8 % / 46.0 % (fair / light / heavy / scrap); **break-even yield < 50 % at ≈ 55 / 48 / 38 / 29 % CER**, precision < 95 % at ≈ 51 / 48 / 42 / 39 % |
+| **K1 German census (2026-10-09)** | cache 10,029 records: de 2,036 · la 3,631 · fr 3,999 · mixed 331 · unknown 32; **2,173 German pieces** of 10,121 with a text, 5,874 pages, **401,394 lines, 40,915 minted (10.2 %)** vs Latin + French 1,328,532 lines, 252,762 minted (19.0 %); minted text with German stopwords 27,643 (67.6 %) at mean confidence 0.839; Leibniz's hand 82 pieces, 18,056 lines |
 | **W4 text access (2026-10-08)** | the live page view before: a drag in the line list selected 0 characters, select-all copied 11,828 with the chrome; after, on the fixture store: **39/39** browser checks, axe-core 0 violations ×5, 390 px without horizontal scroll; on staging (operator, the same evening): record 41800 answers **84 lines on 2 pages, mean confidence 0.96** |
 | **W3 browse index (2026-10-06)** | 2,225 works under 36 section anchors: LH 750 in 30 sections · LBr 1,060 · Marg 370 · Other 45 in 4 sets |
 | **W3 letter convolutes with a correspondent** | **680 / 1,060 (64.2 %)**; with catalogue records 744 (70.2 %); most frequent name kept 634 + 25 (F series) · a lesser name that fits the shelf order 21 · withheld 60 · records naming nobody 4 |
@@ -2182,6 +2337,29 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Open questions
 
+24. **The PHILIUMM model does not read Kurrent as noise (2026-10-09, K1).**
+    The C2 factory minted 40,915 lines on the 2,173 German pieces (10.2 % of
+    their 401,394 recognised lines, half the Latin and French rate); 27,643
+    of them carry German stopwords in the minted text, at a mean confidence
+    of 0.839 on machine text of 41.0 folded characters a line — chance
+    alignment gives ≈ 0.50 at 60 % CER
+    (`reports/kurrent/align-tolerance.md`). Either the model's multilingual
+    FoNDUE-GD base reads Kurrent in part, or the accepted lines are the
+    legible minority (dates, names, Latin-script words inside German lines).
+    The K1 pilot (Task 4) measures the baseline's German yield and shows the
+    operator the crops; if the lines are right, a slice of the German ground
+    truth is already minted and the baseline is a candidate reader for K2 in
+    its own right.
+23. **The factory's Textart rule never fired (2026-10-09, K1).**
+    `stratum_from_textart` matches full words (`reinschrift`, `abfertigung`,
+    `konzept`, `abschrift`, `auszug`); the catalogue writes abbreviations
+    (`Abf.`, `Konz.`, `Abschr.`, `Ausz.`, `Reinschr.`). A document class was
+    recognised on 129 of the 10,121 pieces with a text, so the C2 mint's
+    stratum — and its threshold — came from the layout statistics alone.
+    Teaching the rule the abbreviations is a one-line change that moves a
+    share of the minted lines between strata; the thresholds were set
+    against the layout stratum, so it belongs with C4's calibration, not in
+    a re-mint on its own.
 22. **The browse index wants two authorities (2026-10-06, W3).** (a) *LH section names* are cut from the GWLB's titles: LH 11 reads "Allgemeinen Geschichte" (the title's dative), LH 9 "Archälogie" and LH 15 "Würtemberg" (the library's spellings), LH 37 and LH 42 have no name (their titles name sub-groups), and the twelve sections without a digitized unit are absent. A reviewed table of the 42 section names would settle all four; the question to the Leibniz-Edition is whether the grouping matches how the Arbeitsstellen think of the Faszikel. (b) *Correspondents*: 380 of the 1,060 letter convolutes are unnamed (316 without linked records, 4 whose records name nobody, 60 whose names do not fit the order of the LBr numbers). A full Arbeitskatalog export completes them with no code change. The order check cannot see a wrong name that happens to fit alphabetically, and the F series has no order to check against; a reader who knows the convolutes should look over the named ones once (`/api/works?family=LBr`).
 21. **Fold the metadata fields in the Meilisearch index (2026-10-02).** Titles, shelfmarks, AA references and folio labels are indexed as written, so a quoted reference finds nothing (W2), and even unquoted a Roman numeral with V or J never meets its folded form: *VI* is sent as *ui* and no typo is allowed under four letters. Measured on 1.53.2: `VI` does not find a page whose only VI is in `AA VI,4 N. 109`, and `AA VI,4 N. 109` finds it only through the bare *aa*, below an unrelated page whose text has *aa*. FTS5 folds those columns. Index folded copies at the next rebuild (C4) — a rebuild drops and refills the index, so not in a routine deploy.
 20. **Multi-word queries on Meilisearch are not AND (2026-10-02).** `meili.py` sends no `matchingStrategy`, so Meilisearch's default `last` drops words from the end of the query when results run short and typo-matches the first word left: live, `deus mundus` reports 97,633 hits (at result 8,900, 98 of 100 hold neither word — French *des*) and `mundus deus` 3,775, where FTS5 requires every word. `matchingStrategy: "all"` would make the backends agree and the counts honest, at the cost of pages where a word was misread past typo tolerance — a product decision, open. Quoted phrases and exclusions hold under either strategy.
@@ -2305,6 +2483,31 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-09 — K1, departures from the prompt and from the plan's
+  preamble.** (1) *Where it ran.* The Claude Code session opened in
+  `C:\Users\evana\LeibnizLegible`, a Windows clone from July (a 96 MB store,
+  an old branch, an uncommitted operator edit to `reports/census.md`, all
+  left alone); every command ran in the WSL checkout
+  `/home/evana/LeibnizLegible` through `wsl.exe`, where the store, the
+  environments, the image cache and the GPU are. (2) *Branch.*
+  `claude/dazzling-hopper-uxji2x` per the preamble, not `kurrent-k1`; the
+  hand-over's compare URL names it. (3) *`.venv`.* The prompt calls it the
+  pipeline environment with kraken and torch; it holds neither
+  (site-packages of 2026-09-20). Nothing in K1 uses it; `.venv-k1` carries
+  the stack. (4) *Textart.* The stratum is computed "exactly as the factory
+  computes it", abbreviations unmatched and all; the finding is recorded
+  (Open questions #23), not fixed. (5) *The German list.*
+  `german_pieces.jsonl` holds the `de` pieces and the `mixed` ones with
+  German leading (113 of 2,173); the `language` field tells them apart, and
+  K2 may filter. (6) *The harness.* `evaluate.LineEval` gained `burst` and
+  `summarize` a `factory_gate` option, off by default; the B2 report's
+  numbers are unchanged. (7) *Two checks the prompt did not ask for.* The
+  census reads the minted text's language and the machine text's length
+  behind every minted line, because the hypothesis test came out half-way
+  (German minted at half the rate, not near zero) and the question "what did
+  the factory mint on German pieces?" needed an answer without ground truth.
+  (8) *The tolerance model's op mix* is substitution-heavier than the
+  recorded errors, on purpose and said so: the harder case for the gate.
 - **2026-10-08 — W4, departures from the prompt and from the plan's
   preamble.** (1) *Where it ran.* A cloud session with no store: Task 0's
   look at the live page ran here (headless Chromium through the proxy), the
@@ -2484,6 +2687,19 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**K1 (2026-10-09), in progress on the desktop — Tasks 0–2 done, Checkpoint
+A.** Resume on `claude/dazzling-hopper-uxji2x` with `export
+UV_PROJECT_ENVIRONMENT=.venv-k1`; the suite is green at 686 (`uv run
+--no-sync pytest -q`). Task 3 next: the TrOCR engine behind the `kurrent`
+extra, `leibniz bench kurrent-smoke` on the Kurrent Trace package
+(`data/external/kurrent-trace/Kurrent-Trace-v0.1`, present), the downloads
+only with a go (McCATMuS 16 MB; 1.34 GB per TrOCR model, inference files
+only, to `data/models/hf/`); then Task 4, the pilot on 25 pieces drawn from
+`data/kurrent/german_pieces.jsonl` on the GPU, under nohup with a log. The
+census's own numbers stand as the baseline the pilot must meet: the factory
+minted 10.2 % of the German pieces' lines with the PHILIUMM model. Nothing
+is deployed; the branch is pushed at each checkpoint.
 
 **The final merge: ✅ merged and live** (pull request #40, merge commit
 `62711b3`, the evening of 8 October in New York, 2026-10-09 UTC), after the

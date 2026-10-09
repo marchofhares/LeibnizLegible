@@ -1359,3 +1359,352 @@ they differ, this preamble wins.
    (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
    carry the ones produced so far.
 ~~~~
+
+### Phase K1 — Kurrent track (run 2026-10-09)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session that opened in the stale Windows clone — under the 8 October plan's
+session preamble in the revision given to this session (below the prompt): one
+branch (`claude/dazzling-hopper-uxji2x`, not `kurrent-k1`), nothing deployed,
+the operator's "go" waited for after Task 0 as the prompt says. The departures
+are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase K1 — Kurrent track: German census, aligner noise tolerance, bootstrap readers.
+One local session on the operator's desktop (WSL2 Ubuntu), with the data, the
+store and the GPU at hand.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. Write the "K1 — Kurrent track" entry in
+STATUS.md after every task, not only at the end, so a fresh session can take
+over at any checkpoint. If STATUS.md already carries a K1 entry, continue from
+its first unfinished task on the existing branch.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible, the one the C1 corpus run, the C2 mint and W3 used.
+Facts, to verify in Task 0 rather than assume:
+- data/inventory.sqlite is the MASTER store (16 GB: 13.5M v1 lines, 297k
+  gt_lines). Open it read-only only: `uv run leibniz …` commands open it
+  mode=ro; your own Python uses a `file:…?mode=ro` URI. Never write to it, never
+  VACUUM or move it, never delete anything under data/.
+- The page-image cache is /mnt/d/leibniz-images (the D: drive); the runbooks
+  pass it as `--images /mnt/d/leibniz-images`, and pages.local_path is relative
+  to that root (see align/audit.py attach_images).
+- data/gt/edition_cache.jsonl is the C2 edition cache (10,029 records).
+- `.venv` is the pipeline environment (kraken, torch with CUDA): never run
+  `uv sync` against it and never install into it. `.venv-w3` is the side
+  environment W3 made (web, gt, release extras). This phase gets its own:
+  after Task 1 adds the `kurrent` extra, create it with
+  `UV_PROJECT_ENVIRONMENT=.venv-k1 uv sync --extra bench --extra gt --extra kurrent`
+  and run everything in this phase with `UV_PROJECT_ENVIRONMENT=.venv-k1`
+  exported in your shell. Check that .gitignore already ignores side
+  environments (W3 added a rule); if `.venv-k1/` would show in `git status`,
+  add it to the same rule.
+- The GPU is a GTX 1660 Ti (6 GB) reachable from WSL2 (the C1 recogniser ran on
+  it). Verify in the new environment with
+  `python -c "import torch; print(torch.cuda.is_available(), torch.version.cuda)"`
+  before any GPU step; if it prints False, say so and run on CPU with --sample.
+- Long jobs run under nohup with a log under logs/ (gitignored), and you poll
+  the log rather than block; print the tail when done. Ask the operator for a
+  go before: a download over 1 GB, a job expected to run over an hour,
+  installing any software (apt, winget, npm), and launching Plan B's training.
+- Every result lives in reports/kurrent/ as small committed files (Markdown,
+  JSON, CSV of at most a few thousand rows), rendered by code from data, prose
+  templated. Bulky artefacts (model weights, datasets, crops, HTML pages, full
+  CSVs, the pilot readings) go under data/ (gitignored) and are described, not
+  committed. Never write a number you did not produce.
+- This phase writes nothing to the store: not to gt_lines, not to lines, not
+  to runs. Every reading a candidate model produces lives in JSON under
+  data/kurrent/. The reason: the recognise stage (pipeline/recognize.py →
+  db.set_line_recognition) UPDATES each line's existing row in place, and every
+  reader of the store (the viewer, the index, the text and release exports, the
+  audit crops) takes the highest run id per line as the current text; a second
+  reader's rows would overwrite or shadow the v1 reading. Versioned line rows
+  are a C4 decision (STATUS.md, Divergences), not this phase's.
+- New Python dependencies (transformers for TrOCR) go in a new optional extra
+  `kurrent` under [project.optional-dependencies] in pyproject.toml, next to the
+  existing `bench` extra (which already carries kraken and therefore torch).
+  Lock with `uv lock`; pin transformers to a release whose torch requirement the
+  already-locked torch satisfies, and never bump torch. Imports stay lazy so
+  the tests run without the extra.
+- The operator merges. You push the branch and hand over; you never merge.
+  Nothing is deployed in this phase. Branch: `kurrent-k1`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files (logs, *.log, resume-run.sh, .python-version, reports/gt-audit/
+   gt-audit.html and the like; leave them alone). `git rev-parse --abbrev-ref
+   HEAD` is main; `git pull --ff-only origin main`; confirm the remote.
+2. `nvidia-smi` (driver, VRAM, nothing else running on the GPU); `df -h data
+   /mnt/d`; `uv --version`; whether data/external/kurrent-trace/Kurrent-Trace-v0.1/
+   exists with data/published_gt.jsonl, images/lines/dresden1673/ and labels/
+   dresden1673/ (if not, ask the operator for the zip path or Drive id and run
+   tools/fetch-kurrent-trace.sh; it verifies the checksum and runs the
+   package's validator).
+3. Baseline in .venv-w3 for now: `uv run ruff check .`, `uv run ruff format
+   --check .`, `uv run pytest -q`. Record the counts.
+4. Print a short plan with the steps you expect, their durations and what
+   needs a go, and wait for the operator's "go".
+
+## Background (all you need)
+About 15 % of the Nachlass is German, written in Kurrent. The HTR model this
+project runs (PHILIUMM's FoNDUE-GD_v2_ft_Leibniz) knows Latin and French and
+reads Kurrent as noise. No Leibniz German ground truth exists anywhere; PHILIUMM
+confirmed by email (David Rabouin, 2026-09-29) that they have none and that their
+project barely touched the German correspondence, and on 2026-10-07 he added
+that their model "was not trained for Kurrentschrift either and we might expect
+very bad result on this corpus". Vision language models are assumed out (SPECS
+§1.6 records 70–80 % CER zero-shot on Kurrent); Task 3 may measure that on
+Dresden if an API key is set in the operator's environment.
+The route is the project's own retro-alignment factory. Reihe I of the Academy
+edition is the general correspondence, a large share German, and its §70-expired
+volumes are in the edition cache where a free copy exists (I,3, I,6 to I,12 and
+I,14 to I,16; I,1, I,2, I,4, I,5 and I,13 have none). The C2 factory minted
+158,570 open-bucket lines from the Reihe I volumes (the sum of the Reihe I rows
+in reports/gt-factory.md), all aligned against the Latin and French model's
+machine text, so the hypothesis is that German lines were declined, not minted,
+and the German ground truth is still unmade in pieces the factory has already
+localized. What unlocks it is a bootstrap reader that reads Kurrent at all. This
+phase measures and prepares; it runs no corpus job. Phase K2 will run the
+factory on German pieces with the reader this phase selects; K3 will fine-tune
+on what K2 mints.
+Candidate readers already exist (all verified reachable on 2026-10-05); test
+them before training anything:
+- dh-unibe/trocr-kurrent-XVI-XVII (Hugging Face): TrOCR line model, MIT licence,
+  German Kurrent 16th–18th century, model.safetensors 1.34 GB; the model card
+  reports test CER 5.4 % on held-out lines of the same hands, Swiss-biased data,
+  and states that it reads one line image per call. Fine-tuned from
+  dh-unibe/trocr-kurrent (19th century, MIT), which may be run for reference.
+- fgho/trocr-hanseXVII-kurrent and fgho/trocr-hanseXVI-kurrent: TrOCR, fine-tuned
+  from the Bern model on 17th and 16th century north German administrative
+  records. No licence stated on the Hub: evaluate only, never build on them
+  unless a licence appears; say so in the report.
+- McCATMuS (Zenodo 10.5281/zenodo.13788177): Kraken model, CC BY 4.0, 22 datasets,
+  mostly French with some German, 16th–21st century. It ships as
+  McCATMuS_nfd_nofix_V1.mlmodel (CoreML, 16 MB), not a safetensors container.
+  KrakenEngine (src/leibniz/htr/engines.py) loads through
+  kraken.models.loaders.load_models, adopted in B1 for the safetensors model; if
+  that refuses the CoreML file, add the legacy path (kraken's load_any) behind
+  the same engine class. Do a one-line load check before any long run.
+- PHILIUMM's own model as the baseline, expected to fail on Kurrent. Its
+  weights are already under data/models/ from B1 (check; else `uv run leibniz
+  bench fetch`).
+TrOCR models read ONE LINE IMAGE per call; this project stores line geometry for
+every page, so crops come from the store through the crop machinery in
+src/leibniz/align/audit.py (line_geometry, crop_box, crop_line).
+Kurrent smoke-test data (a chancery hand, not Leibniz's, but the closest period in
+public): Stefan Beckert's Dresdner Hofdiarium ground truth, Zenodo
+10.5281/zenodo.15303243 (1673, Mscr.Dresd.K.117: a JPG and a per-leaf ALTO XML
+per page), 10.5281/zenodo.15303398 (1653–56, K.113: the same layout plus a METS
+file), 10.5281/zenodo.14356190 (1665, K.80: one zip). Zenodo's licence field says
+CC BY 4.0 on all three; the 1673 README says CC BY-NC-SA 4.0; until the author
+resolves that, the Dresden text is nc bucket: internal evaluation only. The
+Kurrent Trace package (fetched by tools/fetch-kurrent-trace.sh) holds 383
+pixel-exact line crops under images/lines/dresden1673/*.png, labels under
+labels/dresden1673/*.gt.txt (crops and labels in separate trees, so the
+image-plus-sidecar loader in htr/data.py will not pair them), the records in
+data/published_gt.jsonl (read this file), and a scripts/ directory whose
+validator the fetch script runs; check what scorer it ships before relying on
+one. Use the package if present, else cut crops from the Zenodo ALTO polygons.
+Plan B training data, only if no candidate reader is usable: the Bullinger HTR
+dataset (github.com/pstroe/bullinger-htr, Git LFS, about an hour to clone,
+165,673 line PNG + TXT pairs, folders `de` and `la` split by langid, 16th century,
+CC BY-SA 4.0; note the ShareAlike question for a released model in the lawyer-memo
+list) plus the Dresden sets.
+Everything fetched from outside lives under data/. Record every source's licence.
+
+## Task 1 — Aligner noise tolerance (needs no data; do this first)
+The B2 harness (src/leibniz/align/evaluate.py) measures the aligner on the
+PHILIUMM validation split with real HTR text and can perturb the edition side
+(build_reference's char_perturb). reports/philiumm-repro.lines.jsonl holds ref
+and hyp for all 1,878 lines, in val order, at about 8 % CER; the strings are
+normalised under the philiumm policy (NFD, whitespace collapsed), which is fine
+for this purpose. Build pieces of 25 consecutive lines from that file in file
+order (GoldLine.image may be empty bytes) and pass the hyp dict in place of
+run_htr_cached, so no model and no images are needed. Add an HTR-side
+corruption option: substitutions, insertions and deletions applied to the
+machine text to reach target CERs of 10, 20, 30, 40, 50 and 60 % against the
+ref, fixed seed, a realistic confusion set rather than uniform random letters
+(say what you chose: visually similar letter pairs, a dropped or doubled minim,
+a merged or split word space); report the achieved CER per level. Measure yield
+and precision per level at the factory's standard thresholds per stratum
+(STRATUM_THRESHOLDS in src/leibniz/align/factory.py). Report the break-even: the
+CER where yield drops below 50 % and where precision drops below 95 %. Write
+reports/kurrent/align-tolerance.md and align-tolerance.json. Tests on fixtures.
+Add the `kurrent` extra and lock it now; create .venv-k1 and switch to it; run
+the suite there. Commit.
+
+## Task 2 — German census of the edition pieces
+- src/leibniz/enrich/langid.py: pure, tested stopword classifier returning
+  la | fr | de | mixed | unknown with a score; handles 17th-century spellings
+  (vnd, vndt, daß, seyn, sey, alß, wan, umb, auff) and returns unknown below a
+  length you justify. No model, no network. The enrich package is C4's; this is
+  its first module, built for clean edition text, and C4 may replace it for
+  noisy HTR lines; say so in the docstring.
+- `leibniz align kurrent-census`: classify every edition-cache record; join to
+  pieces (src/leibniz/align/volumes.py: enumerate_pieces / PieceRef with
+  record_id, work_id, signature, folio_range, textart), canvases
+  (src/leibniz/align/resolve.py), v1 lines (the recognised run) and minted lines
+  (gt_lines.source contains "katalog {record_id}", see align/factory.py). The
+  stratum per piece comes from align/stratum.py's classify_piece over the pages'
+  page_stats plus textart, exactly as the factory computes it;
+  page_stats.stratum_heuristic is NULL under C1, so do not read that column.
+  Also record per piece whether the catalogue's textart marks Leibniz's own
+  hand (`eigh.`), since the Kurrent question is also a question of whose hand.
+  Per volume and overall: pieces by language; localized pages and v1 lines on
+  German pieces; minted lines and yield on German vs Latin and French pieces
+  (the hypothesis test); language by Textart and by hand. Writes
+  reports/kurrent/census.md, census-summary.json, census-by-volume.csv; the full
+  piece list data/kurrent/german_pieces.jsonl (record_id, work_id, page_ids,
+  n_lines, stratum, hand, language score) for K2, plus a committed
+  reports/kurrent/german_pieces_index.csv without page lists.
+Test on fixtures, then run it here (minutes, no GPU), read the results, commit
+the reports. CHECKPOINT A: write the STATUS.md entry so far and commit. The
+operator may stop here and resume later.
+
+## Task 3 — Bootstrap readers, smoke test on Dresden
+- A TrOCR reader class (in src/leibniz/htr/engines.py or a sibling module)
+  implementing BOTH protocols: the bench harness's Engine
+  (src/leibniz/htr/bench.py: transcribe over line image bytes → text) and the
+  pipeline's Recognizer (src/leibniz/pipeline/recognize.py: transcribe_conf →
+  text and confidence or None; version from the model id). KrakenEngine
+  implements both; copy that shape. It lives behind the `kurrent` extra with an
+  offline test using a stub model. Load the Kraken candidate through
+  KrakenEngine (CoreML path, see Background). Model weights download to
+  data/models/hf/ on first use, cache-first.
+- `leibniz bench kurrent-smoke` (the HTR harness's CLI is registered as `bench`
+  in src/leibniz/cli.py; do not add an `htr` group): build the Dresden test set
+  (the package if present, read from data/published_gt.jsonl; else Zenodo ALTO
+  → crops), run every candidate plus the PHILIUMM baseline, score with the B1
+  harness under all three normalization policies, since Dresden conventions
+  differ (u/v as written, long s distinguished); if the package ships a scorer,
+  report its strict and reading scores too; record wall time per line and
+  device. If OPENAI_API_KEY or ANTHROPIC_API_KEY is set in the environment, add
+  one zero-shot vision row on a seeded 150-line subsample through the existing
+  OpenAIEngine or AnthropicEngine (cents; only images are sent, never the nc
+  text), skipping gracefully without a key. Writes
+  reports/kurrent/bootstrap-candidates.md and .json. The report must say this is
+  a ranking, not a benchmark: public data may sit in a candidate's training set.
+Test on a stub, then ask for a go for the downloads (about 1.3 GB per TrOCR
+model), start with the McCATMuS load check, run the smoke test here (CPU is
+fine for 383 lines; use the GPU if available), read the results, commit the
+reports. CHECKPOINT B: update the STATUS.md entry and commit.
+
+## Task 4 — Pilot on Leibniz's own German, without ground truth
+- The crop machinery in src/leibniz/align/audit.py must accept an explicit list
+  of line refs ("{page_id}:{line_seq:03d}") and return crops. If P1 has already
+  landed that refactor on main, reuse it; if not, do it here without changing
+  the existing sheet's behaviour or tests.
+- `leibniz align kurrent-pilot`: from data/kurrent/german_pieces.jsonl pick 20
+  German pieces across volumes, strata and hands with resolved canvases, plus 5
+  Latin or French control pieces; cap pages, with --sample for slow devices.
+  For each candidate that scored reasonably in Task 3 (define the cut in the
+  report; well below the PHILIUMM baseline's Dresden CER is the obvious one),
+  plus the PHILIUMM baseline, read those pages' lines from the stored v1
+  geometry (crops from /mnt/d/leibniz-images through the crop machinery) and
+  write the readings to data/kurrent/pilot-readings/<reader>.jsonl, one row
+  per line (line_id, text, conf, model, device, ms), resumable. Nothing goes
+  into the store; the pipeline's recognise stage is not used. Then run the
+  factory's alignment per piece per reader as a DRY RUN, building the HtrLine
+  lists from those JSONL files: yield and mean confidence at the standard
+  per-stratum thresholds, nothing written to gt_lines. The aligner's confidence
+  is a similarity to the edition text, so German yield is a ground-truth-free
+  measure of how well each reader reads Leibniz's German. The control pieces
+  must show the opposite ordering, PHILIUMM winning; if not, the method is
+  broken and the report says so.
+- Also render data/kurrent/pilot-side-by-side.html: 30 German line crops with
+  every reader's text, for the operator to eyeball; ask the operator to say
+  whether any reader produces German words, and record the answer verbatim.
+- Writes reports/kurrent/pilot.md, pilot-yield.csv, pilot-summary.json with the
+  verdict: which reader K2 should use and the expected German yield.
+Test on fixtures, ask for a go (GPU strongly preferred; hours on CPU with
+--sample), run it under nohup with a log, read the results and the operator's
+verdict, commit. CHECKPOINT C: update the STATUS.md entry and commit.
+
+## Task 5 — Plan B, only if no reader clears the Task 1 break-even in Task 4
+Build fetch and conversion commands for Bullinger (folder de plus a la sample)
+and the three Dresden sets into Kraken training format under data/external/,
+record licences, write a ketos fine-tuning config from the PHILIUMM checkpoint
+with the codec resized to admit ß, umlauts and long s, and a runbook. Fetch and
+convert only with a go; training is launched only if the GPU is available and
+the operator confirms, as a background job with a log. Skip this task entirely
+if Task 4 found a usable reader.
+
+## Finish and hand-over
+Complete STATUS.md's "K1 — Kurrent track" entry: what was built, key numbers
+(German pieces, pages and lines; German vs Latin-French minted yield; break-even
+CER; Dresden CER per candidate; pilot yield per reader), licences recorded, open
+questions, and a gate verdict for K2: GO with a named reader and expected yield,
+or NO-GO with the reason. Append this prompt verbatim to PROMPTS.md under
+"Follow-up phases (2026-10)". ruff + pytest clean in .venv-k1, all tests
+offline. Commit in sensible pieces and `git push -u origin kurrent-k1`. Then
+hand over: print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...kurrent-k1?expand=1,
+tell the operator what to read in the diff (the gate verdict, the census
+numbers, the licences table), remind them that data/kurrent/ holds K2's input
+and the pilot evidence and must be kept, and that nothing is deployed. Do not
+merge.
+~~~~
+
+The session preamble of the 8 October plan, in the revision given to this
+session (against the W4 entry's wording it names "W4" among the entries to
+read and adds point 6, the go):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull`,
+   commit there, `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (the staging site of step S1 exists; until the final merge the script
+   runs from the staging checkout, afterwards from
+   /opt/leibniz-legible/deploy/staging.sh). The operator runs that line and
+   pastes the output. Then the checks against
+   https://staging.leibnizlegible.com: without credentials it answers 401 to
+   everything, which is the one check you can run yourself; the rest you
+   hand the operator as `curl -su USER …` lines to run and paste back. The
+   password never reaches you; the SSH target and the user name are on the
+   operator's plan page, not in the repo, so never write them into STATUS.md
+   or PROMPTS.md. Checks that need no box can run against a local server on
+   a spare port. The live site changes only at the operator's final merge.
+   Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "W4",
+   "S1", "C2b" and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environment is .venv-w3 on the desktop; in the cloud
+   make your own (.venv-cloud, with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far.
+
+6. A go. Where the prompt says to print a plan and wait for "go", a cloud
+   session that was started with the whole step as its task does not wait
+   (nobody answers mid-task): it records the pre-flight in STATUS.md,
+   proceeds, and notes the departure under Divergences. The operator's yes
+   is still needed for anything on the box or the store, which a cloud
+   session hands over anyway. A desktop session waits as the prompt says.
+~~~~
