@@ -99,6 +99,11 @@ export function search(params, signal) {
   return getJSON(`${API}/search${qs ? `?${qs}` : ''}`, signal);
 }
 
+/** GET /api/lookup — where a citation points (a shelfmark and folio, an AA number). */
+export function lookup(q, signal) {
+  return getJSON(`${API}/lookup?q=${encodeURIComponent(q)}`, signal);
+}
+
 /** GET /api/works — every work as a compact row, and the browse tree. */
 export function works(signal) {
   return getJSON(`${API}/works`, signal);

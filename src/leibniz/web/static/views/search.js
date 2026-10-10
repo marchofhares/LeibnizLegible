@@ -230,6 +230,32 @@ function renderResults(params, data) {
   return summary + groups + renderPagination(params, data);
 }
 
+/** Where the query, read as a citation, points: offered above the results. */
+export function renderLookup(found) {
+  if (!found || !found.kind) return '';
+  const targets = found.targets || [];
+  if (!targets.length) {
+    return found.reason
+      ? `<p class="notice notice--inline lookup lookup--none">${esc(t('search.lookup.none', { reason: found.reason }))}</p>`
+      : '';
+  }
+  const items = targets
+    .map((target) => {
+      const text = target.text_url
+        ? ` · <a href="${esc(target.text_url)}" download>${esc(t('search.lookup.text'))}</a>`
+        : '';
+      const detail = target.detail ? ` <span class="muted">${esc(target.detail)}</span>` : '';
+      return `<li><a href="${esc(target.url)}">${esc(target.label)}</a>${detail}${text}</li>`;
+    })
+    .join('');
+  const more = found.more ? `<p class="hint">${esc(t('search.lookup.more', { n: num(found.more) }))}</p>` : '';
+  return (
+    `<section class="panel lookup" aria-labelledby="lookup-heading">` +
+    `<h2 id="lookup-heading">${esc(t(`search.lookup.${found.kind}`))}</h2>` +
+    `<ul class="linklist">${items}</ul>${more}</section>`
+  );
+}
+
 export async function render(ctx) {
   const { root, query, signal, searchPanel } = ctx;
   const params = readParams(query);
@@ -240,6 +266,7 @@ export async function render(ctx) {
       ? `<p class="notice notice--inline">${esc(t('search.filteredToWork'))} ` +
         `<a href="/search?${esc(api.searchQuery({ ...params, work: '', page: 1 }))}">${esc(t('search.clearWork'))}</a></p>`
       : '') +
+    `<div id="lookup-slot"></div>` +
     `<section class="results" aria-labelledby="results-heading">` +
     `<h2 id="results-heading">${esc(t('search.results'))}</h2>` +
     `<div id="results" class="results__body" aria-live="polite" aria-busy="false"></div>` +
@@ -265,6 +292,21 @@ export async function render(ctx) {
 
   results.setAttribute('aria-busy', 'true');
   results.innerHTML = loading(t('search.loading'));
+
+  // A citation ("LH IV, 6, 18 Bl. 1r", "A VI, 4 N. 109") also names a place:
+  // asked beside the search, shown above its results when it points somewhere.
+  if (params.q && !params.work && (params.page || 1) <= 1) {
+    api
+      .lookup(params.q, signal)
+      .then((found) => {
+        if (signal.aborted) return;
+        const slot = root.querySelector('#lookup-slot');
+        if (slot) slot.innerHTML = renderLookup(found);
+      })
+      .catch(() => {
+        /* the lookup is a convenience; the results stand without it */
+      });
+  }
 
   let data;
   try {

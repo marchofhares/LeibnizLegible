@@ -176,6 +176,20 @@ export function twinLine(page) {
   return `<p class="canvas__twin">${esc(t(key, vars))}</p>`;
 }
 
+/** Search inside this work: the search page, narrowed to it. */
+function workSearch(data) {
+  if (!(data.pages || []).some((p) => p.n_lines > 0)) return '';
+  return (
+    `<form class="work-search" action="/search" method="get" role="search">` +
+    `<label class="field__label" for="work-q">${esc(t('work.search'))}</label>` +
+    `<div class="work-search__row">` +
+    `<input id="work-q" name="q" type="search" required maxlength="500" autocomplete="off" />` +
+    `<input type="hidden" name="work" value="${esc(data.work_id)}" />` +
+    `<button type="submit" class="button button--primary">${esc(t('work.search.go'))}</button>` +
+    `</div></form>`
+  );
+}
+
 function canvasStrip(data) {
   const pages = data.pages || [];
   const body = pages.length
@@ -221,6 +235,7 @@ export async function render(ctx) {
     `<p class="muted work__id"><code>${esc(data.work_id || workId)}</code></p>` +
     identity(data) +
     links(data) +
+    workSearch(data) +
     `</header>` +
     katalogSection(data) +
     canvasStrip(data) +

@@ -1091,6 +1091,30 @@ select {
   text-decoration: underline;
 }
 
+.lookup {
+  margin: 0 0 1rem;
+}
+
+.lookup h2 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.work-search {
+  margin: 0.8rem 0 0;
+}
+
+.work-search__row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.work-search__row input {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
 .canvas__twin {
   margin: 0.1rem 0 0;
   font-family: var(--sans);

@@ -76,6 +76,7 @@ from leibniz.search.documents import (
 )
 from leibniz.web import attribution as attr
 from leibniz.web import browse, iiif, pieces
+from leibniz.web import lookup as lookup_mod
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
 from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
@@ -1095,6 +1096,20 @@ def create_app(
             }
         return state["browse"]
 
+    def lookup_indexes() -> dict:
+        """The shelfmark and Akademie-Ausgabe indexes the lookup reads, built on
+        first use and kept for the life of the process."""
+        if state.get("lookup") is None:
+            conn = _open(db_path)
+            try:
+                state["lookup"] = {
+                    "shelfmarks": lookup_mod.build_shelfmark_index(db.iter_works(conn)),
+                    "aa": lookup_mod.build_aa_index(conn),
+                }
+            finally:
+                conn.close()
+        return state["lookup"]
+
     def twins() -> TwinIndex:
         """The scans registered more than once, read on first use and kept for
         the life of the process (the index build rewrites the file; restart)."""
@@ -1214,6 +1229,33 @@ def create_app(
             for hit in res.hits:
                 hit.thumb_url = images.thumb_url_for(hit.work_id, hit.seq, hit.thumb_url)
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/lookup",
+        summary="Go to what a citation names",
+        description=(
+            "Reads `q` as a citation and says where it points: a shelfmark with or "
+            "without its folio (`LH IV, 6, 18 Bl. 1r`, `LBr. 16 Bl. 46`), an "
+            "Akademie-Ausgabe piece (`A VI, 4 N. 109`, `AA II,1 N.130a`), or a work or "
+            "page id. `kind` is `shelfmark`, `aa`, `id`, or null when `q` is not a "
+            "citation (search answers it); `targets` are pages, works or a browse section, "
+            "each with a site `url`; a citation that leads nowhere carries a `reason`."
+        ),
+    )
+    def api_lookup(q: str = Query(..., min_length=1, max_length=200)) -> JSONResponse:
+        indexes = lookup_indexes()
+        conn = _open(db_path)
+        try:
+            found = lookup_mod.lookup(
+                conn,
+                q,
+                shelfmarks=indexes["shelfmarks"],
+                aa_index=indexes["aa"],
+                titles=browse_index()["titles"],
+            )
+        finally:
+            conn.close()
+        return JSONResponse(found.to_dict(), headers=CACHE_HEADERS)
 
     @app.get(
         "/api/works",
