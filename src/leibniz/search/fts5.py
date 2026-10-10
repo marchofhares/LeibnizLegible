@@ -181,7 +181,7 @@ class Fts5Backend:
                             (
                                 cur.lastrowid,
                                 fold(d.text),
-                                fold(d.title),
+                                fold(" ".join([d.title or "", *d.pieces])),
                                 fold(_marks(d)),
                                 fold(" ".join(d.aa_refs)),
                             ),

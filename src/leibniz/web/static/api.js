@@ -104,6 +104,24 @@ export function lookup(q, signal) {
   return getJSON(`${API}/lookup?q=${encodeURIComponent(q)}`, signal);
 }
 
+/** GET /api/letters — Bodemann's letters by correspondent, date and place. */
+export function letters(params, signal) {
+  const qs = new URLSearchParams();
+  for (const key of ['who', 'place', 'from', 'to', 'direction', 'work', 'page', 'limit']) {
+    const value = params[key];
+    if (value !== undefined && value !== null && value !== '' && !(key === 'page' && Number(value) <= 1)) {
+      qs.set(key, String(value));
+    }
+  }
+  const tail = qs.toString();
+  return getJSON(`${API}/letters${tail ? `?${tail}` : ''}`, signal);
+}
+
+/** GET /api/contents — the convolutes whose catalogue pieces carry the words. */
+export function contents(q, signal) {
+  return getJSON(`${API}/contents?q=${encodeURIComponent(q)}`, signal);
+}
+
 /** GET /api/works — every work as a compact row, and the browse tree. */
 export function works(signal) {
   return getJSON(`${API}/works`, signal);

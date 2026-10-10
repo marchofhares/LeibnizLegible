@@ -59,6 +59,8 @@ from fastapi.responses import (
 )
 
 from leibniz import __version__, db
+from leibniz.catalog import letters as letters_mod
+from leibniz.catalog.shelfmarks import signature_keys
 from leibniz.images.twins import TwinGroup, TwinIndex
 from leibniz.search.backend import (
     MATCH_MODES,
@@ -71,8 +73,10 @@ from leibniz.search.documents import (
     ROMAN,
     aa_ref_label,
     corpus_stats,
+    katalog_by_work,
     latest_lines,
     line_summaries_by_page,
+    piece_title,
 )
 from leibniz.web import attribution as attr
 from leibniz.web import browse, iiif, pieces
@@ -82,7 +86,20 @@ from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
 STATIC_DIR = Path(__file__).parent / "static"
-INDEX_ROUTES = ("/", "/search", "/browse", "/about", "/work/{work_id}", "/page/{page_id}")
+INDEX_ROUTES = (
+    "/",
+    "/search",
+    "/browse",
+    "/letters",
+    "/about",
+    "/work/{work_id}",
+    "/page/{page_id}",
+)
+LETTERS_TITLE = "Letters by correspondent, date and place"
+LETTERS_DESCRIPTION = (
+    "Leibniz's correspondence as Eduard Bodemann catalogued it in 1889, letter by letter: "
+    "who wrote to whom, when and from where, each letter linked to the convolute that holds it."
+)
 CACHE_HEADERS = {"Cache-Control": "public, max-age=300"}
 NO_STORE = {"Cache-Control": "no-store"}
 DAY_CACHE = {"Cache-Control": "public, max-age=86400"}
@@ -303,10 +320,17 @@ def _katalog_for_work(
                     "folio_label": where.folio_label,
                     "folio_range": [where.folio_lo, where.folio_hi],
                     "n_pages": len(where.pages),
+                    "first_page": where.pages[0].id,
                 }
             )
         out.append(entry)
-    return out
+    # The convolute's contents in folio order — the pieces placed on their
+    # folios first, by where they begin; the rest after, most trustworthy first.
+    placed_first = sorted(
+        (e for e in out if "folio_range" in e),
+        key=lambda e: (e["folio_range"][0], e["folio_range"][1], e["record_id"]),
+    )
+    return placed_first + [e for e in out if "folio_range" not in e]
 
 
 def _page_summary(
@@ -410,6 +434,18 @@ def _line_stats(lines: list[db.Line]) -> dict:
         "n_lines": len(lines),
         "mean_conf": round(sum(confs) / len(confs), 4) if confs else None,
     }
+
+
+MAX_LETTERS = 1000  # a work page lists at most this many of its convolute's letters
+
+
+def _letter_dict(letter: letters_mod.Letter) -> dict:
+    """One letter as the API gives it: Bodemann's number, the people (GND),
+    the date (exact, or a range, and as the catalogue writes it), the place."""
+    out = letter.to_dict()
+    out["direction"] = letter.direction
+    out["years"] = [letter.year_from, letter.year_to] if letter.year_from else None
+    return out
 
 
 RUN_QUERY = Query(
@@ -697,7 +733,7 @@ def _ssr_browse(families: list[browse.Family]) -> tuple[str, str, str]:
 
 
 def _sitemap_xml(site: str, work_ids: list[str]) -> str:
-    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/about"]
+    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/letters", f"{site}/about"]
     urls += [f"{site}/work/{w}" for w in work_ids]
     body = "".join(f"<url><loc>{_esc(u)}</loc></url>" for u in urls)
     return (
@@ -1020,6 +1056,7 @@ def create_app(
     image_base_url: str | None = None,
     calculemus_url: str | None = None,
     twins_path: str | Path | None = None,
+    letters_path: str | Path | None = None,
 ) -> FastAPI:
     """Build the FastAPI application over a store (+ optional search backend).
 
@@ -1034,7 +1071,9 @@ def create_app(
     can link to it; unset, nothing about the game reaches the HTML.
     ``twins_path`` is the file of scans registered more than once
     (:mod:`leibniz.images.twins`, written by the index build); without it every
-    page shows and exports its own reading, as before.
+    page shows and exports its own reading, as before. ``letters_path`` is the
+    file of Bodemann's letters (:mod:`leibniz.catalog.letters`, written by
+    ``leibniz catalog letters``); without it the letters are not shown.
     """
     app = FastAPI(
         title="Leibniz Legible API",
@@ -1082,10 +1121,12 @@ def create_app(
         if state.get("browse") is None:
             conn = _open(db_path)
             try:
+                works = list(db.iter_works(conn))
                 families = browse.build_index(
-                    db.iter_works(conn),
+                    works,
                     browse.group_correspondents(conn.execute(browse.CORRESPONDENTS_SQL)),
                     db.matched_work_ids(conn),
+                    letters_by_work(works),
                 )
             finally:
                 conn.close()
@@ -1095,6 +1136,61 @@ def create_app(
                 "titles": browse.display_titles(families),
             }
         return state["browse"]
+
+    def letters() -> letters_mod.LettersIndex:
+        """Bodemann's letters, read on first use and kept for the life of the process."""
+        if state.get("letters") is None:
+            state["letters"] = letters_mod.LettersIndex.load(letters_path)
+        return state["letters"]
+
+    def convolute_keys(work: db.Work) -> list[str]:
+        """The letter convolutes a work's shelfmarks name (``LBr 16``; for a part
+        such as ``LBr. 57, 1`` the convolute ``LBr 57``)."""
+        return letters().keys_for(sorted(signature_keys(work.shelfmarks or [])))
+
+    def letters_by_work(works: list[db.Work]) -> dict[str, dict]:
+        """work id → what Bodemann's letters say of its convolute."""
+        if not letters():
+            return {}
+        out = {}
+        for work in works:
+            keys = convolute_keys(work)
+            if keys:
+                out[work.gwlb_object_id] = {
+                    "convolute": keys[0],
+                    **letters().convolutes[keys[0]].to_dict(),
+                }
+        return out
+
+    def works_for_convolute(key: str) -> list[str]:
+        """The works that carry a convolute: its own shelfmark, or a part of it."""
+        shelfmarks = lookup_indexes()["shelfmarks"]
+        own = list(shelfmarks.get(key, ()))
+        parts = sorted(w for k, ids in shelfmarks.items() if k.startswith(f"{key},") for w in ids)
+        return own + [w for w in parts if w not in own]
+
+    def contents_index() -> dict[str, list[tuple[str, dict]]]:
+        """work id → its catalogue pieces, each with its title, incipit and
+        correspondents folded for matching; built on first use."""
+        if state.get("contents") is None:
+            conn = _open(db_path)
+            try:
+                kat = katalog_by_work(conn)
+            finally:
+                conn.close()
+            out: dict[str, list[tuple[str, dict]]] = {}
+            for work_id, records in kat.items():
+                items = []
+                for record in records:
+                    meta = record.get("metadata") or {}
+                    words = " ".join(
+                        str(meta.get(k) or "")
+                        for k in ("titel", "title", "incipit", "absender", "adressat")
+                    )
+                    items.append((letters_mod.fold(words), record))
+                out[work_id] = items
+            state["contents"] = out
+        return state["contents"]
 
     def lookup_indexes() -> dict:
         """The shelfmark and Akademie-Ausgabe indexes the lookup reads, built on
@@ -1231,6 +1327,114 @@ def create_app(
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
 
     @app.get(
+        "/api/contents",
+        summary="Which convolutes hold a piece: the catalogue's titles searched",
+        description=(
+            "The Faszikel index's search: the convolutes whose catalogue records (the "
+            "Arbeitskatalog der Leibniz-Edition, CC BY 4.0) carry `q` in a piece's title, "
+            "incipit, sender or addressee — `Monadologie`, `Characteristica`, a name — case- "
+            "and accent-blind, with up to five of the matching pieces per convolute and "
+            "where they sit (their shelfmark with its folios). The most matches first."
+        ),
+    )
+    def api_contents(
+        q: str = Query(..., min_length=3, max_length=100),
+        limit: int = Query(50, ge=1, le=200),
+    ) -> JSONResponse:
+        needle = letters_mod.fold(" ".join(q.split()))
+        rows = {row["work_id"]: row for row in browse.rows(browse_index()["families"])}
+        hits = []
+        for work_id, items in contents_index().items():
+            matched = [record for hay, record in items if needle in hay]
+            if matched and work_id in rows:
+                hits.append((work_id, matched))
+        hits.sort(key=lambda hit: (-len(hit[1]), rows[hit[0]]["label"]))
+        works = []
+        for work_id, matched in hits[:limit]:
+            row = rows[work_id]
+            works.append(
+                {
+                    "work_id": work_id,
+                    "label": row["label"],
+                    "shelfmark": row["shelfmark"],
+                    "family": row["family"],
+                    "n_matches": len(matched),
+                    "matches": [
+                        {
+                            "record_id": record["record_id"],
+                            "title": piece_title(record) or record["record_id"],
+                            "where": next(iter(record.get("shelfmark_refs") or []), None),
+                            "date": (record.get("metadata") or {}).get("datum"),
+                        }
+                        for record in matched[:5]
+                    ],
+                }
+            )
+        body = {"query": q, "total": len(hits), "works": works, "attribution": attr.KATALOG}
+        return JSONResponse(body, headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/letters",
+        summary="Letters by correspondent, date and place",
+        description=(
+            "Leibniz's letters as Eduard Bodemann catalogued them in 1889 (the LBr "
+            "numbering), letter by letter from correspSearch (BBAW; CC BY 4.0): sender and "
+            "addressee (GND), date, place (GeoNames), Bodemann's number and the works that "
+            "carry the convolute. `who` and `place` match any part of a name, case- and "
+            "accent-blind; `from`/`to` are years; `direction` is `to` or `from` Leibniz; "
+            "`work` narrows to one convolute. In date order."
+        ),
+    )
+    def api_letters(
+        who: str = Query("", max_length=100),
+        place: str = Query("", max_length=100),
+        year_from: int | None = Query(None, alias="from", ge=1600, le=1800),
+        year_to: int | None = Query(None, alias="to", ge=1600, le=1800),
+        direction: str = Query("", pattern="^(to|from|)$"),
+        work: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$", max_length=64),
+        page: int = Query(1, ge=1, le=10_000),
+        limit: int = Query(50, ge=1, le=200),
+    ) -> JSONResponse:
+        index = letters()
+        if not index:
+            raise HTTPException(503, "letters not loaded (run `leibniz catalog letters`)")
+        convolutes: tuple[str, ...] = ()
+        if work:
+            conn = _open(db_path)
+            try:
+                found_work = db.get_work(conn, work)
+            finally:
+                conn.close()
+            if found_work is None:
+                raise HTTPException(404, f"work {work} not found")
+            convolutes = tuple(convolute_keys(found_work)) or ("-",)
+        found = index.search(
+            letters_mod.LetterQuery(
+                who=who,
+                place=place,
+                year_from=year_from,
+                year_to=year_to,
+                direction=direction,
+                convolutes=convolutes,
+            )
+        )
+        start = (page - 1) * limit
+        rows = []
+        for letter in found[start : start + limit]:
+            row = _letter_dict(letter)
+            row["works"] = works_for_convolute(letter.convolute) if letter.convolute else []
+            rows.append(row)
+        body = {
+            "total": len(found),
+            "page": page,
+            "limit": limit,
+            "letters": rows,
+            "source": index.source,
+            "built_at": index.built_at,
+        }
+        return JSONResponse(body, headers=CACHE_HEADERS)
+
+    @app.get(
         "/api/lookup",
         summary="Go to what a citation names",
         description=(
@@ -1320,6 +1524,16 @@ def create_app(
             conn.close()
         # where the work sits in the browse index: the work page's way back
         body["browse"] = browse_index()["places"].get(work.gwlb_object_id)
+        keys = convolute_keys(work)
+        if keys:
+            found = letters().search(letters_mod.LetterQuery(convolutes=tuple(keys)))
+            body["letters"] = {
+                "convolute": keys[0],
+                **letters().convolutes[keys[0]].to_dict(),
+                "items": [_letter_dict(ltr) for ltr in found[:MAX_LETTERS]],
+                "n_items": len(found),
+                "source": letters().source,
+            }
         return JSONResponse(body, headers=CACHE_HEADERS)
 
     @app.get("/api/pages/{page_id}")
@@ -1604,6 +1818,16 @@ def create_app(
         def serve_about(request: Request) -> Response:
             return respond(request, _stamp_shell(shell, path="/about", title="About", site=site))
 
+        def serve_letters(request: Request) -> Response:
+            body = _stamp_shell(
+                shell,
+                path="/letters",
+                title=LETTERS_TITLE,
+                description=LETTERS_DESCRIPTION,
+                site=site,
+            )
+            return respond(request, body)
+
         def serve_browse(request: Request) -> Response:
             index = browse_index()
             if "html" not in index:  # 2,000-odd links: stamped once
@@ -1689,6 +1913,7 @@ def create_app(
             "/search": serve_search,
             "/browse": serve_browse,
             "/about": serve_about,
+            "/letters": serve_letters,
             "/work/{work_id}": serve_index_work,
             "/page/{page_id}": serve_index_page,
         }

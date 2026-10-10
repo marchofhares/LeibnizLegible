@@ -233,7 +233,10 @@ def test_metadata_is_folded_like_the_query(store_path, fake) -> None:
     be.rebuild(iter_page_docs(conn))
     conn.close()
     doc = fake.indexes["leibniz_pages"][doc_id(f"{W1}:0001")]
-    assert doc["meta_folded"].endswith("aa ui 4 n 109 fol 1r")  # "AA VI,4 N. 109", folio 1r
+    # "AA VI,4 N. 109", the title of the piece on this folio, folio 1r
+    assert doc["meta_folded"].endswith(
+        "aa ui 4 n 109 praefatio operis ad instaurationem scientiarum fol 1r"
+    )
     assert fake.settings["leibniz_pages"]["searchableAttributes"] == ["folded", "meta_folded"]
 
 

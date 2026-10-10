@@ -962,9 +962,13 @@ def test_viewer_modules_are_served_as_one_versioned_set(store_path) -> None:
         assert r.content == path.read_bytes(), rel
         # what makes one prefix enough: every import is relative, so it resolves
         # under the prefix its importer was loaded from
-        specifiers = re.findall(
-            r"""(?:\bfrom\s*|\bimport\s*\(?\s*)['"]([^'"]+)['"]""", path.read_text(encoding="utf-8")
+        # the import and export statements (a word "from" in a string is none)
+        source = path.read_text(encoding="utf-8")
+        statics = re.findall(
+            r"""^\s*(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]""", source, re.M
         )
+        dynamics = re.findall(r"""\bimport\s*\(\s*['"]([^'"]+)['"]""", source)
+        specifiers = statics + dynamics
         assert all(s.startswith(("./", "../")) for s in specifiers), (rel, specifiers)
     assert "from './i18n.js'" in (STATIC_DIR / "app.js").read_text(encoding="utf-8")
     assert c.get(f"{prefix}/views/nope.js").status_code == 404
@@ -1184,3 +1188,24 @@ def test_the_server_rendered_page_numbers_its_lines_and_cites(store_path, tmp_pa
     assert "<h2>Cite</h2>" in html_text and f"/page/{W1}:0001?run=3" in html_text
     pinned = c.get(f"/page/{W1}:0001", params={"run": "2"}).text
     assert '<li id="L1">Calculemus, inquit Leibnitius</li>' in pinned
+
+
+# ---- the Faszikel index ------------------------------------------------------- #
+
+
+def test_contents_search_finds_the_convolute_that_holds_a_piece(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    body = c.get("/api/contents", params={"q": "praefatio"}).json()
+    assert body["total"] == 1
+    (work,) = body["works"]
+    assert work["work_id"] == W1 and work["n_matches"] == 1
+    assert work["matches"][0] == {
+        "record_id": "k-109",
+        "title": "Praefatio operis ad instaurationem scientiarum",
+        "where": "LH IV, 6, 18 Bl. 1-2",
+        "date": "1679",
+    }
+    # incipits count; accents and case do not
+    assert c.get("/api/contents", params={"q": "MIHI SI"}).json()["total"] == 1
+    assert c.get("/api/contents", params={"q": "monadologie"}).json()["total"] == 0
+    assert c.get("/api/contents", params={"q": "ab"}).status_code == 422

@@ -17,6 +17,7 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass, field
 
 from leibniz import db
+from leibniz.align.resolve import folio_span_from_signature, index_pages, select_span
 from leibniz.images.twins import TwinGroup, TwinStats, resolve_work
 
 ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI", 7: "VII", 8: "VIII"}
@@ -44,6 +45,8 @@ class PageDoc:
     # the folio labels the same scan is also registered under, where this
     # page carries the text for all of them (leibniz.images.twins, a fold)
     also: list[str] = field(default_factory=list)
+    # the titles of the catalogue pieces whose folios this page carries
+    pieces: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -55,7 +58,7 @@ class PageDoc:
         "VI" (folded "ui") meets "AA VI,4 N. 109"; indexed as written, a quoted
         reference found nothing and an AA number few pages (STATUS Open
         question 21)."""
-        parts = [self.title or "", *self.shelfmarks, *self.aa_refs]
+        parts = [self.title or "", *self.shelfmarks, *self.aa_refs, *self.pieces]
         parts += [f"fol {label}" for label in (self.label, *self.also) if label]
         return " ".join(p for p in parts if p)
 
@@ -154,6 +157,9 @@ def katalog_by_work(conn: sqlite3.Connection) -> dict[str, list[dict]]:
                 "aa_refs": aa_refs,
                 "aa_labels": [lab for r in aa_refs if (lab := aa_ref_label(r))],
                 "metadata": meta,
+                "shelfmark_refs": json.loads(row["shelfmark_refs"])
+                if row["shelfmark_refs"]
+                else [],
             }
         )
     return dict(out)
@@ -176,6 +182,7 @@ def page_doc(
     stratum: str | None = None,
     lines: list[db.Line] | None = None,
     twin: TwinGroup | None = None,
+    pieces: list[str] | None = None,
 ) -> PageDoc | None:
     """Build the document for one page, or ``None`` if it has no recognised text.
 
@@ -219,6 +226,7 @@ def page_doc(
         katalog=[r["record_id"] for r in recs],
         aa_refs=sorted({lab for r in recs for lab in r["aa_labels"]}),
         also=also,
+        pieces=list(pieces or []),
     )
 
 
@@ -256,16 +264,20 @@ def iter_page_docs(
         if twins_out is not None:
             twins_out.extend(groups)
         twin_of = {pid: group for group in groups for pid in group.pages}
+        records = kat.get(work.gwlb_object_id) or []
+        on_page = records_by_page(work.gwlb_object_id, pages, records)
         for page in pages:
             if page.status != "recognized":
                 continue
+            here = on_page.get(page.id, [])
             doc = page_doc(
                 conn,
                 page,
                 work,
-                katalog=kat.get(work.gwlb_object_id),
+                katalog=[r for r in records if r.get("_placed") is None] + here,
                 lines=read.pop(page.id, None),
                 twin=twin_of.get(page.id),
+                pieces=[t for r in here if (t := piece_title(r))],
             )
             if doc is None:
                 continue
@@ -273,6 +285,39 @@ def iter_page_docs(
             n += 1
             if limit is not None and n >= limit:
                 return
+
+
+def piece_title(record: dict) -> str | None:
+    """A catalogue record's title, one line."""
+    meta = record.get("metadata") or {}
+    title = meta.get("titel") or meta.get("title")
+    return " ".join(str(title).split()) if title else None
+
+
+def records_by_page(
+    work_id: str, pages: list[db.Page], records: list[dict]
+) -> dict[str, list[dict]]:
+    """The catalogue records of a work, by the pages their folios cover (the C2
+    rule, :func:`leibniz.align.resolve.select_span`). A placed record is marked
+    ``_placed``; one that cannot be placed stays the whole work's (its AA
+    reference names every page, as before 2026-10)."""
+    index = index_pages(pages)
+    out: dict[str, list[dict]] = defaultdict(list)
+    for record in records:
+        record.pop("_placed", None)
+        span = next(
+            (s for m in record.get("shelfmark_refs") or [] if (s := folio_span_from_signature(m))),
+            None,
+        )
+        if span is None:
+            continue
+        found = select_span(index, work_id, span)
+        if not found.resolved:
+            continue
+        record["_placed"] = True
+        for page in found.pages:
+            out[page.id].append(record)
+    return dict(out)
 
 
 CONF_BANDS: tuple[tuple[str, float, float], ...] = (
@@ -320,4 +365,6 @@ __all__ = [
     "latest_lines",
     "line_summaries_by_page",
     "page_doc",
+    "piece_title",
+    "records_by_page",
 ]

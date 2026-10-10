@@ -109,9 +109,14 @@ function katalogRecord(record) {
     : '';
 
   const title = record.title || record.record_id || '—';
+  // where the piece begins on the scan: the folio range, a link to its first page
+  const folio =
+    record.folio_label && record.first_page
+      ? `<a class="katalog__folio" href="/page/${esc(pathSeg(record.first_page))}">${esc(record.folio_label)}</a> `
+      : '';
   return (
     `<li class="katalog">` +
-    `<h3 class="katalog__title">${esc(title)}</h3>` +
+    `<h3 class="katalog__title">${folio}${esc(title)}</h3>` +
     (body ? `<dl class="deflist">${body}</dl>` : '') +
     text +
     link +
@@ -125,9 +130,13 @@ function katalogSection(data) {
   const body = records.length
     ? `<ul class="katalog-list">${records.map(katalogRecord).join('')}</ul>`
     : `<p class="muted">${esc(t('work.katalog.none'))}</p>`;
+  const order = records.some((r) => r.folio_label)
+    ? `<p class="hint">${esc(t('work.katalog.order'))}</p>`
+    : '';
   return (
     `<section class="panel" aria-labelledby="katalog-heading">` +
     `<h2 id="katalog-heading">${esc(t('work.katalog'))}</h2>` +
+    order +
     body +
     `<p class="attribution__line">${esc(t('work.katalog.attr'))}</p>` +
     `</section>`
@@ -174,6 +183,78 @@ export function twinLine(page) {
     vars = { label: primary ? folioLabel(primary.label, primary.page_id) : '' };
   }
   return `<p class="canvas__twin">${esc(t(key, vars))}</p>`;
+}
+
+// ---------------------------------------------------------------------------
+// a letter convolute's letters, as Bodemann catalogued them (1889)
+// ---------------------------------------------------------------------------
+
+/** A letter's date as the catalogue writes it, else from its range. */
+export function letterDate(letter) {
+  if (letter.date_text) return letter.date_text;
+  if (letter.when) return letter.when;
+  const [from, to] = letter.years || [];
+  if (!from) return t('letters.undated');
+  return from === to ? String(from) : `${from}–${to}`;
+}
+
+/** The people on a letter other than Leibniz, linked to their GND record. */
+export function people(list) {
+  return (list || [])
+    .map((p) =>
+      p.ref
+        ? `<a href="${esc(p.ref)}" rel="noopener">${esc(p.name)}</a>`
+        : esc(p.name),
+    )
+    .join('; ');
+}
+
+export function letterRow(letter) {
+  const route = `${people(letter.senders)} → ${people(letter.addressees)}`;
+  const place = letter.place ? esc(letter.place.name) : '';
+  return (
+    `<tr><td class="num">${esc(letter.key)}</td><td>${esc(letterDate(letter))}</td>` +
+    `<td>${route}</td><td>${place}</td></tr>`
+  );
+}
+
+export function lettersTable(rows, caption) {
+  return (
+    `<table class="letters">` +
+    (caption ? `<caption class="sr-only">${esc(caption)}</caption>` : '') +
+    `<thead><tr><th scope="col">${esc(t('letters.col.key'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.date'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.people'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.place'))}</th></tr></thead>` +
+    `<tbody>${rows.map(letterRow).join('')}</tbody></table>`
+  );
+}
+
+function lettersSection(data) {
+  const letters = data.letters;
+  if (!letters || !letters.n_items) return '';
+  const years = letters.years ? `${letters.years[0]}–${letters.years[1]}` : '';
+  const places = (letters.places || []).slice(0, 5).map((p) => p.name).join(', ');
+  const summary = tn('work.letters.summary', letters.n_items, {
+    n: num(letters.n_items),
+    years: years || t('letters.undated'),
+    places: places || '—',
+  });
+  const shown = letters.items || [];
+  const more =
+    letters.n_items > shown.length
+      ? `<p class="hint">${esc(t('work.letters.more', { n: num(letters.n_items - shown.length) }))}</p>`
+      : '';
+  return (
+    `<section class="panel" aria-labelledby="letters-heading">` +
+    `<h2 id="letters-heading">${esc(t('work.letters'))}</h2>` +
+    `<p>${esc(summary)} <a href="/letters?work=${esc(encodeURIComponent(data.work_id))}">${esc(t('work.letters.find'))}</a></p>` +
+    `<details class="letters__all"><summary>${esc(t('work.letters.list', { n: num(shown.length) }))}</summary>` +
+    lettersTable(shown, t('work.letters')) +
+    `</details>${more}` +
+    `<p class="attribution__line">${esc(t('letters.attr'))}</p>` +
+    `</section>`
+  );
 }
 
 /** Search inside this work: the search page, narrowed to it. */
@@ -237,6 +318,7 @@ export async function render(ctx) {
     links(data) +
     workSearch(data) +
     `</header>` +
+    lettersSection(data) +
     katalogSection(data) +
     canvasStrip(data) +
     `</article>`;
