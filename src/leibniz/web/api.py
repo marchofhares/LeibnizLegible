@@ -79,7 +79,7 @@ from leibniz.search.documents import (
     piece_title,
 )
 from leibniz.web import attribution as attr
-from leibniz.web import browse, iiif, pieces
+from leibniz.web import browse, iiif, links, pieces
 from leibniz.web import lookup as lookup_mod
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
 from leibniz.web.images import ImageSource
@@ -267,8 +267,28 @@ def _record_dict(rec: db.KatalogRecord) -> dict:
             }
         ),
         "drucke": meta.get("drucke") or None,
-        "url": meta.get("url") or meta.get("record_url"),
+        # the record in the Leibniz-Katalog (its extended search: no record pages)
+        "url": meta.get("url") or links.katalog_record_url(rec.record_id, meta.get("katnr")),
+        # where each cited volume of the Akademie-Ausgabe can be read or found
+        "aa_links": _aa_links(aa_refs),
+        # a letter of 1708–1716 not yet in the edition: the Leibniz-Archiv's transcriptions
+        "transcriptions": (
+            links.transcriptions_link(meta.get("datum") or meta.get("date"))
+            if not any(r.get("volume") is not None for r in aa_refs)
+            and (meta.get("absender") or meta.get("adressat"))
+            else None
+        ),
     }
+
+
+def _aa_links(aa_refs: list[dict]) -> list[dict]:
+    """One link per cited volume, in the order the references give them."""
+    out: list[dict] = []
+    for ref in aa_refs:
+        link = links.aa_volume_link(ref.get("series"), ref.get("volume"))
+        if link is not None and link not in out:
+            out.append(link)
+    return out
 
 
 def _katalog_for_work(
@@ -321,6 +341,8 @@ def _katalog_for_work(
                     "folio_range": [where.folio_lo, where.folio_hi],
                     "n_pages": len(where.pages),
                     "first_page": where.pages[0].id,
+                    # the piece's first folio in the GWLB's own viewer
+                    "gwlb_url": attr.gwlb_page_url(work_id, where.pages[0].seq),
                 }
             )
         out.append(entry)
@@ -675,7 +697,8 @@ BROWSE_TITLE = "Browse by shelfmark"
 BROWSE_NOTE = (
     "Titles and shelfmarks are the library's. Section names are cut from its titles. "
     "Correspondent names come from the linked records of the Arbeitskatalog der "
-    "Leibniz-Edition (BBAW / TELOTA, CC BY 4.0), checked against the alphabetical order of "
+    "Leibniz-Edition (BBAW, Arbeitsstelle Potsdam I, CC BY 4.0), checked against the alphabetical "
+    "order of "
     "the LBr numbers; where no record is linked yet, or the names do not fit that order, "
     "an entry shows its shelfmark only. The texts behind the links are machine "
     "transcriptions, not an edition."
@@ -1000,6 +1023,10 @@ def _record_rows(rec: dict) -> list[str]:
         rows.append(f"Other printings: {rec['drucke']}")
     if rec.get("url"):
         rows.append(f"Record in the Leibniz-Katalog: {rec['url']}")
+    for link in rec.get("aa_links") or []:
+        rows.append(f"{link['label']}: {link['url']}")
+    if rec.get("transcriptions"):
+        rows.append(f"{rec['transcriptions']['label']}: {rec['transcriptions']['url']}")
     return rows
 
 

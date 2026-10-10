@@ -104,8 +104,31 @@ function katalogRecord(record) {
       `${esc(t('work.katalog.text', { range: record.folio_label || '' }))}</a></p>`
     : '';
 
-  const link = record.url
-    ? `<p><a href="${esc(record.url)}" rel="noopener">${esc(t('work.katalog.record'))}</a></p>`
+  // links out: the record in the Leibniz-Katalog, the piece's first folio at
+  // the GWLB, each cited volume of the edition, the Leibniz-Archiv's
+  // transcriptions of a late letter not yet edited
+  const out = [];
+  if (record.url) {
+    out.push(`<a href="${esc(record.url)}" rel="noopener">${esc(t('work.katalog.record'))}</a>`);
+  }
+  if (record.gwlb_url) {
+    out.push(`<a href="${esc(record.gwlb_url)}" rel="noopener">${esc(t('work.katalog.gwlb'))}</a>`);
+  }
+  for (const vol of record.aa_links || []) {
+    const key = vol.kind === 'volume' ? 'work.katalog.aa.volume' : 'work.katalog.aa.series';
+    out.push(
+      `<a href="${esc(vol.url)}" rel="noopener">${esc(t(key, { name: vol.name, where: vol.where }))}</a>` +
+        (vol.terms ? ` <span class="muted">(${esc(vol.terms)})</span>` : ''),
+    );
+  }
+  if (record.transcriptions) {
+    out.push(
+      `<a href="${esc(record.transcriptions.url)}" rel="noopener">` +
+        `${esc(t('work.katalog.transcriptions', { year: record.transcriptions.year }))}</a>`,
+    );
+  }
+  const link = out.length
+    ? `<ul class="linklist linklist--inline katalog__links">${out.map((l) => `<li>${l}</li>`).join('')}</ul>`
     : '';
 
   const title = record.title || record.record_id || '—';

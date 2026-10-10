@@ -64,7 +64,7 @@ const STRINGS = {
     'attr.images.mirror':
       'Images: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Served from this project’s copy of the GWLB’s delivery scans; the originals remain with the GWLB.',
     'attr.katalog':
-      'Catalogue: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.',
+      'Catalogue: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I. CC BY 4.0.',
     'attr.transcriptions':
       'Transcriptions: Leibniz Legible, CC BY 4.0 — machine output, not an edition.',
     'attr.code': 'Code: Apache-2.0.',
@@ -166,7 +166,7 @@ const STRINGS = {
     'browse.katalog': 'catalogue records linked',
     'browse.katalog.short': 'K',
     'browse.note':
-      'Titles and shelfmarks are the library’s. Correspondent names come from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, used under CC BY 4.0. K marks a work with linked catalogue records. The texts behind the links are machine transcriptions, not an edition.',
+      'Titles and shelfmarks are the library’s. Correspondent names come from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, used under CC BY 4.0. K marks a work with linked catalogue records. The texts behind the links are machine transcriptions, not an edition.',
 
     // ---- work ------------------------------------------------------------
     'work.heading': 'Work',
@@ -194,12 +194,16 @@ const STRINGS = {
     'work.katalog.match.manual': 'Linked by hand · confidence {conf}',
     'work.katalog.match': 'Link: {method}, confidence {conf}',
     'work.katalog.record': 'Record in the Leibniz-Katalog',
+    'work.katalog.gwlb': 'Its first folio at the GWLB',
+    'work.katalog.aa.volume': '{name}: the volume in the {where}',
+    'work.katalog.aa.series': '{name}: its series at {where}',
+    'work.katalog.transcriptions': 'Transcriptions of the letters of {year} (Leibniz-Archiv, pre-edition)',
     // The piece's machine text across its folios, offered where the record's
     // shelfmark names a folio range the scan's labels can place; {range} is the
     // catalogue's own "Bl. 1–2", the same in both languages.
     'work.katalog.text': 'Text of this piece ({range})',
     'work.katalog.attr':
-      'Catalogue data from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, used under CC BY 4.0.',
+      'Catalogue data from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, used under CC BY 4.0.',
     'work.pages': 'Page images',
     'work.canvases': '{n} page images',
     'work.folio': 'Folio {label}',
@@ -390,7 +394,7 @@ const STRINGS = {
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. The scans carry no related rights (§ 68 UrhG). The copies shown here are the GWLB’s delivery derivatives, unaltered except for the thumbnails, served from this project’s own storage; each page links to its original at the GWLB, whose master files remain the authoritative source.',
     'about.license.katalog.h': 'Catalogue data',
     'about.license.katalog.p':
-      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
+      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
     'about.license.transcriptions.h': 'Transcriptions',
     'about.license.transcriptions.p':
       'Leibniz Legible, CC BY 4.0. Machine output. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
@@ -506,7 +510,7 @@ const STRINGS = {
     'attr.images.mirror':
       'Digitalisate: Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. Ausgeliefert aus der projekteigenen Kopie der GWLB-Auslieferungsscans; die Originale bleiben bei der GWLB.',
     'attr.katalog':
-      'Katalogdaten: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA. CC BY 4.0.',
+      'Katalogdaten: Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I. CC BY 4.0.',
     'attr.transcriptions':
       'Transkriptionen: Leibniz Legible, CC BY 4.0 — maschinell erzeugt, keine Edition.',
     'attr.code': 'Quellcode: Apache-2.0.',
@@ -606,7 +610,7 @@ const STRINGS = {
     'browse.katalog': 'Katalogisate verknüpft',
     'browse.katalog.short': 'K',
     'browse.note':
-      'Titel und Signaturen sind die der Bibliothek. Die Namen der Korrespondenten stammen aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, genutzt unter CC BY 4.0. K kennzeichnet ein Werk mit verknüpften Katalogisaten. Die Texte hinter den Links sind maschinelle Transkriptionen, keine Edition.',
+      'Titel und Signaturen sind die der Bibliothek. Die Namen der Korrespondenten stammen aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, genutzt unter CC BY 4.0. K kennzeichnet ein Werk mit verknüpften Katalogisaten. Die Texte hinter den Links sind maschinelle Transkriptionen, keine Edition.',
 
     // ---- work ------------------------------------------------------------
     'work.heading': 'Werk',
@@ -632,9 +636,13 @@ const STRINGS = {
     'work.katalog.match.manual': 'Von Hand zugeordnet · Konfidenz {conf}',
     'work.katalog.match': 'Zuordnung: {method}, Konfidenz {conf}',
     'work.katalog.record': 'Datensatz im Leibniz-Katalog',
+    'work.katalog.gwlb': 'Erstes Blatt bei der GWLB',
+    'work.katalog.aa.volume': '{name}: der Band im {where}',
+    'work.katalog.aa.series': '{name}: die Reihe bei {where}',
+    'work.katalog.transcriptions': 'Transkriptionen der Briefe von {year} (Leibniz-Archiv, Vorausedition)',
     'work.katalog.text': 'Text dieses Stücks ({range})',
     'work.katalog.attr':
-      'Katalogdaten aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW / TELOTA, genutzt unter CC BY 4.0.',
+      'Katalogdaten aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, genutzt unter CC BY 4.0.',
     'work.pages': 'Seitenbilder',
     'work.canvases': '{n} Seitenbilder',
     'work.folio': 'Blatt {label}',
@@ -825,7 +833,7 @@ const STRINGS = {
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. An den Digitalisaten bestehen keine Leistungsschutzrechte (§ 68 UrhG). Die hier gezeigten Kopien sind die Auslieferungsderivate der GWLB, unverändert bis auf die Vorschaubilder, ausgeliefert aus dem eigenen Speicher dieses Projekts; jede Seite verweist auf ihr Original bei der GWLB, deren Masterdateien die maßgebliche Quelle bleiben.',
     'about.license.katalog.h': 'Katalogdaten',
     'about.license.katalog.p':
-      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW) / TELOTA. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
+      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
     'about.license.transcriptions.h': 'Transkriptionen',
     'about.license.transcriptions.p':
       'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',

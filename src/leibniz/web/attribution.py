@@ -16,7 +16,11 @@ CC_BY_URL = "http://creativecommons.org/licenses/by/4.0/"
 
 KATALOG_NAME = "Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition"
 KATALOG_URL = "https://leibniz-katalog.bbaw.de/"
-KATALOG_PUBLISHER = "Berlin-Brandenburgische Akademie der Wissenschaften (TELOTA)"
+# The catalogue's own citation names its editor: the Arbeitsstelle Potsdam I of
+# the BBAW (TELOTA built the database). Checked on its home page, 2026-10-10.
+KATALOG_PUBLISHER = (
+    "ed. Arbeitsstelle Potsdam I der Berlin-Brandenburgischen Akademie der Wissenschaften"
+)
 
 PHILIUMM_MODEL = "FoNDUE-GD_v2_ft_Leibniz"
 PHILIUMM_MODEL_DOI = "10.5281/zenodo.21457538"
