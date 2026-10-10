@@ -376,8 +376,11 @@ def _once_summaries(
     return out
 
 
-def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str]) -> dict:
+def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str], n: int | None = None) -> dict:
+    """One line as the page API gives it; ``n`` is its number on the page as
+    shown, from 1 (the ``#L<n>`` of a permalink)."""
     return {
+        "n": n,
         "line_id": ln.id,
         "line_seq": ln.line_seq,
         "text": ln.text,
@@ -405,6 +408,69 @@ def _line_stats(lines: list[db.Line]) -> dict:
     return {
         "n_lines": len(lines),
         "mean_conf": round(sum(confs) / len(confs), 4) if confs else None,
+    }
+
+
+RUN_QUERY = Query(
+    None,
+    ge=0,
+    description="Read the page as this recognition run left it (a permalink's `?run=`): "
+    "lines of later runs are left out, so a citation keeps its text after a re-read.",
+)
+
+
+def _lines_for(conn: sqlite3.Connection, page_id: str, run: int | None) -> list[db.Line]:
+    """The page's latest lines, or as run ``run`` left them; a 404 where that run
+    had read nothing on the page."""
+    lines = latest_lines(conn, page_id, as_of_run=run)
+    if run is not None and not _with_text(lines):
+        raise HTTPException(404, f"page {page_id} has no recognised text as of run {run}")
+    return lines
+
+
+def _current_run(
+    conn: sqlite3.Connection, page_id: str, lines: list[db.Line], run: int | None
+) -> int | None:
+    """The run of the page's current reading (the latest among its lines with text)."""
+    current = lines if run is None else latest_lines(conn, page_id)
+    runs = [ln.run_id for ln in _with_text(current) if ln.run_id is not None]
+    return max(runs) if runs else None
+
+
+def _cite(
+    site: str, page: db.Page, work: db.Work | None, lines: list[db.Line], run: dict | None
+) -> dict:
+    """How to cite the page as shown: the run its reading comes from (the
+    latest among its lines), a permalink pinned to that run — a later run (C4)
+    changes the text under the plain URL, never under this one — and the
+    citation itself; a line's is the page's with ``, line <n>`` and ``#L<n>``."""
+    run_id = run.get("run_id") if run else None
+    model = (run or {}).get("model") or next((ln.model for ln in lines if ln.model), None)
+    permalink = f"{site}/page/{page.id}" + (f"?run={run_id}" if run_id is not None else "")
+    title = (work.title if work else None) or page.work_id
+    where = f"fol. {page.label}" if page.label else f"canvas {page.seq}"
+    made = ", ".join(
+        part
+        for part in (
+            f"model {model}" if model else "",
+            f"run {run_id}" if run_id is not None else "",
+        )
+        if part
+    )
+    text = (
+        f"{title}, {where}. Machine transcription, not an edition: {attr.PROJECT_NAME}"
+        + (f" ({made})" if made else "")
+        + f". {permalink}"
+    )
+    return {
+        "run": run_id,
+        "model": model,
+        "permalink": permalink,
+        "page": text,
+        # the parts, for a viewer that words the citation in its own language
+        "title": title,
+        "label": page.label,
+        "seq": page.seq,
     }
 
 
@@ -524,8 +590,10 @@ def _ssr_page(
     prev_id: str | None,
     next_id: str | None,
     twin: TwinGroup | None = None,
+    cite: dict | None = None,
 ) -> tuple[str, str, str]:
-    """(title, description, html) for a page's server-rendered machine text."""
+    """(title, description, html) for a page's server-rendered machine text;
+    each line is ``#L<n>``, as the viewer numbers it, and ``cite`` how to cite it."""
     work_title = (work.title if work else None) or page.work_id
     label = page.label or f"page {page.seq}"
     title = f"{work_title}, fol. {label}"
@@ -547,7 +615,7 @@ def _ssr_page(
     if next_id:
         nav.append(f'<a rel="next" href="/page/{_esc(next_id)}">Next page</a>')
     shown = texts[:SSR_MAX_LINES]
-    body = "".join(f"<li>{_esc(t)}</li>" for t in shown)
+    body = "".join(f'<li id="L{n}">{_esc(t)}</li>' for n, t in enumerate(shown, start=1))
     rest = len(texts) - len(shown)
     more = f"<p>… {rest} more lines in the API.</p>" if rest else ""
     html_out = (
@@ -560,7 +628,8 @@ def _ssr_page(
         f"<nav>{' · '.join(nav)}</nav>"
         + (f"<p>{_esc(twin.describe(page.id))}</p>" if twin is not None else "")
         + f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
-        "</article>"
+        + (f"<h2>Cite</h2><p>{_esc(cite['page'])}</p>" if cite and texts else "")
+        + "</article>"
     )
     return title, description, html_out
 
@@ -763,12 +832,14 @@ def _page_text(
     runs: dict[int | None, dict | None],
     fmt: str,
     twin: TwinGroup | None = None,
+    permalink: str | None = None,
 ) -> str:
     """One page's export; ``lines`` are its lines with text, as ``/api/pages`` shows them."""
     stats = _line_stats(lines)
     rows = [
         f"{attr.PROJECT_NAME} — {site}",
         f"Page: {site}/page/{page.id}",
+        *([f"Permalink to this reading: {permalink}"] if permalink else []),
         _title_row(work, page.work_id),
         f"{_folio(page)}, page id {page.id}",
         *([f"Scan: {twin.describe(page.id)}"] if twin is not None else []),
@@ -1210,14 +1281,15 @@ def create_app(
         return JSONResponse(body, headers=CACHE_HEADERS)
 
     @app.get("/api/pages/{page_id}")
-    def api_page(page_id: str) -> JSONResponse:
+    def api_page(page_id: str, run: int | None = RUN_QUERY) -> JSONResponse:
         conn = _open(db_path)
         try:
             page = db.get_page(conn, page_id)
             if page is None:
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
-            lines = latest_lines(conn, page_id)
+            lines = _lines_for(conn, page_id, run)
+            current_run = _current_run(conn, page_id, lines, run)
             twin = twins().get(page.id)
             # a spread page shows its half of the image; the lines across the fold on both
             recognised, across = _twin_lines(twin, page.id, _with_text(lines))
@@ -1257,15 +1329,21 @@ def create_app(
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=page.work_id),
                 "gwlb_page_url": attr.gwlb_page_url(page.work_id, page.seq),
                 "run": _run_info(conn, max(run_ids) if run_ids else None),
+                "as_of_run": run,
+                "current_run": current_run,
                 "stats": _line_stats(recognised),
                 "lines": [
-                    {**_line_dict(ln, page, run_dates), "crosses_fold": ln.line_seq in across}
-                    for ln in recognised
+                    {
+                        **_line_dict(ln, page, run_dates, i),
+                        "crosses_fold": ln.line_seq in across,
+                    }
+                    for i, ln in enumerate(recognised, start=1)
                 ],
                 "twin": _twin_dict(twin, page.id) if twin is not None else None,
                 "honesty": attr.HONESTY,
                 "attribution": attr.attribution(images.mirrored),
             }
+            body["cite"] = _cite(site, page, titled(work), recognised, body["run"])
         finally:
             conn.close()
         return JSONResponse(body, headers=CACHE_HEADERS)
@@ -1286,7 +1364,9 @@ def create_app(
         response_class=PlainTextResponse,
         responses=TEXT_RESPONSES,
     )
-    def api_page_text(page_id: str, fmt: TextFormat = "txt") -> Response:
+    def api_page_text(
+        page_id: str, fmt: TextFormat = "txt", run: int | None = RUN_QUERY
+    ) -> Response:
         conn = _open(db_path)
         try:
             page = db.get_page(conn, page_id)
@@ -1294,11 +1374,14 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
             twin = twins().get(page.id)
-            lines, _ = _twin_lines(twin, page.id, _with_text(latest_lines(conn, page_id)))
+            lines, _ = _twin_lines(twin, page.id, _with_text(_lines_for(conn, page_id, run)))
             runs = {run_id: _run_info(conn, run_id) for run_id in {ln.run_id for ln in lines}}
+            run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
+            pinned = runs.get(max(run_ids)) if run_ids else None
         finally:
             conn.close()
-        body = _page_text(site, page, titled(work), lines, runs, fmt, twin)
+        permalink = _cite(site, page, titled(work), lines, pinned)["permalink"] if lines else None
+        body = _page_text(site, page, titled(work), lines, runs, fmt, twin, permalink)
         return Response(body, media_type=TEXT_MEDIA[fmt], headers=_text_headers(page.id, fmt))
 
     @app.get(
@@ -1530,7 +1613,12 @@ def create_app(
                     return respond(request, body, status=404)
                 work = db.get_work(conn, page.work_id)
                 twin = twins().get(page.id)
-                lines, _ = _twin_lines(twin, page.id, latest_lines(conn, page_id))
+                raw = request.query_params.get("run", "")
+                run = int(raw) if raw.isdigit() else None
+                lines = latest_lines(conn, page_id, as_of_run=run)
+                lines, _ = _twin_lines(twin, page.id, _with_text(lines))
+                run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
+                pinned = _run_info(conn, max(run_ids)) if run_ids else None
                 neighbours = conn.execute(
                     "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
                     (page.work_id, page.seq - 1, page.seq + 1),
@@ -1541,8 +1629,9 @@ def create_app(
             next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
             shown = images.resolve(page)
             gwlb_url = attr.gwlb_page_url(page.work_id, page.seq)
+            cite = _cite(site, page, titled(work), lines, pinned)
             title, description, ssr = _ssr_page(
-                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id, twin
+                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id, twin, cite
             )
             body = _stamp_shell(
                 shell,

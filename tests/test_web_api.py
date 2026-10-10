@@ -1142,3 +1142,45 @@ def test_an_unnamed_letter_convolute_is_called_by_its_shelfmark(store_path, tmp_
     assert c.get(f"/api/works/{W2}").json()["title"] == "LBr. 464"
     # a title that names the work stays the library's
     assert c.get(f"/api/works/{W1}").json()["title"] == "LH 4,6,18"
+
+
+# ---- citable lines ------------------------------------------------------------ #
+
+
+def test_lines_are_numbered_from_one_and_the_page_says_how_to_cite_it(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    p = c.get(f"/api/pages/{W1}:0001").json()
+    assert [ln["n"] for ln in p["lines"]] == [1, 2, 3]
+    assert [ln["line_seq"] for ln in p["lines"]] == [0, 1, 2]  # the store's numbering stays
+    cite = p["cite"]
+    # line 1 was re-read by run 3: the page's reading is pinned to run 3
+    assert cite["run"] == 3 and cite["model"] == "leibniz-htr-v2@v2"
+    assert cite["permalink"] == f"https://leibnizlegible.com/page/{W1}:0001?run=3"
+    assert cite["page"].startswith("LH 4,6,18, fol. 1r. Machine transcription, not an edition")
+    assert cite["page"].endswith(f"(model leibniz-htr-v2@v2, run 3). {cite['permalink']}")
+    assert (p["as_of_run"], p["current_run"]) == (None, 3)
+
+
+def test_a_permalink_pinned_to_a_run_keeps_its_text(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    old = c.get(f"/api/pages/{W1}:0001", params={"run": 2}).json()
+    assert old["lines"][0]["text"] == "Calculemus, inquit Leibnitius"  # before the re-read
+    assert (old["as_of_run"], old["current_run"]) == (2, 3)
+    assert old["cite"]["run"] == 2 and old["cite"]["permalink"].endswith("?run=2")
+    now = c.get(f"/api/pages/{W1}:0001", params={"run": 3}).json()
+    assert now["lines"][0]["text"] == "Calculemus inquit Leibnitius."
+    gone = c.get(f"/api/pages/{W1}:0001", params={"run": 1})  # segmentation only: no text
+    assert gone.status_code == 404 and "as of run 1" in gone.json()["detail"]
+    assert c.get(f"/api/pages/{W1}:0001", params={"run": -1}).status_code == 422
+    text = c.get(f"/api/pages/{W1}:0001/text", params={"run": 2}).text
+    assert f"# Permalink to this reading: https://leibnizlegible.com/page/{W1}:0001?run=2" in text
+    assert "Calculemus, inquit Leibnitius" in text and "Calculemus inquit" not in text
+
+
+def test_the_server_rendered_page_numbers_its_lines_and_cites(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    html_text = c.get(f"/page/{W1}:0001").text
+    assert '<li id="L1">Calculemus inquit Leibnitius.</li>' in html_text
+    assert "<h2>Cite</h2>" in html_text and f"/page/{W1}:0001?run=3" in html_text
+    pinned = c.get(f"/page/{W1}:0001", params={"run": "2"}).text
+    assert '<li id="L1">Calculemus, inquit Leibnitius</li>' in pinned

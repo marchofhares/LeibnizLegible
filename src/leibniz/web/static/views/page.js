@@ -106,6 +106,7 @@ export function polygonPoints(line) {
 
 function provenance(line, run, data) {
   const rows = [];
+  if (line.line_id) rows.push([t('page.prov.lineId'), `<code>${esc(line.line_id)}</code>`]);
   const model = line.model || (run && run.model);
   if (model) rows.push([t('page.prov.model'), esc(model)]);
   const runId = line.run_id || (run && run.run_id);
@@ -156,9 +157,14 @@ function provenance(line, run, data) {
   );
 }
 
+/** A line's number on the page as shown, from 1: what `#L<n>` names. */
+function lineNumber(line, index) {
+  return line.n != null ? line.n : index + 1;
+}
+
 function lineEntry(line, index, run, data) {
   const id = String(line.line_id != null ? line.line_id : index);
-  const seq = line.line_seq != null ? line.line_seq : index + 1;
+  const seq = lineNumber(line, index);
   const text = (line.text || '').trim();
   const meta = [
     statusBadge(line.status),
@@ -171,7 +177,7 @@ function lineEntry(line, index, run, data) {
     .filter(Boolean)
     .join('');
   return (
-    `<li class="line" data-line="${esc(id)}">` +
+    `<li class="line" id="L${esc(seq)}" data-line="${esc(id)}">` +
     `<button type="button" class="line__btn" data-line="${esc(id)}">` +
     `<span class="line__seq" aria-hidden="true">${esc(seq)}</span>` +
     `<span class="sr-only">${esc(t('page.line', { n: seq }))}</span>` +
@@ -256,12 +262,75 @@ function textPanel(data, pageId) {
     `<p class="hint page-text__help">${esc(t('page.text.help'))}</p>` +
     `<div class="page-text__tools">` +
     `<button type="button" class="button button--primary" id="copy-text">${esc(t('page.text.copy'))}</button>` +
-    `<a class="button" href="${esc(api.pageTextUrl(data.page_id || pageId))}" download>${esc(t('page.text.download'))}</a>` +
+    `<a class="button" href="${esc(api.pageTextUrl(data.page_id || pageId, data.as_of_run))}" download>${esc(t('page.text.download'))}</a>` +
     `<span class="page-text__status" id="copy-status" role="status" aria-live="polite"></span>` +
     `</div>` +
     `<p class="page-text__prov">${esc(t('page.text.prov', { runs: runsLine(data) }))}</p>` +
     `<pre class="page-text__block" id="page-text-block">${esc(lines.join('\n'))}</pre>` +
     `</section>`
+  );
+}
+
+// ---------------------------------------------------------------------------
+// citing: the page or one line, pinned to the run its reading comes from
+// ---------------------------------------------------------------------------
+
+/** The citation of the page, or of one line of it: the work, the folio (and
+ *  the line), the machine and the run, the permalink pinned to that run. */
+export function citation(data, line, index) {
+  const cite = data.cite || {};
+  const where = cite.label
+    ? t('page.cite.folio', { label: cite.label })
+    : t('page.cite.canvas', { seq: cite.seq != null ? cite.seq : data.seq });
+  const made = [
+    cite.model ? t('page.cite.model', { model: cite.model }) : '',
+    cite.run != null ? t('page.cite.run', { run: cite.run }) : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+  let link = cite.permalink || '';
+  let place = where;
+  let tail = '';
+  if (line) {
+    const n = lineNumber(line, index);
+    place = t('page.cite.line', { where, n });
+    link = link ? `${link}#L${n}` : '';
+    tail = line.line_id ? ` (${t('page.cite.lineId', { id: line.line_id })})` : '';
+  }
+  return (
+    t('page.cite.text', {
+      title: cite.title || data.work_title || data.work_id || '',
+      where: place,
+      made: made ? ` (${made})` : '',
+      link,
+    }) + tail
+  );
+}
+
+function citePanel(data) {
+  if (!(data.lines || []).length || !data.cite) return '';
+  return (
+    `<section class="panel page-cite" id="cite" aria-labelledby="cite-heading">` +
+    `<h2 id="cite-heading">${esc(t('page.cite'))}</h2>` +
+    `<p class="hint" id="cite-what">${esc(t('page.cite.page'))}</p>` +
+    `<p class="page-cite__text" id="cite-text">${esc(citation(data))}</p>` +
+    `<div class="page-text__tools">` +
+    `<button type="button" class="button" id="cite-copy">${esc(t('page.cite.copy'))}</button>` +
+    `<span class="page-text__status" id="cite-status" role="status" aria-live="polite"></span>` +
+    `</div></section>`
+  );
+}
+
+/** Where the address pins the page to a run: say so, and whether a later
+ *  reading exists. */
+function runNotice(data) {
+  if (data.as_of_run === null || data.as_of_run === undefined) return '';
+  const later = data.current_run !== null && data.current_run !== undefined && data.current_run > data.as_of_run;
+  const current = `<a href="/page/${esc(pathSeg(data.page_id))}">${esc(t('page.run.current'))}</a>`;
+  return (
+    `<p class="panel notice notice--twin" role="note">` +
+    linked(later ? 'page.run.older' : 'page.run.pinned', { run: data.as_of_run, now: data.current_run }, { current }) +
+    `</p>`
   );
 }
 
@@ -448,9 +517,10 @@ export async function render(ctx) {
   root.innerHTML = honestyBanner() + `<div class="panel">${loading(t('page.loading'))}</div>`;
   document.title = t('site.name');
 
+  const run = ctx.query && /^\d+$/.test(ctx.query.get('run') || '') ? ctx.query.get('run') : null;
   let data;
   try {
-    data = await api.page(pageId, signal);
+    data = await api.page(pageId, signal, run);
   } catch (err) {
     if (err && err.name === 'AbortError') return;
     if (err instanceof api.ApiError && err.notFound) {
@@ -470,9 +540,10 @@ export async function render(ctx) {
   root.innerHTML =
     honestyBanner() +
     pageHeader(data, pageId) +
+    runNotice(data) +
     twinNotice(data) +
     `<div class="page-layout">${viewerPanel(data)}` +
-    `<div class="page-side">${linePanel(data)}${textPanel(data, pageId)}</div></div>`;
+    `<div class="page-side">${linePanel(data)}${citePanel(data)}${textPanel(data, pageId)}</div></div>`;
 
   return wire(root, data);
 }
@@ -490,9 +561,36 @@ function wire(root, data) {
   let selected = null;
 
   const byId = new Map();
+  const indexOf = new Map();
+  const byNumber = new Map();
   (data.lines || []).forEach((line, index) => {
-    byId.set(String(line.line_id != null ? line.line_id : index), line);
+    const id = String(line.line_id != null ? line.line_id : index);
+    byId.set(id, line);
+    indexOf.set(id, index);
+    byNumber.set(String(lineNumber(line, index)), id);
   });
+
+  // The citation follows the selected line, and so does the address: #L<n>
+  // is the line's permalink on this reading (the page's own ?run= kept).
+  const citeText = root.querySelector('#cite-text');
+  const citeWhat = root.querySelector('#cite-what');
+  function cite(id) {
+    const line = byId.get(id);
+    if (!line) return;
+    const index = indexOf.get(id);
+    const n = lineNumber(line, index);
+    if (citeText) citeText.textContent = citation(data, line, index);
+    if (citeWhat) citeWhat.textContent = t('page.cite.lineWhat', { n });
+    try {
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${window.location.pathname}${window.location.search}#L${n}`,
+      );
+    } catch {
+      /* the address stays as it was */
+    }
+  }
 
   // While the overlay is hidden a line selected in the panel still zooms the
   // image to it, and its polygon keeps the highlight for when the overlay is
@@ -566,6 +664,7 @@ function wire(root, data) {
     if (selectionInside(list)) return;
     const id = button.getAttribute('data-line');
     highlight(id);
+    cite(id);
     zoomTo(id);
   }
 
@@ -669,7 +768,17 @@ function wire(root, data) {
     if (Math.hypot(dx, dy) > CLICK_SLOP_PX) return;
     if (Date.now() - started.at > CLICK_MAX_MS) return;
     highlight(started.id);
+    cite(started.id);
     scrollToEntry(started.id);
+  }
+
+  // --- the permalink's line ------------------------------------------------
+  const wanted = /^#L(\d+)$/.exec(window.location.hash || '');
+  const fromAddress = wanted ? byNumber.get(wanted[1]) : undefined;
+  if (fromAddress) {
+    highlight(fromAddress);
+    cite(fromAddress);
+    scrollToEntry(fromAddress);
   }
 
   // --- OpenSeadragon -------------------------------------------------------
@@ -717,7 +826,10 @@ function wire(root, data) {
           /* the viewer shows the whole image instead */
         }
       }
-      if (selected) highlight(selected);
+      if (selected) {
+        highlight(selected);
+        if (fromAddress) zoomTo(selected); // the permalink's line, once the image is there
+      }
     });
 
     viewer.addHandler('open-failed', () => {
@@ -782,6 +894,36 @@ function wire(root, data) {
   }
   if (copyBtn) copyBtn.addEventListener('click', onCopy);
 
+  const citeBtn = root.querySelector('#cite-copy');
+  const citeStatus = root.querySelector('#cite-status');
+  function onCiteCopy() {
+    if (!citeText) return;
+    const text = citeText.textContent;
+    const done = (message) => {
+      if (citeStatus) citeStatus.textContent = message;
+    };
+    done('');
+    const clipboard = navigator.clipboard;
+    const select = () => {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(citeText);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch {
+        /* selection unavailable */
+      }
+      done(t('page.text.copyRefused'));
+    };
+    if (clipboard && typeof clipboard.writeText === 'function') {
+      clipboard.writeText(text).then(() => done(t('page.cite.copied')), select);
+    } else {
+      select();
+    }
+  }
+  if (citeBtn) citeBtn.addEventListener('click', onCiteCopy);
+
   return function cleanup() {
     if (list) {
       list.removeEventListener('click', onListClick);
@@ -790,6 +932,7 @@ function wire(root, data) {
     }
     if (toggle) toggle.removeEventListener('click', onToggle);
     if (copyBtn) copyBtn.removeEventListener('click', onCopy);
+    if (citeBtn) citeBtn.removeEventListener('click', onCiteCopy);
     if (overlaySvg) overlaySvg.removeEventListener('pointerdown', onOverlayPointerDown);
     window.removeEventListener('pointerup', onWindowPointerUp);
     window.removeEventListener('pointercancel', onWindowPointerUp);

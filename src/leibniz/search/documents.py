@@ -60,17 +60,24 @@ class PageDoc:
         return " ".join(p for p in parts if p)
 
 
-def latest_lines(conn: sqlite3.Connection, page_id: str) -> list[db.Line]:
+def latest_lines(
+    conn: sqlite3.Connection, page_id: str, *, as_of_run: int | None = None
+) -> list[db.Line]:
     """A page's lines in reading order, one per ``line_seq`` (latest run wins).
 
     ``lines`` is unique on ``(page_id, line_seq, run_id)``, so a page re-run by a
     later model (C4) may carry two rows per line; the viewer and the index show
     the most recent recognition and keep the older rows as provenance.
+    ``as_of_run`` reads the page as that run left it — rows of later runs
+    ignored — which is what a citation pinned to a run (``?run=``) shows.
     """
     best: dict[int, db.Line] = {}
     for line in db.iter_lines_for_page(conn, page_id):
+        run = line.run_id or 0
+        if as_of_run is not None and run > as_of_run:
+            continue
         cur = best.get(line.line_seq)
-        if cur is None or (line.run_id or 0) >= (cur.run_id or 0):
+        if cur is None or run >= (cur.run_id or 0):
             best[line.line_seq] = line
     return [best[k] for k in sorted(best)]
 

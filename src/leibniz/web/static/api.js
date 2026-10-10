@@ -110,8 +110,9 @@ export function work(workId, signal) {
 }
 
 /** GET /api/pages/{page_id} */
-export function page(pageId, signal) {
-  return getJSON(`${API}/pages/${pathSeg(pageId)}`, signal);
+export function page(pageId, signal, run) {
+  const pinned = run !== undefined && run !== null && run !== '' ? `?run=${encodeURIComponent(run)}` : '';
+  return getJSON(`${API}/pages/${pathSeg(pageId)}${pinned}`, signal);
 }
 
 /** GET /api/stats */
@@ -125,8 +126,9 @@ export function manifestUrl(workId) {
 }
 
 /** One page's transcription as a plain-text download, provenance in its header. */
-export function pageTextUrl(pageId) {
-  return `${API}/pages/${pathSeg(pageId)}/text`;
+export function pageTextUrl(pageId, run) {
+  const pinned = run !== undefined && run !== null && run !== '' ? `?run=${encodeURIComponent(run)}` : '';
+  return `${API}/pages/${pathSeg(pageId)}/text${pinned}`;
 }
 
 /** A whole work's transcription as one plain-text download, folio by folio. */
