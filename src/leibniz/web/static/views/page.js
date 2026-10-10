@@ -127,12 +127,22 @@ function provenance(line, run, data) {
     rows.push([t('page.prov.source'), esc(t('page.prov.none'))]);
   }
 
-  // provenance names the source image at the GWLB, whatever is displayed
-  const imageUrl = data.source_image_url || data.image_service_url || data.image_url;
+  // provenance names the source image at the GWLB, whatever is displayed:
+  // the JPEG the machine read, which opens, and the IIIF service where the
+  // work has one (its base URI is an identifier; its info.json describes it)
+  const imageUrl = data.source_image_url || data.image_url;
   if (imageUrl) {
     rows.push([
       t('page.prov.image'),
       `<a href="${esc(imageUrl)}" rel="noopener"><code>${esc(imageUrl)}</code></a>`,
+    ]);
+  }
+  const service = data.source_image_service;
+  if (service) {
+    const info = `${String(service).replace(/\/+$/, '')}/info.json`;
+    rows.push([
+      t('page.prov.iiif'),
+      `<a href="${esc(info)}" rel="noopener"><code>${esc(service)}</code></a>`,
     ]);
   }
 
@@ -287,6 +297,9 @@ function pageHeader(data, pageId) {
     `<nav class="page-nav" aria-label="${esc(t('page.nav'))}">${nav}</nav>` +
     `<ul class="linklist linklist--inline">` +
     textLink +
+    (data.gwlb_page_url || data.gwlb_url
+      ? `<li><a href="${esc(data.gwlb_page_url || data.gwlb_url)}" rel="noopener">${esc(t('page.gwlb'))}</a></li>`
+      : '') +
     `<li><a href="${esc(manifest)}" rel="noopener">${esc(t('page.mirador'))}</a></li>` +
     `<li><a href="${esc(api.reportUrl(data.page_id || pageId))}" rel="noopener">${esc(t('page.report'))}</a></li>` +
     `</ul></header>`

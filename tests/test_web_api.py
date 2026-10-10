@@ -352,8 +352,8 @@ def test_page_text_export(store_path, tmp_path) -> None:
         f"# Page: https://leibnizlegible.com/page/{W1}:0001",
         "# Title: LH 4,6,18 (shelfmark LH IV, 6, 18)",
         f"# Folio 1r, page id {W1}:0001",
-        f"# Original at the GWLB: https://digitale-sammlungen.gwlb.de/resolve?id={W1}",
-        f"# Source image: https://digitale-sammlungen.gwlb.de/iiif/{W1}/ptif/1.ptif",
+        f"# Original at the GWLB: https://digitale-sammlungen.gwlb.de/resolve?id={W1}&page=1",
+        f"# Source image: https://digitale-sammlungen.gwlb.de/content/{W1}/jpgs/default/00000001.jpg",
         "# Model: leibniz-htr-v2@v2, run 3",  # the re-read line: the later run first
         "# Model: FoNDUE-GD_v2_ft_Leibniz@v1, run 2",
         "# Lines: 3 recognised, mean confidence 0.74",
@@ -636,7 +636,7 @@ def test_record_text_404s_say_why(store_path, tmp_path) -> None:
     # the work's records say which can be placed, and only those carry the link
     katalog = {k["record_id"]: k for k in c.get(f"/api/works/{W1}").json()["katalog"]}
     placed = katalog["k-109"]
-    assert placed["text_url"] == "/api/records/k-109/text"
+    assert placed["text_url"] == f"/api/records/k-109/text?work={W1}"
     assert (placed["folio_label"], placed["folio_range"], placed["n_pages"]) == (
         "Bl. 1–2",
         [1, 2],
@@ -664,7 +664,10 @@ def test_record_text_is_documented_crawlable_and_linked(store_path, tmp_path) ->
     assert "`GET /api/records/{record_id}/text`:" in llms and "`text_url`" in llms
     # the server-rendered work page links the piece's text, and only where it resolves
     work = c.get(f"/work/{W1}").text
-    assert '<a href="/api/records/k-109/text" download>Text of this piece (Bl. 1–2)</a>' in work
+    assert (
+        f'<a href="/api/records/k-109/text?work={W1}" download>Text of this piece (Bl. 1–2)</a>'
+        in work
+    )
     assert "/api/records/k-nobl/text" not in work
     # the viewer has the words in both languages; the page view's download moved
     # into the text block; the About page says text comes per page, work and piece
@@ -1019,3 +1022,123 @@ def test_asset_versions_follow_the_file_content(store_path, tmp_path) -> None:
     assert added["modules"] != deeper["modules"]
     (static / "vendor" / "lib.js").write_text("/* vendor/lib.js v2 */", encoding="utf-8")
     assert restarted() == added
+
+
+# ---- 2026-10 fixes ------------------------------------------------------------ #
+
+
+def test_search_words_all_by_default_and_any_on_request(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path)
+    narrow = c.get("/api/search", params={"q": "Calculemus grace"}).json()
+    assert narrow["total"] == 0 and narrow["match"] == "all"
+    broad = c.get("/api/search", params={"q": "Calculemus grace", "match": "any"}).json()
+    assert broad["total"] == 2 and broad["match"] == "any" and broad["reachable"] == 2
+    assert c.get("/api/search", params={"q": "de", "match": "most"}).status_code == 422
+
+
+def test_search_refuses_malformed_filters_as_the_query_s_fault(store_path, tmp_path) -> None:
+    from leibniz.search.backend import SearchQueryError
+
+    c = _client(store_path, tmp_path)
+    for bad in ({"set": 'Leibniz"Briefwechsel'}, {"work": 'x" OR set_name = "y'}):
+        assert c.get("/api/search", params={"q": "de", **bad}).status_code == 422, bad
+    assert c.get("/api/search", params={"q": "de", "page": 10_001}).status_code == 422
+    assert c.get("/api/search", params={"q": "de\x00"}).status_code == 200
+
+    class Refusing:
+        name = "meili"
+
+        def search(self, query):
+            raise SearchQueryError("bad filter")
+
+        def meta(self):
+            return {}
+
+        def count(self):
+            return 0
+
+        def health(self):
+            return True
+
+    refusing = TestClient(create_app(store_path, search=Refusing()))
+    r = refusing.get("/api/search", params={"q": "de"})
+    assert r.status_code == 400 and "bad filter" in r.text
+
+
+def test_a_404_shell_escapes_the_path_it_names(store_path, tmp_path) -> None:
+    c = TestClient(create_app(store_path, search=None, static_dir=STATIC_DIR))
+    for route in ("/work/", "/page/"):
+        r = c.get(route + 'x"><img src=x onerror=alert(1)>')
+        assert r.status_code == 404 and "Leibniz Legible" in r.text
+        assert "<img src=x" not in r.text
+        assert '&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"' in r.text
+
+
+def test_export_headers_keep_one_line_per_field(store_path, tmp_path) -> None:
+    rows = ["Title: a letter\nwith a break", "Incipit:  two\n\nparagraphs"]
+    head = api._head(rows, "txt")
+    assert head == "# Title: a letter with a break\n# Incipit: two paragraphs\n\n"
+
+
+def test_a_work_without_pages_has_no_manifest(store_path, tmp_path) -> None:
+    conn = sqlite3.connect(store_path)
+    conn.execute(
+        "INSERT INTO works (gwlb_object_id, set_name, shelfmarks, metadata) "
+        "VALUES ('00099999', 'LeibnizHandschriften', '[]', '{}')"
+    )
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path, search=False)
+    r = c.get("/manifests/00099999")
+    assert r.status_code == 404 and "no page images" in r.text
+
+
+def test_page_links_its_own_page_at_the_gwlb(store_path, tmp_path) -> None:
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    p = c.get(f"/api/pages/{W1}:0002").json()
+    assert p["gwlb_page_url"] == f"https://digitale-sammlungen.gwlb.de/resolve?id={W1}&page=2"
+    assert p["gwlb_url"] == f"https://digitale-sammlungen.gwlb.de/resolve?id={W1}"
+    html = c.get(f"/page/{W1}:0002").text
+    assert f'href="https://digitale-sammlungen.gwlb.de/resolve?id={W1}&amp;page=2"' in html
+
+
+def _generic_title(store_path: Path) -> None:
+    """W2 as the live letters are: the library's title names the Nachlass."""
+    conn = db.connect(store_path)
+    db.upsert_work(
+        conn,
+        db.Work(
+            W2,
+            "LeibnizBriefwechsel",
+            title="Nachlass Gottfried Wilhelm Leibniz",
+            shelfmarks=["LBr. 464"],
+            n_canvases=1,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
+def test_letter_convolutes_are_named_not_called_the_nachlass(store_path, tmp_path) -> None:
+    _generic_title(store_path)
+    _link_letters(store_path)
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    work = c.get(f"/api/works/{W2}").json()
+    assert work["title"] == "LBr. 464 · Hansen"
+    assert work["library_title"] == "Nachlass Gottfried Wilhelm Leibniz"
+    assert c.get(f"/api/pages/{W2}:0001").json()["work_title"] == "LBr. 464 · Hansen"
+    hits = c.get("/api/search", params={"q": "de", "work": W2}).json()["hits"]
+    assert hits and all(h["title"] == "LBr. 464 · Hansen" for h in hits)
+    assert c.get(f"/manifests/{W2}").json()["label"] == {"none": ["LBr. 464 · Hansen"]}
+    head, _ = _split(c.get(f"/api/pages/{W2}:0001/text").text)
+    assert "# Title: LBr. 464 · Hansen" in head  # the shelfmark is not repeated
+    assert "<h1>LBr. 464 · Hansen</h1>" in c.get(f"/work/{W2}").text
+    assert "Nachlass Gottfried Wilhelm Leibniz" not in c.get(f"/page/{W2}:0001").text
+
+
+def test_an_unnamed_letter_convolute_is_called_by_its_shelfmark(store_path, tmp_path) -> None:
+    _generic_title(store_path)
+    c = _client(store_path, tmp_path)
+    assert c.get(f"/api/works/{W2}").json()["title"] == "LBr. 464"
+    # a title that names the work stays the library's
+    assert c.get(f"/api/works/{W1}").json()["title"] == "LH 4,6,18"

@@ -16,10 +16,15 @@ from __future__ import annotations
 from leibniz import db
 from leibniz.web import attribution as attr
 from leibniz.web.geometry import line_bbox, polygon_points
+from leibniz.web.images import iiif_full_image
 
 PRESENTATION_CONTEXT = "http://iiif.io/api/presentation/3/context.json"
 LEIBNIZ_NS = "https://github.com/marchofhares/leibnizlegible/ns#"
-CONTEXT = [PRESENTATION_CONTEXT, {"leibniz": LEIBNIZ_NS}]
+# Extension contexts first, the Presentation context last (Presentation 3
+# §4.6); before 2026-10 the order was the other way round.
+CONTEXT = [{"leibniz": LEIBNIZ_NS}, PRESENTATION_CONTEXT]
+# The GWLB's image services speak Image API 2 at level 1 (their info.json).
+IMAGE2_LEVEL1 = "http://iiif.io/api/image/2/level1.json"
 
 LANG_TAGS = {"la": "la", "fr": "fr", "de": "de", "mixed": "mul", "unknown": "und"}
 
@@ -36,24 +41,36 @@ def annotation_page_id(base_url: str, page_id: str) -> str:
     return f"{base_url}/annotations/{page_id}"
 
 
+def _dimensions(page: db.Page) -> dict:
+    """``height`` and ``width`` where the store has them; never ``null``, which
+    no IIIF client reads as a size."""
+    if page.height and page.width:
+        return {"height": page.height, "width": page.width}
+    return {}
+
+
 def _image_body(page: db.Page) -> dict:
     if page.delivery == "iiif" and page.image_service_url:
         return {
-            "id": f"{page.image_service_url}/full/max/0/default.jpg",
+            "id": iiif_full_image(page.image_service_url),
             "type": "Image",
             "format": "image/jpeg",
-            "height": page.height,
-            "width": page.width,
+            **_dimensions(page),
+            # An Image API 2 service keeps its 2.x keys inside a Presentation 3
+            # manifest (``@id``/``@type``), and names its profile by URI.
             "service": [
-                {"id": page.image_service_url, "type": "ImageService2", "profile": "level1"}
+                {
+                    "@id": page.image_service_url,
+                    "@type": "ImageService2",
+                    "profile": IMAGE2_LEVEL1,
+                }
             ],
         }
     return {
         "id": page.image_url,
         "type": "Image",
         "format": "image/jpeg",
-        "height": page.height,
-        "width": page.width,
+        **_dimensions(page),
     }
 
 
@@ -68,8 +85,7 @@ def build_canvas(
         "id": cid,
         "type": "Canvas",
         "label": {"none": [label]},
-        "height": page.height,
-        "width": page.width,
+        **_dimensions(page),
         "items": [
             {
                 "id": f"{cid}/page",

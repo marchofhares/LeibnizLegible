@@ -50,7 +50,7 @@ const STRINGS = {
     'search.heading': 'Search the Nachlass',
     'search.label': 'Search the Nachlass',
     'search.hint':
-      'The index is typo-tolerant. Search is over machine transcriptions only. Use "quotes" for an exact phrase and -word to leave a word out; both match exactly, so they miss words the machine misread.',
+      'The index is typo-tolerant, and a page must hold every word you type (or any of them, if you tick the box below). Search is over machine transcriptions only. Use "quotes" for an exact phrase and -word to leave a word out; both match exactly, so they miss words the machine misread.',
     'search.placeholder': 'e.g. calculemus',
     'search.submit': 'Search',
     'search.filters': 'Filters',
@@ -84,6 +84,10 @@ const STRINGS = {
     'search.clearWork': 'Search all works',
     'search.noWork': 'Untitled work',
     'search.browse': 'Or browse the Nachlass by shelfmark.',
+    'search.match.any': 'Pages with any of the words',
+    'search.capped':
+      'Only the first {reachable} of the {total} hits can be paged through; narrow the search to reach the rest.',
+    'search.pastEnd': 'No hits on this page.',
 
     // ---- browse ----------------------------------------------------------
     // Family and section names are the archive's own German words; they stay
@@ -191,6 +195,7 @@ const STRINGS = {
     'page.line': 'Line {n}',
     'page.lineEmpty': '(empty line)',
     'page.mirador': 'Open in Mirador or another IIIF viewer',
+    'page.gwlb': 'This page at the GWLB',
     'page.report': 'Report an error',
     // ---- the text block: the page's lines as one piece of selectable text
     'page.textLink': 'Text of this page',
@@ -216,6 +221,7 @@ const STRINGS = {
     'page.prov.source': 'Source',
     'page.prov.none': 'Machine output; no external source.',
     'page.prov.image': 'Image',
+    'page.prov.iiif': 'IIIF image service',
     'page.conf': 'confidence {c}',
     'page.confUnknown': 'confidence not recorded',
     'page.langOf': 'language: {lang}',
@@ -408,7 +414,7 @@ const STRINGS = {
     'search.heading': 'Den Nachlass durchsuchen',
     'search.label': 'Den Nachlass durchsuchen',
     'search.hint':
-      'Der Index ist tippfehlertolerant. Durchsucht werden ausschließlich maschinelle Transkriptionen. Mit „Anführungszeichen“ suchen Sie eine genaue Wortfolge, mit -Wort schließen Sie ein Wort aus; beides sucht exakt und übersieht daher Wörter, die die Maschine falsch gelesen hat.',
+      'Der Index ist tippfehlertolerant, und eine Seite muss jedes eingegebene Wort enthalten (oder eines davon, wenn Sie das Kästchen unten ankreuzen). Durchsucht werden ausschließlich maschinelle Transkriptionen. Mit „Anführungszeichen“ suchen Sie eine genaue Wortfolge, mit -Wort schließen Sie ein Wort aus; beides sucht exakt und übersieht daher Wörter, die die Maschine falsch gelesen hat.',
     'search.placeholder': 'z. B. calculemus',
     'search.submit': 'Suchen',
     'search.filters': 'Filter',
@@ -442,6 +448,10 @@ const STRINGS = {
     'search.clearWork': 'Alle Werke durchsuchen',
     'search.noWork': 'Werk ohne Titel',
     'search.browse': 'Oder den Nachlass nach Signaturen durchsehen.',
+    'search.match.any': 'Seiten mit einem der Wörter',
+    'search.capped':
+      'Nur die ersten {reachable} der {total} Treffer lassen sich durchblättern; grenzen Sie die Suche ein, um die übrigen zu erreichen.',
+    'search.pastEnd': 'Auf dieser Seite gibt es keine Treffer.',
 
     // ---- browse ----------------------------------------------------------
     'browse.heading': 'Der Nachlass nach Signaturen',
@@ -542,6 +552,7 @@ const STRINGS = {
     'page.line': 'Zeile {n}',
     'page.lineEmpty': '(leere Zeile)',
     'page.mirador': 'In Mirador oder einem anderen IIIF-Viewer öffnen',
+    'page.gwlb': 'Diese Seite bei der GWLB',
     'page.report': 'Fehler melden',
     // ---- der Textblock
     'page.textLink': 'Text dieser Seite',
@@ -567,6 +578,7 @@ const STRINGS = {
     'page.prov.source': 'Quelle',
     'page.prov.none': 'Maschinelle Ausgabe; keine externe Quelle.',
     'page.prov.image': 'Bildquelle',
+    'page.prov.iiif': 'IIIF-Bilddienst',
     'page.conf': 'Konfidenz {c}',
     'page.confUnknown': 'Konfidenz nicht erfasst',
     'page.langOf': 'Sprache: {lang}',

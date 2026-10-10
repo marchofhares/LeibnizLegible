@@ -24,6 +24,7 @@ Pure and offline.
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass
 
 from leibniz.align.normalize import AlignNorm, normalize_indexed
@@ -84,7 +85,12 @@ def parse_query(query: str | None) -> ParsedQuery:
     phrases are de-duplicated, order kept, and the clauses capped at
     :data:`MAX_QUERY_TERMS` with exclusions and phrases first in line.
     """
-    text = query or ""
+    # A control character (a NUL above all) is no letter of any query; FTS5
+    # read a NUL inside a quoted token as the end of the string and answered
+    # 500 (2026-10).
+    text = "".join(
+        " " if unicodedata.category(ch) == "Cc" and not ch.isspace() else ch for ch in (query or "")
+    )
     words: list[str] = []
     phrases: list[tuple[str, ...]] = []
     excluded: list[tuple[str, ...]] = []

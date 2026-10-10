@@ -96,6 +96,24 @@ def build(
 
 
 @app.command()
+def settings(
+    meili_url: str | None = MEILI_URL_OPT,
+    meili_key: str | None = MEILI_KEY_OPT,
+    meili_index: str | None = MEILI_INDEX_OPT,
+) -> None:
+    """Apply the code's Meilisearch settings (ranking, typo rules) to the live index
+    without rebuilding it. A change of document fields still needs `index build`."""
+    from leibniz.search.meili import SETTINGS
+
+    be = _backend("meili", Path(DEFAULT_INDEX_PATH), meili_url, meili_key, meili_index)
+    task = be.push_settings()
+    console.print(
+        f"[green]settings applied[/green] to {be.index_uid} (task {task.get('uid')}, "
+        f"{task.get('status')}): ranking {SETTINGS['rankingRules']}"
+    )
+
+
+@app.command()
 def status(
     backend: str = BACKEND_OPT,
     index: Path = INDEX_OPT,

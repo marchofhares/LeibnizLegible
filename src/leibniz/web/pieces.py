@@ -108,10 +108,25 @@ def place_all(
     return {rec.record_id: place(rec, work_id, index) for rec in records}
 
 
-def place_record(conn: sqlite3.Connection, record: db.KatalogRecord) -> Placement | Unplaced:
+def place_record(
+    conn: sqlite3.Connection, record: db.KatalogRecord, work_id: str | None = None
+) -> Placement | Unplaced:
     """Place a record on the work its best crosswalk link names (the factory's
-    rule); where it links several works, the first that places it wins."""
+    rule); where it links several works, the first that places it wins.
+
+    ``work_id`` places it on that work instead — one the record is linked to —
+    as the work page did when it offered the link: before 2026-10 the page
+    placed a record on the work being viewed and the download on the record's
+    best link, so a record linked to two works could serve the other one's
+    folios.
+    """
     links = db.crosswalk_for_record(conn, record.record_id)
+    if work_id is not None:
+        if not any(link.work_id == work_id for link in links):
+            return Unplaced(
+                record.record_id, f"record {record.record_id} is not linked to work {work_id}"
+            )
+        return place(record, work_id, index_pages(db.get_pages(conn, work_id)))
     if not links:
         return place(record, None, {})
     last: Placement | Unplaced | None = None

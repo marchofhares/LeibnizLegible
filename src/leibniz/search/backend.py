@@ -17,6 +17,15 @@ from leibniz.search.documents import PageDoc
 
 DEFAULT_LIMIT = 20
 MAX_LIMIT = 100
+# How deep a result list can be paged: Meilisearch serves no hit past its
+# ``maxTotalHits`` (meili.SETTINGS), so neither backend offers one. A page past
+# it is clamped to the last reachable one; the reported total stays the total.
+MAX_REACHABLE = 10_000
+MATCH_MODES = ("all", "any")
+
+
+class SearchQueryError(ValueError):
+    """A query the backend refused as malformed (an HTTP 400, not an outage)."""
 
 
 @dataclass(slots=True)
@@ -31,11 +40,17 @@ class SearchQuery:
     work_id: str | None = None
     page: int = 1
     limit: int = DEFAULT_LIMIT
+    # "all": a page must hold every word (the default since 2026-10; Meilisearch's
+    # own default dropped words from the end of the query when results ran
+    # short, so "deus mundus" counted 97,633 pages, most with neither word);
+    # "any": a page holding one of them is enough, the broader net for words
+    # the machine may have misread past typo tolerance.
+    match: str = "all"
 
     def normalized(self) -> SearchQuery:
         """Clamp paging and drop filter values outside the known vocabularies."""
-        page = max(1, int(self.page or 1))
         limit = max(1, min(MAX_LIMIT, int(self.limit or DEFAULT_LIMIT)))
+        page = max(1, min(max_page(limit), int(self.page or 1)))
         lang = self.lang if self.lang in LINE_LANGS else None
         stratum = self.stratum if self.stratum in GT_STRATA else None
         min_conf = None
@@ -50,11 +65,17 @@ class SearchQuery:
             work_id=(self.work_id or None),
             page=page,
             limit=limit,
+            match=self.match if self.match in MATCH_MODES else "all",
         )
 
     @property
     def offset(self) -> int:
         return (max(1, self.page) - 1) * max(1, self.limit)
+
+
+def max_page(limit: int) -> int:
+    """The last page of ``limit`` hits that starts inside :data:`MAX_REACHABLE`."""
+    return max(1, -(-MAX_REACHABLE // max(1, limit)))
 
 
 @dataclass(slots=True)
@@ -91,13 +112,21 @@ class SearchResult:
     took_ms: int
     backend: str
     hits: list[SearchHit] = field(default_factory=list)
+    match: str = "all"
+
+    @property
+    def reachable(self) -> int:
+        """How many of the ``total`` hits can be paged to (:data:`MAX_REACHABLE`)."""
+        return min(self.total, MAX_REACHABLE)
 
     def to_dict(self) -> dict:
         return {
             "query": self.query,
             "total": self.total,
+            "reachable": self.reachable,
             "page": self.page,
             "limit": self.limit,
+            "match": self.match,
             "took_ms": self.took_ms,
             "backend": self.backend,
             "hits": [h.to_dict() for h in self.hits],
@@ -125,9 +154,13 @@ class SearchBackend(Protocol):
 
 __all__ = [
     "DEFAULT_LIMIT",
+    "MATCH_MODES",
     "MAX_LIMIT",
+    "MAX_REACHABLE",
     "SearchBackend",
     "SearchHit",
     "SearchQuery",
+    "SearchQueryError",
     "SearchResult",
+    "max_page",
 ]

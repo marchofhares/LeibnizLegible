@@ -691,6 +691,16 @@ select {
   margin: 0 0 0.7rem;
 }
 
+.field--check {
+  margin: 0.4rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.field--check input {
+  margin-inline-end: 0.35rem;
+}
+
 .field__range {
   display: flex;
   align-items: center;
@@ -784,8 +794,8 @@ select {
 .hit__title {
   font-family: var(--sans);
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  /* no uppercase: a folio label's r/v is part of it ("Folio 137r", not "137R") */
+  letter-spacing: 0.02em;
 }
 
 .hit__snippet {

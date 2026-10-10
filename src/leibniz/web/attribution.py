@@ -6,6 +6,10 @@ from __future__ import annotations
 GWLB_NAME = "Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover"
 GWLB_COLLECTIONS = "https://digitale-sammlungen.gwlb.de/"
 GWLB_RESOLVE = "https://digitale-sammlungen.gwlb.de/resolve?id={work_id}"
+# One page of a work in the GWLB's viewer: ``page`` is the canvas position, the
+# store's ``seq`` (checked live 2026-10: ``resolve?id=00068221&page=43`` opens
+# the page whose image is ``…/ptif/00000043.ptif``).
+GWLB_PAGE = "https://digitale-sammlungen.gwlb.de/resolve?id={work_id}&page={seq}"
 PDM_URL = "http://creativecommons.org/publicdomain/mark/1.0/"
 CC0_URL = "http://creativecommons.org/publicdomain/zero/1.0/"
 CC_BY_URL = "http://creativecommons.org/licenses/by/4.0/"
@@ -51,6 +55,11 @@ TEXT_LICENCE = (
 WORDING_RULE = 'Wording rule: say "the machine reads it as …", never "Leibniz wrote".'
 
 
+def gwlb_page_url(work_id: str, seq: int) -> str:
+    """The page's original in the GWLB's own viewer."""
+    return GWLB_PAGE.format(work_id=work_id, seq=seq)
+
+
 def images_line(mirrored: bool = False) -> str:
     """The images line: where the pixels come from, honestly (see ``web/images.py``)."""
     return IMAGES_MIRROR if mirrored else IMAGES
@@ -75,6 +84,7 @@ __all__ = [
     "CC_BY_URL",
     "GWLB_COLLECTIONS",
     "GWLB_NAME",
+    "GWLB_PAGE",
     "GWLB_RESOLVE",
     "HONESTY",
     "IMAGES",
@@ -95,5 +105,6 @@ __all__ = [
     "TRANSCRIPTIONS",
     "WORDING_RULE",
     "attribution",
+    "gwlb_page_url",
     "images_line",
 ]

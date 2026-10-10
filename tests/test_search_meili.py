@@ -68,6 +68,11 @@ class FakeMeili:
             uid = path.split("/")[2]
             body = json.loads(request.content)
             self.searches.append(body)
+            for f in body.get("filter", []):
+                if f.count('"') % 2:
+                    return httpx.Response(
+                        400, json={"code": "invalid_search_filter", "message": "bad filter"}
+                    )
             q = body["q"]
             hits = [d for d in self.indexes[uid].values() if q.split()[0] in d["folded"]]
             for f in body.get("filter", []):
@@ -93,7 +98,14 @@ class FakeMeili:
             uid = path.split("/")[2]
             if uid not in self.indexes:
                 return httpx.Response(404, json={"code": "index_not_found"})
-            return httpx.Response(200, json={"numberOfDocuments": len(self.indexes[uid])})
+            docs = self.indexes[uid].values()
+            fields: dict[str, int] = {}
+            for d in docs:
+                for k in d:
+                    fields[k] = fields.get(k, 0) + 1
+            return httpx.Response(
+                200, json={"numberOfDocuments": len(self.indexes[uid]), "fieldDistribution": fields}
+            )
         return httpx.Response(500, json={"unexpected": path})
 
 
@@ -200,3 +212,54 @@ def test_meili_query_is_well_formed() -> None:
         assert all(i == 0 or q[i - 1] == " " for i, c in enumerate(q) if c == "-"), typed
         terms = len(parsed.excluded) + len(parsed.phrases) + len(parsed.words)
         assert terms <= 12, typed
+
+
+def test_words_must_all_match_unless_any_is_asked(store_path, fake) -> None:
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))
+    conn.close()
+    res = be.search(SearchQuery(q="Calculemus inquit"))
+    assert fake.searches[-1]["matchingStrategy"] == "all" and res.match == "all"
+    res = be.search(SearchQuery(q="Calculemus inquit", match="any"))
+    assert fake.searches[-1]["matchingStrategy"] == "last" and res.match == "any"
+    assert be.search(SearchQuery(q="x", match="bogus")).match == "all"
+
+
+def test_metadata_is_folded_like_the_query(store_path, fake) -> None:
+    """A title, shelfmark or AA reference is searched folded: "VI" meets "ui"."""
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))
+    conn.close()
+    doc = fake.indexes["leibniz_pages"][doc_id(f"{W1}:0001")]
+    assert doc["meta_folded"].endswith("aa ui 4 n 109 fol 1r")  # "AA VI,4 N. 109", folio 1r
+    assert fake.settings["leibniz_pages"]["searchableAttributes"] == ["folded", "meta_folded"]
+
+
+def test_filter_values_are_checked_and_refusals_are_query_errors(store_path, fake) -> None:
+    from leibniz.search.backend import SearchQueryError
+
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))
+    conn.close()
+    with pytest.raises(SearchQueryError, match="not a valid work_id"):
+        be.search(SearchQuery(q="de", work_id='x" OR set_name = "y'))
+    assert be.search(SearchQuery(q="de", work_id=W2)).total == 1
+    # a refusal from the server (a 4xx) is the query's fault, not an outage
+    be._filter = staticmethod(lambda q: ['work_id = "unbalanced'])  # type: ignore[method-assign]
+    with pytest.raises(SearchQueryError, match="bad filter"):
+        be.search(SearchQuery(q="de"))
+
+
+def test_settings_push_refuses_an_index_built_without_the_fields(store_path, fake) -> None:
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))
+    conn.close()
+    assert be.push_settings()["status"] == "succeeded"
+    for d in fake.indexes["leibniz_pages"].values():
+        d.pop("meta_folded")
+    with pytest.raises(RuntimeError, match="no field meta_folded"):
+        be.push_settings()

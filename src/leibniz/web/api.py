@@ -42,6 +42,7 @@ import json
 import re
 import sqlite3
 from collections.abc import Iterator
+from dataclasses import replace
 from pathlib import Path
 from typing import Annotated
 
@@ -58,7 +59,13 @@ from fastapi.responses import (
 )
 
 from leibniz import __version__, db
-from leibniz.search.backend import SearchBackend, SearchQuery
+from leibniz.search.backend import (
+    MATCH_MODES,
+    MAX_REACHABLE,
+    SearchBackend,
+    SearchQuery,
+    SearchQueryError,
+)
 from leibniz.search.documents import (
     ROMAN,
     aa_ref_label,
@@ -288,7 +295,9 @@ def _katalog_for_work(
         if isinstance(where, pieces.Placement):
             entry.update(
                 {
-                    "text_url": f"/api/records/{rec.record_id}/text",
+                    # placed on this work, so the download serves what the
+                    # link says (the record may be linked to more than one)
+                    "text_url": f"/api/records/{rec.record_id}/text?work={work_id}",
                     "folio_label": where.folio_label,
                     "folio_range": [where.folio_lo, where.folio_hi],
                     "n_pages": len(where.pages),
@@ -368,7 +377,10 @@ def _stamp_shell(
     out = shell
     if site != SITE_URL:
         out = out.replace(SITE_URL, site)
-    url = f"{site}{path}"
+    # The path carries whatever id the request named — on a 404 an id the store
+    # never had — so it is escaped like any other text (2026-10: a quote in it
+    # closed the attribute, and the rest of the URL became markup on our page).
+    url = _esc(f"{site}{path}")
     out = out.replace(f'href="{site}/"', f'href="{url}"', 1)  # canonical
     og_url = 'property="og:url" content="'
     out = out.replace(f'{og_url}{site}/"', f'{og_url}{url}"', 1)
@@ -625,7 +637,7 @@ def _why(page: db.Page) -> str:
 
 def _title_row(work: db.Work | None, work_id: str) -> str:
     title = (work.title if work else None) or work_id
-    marks = [m for m in (work.shelfmarks if work else []) if m and m != title]
+    marks = [m for m in (work.shelfmarks if work else []) if m and m not in title]
     if not marks:
         return f"Title: {title}"
     return f"Title: {title} (shelfmark{'s' if len(marks) > 1 else ''} {'; '.join(marks)})"
@@ -679,8 +691,12 @@ def _text_rows(lines: list[db.Line], fmt: str) -> list[str]:
 
 
 def _head(rows: list[str], fmt: str) -> str:
-    """The ``# `` comment header, the blank line, and in TSV the column row."""
-    out = "".join(f"# {row}\n" for row in rows) + "\n"
+    """The ``# `` comment header, the blank line, and in TSV the column row.
+
+    Each row is one line: a title or an incipit can carry a line break, and a
+    blank line inside the header would end it where a parser looks for the body.
+    """
+    out = "".join(f"# {' '.join(row.split())}\n" for row in rows) + "\n"
     return out + ("\t".join(TSV_COLUMNS) + "\n" if fmt == "tsv" else "")
 
 
@@ -699,7 +715,7 @@ def _page_text(
         f"Page: {site}/page/{page.id}",
         _title_row(work, page.work_id),
         f"{_folio(page)}, page id {page.id}",
-        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=page.work_id)}",
+        f"Original at the GWLB: {attr.gwlb_page_url(page.work_id, page.seq)}",
         f"Source image: {ImageSource.source_url(page) or 'not recorded'}",
         *_run_rows(lines, runs),
         _count_row(stats["n_lines"], stats["mean_conf"])
@@ -920,8 +936,21 @@ def create_app(
                 )
             finally:
                 conn.close()
-            state["browse"] = {"families": families, "places": browse.places(families)}
+            state["browse"] = {
+                "families": families,
+                "places": browse.places(families),
+                "titles": browse.display_titles(families),
+            }
         return state["browse"]
+
+    def titled(work: db.Work | None) -> db.Work | None:
+        """The work as it is shown: where the library's title is the generic
+        one every letter convolute carries, the browse index's name for it
+        (``LBr. 16 · Arnauld``); the store's row is untouched."""
+        if work is None:
+            return None
+        shown = browse_index()["titles"].get(work.gwlb_object_id)
+        return replace(work, title=shown) if shown and shown != work.title else work
 
     def works_body(families: list[browse.Family]) -> dict:
         return {
@@ -978,13 +1007,26 @@ def create_app(
                 'order; a minus in front (-word, -"two words") leaves out pages containing it.'
             ),
         ),
-        set: str | None = Query(None, alias="set"),  # noqa: A002 — the API's public name
+        set: str | None = Query(  # noqa: A002 — the API's public name
+            None, alias="set", pattern=r"^[A-Za-z][A-Za-z0-9_-]*$", max_length=64
+        ),
         lang: str | None = None,
         stratum: str | None = None,
         min_conf: float | None = Query(None, ge=0.0, le=1.0),
-        work: str | None = None,
-        page: int = Query(1, ge=1),
+        work: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$", max_length=64),
+        page: int = Query(
+            1,
+            ge=1,
+            le=MAX_REACHABLE,
+            description=f"1-based; no hit past the first {MAX_REACHABLE:,} can be paged to "
+            "(`reachable` in the answer), and a page past them answers the last one.",
+        ),
         limit: int = Query(20, ge=1, le=100),
+        match: str = Query(
+            "all",
+            pattern="^(" + "|".join(MATCH_MODES) + ")$",
+            description="`all` (default): a page must hold every word; `any`: one is enough.",
+        ),
     ) -> JSONResponse:
         if search is None:
             raise HTTPException(503, "search index not configured (run `leibniz index build`)")
@@ -999,10 +1041,16 @@ def create_app(
                     work_id=work,
                     page=page,
                     limit=limit,
+                    match=match,
                 )
             )
+        except SearchQueryError as exc:  # the query, not the index: say so
+            raise HTTPException(400, str(exc)) from exc
         except httpx.HTTPError as exc:  # Meilisearch down or restarting
             raise HTTPException(503, "search backend unavailable; try again shortly") from exc
+        titles = browse_index()["titles"]
+        for hit in res.hits:  # the index holds the library's title; show the work's name
+            hit.title = titles.get(hit.work_id, hit.title)
         if images.mirrored:  # the index stored the GWLB thumbnails; the mirror has its own
             for hit in res.hits:
                 hit.thumb_url = images.thumb_url_for(hit.work_id, hit.seq, hit.thumb_url)
@@ -1053,7 +1101,8 @@ def create_app(
             body = {
                 "work_id": work.gwlb_object_id,
                 "set": work.set_name,
-                "title": work.title,
+                "title": titled(work).title,
+                "library_title": work.title,
                 "shelfmarks": list(work.shelfmarks or []),
                 "manifest_url": work.manifest_url,
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id),
@@ -1091,7 +1140,7 @@ def create_app(
             body = {
                 "page_id": page.id,
                 "work_id": page.work_id,
-                "work_title": work.title if work else None,
+                "work_title": titled(work).title if work else None,
                 "set": work.set_name if work else None,
                 "shelfmarks": list(work.shelfmarks or []) if work else [],
                 "seq": page.seq,
@@ -1105,6 +1154,7 @@ def create_app(
                 "thumb_url": shown.thumb_url,
                 "image_origin": "mirror" if shown is not page else "gwlb",
                 "source_image_url": images.source_url(page),
+                "source_image_service": images.service_url(page),
                 "status": page.status,
                 "skip_reason": page.skip_reason,
                 "prev_page_id": prev_id,
@@ -1112,6 +1162,7 @@ def create_app(
                 "manifest_url": f"/manifests/{page.work_id}",
                 "annotations_url": f"/annotations/{page.id}",
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=page.work_id),
+                "gwlb_page_url": attr.gwlb_page_url(page.work_id, page.seq),
                 "run": _run_info(conn, max(run_ids) if run_ids else None),
                 "stats": _line_stats(recognised),
                 "lines": [_line_dict(ln, page, run_dates) for ln in recognised],
@@ -1149,7 +1200,7 @@ def create_app(
             runs = {run_id: _run_info(conn, run_id) for run_id in {ln.run_id for ln in lines}}
         finally:
             conn.close()
-        body = _page_text(site, page, work, lines, runs, fmt)
+        body = _page_text(site, page, titled(work), lines, runs, fmt)
         return Response(body, media_type=TEXT_MEDIA[fmt], headers=_text_headers(page.id, fmt))
 
     @app.get(
@@ -1174,7 +1225,7 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _work_text(db_path, site, work, pages, summaries, fmt),
+            _work_text(db_path, site, titled(work), pages, summaries, fmt),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(work.gwlb_object_id, fmt),
         )
@@ -1197,13 +1248,23 @@ def create_app(
         response_class=PlainTextResponse,
         responses=RECORD_RESPONSES,
     )
-    def api_record_text(record_id: str, fmt: TextFormat = "txt") -> StreamingResponse:
+    def api_record_text(
+        record_id: str,
+        fmt: TextFormat = "txt",
+        work: str | None = Query(
+            None,
+            pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$",
+            max_length=64,
+            description="Place the record on this work (one it is linked to); default: its "
+            "best-linked work that places it.",
+        ),
+    ) -> StreamingResponse:
         conn = _open(db_path)
         try:
             record = db.get_katalog_record(conn, record_id)
             if record is None:
                 raise HTTPException(404, f"record {record_id} not found")
-            placed = pieces.place_record(conn, record)
+            placed = pieces.place_record(conn, record, work)
             if isinstance(placed, pieces.Unplaced):
                 raise HTTPException(404, placed.reason)
             work = db.get_work(conn, placed.work_id)
@@ -1211,7 +1272,7 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _record_text(db_path, site, _record_dict(record), placed, work, summaries, fmt),
+            _record_text(db_path, site, _record_dict(record), placed, titled(work), summaries, fmt),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(f"record-{record_id}", fmt),
         )
@@ -1225,6 +1286,8 @@ def create_app(
             if work is None:
                 raise HTTPException(404, f"work {work_id} not found")
             pages = db.get_pages(conn, work_id)
+            if not pages:  # a manifest must paint at least one canvas
+                raise HTTPException(404, f"work {work_id} has no page images")
             counts = {pid: n for pid, (n, _) in line_summaries_by_page(conn, work_id).items()}
             sources = (
                 {p.id: images.source_url(p) for p in pages if images.is_mirrored(p)}
@@ -1232,7 +1295,7 @@ def create_app(
                 else None
             )
             body = iiif.build_manifest(
-                work,
+                titled(work),
                 [images.resolve(p) for p in pages],
                 base_url=base(request),
                 line_counts=counts,
@@ -1343,7 +1406,7 @@ def create_app(
                 conn.close()
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
             place = browse_index()["places"].get(work.gwlb_object_id)
-            title, description, ssr = _ssr_work(work, pages, katalog, gwlb_url, place)
+            title, description, ssr = _ssr_work(titled(work), pages, katalog, gwlb_url, place)
             body = _stamp_shell(
                 shell,
                 path=f"/work/{work_id}",
@@ -1374,9 +1437,9 @@ def create_app(
             prev_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq - 1), None)
             next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
             shown = images.resolve(page)
-            gwlb_url = attr.GWLB_RESOLVE.format(work_id=page.work_id)
+            gwlb_url = attr.gwlb_page_url(page.work_id, page.seq)
             title, description, ssr = _ssr_page(
-                page, work, lines, shown.image_url, gwlb_url, prev_id, next_id
+                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id
             )
             body = _stamp_shell(
                 shell,

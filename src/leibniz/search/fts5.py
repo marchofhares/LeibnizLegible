@@ -19,7 +19,7 @@ import time
 from collections.abc import Iterable
 from pathlib import Path
 
-from leibniz.search.backend import SearchHit, SearchQuery, SearchResult
+from leibniz.search.backend import SearchHit, SearchQuery, SearchQueryError, SearchResult
 from leibniz.search.documents import PageDoc
 from leibniz.search.normalize import ParsedQuery, fold, parse_query
 from leibniz.search.snippet import PREFIX_MIN, make_snippet
@@ -62,14 +62,17 @@ CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
 _BM25 = "bm25(docs_fts, 1.0, 3.0, 3.0, 3.0)"
 
 
-def match_expression(terms: list[str]) -> str:
-    """FTS5 MATCH expression: quoted terms ANDed, prefix-matched from ``PREFIX_MIN``."""
+def match_expression(terms: list[str], *, any_word: bool = False) -> str:
+    """FTS5 MATCH expression: quoted terms ANDed (ORed with ``any_word``),
+    prefix-matched from ``PREFIX_MIN``."""
     parts: list[str] = []
     for t in terms:
         t = t.replace('"', "")
         if not t:
             continue
         parts.append(f'"{t}"*' if len(t) >= PREFIX_MIN else f'"{t}"')
+    if any_word and len(parts) > 1:
+        return "(" + " OR ".join(parts) + ")"
     return " ".join(parts)
 
 
@@ -77,16 +80,19 @@ def _phrase(tokens: tuple[str, ...]) -> str:
     return '"' + " ".join(t.replace('"', "") for t in tokens) + '"'
 
 
-def match_query(query: ParsedQuery) -> str:
+def match_query(query: ParsedQuery, *, any_word: bool = False) -> str:
     """FTS5 MATCH for a :attr:`~ParsedQuery.searchable` query: the phrases, then
     the words as :func:`match_expression` writes them, all ANDed, minus the
     exclusions (``(…) NOT ("a" OR "b c")``; FTS5's ``NOT`` needs something to
     subtract from). Plain words alone give :func:`match_expression`'s string
-    unchanged."""
-    words = match_expression(list(query.words))
+    unchanged. ``any_word`` (``match=any``) ORs the words and the phrases."""
+    words = match_expression(list(query.words), any_word=any_word)
     if not query.phrases and not query.excluded:
         return words
-    positive = " ".join([*map(_phrase, query.phrases), *([words] if words else [])])
+    joiner = " OR " if any_word else " "
+    positive = joiner.join([*map(_phrase, query.phrases), *([words] if words else [])])
+    if any_word and query.phrases:
+        positive = f"({positive})"
     if not query.excluded:
         return positive
     return f"({positive}) NOT ({' OR '.join(map(_phrase, query.excluded))})"
@@ -222,7 +228,7 @@ class Fts5Backend:
             return empty
         if str(self.path) != ":memory:" and not self.path.exists():
             return empty
-        match = match_query(parsed)
+        match = match_query(parsed, any_word=q.match == "any")
         where, params = self._filters(q)
         conn = self._connect()
         try:
@@ -237,6 +243,8 @@ class Fts5Backend:
                 f"WHERE docs_fts MATCH ?{where} ORDER BY score LIMIT ? OFFSET ?",
                 [match, *params, q.limit, q.offset],
             ).fetchall()
+        except sqlite3.OperationalError as exc:  # a MATCH the tokenizer cannot read
+            raise SearchQueryError(f"the query could not be read: {exc}") from exc
         finally:
             conn.close()
         hits = [
@@ -259,7 +267,7 @@ class Fts5Backend:
             for r in rows
         ]
         took = int((time.perf_counter() - t0) * 1000)
-        return SearchResult(q.q, int(total), q.page, q.limit, took, self.name, hits)
+        return SearchResult(q.q, int(total), q.page, q.limit, took, self.name, hits, match=q.match)
 
     # -- introspection ----------------------------------------------------- #
     def meta(self) -> dict:

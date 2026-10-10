@@ -95,3 +95,35 @@ def test_place_record_follows_the_best_link_then_the_next(store_path) -> None:
     res = pieces.place_record(conn, only_w2)
     assert isinstance(res, pieces.Unplaced) and f"no page of work {W2}" in res.reason
     conn.close()
+
+
+def test_place_record_on_the_work_the_page_offered_it_from() -> None:
+    # A record linked to two works that both carry its folios: the work page
+    # of the second work offers "Text of this piece", and the download must
+    # serve that work's folios, not the best link's (2026-10).
+    conn = db.init_db(":memory:")
+    for wid in ("WA", "WB"):
+        db.upsert_work(conn, db.Work(wid, "LeibnizHandschriften"))
+        for seq, label in enumerate(("1r", "1v"), start=1):
+            db.upsert_page(conn, db.Page(work_id=wid, seq=seq, label=label))
+    rec = db.KatalogRecord(record_id="R", shelfmark_refs=["LH 1 Bl. 1"])
+    db.upsert_katalog_record(conn, rec)
+    db.upsert_crosswalk(conn, db.CrosswalkMatch("R", "WA", "gwlb_link", 1.0))
+    db.upsert_crosswalk(conn, db.CrosswalkMatch("R", "WB", "shelfmark", 0.7))
+    best = pieces.place_record(conn, rec)
+    assert isinstance(best, pieces.Placement) and best.work_id == "WA"
+    on_b = pieces.place_record(conn, rec, "WB")
+    assert isinstance(on_b, pieces.Placement) and on_b.page_ids == ["WB:0001", "WB:0002"]
+    stray = pieces.place_record(conn, rec, "WC")
+    assert isinstance(stray, pieces.Unplaced) and "not linked to work WC" in stray.reason
+
+
+def test_placement_keeps_the_sides() -> None:
+    conn = db.init_db(":memory:")
+    db.upsert_work(conn, db.Work("W", "LeibnizBriefwechsel"))
+    for seq, label in enumerate(("108r", "108v", "109r"), start=1):
+        db.upsert_page(conn, db.Page(work_id="W", seq=seq, label=label))
+    rec = db.KatalogRecord(record_id="R", shelfmark_refs=["LBr 1 Bl. 108v°"])
+    placed = pieces.place(rec, "W", pieces.index_pages(db.get_pages(conn, "W")))
+    assert isinstance(placed, pieces.Placement)
+    assert placed.page_ids == ["W:0002"] and placed.folio_label == "Bl. 108v"

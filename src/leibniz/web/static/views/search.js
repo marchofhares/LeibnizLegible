@@ -38,6 +38,7 @@ function readParams(query) {
     work: get('work'),
     page: Number.isFinite(pageNum) && pageNum > 1 ? pageNum : 1,
     limit: Number.isFinite(limitNum) && limitNum > 0 ? limitNum : '',
+    match: get('match') === 'any' ? 'any' : '',
   };
 }
 
@@ -55,6 +56,9 @@ function fillForm(panel, params) {
     const has = Array.from(select.options).some((o) => o.value === params[name]);
     select.value = has ? params[name] : '';
   }
+
+  const anyWord = form.querySelector('#match');
+  if (anyWord) anyWord.checked = params.match === 'any';
 
   const range = form.querySelector('#min_conf');
   const output = form.querySelector('#min_conf_out');
@@ -123,7 +127,9 @@ function renderHit(hit) {
     typeof hit.n_lines === 'number'
       ? `<span class="meta__item">${esc(tn('search.hit.lines', hit.n_lines))}</span>`
       : '',
-    hit.lang ? `<span class="meta__item">${esc(langLabel(hit.lang))}</span>` : '',
+    hit.lang && hit.lang !== 'unknown'
+      ? `<span class="meta__item">${esc(langLabel(hit.lang))}</span>`
+      : '',
     hit.stratum && hit.stratum !== 'unknown'
       ? `<span class="meta__item">${esc(stratumLabel(hit.stratum))}</span>`
       : '',
@@ -155,7 +161,9 @@ function renderGroup(group) {
 
 function renderPagination(params, data) {
   const limit = Number(data.limit) || Number(params.limit) || DEFAULT_LIMIT;
-  const total = Number(data.total) || 0;
+  // Only the hits the index can serve can be paged to (`reachable`, at most
+  // 10,000); the pages beyond them used to be offered and came back empty.
+  const total = Number(data.reachable ?? data.total) || 0;
   const pageNo = Number(data.page) || params.page || 1;
   const pages = Math.max(1, Math.ceil(total / Math.max(1, limit)));
   if (pages <= 1) return '';
@@ -186,12 +194,21 @@ function browseLink() {
 
 function renderResults(params, data) {
   const total = Number(data.total) || 0;
-  if (total === 0 || !(data.hits || []).length) {
+  if (total === 0) {
     return (
       `<div class="state state--empty"><p>${esc(t('search.empty'))}</p>` +
       `<p class="hint">${esc(t('search.empty.hint'))} ${browseLink()}</p></div>`
     );
   }
+  if (!(data.hits || []).length) {
+    // A page past the last hit (an old link, a hand-edited URL): say so, and
+    // keep the way back.
+    return (
+      `<div class="state state--empty"><p>${esc(t('search.pastEnd'))}</p></div>` +
+      renderPagination(params, data)
+    );
+  }
+  const reachable = Number(data.reachable ?? total) || 0;
   const summary =
     `<p class="results__summary">` +
     `<strong>${esc(tn('search.summary', total, { total: num(total), ms: num(Number(data.took_ms) || 0) }))}</strong>` +
@@ -199,7 +216,10 @@ function renderResults(params, data) {
     (data.backend
       ? ` <span class="muted">${esc(t('search.backend', { backend: data.backend }))}</span>`
       : '') +
-    `</p>`;
+    `</p>` +
+    (reachable < total
+      ? `<p class="hint">${esc(t('search.capped', { reachable: num(reachable), total: num(total) }))}</p>`
+      : '');
   const groups = groupHits(data.hits).map(renderGroup).join('');
   return summary + groups + renderPagination(params, data);
 }

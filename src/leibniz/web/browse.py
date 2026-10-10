@@ -700,6 +700,39 @@ def tree(families: Iterable[Family]) -> list[dict]:
     return out
 
 
+# The title the library gives every letter convolute alike: it names the
+# Nachlass, not the convolute (all 1,060 LBr works, 2026-10).
+GENERIC_TITLES = frozenset({"nachlass gottfried wilhelm leibniz"})
+
+
+def is_generic_title(title: str | None) -> bool:
+    """Whether a work's title says nothing about the work itself."""
+    return " ".join((title or "").split()).casefold() in GENERIC_TITLES | {""}
+
+
+def display_title(entry: Entry, family: str) -> str | None:
+    """What names a work where its own title does not: a letter convolute by
+    its shelfmark and correspondent (``LBr. 16 · Arnauld``), anything else by
+    its label; ``None`` where the library's title says something."""
+    if not is_generic_title(entry.title):
+        return None
+    if family == "LBr" and entry.shelfmark and entry.label != entry.shelfmark:
+        return f"{entry.shelfmark} · {entry.label}"
+    return entry.shelfmark or entry.label or None
+
+
+def display_titles(families: Iterable[Family]) -> dict[str, str]:
+    """work id → the title to show in its place, for the works whose own title
+    is the library's generic one (:func:`display_title`)."""
+    out: dict[str, str] = {}
+    for fam in families:
+        for section in fam.sections:
+            for entry in section.entries:
+                if (shown := display_title(entry, fam.key)) is not None:
+                    out[entry.work_id] = shown
+    return out
+
+
 def places(families: Iterable[Family]) -> dict[str, dict]:
     """work id → where it sits (family, section, anchor, the section's title),
     for a work page's way back into the index."""
@@ -721,6 +754,7 @@ __all__ = [
     "CORRESPONDENTS_SQL",
     "FAMILIES",
     "FAMILY_NAMES",
+    "GENERIC_TITLES",
     "RESCUE_RECORDS",
     "SET_LABELS",
     "Correspondence",
@@ -731,7 +765,10 @@ __all__ = [
     "correspondent",
     "correspondent_names",
     "correspondent_weights",
+    "display_title",
+    "display_titles",
     "group_correspondents",
+    "is_generic_title",
     "names_as_written",
     "names_in_order",
     "natural_key",

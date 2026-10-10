@@ -44,6 +44,17 @@ class PageDoc:
     def to_dict(self) -> dict:
         return asdict(self)
 
+    def meta_text(self) -> str:
+        """What names the page besides its text: the work's title and shelfmarks,
+        the catalogue's AA references, the folio label. The index folds it as it
+        folds the text, so "VI" (folded "ui") meets "AA VI,4 N. 109"; indexed as
+        written, a quoted reference found nothing and an AA number few pages
+        (STATUS Open question 21)."""
+        parts = [self.title or "", *self.shelfmarks, *self.aa_refs]
+        if self.label:
+            parts.append(f"fol {self.label}")
+        return " ".join(p for p in parts if p)
+
 
 def latest_lines(conn: sqlite3.Connection, page_id: str) -> list[db.Line]:
     """A page's lines in reading order, one per ``line_seq`` (latest run wins).

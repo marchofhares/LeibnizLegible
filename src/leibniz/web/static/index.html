@@ -141,9 +141,16 @@
                 </button>
               </div>
               <p class="hint" id="search-hint" data-i18n="search.hint">
-                The index is typo-tolerant. Search is over machine transcriptions only. Use
+                The index is typo-tolerant, and a page must hold every word you type (or any of
+                them, if you tick the box below). Search is over machine transcriptions only. Use
                 "quotes" for an exact phrase and -word to leave a word out; both match exactly,
                 so they miss words the machine misread.
+              </p>
+              <p class="field field--check">
+                <label>
+                  <input type="checkbox" id="match" name="match" value="any" />
+                  <span data-i18n="search.match.any">Pages with any of the words</span>
+                </label>
               </p>
             </div>
 
