@@ -231,6 +231,24 @@ def has_gt_for_record(conn: sqlite3.Connection, record_id: str) -> bool:
     return row.fetchone() is not None
 
 
+def delete_minted(conn: sqlite3.Connection) -> dict[str, int]:
+    """Delete every row a catalogue record owns — the factory's output — and
+    return the counts removed by licence bucket; rows without an owner
+    (ground truth imported from elsewhere) stay. For the one full re-mint: a
+    re-mint replaces each record it mints, so a record the new rules no longer
+    mint would keep its old rows. The caller holds the write lock and commits;
+    :func:`ensure_gt_ownership` has run."""
+    counts = {
+        row[0]: row[1]
+        for row in conn.execute(
+            "SELECT license_bucket, COUNT(*) FROM gt_lines WHERE record_id IS NOT NULL "
+            "GROUP BY license_bucket"
+        )
+    }
+    conn.execute("DELETE FROM gt_lines WHERE record_id IS NOT NULL")
+    return counts
+
+
 def count_open_bucket(pairs: Sequence[GtPair]) -> int:
     """How many pairs are CC-BY-shippable (``open`` bucket) — a report figure."""
     return sum(1 for p in pairs if p.license_bucket == "open")
@@ -282,6 +300,7 @@ __all__ = [
     "count_gt_lines",
     "count_open_bucket",
     "delete_gt_for_refs",
+    "delete_minted",
     "ensure_gt_ownership",
     "has_gt_for_record",
     "has_gt_for_refs",

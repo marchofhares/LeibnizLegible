@@ -707,6 +707,44 @@ def ingest(
                 )
 
 
+@app.command(name="gt-reset")
+def gt_reset(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    yes: bool = typer.Option(False, "--yes", help="Delete without asking."),
+) -> None:
+    """Delete every line the factory minted, before the one full re-mint.
+
+    A re-mint replaces each record it mints; a record the current rules no
+    longer mint (no canvases on its folio sides, no text in the edition cache)
+    would keep its old lines. This clears the rows a catalogue record owns —
+    the factory's — and keeps ground truth imported from elsewhere. Back the
+    store up first; then run the factory's shards without --resume."""
+    from leibniz.align.factory import with_write_lock
+    from leibniz.align.pairs import delete_minted, ensure_gt_ownership
+    from leibniz.db import open_db
+
+    with open_db(db_path) as conn:
+        backfilled = with_write_lock(conn, lambda: ensure_gt_ownership(conn))
+        owned = conn.execute(
+            "SELECT COUNT(*) FROM gt_lines WHERE record_id IS NOT NULL"
+        ).fetchone()[0]
+        kept = conn.execute("SELECT COUNT(*) FROM gt_lines WHERE record_id IS NULL").fetchone()[0]
+        _console.print(
+            f"{owned:,} minted lines owned by catalogue records ({backfilled:,} owners filled in "
+            f"from their source just now); {kept:,} other lines are kept."
+        )
+        if not owned:
+            return
+        if not yes and not typer.confirm(f"Delete the {owned:,} minted lines?"):
+            raise typer.Exit(1)
+        removed = with_write_lock(conn, lambda: delete_minted(conn))
+    _console.print(
+        f"[bold]deleted[/bold] {sum(removed.values()):,} lines "
+        f"({', '.join(f'{k} {v:,}' for k, v in sorted(removed.items()))}). Now the factory's "
+        "shards, without --resume."
+    )
+
+
 @app.command(name="edition-cache")
 def edition_cache(
     out: Path = typer.Argument(

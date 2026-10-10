@@ -2950,9 +2950,11 @@ twins and writes `<store dir>/leibniz_pages.twins.json`; restart the app.
 on the server as the service user (about 1,550 requests at one a second;
 resumable) writes `letters.json` beside the store; restart. (5) On the
 desktop, before C3: `leibniz align edition-cache` again (it now records the
-pieces per record), then the re-mint without `--resume`, `audit-reach`,
-`gt-report`, and `philiumm-vi4` match/compare; read the counts before
-quoting any. (6) Read `/api/stats` (`images`, `lines_once`, `twins`) and
+pieces per record); back the store up; `leibniz align gt-reset` (deletes the
+lines the factory minted, keeps imported ground truth — a re-mint alone would
+leave the old lines of records the new rules no longer mint); the six shards
+without `--resume`; then `audit-reach`, `gt-report`, and `philiumm-vi4`
+match/compare; read the counts before quoting any. (6) Read `/api/stats` (`images`, `lines_once`, `twins`) and
 spot-check twins (Open questions #26) before the About page's figures are
 quoted anywhere.
 

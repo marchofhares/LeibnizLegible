@@ -104,6 +104,7 @@ uv run leibniz catalog crosswalk                # records → works
 uv run leibniz align pieces                     # enumerate the §70 pieces localizable to canvases
 uv run leibniz align ingest                     # fetch + extract each volume's reading text (cache-first)
 uv run leibniz align edition-cache              # join to the katalog → data/gt/edition_cache.jsonl
+uv run leibniz align gt-reset                   # a full re-mint: clear the factory's lines first (back up the store)
 uv run leibniz align factory data/gt/edition_cache.jsonl --shard 1/6 --resume  # ×6 workers (needs the C1 HTR lines)
 uv run leibniz align gt-report                  # writes reports/gt-factory.md
 uv run leibniz align audit-sheet --images /path/to/image-cache   # 200 line strips → reports/gt-audit/gt-audit.html

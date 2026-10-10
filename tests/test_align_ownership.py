@@ -218,3 +218,32 @@ def test_select_text_pieces_mints_a_record_once_under_the_volume_its_text_came_f
     assert F.select_text_pieces([_piece(1, 5, "7")], refs) == []
     # an older cache without refs: the first citation, as before
     assert F.select_text_pieces(pieces, {}) == [pieces[0]]
+
+
+def test_gt_reset_clears_minted_lines_and_keeps_imported_ones(store_path) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    conn = db.connect(store_path)
+    conn.execute(
+        "INSERT INTO gt_lines (line_image_ref, text, source, stratum, align_conf, license_bucket) "
+        "VALUES ('00068642:0002:001', 'vt sit', 'AA VI,4 N.109 (§70-expired AA reading text; "
+        "katalog k-109)', 'fair_copy', 0.9, 'open')"
+    )
+    conn.commit()
+    before = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+    conn.close()
+    runner = CliRunner()
+    refused = runner.invoke(app, ["align", "gt-reset", "--db", str(store_path)], input="n\n")
+    assert refused.exit_code == 1
+    r = runner.invoke(app, ["align", "gt-reset", "--db", str(store_path), "--yes"])
+    assert r.exit_code == 0, r.stdout
+    assert "deleted 1 lines (open 1)" in r.stdout
+    conn = db.connect(store_path)
+    after = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+    left = [row[0] for row in conn.execute("SELECT source FROM gt_lines")]
+    conn.close()
+    assert after == before - 1 and all("katalog" not in s for s in left)
+    again = runner.invoke(app, ["align", "gt-reset", "--db", str(store_path), "--yes"])
+    assert again.exit_code == 0 and "0 minted lines" in again.stdout
