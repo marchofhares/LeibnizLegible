@@ -1209,3 +1209,11 @@ def test_contents_search_finds_the_convolute_that_holds_a_piece(store_path, tmp_
     assert c.get("/api/contents", params={"q": "MIHI SI"}).json()["total"] == 1
     assert c.get("/api/contents", params={"q": "monadologie"}).json()["total"] == 0
     assert c.get("/api/contents", params={"q": "ab"}).status_code == 422
+    # the browse page's status line says what the catalogue found when no
+    # shelfmark or name matches ("No work matches" above a list of convolutes
+    # read as a contradiction), and that the site holds part of the catalogue
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    browse_js = (STATIC_DIR / "views" / "browse.js").read_text(encoding="utf-8")
+    for key in ("browse.filter.onlyContents", "browse.filter.noneAnywhere"):
+        assert strings.count(f"'{key}':") == 2, key  # EN and DE
+        assert key in browse_js, key

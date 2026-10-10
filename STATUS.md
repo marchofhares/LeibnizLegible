@@ -688,8 +688,9 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   catalogue records leave unnamed (the alphabetical check still applies).
   A reader asked for a Faszikel index: a work's catalogue records now come in
   folio order, `/api/contents` and the browse filter find the convolute that
-  holds a piece by its title (`Monadologie`), and the index gives each page
-  the titles and AA references of the pieces on its folios.
+  holds a piece by its title, and the index gives each page the titles and
+  AA references of the pieces on its folios — for the catalogue records the
+  store holds (Open questions #27: not, for one, the Monadologie's).
 - **Links out** (`23359e0`). Each catalogue record links its record in the
   Leibniz-Katalog (its extended search, id and catalogue number), its first
   folio at the GWLB, the volume of each AA reference where it can be read
@@ -2548,6 +2549,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Open questions
 
+27. **The catalogue in the store is part of the Arbeitskatalog (2026-10-10,
+    W5's staging look).** The store holds the records of the §70 volumes'
+    sweep (C2) and the July sample (A3): 24,916 records, 1,197 of 2,225 works
+    with any. `Monadologie` in the browse filter found nothing on staging:
+    the Leibniz-Katalog has the piece on LH 4, 1, 1a Bl. 1–6 and LH 4, 1, 1b
+    (records 39739, 39743, 39744), and the store has no record for either
+    convolute. The Faszikel index, the title search and the convolute names
+    from the catalogue reach as far as the records do; the browse page now
+    says so when nothing matches. The remedy is the full scrape
+    (`reports/crosswalk.md`, "Operator command": signature-prefix slices,
+    a few hours at the polite rate, then `leibniz catalog crosswalk`) and a
+    new serving copy, or a TELOTA export.
 26. **The twin rule's corpus-wide error is unmeasured (2026-10-10, W5).** The
     thresholds come from 27 works (25 groups checked byte for byte). The line
     check guards against folding two different pages that happen to share a

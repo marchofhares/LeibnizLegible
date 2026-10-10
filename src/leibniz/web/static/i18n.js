@@ -140,6 +140,9 @@ const STRINGS = {
     'browse.filter.count': '{n} of {total} works match.',
     'browse.filter.count.one': '{n} of {total} works matches.',
     'browse.filter.none': 'No work matches this filter.',
+    'browse.filter.onlyContents': 'No shelfmark or name matches; the catalogue pieces below do.',
+    'browse.filter.noneAnywhere':
+      'No shelfmark or name matches, and no catalogue piece this site holds carries these words. It holds part of the Arbeitskatalog so far, not yet every record.',
     'browse.matching': '{n} of {total}',
     'browse.works': '{n} works',
     'browse.works.one': '{n} work',
@@ -584,6 +587,9 @@ const STRINGS = {
     'browse.filter.count': '{n} von {total} Werken passen.',
     'browse.filter.count.one': '{n} von {total} Werken passt.',
     'browse.filter.none': 'Kein Werk passt zu diesem Filter.',
+    'browse.filter.onlyContents': 'Keine Signatur und kein Name passt; die Stücke des Katalogs unten schon.',
+    'browse.filter.noneAnywhere':
+      'Keine Signatur und kein Name passt, und kein Stück des Katalogs, das diese Seite führt, enthält diese Wörter. Sie führt bisher einen Teil des Arbeitskatalogs, noch nicht jeden Eintrag.',
     'browse.matching': '{n} von {total}',
     'browse.works': '{n} Werke',
     'browse.works.one': '{n} Werk',

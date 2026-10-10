@@ -149,7 +149,9 @@ The index folds text and query onto the aligner's early-modern comparison
 alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. A page
 must hold every word (`match=any` for one of them); titles, shelfmarks, AA
 references, folio labels and the titles of the catalogue pieces on a page are
-folded the same way, so `AA VI,4 N. 109` or `Monadologie` find their pages.
+folded the same way, so `AA VI,4 N. 109` or `Praefatio` find their pages. The
+pieces are those of the catalogue records the store holds: part of the
+Arbeitskatalog (`reports/crosswalk.md`), so far not, for one, the Monadologie's.
 `/api/lookup` reads a query as a citation — a shelfmark with its folio, an
 Akademie-Ausgabe number, an id — and the search page offers where it points.
 Queries take two operators: `"…"` (or „…“, «…») for words that must stand exactly so

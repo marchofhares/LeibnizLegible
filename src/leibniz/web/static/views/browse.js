@@ -293,6 +293,10 @@ export async function render(ctx) {
     }
   }
 
+  // How many works the shelfmark filter shows; the catalogue's answer, which
+  // comes later, speaks in the status line when they are none.
+  let lastShown = 0;
+
   /** Show what matches the filter; with none, the sections the reader opened. */
   function apply() {
     const needle = needleOf(kept.filter);
@@ -320,6 +324,7 @@ export async function render(ctx) {
     for (const block of blocks) {
       block.hidden = sections.every((sec) => sec.block !== block || sec.details.hidden);
     }
+    lastShown = shown;
     if (!needle) status.textContent = '';
     else if (shown === 0) status.textContent = t('browse.filter.none');
     else {
@@ -368,6 +373,13 @@ export async function render(ctx) {
       .then((found) => {
         if (signal.aborted || words !== kept.filter.trim()) return;
         contentsBox.innerHTML = contentsBlock(found);
+        // "No work matches" above a list of convolutes read as a contradiction:
+        // the status line says what matched where, and that the site holds
+        // only part of the Arbeitskatalog so far (reports/crosswalk.md).
+        if (lastShown === 0) {
+          const any = Boolean(found && found.total);
+          status.textContent = t(any ? 'browse.filter.onlyContents' : 'browse.filter.noneAnywhere');
+        }
       })
       .catch(() => {
         /* the shelfmark filter stands on its own */

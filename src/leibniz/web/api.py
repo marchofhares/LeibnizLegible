@@ -1359,9 +1359,10 @@ def create_app(
         description=(
             "The Faszikel index's search: the convolutes whose catalogue records (the "
             "Arbeitskatalog der Leibniz-Edition, CC BY 4.0) carry `q` in a piece's title, "
-            "incipit, sender or addressee — `Monadologie`, `Characteristica`, a name — case- "
-            "and accent-blind, with up to five of the matching pieces per convolute and "
-            "where they sit (their shelfmark with its folios). The most matches first."
+            "incipit, sender or addressee — a title word such as `Praefatio`, a name — "
+            "case- and accent-blind, with up to five of the matching pieces per convolute "
+            "and where they sit (their shelfmark with its folios). The most matches first. "
+            "Only the records this site holds: part of the Arbeitskatalog so far."
         ),
     )
     def api_contents(
