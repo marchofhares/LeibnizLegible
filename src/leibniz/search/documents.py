@@ -17,6 +17,7 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass, field
 
 from leibniz import db
+from leibniz.images.twins import TwinGroup, TwinStats, resolve_work
 
 ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI", 7: "VII", 8: "VIII"}
 
@@ -40,19 +41,22 @@ class PageDoc:
     thumb_url: str | None
     katalog: list[str] = field(default_factory=list)
     aa_refs: list[str] = field(default_factory=list)
+    # the folio labels the same scan is also registered under, where this
+    # page carries the text for all of them (leibniz.images.twins, a fold)
+    also: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     def meta_text(self) -> str:
         """What names the page besides its text: the work's title and shelfmarks,
-        the catalogue's AA references, the folio label. The index folds it as it
-        folds the text, so "VI" (folded "ui") meets "AA VI,4 N. 109"; indexed as
-        written, a quoted reference found nothing and an AA number few pages
-        (STATUS Open question 21)."""
+        the catalogue's AA references, the folio label (and the labels the scan
+        is also registered under). The index folds it as it folds the text, so
+        "VI" (folded "ui") meets "AA VI,4 N. 109"; indexed as written, a quoted
+        reference found nothing and an AA number few pages (STATUS Open
+        question 21)."""
         parts = [self.title or "", *self.shelfmarks, *self.aa_refs]
-        if self.label:
-            parts.append(f"fol {self.label}")
+        parts += [f"fol {label}" for label in (self.label, *self.also) if label]
         return " ".join(p for p in parts if p)
 
 
@@ -163,9 +167,26 @@ def page_doc(
     *,
     katalog: list[dict] | None = None,
     stratum: str | None = None,
+    lines: list[db.Line] | None = None,
+    twin: TwinGroup | None = None,
 ) -> PageDoc | None:
-    """Build the document for one page, or ``None`` if it has no recognised text."""
-    lines = [ln for ln in latest_lines(conn, page.id) if ln.text]
+    """Build the document for one page, or ``None`` if it has no recognised text.
+
+    ``lines`` are the page's latest lines where the caller has read them
+    already. ``twin`` is the page's group where its scan is registered more
+    than once: a spread page indexes its own half, a fold indexes the text once,
+    on its primary page, which names the other labels (``also``).
+    """
+    if lines is None:
+        lines = latest_lines(conn, page.id)
+    lines = [ln for ln in lines if ln.text]
+    also: list[str] = []
+    if twin is not None:
+        if not twin.carries_text(page.id):
+            return None
+        lines = [ln for ln, _ in twin.own_lines(page.id, lines, for_index=True)]
+        if twin.kind == "fold":
+            also = [label for _, label in twin.others(page.id) if label]
     if not lines:
         return None
     confs = [ln.conf for ln in lines if ln.conf is not None]
@@ -190,6 +211,7 @@ def page_doc(
         thumb_url=page.thumb_url,
         katalog=[r["record_id"] for r in recs],
         aa_refs=sorted({lab for r in recs for lab in r["aa_labels"]}),
+        also=also,
     )
 
 
@@ -199,8 +221,16 @@ def iter_page_docs(
     set_name: str | None = None,
     work_id: str | None = None,
     limit: int | None = None,
+    twins_out: list[TwinGroup] | None = None,
+    twin_stats: TwinStats | None = None,
 ) -> Iterator[PageDoc]:
-    """Yield a document for every recognised page (optionally one set / work)."""
+    """Yield a document for every recognised page (optionally one set / work).
+
+    Scans registered more than once are found work by work as the lines are
+    read (:func:`leibniz.images.twins.resolve_work`) and indexed once: a spread
+    as its two halves, a fold on one page. ``twins_out`` collects the groups
+    and ``twin_stats`` counts them, for the file the web application reads.
+    """
     kat = katalog_by_work(conn)
     n = 0
     sql = "SELECT * FROM works"
@@ -214,10 +244,22 @@ def iter_page_docs(
     sql += " ORDER BY gwlb_object_id"
     works = [db._work_from_row(r) for r in conn.execute(sql, params)]
     for work in works:
-        for page in db.get_pages(conn, work.gwlb_object_id):
+        pages = db.get_pages(conn, work.gwlb_object_id)
+        groups, read = resolve_work(pages, lambda pid: latest_lines(conn, pid), twin_stats)
+        if twins_out is not None:
+            twins_out.extend(groups)
+        twin_of = {pid: group for group in groups for pid in group.pages}
+        for page in pages:
             if page.status != "recognized":
                 continue
-            doc = page_doc(conn, page, work, katalog=kat.get(work.gwlb_object_id))
+            doc = page_doc(
+                conn,
+                page,
+                work,
+                katalog=kat.get(work.gwlb_object_id),
+                lines=read.pop(page.id, None),
+                twin=twin_of.get(page.id),
+            )
             if doc is None:
                 continue
             yield doc

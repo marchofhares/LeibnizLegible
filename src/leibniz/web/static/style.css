@@ -383,6 +383,15 @@ main:focus {
   border-left: 4px solid var(--rule-strong);
 }
 
+/* one scan, several registrations (views/page.js twinNotice) */
+.notice--twin {
+  border-left: 4px solid var(--rule-strong);
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
 .notice--inline {
   background: var(--bg-sunken);
   border: 1px solid var(--rule);
@@ -610,6 +619,12 @@ a.button--primary:hover {
 .chip--lang {
   background: var(--bg-sunken);
   color: var(--fg);
+}
+
+.chip--fold {
+  background: var(--bg-sunken);
+  color: var(--fg);
+  border: 1px dashed var(--rule-strong);
 }
 
 .dot {
@@ -1074,6 +1089,18 @@ select {
 
 .canvas__link:hover .canvas__label {
   text-decoration: underline;
+}
+
+.canvas__twin {
+  margin: 0.1rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hit__also {
+  font-weight: normal;
+  color: var(--muted);
 }
 
 .canvas__meta {

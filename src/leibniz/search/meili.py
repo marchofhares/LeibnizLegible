@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 import httpx
 
@@ -64,6 +64,7 @@ RETRIEVE = [
     "stratum",
     "thumb_url",
     "text",
+    "also",
 ]
 
 
@@ -157,7 +158,11 @@ class MeiliBackend:
 
     # -- build ------------------------------------------------------------- #
     def rebuild(
-        self, docs: Iterable[PageDoc], *, meta: dict | None = None, batch: int = 2000
+        self,
+        docs: Iterable[PageDoc],
+        *,
+        meta: dict | Callable[[], dict] | None = None,
+        batch: int = 2000,
     ) -> int:
         for uid in (self.index_uid, self._meta_uid):
             # Deleting an index is a task; on a fresh server (first build) that
@@ -187,7 +192,7 @@ class MeiliBackend:
             if len(pending) >= batch:
                 flush()
         flush()
-        info = dict(meta or {})
+        info = dict((meta() if callable(meta) else meta) or {})
         info.update(
             {
                 "doc_id": "meta",
@@ -262,6 +267,7 @@ class MeiliBackend:
                 stratum=h.get("stratum", "unknown"),
                 thumb_url=h.get("thumb_url"),
                 score=h.get("_rankingScore"),
+                also=list(h.get("also") or []),
             )
             for h in data.get("hits", [])
         ]

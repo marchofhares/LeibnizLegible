@@ -59,6 +59,7 @@ from fastapi.responses import (
 )
 
 from leibniz import __version__, db
+from leibniz.images.twins import TwinGroup, TwinIndex
 from leibniz.search.backend import (
     MATCH_MODES,
     MAX_REACHABLE,
@@ -307,11 +308,17 @@ def _katalog_for_work(
     return out
 
 
-def _page_summary(page: db.Page, summary: tuple[int, float | None] | None) -> dict:
+def _page_summary(
+    page: db.Page, summary: tuple[int, float | None] | None, twin: TwinGroup | None = None
+) -> dict:
     """One row of a work's page list; ``summary`` comes from
-    :func:`line_summaries_by_page` (one query for the whole work)."""
+    :func:`line_summaries_by_page` (one query for the whole work). A page whose
+    scan is registered more than once counts the lines it shows (a spread its
+    half) and says so (``twin``)."""
     n_lines, mean_conf = summary if summary is not None else (0, None)
-    return {
+    if twin is not None and page.id in twin.n_lines:
+        n_lines, mean_conf = twin.n_lines[page.id], twin.mean_conf.get(page.id)
+    out = {
         "page_id": page.id,
         "seq": page.seq,
         "label": page.label,
@@ -321,6 +328,52 @@ def _page_summary(page: db.Page, summary: tuple[int, float | None] | None) -> di
         "n_lines": n_lines,
         "mean_conf": mean_conf,
     }
+    if twin is not None:
+        out["twin"] = _twin_dict(twin, page.id)
+    return out
+
+
+def _twin_dict(group: TwinGroup, page_id: str) -> dict:
+    """What a page says about the other registrations of its scan."""
+    out: dict = {
+        "kind": group.kind,
+        "others": [{"page_id": pid, "label": label} for pid, label in group.others(page_id)],
+        "note": group.describe(page_id),
+    }
+    if group.kind == "spread":
+        out.update({"side": group.side(page_id), "fold_x": group.fold_x})
+    else:
+        out.update({"primary": group.primary, "is_primary": page_id == group.primary})
+    return out
+
+
+def _twin_lines(
+    group: TwinGroup | None, page_id: str, lines: list[db.Line], *, once: bool = False
+) -> tuple[list[db.Line], set[int]]:
+    """The lines a page shows given its scan's group, and the ``line_seq`` of
+    those that cross a spread's fold; ``once`` gives each line to one page only
+    (the exports of several pages)."""
+    if group is None:
+        return lines, set()
+    pairs = group.own_lines(page_id, lines, for_index=once)
+    return [ln for ln, _ in pairs], {ln.line_seq for ln, across in pairs if across}
+
+
+def _once_summaries(
+    summaries: dict[str, tuple[int, float | None]], pages: list[db.Page], twins: TwinIndex
+) -> dict[str, tuple[int, float | None]]:
+    """Per-page summaries with each scan's lines counted once (a spread by its
+    halves, a fold on its primary), for the line count of a several-page export."""
+    out = dict(summaries)
+    for page in pages:
+        group = twins.get(page.id)
+        if group is not None and page.id in group.n_once:
+            n = group.n_once[page.id]
+            if n:
+                out[page.id] = (n, group.mean_conf.get(page.id))
+            else:
+                out.pop(page.id, None)
+    return out
 
 
 def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str]) -> dict:
@@ -470,6 +523,7 @@ def _ssr_page(
     gwlb_url: str,
     prev_id: str | None,
     next_id: str | None,
+    twin: TwinGroup | None = None,
 ) -> tuple[str, str, str]:
     """(title, description, html) for a page's server-rendered machine text."""
     work_title = (work.title if work else None) or page.work_id
@@ -504,7 +558,8 @@ def _ssr_page(
         + (f' · <a href="{_esc(image_url)}">Page image</a>' if image_url else "")
         + f' · <a href="/annotations/{_esc(page.id)}">Annotations (IIIF)</a>{download}</p>'
         f"<nav>{' · '.join(nav)}</nav>"
-        f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
+        + (f"<p>{_esc(twin.describe(page.id))}</p>" if twin is not None else "")
+        + f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
         "</article>"
     )
     return title, description, html_out
@@ -707,6 +762,7 @@ def _page_text(
     lines: list[db.Line],
     runs: dict[int | None, dict | None],
     fmt: str,
+    twin: TwinGroup | None = None,
 ) -> str:
     """One page's export; ``lines`` are its lines with text, as ``/api/pages`` shows them."""
     stats = _line_stats(lines)
@@ -715,6 +771,7 @@ def _page_text(
         f"Page: {site}/page/{page.id}",
         _title_row(work, page.work_id),
         f"{_folio(page)}, page id {page.id}",
+        *([f"Scan: {twin.describe(page.id)}"] if twin is not None else []),
         f"Original at the GWLB: {attr.gwlb_page_url(page.work_id, page.seq)}",
         f"Source image: {ImageSource.source_url(page) or 'not recorded'}",
         *_run_rows(lines, runs),
@@ -741,7 +798,9 @@ def _pages_count_row(pages: list[db.Page], summaries: dict[str, tuple[int, float
     return _count_row(n_lines, mean, f" on {len(found):,} of {len(pages):,} pages")
 
 
-def _page_chunks(db_path: str | Path, pages: list[db.Page], fmt: str) -> Iterator[str]:
+def _page_chunks(
+    db_path: str | Path, pages: list[db.Page], fmt: str, twins: TwinIndex | None = None
+) -> Iterator[str]:
     """The body of a streamed export, one chunk per page in the order given.
 
     Each page is read with :func:`latest_lines` as it is sent, so a convolute
@@ -753,10 +812,20 @@ def _page_chunks(db_path: str | Path, pages: list[db.Page], fmt: str) -> Iterato
     try:
         runs: dict[int | None, dict | None] = {}
         for i, page in enumerate(pages):
-            lines = _with_text(latest_lines(conn, page.id))
+            block = [f"## {_folio(page)} — {page.id}"]
+            group = twins.get(page.id) if twins is not None else None
+            if group is not None and not group.carries_text(page.id):
+                # a fold: the text is given once, on the scan's primary page
+                block.append(f"# {group.describe(page.id)}")
+                yield ("\n" if i else "") + "".join(f"{row}\n" for row in block)
+                continue
+            lines, _ = _twin_lines(
+                group, page.id, _with_text(latest_lines(conn, page.id)), once=True
+            )
             for run_id in {ln.run_id for ln in lines} - runs.keys():
                 runs[run_id] = _run_info(conn, run_id)
-            block = [f"## {_folio(page)} — {page.id}"]
+            if group is not None:
+                block.append(f"# Scan: {group.describe(page.id)}")
             if lines:
                 block.append(f"# Source image: {ImageSource.source_url(page) or 'not recorded'}")
                 block += [f"# {row}" for row in _run_rows(lines, runs)]
@@ -775,9 +844,13 @@ def _work_text(
     pages: list[db.Page],
     summaries: dict[str, tuple[int, float | None]],
     fmt: str,
+    twins: TwinIndex | None = None,
 ) -> Iterator[str]:
     """A work's export: the header from the one :func:`line_summaries_by_page`
-    query, then :func:`_page_chunks` over every page in canvas order."""
+    query, then :func:`_page_chunks` over every page in canvas order. A scan
+    registered more than once gives its lines once (``twins``)."""
+    if twins is not None:
+        summaries = _once_summaries(summaries, pages, twins)
     rows = [
         f"{attr.PROJECT_NAME} — {site}",
         f"Work: {site}/work/{work.gwlb_object_id}",
@@ -791,7 +864,7 @@ def _work_text(
         *([TSV_LAYOUT] if fmt == "tsv" else []),
     ]
     yield _head(rows, fmt)
-    yield from _page_chunks(db_path, pages, fmt)
+    yield from _page_chunks(db_path, pages, fmt, twins)
 
 
 def _record_rows(rec: dict) -> list[str]:
@@ -830,10 +903,14 @@ def _record_text(
     work: db.Work | None,
     summaries: dict[str, tuple[int, float | None]],
     fmt: str,
+    twins: TwinIndex | None = None,
 ) -> Iterator[str]:
     """A catalogue piece's export: the record, the work, the folio range and the
-    canvases in the header, then :func:`_page_chunks` over the placed pages."""
+    canvases in the header, then :func:`_page_chunks` over the placed pages. A
+    scan registered more than once gives its lines once (``twins``)."""
     pages = placed.pages
+    if twins is not None:
+        summaries = _once_summaries(summaries, pages, twins)
     seqs = [p.seq for p in pages]
     span = f"canvas {seqs[0]}" if len(seqs) == 1 else f"canvases {seqs[0]}–{seqs[-1]}"
     rows = [
@@ -845,7 +922,7 @@ def _record_text(
         f"Folios: {placed.folio_label} (from the shelfmark {placed.signature}): "
         f"{len(pages):,} page{'' if len(pages) == 1 else 's'}, {span}, "
         f"page ids {pages[0].id} to {pages[-1].id}",
-        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=placed.work_id)}",
+        f"Original at the GWLB: {attr.gwlb_page_url(placed.work_id, pages[0].seq)}",
         _pages_count_row(pages, summaries),
         attr.KATALOG,
         attr.HONESTY,
@@ -855,7 +932,7 @@ def _record_text(
         *([TSV_LAYOUT] if fmt == "tsv" else []),
     ]
     yield _head(rows, fmt)
-    yield from _page_chunks(db_path, pages, fmt)
+    yield from _page_chunks(db_path, pages, fmt, twins)
 
 
 def create_app(
@@ -870,6 +947,7 @@ def create_app(
     cors: bool = True,
     image_base_url: str | None = None,
     calculemus_url: str | None = None,
+    twins_path: str | Path | None = None,
 ) -> FastAPI:
     """Build the FastAPI application over a store (+ optional search backend).
 
@@ -882,6 +960,9 @@ def create_app(
     ``calculemus_url`` is the origin of the game built on this corpus, stamped
     into the viewer shell (``<html data-calculemus-url>``) so the About page
     can link to it; unset, nothing about the game reaches the HTML.
+    ``twins_path`` is the file of scans registered more than once
+    (:mod:`leibniz.images.twins`, written by the index build); without it every
+    page shows and exports its own reading, as before.
     """
     app = FastAPI(
         title="Leibniz Legible API",
@@ -942,6 +1023,13 @@ def create_app(
                 "titles": browse.display_titles(families),
             }
         return state["browse"]
+
+    def twins() -> TwinIndex:
+        """The scans registered more than once, read on first use and kept for
+        the life of the process (the index build rewrites the file; restart)."""
+        if state.get("twins") is None:
+            state["twins"] = TwinIndex.load(twins_path)
+        return state["twins"]
 
     def titled(work: db.Work | None) -> db.Work | None:
         """The work as it is shown: where the library's title is the generic
@@ -1108,7 +1196,10 @@ def create_app(
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id),
                 "n_canvases": work.n_canvases,
                 "iiif_manifest": f"/manifests/{work.gwlb_object_id}",
-                "pages": [_page_summary(images.resolve(p), summaries.get(p.id)) for p in pages],
+                "pages": [
+                    _page_summary(images.resolve(p), summaries.get(p.id), twins().get(p.id))
+                    for p in pages
+                ],
                 "katalog": _katalog_for_work(conn, work_id, pages),
                 "attribution": attr.attribution(images.mirrored),
             }
@@ -1127,7 +1218,9 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
             lines = latest_lines(conn, page_id)
-            recognised = _with_text(lines)
+            twin = twins().get(page.id)
+            # a spread page shows its half of the image; the lines across the fold on both
+            recognised, across = _twin_lines(twin, page.id, _with_text(lines))
             run_dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
             neighbours = conn.execute(
                 "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
@@ -1165,7 +1258,11 @@ def create_app(
                 "gwlb_page_url": attr.gwlb_page_url(page.work_id, page.seq),
                 "run": _run_info(conn, max(run_ids) if run_ids else None),
                 "stats": _line_stats(recognised),
-                "lines": [_line_dict(ln, page, run_dates) for ln in recognised],
+                "lines": [
+                    {**_line_dict(ln, page, run_dates), "crosses_fold": ln.line_seq in across}
+                    for ln in recognised
+                ],
+                "twin": _twin_dict(twin, page.id) if twin is not None else None,
                 "honesty": attr.HONESTY,
                 "attribution": attr.attribution(images.mirrored),
             }
@@ -1196,11 +1293,12 @@ def create_app(
             if page is None:
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
-            lines = _with_text(latest_lines(conn, page_id))
+            twin = twins().get(page.id)
+            lines, _ = _twin_lines(twin, page.id, _with_text(latest_lines(conn, page_id)))
             runs = {run_id: _run_info(conn, run_id) for run_id in {ln.run_id for ln in lines}}
         finally:
             conn.close()
-        body = _page_text(site, page, titled(work), lines, runs, fmt)
+        body = _page_text(site, page, titled(work), lines, runs, fmt, twin)
         return Response(body, media_type=TEXT_MEDIA[fmt], headers=_text_headers(page.id, fmt))
 
     @app.get(
@@ -1225,7 +1323,7 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _work_text(db_path, site, titled(work), pages, summaries, fmt),
+            _work_text(db_path, site, titled(work), pages, summaries, fmt, twins()),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(work.gwlb_object_id, fmt),
         )
@@ -1272,7 +1370,9 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _record_text(db_path, site, _record_dict(record), placed, titled(work), summaries, fmt),
+            _record_text(
+                db_path, site, _record_dict(record), placed, titled(work), summaries, fmt, twins()
+            ),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(f"record-{record_id}", fmt),
         )
@@ -1315,9 +1415,11 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             lines = latest_lines(conn, page_id)
             dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
+            # a spread page's canvas is the whole image; its annotations, its half
+            shown, _ = _twin_lines(twins().get(page.id), page.id, lines)
             body = iiif.build_annotation_page(
                 page,
-                lines,
+                shown,
                 base_url=base(request),
                 run_dates=dates,
                 images_mirrored=images.mirrored,
@@ -1427,7 +1529,8 @@ def create_app(
                     )
                     return respond(request, body, status=404)
                 work = db.get_work(conn, page.work_id)
-                lines = latest_lines(conn, page_id)
+                twin = twins().get(page.id)
+                lines, _ = _twin_lines(twin, page.id, latest_lines(conn, page_id))
                 neighbours = conn.execute(
                     "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
                     (page.work_id, page.seq - 1, page.seq + 1),
@@ -1439,7 +1542,7 @@ def create_app(
             shown = images.resolve(page)
             gwlb_url = attr.gwlb_page_url(page.work_id, page.seq)
             title, description, ssr = _ssr_page(
-                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id
+                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id, twin
             )
             body = _stamp_shell(
                 shell,

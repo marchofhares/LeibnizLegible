@@ -17,6 +17,7 @@ import {
   statusBadge,
   langLabel,
   datetime,
+  folioLabel,
 } from '../dom.js';
 import { errorPanel, loading, renderNotFound, honestyBanner } from './common.js';
 
@@ -165,6 +166,7 @@ function lineEntry(line, index, run, data) {
     line.lang
       ? chip('chip--lang', langLabel(line.lang), t('page.langOf', { lang: langLabel(line.lang) }))
       : '',
+    line.crosses_fold ? chip('chip--fold', t('page.crossesFold'), t('page.crossesFold.title')) : '',
   ]
     .filter(Boolean)
     .join('');
@@ -264,6 +266,54 @@ function textPanel(data, pageId) {
 }
 
 // ---------------------------------------------------------------------------
+// one scan, several registrations: a spread's half, or a repeat
+// ---------------------------------------------------------------------------
+
+/** "fol. 1r" linking to that page, for each of the scan's other registrations. */
+function registrationLinks(others) {
+  return (others || [])
+    .map(
+      (o) =>
+        `<a href="/page/${esc(pathSeg(o.page_id))}">${esc(folioLabel(o.label, o.page_id))}</a>`,
+    )
+    .join(', ');
+}
+
+/** A sentence from the string table with links in it: the table's text is
+ *  escaped, then each marker is replaced by its (already escaped) HTML. */
+function linked(key, vars, html) {
+  const marks = {};
+  const withMarks = { ...vars };
+  Object.keys(html).forEach((name, i) => {
+    marks[name] = `\u2063${i}\u2063`;
+    withMarks[name] = marks[name];
+  });
+  let out = esc(t(key, withMarks));
+  for (const [name, mark] of Object.entries(marks)) out = out.split(mark).join(html[name]);
+  return out;
+}
+
+export function twinNotice(data) {
+  const twin = data.twin;
+  if (!twin) return '';
+  const others = registrationLinks(twin.others);
+  let text;
+  if (twin.kind === 'spread') {
+    text = linked(
+      'page.twin.spread',
+      { side: t(twin.side === 'left' ? 'page.twin.left' : 'page.twin.right') },
+      { others },
+    );
+  } else if (twin.is_primary) {
+    text = linked('page.twin.primary', {}, { others });
+  } else {
+    const primary = (twin.others || []).find((o) => o.page_id === twin.primary);
+    text = linked('page.twin.secondary', {}, { primary: registrationLinks(primary ? [primary] : []) });
+  }
+  return `<p class="panel notice notice--twin" role="note">${text}</p>`;
+}
+
+// ---------------------------------------------------------------------------
 // header / chrome
 // ---------------------------------------------------------------------------
 
@@ -359,6 +409,18 @@ function tileSourceFor(data) {
   return null;
 }
 
+/** For a spread's page, its half of the image in viewport units (the image is
+ *  1.0 wide): `[x, y, w, h]`; otherwise null. */
+export function halfBounds(data, size) {
+  const twin = data.twin;
+  const width = size ? size.width : imageSize(data).width;
+  const height = size ? size.height : imageSize(data).height;
+  if (!twin || twin.kind !== 'spread' || !(Number(twin.fold_x) > 0) || !width) return null;
+  const fold = Math.min(1, Number(twin.fold_x) / width);
+  const h = height / width;
+  return twin.side === 'left' ? [0, 0, fold, h] : [fold, 0, 1 - fold, h];
+}
+
 function buildOverlay(data) {
   const { width, height } = imageSize(data);
   const svg = document.createElementNS(SVG_NS, 'svg');
@@ -408,6 +470,7 @@ export async function render(ctx) {
   root.innerHTML =
     honestyBanner() +
     pageHeader(data, pageId) +
+    twinNotice(data) +
     `<div class="page-layout">${viewerPanel(data)}` +
     `<div class="page-side">${linePanel(data)}${textPanel(data, pageId)}</div></div>`;
 
@@ -645,6 +708,15 @@ function wire(root, data) {
         element: overlaySvg,
         location: new window.OpenSeadragon.Rect(0, 0, 1, built.height / built.width),
       });
+      // a spread opens on this page's half; the home button shows the whole image
+      const half = halfBounds(data, built);
+      if (half) {
+        try {
+          viewer.viewport.fitBounds(new window.OpenSeadragon.Rect(...half), true);
+        } catch {
+          /* the viewer shows the whole image instead */
+        }
+      }
       if (selected) highlight(selected);
     });
 

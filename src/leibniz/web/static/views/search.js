@@ -136,9 +136,15 @@ function renderHit(hit) {
   ]
     .filter(Boolean)
     .join('');
+  // one scan registered under several labels is listed once, under one of them
+  const also = (hit.also || []).length
+    ? ` <span class="hit__also">${esc(
+        t('search.also', { labels: hit.also.map((l) => folioLabel(l, '')).join(', ') }),
+      )}</span>`
+    : '';
   return (
     `<li class="hit">${thumb}<div class="hit__body">` +
-    `<h4 class="hit__title"><a href="${esc(href)}">${esc(label)}</a></h4>` +
+    `<h4 class="hit__title"><a href="${esc(href)}">${esc(label)}</a>${also}</h4>` +
     `<p class="hit__snippet">${snippet(hit.snippet)}</p>` +
     `<p class="hit__meta">${meta}</p>` +
     `</div></li>`

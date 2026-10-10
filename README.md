@@ -57,15 +57,25 @@ uv run leibniz images fetch --work 00067974 --work DE-611-HS-854976  # pull a de
 uv run leibniz images verify --deep  # re-checksum the cache, report gaps
 uv run leibniz images stats          # counts/bytes/dimensions → reports/census.md
 uv run leibniz images duplicates     # sheet-sides registered under two folio labels → reports/duplicates.md
+uv run leibniz images twins --out data/search.twins.json  # the same from the store alone, spread or fold
 ```
 
-**Sheet-sides are registered twice.** In the GWLB's static-JPEG delivery a scan
-is one side of an unfolded sheet — two folio pages side by side — and the METS
-lists that one image under both folio labels (outer side `1r` + `2v`, inner side
-`1v` + `2r`). The corpus run read every such image twice, so the page and line
-totals below count those repeats and search returns them as twin hits.
-`leibniz images duplicates` hashes the thumbnails and lists the pairs; folding
-them in the index and publishing a distinct-scan count is the next data fix.
+**Sheet-sides are registered twice.** The GWLB photographs an unfolded sheet
+as one image — two folio pages side by side — and registers that image under
+both folio labels (outer side `1r` + `2v`, inner side `1v` + `2r`), each label
+with its own copy of the file: the copies differ only in the caption stamped in
+a corner, so their checksums differ and their sizes almost agree. This happens
+in the IIIF (LH) works as well as in the static-JPEG ones. The corpus run read
+every such image once per label, so the page and line totals below count those
+repeats. Since 2026-10 the index build finds them from the store alone (same
+image size, file sizes within 0.1 %, a recto and a verso, confirmed by the
+lines lying in the same places; `src/leibniz/images/twins.py`): a two-page
+spread is indexed as its two halves, split at the fold (verso left, recto
+right), any other repeat on one page, and the site, the exports and the About
+page's figures follow it. The groups are written beside the index
+(`search.twins.json`, `<store dir>/<index uid>.twins.json`, or
+`LEIBNIZ_TWINS_PATH`); `leibniz images twins` writes the same file without an
+index build.
 
 Caches one JPEG delivery derivative per page under `data/images/` — resumable,
 checksummed, integrity-retried. The full-corpus pull (~365 GB) is an operator
@@ -239,7 +249,7 @@ default, that alone makes the About page link to it.
 **The v1 corpus run is complete (2026-09-11): 236,210 of 236,795 page records —
 99.75% of the digitized Nachlass — are machine-recognised, 13.5M line records
 with per-line confidence and provenance (sheet-sides registered twice included;
-see the duplicates note above).** The remainder is enumerated (569 skips
+see the note on them above).** The remainder is enumerated (569 skips
 with reasons; 16 pages behind broken GWLB redirects). Phases **A0–A3, B1–B2,
 C1** are complete (`STATUS.md` has the detail). A1's census found **2,225 works
 / 236,795 page images**; A2/A3 built the image cache (395.6 GB) and katalog

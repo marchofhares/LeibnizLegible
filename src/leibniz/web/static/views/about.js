@@ -35,6 +35,10 @@ function statTiles(data) {
     ['about.numbers.skipped', data.pages_skipped],
     ['about.numbers.lines', data.lines],
   ];
+  // each scan counted once: written by an index build that found the scans
+  // registered under two labels (leibniz/images/twins.py)
+  if (typeof data.images === 'number') tiles.splice(2, 0, ['about.numbers.images', data.images]);
+  if (typeof data.lines_once === 'number') tiles.push(['about.numbers.linesOnce', data.lines_once]);
   return (
     `<ul class="stats">` +
     tiles
@@ -265,7 +269,9 @@ export async function render(ctx) {
       box.setAttribute('aria-busy', 'false');
       box.innerHTML =
         statTiles(data) +
-        `<p class="muted">${esc(t('about.numbers.caveat'))}</p>` +
+        `<p class="muted">${esc(
+          t(typeof data.images === 'number' ? 'about.numbers.caveat' : 'about.numbers.caveatRaw'),
+        )}</p>` +
         provenanceRows(data) +
         histogram(data);
     })

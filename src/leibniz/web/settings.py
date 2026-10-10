@@ -23,6 +23,7 @@ application from scratch: the CLI exports its options with :meth:`to_env` and
 | ``LEIBNIZ_RATE_BURST``    | ``rate_burst`` | ``40``                        |
 | ``LEIBNIZ_IMAGE_BASE_URL``| ``image_base_url`` | unset: images from the GWLB |
 | ``LEIBNIZ_CALCULEMUS_URL``| ``calculemus_url`` | unset: no link to the game  |
+| ``LEIBNIZ_TWINS_PATH``    | ``twins_path`` | beside the index (``images/twins.py``) |
 """
 
 from __future__ import annotations
@@ -65,6 +66,7 @@ ENV: dict[str, str] = {
     "rate_burst": "LEIBNIZ_RATE_BURST",
     "image_base_url": "LEIBNIZ_IMAGE_BASE_URL",
     "calculemus_url": "LEIBNIZ_CALCULEMUS_URL",
+    "twins_path": "LEIBNIZ_TWINS_PATH",
 }
 MEILI_KEY_FALLBACK = "MEILI_MASTER_KEY"  # the dev name; production uses a search-only key
 
@@ -87,6 +89,7 @@ class ServeSettings:
     rate_burst: int = DEFAULT_RATE_BURST
     image_base_url: str | None = None  # the image mirror (web/images.py); unset = GWLB
     calculemus_url: str | None = None  # the game's origin, linked from About; unset = no link
+    twins_path: Path | None = None  # scans registered twice; unset = beside the index
 
     def __post_init__(self) -> None:
         self.backend = (self.backend or "fts5").lower()
@@ -103,6 +106,7 @@ class ServeSettings:
         self.base_url = (self.base_url or "").strip().rstrip("/") or None
         self.image_base_url = (self.image_base_url or "").strip().rstrip("/") or None
         self.calculemus_url = (self.calculemus_url or "").strip().rstrip("/") or None
+        self.twins_path = Path(self.twins_path) if self.twins_path else None
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> ServeSettings:
@@ -128,6 +132,7 @@ class ServeSettings:
             rate_burst=int(str(get("rate_burst", DEFAULT_RATE_BURST))),
             image_base_url=e.get(ENV["image_base_url"]) or None,
             calculemus_url=e.get(ENV["calculemus_url"]) or None,
+            twins_path=e.get(ENV["twins_path"]) or None,
         )
 
     def to_env(self) -> dict[str, str]:
@@ -152,7 +157,18 @@ class ServeSettings:
             out[ENV["image_base_url"]] = self.image_base_url
         if self.calculemus_url:
             out[ENV["calculemus_url"]] = self.calculemus_url
+        if self.twins_path:
+            out[ENV["twins_path"]] = str(self.twins_path)
         return out
+
+    @property
+    def resolved_twins_path(self) -> Path:
+        """The twins file: ``twins_path``, else beside the index this site searches."""
+        from leibniz.images.twins import twins_path_for
+
+        if self.twins_path:
+            return self.twins_path
+        return twins_path_for(self.backend, self.index_path, self.db_path, self.meili_index)
 
     @property
     def base_url_is_placeholder(self) -> bool:
@@ -182,6 +198,7 @@ class ServeSettings:
             rate_burst=self.rate_burst,
             image_base_url=self.image_base_url,
             calculemus_url=self.calculemus_url,
+            twins_path=self.resolved_twins_path,
         )
 
 

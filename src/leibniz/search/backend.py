@@ -8,7 +8,7 @@ text so both backends return identical hit records.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from typing import Protocol
 
@@ -96,6 +96,7 @@ class SearchHit:
     stratum: str
     thumb_url: str | None
     score: float | None = None
+    also: list[str] = field(default_factory=list)  # the scan's other folio labels
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -138,8 +139,12 @@ class SearchBackend(Protocol):
 
     name: str
 
-    def rebuild(self, docs: Iterable[PageDoc], *, meta: dict | None = None) -> int:
-        """Replace the index with ``docs``; return the number indexed."""
+    def rebuild(
+        self, docs: Iterable[PageDoc], *, meta: dict | Callable[[], dict] | None = None
+    ) -> int:
+        """Replace the index with ``docs``; return the number indexed. ``meta``
+        may be a callable, called once the documents are in, for the figures
+        the documents themselves produce."""
 
     def search(self, query: SearchQuery) -> SearchResult: ...
 

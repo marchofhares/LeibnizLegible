@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from leibniz.search.backend import SearchHit, SearchQuery, SearchQueryError, SearchResult
@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS docs (
     thumb_url   TEXT,
     katalog     TEXT NOT NULL,      -- JSON array of record ids
     aa_refs     TEXT NOT NULL,      -- JSON array of "AA I,3 N. 12" labels
-    text        TEXT NOT NULL
+    text        TEXT NOT NULL,
+    also        TEXT                -- JSON array: the scan's other folio labels
 );
 CREATE INDEX IF NOT EXISTS ix_docs_work    ON docs (work_id);
 CREATE INDEX IF NOT EXISTS ix_docs_set     ON docs (set_name);
@@ -56,6 +57,15 @@ CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(
 );
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
 """
+
+
+def _marks(doc: PageDoc) -> str:
+    """The shelfmark column: the work's shelfmarks and the page's folio labels
+    (its own and those its scan is also registered under), as Meilisearch's
+    ``meta_folded`` has them."""
+    labels = [f"fol {label}" for label in (doc.label, *doc.also) if label]
+    return " ".join([*doc.shelfmarks, *labels])
+
 
 # bm25 column weights: a hit in the title / shelfmark / AA reference outranks
 # one in the body text (the body dominates by length otherwise).
@@ -117,7 +127,11 @@ class Fts5Backend:
 
     # -- build ------------------------------------------------------------- #
     def rebuild(
-        self, docs: Iterable[PageDoc], *, meta: dict | None = None, batch: int = 500
+        self,
+        docs: Iterable[PageDoc],
+        *,
+        meta: dict | Callable[[], dict] | None = None,
+        batch: int = 500,
     ) -> int:
         conn = self._connect()
         try:
@@ -139,8 +153,8 @@ class Fts5Backend:
                             """
                             INSERT INTO docs (page_id, work_id, seq, label, set_name, title,
                                               shelfmarks, n_lines, mean_conf, lang, stratum,
-                                              thumb_url, katalog, aa_refs, text)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                              thumb_url, katalog, aa_refs, text, also)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """,
                             (
                                 d.page_id,
@@ -158,6 +172,7 @@ class Fts5Backend:
                                 json.dumps(d.katalog),
                                 json.dumps(d.aa_refs, ensure_ascii=False),
                                 d.text,
+                                json.dumps(d.also, ensure_ascii=False),
                             ),
                         )
                         conn.execute(
@@ -167,7 +182,7 @@ class Fts5Backend:
                                 cur.lastrowid,
                                 fold(d.text),
                                 fold(d.title),
-                                fold(" ".join(d.shelfmarks)),
+                                fold(_marks(d)),
                                 fold(" ".join(d.aa_refs)),
                             ),
                         )
@@ -179,7 +194,7 @@ class Fts5Backend:
                 if len(pending) >= batch:
                     flush()
             flush()
-            info = dict(meta or {})
+            info = dict((meta() if callable(meta) else meta) or {})
             info.update(
                 {
                     "backend": self.name,
@@ -263,6 +278,8 @@ class Fts5Backend:
                 stratum=r["stratum"],
                 thumb_url=r["thumb_url"],
                 score=round(-float(r["score"]), 4),
+                # an index built before 2026-10 has no ``also`` column
+                also=json.loads(r["also"] or "[]") if "also" in r.keys() else [],
             )
             for r in rows
         ]

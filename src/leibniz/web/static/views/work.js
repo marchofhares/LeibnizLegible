@@ -154,8 +154,26 @@ function canvas(page) {
     `<p class="canvas__meta">` +
     `<span class="dot dot--${skipped ? 'skipped' : 'ok'}" aria-hidden="true"></span>` +
     `<span class="canvas__status">${esc(statusLabel + reason)}</span>${lines}</p>` +
+    twinLine(page) +
     `</li>`
   );
+}
+
+/** One scan under several labels: "Spread with fol. 2v", "Same scan as fol. 1r". */
+export function twinLine(page) {
+  const twin = page.twin;
+  if (!twin) return '';
+  const labels = (twin.others || []).map((o) => folioLabel(o.label, o.page_id)).join(', ');
+  let key = 'work.twin.primary';
+  let vars = { labels };
+  if (twin.kind === 'spread') {
+    key = 'work.twin.spread';
+  } else if (!twin.is_primary) {
+    const primary = (twin.others || []).find((o) => o.page_id === twin.primary);
+    key = 'work.twin.secondary';
+    vars = { label: primary ? folioLabel(primary.label, primary.page_id) : '' };
+  }
+  return `<p class="canvas__twin">${esc(t(key, vars))}</p>`;
 }
 
 function canvasStrip(data) {
