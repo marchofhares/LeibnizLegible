@@ -167,9 +167,13 @@ print('recognised', r, '| with text', t, '| difference', r - t)
 "
 ```
 
-The build **replaces** the index wholesale (drop →
-create → settings → documents), so re-running it is safe and is how a new
-corpus run (C4) goes live. Since 2026-10 it also finds the scans the GWLB
+The build **replaces** the index wholesale, so re-running it is safe and is
+how a new corpus run (C4) goes live. Since 2026-10 it builds beside the live
+index (`leibniz_pages__next`, settings, documents) and swaps the two in one
+Meilisearch task at the end, then deletes the old generation: search keeps
+answering from the old index throughout (before, the build dropped it first
+and search answered from a half-filled index for hours). Both generations
+sit on disk until the swap — the sizing in §1 allows for it. Since 2026-10 it also finds the scans the GWLB
 registered under two folio labels (`src/leibniz/images/twins.py`), indexes
 each once — a two-page spread as its two halves — and writes the groups to
 `/var/lib/leibniz-legible/<index uid>.twins.json`, which the app reads at

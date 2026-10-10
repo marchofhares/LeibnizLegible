@@ -157,6 +157,18 @@ class MeiliBackend:
         return self._wait(self.client.patch(f"/indexes/{self.index_uid}/settings", json=SETTINGS))
 
     # -- build ------------------------------------------------------------- #
+    def _drop(self, uid: str) -> None:
+        """Delete an index; one that is not there is what was wanted."""
+        r = self.client.delete(f"/indexes/{uid}")
+        if r.status_code != 404:
+            self._wait(r, ignore=("index_not_found",))
+
+    def _create(self, uid: str) -> None:
+        self._wait(self.client.post("/indexes", json={"uid": uid, "primaryKey": "doc_id"}))
+
+    def _exists(self, uid: str) -> bool:
+        return self.client.get(f"/indexes/{uid}").status_code == 200
+
     def rebuild(
         self,
         docs: Iterable[PageDoc],
@@ -164,14 +176,22 @@ class MeiliBackend:
         meta: dict | Callable[[], dict] | None = None,
         batch: int = 2000,
     ) -> int:
-        for uid in (self.index_uid, self._meta_uid):
-            # Deleting an index is a task; on a fresh server (first build) that
-            # task fails with index_not_found, which is exactly what we want.
-            r = self.client.delete(f"/indexes/{uid}")
-            if r.status_code != 404:
-                self._wait(r, ignore=("index_not_found",))
-            self._wait(self.client.post("/indexes", json={"uid": uid, "primaryKey": "doc_id"}))
-        self._wait(self.client.patch(f"/indexes/{self.index_uid}/settings", json=SETTINGS))
+        """Build the index beside the live one and swap it in when it is complete.
+
+        The documents go into ``<uid>__next`` (and ``<uid>_meta__next``); one
+        ``/swap-indexes`` task then exchanges them with the live pair, and the
+        old generation is deleted. Until 2026-10 the build dropped the live
+        index first, so search answered from a half-filled index for the hours
+        a full build takes. The search key's ``leibniz_pages*`` pattern covers
+        the build's names; the server must hold both generations for a while
+        (deploy/README §1 sizes the disk for that).
+        """
+        live = (self.index_uid, self._meta_uid)
+        nxt = tuple(f"{uid}__next" for uid in live)
+        for uid in nxt:  # a build that died half way left these
+            self._drop(uid)
+            self._create(uid)
+        self._wait(self.client.patch(f"/indexes/{nxt[0]}/settings", json=SETTINGS))
         n = 0
         pending: list[dict] = []
 
@@ -179,7 +199,7 @@ class MeiliBackend:
             nonlocal n
             if not pending:
                 return
-            self._wait(self.client.post(f"/indexes/{self.index_uid}/documents", json=pending))
+            self._wait(self.client.post(f"/indexes/{nxt[0]}/documents", json=pending))
             n += len(pending)
             pending.clear()
 
@@ -201,7 +221,14 @@ class MeiliBackend:
                 "n_docs": n,
             }
         )
-        self._wait(self.client.post(f"/indexes/{self._meta_uid}/documents", json=[info]))
+        self._wait(self.client.post(f"/indexes/{nxt[1]}/documents", json=[info]))
+        for uid in live:  # the first build: an empty live pair to swap with
+            if not self._exists(uid):
+                self._create(uid)
+        swap = [{"indexes": [old, new]} for old, new in zip(live, nxt, strict=True)]
+        self._wait(self.client.post("/swap-indexes", json=swap))
+        for uid in nxt:  # now the previous generation
+            self._drop(uid)
         return n
 
     # -- query ------------------------------------------------------------- #

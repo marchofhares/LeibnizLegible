@@ -28,6 +28,7 @@ class FakeMeili:
         self.task_state: dict[int, dict] = {}
         self.calls: list[str] = []
         self.searches: list[dict] = []
+        self.swaps = 0
 
     def _task(self, status: str = "succeeded", error: dict | None = None) -> httpx.Response:
         self.tasks += 1
@@ -55,6 +56,23 @@ class FakeMeili:
             return self._task()
         if method == "POST" and path == "/indexes":
             self.indexes[json.loads(request.content)["uid"]] = {}
+            return self._task()
+        if method == "GET" and path.startswith("/indexes/") and path.count("/") == 2:
+            uid = path.split("/")[2]
+            return httpx.Response(200 if uid in self.indexes else 404, json={"uid": uid})
+        if method == "POST" and path == "/swap-indexes":
+            for pair in json.loads(request.content):
+                a, b = pair["indexes"]
+                assert a in self.indexes and b in self.indexes, pair  # as Meilisearch requires
+                self.indexes[a], self.indexes[b] = self.indexes[b], self.indexes[a]
+                sa, sb = self.settings.get(a), self.settings.get(b)
+                self.settings.pop(a, None)
+                self.settings.pop(b, None)
+                if sb is not None:
+                    self.settings[a] = sb
+                if sa is not None:
+                    self.settings[b] = sa
+            self.swaps += 1
             return self._task()
         if method == "PATCH" and path.endswith("/settings"):
             self.settings[path.split("/")[2]] = json.loads(request.content)
@@ -129,15 +147,18 @@ def test_rebuild_search_meta_count(store_path, fake) -> None:
     n = be.rebuild(iter_page_docs(conn), meta={"stats": {"pages": 4}})
     conn.close()
     assert n == 3 and be.count() == 3
-    # the first build on a fresh server: both deletes failed with index_not_found and were ignored
+    # the first build on a fresh server: the deletes of a leftover build pair
+    # failed with index_not_found and were ignored
     failed = [t for t in fake.task_state.values() if t["status"] == "failed"]
     assert len(failed) == 2 and all(t["error"]["code"] == "index_not_found" for t in failed)
-    # a second build (indexes exist now) deletes them for real
+    # a second build swaps a new generation in
     conn = db.connect(store_path)
     assert be.rebuild(iter_page_docs(conn), meta={"stats": {"pages": 4}}) == 3
     conn.close()
     assert fake.settings["leibniz_pages"]["typoTolerance"]["enabled"] is True
-    assert "POST /indexes" in fake.calls and "PATCH /indexes/leibniz_pages/settings" in fake.calls
+    # the settings go to the index being built; the swap carries them live
+    assert "POST /indexes" in fake.calls
+    assert "PATCH /indexes/leibniz_pages__next/settings" in fake.calls
 
     res = be.search(SearchQuery(q="Calculemus"))
     assert res.total == 1 and res.backend == "meili" and res.took_ms == 3
@@ -266,3 +287,22 @@ def test_settings_push_refuses_an_index_built_without_the_fields(store_path, fak
         d.pop("meta_folded")
     with pytest.raises(RuntimeError, match="no field meta_folded"):
         be.push_settings()
+
+
+def test_a_rebuild_fills_a_second_index_and_swaps_it_in(store_path, fake) -> None:
+    """The live index answers throughout: the documents go into ``__next`` and
+    one swap puts them live; the old generation is deleted after."""
+    be = _backend(fake)
+    conn = db.connect(store_path)
+    be.rebuild(iter_page_docs(conn))  # the first build: nothing live yet
+    assert set(fake.indexes) == {"leibniz_pages", "leibniz_pages_meta"} and fake.swaps == 1
+    assert len(fake.indexes["leibniz_pages"]) == 3
+    fake.calls.clear()
+    be.rebuild(iter_page_docs(conn, work_id=W2))  # a second build
+    conn.close()
+    assert fake.swaps == 2 and len(fake.indexes["leibniz_pages"]) == 1
+    assert set(fake.indexes) == {"leibniz_pages", "leibniz_pages_meta"}
+    # the live index was never deleted, and no document went into it directly
+    assert "DELETE /indexes/leibniz_pages" not in fake.calls
+    assert "POST /indexes/leibniz_pages/documents" not in fake.calls
+    assert fake.settings["leibniz_pages"]["searchableAttributes"] == ["folded", "meta_folded"]
