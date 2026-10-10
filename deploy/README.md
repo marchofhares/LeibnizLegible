@@ -169,7 +169,15 @@ print('recognised', r, '| with text', t, '| difference', r - t)
 
 The build **replaces** the index wholesale (drop →
 create → settings → documents), so re-running it is safe and is how a new
-corpus run (C4) goes live. Check the result:
+corpus run (C4) goes live. Since 2026-10 it also finds the scans the GWLB
+registered under two folio labels (`src/leibniz/images/twins.py`), indexes
+each once — a two-page spread as its two halves — and writes the groups to
+`/var/lib/leibniz-legible/<index uid>.twins.json`, which the app reads at
+start: restart `leibniz-legible` after a build. A partial build (`--work`,
+`--set`, `--limit`) leaves that file as it was. A change of ranking or typo
+rules alone needs no rebuild: `leibniz index settings` pushes them (it
+refuses an index built before the folded metadata field existed). Check the
+result:
 
 ```bash
 sudo -u leibniz env MEILI_API_KEY=… /opt/leibniz-legible/.venv/bin/leibniz index status --backend meili
@@ -179,6 +187,22 @@ sudo -u leibniz env MEILI_API_KEY=… /opt/leibniz-legible/.venv/bin/leibniz ind
 fts5`) writes a single SQLite FTS5 file, `LEIBNIZ_INDEX_PATH`; set
 `LEIBNIZ_SEARCH_BACKEND=fts5`. Prefix matching and the early-modern folding
 (u≡v, i≡j, ſ→s, diacritics) work; typo tolerance does not.
+
+### The letters (once, and whenever correspSearch changes)
+
+```bash
+sudo -u leibniz /opt/leibniz-legible/.venv/bin/leibniz catalog letters \
+  --db /var/lib/leibniz-legible/inventory.sqlite \
+  --cache /var/lib/leibniz-legible/cache/correspsearch
+systemctl restart leibniz-legible
+```
+
+Eduard Bodemann's catalogue of the letters (1889), letter by letter from
+correspSearch (BBAW; CC BY 4.0; data from the Portal Der deutsche Brief im
+18. Jahrhundert): about 1,550 requests at one a second, resumable from the
+cache directory, written to `/var/lib/leibniz-legible/letters.json`. It names
+the letter convolutes the catalogue records leave unnamed and feeds
+`/letters`; the attribution travels with every page that shows it.
 
 ## 6. Start and verify
 

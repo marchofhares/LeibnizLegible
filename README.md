@@ -88,6 +88,7 @@ command; a `--set`/`--work`/`--limit` slice pulls a dev corpus. Images are
 uv run leibniz catalog scrape --sample   # scrape a cross-set sample of Ritter-Katalog records
 uv run leibniz catalog crosswalk         # match records → works (GWLB link + shelfmark)
 uv run leibniz catalog report            # write reports/crosswalk.md
+uv run leibniz catalog letters           # Bodemann's letters (correspSearch, CC BY 4.0) → letters.json beside the store
 ```
 
 Joins the BBAW Ritter-Katalog (CC BY 4.0) to our works so every scan links to its
@@ -144,8 +145,13 @@ uv run leibniz serve --backend meili --host 0.0.0.0 --base-url https://your.host
 ```
 
 The index folds text and query onto the aligner's early-modern comparison
-alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. Queries
-take two operators: `"…"` (or „…“, «…») for words that must stand exactly so
+alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. A page
+must hold every word (`match=any` for one of them); titles, shelfmarks, AA
+references, folio labels and the titles of the catalogue pieces on a page are
+folded the same way, so `AA VI,4 N. 109` or `Monadologie` find their pages.
+`/api/lookup` reads a query as a citation — a shelfmark with its folio, an
+Akademie-Ausgabe number, an id — and the search page offers where it points.
+Queries take two operators: `"…"` (or „…“, «…») for words that must stand exactly so
 and in that order, and a leading `-` to leave out pages with a word or a
 quoted phrase; both match exactly, so they cannot see past a misread word.
 The API (`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
@@ -178,6 +184,18 @@ the GWLB's own Image API (static JPEG where no service exists) or on the
 project's image mirror when `LEIBNIZ_IMAGE_BASE_URL` is set, a line-polygon
 overlay, status badges, confidence bands, provenance per line, EN/DE.
 
+Since 2026-10: lines are numbered from 1 and citable (`/page/{id}#L3`; a Cite
+box with model, run and a permalink; `?run=N` reads a page as run N left it).
+A scan the library registered under two folio labels is shown and indexed
+once — a two-page spread split at the fold — from the twins file the index
+build writes (`LEIBNIZ_TWINS_PATH`, else beside the index). `/letters` and
+`/api/letters` list Bodemann's letters by correspondent, date and place from
+`letters.json` (`LEIBNIZ_LETTERS_PATH`, else beside the store), and each letter
+convolute's page lists its own; `/api/contents` and the browse filter find the
+convolute that holds a piece by its title. Catalogue records link out to the
+Leibniz-Katalog, the cited volumes of the Akademie-Ausgabe, the piece's folio
+at the GWLB and, for letters of 1708–1716, the Leibniz-Archiv's transcriptions.
+
 ### Releases (Phase D3)
 
 ```bash
@@ -196,7 +214,8 @@ the project against SPECS §3, criterion by criterion.
 ```bash
 deploy/prepare-store.sh                                # desktop: compact, verified serving copy of the store
 curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/deploy/install.sh | bash  # server: users, venv, Meilisearch, Caddy, units
-leibniz index build --backend meili                    # server: one pass over the store, an hour or two
+leibniz index build --backend meili                    # server: one pass over the store; also writes the twins file
+leibniz catalog letters --db /var/lib/leibniz-legible/inventory.sqlite  # server: letters.json beside the store
 leibniz index bench --url https://your.host            # search p95 against SPECS §3.3 (500 ms)
 ```
 
