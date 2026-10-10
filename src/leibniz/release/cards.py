@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from leibniz.align.audit import audit_sentence
 from leibniz.web import attribution as attr
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -63,12 +64,30 @@ ERROR_RATES = (
     "See `reports/philiumm-repro.md`."
 )
 
+# The card's audit paragraph without numbers, for an export run where no scored
+# audit summary exists. Where one does (`leibniz align audit-score` writes
+# reports/gt-audit/audit-summary.json), :func:`gt_audit_note` quotes it; until
+# 2026-10 this constant still read "97.5 % … preliminary (20 of 200)" after the
+# audit had been scored.
 GT_AUDIT_NOTE = (
-    "The minted lines' precision was measured at 97.5 % on favourable material in the "
-    "prototype (`reports/alignment-prototype.md`); the corpus mint's hand audit is "
-    "preliminary (20 of 200 lines judged; `reports/gt-audit.md`) and the precision gate "
-    "is deferred to the fine-tuning ablation. Treat `align_conf` as the per-line signal."
+    "The minted lines' precision is measured by a stratified hand audit "
+    "(`reports/gt-audit.md`). Treat `align_conf` as the per-line signal."
 )
+
+GT_PROVENANCE_NOTE = (
+    "Each row's `source` names the printed piece(s) its text was read from, the free "
+    "copy of the volume it was read from where the factory recorded it (`channel ia`, "
+    "`gwlb` or `potsdam`; the terms of each channel are in "
+    "`src/leibniz/align/volumes_sources.py`), and the catalogue record (`katalog <id>`)."
+)
+
+
+def gt_audit_note(summary: dict | None) -> str:
+    """The audit paragraph, quoting the scored audit where its summary exists."""
+    sentence = audit_sentence(summary)
+    if sentence is None:
+        return GT_AUDIT_NOTE
+    return f"{sentence} Treat `align_conf` as the per-line signal."
 
 
 def _schema_table(tables: list[TableSpec]) -> str:
@@ -83,7 +102,12 @@ def _schema_table(tables: list[TableSpec]) -> str:
 
 
 def render_card(
-    dataset: str, tables: list[TableSpec], exp: DatasetExport, *, stats: dict | None = None
+    dataset: str,
+    tables: list[TableSpec],
+    exp: DatasetExport,
+    *,
+    stats: dict | None = None,
+    audit_summary: dict | None = None,
 ) -> str:
     meta = CARD_META[dataset]
     lines = [
@@ -138,7 +162,7 @@ def render_card(
         "",
     ]
     if dataset == "gt":
-        lines += [GT_AUDIT_NOTE, ""]
+        lines += [gt_audit_note(audit_summary), "", GT_PROVENANCE_NOTE, ""]
     lines += [
         "## Use with care",
         "",
@@ -155,4 +179,12 @@ def render_card(
     return "\n".join(lines)
 
 
-__all__ = ["ANTI_CONTAMINATION", "CARD_META", "ERROR_RATES", "GT_AUDIT_NOTE", "render_card"]
+__all__ = [
+    "ANTI_CONTAMINATION",
+    "CARD_META",
+    "ERROR_RATES",
+    "GT_AUDIT_NOTE",
+    "GT_PROVENANCE_NOTE",
+    "gt_audit_note",
+    "render_card",
+]

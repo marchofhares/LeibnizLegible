@@ -121,3 +121,32 @@ def test_hostile_queries_never_reach_fts5_as_syntax(store_path, tmp_path) -> Non
     for _ in range(3000):
         q = "".join(rng.choice(pieces) for _ in range(rng.randint(1, 14)))
         assert be.search(SearchQuery(q=q)).total >= 0, q
+
+
+def test_all_words_by_default_any_word_on_request(store_path, tmp_path) -> None:
+    be = _build(store_path, tmp_path)
+    # "Calculemus" is on 1r only, "grâce" on the Briefwechsel page only
+    assert be.search(SearchQuery(q="Calculemus grace")).total == 0
+    broad = be.search(SearchQuery(q="Calculemus grace", match="any"))
+    assert broad.total == 2 and broad.match == "any"
+    assert match_query(parse_query("a b"), any_word=True) == '("a" OR "b")'
+    assert match_query(parse_query('"arte combinatoria" de'), any_word=True) == (
+        '("arte combinatoria" OR "de")'
+    )
+
+
+def test_control_characters_are_no_query(store_path, tmp_path) -> None:
+    be = _build(store_path, tmp_path)
+    for q in ("Calculemus\x00", "\x00", 'Calc"\x00"ulemus', "\x07de\x1b"):
+        assert be.search(SearchQuery(q=q)).total >= 0, repr(q)
+    assert be.search(SearchQuery(q="Calculemus\x00")).total == 1
+
+
+def test_paging_stops_at_the_reachable_depth() -> None:
+    from leibniz.search.backend import MAX_REACHABLE, SearchResult, max_page
+
+    q = SearchQuery(q="de", page=10_000, limit=20).normalized()
+    assert q.page == max_page(20) == MAX_REACHABLE // 20 and q.offset < MAX_REACHABLE
+    assert SearchQuery(q="de", page=3, limit=30).normalized().page == 3
+    big = SearchResult("de", 97_633, 1, 20, 3, "fts5", [])
+    assert big.to_dict()["reachable"] == MAX_REACHABLE and big.to_dict()["total"] == 97_633

@@ -356,3 +356,70 @@ def test_cli_kurrent_pilot_with_echo(tmp_path: Path) -> None:
     assert (tmp_path / "reports" / "pilot-yield.csv").exists()
     assert (tmp_path / "side.html").exists()
     assert (tmp_path / "readings" / "echo.jsonl").exists()
+    # --- 2026-10: re-rendering a finished pilot can no longer mix two selections ---
+    reports = tmp_path / "reports"
+    base = [
+        "align", "kurrent-pilot", "--db", str(db_path), "--german", str(german),
+        "--edition-cache", str(cache), "--images", str(images), "--readers", "echo",
+        "--n-german", "1", "--n-control", "1", "--min-lines", "1", "--device", "cpu",
+        "--today", TODAY.isoformat(), "--readings-dir", str(tmp_path / "readings"),
+        "--side-by-side", str(tmp_path / "side.html"), "--reports-dir", str(reports),
+    ]  # fmt: skip
+    # --no-read with no --max-pages takes the cap of the run whose readings are on disk
+    again = runner.invoke(app, [*base, "--no-read", "--operator-verdict", "Partly."])
+    assert again.exit_code == 0, again.output
+    assert "--max-pages 3" in again.output and "Partly." in (reports / "pilot.md").read_text()
+    # --from-summary needs neither store nor readings, and keeps the run's numbers
+    before = json.loads((reports / "pilot-summary.json").read_text())
+    rerender = runner.invoke(
+        app,
+        [
+            "align", "kurrent-pilot", "--from-summary", str(reports / "pilot-summary.json"),
+            "--yields", str(reports / "pilot-yield.csv"), "--reports-dir", str(reports),
+            "--operator-verdict", "Yes, Partly.",
+        ],
+    )  # fmt: skip
+    assert rerender.exit_code == 0, rerender.output
+    after = json.loads((reports / "pilot-summary.json").read_text())
+    assert after["summaries"] == before["summaries"] and after["max_pages"] == before["max_pages"]
+    assert after["operator_verdict"] == "Yes, Partly."
+
+
+def test_result_from_files_refuses_files_from_two_runs(tmp_path: Path) -> None:
+    summary = {
+        "generated": "2026-10-09",
+        "readers": ["r"],
+        "sample": None,
+        "max_pages": 2,
+        "pieces": [],
+        "summaries": [
+            {
+                "reader": "r", "german_lines": 10, "german_aligned": 2, "german_yield": 0.2,
+                "german_mean_conf": 0.3, "control_lines": 0, "control_aligned": 0,
+                "control_yield": None, "control_mean_conf": 0.0,
+            }
+        ],
+        "verdict": {
+            "best_reader": "r", "best_german_yield": 0.2, "baseline_german_yield": None,
+            "controls_consistent": True, "control_winner": None, "note": "",
+        },
+        "operator_verdict": None,
+    }  # fmt: skip
+    (tmp_path / "s.json").write_text(json.dumps(summary), encoding="utf-8")
+    header = (
+        "record_id,role,reader,volume,stratum,hand,leibniz_hand,threshold,n_lines,n_read,"
+        "n_aligned,yield,mean_conf,mean_conf_aligned\n"
+    )
+    (tmp_path / "ok.csv").write_text(
+        header + '1,german,r,"I,3",scrap,own,1,0.80,10,10,2,0.2000,0.3000,0.9000\n',
+        encoding="utf-8",
+    )
+    res = P.result_from_files(tmp_path / "s.json", tmp_path / "ok.csv", operator_verdict="Yes")
+    assert res.max_pages == 2 and res.operator_verdict == "Yes" and res.yields[0].leibniz_hand
+    # the committed 2026-10-09 re-render: more lines in the yields than the readings covered
+    (tmp_path / "mixed.csv").write_text(
+        header + '1,german,r,"I,3",scrap,own,1,0.80,14,10,2,0.1429,0.3000,0.9000\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="not one run"):
+        P.result_from_files(tmp_path / "s.json", tmp_path / "mixed.csv")

@@ -116,6 +116,9 @@ class Entry:
     title: str
     n_canvases: int
     has_katalog: bool
+    # a letter convolute: what Bodemann's catalogue says of its letters
+    # (leibniz.catalog.letters.Convolute.to_dict), where the letters file is there
+    letters: dict | None = field(default=None, hash=False, compare=False)
 
 
 @dataclass(slots=True)
@@ -498,13 +501,32 @@ def names_in_order(candidates: Sequence[Mapping[str, int]]) -> list[str | None]:
     return out
 
 
+def bodemann_weights(letters: Mapping | None) -> dict[str, int]:
+    """Who Bodemann's letters of a convolute name beside Leibniz, by number of
+    letters (``Convolute.to_dict``'s ``correspondents``)."""
+    out: dict[str, int] = {}
+    for person in (letters or {}).get("correspondents") or []:
+        name = " ".join(str(person.get("name") or "").split())
+        if name and name != LEIBNIZ:
+            out[name] = out.get(name, 0) + int(person.get("n") or 1)
+    return out
+
+
 def _lbr_section(
     placed: list[tuple[_Placed, Work]],
     correspondents: Mapping[str, Sequence[Correspondence]],
     with_records: Collection[str],
+    letters: Mapping[str, Mapping] | None = None,
 ) -> Section:
     numbered = sorted(placed, key=lambda it: (it[0].order, it[1].gwlb_object_id))
-    weights = [correspondent_weights(correspondents.get(w.gwlb_object_id, ())) for _, w in numbered]
+    letters = letters or {}
+    # The catalogue records' names first; where they name nobody, the people
+    # Bodemann's letters of the convolute name (the same alphabetical check holds).
+    weights = [
+        correspondent_weights(correspondents.get(w.gwlb_object_id, ()))
+        or bodemann_weights(letters.get(w.gwlb_object_id))
+        for _, w in numbered
+    ]
     # The plain numbers (1 … 1028, with 33a and "57, 1") are the alphabetical
     # run. The F series, the princes by house and first name, has no one order
     # to hold a name against: it keeps its most frequent name, and a name that
@@ -529,6 +551,8 @@ def _lbr_section(
     unnamed: list[Entry] = []
     for (place, work), name in zip(numbered, names, strict=True):
         entry = _entry(work, place.mark, name or place.mark, with_records)
+        if work.gwlb_object_id in letters:
+            entry = replace(entry, letters=dict(letters[work.gwlb_object_id]))
         (named if name else unnamed).append(entry)
     order = {entry.work_id: i for i, entry in enumerate(named)}
     named.sort(key=lambda e: (_fold(e.label), order[e.work_id]))
@@ -574,12 +598,16 @@ def build_index(
     works: Iterable[Work],
     correspondents: Mapping[str, Sequence[Correspondence]] | None = None,
     with_records: Collection[str] = (),
+    letters: Mapping[str, Mapping] | None = None,
 ) -> list[Family]:
     """The tree family → section → entries; every work lands in exactly one entry.
 
     ``correspondents`` maps a work id to its :class:`Correspondence` rows
     (:data:`CORRESPONDENTS_SQL`); ``with_records`` is the ids of the works with
-    any catalogue record. Families and sections without works are left out.
+    any catalogue record; ``letters`` maps a letter convolute's work id to what
+    Bodemann's catalogue says of its letters (who, when, where), which names a
+    convolute the catalogue records leave unnamed. Families and sections
+    without works are left out.
     """
     with_records = frozenset(with_records)
     placed: dict[str, list[tuple[_Placed, Work]]] = {"LH": [], "LBr": [], "Marg": []}
@@ -596,7 +624,10 @@ def build_index(
         families.append(Family("LH", _lh_sections(placed["LH"], with_records)))
     if placed["LBr"]:
         families.append(
-            Family("LBr", [_lbr_section(placed["LBr"], correspondents or {}, with_records)])
+            Family(
+                "LBr",
+                [_lbr_section(placed["LBr"], correspondents or {}, with_records, letters)],
+            )
         )
     if placed["Marg"]:
         items = sorted(placed["Marg"], key=lambda it: (it[0].order, it[1].gwlb_object_id))
@@ -661,6 +692,7 @@ def rows(families: Iterable[Family]) -> list[dict]:
             "label": entry.label,
             "n_canvases": entry.n_canvases,
             "has_katalog": entry.has_katalog,
+            **({"letters": entry.letters} if entry.letters else {}),
         }
         for fam in families
         for section in fam.sections
@@ -700,6 +732,39 @@ def tree(families: Iterable[Family]) -> list[dict]:
     return out
 
 
+# The title the library gives every letter convolute alike: it names the
+# Nachlass, not the convolute (all 1,060 LBr works, 2026-10).
+GENERIC_TITLES = frozenset({"nachlass gottfried wilhelm leibniz"})
+
+
+def is_generic_title(title: str | None) -> bool:
+    """Whether a work's title says nothing about the work itself."""
+    return " ".join((title or "").split()).casefold() in GENERIC_TITLES | {""}
+
+
+def display_title(entry: Entry, family: str) -> str | None:
+    """What names a work where its own title does not: a letter convolute by
+    its shelfmark and correspondent (``LBr. 16 · Arnauld``), anything else by
+    its label; ``None`` where the library's title says something."""
+    if not is_generic_title(entry.title):
+        return None
+    if family == "LBr" and entry.shelfmark and entry.label != entry.shelfmark:
+        return f"{entry.shelfmark} · {entry.label}"
+    return entry.shelfmark or entry.label or None
+
+
+def display_titles(families: Iterable[Family]) -> dict[str, str]:
+    """work id → the title to show in its place, for the works whose own title
+    is the library's generic one (:func:`display_title`)."""
+    out: dict[str, str] = {}
+    for fam in families:
+        for section in fam.sections:
+            for entry in section.entries:
+                if (shown := display_title(entry, fam.key)) is not None:
+                    out[entry.work_id] = shown
+    return out
+
+
 def places(families: Iterable[Family]) -> dict[str, dict]:
     """work id → where it sits (family, section, anchor, the section's title),
     for a work page's way back into the index."""
@@ -721,17 +786,22 @@ __all__ = [
     "CORRESPONDENTS_SQL",
     "FAMILIES",
     "FAMILY_NAMES",
+    "GENERIC_TITLES",
     "RESCUE_RECORDS",
     "SET_LABELS",
     "Correspondence",
     "Entry",
     "Family",
     "Section",
+    "bodemann_weights",
     "build_index",
     "correspondent",
     "correspondent_names",
     "correspondent_weights",
+    "display_title",
+    "display_titles",
     "group_correspondents",
+    "is_generic_title",
     "names_as_written",
     "names_in_order",
     "natural_key",

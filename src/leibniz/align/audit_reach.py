@@ -15,13 +15,18 @@ store already holds — no image, no model:
   cuts ``align/stratum.py`` uses for ``heavy_revision``. The audit found
   additions rendered inline *on such pages*; the proxy marks the pages, not
   the lines.
-* **hand** — the catalogue record the line was minted from carries ``eigh.``
-  (*eigenhändig*) in its ``Textart``: the piece is in its author's own hand.
-  For a letter the author is the sender, so ``eigh`` alone counts a
-  correspondent's hand on a letter Leibniz received; ``leibniz`` narrows it to
-  the lines whose record names no sender (a writing) or names Leibniz as the
-  sender (his own draft or letter). Shares per stratum and per volume are of
-  the lines whose record has a Textart.
+* **hand** — the catalogue record the line was minted from says, in its
+  ``Textart``, that the piece itself is autograph (*eigenhändig*):
+  ``Abf., eigh.``, ``Konz.; eigh.`` — the rule of
+  :func:`leibniz.catalog.hands.hand_from_textart`, shared with the K1 census.
+  An ``eigh.`` that qualifies a part only (``Abf.; eigh. Aufschr.``, a scribe's
+  copy with an autograph address) does not count; before 2026-10 it did, and
+  the shares "in Leibniz's own hand" included those copies. For a letter the
+  author is the sender, so ``eigh`` alone counts a correspondent's hand on a
+  letter Leibniz received; ``leibniz`` narrows it to the lines whose record
+  names no sender (a writing) or names Leibniz himself as the sender
+  (:func:`~leibniz.catalog.hands.is_leibniz_name`: not a namesake). Shares
+  per stratum and per volume are of the lines whose record has a Textart.
 * **Marginalien** — the line's work is in the Marginalien set (annotated
   printed books), where the body text is print, not Leibniz.
 * **bracket** — the minted text carries an editorial bracket, the leak the
@@ -48,6 +53,7 @@ from leibniz.align.audit_patterns import (
     is_math_dense,
 )
 from leibniz.align.stratum import HEAVY_MIN_OVERLAP_FRAC, HEAVY_MIN_SHORT_FRAC
+from leibniz.catalog.hands import hand_from_textart, is_leibniz_hand
 from leibniz.catalog.shelfmarks import normalize_signature
 
 FLAGS = ("hyphen", "math", "addition", "eigh", "leibniz", "marginalien", "bracket", "lh35")
@@ -167,10 +173,11 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
         if page_flags[page_id]:
             flags.append("addition")
         ta, sender = textart.get(rec, (None, None)) if rec is not None else (None, None)
-        eigh = None if not ta else ("eigh." in ta.lower())
+        hand = hand_from_textart(ta) if ta else None
+        eigh = None if not ta else hand == "own"
         if eigh:
             flags.append("eigh")
-            if not sender or "leibniz" in sender.lower():
+            if is_leibniz_hand(hand, sender):
                 flags.append("leibniz")
         marg, lh35 = work_info[work_id]
         if marg:

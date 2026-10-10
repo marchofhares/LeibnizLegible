@@ -51,43 +51,12 @@ from leibniz.align.normalize import normalize
 from leibniz.align.resolve import index_pages, select_folios
 from leibniz.align.stratum import classify_piece
 from leibniz.align.volumes import PieceRef, enumerate_pieces
+from leibniz.catalog.hands import HANDS, hand_from_textart, is_leibniz_hand
 from leibniz.enrich.langid import LangResult, classify, count_hits, tokens
 
 LANGS: tuple[str, ...] = ("la", "fr", "de", "mixed", "unknown")
-HANDS: tuple[str, ...] = ("own", "partial", "other", "none")
 STRATA: tuple[str, ...] = ("fair_copy", "light_revision", "heavy_revision", "scrap", "unknown")
 LATIN_FRENCH: tuple[str, ...] = ("la", "fr")
-
-# Textart abbreviations that name the document itself, so "eigh. <one of these>"
-# says the whole piece is autograph (as "eigh." alone does); "eigh." before any
-# other word (Aufschr., Anschr., Korr., Nachschr., Zusatz, Unterschr., Verm.)
-# qualifies that part only.
-_DOCUMENT_TYPES: frozenset[str] = frozenset(
-    {"abf", "konz", "reinschr", "abschr", "ausz", "mf", "entw", "aufz", "notiz", "text", "exz"}
-)
-
-
-def hand_from_textart(textart: str | None) -> str:
-    """``own`` | ``partial`` | ``other`` | ``none`` from the catalogue's Textart."""
-    if textart is None or not textart.strip():
-        return "none"
-    t = textart.lower()
-    if "eigh" not in t:
-        return "other"
-    verdict = "partial"
-    for raw in t.replace(";", ",").split(","):
-        seg = raw.strip()
-        if not seg.startswith("eigh"):
-            continue
-        rest = seg[4:].lstrip(".").strip()
-        if not rest or rest.split()[0].rstrip(".") in _DOCUMENT_TYPES:
-            return "own"
-    return verdict
-
-
-def is_leibniz_hand(hand: str, absender: str | None) -> bool:
-    """The C2b rule: the author's own hand, and the author is Leibniz (or no sender)."""
-    return hand == "own" and (not absender or "leibniz" in absender.lower())
 
 
 @dataclass(slots=True)
@@ -299,7 +268,13 @@ def _place(
         if index is None:
             index = index_pages(db.get_pages(conn, piece.work_id))
             indexes[piece.work_id] = index
-        pages = select_folios(index, piece.work_id, *piece.folio_range).pages
+        pages = select_folios(
+            index,
+            piece.work_id,
+            *piece.folio_range,
+            side_lo=piece.folio_sides[0],
+            side_hi=piece.folio_sides[1],
+        ).pages
     page_ids = [p.id for p in pages]
     n_lines = count_recognised_lines(conn, page_ids) if page_ids else 0
     stratum = (

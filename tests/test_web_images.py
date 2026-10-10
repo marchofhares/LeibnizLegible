@@ -58,7 +58,13 @@ def test_image_source_urls(store_path) -> None:
     shown = on.resolve(cached)
     assert shown.delivery == "static" and shown.image_service_url is None
     assert shown.image_url == f"{MIRROR}/{W1}/0001.jpg" and shown.width == 2000
-    assert on.source_url(cached) == cached.image_service_url  # provenance: the GWLB
+    # provenance: the GWLB image the machine read, a URL that opens; the IIIF
+    # service stays on record beside it
+    assert on.source_url(cached) == cached.image_url and "/jpgs/default/" in cached.image_url
+    assert on.service_url(cached) == cached.image_service_url
+    no_jpeg = db.Page(work_id=W1, seq=9, image_service_url="https://x.test/iiif/9.ptif")
+    assert on.source_url(no_jpeg) == "https://x.test/iiif/9.ptif/full/max/0/default.jpg"
+    assert on.source_url(db.Page(work_id=W1, seq=9)) is None
     # never cached → still the GWLB, untouched
     assert on.resolve(uncached) is uncached and on.image_url(uncached) == uncached.image_url
 
@@ -71,7 +77,11 @@ def test_api_with_mirror(store_path, tmp_path) -> None:
     assert p["image_url"] == f"{MIRROR}/{W1}/0001.jpg"
     assert p["thumb_url"] == f"{MIRROR}/thumbs/{W1}/0001.jpg"
     assert p["image_origin"] == "mirror"
-    assert p["source_image_url"].startswith("https://digitale-sammlungen.gwlb.de/iiif/")
+    assert p["source_image_url"] == (
+        f"https://digitale-sammlungen.gwlb.de/content/{W1}/jpgs/default/00000001.jpg"
+    )
+    assert p["source_image_service"].startswith("https://digitale-sammlungen.gwlb.de/iiif/")
+    assert p["gwlb_page_url"] == f"https://digitale-sammlungen.gwlb.de/resolve?id={W1}&page=1"
     assert p["attribution"]["images"] == attr.IMAGES_MIRROR
     # the skipped page was never cached: GWLB, as before
     s = c.get(f"/api/pages/{W1}:0003").json()
@@ -90,10 +100,9 @@ def test_api_without_mirror_is_unchanged(store_path, tmp_path) -> None:
     c = _client(store_path, tmp_path, mirror=None)
     p = c.get(f"/api/pages/{W1}:0001").json()
     assert p["delivery"] == "iiif" and p["image_origin"] == "gwlb"
-    assert (
-        p["image_service_url"].endswith("/1.ptif")
-        and p["source_image_url"] == p["image_service_url"]
-    )
+    assert p["image_service_url"].endswith("/1.ptif")
+    assert p["source_image_service"] == p["image_service_url"]
+    assert p["source_image_url"] == p["image_url"]  # the delivery JPEG, shown and read
     assert p["attribution"]["images"] == attr.IMAGES
     assert c.get("/api/stats").json()["images"] == {"origin": "gwlb", "base_url": None}
 
@@ -106,7 +115,10 @@ def test_manifest_and_annotations_with_mirror(store_path, tmp_path) -> None:
     assert body["id"] == f"{MIRROR}/{W1}/0001.jpg" and "service" not in body
     assert body["width"] == 2000 and body["height"] == 2500
     src = next(x for x in m["items"][0]["metadata"] if x["label"]["en"] == ["Source image (GWLB)"])
-    assert src["value"]["none"][0].startswith("https://digitale-sammlungen.gwlb.de/iiif/")
+    # the mirror copies the GWLB's delivery JPEG: that file is the canvas's source
+    assert src["value"]["none"][0] == (
+        f"https://digitale-sammlungen.gwlb.de/content/{W1}/jpgs/default/00000001.jpg"
+    )
     assert attr.IMAGES_MIRROR in m["requiredStatement"]["value"]["en"]
     # uncached canvases keep the GWLB service and carry no source row
     canvas2 = m["items"][1]

@@ -196,15 +196,15 @@ def test_write_pairs_retries_a_lock_collision(monkeypatch) -> None:
     _seed_piece(conn)
     cfg = F.FactoryConfig(today=TODAY)
     calls = {"n": 0}
-    real_delete = F.delete_gt_for_refs
+    real_replace = F.replace_record_pairs
 
-    def flaky_delete(c, refs):
+    def flaky_replace(c, record_id, pairs):
         calls["n"] += 1
         if calls["n"] == 1:
             raise sqlite3.OperationalError("database is locked")
-        return real_delete(c, refs)
+        return real_replace(c, record_id, pairs)
 
-    monkeypatch.setattr(F, "delete_gt_for_refs", flaky_delete)
+    monkeypatch.setattr(F, "replace_record_pairs", flaky_replace)
     monkeypatch.setattr(F.time, "sleep", lambda _s: None)
     stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
     assert calls["n"] == 2
@@ -220,10 +220,10 @@ def test_write_pairs_gives_up_after_retries(monkeypatch) -> None:
     _seed_piece(conn)
     cfg = F.FactoryConfig(today=TODAY)
 
-    def always_locked(c, refs):
+    def always_locked(c, record_id, pairs):
         raise sqlite3.OperationalError("database is locked")
 
-    monkeypatch.setattr(F, "delete_gt_for_refs", always_locked)
+    monkeypatch.setattr(F, "replace_record_pairs", always_locked)
     monkeypatch.setattr(F.time, "sleep", lambda _s: None)
     stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
     assert stats.skips == {"error:OperationalError": 1}

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 
 import httpx
@@ -23,6 +24,7 @@ from rich.console import Console
 from rich.table import Table
 
 from leibniz import db
+from leibniz.images import twins as twins_mod
 from leibniz.search import open_backend
 from leibniz.search.backend import SearchQuery
 from leibniz.search.bench import DEFAULT_QUERIES, DEFAULT_RATE, bench_search
@@ -77,22 +79,88 @@ def build(
     work: str | None = typer.Option(None, "--work", help="Index one work only."),
     limit: int | None = typer.Option(None, "--limit", help="Cap the number of pages (dev)."),
     no_stats: bool = typer.Option(False, "--no-stats", help="Skip the corpus statistics scan."),
+    twins_path: Path | None = typer.Option(
+        None,
+        "--twins",
+        help="Where to write the scans registered twice (env LEIBNIZ_TWINS_PATH; default "
+        "beside the index, see `leibniz images twins`). Written by a full build only.",
+    ),
 ) -> None:
-    """(Re)build the search index from the store."""
+    """(Re)build the search index from the store.
+
+    Scans the library registered under two folio labels are indexed once — a
+    spread as its two halves, any other twin on one page — and the groups are
+    written beside the index for the web application (`--twins`)."""
     be = _backend(backend, index, meili_url, meili_key, meili_index)
+    uid = meili_index or os.environ.get("LEIBNIZ_MEILI_INDEX") or DEFAULT_INDEX_UID
+    target = twins_path or twins_mod.twins_path_for(backend, index, db_path, uid)
+    full = set_name is None and work is None and limit is None
+    groups: list[twins_mod.TwinGroup] = []
+    twin_stats = twins_mod.TwinStats()
+    indexed = {"pages": 0, "lines": 0}
     conn = db.init_db(db_path)
     try:
-        meta = {"db": str(db_path), "git_sha": db.git_sha()}
+        meta: dict = {"db": str(db_path), "git_sha": db.git_sha()}
         if not no_stats:
             console.print("Computing corpus statistics …")
             meta["stats"] = corpus_stats(conn)
+
+        def docs():
+            for doc in iter_page_docs(
+                conn,
+                set_name=set_name,
+                work_id=work,
+                limit=limit,
+                twins_out=groups,
+                twin_stats=twin_stats,
+            ):
+                indexed["pages"] += 1
+                indexed["lines"] += doc.n_lines
+                yield doc
+
+        def final_meta() -> dict:
+            # what only the documents can tell: the lines each scan carries once
+            if "stats" in meta and full:
+                meta["stats"].update(
+                    twins_mod.dedup_stats(meta["stats"], twin_stats, indexed["lines"])
+                )
+            return meta
+
         console.print(f"Indexing pages into [cyan]{be.name}[/cyan] …")
-        n = be.rebuild(
-            iter_page_docs(conn, set_name=set_name, work_id=work, limit=limit), meta=meta
-        )
+        n = be.rebuild(docs(), meta=final_meta)
     finally:
         conn.close()
     console.print(f"[green]Indexed {n:,} pages[/green] ({be.name}).")
+    found = twin_stats.to_dict()
+    console.print(
+        f"Scans registered more than once: {found['groups']:,} confirmed "
+        f"({found['spreads']:,} spreads, {found['folds']:,} folded), "
+        f"{found['unconfirmed']:,} candidates left as they are."
+    )
+    if full:
+        built = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        written = twins_mod.TwinIndex(groups, found, built).write(target)
+        console.print(f"Twins written to {written} — restart the web application to use them.")
+    else:
+        console.print("[yellow]A partial build: the twins file is left as it was.[/yellow]")
+
+
+@app.command()
+def settings(
+    meili_url: str | None = MEILI_URL_OPT,
+    meili_key: str | None = MEILI_KEY_OPT,
+    meili_index: str | None = MEILI_INDEX_OPT,
+) -> None:
+    """Apply the code's Meilisearch settings (ranking, typo rules) to the live index
+    without rebuilding it. A change of document fields still needs `index build`."""
+    from leibniz.search.meili import SETTINGS
+
+    be = _backend("meili", Path(DEFAULT_INDEX_PATH), meili_url, meili_key, meili_index)
+    task = be.push_settings()
+    console.print(
+        f"[green]settings applied[/green] to {be.index_uid} (task {task.get('uid')}, "
+        f"{task.get('status')}): ranking {SETTINGS['rankingRules']}"
+    )
 
 
 @app.command()

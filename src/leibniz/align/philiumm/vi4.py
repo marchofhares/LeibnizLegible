@@ -640,13 +640,27 @@ def match_summary(matches: Sequence[FileMatch]) -> dict:
         "pairs": sum(len(m.pairs) for m in noisy),
         "pairs_by_iou": sens,
         "layouts": layouts,
-        "pages": sorted({pid for m in matches if m.status == "matched" for pid in m.page_ids}),
+        # every page heldout_pages.csv lists, all three splits: before 2026-10 this
+        # was the matched noisy files' pages alone (1,149), while the CSV — the file
+        # C3 reads — holds 1,472, the clean and val pages PHILIUMM trained and
+        # validated on among them
+        "pages": heldout_page_ids(matches),
+        "pages_by_split": {
+            split: len({pid for m in matches if m.split == split for pid in m.page_ids})
+            for split in sorted({m.split for m in matches})
+        },
         "unresolved": [
             {"name": m.name, "split": m.split, "status": m.status, "notes": m.notes}
             for m in matches
             if m.status not in ("matched", "resolved", "ambiguous_work")
         ],
     }
+
+
+def heldout_page_ids(matches: Sequence[FileMatch]) -> list[str]:
+    """The distinct pages :func:`write_heldout` lists: every page any file of any
+    split resolved to, sorted — what C3 must keep out of its evaluation set."""
+    return sorted({pid for m in matches for pid in m.page_ids})
 
 
 def write_heldout(matches: Sequence[FileMatch], path: Path) -> int:
@@ -1091,6 +1105,7 @@ __all__ = [
     "disagreement_sample",
     "fetch_listing",
     "fetch_noisy",
+    "heldout_page_ids",
     "hf_file_url",
     "iou",
     "judge",

@@ -45,7 +45,56 @@ export function needleOf(query) {
 }
 
 function haystack(work) {
-  return ` ${fold([work.label, ...(work.shelfmarks || []), work.title].join(' '))} `;
+  // a letter convolute is also found by the people and places of its letters
+  const letters = work.letters || {};
+  const names = [
+    ...(letters.correspondents || []).map((p) => p.name),
+    ...(letters.places || []).map((p) => p.name),
+  ];
+  return ` ${fold([work.label, ...(work.shelfmarks || []), work.title, ...names].join(' '))} `;
+}
+
+/** The years of a letter convolute's letters, as Bodemann dates them. */
+function letterYears(work) {
+  const years = work.letters && work.letters.years;
+  if (!years || !years[0]) return '';
+  const span = years[0] === years[1] ? String(years[0]) : `${years[0]}–${years[1]}`;
+  const places = (work.letters.places || []).slice(0, 3).map((p) => p.name).join(', ');
+  const title = places ? ` title="${esc(t('browse.letters.places', { places }))}"` : '';
+  return `<span class="entry__years"${title}>${esc(span)}</span>`;
+}
+
+// ---------------------------------------------------------------------------
+// the catalogue's contents: which convolute holds a piece
+// ---------------------------------------------------------------------------
+
+export function contentsBlock(found) {
+  if (!found || !(found.works || []).length) return '';
+  const items = found.works
+    .map((work) => {
+      const pieces = (work.matches || [])
+        .map(
+          (m) =>
+            `<li>${esc(m.title)}${m.where ? ` <span class="muted">${esc(m.where)}</span>` : ''}</li>`,
+        )
+        .join('');
+      const more =
+        work.n_matches > (work.matches || []).length
+          ? `<li class="muted">${esc(t('browse.contents.more', { n: num(work.n_matches - work.matches.length) }))}</li>`
+          : '';
+      const name = work.label === work.shelfmark ? work.shelfmark : `${work.shelfmark} · ${work.label}`;
+      return (
+        `<li><a href="/work/${esc(pathSeg(work.work_id))}">${esc(name)}</a>` +
+        `<ul class="contents__pieces">${pieces}${more}</ul></li>`
+      );
+    })
+    .join('');
+  return (
+    `<section class="panel contents" aria-labelledby="contents-heading">` +
+    `<h2 id="contents-heading">${esc(tn('browse.contents.h', found.total, { n: num(found.total) }))}</h2>` +
+    `<p class="hint">${esc(t('browse.contents.hint'))}</p>` +
+    `<ul class="contents__works">${items}</ul></section>`
+  );
 }
 
 function counts(nWorks, nPages) {
@@ -92,7 +141,7 @@ function entry(family, work) {
   return (
     `<li class="entry" data-work="${esc(work.work_id)}">` +
     `<a class="entry__link" href="/work/${esc(pathSeg(work.work_id))}">${inner}</a> ` +
-    `<span class="entry__meta"><span class="entry__pages">${esc(pages)}</span>${records}</span>` +
+    `<span class="entry__meta">${letterYears(work)}<span class="entry__pages">${esc(pages)}</span>${records}</span>` +
     `</li>`
   );
 }
@@ -183,6 +232,7 @@ export async function render(ctx) {
     `placeholder="${esc(t('browse.filter.placeholder'))}" aria-describedby="browse-status" />` +
     `<p class="hint" id="browse-status" role="status" aria-live="polite"></p>` +
     `</div></header>` +
+    `<div id="browse-contents"></div>` +
     (data.groups || []).map((group) => familyBlock(group, works)).join('') +
     `<p class="attribution__line browse__note">${esc(t('browse.note'))}</p>` +
     `</article>`;
@@ -243,6 +293,10 @@ export async function render(ctx) {
     }
   }
 
+  // How many works the shelfmark filter shows; the catalogue's answer, which
+  // comes later, speaks in the status line when they are none.
+  let lastShown = 0;
+
   /** Show what matches the filter; with none, the sections the reader opened. */
   function apply() {
     const needle = needleOf(kept.filter);
@@ -270,6 +324,7 @@ export async function render(ctx) {
     for (const block of blocks) {
       block.hidden = sections.every((sec) => sec.block !== block || sec.details.hidden);
     }
+    lastShown = shown;
     if (!needle) status.textContent = '';
     else if (shown === 0) status.textContent = t('browse.filter.none');
     else {
@@ -299,9 +354,44 @@ export async function render(ctx) {
   apply();
   followHash();
 
+  // Three letters or more also ask the catalogue's contents: the convolutes
+  // whose pieces carry the words ("Monadologie" is no shelfmark, but a title).
+  const contentsBox = root.querySelector('#browse-contents');
+  let contentsTimer = null;
+  let contentsAsked = '';
+  function askContents() {
+    const words = kept.filter.trim();
+    if (words.length < 3) {
+      contentsAsked = '';
+      contentsBox.innerHTML = '';
+      return;
+    }
+    if (words === contentsAsked) return;
+    contentsAsked = words;
+    api
+      .contents(words, signal)
+      .then((found) => {
+        if (signal.aborted || words !== kept.filter.trim()) return;
+        contentsBox.innerHTML = contentsBlock(found);
+        // "No work matches" above a list of convolutes read as a contradiction:
+        // the status line says what matched where, and that the site holds
+        // only part of the Arbeitskatalog so far (reports/crosswalk.md).
+        if (lastShown === 0) {
+          const any = Boolean(found && found.total);
+          status.textContent = t(any ? 'browse.filter.onlyContents' : 'browse.filter.noneAnywhere');
+        }
+      })
+      .catch(() => {
+        /* the shelfmark filter stands on its own */
+      });
+  }
+  askContents();
+
   input.addEventListener('input', () => {
     kept.filter = input.value;
     apply();
+    window.clearTimeout(contentsTimer);
+    contentsTimer = window.setTimeout(askContents, 350);
   });
 
   const onClick = (event) => {
@@ -326,5 +416,6 @@ export async function render(ctx) {
   return () => {
     root.removeEventListener('click', onClick);
     window.removeEventListener('hashchange', followHash);
+    window.clearTimeout(contentsTimer);
   };
 }

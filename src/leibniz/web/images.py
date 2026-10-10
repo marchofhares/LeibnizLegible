@@ -32,6 +32,12 @@ from leibniz.images.fetch import cache_relpath
 THUMBS_PREFIX = "thumbs"
 
 
+def iiif_full_image(service_url: str) -> str:
+    """The whole image from an IIIF Image API 2 service, as a JPEG (``max``:
+    the GWLB's server speaks 2.1, checked live 2026-10)."""
+    return f"{service_url.rstrip('/')}/full/max/0/default.jpg"
+
+
 @dataclass(frozen=True, slots=True)
 class ImageSource:
     """Resolves display URLs for pages: the mirror when configured, else the GWLB."""
@@ -72,8 +78,24 @@ class ImageSource:
 
     @staticmethod
     def source_url(page: db.Page) -> str | None:
-        """The canonical GWLB image URI — provenance, whatever is displayed."""
-        return page.image_service_url or page.image_url
+        """The GWLB image the machine read — provenance, whatever is displayed.
+
+        That is the delivery JPEG the A2 cache downloaded (the line polygons
+        sit on its pixels), and a reader can open it. Before 2026-10 this was
+        the IIIF service's base URI where a work has one: an identifier, not an
+        image, which the GWLB's server answers with 400. The service stays on
+        record as :meth:`service_url`.
+        """
+        if page.image_url:
+            return page.image_url
+        if page.image_service_url:
+            return iiif_full_image(page.image_service_url)
+        return None
+
+    @staticmethod
+    def service_url(page: db.Page) -> str | None:
+        """The GWLB's IIIF Image API service for the page, if the work has one."""
+        return page.image_service_url
 
     def resolve(self, page: db.Page) -> db.Page:
         """A copy of ``page`` whose display fields point at the mirror, as a
@@ -89,4 +111,4 @@ class ImageSource:
         )
 
 
-__all__ = ["THUMBS_PREFIX", "ImageSource"]
+__all__ = ["THUMBS_PREFIX", "ImageSource", "iiif_full_image"]

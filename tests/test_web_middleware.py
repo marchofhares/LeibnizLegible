@@ -107,3 +107,15 @@ def test_app_set_header_wins() -> None:
     r = TestClient(app).get("/z")
     assert r.headers["X-Content-Type-Options"] == "custom"
     assert r.headers["Referrer-Policy"] == SECURITY_HEADERS["Referrer-Policy"]
+
+
+def test_ipv6_clients_share_their_64_and_mapped_ipv4_is_ipv4() -> None:
+    key = RateLimitMiddleware.client_key
+    a = key({"client": ("2001:db8:1:2:aaaa::1", 1)})
+    b = key({"client": ("2001:db8:1:2:ffff::9", 2)})
+    assert a == b == "2001:db8:1:2::/64"
+    assert key({"client": ("2001:db8:1:3::1", 1)}) != a
+    assert key({"client": ("::ffff:192.0.2.7", 1)}) == "192.0.2.7"
+    assert key({"client": ("192.0.2.7", 1)}) == "192.0.2.7"
+    assert key({"client": ("testclient", 1)}) == "testclient"
+    assert key({}) == "unknown"

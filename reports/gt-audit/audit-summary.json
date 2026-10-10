@@ -1,0 +1,76 @@
+{
+  "generated_by": "leibniz align audit-score",
+  "verdicts": "philiumm.csv",
+  "weights_source": "stratum weights from the test (fair_copy 100, light_revision 300, heavy_revision 500, scrap 100)",
+  "n_rows": 8,
+  "n_judged": 8,
+  "n_unjudged": 0,
+  "n_scored": 8,
+  "n_unreadable": 0,
+  "gate": 0.95,
+  "weighted_precision": 0.95,
+  "weighted_usable": 0.95,
+  "passes_gate": true,
+  "by_stratum": {
+    "fair_copy": {
+      "judged": 2,
+      "scored": 2,
+      "correct": 1,
+      "boundary": 0,
+      "wrong": 1,
+      "unreadable": 0,
+      "precision": 0.5,
+      "interval": [
+        0.09452865480086614,
+        0.9054713451991339
+      ],
+      "usable": 0.5,
+      "weight": 0.1
+    },
+    "light_revision": {
+      "judged": 2,
+      "scored": 2,
+      "correct": 2,
+      "boundary": 0,
+      "wrong": 0,
+      "unreadable": 0,
+      "precision": 1.0,
+      "interval": [
+        0.34237195288961925,
+        1.0
+      ],
+      "usable": 1.0,
+      "weight": 0.3
+    },
+    "heavy_revision": {
+      "judged": 2,
+      "scored": 2,
+      "correct": 2,
+      "boundary": 0,
+      "wrong": 0,
+      "unreadable": 0,
+      "precision": 1.0,
+      "interval": [
+        0.34237195288961925,
+        1.0
+      ],
+      "usable": 1.0,
+      "weight": 0.5
+    },
+    "scrap": {
+      "judged": 2,
+      "scored": 2,
+      "correct": 2,
+      "boundary": 0,
+      "wrong": 0,
+      "unreadable": 0,
+      "precision": 1.0,
+      "interval": [
+        0.34237195288961925,
+        1.0
+      ],
+      "usable": 1.0,
+      "weight": 0.1
+    }
+  }
+}
