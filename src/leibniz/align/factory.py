@@ -24,11 +24,12 @@ production provider wires :mod:`leibniz.align.pdftext`.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import random
 import sqlite3
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -37,9 +38,10 @@ from leibniz.align.align import DEFAULT_THRESHOLD, HtrLine, align_piece
 from leibniz.align.normalize import DEFAULT_NORM, AlignNorm
 from leibniz.align.pairs import (
     GtPair,
-    delete_gt_for_refs,
-    has_gt_for_refs,
-    insert_gt_pairs,
+    RecordWrite,
+    ensure_gt_ownership,
+    has_gt_for_record,
+    replace_record_pairs,
     result_to_pairs,
 )
 from leibniz.align.resolve import resolve_canvases
@@ -97,6 +99,8 @@ class PieceResult:
     n_htr_lines: int = 0
     n_minted: int = 0
     yield_rate: float = 0.0
+    n_won: int = 0  # lines taken over from another record on confidence
+    n_lost: int = 0  # aligned lines another record holds more confidently
 
     @property
     def minted(self) -> bool:
@@ -116,6 +120,9 @@ class FactoryStats:
     by_stratum: dict[str, int] = field(default_factory=dict)
     skips: dict[str, int] = field(default_factory=dict)
     results: list[PieceResult] = field(default_factory=list)
+    lines_won: int = 0
+    lines_lost: int = 0
+    backfilled: int = 0  # older rows given their record id from `source`
 
 
 def htr_lines_for_pages(conn, pages: Sequence[db.Page]) -> list[HtrLine]:
@@ -158,14 +165,25 @@ def mint_piece(
 
     Returns a :class:`PieceResult`; skips (with a reason) when the piece cannot be
     localized, has no recognised HTR lines, or no edition text. Idempotent when
-    ``insert`` is set: existing ``gt_lines`` for this piece's line refs are cleared
-    before the fresh mint. With ``resume``, a piece whose lines already carry
-    ``gt_lines`` is skipped instead (an interrupted run picks up where it stopped).
+    ``insert`` is set: the record's own earlier rows are replaced, and no other
+    record's (:func:`~leibniz.align.pairs.replace_record_pairs`). With ``resume``,
+    a record that already owns minted rows is skipped instead (an interrupted run
+    picks up where it stopped); a neighbour minted on a shared folio no longer
+    counts.
     """
     if not piece.localizable:
         return PieceResult(piece, "skipped:not_localizable")
     assert piece.folio_range is not None and piece.work_id is not None
-    res = resolve_canvases(conn, piece.work_id, piece.folio_range[0], piece.folio_range[1])
+    if resume and has_gt_for_record(conn, piece.record_id):
+        return PieceResult(piece, "skipped:already_minted")
+    res = resolve_canvases(
+        conn,
+        piece.work_id,
+        piece.folio_range[0],
+        piece.folio_range[1],
+        side_lo=piece.folio_sides[0],
+        side_hi=piece.folio_sides[1],
+    )
     if not res.pages:
         return PieceResult(piece, "skipped:no_canvases")
     htr = htr_lines_for_pages(conn, res.pages)
@@ -173,19 +191,19 @@ def mint_piece(
         return PieceResult(piece, "skipped:no_htr_lines", n_canvases=len(res.pages))
     if not edition_text.strip():
         return PieceResult(piece, "skipped:no_edition_text", n_canvases=len(res.pages))
-    if resume and has_gt_for_refs(conn, (ln.ref for ln in htr)):
-        return PieceResult(piece, "skipped:already_minted", n_canvases=len(res.pages))
 
     stratum = classify_piece(page_stats_for_pages(conn, res.pages), textart=piece.textart).stratum
     threshold = config.threshold_for(stratum)
     alignment = align_piece(htr, edition_text, norm=config.norm, threshold=threshold)
 
-    source = f"{piece.aa_label} (§70-expired AA reading text; katalog {piece.record_id})"
     pairs = result_to_pairs(
-        alignment, source=source, stratum=stratum, license_bucket=config.license_bucket
+        alignment,
+        source=source_string(piece),
+        stratum=stratum,
+        license_bucket=config.license_bucket,
+        record_id=piece.record_id,
     )
-    if insert:
-        write_pairs(conn, [ln.ref for ln in alignment.lines], pairs)
+    written = write_record(conn, piece.record_id, pairs) if insert else None
     return PieceResult(
         piece=piece,
         status="minted",
@@ -193,9 +211,67 @@ def mint_piece(
         threshold=threshold,
         n_canvases=len(res.pages),
         n_htr_lines=len(htr),
-        n_minted=len(pairs),
+        n_minted=written.written if written is not None else len(pairs),
         yield_rate=alignment.yield_rate,
+        n_won=written.won if written is not None else 0,
+        n_lost=written.lost if written is not None else 0,
     )
+
+
+def source_string(piece: PieceRef) -> str:
+    """The provenance a minted row carries: the printed piece(s), the free copy
+    the reading text was read from (where the edition cache recorded it), and
+    the catalogue record — ``"AA I,9 N.12 (§70-expired AA reading text; channel
+    ia; katalog 4711)"``. ``katalog <id>`` stays last: the reach census and the
+    K1 census read the record id up to the closing parenthesis."""
+    via = f"; channel {piece.channel}" if piece.channel else ""
+    return f"{piece.aa_label} (§70-expired AA reading text{via}; katalog {piece.record_id})"
+
+
+def select_text_pieces(
+    pieces: Sequence[PieceRef], refs_by_record: Mapping[str, Sequence[Mapping]]
+) -> list[PieceRef]:
+    """One piece per catalogue record, labelled by the printed piece(s) its
+    edition text actually came from.
+
+    :func:`~leibniz.align.volumes.enumerate_pieces` yields one piece per
+    expired citation, but the edition cache holds one text per record. Minting
+    each citation re-minted the same text under each label, and whichever
+    shard wrote last named the volume: lines came to be filed under volumes
+    with no text at all (2026-10: I,2, I,4, I,5 and II,1 among them).
+    ``refs_by_record`` is the cache's record → ``[{series, volume, piece,
+    channel}]`` (:func:`leibniz.align.ingest.load_edition_refs`), in the order
+    the text was joined. A record whose text came from a volume this
+    enumeration did not cite (a ``--series``/``--volume`` run) is left to that
+    volume's run; a record the cache has no refs for keeps its first citation.
+    """
+    by_record: dict[str, list[PieceRef]] = {}
+    for p in pieces:
+        by_record.setdefault(p.record_id, []).append(p)
+    out: list[PieceRef] = []
+    for rid, cands in by_record.items():
+        refs = list(refs_by_record.get(rid) or [])
+        if not refs:
+            out.append(cands[0])
+            continue
+        first = refs[0]
+        key = (int(first["series"]), str(first["volume"]))
+        match = next((p for p in cands if (p.series, str(p.volume)) == key), None)
+        if match is None:
+            continue
+        channels = sorted({str(r["channel"]) for r in refs if r.get("channel")})
+        out.append(
+            dataclasses.replace(
+                match,
+                piece=str(first.get("piece") or match.piece),
+                also=tuple(
+                    f"{_series_roman(int(r['series']))},{r['volume']} N.{r.get('piece', '')}"
+                    for r in refs[1:]
+                ),
+                channel="+".join(channels) or None,
+            )
+        )
+    return out
 
 
 def with_write_lock[T](
@@ -230,19 +306,14 @@ def with_write_lock[T](
     raise AssertionError("unreachable")  # pragma: no cover
 
 
-def write_pairs(conn, refs: Sequence[str], pairs: Sequence[GtPair]) -> None:
-    """Replace the ``gt_lines`` of these line refs with ``pairs``, atomically.
+def write_record(conn, record_id: str, pairs: Sequence[GtPair]) -> RecordWrite:
+    """Replace one record's ``gt_lines`` with ``pairs``, atomically.
 
     One transaction per piece via :func:`with_write_lock`; a persistent lock
     failure propagates and the factory records the piece as
     ``skipped:error:OperationalError`` and moves on.
     """
-
-    def _replace() -> None:
-        delete_gt_for_refs(conn, refs)
-        insert_gt_pairs(conn, pairs)
-
-    with_write_lock(conn, _replace)
+    return with_write_lock(conn, lambda: replace_record_pairs(conn, record_id, pairs))
 
 
 def run_factory(
@@ -257,15 +328,18 @@ def run_factory(
     pieces: Sequence[PieceRef] | None = None,
     shard: tuple[int, int] | None = None,
     resume: bool = False,
+    text_refs: Mapping[str, Sequence[Mapping]] | None = None,
 ) -> FactoryStats:
     """Enumerate §70 pieces and mint each, recording one ``runs`` row.
 
     ``edition_text_for`` supplies each piece's reading text (production: extract
     from the volume PDF; tests: a dict). Aggregates minted-line counts by volume /
     series / stratum for the GT-factory report. ``pieces`` may be pre-enumerated
-    (the CLI does, to size its progress bar); ``shard=(i, n)`` keeps every
-    ``n``-th piece starting at ``i`` so parallel workers split one pass
-    disjointly; ``resume`` skips pieces already minted.
+    (the CLI does, to size its progress bar); ``text_refs`` (the edition cache's
+    record → printed pieces) narrows them to one piece per record
+    (:func:`select_text_pieces`); ``shard=(i, n)`` keeps every ``n``-th piece
+    starting at ``i`` so parallel workers split one pass disjointly; ``resume``
+    skips records already minted.
     """
     params = {
         "series": series,
@@ -274,6 +348,7 @@ def run_factory(
         "stratum_thresholds": config.stratum_thresholds,
         "shard": list(shard) if shard else None,
         "resume": resume,
+        "ownership": "record",  # 2026-10: a re-mint replaces one record's rows only
     }
     # The run bookkeeping is written under the same lock discipline as the
     # pieces: six shard workers start seconds apart and finish while the others
@@ -287,8 +362,12 @@ def run_factory(
     )
     if pieces is None:
         pieces, _enum = enumerate_pieces(conn, today=config.today, series=series, volume=volume)
+    if text_refs is not None:
+        pieces = select_text_pieces(pieces, text_refs)
     pieces = shard_pieces(pieces, shard)
     stats = FactoryStats(run_id=run_id)
+    if insert:
+        stats.backfilled = with_write_lock(conn, lambda: ensure_gt_ownership(conn))
     for piece in pieces:
         stats.pieces_seen += 1
         text = edition_text_for(piece) or ""
@@ -309,6 +388,8 @@ def run_factory(
         if result.minted:
             stats.pieces_minted += 1
             stats.lines_minted += result.n_minted
+            stats.lines_won += result.n_won
+            stats.lines_lost += result.n_lost
             stats.by_volume[piece.volume_label] = (
                 stats.by_volume.get(piece.volume_label, 0) + result.n_minted
             )
@@ -376,5 +457,8 @@ __all__ = [
     "mint_piece",
     "page_stats_for_pages",
     "run_factory",
+    "select_text_pieces",
     "shard_pieces",
+    "source_string",
+    "write_record",
 ]

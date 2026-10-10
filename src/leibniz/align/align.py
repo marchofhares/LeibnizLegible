@@ -41,8 +41,12 @@ from leibniz.align.normalize import DEFAULT_NORM, AlignNorm, normalize_indexed
 
 # Characters that, at the end of an HTR line, signal a word split across the line
 # break (so the fragments should be rejoined without a word boundary). Early-
-# modern hyphens are various; also handles the double-oblique "=" convention.
-_HYPHENS = ("-", "¬", "=", "‐", "‑", "­")
+# modern hyphens are various; also handles the double-oblique "=" convention
+# and its Unicode form "⸗" (U+2E17, the Fraktur and Kurrent transcription
+# mark). The en dash "–" is the PHILIUMM ground truth's own line-end mark: its
+# validation split ends 7 split words with "–" against 3 with "-", and the
+# model reads "–" there as often as "-" (2026-10).
+_HYPHENS = ("-", "¬", "=", "‐", "‑", "­", "–", "⸗")
 HYPHENS = _HYPHENS  # public alias (the audit and the reach census test the same set)
 
 # Default: a line must have at least this fraction of its characters matched by

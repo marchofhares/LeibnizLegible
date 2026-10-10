@@ -29,14 +29,19 @@ from dataclasses import dataclass
 # captures nothing itself; the numeric tail is whatever follows the label.
 _FAMILY_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("Marg", re.compile(r"Leibn\.?\s*Marg\.?", re.IGNORECASE)),
-    ("LBr", re.compile(r"\bLBr\b\.?", re.IGNORECASE)),
+    # "LBr. 16", "LBr 16" — and the catalogue's run-together "LBrF 20" for the
+    # F series, which a word boundary after "LBr" would never see.
+    ("LBr", re.compile(r"\bLBr(?:\b\.?|(?=F\.?\s*\d))", re.IGNORECASE)),
     ("LK", re.compile(r"\bLK\b[-\s]?", re.IGNORECASE)),
     ("LH", re.compile(r"\bLH\b\.?")),  # case-sensitive: the signature, not a word
 )
 
-# A leaf/folio reference: "Bl. 28", "Blatt 12", "Bl. 67-70", "Bl. 12r".
+# A leaf/folio reference: "Bl. 28", "Blatt 12", "Bl. 67-70", "Bl. 12r", and the
+# spellings with a spaced or raised side, "Bl. 12 r°–13 v°", "Bl. 108v°". The
+# side (r/v) is kept, so a piece on "Bl. 5v" is not read as all of folio 5.
+_SIDE = r"(?:[a-z]|\s*[rv](?![a-z]))?°?"
 _BLATT = re.compile(
-    r"\bBl(?:att|\.|\b)\.?\s*([0-9]+[a-z]?(?:\s*[-–]\s*[0-9]+[a-z]?)?)", re.IGNORECASE
+    rf"\bBl(?:att|\.|\b)\.?\s*([0-9]+{_SIDE}(?:\s*[-–]\s*[0-9]+{_SIDE})?)", re.IGNORECASE
 )
 
 _ROMAN_RE = re.compile(r"^[ivxlcdm]+$", re.IGNORECASE)
@@ -149,6 +154,10 @@ def normalize_signature(raw: str) -> Signature:
     # is itself a distinct work (STATUS Open Q #4).
     tail = tail.split("(", 1)[0]
     tail = re.split(r"\bS\.\s", tail, maxsplit=1)[0]
+    if family == "LBr":
+        # The F series as the catalogue runs it together ("LBrF 20", "LBr F20")
+        # and as the library writes it ("LBr. F 20") is one key: "LBr f,20".
+        tail = re.sub(r"^\s*F\.?\s*(?=\d)", " F ", tail)
 
     blatt = None
     bm = _BLATT.search(tail)

@@ -280,6 +280,10 @@ def test_match_judge_render_and_sheet(tmp_path: Path) -> None:
         and summ["pairs"] == 6
         and summ["by_split_status"]["val"]["unparsed"] == 1
     )
+    # the summary counts the pages heldout_pages.csv lists, every split's (2026-10:
+    # it had counted the matched noisy files' pages alone)
+    assert summ["pages"] == sorted({h["page_id"] for h in held}) == V.heldout_page_ids(matches)
+    assert sum(summ["pages_by_split"].values()) >= len(summ["pages"])
 
     rows = V.judge(conn, matches, dest)
     buckets = {r.ref: r.bucket for r in rows}

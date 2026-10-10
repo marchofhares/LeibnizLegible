@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
+from leibniz.align.audit import audit_sentence
 from leibniz.align.ingest import (
     DEFAULT_EDITIONS_DIR,
     cross_source_qa,
@@ -51,6 +52,7 @@ class GtReport:
     enum_with_folio: int
     enum_by_volume: dict[str, int]
     audit: dict[str, tuple[int, float]] = field(default_factory=dict)  # stratum → (n, precision)
+    audit_summary: dict | None = None  # reports/gt-audit/audit-summary.json, when scored
     extraction: list[VolumeExtraction] = field(default_factory=list)
     cache_records: int = 0  # katalog records with reading text in the edition cache
     cache_by_volume: dict[str, int] = field(default_factory=dict)
@@ -87,8 +89,20 @@ def gather_gt(
     audit: dict[str, tuple[int, float]] | None = None,
     editions_dir: Path = DEFAULT_EDITIONS_DIR,
     edition_cache: Path | None = None,
+    audit_summary: dict | None = None,
 ) -> GtReport:
-    """Query minted ``gt_lines`` + piece enumeration into a :class:`GtReport`."""
+    """Query minted ``gt_lines`` + piece enumeration into a :class:`GtReport`.
+
+    ``audit_summary`` is the scored hand audit (``leibniz align audit-score``
+    writes it); its per-stratum precision fills ``audit`` where that is not
+    given, so the report quotes the audit instead of "pending".
+    """
+    if audit is None and audit_summary:
+        audit = {
+            k: (int(v.get("scored") or 0), float(v["precision"]))
+            for k, v in (audit_summary.get("by_stratum") or {}).items()
+            if v.get("precision") is not None
+        }
     n_open = conn.execute("SELECT COUNT(*) FROM gt_lines WHERE license_bucket = 'open'").fetchone()[
         0
     ]
@@ -133,6 +147,7 @@ def gather_gt(
         enum_with_folio=enum.with_folio_range if enum else 0,
         enum_by_volume=dict(enum.by_volume) if enum else {},
         audit=audit or {},
+        audit_summary=audit_summary,
         extraction=extraction,
         cache_records=cache_records,
         cache_by_volume=cache_by_volume,
@@ -497,13 +512,18 @@ def _render_strata(A, rep: GtReport) -> None:
             aud_p = f"{aud[1]:.1%}" if aud else "_pending hand-audit_"
             A(f"| {stratum} | {n:,} | {aud_n} | {aud_p} |")
         A("")
-        A(
-            "Estimated precision comes from a hand-audit of ~200 lines stratified by "
-            "stratum (the operator step below); until then the B2 measurement stands as "
-            "the expectation — **97.5 % on fair copies**, degrading on drafts exactly as "
-            "the omission conditions predicted, which is why drafts carry a higher mint "
-            "threshold."
-        )
+        sentence = audit_sentence(rep.audit_summary)
+        if sentence is not None:
+            A(
+                f"{sentence} The audit was drawn in equal numbers per stratum; the "
+                "corpus-weighted figure weights each stratum by its share of the mint."
+            )
+        else:
+            A(
+                "Estimated precision comes from a hand-audit of ~200 lines stratified by "
+                "stratum (`leibniz align audit-sheet`, then `audit-score`); no scored audit "
+                "was found for this report."
+            )
     else:
         A("_No minted lines yet._")
     A("")

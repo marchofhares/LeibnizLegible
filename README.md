@@ -254,9 +254,13 @@ and the reading-text extraction of 21 of 31 expired volumes from
 their free digital copies (6,188 pieces, 26.2M
 characters, 10,029 witnesses with text). **The mint has run (2026-09-16):
 297,424 open-bucket ground-truth lines**, 5.9× the 50k target, in about two
-hours on six workers. Its precision is only preliminarily audited (20 of
-200 sheet lines, `leibniz align audit-sheet` / `audit-score`; the gate is
-deferred to the C3 ablation). **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
+hours on six workers. Its precision was hand-audited on 199 of 200
+sampled lines (2026-10-07; `reports/gt-audit.md`, numbers in
+`reports/gt-audit/audit-summary.json`): corpus-weighted 72.3 % as written,
+below the 95 % gate, and 92.2 % counting a line a letter or a word off at
+an end as usable. The patterns behind it are fixed in the factory (the
+scribe's line-end hyphen kept, minted text one line, a re-mint replacing one
+catalogue record's lines only) and land with the one re-mint before C3. **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
 Presentation 3 manifests with W3C annotations, the viewer, and the dataset
 exports with cards** — the v1 public beta; the operator runs `leibniz index
 build` + `leibniz serve` on the corpus store. **The deployment kit landed the

@@ -21,6 +21,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from leibniz import __version__, db
+from leibniz.align.audit import load_audit_summary
 from leibniz.release.cards import render_card
 from leibniz.web.geometry import line_bbox
 
@@ -257,12 +258,15 @@ def iter_transcriptions(conn: sqlite3.Connection) -> Iterator[dict]:
 
 
 def iter_gt(conn: sqlite3.Connection) -> Iterator[dict]:
+    """Open-bucket ground truth, one line of text per row: rows minted before
+    2026-10 can carry the edition print's own line break inside a manuscript
+    line, and a line's ground truth is one line (the factory now mints it so)."""
     cur = conn.execute("SELECT * FROM gt_lines WHERE license_bucket = 'open' ORDER BY id")
     for r in cur:
         yield {
             "gt_id": r["id"],
             "line_image_ref": r["line_image_ref"],
-            "text": r["text"],
+            "text": " ".join((r["text"] or "").split()),
             "source": r["source"],
             "stratum": r["stratum"],
             "align_conf": r["align_conf"],
@@ -426,7 +430,14 @@ def export_dataset(
         json.dumps(exp.manifest(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     (out_dir / "README.md").write_text(
-        render_card(dataset, TABLES[dataset], exp, stats=stats), encoding="utf-8"
+        render_card(
+            dataset,
+            TABLES[dataset],
+            exp,
+            stats=stats,
+            audit_summary=load_audit_summary() if dataset == "gt" else None,
+        ),
+        encoding="utf-8",
     )
     return exp
 
