@@ -42,6 +42,7 @@ import json
 import re
 import sqlite3
 from collections.abc import Iterator
+from dataclasses import replace
 from pathlib import Path
 from typing import Annotated
 
@@ -58,22 +59,47 @@ from fastapi.responses import (
 )
 
 from leibniz import __version__, db
-from leibniz.search.backend import SearchBackend, SearchQuery
+from leibniz.catalog import letters as letters_mod
+from leibniz.catalog.shelfmarks import signature_keys
+from leibniz.images.twins import TwinGroup, TwinIndex
+from leibniz.search.backend import (
+    MATCH_MODES,
+    MAX_REACHABLE,
+    SearchBackend,
+    SearchQuery,
+    SearchQueryError,
+)
 from leibniz.search.documents import (
     ROMAN,
     aa_ref_label,
     corpus_stats,
+    katalog_by_work,
     latest_lines,
     line_summaries_by_page,
+    piece_title,
 )
 from leibniz.web import attribution as attr
-from leibniz.web import browse, iiif, pieces
+from leibniz.web import browse, iiif, links, pieces
+from leibniz.web import lookup as lookup_mod
 from leibniz.web.geometry import baseline_points, line_bbox, polygon_points
 from leibniz.web.images import ImageSource
 from leibniz.web.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
 STATIC_DIR = Path(__file__).parent / "static"
-INDEX_ROUTES = ("/", "/search", "/browse", "/about", "/work/{work_id}", "/page/{page_id}")
+INDEX_ROUTES = (
+    "/",
+    "/search",
+    "/browse",
+    "/letters",
+    "/about",
+    "/work/{work_id}",
+    "/page/{page_id}",
+)
+LETTERS_TITLE = "Letters by correspondent, date and place"
+LETTERS_DESCRIPTION = (
+    "Leibniz's correspondence as Eduard Bodemann catalogued it in 1889, letter by letter: "
+    "who wrote to whom, when and from where, each letter linked to the convolute that holds it."
+)
 CACHE_HEADERS = {"Cache-Control": "public, max-age=300"}
 NO_STORE = {"Cache-Control": "no-store"}
 DAY_CACHE = {"Cache-Control": "public, max-age=86400"}
@@ -241,8 +267,28 @@ def _record_dict(rec: db.KatalogRecord) -> dict:
             }
         ),
         "drucke": meta.get("drucke") or None,
-        "url": meta.get("url") or meta.get("record_url"),
+        # the record in the Leibniz-Katalog (its extended search: no record pages)
+        "url": meta.get("url") or links.katalog_record_url(rec.record_id, meta.get("katnr")),
+        # where each cited volume of the Akademie-Ausgabe can be read or found
+        "aa_links": _aa_links(aa_refs),
+        # a letter of 1708–1716 not yet in the edition: the Leibniz-Archiv's transcriptions
+        "transcriptions": (
+            links.transcriptions_link(meta.get("datum") or meta.get("date"))
+            if not any(r.get("volume") is not None for r in aa_refs)
+            and (meta.get("absender") or meta.get("adressat"))
+            else None
+        ),
     }
+
+
+def _aa_links(aa_refs: list[dict]) -> list[dict]:
+    """One link per cited volume, in the order the references give them."""
+    out: list[dict] = []
+    for ref in aa_refs:
+        link = links.aa_volume_link(ref.get("series"), ref.get("volume"))
+        if link is not None and link not in out:
+            out.append(link)
+    return out
 
 
 def _katalog_for_work(
@@ -288,21 +334,38 @@ def _katalog_for_work(
         if isinstance(where, pieces.Placement):
             entry.update(
                 {
-                    "text_url": f"/api/records/{rec.record_id}/text",
+                    # placed on this work, so the download serves what the
+                    # link says (the record may be linked to more than one)
+                    "text_url": f"/api/records/{rec.record_id}/text?work={work_id}",
                     "folio_label": where.folio_label,
                     "folio_range": [where.folio_lo, where.folio_hi],
                     "n_pages": len(where.pages),
+                    "first_page": where.pages[0].id,
+                    # the piece's first folio in the GWLB's own viewer
+                    "gwlb_url": attr.gwlb_page_url(work_id, where.pages[0].seq),
                 }
             )
         out.append(entry)
-    return out
+    # The convolute's contents in folio order — the pieces placed on their
+    # folios first, by where they begin; the rest after, most trustworthy first.
+    placed_first = sorted(
+        (e for e in out if "folio_range" in e),
+        key=lambda e: (e["folio_range"][0], e["folio_range"][1], e["record_id"]),
+    )
+    return placed_first + [e for e in out if "folio_range" not in e]
 
 
-def _page_summary(page: db.Page, summary: tuple[int, float | None] | None) -> dict:
+def _page_summary(
+    page: db.Page, summary: tuple[int, float | None] | None, twin: TwinGroup | None = None
+) -> dict:
     """One row of a work's page list; ``summary`` comes from
-    :func:`line_summaries_by_page` (one query for the whole work)."""
+    :func:`line_summaries_by_page` (one query for the whole work). A page whose
+    scan is registered more than once counts the lines it shows (a spread its
+    half) and says so (``twin``)."""
     n_lines, mean_conf = summary if summary is not None else (0, None)
-    return {
+    if twin is not None and page.id in twin.n_lines:
+        n_lines, mean_conf = twin.n_lines[page.id], twin.mean_conf.get(page.id)
+    out = {
         "page_id": page.id,
         "seq": page.seq,
         "label": page.label,
@@ -312,10 +375,59 @@ def _page_summary(page: db.Page, summary: tuple[int, float | None] | None) -> di
         "n_lines": n_lines,
         "mean_conf": mean_conf,
     }
+    if twin is not None:
+        out["twin"] = _twin_dict(twin, page.id)
+    return out
 
 
-def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str]) -> dict:
+def _twin_dict(group: TwinGroup, page_id: str) -> dict:
+    """What a page says about the other registrations of its scan."""
+    out: dict = {
+        "kind": group.kind,
+        "others": [{"page_id": pid, "label": label} for pid, label in group.others(page_id)],
+        "note": group.describe(page_id),
+    }
+    if group.kind == "spread":
+        out.update({"side": group.side(page_id), "fold_x": group.fold_x})
+    else:
+        out.update({"primary": group.primary, "is_primary": page_id == group.primary})
+    return out
+
+
+def _twin_lines(
+    group: TwinGroup | None, page_id: str, lines: list[db.Line], *, once: bool = False
+) -> tuple[list[db.Line], set[int]]:
+    """The lines a page shows given its scan's group, and the ``line_seq`` of
+    those that cross a spread's fold; ``once`` gives each line to one page only
+    (the exports of several pages)."""
+    if group is None:
+        return lines, set()
+    pairs = group.own_lines(page_id, lines, for_index=once)
+    return [ln for ln, _ in pairs], {ln.line_seq for ln, across in pairs if across}
+
+
+def _once_summaries(
+    summaries: dict[str, tuple[int, float | None]], pages: list[db.Page], twins: TwinIndex
+) -> dict[str, tuple[int, float | None]]:
+    """Per-page summaries with each scan's lines counted once (a spread by its
+    halves, a fold on its primary), for the line count of a several-page export."""
+    out = dict(summaries)
+    for page in pages:
+        group = twins.get(page.id)
+        if group is not None and page.id in group.n_once:
+            n = group.n_once[page.id]
+            if n:
+                out[page.id] = (n, group.mean_conf.get(page.id))
+            else:
+                out.pop(page.id, None)
+    return out
+
+
+def _line_dict(ln: db.Line, page: db.Page, run_dates: dict[int, str], n: int | None = None) -> dict:
+    """One line as the page API gives it; ``n`` is its number on the page as
+    shown, from 1 (the ``#L<n>`` of a permalink)."""
     return {
+        "n": n,
         "line_id": ln.id,
         "line_seq": ln.line_seq,
         "text": ln.text,
@@ -346,6 +458,81 @@ def _line_stats(lines: list[db.Line]) -> dict:
     }
 
 
+MAX_LETTERS = 1000  # a work page lists at most this many of its convolute's letters
+
+
+def _letter_dict(letter: letters_mod.Letter) -> dict:
+    """One letter as the API gives it: Bodemann's number, the people (GND),
+    the date (exact, or a range, and as the catalogue writes it), the place."""
+    out = letter.to_dict()
+    out["direction"] = letter.direction
+    out["years"] = [letter.year_from, letter.year_to] if letter.year_from else None
+    return out
+
+
+RUN_QUERY = Query(
+    None,
+    ge=0,
+    description="Read the page as this recognition run left it (a permalink's `?run=`): "
+    "lines of later runs are left out, so a citation keeps its text after a re-read.",
+)
+
+
+def _lines_for(conn: sqlite3.Connection, page_id: str, run: int | None) -> list[db.Line]:
+    """The page's latest lines, or as run ``run`` left them; a 404 where that run
+    had read nothing on the page."""
+    lines = latest_lines(conn, page_id, as_of_run=run)
+    if run is not None and not _with_text(lines):
+        raise HTTPException(404, f"page {page_id} has no recognised text as of run {run}")
+    return lines
+
+
+def _current_run(
+    conn: sqlite3.Connection, page_id: str, lines: list[db.Line], run: int | None
+) -> int | None:
+    """The run of the page's current reading (the latest among its lines with text)."""
+    current = lines if run is None else latest_lines(conn, page_id)
+    runs = [ln.run_id for ln in _with_text(current) if ln.run_id is not None]
+    return max(runs) if runs else None
+
+
+def _cite(
+    site: str, page: db.Page, work: db.Work | None, lines: list[db.Line], run: dict | None
+) -> dict:
+    """How to cite the page as shown: the run its reading comes from (the
+    latest among its lines), a permalink pinned to that run — a later run (C4)
+    changes the text under the plain URL, never under this one — and the
+    citation itself; a line's is the page's with ``, line <n>`` and ``#L<n>``."""
+    run_id = run.get("run_id") if run else None
+    model = (run or {}).get("model") or next((ln.model for ln in lines if ln.model), None)
+    permalink = f"{site}/page/{page.id}" + (f"?run={run_id}" if run_id is not None else "")
+    title = (work.title if work else None) or page.work_id
+    where = f"fol. {page.label}" if page.label else f"canvas {page.seq}"
+    made = ", ".join(
+        part
+        for part in (
+            f"model {model}" if model else "",
+            f"run {run_id}" if run_id is not None else "",
+        )
+        if part
+    )
+    text = (
+        f"{title}, {where}. Machine transcription, not an edition: {attr.PROJECT_NAME}"
+        + (f" ({made})" if made else "")
+        + f". {permalink}"
+    )
+    return {
+        "run": run_id,
+        "model": model,
+        "permalink": permalink,
+        "page": text,
+        # the parts, for a viewer that words the citation in its own language
+        "title": title,
+        "label": page.label,
+        "seq": page.seq,
+    }
+
+
 def _esc(text: object) -> str:
     return html.escape(str(text if text is not None else ""), quote=True)
 
@@ -368,7 +555,10 @@ def _stamp_shell(
     out = shell
     if site != SITE_URL:
         out = out.replace(SITE_URL, site)
-    url = f"{site}{path}"
+    # The path carries whatever id the request named — on a 404 an id the store
+    # never had — so it is escaped like any other text (2026-10: a quote in it
+    # closed the attribute, and the rest of the URL became markup on our page).
+    url = _esc(f"{site}{path}")
     out = out.replace(f'href="{site}/"', f'href="{url}"', 1)  # canonical
     og_url = 'property="og:url" content="'
     out = out.replace(f'{og_url}{site}/"', f'{og_url}{url}"', 1)
@@ -458,8 +648,11 @@ def _ssr_page(
     gwlb_url: str,
     prev_id: str | None,
     next_id: str | None,
+    twin: TwinGroup | None = None,
+    cite: dict | None = None,
 ) -> tuple[str, str, str]:
-    """(title, description, html) for a page's server-rendered machine text."""
+    """(title, description, html) for a page's server-rendered machine text;
+    each line is ``#L<n>``, as the viewer numbers it, and ``cite`` how to cite it."""
     work_title = (work.title if work else None) or page.work_id
     label = page.label or f"page {page.seq}"
     title = f"{work_title}, fol. {label}"
@@ -481,7 +674,7 @@ def _ssr_page(
     if next_id:
         nav.append(f'<a rel="next" href="/page/{_esc(next_id)}">Next page</a>')
     shown = texts[:SSR_MAX_LINES]
-    body = "".join(f"<li>{_esc(t)}</li>" for t in shown)
+    body = "".join(f'<li id="L{n}">{_esc(t)}</li>' for n, t in enumerate(shown, start=1))
     rest = len(texts) - len(shown)
     more = f"<p>… {rest} more lines in the API.</p>" if rest else ""
     html_out = (
@@ -492,8 +685,10 @@ def _ssr_page(
         + (f' · <a href="{_esc(image_url)}">Page image</a>' if image_url else "")
         + f' · <a href="/annotations/{_esc(page.id)}">Annotations (IIIF)</a>{download}</p>'
         f"<nav>{' · '.join(nav)}</nav>"
-        f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
-        "</article>"
+        + (f"<p>{_esc(twin.describe(page.id))}</p>" if twin is not None else "")
+        + f'<h2>The machine reads it as</h2><ol class="ssr__lines">{body}</ol>{more}'
+        + (f"<h2>Cite</h2><p>{_esc(cite['page'])}</p>" if cite and texts else "")
+        + "</article>"
     )
     return title, description, html_out
 
@@ -502,7 +697,8 @@ BROWSE_TITLE = "Browse by shelfmark"
 BROWSE_NOTE = (
     "Titles and shelfmarks are the library's. Section names are cut from its titles. "
     "Correspondent names come from the linked records of the Arbeitskatalog der "
-    "Leibniz-Edition (BBAW / TELOTA, CC BY 4.0), checked against the alphabetical order of "
+    "Leibniz-Edition (BBAW, Arbeitsstelle Potsdam I, CC BY 4.0), checked against the alphabetical "
+    "order of "
     "the LBr numbers; where no record is linked yet, or the names do not fit that order, "
     "an entry shows its shelfmark only. The texts behind the links are machine "
     "transcriptions, not an edition."
@@ -560,7 +756,7 @@ def _ssr_browse(families: list[browse.Family]) -> tuple[str, str, str]:
 
 
 def _sitemap_xml(site: str, work_ids: list[str]) -> str:
-    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/about"]
+    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/letters", f"{site}/about"]
     urls += [f"{site}/work/{w}" for w in work_ids]
     body = "".join(f"<url><loc>{_esc(u)}</loc></url>" for u in urls)
     return (
@@ -625,7 +821,7 @@ def _why(page: db.Page) -> str:
 
 def _title_row(work: db.Work | None, work_id: str) -> str:
     title = (work.title if work else None) or work_id
-    marks = [m for m in (work.shelfmarks if work else []) if m and m != title]
+    marks = [m for m in (work.shelfmarks if work else []) if m and m not in title]
     if not marks:
         return f"Title: {title}"
     return f"Title: {title} (shelfmark{'s' if len(marks) > 1 else ''} {'; '.join(marks)})"
@@ -679,8 +875,12 @@ def _text_rows(lines: list[db.Line], fmt: str) -> list[str]:
 
 
 def _head(rows: list[str], fmt: str) -> str:
-    """The ``# `` comment header, the blank line, and in TSV the column row."""
-    out = "".join(f"# {row}\n" for row in rows) + "\n"
+    """The ``# `` comment header, the blank line, and in TSV the column row.
+
+    Each row is one line: a title or an incipit can carry a line break, and a
+    blank line inside the header would end it where a parser looks for the body.
+    """
+    out = "".join(f"# {' '.join(row.split())}\n" for row in rows) + "\n"
     return out + ("\t".join(TSV_COLUMNS) + "\n" if fmt == "tsv" else "")
 
 
@@ -691,15 +891,19 @@ def _page_text(
     lines: list[db.Line],
     runs: dict[int | None, dict | None],
     fmt: str,
+    twin: TwinGroup | None = None,
+    permalink: str | None = None,
 ) -> str:
     """One page's export; ``lines`` are its lines with text, as ``/api/pages`` shows them."""
     stats = _line_stats(lines)
     rows = [
         f"{attr.PROJECT_NAME} — {site}",
         f"Page: {site}/page/{page.id}",
+        *([f"Permalink to this reading: {permalink}"] if permalink else []),
         _title_row(work, page.work_id),
         f"{_folio(page)}, page id {page.id}",
-        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=page.work_id)}",
+        *([f"Scan: {twin.describe(page.id)}"] if twin is not None else []),
+        f"Original at the GWLB: {attr.gwlb_page_url(page.work_id, page.seq)}",
         f"Source image: {ImageSource.source_url(page) or 'not recorded'}",
         *_run_rows(lines, runs),
         _count_row(stats["n_lines"], stats["mean_conf"])
@@ -725,7 +929,9 @@ def _pages_count_row(pages: list[db.Page], summaries: dict[str, tuple[int, float
     return _count_row(n_lines, mean, f" on {len(found):,} of {len(pages):,} pages")
 
 
-def _page_chunks(db_path: str | Path, pages: list[db.Page], fmt: str) -> Iterator[str]:
+def _page_chunks(
+    db_path: str | Path, pages: list[db.Page], fmt: str, twins: TwinIndex | None = None
+) -> Iterator[str]:
     """The body of a streamed export, one chunk per page in the order given.
 
     Each page is read with :func:`latest_lines` as it is sent, so a convolute
@@ -737,10 +943,20 @@ def _page_chunks(db_path: str | Path, pages: list[db.Page], fmt: str) -> Iterato
     try:
         runs: dict[int | None, dict | None] = {}
         for i, page in enumerate(pages):
-            lines = _with_text(latest_lines(conn, page.id))
+            block = [f"## {_folio(page)} — {page.id}"]
+            group = twins.get(page.id) if twins is not None else None
+            if group is not None and not group.carries_text(page.id):
+                # a fold: the text is given once, on the scan's primary page
+                block.append(f"# {group.describe(page.id)}")
+                yield ("\n" if i else "") + "".join(f"{row}\n" for row in block)
+                continue
+            lines, _ = _twin_lines(
+                group, page.id, _with_text(latest_lines(conn, page.id)), once=True
+            )
             for run_id in {ln.run_id for ln in lines} - runs.keys():
                 runs[run_id] = _run_info(conn, run_id)
-            block = [f"## {_folio(page)} — {page.id}"]
+            if group is not None:
+                block.append(f"# Scan: {group.describe(page.id)}")
             if lines:
                 block.append(f"# Source image: {ImageSource.source_url(page) or 'not recorded'}")
                 block += [f"# {row}" for row in _run_rows(lines, runs)]
@@ -759,9 +975,13 @@ def _work_text(
     pages: list[db.Page],
     summaries: dict[str, tuple[int, float | None]],
     fmt: str,
+    twins: TwinIndex | None = None,
 ) -> Iterator[str]:
     """A work's export: the header from the one :func:`line_summaries_by_page`
-    query, then :func:`_page_chunks` over every page in canvas order."""
+    query, then :func:`_page_chunks` over every page in canvas order. A scan
+    registered more than once gives its lines once (``twins``)."""
+    if twins is not None:
+        summaries = _once_summaries(summaries, pages, twins)
     rows = [
         f"{attr.PROJECT_NAME} — {site}",
         f"Work: {site}/work/{work.gwlb_object_id}",
@@ -775,7 +995,7 @@ def _work_text(
         *([TSV_LAYOUT] if fmt == "tsv" else []),
     ]
     yield _head(rows, fmt)
-    yield from _page_chunks(db_path, pages, fmt)
+    yield from _page_chunks(db_path, pages, fmt, twins)
 
 
 def _record_rows(rec: dict) -> list[str]:
@@ -803,6 +1023,10 @@ def _record_rows(rec: dict) -> list[str]:
         rows.append(f"Other printings: {rec['drucke']}")
     if rec.get("url"):
         rows.append(f"Record in the Leibniz-Katalog: {rec['url']}")
+    for link in rec.get("aa_links") or []:
+        rows.append(f"{link['label']}: {link['url']}")
+    if rec.get("transcriptions"):
+        rows.append(f"{rec['transcriptions']['label']}: {rec['transcriptions']['url']}")
     return rows
 
 
@@ -814,10 +1038,14 @@ def _record_text(
     work: db.Work | None,
     summaries: dict[str, tuple[int, float | None]],
     fmt: str,
+    twins: TwinIndex | None = None,
 ) -> Iterator[str]:
     """A catalogue piece's export: the record, the work, the folio range and the
-    canvases in the header, then :func:`_page_chunks` over the placed pages."""
+    canvases in the header, then :func:`_page_chunks` over the placed pages. A
+    scan registered more than once gives its lines once (``twins``)."""
     pages = placed.pages
+    if twins is not None:
+        summaries = _once_summaries(summaries, pages, twins)
     seqs = [p.seq for p in pages]
     span = f"canvas {seqs[0]}" if len(seqs) == 1 else f"canvases {seqs[0]}–{seqs[-1]}"
     rows = [
@@ -829,7 +1057,7 @@ def _record_text(
         f"Folios: {placed.folio_label} (from the shelfmark {placed.signature}): "
         f"{len(pages):,} page{'' if len(pages) == 1 else 's'}, {span}, "
         f"page ids {pages[0].id} to {pages[-1].id}",
-        f"Original at the GWLB: {attr.GWLB_RESOLVE.format(work_id=placed.work_id)}",
+        f"Original at the GWLB: {attr.gwlb_page_url(placed.work_id, pages[0].seq)}",
         _pages_count_row(pages, summaries),
         attr.KATALOG,
         attr.HONESTY,
@@ -839,7 +1067,7 @@ def _record_text(
         *([TSV_LAYOUT] if fmt == "tsv" else []),
     ]
     yield _head(rows, fmt)
-    yield from _page_chunks(db_path, pages, fmt)
+    yield from _page_chunks(db_path, pages, fmt, twins)
 
 
 def create_app(
@@ -854,6 +1082,8 @@ def create_app(
     cors: bool = True,
     image_base_url: str | None = None,
     calculemus_url: str | None = None,
+    twins_path: str | Path | None = None,
+    letters_path: str | Path | None = None,
 ) -> FastAPI:
     """Build the FastAPI application over a store (+ optional search backend).
 
@@ -866,6 +1096,11 @@ def create_app(
     ``calculemus_url`` is the origin of the game built on this corpus, stamped
     into the viewer shell (``<html data-calculemus-url>``) so the About page
     can link to it; unset, nothing about the game reaches the HTML.
+    ``twins_path`` is the file of scans registered more than once
+    (:mod:`leibniz.images.twins`, written by the index build); without it every
+    page shows and exports its own reading, as before. ``letters_path`` is the
+    file of Bodemann's letters (:mod:`leibniz.catalog.letters`, written by
+    ``leibniz catalog letters``); without it the letters are not shown.
     """
     app = FastAPI(
         title="Leibniz Legible API",
@@ -913,15 +1148,106 @@ def create_app(
         if state.get("browse") is None:
             conn = _open(db_path)
             try:
+                works = list(db.iter_works(conn))
                 families = browse.build_index(
-                    db.iter_works(conn),
+                    works,
                     browse.group_correspondents(conn.execute(browse.CORRESPONDENTS_SQL)),
                     db.matched_work_ids(conn),
+                    letters_by_work(works),
                 )
             finally:
                 conn.close()
-            state["browse"] = {"families": families, "places": browse.places(families)}
+            state["browse"] = {
+                "families": families,
+                "places": browse.places(families),
+                "titles": browse.display_titles(families),
+            }
         return state["browse"]
+
+    def letters() -> letters_mod.LettersIndex:
+        """Bodemann's letters, read on first use and kept for the life of the process."""
+        if state.get("letters") is None:
+            state["letters"] = letters_mod.LettersIndex.load(letters_path)
+        return state["letters"]
+
+    def convolute_keys(work: db.Work) -> list[str]:
+        """The letter convolutes a work's shelfmarks name (``LBr 16``; for a part
+        such as ``LBr. 57, 1`` the convolute ``LBr 57``)."""
+        return letters().keys_for(sorted(signature_keys(work.shelfmarks or [])))
+
+    def letters_by_work(works: list[db.Work]) -> dict[str, dict]:
+        """work id → what Bodemann's letters say of its convolute."""
+        if not letters():
+            return {}
+        out = {}
+        for work in works:
+            keys = convolute_keys(work)
+            if keys:
+                out[work.gwlb_object_id] = {
+                    "convolute": keys[0],
+                    **letters().convolutes[keys[0]].to_dict(),
+                }
+        return out
+
+    def works_for_convolute(key: str) -> list[str]:
+        """The works that carry a convolute: its own shelfmark, or a part of it."""
+        shelfmarks = lookup_indexes()["shelfmarks"]
+        own = list(shelfmarks.get(key, ()))
+        parts = sorted(w for k, ids in shelfmarks.items() if k.startswith(f"{key},") for w in ids)
+        return own + [w for w in parts if w not in own]
+
+    def contents_index() -> dict[str, list[tuple[str, dict]]]:
+        """work id → its catalogue pieces, each with its title, incipit and
+        correspondents folded for matching; built on first use."""
+        if state.get("contents") is None:
+            conn = _open(db_path)
+            try:
+                kat = katalog_by_work(conn)
+            finally:
+                conn.close()
+            out: dict[str, list[tuple[str, dict]]] = {}
+            for work_id, records in kat.items():
+                items = []
+                for record in records:
+                    meta = record.get("metadata") or {}
+                    words = " ".join(
+                        str(meta.get(k) or "")
+                        for k in ("titel", "title", "incipit", "absender", "adressat")
+                    )
+                    items.append((letters_mod.fold(words), record))
+                out[work_id] = items
+            state["contents"] = out
+        return state["contents"]
+
+    def lookup_indexes() -> dict:
+        """The shelfmark and Akademie-Ausgabe indexes the lookup reads, built on
+        first use and kept for the life of the process."""
+        if state.get("lookup") is None:
+            conn = _open(db_path)
+            try:
+                state["lookup"] = {
+                    "shelfmarks": lookup_mod.build_shelfmark_index(db.iter_works(conn)),
+                    "aa": lookup_mod.build_aa_index(conn),
+                }
+            finally:
+                conn.close()
+        return state["lookup"]
+
+    def twins() -> TwinIndex:
+        """The scans registered more than once, read on first use and kept for
+        the life of the process (the index build rewrites the file; restart)."""
+        if state.get("twins") is None:
+            state["twins"] = TwinIndex.load(twins_path)
+        return state["twins"]
+
+    def titled(work: db.Work | None) -> db.Work | None:
+        """The work as it is shown: where the library's title is the generic
+        one every letter convolute carries, the browse index's name for it
+        (``LBr. 16 · Arnauld``); the store's row is untouched."""
+        if work is None:
+            return None
+        shown = browse_index()["titles"].get(work.gwlb_object_id)
+        return replace(work, title=shown) if shown and shown != work.title else work
 
     def works_body(families: list[browse.Family]) -> dict:
         return {
@@ -978,13 +1304,26 @@ def create_app(
                 'order; a minus in front (-word, -"two words") leaves out pages containing it.'
             ),
         ),
-        set: str | None = Query(None, alias="set"),  # noqa: A002 — the API's public name
+        set: str | None = Query(  # noqa: A002 — the API's public name
+            None, alias="set", pattern=r"^[A-Za-z][A-Za-z0-9_-]*$", max_length=64
+        ),
         lang: str | None = None,
         stratum: str | None = None,
         min_conf: float | None = Query(None, ge=0.0, le=1.0),
-        work: str | None = None,
-        page: int = Query(1, ge=1),
+        work: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$", max_length=64),
+        page: int = Query(
+            1,
+            ge=1,
+            le=MAX_REACHABLE,
+            description=f"1-based; no hit past the first {MAX_REACHABLE:,} can be paged to "
+            "(`reachable` in the answer), and a page past them answers the last one.",
+        ),
         limit: int = Query(20, ge=1, le=100),
+        match: str = Query(
+            "all",
+            pattern="^(" + "|".join(MATCH_MODES) + ")$",
+            description="`all` (default): a page must hold every word; `any`: one is enough.",
+        ),
     ) -> JSONResponse:
         if search is None:
             raise HTTPException(503, "search index not configured (run `leibniz index build`)")
@@ -999,14 +1338,155 @@ def create_app(
                     work_id=work,
                     page=page,
                     limit=limit,
+                    match=match,
                 )
             )
+        except SearchQueryError as exc:  # the query, not the index: say so
+            raise HTTPException(400, str(exc)) from exc
         except httpx.HTTPError as exc:  # Meilisearch down or restarting
             raise HTTPException(503, "search backend unavailable; try again shortly") from exc
+        titles = browse_index()["titles"]
+        for hit in res.hits:  # the index holds the library's title; show the work's name
+            hit.title = titles.get(hit.work_id, hit.title)
         if images.mirrored:  # the index stored the GWLB thumbnails; the mirror has its own
             for hit in res.hits:
                 hit.thumb_url = images.thumb_url_for(hit.work_id, hit.seq, hit.thumb_url)
         return JSONResponse(res.to_dict(), headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/contents",
+        summary="Which convolutes hold a piece: the catalogue's titles searched",
+        description=(
+            "The Faszikel index's search: the convolutes whose catalogue records (the "
+            "Arbeitskatalog der Leibniz-Edition, CC BY 4.0) carry `q` in a piece's title, "
+            "incipit, sender or addressee — `Monadologie`, `Characteristica`, a name — case- "
+            "and accent-blind, with up to five of the matching pieces per convolute and "
+            "where they sit (their shelfmark with its folios). The most matches first."
+        ),
+    )
+    def api_contents(
+        q: str = Query(..., min_length=3, max_length=100),
+        limit: int = Query(50, ge=1, le=200),
+    ) -> JSONResponse:
+        needle = letters_mod.fold(" ".join(q.split()))
+        rows = {row["work_id"]: row for row in browse.rows(browse_index()["families"])}
+        hits = []
+        for work_id, items in contents_index().items():
+            matched = [record for hay, record in items if needle in hay]
+            if matched and work_id in rows:
+                hits.append((work_id, matched))
+        hits.sort(key=lambda hit: (-len(hit[1]), rows[hit[0]]["label"]))
+        works = []
+        for work_id, matched in hits[:limit]:
+            row = rows[work_id]
+            works.append(
+                {
+                    "work_id": work_id,
+                    "label": row["label"],
+                    "shelfmark": row["shelfmark"],
+                    "family": row["family"],
+                    "n_matches": len(matched),
+                    "matches": [
+                        {
+                            "record_id": record["record_id"],
+                            "title": piece_title(record) or record["record_id"],
+                            "where": next(iter(record.get("shelfmark_refs") or []), None),
+                            "date": (record.get("metadata") or {}).get("datum"),
+                        }
+                        for record in matched[:5]
+                    ],
+                }
+            )
+        body = {"query": q, "total": len(hits), "works": works, "attribution": attr.KATALOG}
+        return JSONResponse(body, headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/letters",
+        summary="Letters by correspondent, date and place",
+        description=(
+            "Leibniz's letters as Eduard Bodemann catalogued them in 1889 (the LBr "
+            "numbering), letter by letter from correspSearch (BBAW; CC BY 4.0): sender and "
+            "addressee (GND), date, place (GeoNames), Bodemann's number and the works that "
+            "carry the convolute. `who` and `place` match any part of a name, case- and "
+            "accent-blind; `from`/`to` are years; `direction` is `to` or `from` Leibniz; "
+            "`work` narrows to one convolute. In date order."
+        ),
+    )
+    def api_letters(
+        who: str = Query("", max_length=100),
+        place: str = Query("", max_length=100),
+        year_from: int | None = Query(None, alias="from", ge=1600, le=1800),
+        year_to: int | None = Query(None, alias="to", ge=1600, le=1800),
+        direction: str = Query("", pattern="^(to|from|)$"),
+        work: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$", max_length=64),
+        page: int = Query(1, ge=1, le=10_000),
+        limit: int = Query(50, ge=1, le=200),
+    ) -> JSONResponse:
+        index = letters()
+        if not index:
+            raise HTTPException(503, "letters not loaded (run `leibniz catalog letters`)")
+        convolutes: tuple[str, ...] = ()
+        if work:
+            conn = _open(db_path)
+            try:
+                found_work = db.get_work(conn, work)
+            finally:
+                conn.close()
+            if found_work is None:
+                raise HTTPException(404, f"work {work} not found")
+            convolutes = tuple(convolute_keys(found_work)) or ("-",)
+        found = index.search(
+            letters_mod.LetterQuery(
+                who=who,
+                place=place,
+                year_from=year_from,
+                year_to=year_to,
+                direction=direction,
+                convolutes=convolutes,
+            )
+        )
+        start = (page - 1) * limit
+        rows = []
+        for letter in found[start : start + limit]:
+            row = _letter_dict(letter)
+            row["works"] = works_for_convolute(letter.convolute) if letter.convolute else []
+            rows.append(row)
+        body = {
+            "total": len(found),
+            "page": page,
+            "limit": limit,
+            "letters": rows,
+            "source": index.source,
+            "built_at": index.built_at,
+        }
+        return JSONResponse(body, headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/lookup",
+        summary="Go to what a citation names",
+        description=(
+            "Reads `q` as a citation and says where it points: a shelfmark with or "
+            "without its folio (`LH IV, 6, 18 Bl. 1r`, `LBr. 16 Bl. 46`), an "
+            "Akademie-Ausgabe piece (`A VI, 4 N. 109`, `AA II,1 N.130a`), or a work or "
+            "page id. `kind` is `shelfmark`, `aa`, `id`, or null when `q` is not a "
+            "citation (search answers it); `targets` are pages, works or a browse section, "
+            "each with a site `url`; a citation that leads nowhere carries a `reason`."
+        ),
+    )
+    def api_lookup(q: str = Query(..., min_length=1, max_length=200)) -> JSONResponse:
+        indexes = lookup_indexes()
+        conn = _open(db_path)
+        try:
+            found = lookup_mod.lookup(
+                conn,
+                q,
+                shelfmarks=indexes["shelfmarks"],
+                aa_index=indexes["aa"],
+                titles=browse_index()["titles"],
+            )
+        finally:
+            conn.close()
+        return JSONResponse(found.to_dict(), headers=CACHE_HEADERS)
 
     @app.get(
         "/api/works",
@@ -1053,13 +1533,17 @@ def create_app(
             body = {
                 "work_id": work.gwlb_object_id,
                 "set": work.set_name,
-                "title": work.title,
+                "title": titled(work).title,
+                "library_title": work.title,
                 "shelfmarks": list(work.shelfmarks or []),
                 "manifest_url": work.manifest_url,
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id),
                 "n_canvases": work.n_canvases,
                 "iiif_manifest": f"/manifests/{work.gwlb_object_id}",
-                "pages": [_page_summary(images.resolve(p), summaries.get(p.id)) for p in pages],
+                "pages": [
+                    _page_summary(images.resolve(p), summaries.get(p.id), twins().get(p.id))
+                    for p in pages
+                ],
                 "katalog": _katalog_for_work(conn, work_id, pages),
                 "attribution": attr.attribution(images.mirrored),
             }
@@ -1067,18 +1551,31 @@ def create_app(
             conn.close()
         # where the work sits in the browse index: the work page's way back
         body["browse"] = browse_index()["places"].get(work.gwlb_object_id)
+        keys = convolute_keys(work)
+        if keys:
+            found = letters().search(letters_mod.LetterQuery(convolutes=tuple(keys)))
+            body["letters"] = {
+                "convolute": keys[0],
+                **letters().convolutes[keys[0]].to_dict(),
+                "items": [_letter_dict(ltr) for ltr in found[:MAX_LETTERS]],
+                "n_items": len(found),
+                "source": letters().source,
+            }
         return JSONResponse(body, headers=CACHE_HEADERS)
 
     @app.get("/api/pages/{page_id}")
-    def api_page(page_id: str) -> JSONResponse:
+    def api_page(page_id: str, run: int | None = RUN_QUERY) -> JSONResponse:
         conn = _open(db_path)
         try:
             page = db.get_page(conn, page_id)
             if page is None:
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
-            lines = latest_lines(conn, page_id)
-            recognised = _with_text(lines)
+            lines = _lines_for(conn, page_id, run)
+            current_run = _current_run(conn, page_id, lines, run)
+            twin = twins().get(page.id)
+            # a spread page shows its half of the image; the lines across the fold on both
+            recognised, across = _twin_lines(twin, page.id, _with_text(lines))
             run_dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
             neighbours = conn.execute(
                 "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
@@ -1091,7 +1588,7 @@ def create_app(
             body = {
                 "page_id": page.id,
                 "work_id": page.work_id,
-                "work_title": work.title if work else None,
+                "work_title": titled(work).title if work else None,
                 "set": work.set_name if work else None,
                 "shelfmarks": list(work.shelfmarks or []) if work else [],
                 "seq": page.seq,
@@ -1105,6 +1602,7 @@ def create_app(
                 "thumb_url": shown.thumb_url,
                 "image_origin": "mirror" if shown is not page else "gwlb",
                 "source_image_url": images.source_url(page),
+                "source_image_service": images.service_url(page),
                 "status": page.status,
                 "skip_reason": page.skip_reason,
                 "prev_page_id": prev_id,
@@ -1112,12 +1610,23 @@ def create_app(
                 "manifest_url": f"/manifests/{page.work_id}",
                 "annotations_url": f"/annotations/{page.id}",
                 "gwlb_url": attr.GWLB_RESOLVE.format(work_id=page.work_id),
+                "gwlb_page_url": attr.gwlb_page_url(page.work_id, page.seq),
                 "run": _run_info(conn, max(run_ids) if run_ids else None),
+                "as_of_run": run,
+                "current_run": current_run,
                 "stats": _line_stats(recognised),
-                "lines": [_line_dict(ln, page, run_dates) for ln in recognised],
+                "lines": [
+                    {
+                        **_line_dict(ln, page, run_dates, i),
+                        "crosses_fold": ln.line_seq in across,
+                    }
+                    for i, ln in enumerate(recognised, start=1)
+                ],
+                "twin": _twin_dict(twin, page.id) if twin is not None else None,
                 "honesty": attr.HONESTY,
                 "attribution": attr.attribution(images.mirrored),
             }
+            body["cite"] = _cite(site, page, titled(work), recognised, body["run"])
         finally:
             conn.close()
         return JSONResponse(body, headers=CACHE_HEADERS)
@@ -1138,18 +1647,24 @@ def create_app(
         response_class=PlainTextResponse,
         responses=TEXT_RESPONSES,
     )
-    def api_page_text(page_id: str, fmt: TextFormat = "txt") -> Response:
+    def api_page_text(
+        page_id: str, fmt: TextFormat = "txt", run: int | None = RUN_QUERY
+    ) -> Response:
         conn = _open(db_path)
         try:
             page = db.get_page(conn, page_id)
             if page is None:
                 raise HTTPException(404, f"page {page_id} not found")
             work = db.get_work(conn, page.work_id)
-            lines = _with_text(latest_lines(conn, page_id))
+            twin = twins().get(page.id)
+            lines, _ = _twin_lines(twin, page.id, _with_text(_lines_for(conn, page_id, run)))
             runs = {run_id: _run_info(conn, run_id) for run_id in {ln.run_id for ln in lines}}
+            run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
+            pinned = runs.get(max(run_ids)) if run_ids else None
         finally:
             conn.close()
-        body = _page_text(site, page, work, lines, runs, fmt)
+        permalink = _cite(site, page, titled(work), lines, pinned)["permalink"] if lines else None
+        body = _page_text(site, page, titled(work), lines, runs, fmt, twin, permalink)
         return Response(body, media_type=TEXT_MEDIA[fmt], headers=_text_headers(page.id, fmt))
 
     @app.get(
@@ -1174,7 +1689,7 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _work_text(db_path, site, work, pages, summaries, fmt),
+            _work_text(db_path, site, titled(work), pages, summaries, fmt, twins()),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(work.gwlb_object_id, fmt),
         )
@@ -1197,13 +1712,23 @@ def create_app(
         response_class=PlainTextResponse,
         responses=RECORD_RESPONSES,
     )
-    def api_record_text(record_id: str, fmt: TextFormat = "txt") -> StreamingResponse:
+    def api_record_text(
+        record_id: str,
+        fmt: TextFormat = "txt",
+        work: str | None = Query(
+            None,
+            pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]*$",
+            max_length=64,
+            description="Place the record on this work (one it is linked to); default: its "
+            "best-linked work that places it.",
+        ),
+    ) -> StreamingResponse:
         conn = _open(db_path)
         try:
             record = db.get_katalog_record(conn, record_id)
             if record is None:
                 raise HTTPException(404, f"record {record_id} not found")
-            placed = pieces.place_record(conn, record)
+            placed = pieces.place_record(conn, record, work)
             if isinstance(placed, pieces.Unplaced):
                 raise HTTPException(404, placed.reason)
             work = db.get_work(conn, placed.work_id)
@@ -1211,7 +1736,9 @@ def create_app(
         finally:
             conn.close()
         return StreamingResponse(
-            _record_text(db_path, site, _record_dict(record), placed, work, summaries, fmt),
+            _record_text(
+                db_path, site, _record_dict(record), placed, titled(work), summaries, fmt, twins()
+            ),
             media_type=TEXT_MEDIA[fmt],
             headers=_text_headers(f"record-{record_id}", fmt),
         )
@@ -1225,6 +1752,8 @@ def create_app(
             if work is None:
                 raise HTTPException(404, f"work {work_id} not found")
             pages = db.get_pages(conn, work_id)
+            if not pages:  # a manifest must paint at least one canvas
+                raise HTTPException(404, f"work {work_id} has no page images")
             counts = {pid: n for pid, (n, _) in line_summaries_by_page(conn, work_id).items()}
             sources = (
                 {p.id: images.source_url(p) for p in pages if images.is_mirrored(p)}
@@ -1232,7 +1761,7 @@ def create_app(
                 else None
             )
             body = iiif.build_manifest(
-                work,
+                titled(work),
                 [images.resolve(p) for p in pages],
                 base_url=base(request),
                 line_counts=counts,
@@ -1252,9 +1781,11 @@ def create_app(
                 raise HTTPException(404, f"page {page_id} not found")
             lines = latest_lines(conn, page_id)
             dates = _run_dates(conn, {ln.run_id for ln in lines if ln.run_id is not None})
+            # a spread page's canvas is the whole image; its annotations, its half
+            shown, _ = _twin_lines(twins().get(page.id), page.id, lines)
             body = iiif.build_annotation_page(
                 page,
-                lines,
+                shown,
                 base_url=base(request),
                 run_dates=dates,
                 images_mirrored=images.mirrored,
@@ -1314,6 +1845,16 @@ def create_app(
         def serve_about(request: Request) -> Response:
             return respond(request, _stamp_shell(shell, path="/about", title="About", site=site))
 
+        def serve_letters(request: Request) -> Response:
+            body = _stamp_shell(
+                shell,
+                path="/letters",
+                title=LETTERS_TITLE,
+                description=LETTERS_DESCRIPTION,
+                site=site,
+            )
+            return respond(request, body)
+
         def serve_browse(request: Request) -> Response:
             index = browse_index()
             if "html" not in index:  # 2,000-odd links: stamped once
@@ -1343,7 +1884,7 @@ def create_app(
                 conn.close()
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
             place = browse_index()["places"].get(work.gwlb_object_id)
-            title, description, ssr = _ssr_work(work, pages, katalog, gwlb_url, place)
+            title, description, ssr = _ssr_work(titled(work), pages, katalog, gwlb_url, place)
             body = _stamp_shell(
                 shell,
                 path=f"/work/{work_id}",
@@ -1364,7 +1905,13 @@ def create_app(
                     )
                     return respond(request, body, status=404)
                 work = db.get_work(conn, page.work_id)
-                lines = latest_lines(conn, page_id)
+                twin = twins().get(page.id)
+                raw = request.query_params.get("run", "")
+                run = int(raw) if raw.isdigit() else None
+                lines = latest_lines(conn, page_id, as_of_run=run)
+                lines, _ = _twin_lines(twin, page.id, _with_text(lines))
+                run_ids = [ln.run_id for ln in lines if ln.run_id is not None]
+                pinned = _run_info(conn, max(run_ids)) if run_ids else None
                 neighbours = conn.execute(
                     "SELECT page_id, seq FROM pages WHERE work_id = ? AND seq IN (?, ?)",
                     (page.work_id, page.seq - 1, page.seq + 1),
@@ -1374,9 +1921,10 @@ def create_app(
             prev_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq - 1), None)
             next_id = next((r["page_id"] for r in neighbours if r["seq"] == page.seq + 1), None)
             shown = images.resolve(page)
-            gwlb_url = attr.GWLB_RESOLVE.format(work_id=page.work_id)
+            gwlb_url = attr.gwlb_page_url(page.work_id, page.seq)
+            cite = _cite(site, page, titled(work), lines, pinned)
             title, description, ssr = _ssr_page(
-                page, work, lines, shown.image_url, gwlb_url, prev_id, next_id
+                page, titled(work), lines, shown.image_url, gwlb_url, prev_id, next_id, twin, cite
             )
             body = _stamp_shell(
                 shell,
@@ -1392,6 +1940,7 @@ def create_app(
             "/search": serve_search,
             "/browse": serve_browse,
             "/about": serve_about,
+            "/letters": serve_letters,
             "/work/{work_id}": serve_index_work,
             "/page/{page_id}": serve_index_page,
         }

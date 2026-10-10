@@ -12,12 +12,19 @@ Quoted phrases and exclusions use Meilisearch's own ``"…"`` and ``-`` syntax
 
 from __future__ import annotations
 
+import re
 import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 import httpx
 
-from leibniz.search.backend import SearchHit, SearchQuery, SearchResult
+from leibniz.search.backend import (
+    MAX_REACHABLE,
+    SearchHit,
+    SearchQuery,
+    SearchQueryError,
+    SearchResult,
+)
 from leibniz.search.documents import PageDoc
 from leibniz.search.normalize import ParsedQuery, fold, parse_query
 from leibniz.search.snippet import make_snippet
@@ -26,12 +33,22 @@ DEFAULT_MEILI_URL = "http://127.0.0.1:7700"
 DEFAULT_INDEX_UID = "leibniz_pages"
 
 SETTINGS = {
-    "searchableAttributes": ["folded", "title", "shelfmarks", "aa_refs", "label"],
+    # the text, then what names the page (title, shelfmarks, AA references,
+    # folio), both folded the same way as the query (PageDoc.meta_text)
+    "searchableAttributes": ["folded", "meta_folded"],
     "filterableAttributes": ["set_name", "lang", "stratum", "mean_conf", "work_id"],
     "sortableAttributes": ["mean_conf", "seq"],
+    # "exactness" before proximity: the word as typed outranks a word it is the
+    # beginning of — "monas" before "Monasteris" (Meilisearch's default order
+    # ranks exactness last, behind proximity and attribute).
+    "rankingRules": ["words", "typo", "exactness", "proximity", "attribute", "sort"],
     "typoTolerance": {"enabled": True, "minWordSizeForTypos": {"oneTypo": 4, "twoTypos": 8}},
-    "pagination": {"maxTotalHits": 10000},
+    "pagination": {"maxTotalHits": MAX_REACHABLE},
 }
+
+# Values that reach a filter expression only ever come from these shapes: a set
+# name (letters and hyphens), a work id (8 digits, or DE-611-HS-…).
+_FILTER_SAFE = {"set_name": r"[A-Za-z][A-Za-z0-9_-]*", "work_id": r"[A-Za-z0-9][A-Za-z0-9_-]*"}
 
 RETRIEVE = [
     "page_id",
@@ -47,6 +64,7 @@ RETRIEVE = [
     "stratum",
     "thumb_url",
     "text",
+    "also",
 ]
 
 
@@ -119,18 +137,61 @@ class MeiliBackend:
     def _meta_uid(self) -> str:
         return f"{self.index_uid}_meta"
 
+    def push_settings(self) -> dict:
+        """Apply :data:`SETTINGS` to the live index without rebuilding it — enough
+        for a ranking or a typo rule; a new document field needs :meth:`rebuild`.
+
+        Refuses when the index's documents lack a field the settings search:
+        pushed onto an index built before ``meta_folded`` existed, they would
+        stop titles and shelfmarks from matching until the next rebuild.
+        """
+        r = self.client.get(f"/indexes/{self.index_uid}/stats")
+        r.raise_for_status()
+        fields = r.json().get("fieldDistribution") or {}
+        missing = [a for a in SETTINGS["searchableAttributes"] if a not in fields]
+        if missing:
+            raise RuntimeError(
+                f"index {self.index_uid} has no field {', '.join(missing)}: rebuild it "
+                "(`leibniz index build`), which applies the settings as well"
+            )
+        return self._wait(self.client.patch(f"/indexes/{self.index_uid}/settings", json=SETTINGS))
+
     # -- build ------------------------------------------------------------- #
+    def _drop(self, uid: str) -> None:
+        """Delete an index; one that is not there is what was wanted."""
+        r = self.client.delete(f"/indexes/{uid}")
+        if r.status_code != 404:
+            self._wait(r, ignore=("index_not_found",))
+
+    def _create(self, uid: str) -> None:
+        self._wait(self.client.post("/indexes", json={"uid": uid, "primaryKey": "doc_id"}))
+
+    def _exists(self, uid: str) -> bool:
+        return self.client.get(f"/indexes/{uid}").status_code == 200
+
     def rebuild(
-        self, docs: Iterable[PageDoc], *, meta: dict | None = None, batch: int = 2000
+        self,
+        docs: Iterable[PageDoc],
+        *,
+        meta: dict | Callable[[], dict] | None = None,
+        batch: int = 2000,
     ) -> int:
-        for uid in (self.index_uid, self._meta_uid):
-            # Deleting an index is a task; on a fresh server (first build) that
-            # task fails with index_not_found, which is exactly what we want.
-            r = self.client.delete(f"/indexes/{uid}")
-            if r.status_code != 404:
-                self._wait(r, ignore=("index_not_found",))
-            self._wait(self.client.post("/indexes", json={"uid": uid, "primaryKey": "doc_id"}))
-        self._wait(self.client.patch(f"/indexes/{self.index_uid}/settings", json=SETTINGS))
+        """Build the index beside the live one and swap it in when it is complete.
+
+        The documents go into ``<uid>__next`` (and ``<uid>_meta__next``); one
+        ``/swap-indexes`` task then exchanges them with the live pair, and the
+        old generation is deleted. Until 2026-10 the build dropped the live
+        index first, so search answered from a half-filled index for the hours
+        a full build takes. The search key's ``leibniz_pages*`` pattern covers
+        the build's names; the server must hold both generations for a while
+        (deploy/README §1 sizes the disk for that).
+        """
+        live = (self.index_uid, self._meta_uid)
+        nxt = tuple(f"{uid}__next" for uid in live)
+        for uid in nxt:  # a build that died half way left these
+            self._drop(uid)
+            self._create(uid)
+        self._wait(self.client.patch(f"/indexes/{nxt[0]}/settings", json=SETTINGS))
         n = 0
         pending: list[dict] = []
 
@@ -138,7 +199,7 @@ class MeiliBackend:
             nonlocal n
             if not pending:
                 return
-            self._wait(self.client.post(f"/indexes/{self.index_uid}/documents", json=pending))
+            self._wait(self.client.post(f"/indexes/{nxt[0]}/documents", json=pending))
             n += len(pending)
             pending.clear()
 
@@ -146,11 +207,12 @@ class MeiliBackend:
             row = d.to_dict()
             row["doc_id"] = doc_id(d.page_id)
             row["folded"] = fold(d.text)
+            row["meta_folded"] = fold(d.meta_text())
             pending.append(row)
             if len(pending) >= batch:
                 flush()
         flush()
-        info = dict(meta or {})
+        info = dict((meta() if callable(meta) else meta) or {})
         info.update(
             {
                 "doc_id": "meta",
@@ -159,23 +221,33 @@ class MeiliBackend:
                 "n_docs": n,
             }
         )
-        self._wait(self.client.post(f"/indexes/{self._meta_uid}/documents", json=[info]))
+        self._wait(self.client.post(f"/indexes/{nxt[1]}/documents", json=[info]))
+        for uid in live:  # the first build: an empty live pair to swap with
+            if not self._exists(uid):
+                self._create(uid)
+        swap = [{"indexes": [old, new]} for old, new in zip(live, nxt, strict=True)]
+        self._wait(self.client.post("/swap-indexes", json=swap))
+        for uid in nxt:  # now the previous generation
+            self._drop(uid)
         return n
 
     # -- query ------------------------------------------------------------- #
     @staticmethod
     def _filter(q: SearchQuery) -> list[str]:
+        """The filter clauses, every value checked and quoted: a quote in a set
+        name or a work id once rewrote the expression, and Meilisearch's refusal
+        came back as "search backend unavailable" (2026-10)."""
         f: list[str] = []
         if q.set_name:
-            f.append(f'set_name = "{q.set_name}"')
+            f.append(f"set_name = {_quoted('set_name', q.set_name)}")
         if q.lang:
-            f.append(f'lang = "{q.lang}"')
+            f.append(f"lang = {_quoted('lang', q.lang)}")
         if q.stratum:
-            f.append(f'stratum = "{q.stratum}"')
+            f.append(f"stratum = {_quoted('stratum', q.stratum)}")
         if q.min_conf is not None:
-            f.append(f"mean_conf >= {q.min_conf}")
+            f.append(f"mean_conf >= {float(q.min_conf)}")
         if q.work_id:
-            f.append(f'work_id = "{q.work_id}"')
+            f.append(f"work_id = {_quoted('work_id', q.work_id)}")
         return f
 
     def search(self, query: SearchQuery) -> SearchResult:
@@ -189,11 +261,21 @@ class MeiliBackend:
             "limit": q.limit,
             "offset": q.offset,
             "attributesToRetrieve": RETRIEVE,
+            # "last" drops words from the end when results run short: the
+            # broader net, offered as match=any
+            "matchingStrategy": "all" if q.match == "all" else "last",
         }
         flt = self._filter(q)
         if flt:
             body["filter"] = flt
         r = self.client.post(f"/indexes/{self.index_uid}/search", json=body)
+        if 400 <= r.status_code < 500:
+            try:
+                message = r.json().get("message")
+            except ValueError:
+                message = None
+            refused = f"the search index refused the query ({r.status_code})"
+            raise SearchQueryError(message or refused)
         r.raise_for_status()
         data = r.json()
         hits = [
@@ -212,12 +294,13 @@ class MeiliBackend:
                 stratum=h.get("stratum", "unknown"),
                 thumb_url=h.get("thumb_url"),
                 score=h.get("_rankingScore"),
+                also=list(h.get("also") or []),
             )
             for h in data.get("hits", [])
         ]
         total = int(data.get("estimatedTotalHits", data.get("totalHits", len(hits))))
         took = int(data.get("processingTimeMs", (time.perf_counter() - t0) * 1000))
-        return SearchResult(q.q, total, q.page, q.limit, took, self.name, hits)
+        return SearchResult(q.q, total, q.page, q.limit, took, self.name, hits, match=q.match)
 
     # -- introspection ----------------------------------------------------- #
     def meta(self) -> dict:
@@ -251,6 +334,14 @@ class MeiliBackend:
             )
         except httpx.HTTPError:
             return False
+
+
+def _quoted(field_name: str, value: str) -> str:
+    """A filter value, checked against its field's shape and quoted for Meilisearch."""
+    shape = _FILTER_SAFE.get(field_name)
+    if shape is not None and re.fullmatch(shape, value) is None:
+        raise SearchQueryError(f"not a valid {field_name}: {value!r}")
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
 __all__ = [

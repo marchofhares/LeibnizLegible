@@ -83,3 +83,26 @@ def test_line_summaries_by_page_match_latest_lines(store_path) -> None:
     assert len([ln for ln in latest_lines(conn, f"{w1}:0002") if ln.text]) == 1
     assert line_summaries_by_page(conn, "nope") == {}
     conn.close()
+
+
+def test_a_piece_title_names_the_pages_of_its_folios(store_path) -> None:
+    conn = db.connect(store_path)
+    db.upsert_katalog_record(
+        conn,
+        db.KatalogRecord(
+            record_id="k-mon",
+            metadata={"titel": "Monadologie", "gwlb_ids": ["00068642"]},
+            shelfmark_refs=["LH IV, 6, 18 Bl. 2"],
+            aa_refs=[{"series": 6, "volume": "4", "piece": "300"}],
+        ),
+    )
+    db.upsert_crosswalk(conn, db.CrosswalkMatch("k-mon", "00068642", "gwlb_link", 1.0))
+    conn.commit()
+    docs = {d.page_id: d for d in iter_page_docs(conn)}
+    conn.close()
+    first, second = docs["00068642:0001"], docs["00068642:0002"]
+    # k-109 covers Bl. 1-2 (both pages); the Monadologie Bl. 2 only — 2r, never read
+    assert "Monadologie" not in first.pieces and "Monadologie" not in second.pieces
+    assert first.pieces == ["Praefatio operis ad instaurationem scientiarum"]
+    assert "AA VI,4 N. 300" not in first.aa_refs  # placed elsewhere: not this page's
+    assert "AA VI,4 N. 109" in first.aa_refs

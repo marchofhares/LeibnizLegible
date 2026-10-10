@@ -57,15 +57,25 @@ uv run leibniz images fetch --work 00067974 --work DE-611-HS-854976  # pull a de
 uv run leibniz images verify --deep  # re-checksum the cache, report gaps
 uv run leibniz images stats          # counts/bytes/dimensions → reports/census.md
 uv run leibniz images duplicates     # sheet-sides registered under two folio labels → reports/duplicates.md
+uv run leibniz images twins --out data/search.twins.json  # the same from the store alone, spread or fold
 ```
 
-**Sheet-sides are registered twice.** In the GWLB's static-JPEG delivery a scan
-is one side of an unfolded sheet — two folio pages side by side — and the METS
-lists that one image under both folio labels (outer side `1r` + `2v`, inner side
-`1v` + `2r`). The corpus run read every such image twice, so the page and line
-totals below count those repeats and search returns them as twin hits.
-`leibniz images duplicates` hashes the thumbnails and lists the pairs; folding
-them in the index and publishing a distinct-scan count is the next data fix.
+**Sheet-sides are registered twice.** The GWLB photographs an unfolded sheet
+as one image — two folio pages side by side — and registers that image under
+both folio labels (outer side `1r` + `2v`, inner side `1v` + `2r`), each label
+with its own copy of the file: the copies differ only in the caption stamped in
+a corner, so their checksums differ and their sizes almost agree. This happens
+in the IIIF (LH) works as well as in the static-JPEG ones. The corpus run read
+every such image once per label, so the page and line totals below count those
+repeats. Since 2026-10 the index build finds them from the store alone (same
+image size, file sizes within 0.1 %, a recto and a verso, confirmed by the
+lines lying in the same places; `src/leibniz/images/twins.py`): a two-page
+spread is indexed as its two halves, split at the fold (verso left, recto
+right), any other repeat on one page, and the site, the exports and the About
+page's figures follow it. The groups are written beside the index
+(`search.twins.json`, `<store dir>/<index uid>.twins.json`, or
+`LEIBNIZ_TWINS_PATH`); `leibniz images twins` writes the same file without an
+index build.
 
 Caches one JPEG delivery derivative per page under `data/images/` — resumable,
 checksummed, integrity-retried. The full-corpus pull (~365 GB) is an operator
@@ -78,6 +88,7 @@ command; a `--set`/`--work`/`--limit` slice pulls a dev corpus. Images are
 uv run leibniz catalog scrape --sample   # scrape a cross-set sample of Ritter-Katalog records
 uv run leibniz catalog crosswalk         # match records → works (GWLB link + shelfmark)
 uv run leibniz catalog report            # write reports/crosswalk.md
+uv run leibniz catalog letters           # Bodemann's letters (correspSearch, CC BY 4.0) → letters.json beside the store
 ```
 
 Joins the BBAW Ritter-Katalog (CC BY 4.0) to our works so every scan links to its
@@ -93,6 +104,7 @@ uv run leibniz catalog crosswalk                # records → works
 uv run leibniz align pieces                     # enumerate the §70 pieces localizable to canvases
 uv run leibniz align ingest                     # fetch + extract each volume's reading text (cache-first)
 uv run leibniz align edition-cache              # join to the katalog → data/gt/edition_cache.jsonl
+uv run leibniz align gt-reset                   # a full re-mint: clear the factory's lines first (back up the store)
 uv run leibniz align factory data/gt/edition_cache.jsonl --shard 1/6 --resume  # ×6 workers (needs the C1 HTR lines)
 uv run leibniz align gt-report                  # writes reports/gt-factory.md
 uv run leibniz align audit-sheet --images /path/to/image-cache   # 200 line strips → reports/gt-audit/gt-audit.html
@@ -134,8 +146,13 @@ uv run leibniz serve --backend meili --host 0.0.0.0 --base-url https://your.host
 ```
 
 The index folds text and query onto the aligner's early-modern comparison
-alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. Queries
-take two operators: `"…"` (or „…“, «…») for words that must stand exactly so
+alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. A page
+must hold every word (`match=any` for one of them); titles, shelfmarks, AA
+references, folio labels and the titles of the catalogue pieces on a page are
+folded the same way, so `AA VI,4 N. 109` or `Monadologie` find their pages.
+`/api/lookup` reads a query as a citation — a shelfmark with its folio, an
+Akademie-Ausgabe number, an id — and the search page offers where it points.
+Queries take two operators: `"…"` (or „…“, «…») for words that must stand exactly so
 and in that order, and a leading `-` to leave out pages with a word or a
 quoted phrase; both match exactly, so they cannot see past a misread word.
 The API (`/api/search`, `/api/works/{id}`, `/api/pages/{id}`, `/api/stats`) serves
@@ -168,6 +185,18 @@ the GWLB's own Image API (static JPEG where no service exists) or on the
 project's image mirror when `LEIBNIZ_IMAGE_BASE_URL` is set, a line-polygon
 overlay, status badges, confidence bands, provenance per line, EN/DE.
 
+Since 2026-10: lines are numbered from 1 and citable (`/page/{id}#L3`; a Cite
+box with model, run and a permalink; `?run=N` reads a page as run N left it).
+A scan the library registered under two folio labels is shown and indexed
+once — a two-page spread split at the fold — from the twins file the index
+build writes (`LEIBNIZ_TWINS_PATH`, else beside the index). `/letters` and
+`/api/letters` list Bodemann's letters by correspondent, date and place from
+`letters.json` (`LEIBNIZ_LETTERS_PATH`, else beside the store), and each letter
+convolute's page lists its own; `/api/contents` and the browse filter find the
+convolute that holds a piece by its title. Catalogue records link out to the
+Leibniz-Katalog, the cited volumes of the Akademie-Ausgabe, the piece's folio
+at the GWLB and, for letters of 1708–1716, the Leibniz-Archiv's transcriptions.
+
 ### Releases (Phase D3)
 
 ```bash
@@ -186,7 +215,8 @@ the project against SPECS §3, criterion by criterion.
 ```bash
 deploy/prepare-store.sh                                # desktop: compact, verified serving copy of the store
 curl -fsSL https://raw.githubusercontent.com/marchofhares/leibnizlegible/main/deploy/install.sh | bash  # server: users, venv, Meilisearch, Caddy, units
-leibniz index build --backend meili                    # server: one pass over the store, an hour or two
+leibniz index build --backend meili                    # server: one pass over the store; also writes the twins file
+leibniz catalog letters --db /var/lib/leibniz-legible/inventory.sqlite  # server: letters.json beside the store
 leibniz index bench --url https://your.host            # search p95 against SPECS §3.3 (500 ms)
 ```
 
@@ -239,7 +269,7 @@ default, that alone makes the About page link to it.
 **The v1 corpus run is complete (2026-09-11): 236,210 of 236,795 page records —
 99.75% of the digitized Nachlass — are machine-recognised, 13.5M line records
 with per-line confidence and provenance (sheet-sides registered twice included;
-see the duplicates note above).** The remainder is enumerated (569 skips
+see the note on them above).** The remainder is enumerated (569 skips
 with reasons; 16 pages behind broken GWLB redirects). Phases **A0–A3, B1–B2,
 C1** are complete (`STATUS.md` has the detail). A1's census found **2,225 works
 / 236,795 page images**; A2/A3 built the image cache (395.6 GB) and katalog
@@ -254,9 +284,13 @@ and the reading-text extraction of 21 of 31 expired volumes from
 their free digital copies (6,188 pieces, 26.2M
 characters, 10,029 witnesses with text). **The mint has run (2026-09-16):
 297,424 open-bucket ground-truth lines**, 5.9× the 50k target, in about two
-hours on six workers. Its precision is only preliminarily audited (20 of
-200 sheet lines, `leibniz align audit-sheet` / `audit-score`; the gate is
-deferred to the C3 ablation). **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
+hours on six workers. Its precision was hand-audited on 199 of 200
+sampled lines (2026-10-07; `reports/gt-audit.md`, numbers in
+`reports/gt-audit/audit-summary.json`): corpus-weighted 72.3 % as written,
+below the 95 % gate, and 92.2 % counting a line a letter or a word off at
+an end as usable. The patterns behind it are fixed in the factory (the
+scribe's line-end hyphen kept, minted text one line, a re-mint replacing one
+catalogue record's lines only) and land with the one re-mint before C3. **Phase D is built on v1 (2026-09-16): the search index, the JSON API, IIIF
 Presentation 3 manifests with W3C annotations, the viewer, and the dataset
 exports with cards** — the v1 public beta; the operator runs `leibniz index
 build` + `leibniz serve` on the corpus store. **The deployment kit landed the

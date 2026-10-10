@@ -25,6 +25,7 @@ loop are untouched.
 
 from __future__ import annotations
 
+import ipaddress
 import math
 import time
 from collections.abc import Callable, Iterable
@@ -93,9 +94,25 @@ class RateLimitMiddleware:
 
     @staticmethod
     def client_key(scope: Scope) -> str:
-        """The peer address (uvicorn substitutes ``X-Forwarded-For`` for trusted proxies)."""
+        """The peer address (uvicorn substitutes ``X-Forwarded-For`` for trusted proxies).
+
+        An IPv6 client is keyed by its /64, the block one host or one home is
+        given: keyed by the full address, a client could walk its /64 for a
+        fresh burst each time, and evict everyone else's buckets doing it.
+        """
         client = scope.get("client")
-        return str(client[0]) if client else "unknown"
+        if not client:
+            return "unknown"
+        host = str(client[0])
+        try:
+            addr = ipaddress.ip_address(host)
+        except ValueError:
+            return host
+        if isinstance(addr, ipaddress.IPv6Address):
+            if addr.ipv4_mapped is not None:  # ::ffff:a.b.c.d is that IPv4 client
+                return str(addr.ipv4_mapped)
+            return str(ipaddress.ip_network(f"{addr}/64", strict=False))
+        return str(addr)
 
     def take(self, key: str) -> float:
         """Take one token for ``key``: ``0.0`` if allowed, else seconds until one is due."""

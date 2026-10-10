@@ -113,3 +113,17 @@ def test_assess_extraction() -> None:
 def test_assess_extraction_empty() -> None:
     qa = assess_extraction([])
     assert qa.n_sampled == 0 and qa.error_rate == 0.0
+
+
+def test_source_is_free_needs_the_edition_where_there_are_several() -> None:
+    from leibniz.align.volumes_sources import EditionSource, source_is_free
+
+    today = date(2026, 10, 10)
+    assert source_is_free(EditionSource(1, 6, "ia", "x"), today)
+    assert not source_is_free(EditionSource(1, 17, "ia", "x"), today)  # free 2027-01-01
+    assert source_is_free(EditionSource(1, 17, "ia", "x"), date(2027, 1, 1))
+    # II,1: the 1926 print is free, the 2006 Neubearbeitung protected until 2032
+    assert source_is_free(EditionSource(2, 1, "ia", "x", edition="1926"), today)
+    assert not source_is_free(EditionSource(2, 1, "ia", "x", edition="2006"), today)
+    assert not source_is_free(EditionSource(2, 1, "ia", "x"), today)  # does not say: refused
+    assert not source_is_free(EditionSource(9, 9, "ia", "x"), today)  # not in the registry

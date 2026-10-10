@@ -17,15 +17,21 @@ def test_manifest_shape(store_path) -> None:
     work = db.get_work(conn, W1)
     pages = db.get_pages(conn, W1)
     m = iiif.build_manifest(work, pages, base_url=BASE, line_counts={f"{W1}:0001": 3})
-    assert m["@context"][0].endswith("/presentation/3/context.json")
+    # extension contexts first, the Presentation context last (Presentation 3 §4.6)
+    assert m["@context"][-1] == "http://iiif.io/api/presentation/3/context.json"
+    assert m["@context"][0] == {"leibniz": iiif.LEIBNIZ_NS}
     assert m["id"] == f"{BASE}/manifests/{W1}" and m["type"] == "Manifest"
     assert m["label"] == {"none": ["LH 4,6,18"]}
     assert len(m["items"]) == 3
     c0 = m["items"][0]
     assert c0["id"] == f"{BASE}/manifests/{W1}/canvas/1" and c0["width"] == 2000
     body = c0["items"][0]["items"][0]["body"]
-    assert body["service"][0]["type"] == "ImageService2"
-    assert body["service"][0]["id"].startswith("https://digitale-sammlungen.gwlb.de/iiif/")
+    # an Image API 2 service keeps its 2.x keys and names its profile by URI
+    svc = body["service"][0]
+    assert svc["@type"] == "ImageService2" and "type" not in svc and "id" not in svc
+    assert svc["@id"].startswith("https://digitale-sammlungen.gwlb.de/iiif/")
+    assert svc["profile"] == "http://iiif.io/api/image/2/level1.json"
+    assert body["id"] == svc["@id"] + "/full/max/0/default.jpg"
     assert c0["annotations"][0]["id"] == f"{BASE}/annotations/{W1}:0001"
     assert any(md["value"]["en"] == ["3"] for md in c0["metadata"])
     assert m["seeAlso"][0]["id"].endswith("/manifest.json")
@@ -61,3 +67,15 @@ def test_annotation_page(store_path) -> None:
     assert a0["leibniz:polygon"][0] == [100, 160]
     assert ap["items"][2]["body"]["language"] == "und"
     assert "transcriptions" in ap["leibniz:attribution"]
+
+
+def test_unknown_dimensions_are_left_out_not_null(store_path) -> None:
+    conn = db.connect(store_path)
+    work = db.get_work(conn, W1)
+    page = db.get_pages(conn, W1)[0]
+    page.width = page.height = None
+    canvas = iiif.build_manifest(work, [page], base_url=BASE)["items"][0]
+    body = canvas["items"][0]["items"][0]["body"]
+    assert "width" not in canvas and "height" not in canvas
+    assert "width" not in body and "height" not in body
+    assert None not in canvas.values() and None not in body.values()

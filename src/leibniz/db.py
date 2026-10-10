@@ -172,7 +172,12 @@ CREATE TABLE IF NOT EXISTS gt_lines (
     stratum         TEXT CHECK (stratum IN
                         ('fair_copy','light_revision','heavy_revision','scrap','unknown')),
     align_conf      REAL,
-    license_bucket  TEXT NOT NULL CHECK (license_bucket IN ('open','nc'))
+    license_bucket  TEXT NOT NULL CHECK (license_bucket IN ('open','nc')),
+    -- the catalogue record a factory row was minted from (2026-10): a re-mint
+    -- replaces one record's rows only. Older stores gain the column, its index
+    -- and the backfill from `source` when the factory opens them
+    -- (align/pairs.py ensure_gt_ownership), never on a read path.
+    record_id       TEXT
 );
 
 -- Per-page segmentation statistics (C1). Not in the SPECS §4.3 canonical list —

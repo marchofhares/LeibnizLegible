@@ -169,3 +169,18 @@ def test_evaluate_harness_numbers_do_not_move_with_keep_hyphen() -> None:
     # carries the hyphen and the cut falls after "- ": nothing to restore, same slices
     assert [e.projected for e in on] == [e.projected for e in off]
     assert on[0].projected.rstrip().endswith("industri-")
+
+
+def test_en_dash_and_double_oblique_are_line_end_hyphens() -> None:
+    # PHILIUMM's ground truth marks a split word with an en dash more often than
+    # with "-"; Kurrent transcriptions use "⸗" (2026-10).
+    edition = "de quinque Machinis industriae atque experientiae artificum"
+    for mark in ("–", "⸗"):
+        res = align_piece(
+            _htr(f"de quinque Machinis industri{mark}", "ae atque experientiae artificum"),
+            edition,
+            threshold=0.5,
+        )
+        assert res.lines[0].edition_text == f"de quinque Machinis industri{mark}"
+        assert res.lines[0].kept_hyphen == mark
+        assert res.lines[1].edition_text.startswith("ae atque")

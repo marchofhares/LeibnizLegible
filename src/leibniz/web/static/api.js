@@ -1,7 +1,7 @@
 // api.js — thin wrappers over the JSON API served by the FastAPI app.
 //
 // The contract (fixed, implemented by src/leibniz/web/api.py):
-//   GET /api/search?q&set&lang&stratum&min_conf&work&page&limit
+//   GET /api/search?q&set&lang&stratum&min_conf&work&page&limit&match
 //   GET /api/works               (every work as a row + the browse tree)
 //   GET /api/works/{work_id}
 //   GET /api/pages/{page_id}
@@ -63,12 +63,22 @@ async function getJSON(url, signal) {
 }
 
 /** The query parameters `/api/search` accepts, in a stable order. */
-export const SEARCH_PARAMS = ['q', 'set', 'lang', 'stratum', 'min_conf', 'work', 'page', 'limit'];
+export const SEARCH_PARAMS = [
+  'q',
+  'set',
+  'lang',
+  'stratum',
+  'min_conf',
+  'work',
+  'page',
+  'limit',
+  'match',
+];
 
 /**
  * Build a query string from a params object, dropping empty values.
- * `page=1` and `min_conf=0` are dropped too: they are the defaults, and a
- * clean URL is easier to share.
+ * `page=1`, `min_conf=0` and `match=all` are dropped too: they are the
+ * defaults, and a clean URL is easier to share.
  */
 export function searchQuery(params) {
   const qs = new URLSearchParams();
@@ -77,6 +87,7 @@ export function searchQuery(params) {
     if (value === undefined || value === null || value === '') continue;
     if (key === 'page' && Number(value) <= 1) continue;
     if (key === 'min_conf' && Number(value) <= 0) continue;
+    if (key === 'match' && value !== 'any') continue;
     qs.set(key, String(value));
   }
   return qs.toString();
@@ -86,6 +97,29 @@ export function searchQuery(params) {
 export function search(params, signal) {
   const qs = searchQuery(params);
   return getJSON(`${API}/search${qs ? `?${qs}` : ''}`, signal);
+}
+
+/** GET /api/lookup — where a citation points (a shelfmark and folio, an AA number). */
+export function lookup(q, signal) {
+  return getJSON(`${API}/lookup?q=${encodeURIComponent(q)}`, signal);
+}
+
+/** GET /api/letters — Bodemann's letters by correspondent, date and place. */
+export function letters(params, signal) {
+  const qs = new URLSearchParams();
+  for (const key of ['who', 'place', 'from', 'to', 'direction', 'work', 'page', 'limit']) {
+    const value = params[key];
+    if (value !== undefined && value !== null && value !== '' && !(key === 'page' && Number(value) <= 1)) {
+      qs.set(key, String(value));
+    }
+  }
+  const tail = qs.toString();
+  return getJSON(`${API}/letters${tail ? `?${tail}` : ''}`, signal);
+}
+
+/** GET /api/contents — the convolutes whose catalogue pieces carry the words. */
+export function contents(q, signal) {
+  return getJSON(`${API}/contents?q=${encodeURIComponent(q)}`, signal);
 }
 
 /** GET /api/works — every work as a compact row, and the browse tree. */
@@ -99,8 +133,9 @@ export function work(workId, signal) {
 }
 
 /** GET /api/pages/{page_id} */
-export function page(pageId, signal) {
-  return getJSON(`${API}/pages/${pathSeg(pageId)}`, signal);
+export function page(pageId, signal, run) {
+  const pinned = run !== undefined && run !== null && run !== '' ? `?run=${encodeURIComponent(run)}` : '';
+  return getJSON(`${API}/pages/${pathSeg(pageId)}${pinned}`, signal);
 }
 
 /** GET /api/stats */
@@ -114,8 +149,9 @@ export function manifestUrl(workId) {
 }
 
 /** One page's transcription as a plain-text download, provenance in its header. */
-export function pageTextUrl(pageId) {
-  return `${API}/pages/${pathSeg(pageId)}/text`;
+export function pageTextUrl(pageId, run) {
+  const pinned = run !== undefined && run !== null && run !== '' ? `?run=${encodeURIComponent(run)}` : '';
+  return `${API}/pages/${pathSeg(pageId)}/text${pinned}`;
 }
 
 /** A whole work's transcription as one plain-text download, folio by folio. */

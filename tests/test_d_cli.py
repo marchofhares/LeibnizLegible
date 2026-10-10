@@ -65,7 +65,13 @@ def test_index_meili_index_option_and_env(store_path, monkeypatch) -> None:
     assert r.exit_code == 0, r.stdout
     assert "Indexed 3 pages" in r.stdout
     touched = {p.split("/")[2] for p in seen if p.split(" ")[1].startswith("/indexes/")}
-    assert touched == {"leibniz_pages_staging", "leibniz_pages_staging_meta"}
+    # the staging pair, and the pair it is built in beside them before the swap
+    assert touched == {
+        "leibniz_pages_staging",
+        "leibniz_pages_staging_meta",
+        "leibniz_pages_staging__next",
+        "leibniz_pages_staging_meta__next",
+    }
     seen.clear()
     r = runner.invoke(app, ["index", "status", "--backend", "meili", "--meili-index", "other"])
     assert r.exit_code == 0 and "(other)" in r.stdout and "documents: 3" in r.stdout

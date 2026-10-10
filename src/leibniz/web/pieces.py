@@ -18,18 +18,19 @@ import sqlite3
 from dataclasses import dataclass
 
 from leibniz import db
-from leibniz.align.resolve import folio_range_from_signature, index_pages, select_folios
+from leibniz.align.resolve import FolioSpan, folio_span_from_signature, index_pages, select_span
 
 
-def folio_label(lo: int, hi: int) -> str:
-    """``Bl. 1–2``, or ``Bl. 12`` for a single folio, as a catalogue reads."""
-    return f"Bl. {lo}" if lo == hi else f"Bl. {lo}–{hi}"
+def folio_label(lo: int, hi: int, side_lo: str = "", side_hi: str = "") -> str:
+    """``Bl. 1–2``, ``Bl. 12``, ``Bl. 46v–47r``, as a catalogue reads."""
+    return FolioSpan(lo, hi, side_lo, side_hi).label
 
 
 @dataclass(frozen=True, slots=True)
 class Placement:
-    """A record placed on a work's pages: the folio range, the shelfmark that
-    carried it, and the pages in canvas order."""
+    """A record placed on a work's pages: the folio span, the shelfmark that
+    carried it, and the pages in canvas order. The sides count: ``Bl. 108v``
+    is the verso alone, not all of folio 108."""
 
     record_id: str
     work_id: str
@@ -37,10 +38,12 @@ class Placement:
     folio_lo: int
     folio_hi: int
     pages: list[db.Page]
+    side_lo: str = ""
+    side_hi: str = ""
 
     @property
     def folio_label(self) -> str:
-        return folio_label(self.folio_lo, self.folio_hi)
+        return folio_label(self.folio_lo, self.folio_hi, self.side_lo, self.side_hi)
 
     @property
     def page_ids(self) -> list[str]:
@@ -55,12 +58,12 @@ class Unplaced:
     reason: str
 
 
-def _folio_range(record: db.KatalogRecord) -> tuple[str, tuple[int, int]] | None:
+def _folio_span(record: db.KatalogRecord) -> tuple[str, FolioSpan] | None:
     """The first of the record's shelfmarks that names a ``Bl.`` range, with it."""
     for signature in record.shelfmark_refs:
-        rng = folio_range_from_signature(signature)
-        if rng is not None:
-            return signature, rng
+        span = folio_span_from_signature(signature)
+        if span is not None:
+            return signature, span
     return None
 
 
@@ -72,7 +75,7 @@ def place(
     rid = record.record_id
     if work_id is None:
         return Unplaced(rid, f"record {rid} is not linked to a digitized work")
-    found = _folio_range(record)
+    found = _folio_span(record)
     if found is None:
         marks = "; ".join(m for m in record.shelfmark_refs if m)
         what = (
@@ -83,16 +86,18 @@ def place(
         return Unplaced(
             rid, f"record {rid} cannot be placed on the scan: {what} no folio (Bl.) range"
         )
-    signature, (lo, hi) = found
-    res = select_folios(index, work_id, lo, hi)
+    signature, span = found
+    res = select_span(index, work_id, span)
     if not res.resolved:
         return Unplaced(
             rid,
             f"record {rid} cannot be placed on the scan: {signature!r} names folios "
-            f"{folio_label(lo, hi)}, but no page of work {work_id} carries a folio label in "
+            f"{span.label}, but no page of work {work_id} carries a folio label in "
             f"that range ({res.labelled_pages} of its pages carry folio labels)",
         )
-    return Placement(rid, work_id, signature, lo, hi, res.pages)
+    return Placement(
+        rid, work_id, signature, span.lo, span.hi, res.pages, span.side_lo, span.side_hi
+    )
 
 
 def place_all(
@@ -103,10 +108,25 @@ def place_all(
     return {rec.record_id: place(rec, work_id, index) for rec in records}
 
 
-def place_record(conn: sqlite3.Connection, record: db.KatalogRecord) -> Placement | Unplaced:
+def place_record(
+    conn: sqlite3.Connection, record: db.KatalogRecord, work_id: str | None = None
+) -> Placement | Unplaced:
     """Place a record on the work its best crosswalk link names (the factory's
-    rule); where it links several works, the first that places it wins."""
+    rule); where it links several works, the first that places it wins.
+
+    ``work_id`` places it on that work instead — one the record is linked to —
+    as the work page did when it offered the link: before 2026-10 the page
+    placed a record on the work being viewed and the download on the record's
+    best link, so a record linked to two works could serve the other one's
+    folios.
+    """
     links = db.crosswalk_for_record(conn, record.record_id)
+    if work_id is not None:
+        if not any(link.work_id == work_id for link in links):
+            return Unplaced(
+                record.record_id, f"record {record.record_id} is not linked to work {work_id}"
+            )
+        return place(record, work_id, index_pages(db.get_pages(conn, work_id)))
     if not links:
         return place(record, None, {})
     last: Placement | Unplaced | None = None

@@ -5,6 +5,8 @@ Three subcommands:
 * ``leibniz catalog scrape`` — fetch/parse katalog queries → ``katalog_records``.
 * ``leibniz catalog crosswalk`` — match records to works → ``crosswalk``.
 * ``leibniz catalog report`` — write ``reports/crosswalk.md``.
+* ``leibniz catalog letters`` — Bodemann's letters from correspSearch (CC BY 4.0)
+  → the letters file the web application reads (who, when, where per letter).
 
 Every mutating run is recorded in ``runs`` with the git SHA (provenance, §4.5).
 """
@@ -20,6 +22,7 @@ from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
 
 from leibniz import db
 from leibniz.catalog import crosswalk as crosswalk_mod
+from leibniz.catalog import letters as letters_mod
 from leibniz.catalog import report as report_mod
 from leibniz.catalog import scrape as scrape_mod
 from leibniz.net import PoliteClient
@@ -242,3 +245,47 @@ def report(
 
 
 __all__ = ["app"]
+
+
+@app.command()
+def letters(
+    db_path: Path = typer.Option(
+        db.DEFAULT_DB_PATH, "--db", help="The store the web application serves (for --out)."
+    ),
+    out: Path | None = typer.Option(
+        None,
+        "--out",
+        help="The letters file (env LEIBNIZ_LETTERS_PATH; default letters.json beside the store).",
+    ),
+    cache_dir: Path = typer.Option(
+        Path("data/cache/correspsearch"),
+        "--cache",
+        help="Where the API pages are kept; a run resumes from them.",
+    ),
+    min_interval: float = typer.Option(1.0, "--min-interval", help="Seconds between requests."),
+) -> None:
+    """Fetch Bodemann's catalogue of the letters (1889) from correspSearch, letter by
+    letter, and write the file behind the site's letters: who wrote to whom, when and
+    from where, filed by LBr convolute. CC BY 4.0 (correspSearch, BBAW; data: Portal
+    Der deutsche Brief im 18. Jahrhundert). About 1,550 requests at one a second."""
+    target = out or letters_mod.letters_path_for(db_path)
+    with (
+        PoliteClient(min_interval=min_interval) as client,
+        Progress(
+            TextColumn("[cyan]correspSearch"), BarColumn(), MofNCompleteColumn(), console=console
+        ) as progress,
+    ):
+        task = progress.add_task("pages", total=None)
+
+        def advance(n: int, total: int) -> None:
+            progress.update(task, completed=n, total=total)
+
+        found = letters_mod.harvest(client.get_bytes, cache_dir, progress=advance)
+    index = letters_mod.LettersIndex(found, letters_mod.built_now())
+    index.write(target)
+    placed = sum(1 for ltr in found if ltr.convolute)
+    console.print(
+        f"{len(found):,} letters ({placed:,} filed under a convolute, "
+        f"{len(index.convolutes):,} convolutes) → {target}. Restart the web application "
+        "to show them."
+    )

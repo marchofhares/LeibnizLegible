@@ -227,7 +227,12 @@ def kurrent_pilot(
     ),
     n_german: int = typer.Option(20, "--n-german", help="German pieces to read."),
     n_control: int = typer.Option(5, "--n-control", help="Latin or French control pieces."),
-    max_pages: int = typer.Option(3, "--max-pages", help="Pages read per piece."),
+    max_pages: int = typer.Option(
+        None,
+        "--max-pages",
+        help="Pages read per piece (default 3; with --no-read, the cap the readings on disk "
+        "were taken with, from the last pilot-summary.json).",
+    ),
     min_lines: int = typer.Option(20, "--min-lines", help="Least recognised lines for a piece."),
     sample: int | None = typer.Option(
         None, "--sample", help="Read only the first N lines of each page (slow devices)."
@@ -253,13 +258,46 @@ def kurrent_pilot(
     no_read: bool = typer.Option(
         False, "--no-read", help="Score the readings already on disk; read nothing new."
     ),
+    from_summary: Path = typer.Option(
+        None,
+        "--from-summary",
+        help="Re-render the report from a finished pilot's own pilot-summary.json and "
+        "pilot-yield.csv (--yields): no store, no images, no readings. For adding the "
+        "operator's verdict afterwards.",
+    ),
+    yields_csv: Path = typer.Option(
+        Path("reports/kurrent/pilot-yield.csv"), "--yields", help="With --from-summary."
+    ),
 ) -> None:
     """Candidate readers on Leibniz's German, as a factory dry run (K1 Task 4); nothing stored."""
+    import json
     from datetime import date
 
     from leibniz.align import kurrent_pilot as P
     from leibniz.align.ingest import load_edition_cache
     from leibniz.htr import kurrent as K
+
+    if from_summary is not None:
+        try:
+            res = P.result_from_files(from_summary, yields_csv, operator_verdict=operator_verdict)
+        except ValueError as exc:
+            raise typer.BadParameter(str(exc)) from None
+        paths = P.write_outputs(res, reports_dir=reports_dir)
+        _console.print(
+            f"[bold]kurrent-pilot[/bold] re-rendered from {from_summary} and {yields_csv} "
+            f"(pages capped at {res.max_pages}); " + ", ".join(f"{k} {v}" for k, v in paths.items())
+        )
+        return
+    if max_pages is None:
+        last = reports_dir / "pilot-summary.json"
+        if no_read and last.exists():
+            max_pages = int(json.loads(last.read_text(encoding="utf-8"))["max_pages"])
+            _console.print(
+                f"--no-read: the readings on disk were taken with --max-pages {max_pages} "
+                f"({last}); using it"
+            )
+        else:
+            max_pages = P.MAX_PAGES
 
     t = date.fromisoformat(today) if today else date.today()
     keys = (
@@ -294,6 +332,13 @@ def kurrent_pilot(
             cand = K.CANDIDATES[key]
             if no_read:
                 readings[key] = P.load_readings(readings_dir, key)
+                missing = P.uncovered_pages(conn, pieces, readings[key], sample=sample)
+                if missing:
+                    raise typer.BadParameter(
+                        f"--no-read: {len(missing)} selected pages have no {key} readings on "
+                        f"disk (e.g. {', '.join(missing[:3])}); they would count as unread. "
+                        "Pass the --max-pages the readings were taken with."
+                    )
                 continue
             readings[key] = P.read_pieces(
                 conn,
@@ -505,7 +550,9 @@ def factory(
         None, "--shard", help="Mint shard i/N of the pieces (e.g. 3/12) — parallel workers."
     ),
     resume: bool = typer.Option(
-        False, "--resume", help="Skip pieces that already carry gt_lines (continue a run)."
+        False,
+        "--resume",
+        help="Skip catalogue records that already own gt_lines (continue a run).",
     ),
 ) -> None:
     """Mint gt_lines across the §70 pieces from a pre-extracted edition-text cache."""
@@ -514,17 +561,32 @@ def factory(
 
     from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 
-    from leibniz.align.factory import FactoryConfig, dict_provider, run_factory, shard_pieces
-    from leibniz.align.ingest import load_edition_cache
+    from leibniz.align.factory import (
+        FactoryConfig,
+        dict_provider,
+        run_factory,
+        select_text_pieces,
+        shard_pieces,
+    )
+    from leibniz.align.ingest import load_edition_cache, load_edition_refs
     from leibniz.align.volumes import enumerate_pieces
     from leibniz.db import open_db
 
     t = date.fromisoformat(today) if today else date.today()
     cfg = FactoryConfig(today=t, license_bucket=license_bucket)
     shard_t = _parse_shard(shard)
+    refs = load_edition_refs(edition_cache)
+    if not refs:
+        _console.print(
+            "[yellow]The edition cache records no printed pieces per record (written before "
+            "2026-10): a record citing two volumes is minted under its first citation. Run "
+            "[cyan]leibniz align edition-cache[/cyan] again first.[/yellow]"
+        )
     with open_db(db_path) as conn:
         pieces, _enum = enumerate_pieces(conn, today=t, series=series, volume=volume)
-        todo = shard_pieces(pieces, shard_t)
+        # One piece per record, under the volume its text came from; then the
+        # shard (the order is deterministic, so N workers still split it exactly).
+        todo = shard_pieces(select_text_pieces(pieces, refs), shard_t)
         # Stream the cache and keep only this shard's texts: N parallel workers
         # each parsing the whole cache at once is what exhausts a WSL VM's memory.
         cache = load_edition_cache(edition_cache, needed={p.record_id for p in todo})
@@ -645,6 +707,44 @@ def ingest(
                 )
 
 
+@app.command(name="gt-reset")
+def gt_reset(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store path."),
+    yes: bool = typer.Option(False, "--yes", help="Delete without asking."),
+) -> None:
+    """Delete every line the factory minted, before the one full re-mint.
+
+    A re-mint replaces each record it mints; a record the current rules no
+    longer mint (no canvases on its folio sides, no text in the edition cache)
+    would keep its old lines. This clears the rows a catalogue record owns —
+    the factory's — and keeps ground truth imported from elsewhere. Back the
+    store up first; then run the factory's shards without --resume."""
+    from leibniz.align.factory import with_write_lock
+    from leibniz.align.pairs import delete_minted, ensure_gt_ownership
+    from leibniz.db import open_db
+
+    with open_db(db_path) as conn:
+        backfilled = with_write_lock(conn, lambda: ensure_gt_ownership(conn))
+        owned = conn.execute(
+            "SELECT COUNT(*) FROM gt_lines WHERE record_id IS NOT NULL"
+        ).fetchone()[0]
+        kept = conn.execute("SELECT COUNT(*) FROM gt_lines WHERE record_id IS NULL").fetchone()[0]
+        _console.print(
+            f"{owned:,} minted lines owned by catalogue records ({backfilled:,} owners filled in "
+            f"from their source just now); {kept:,} other lines are kept."
+        )
+        if not owned:
+            return
+        if not yes and not typer.confirm(f"Delete the {owned:,} minted lines?"):
+            raise typer.Exit(1)
+        removed = with_write_lock(conn, lambda: delete_minted(conn))
+    _console.print(
+        f"[bold]deleted[/bold] {sum(removed.values()):,} lines "
+        f"({', '.join(f'{k} {v:,}' for k, v in sorted(removed.items()))}). Now the factory's "
+        "shards, without --resume."
+    )
+
+
 @app.command(name="edition-cache")
 def edition_cache(
     out: Path = typer.Argument(
@@ -664,24 +764,35 @@ def edition_cache(
         text_path,
         write_edition_cache,
     )
-    from leibniz.align.volumes_sources import readable_sources
+    from leibniz.align.volumes_sources import readable_sources, source_is_free
     from leibniz.db import open_db
     from leibniz.legal import expired_volumes
 
     t = date.fromisoformat(today) if today else date.today()
     texts: dict[tuple[int, int], dict[str, str]] = {}
+    channels: dict[tuple[int, int], dict[str, str]] = {}
     for v in expired_volumes(t):
         if not isinstance(v.volume, int):
             continue
         for src in readable_sources(v.series, v.volume):
+            if not source_is_free(src, t):
+                _console.print(
+                    f"[yellow]skipped {src.kind} copy of {v.label}: its edition is not "
+                    "known to be §70-free[/yellow]"
+                )
+                continue
             path = text_path(src, editions_dir)
             if path.exists():
                 merged = texts.setdefault((v.series, v.volume), {})
+                via = channels.setdefault((v.series, v.volume), {})
                 for piece, text in load_volume_texts(path).items():
-                    merged.setdefault(piece, text)  # preferred source first
+                    if piece not in merged:  # preferred source first
+                        merged[piece] = text
+                        via[piece] = src.kind
+    refs: dict[str, list[dict]] = {}
     with open_db(db_path) as conn:
-        cache, stats = build_edition_cache(conn, texts)
-    write_edition_cache(out, cache)
+        cache, stats = build_edition_cache(conn, texts, channels=channels, refs_out=refs)
+    write_edition_cache(out, cache, refs)
     _console.print(
         f"[bold green]{stats.records_with_text:,} records with reading text[/bold green] "
         f"({sum(len(v) for v in cache.values()):,} chars) → {out}; "
@@ -708,12 +819,19 @@ def gt_report(
     """(Re)write reports/gt-factory.md from the minted gt_lines + piece enumeration."""
     from datetime import date
 
+    from leibniz.align.audit import load_audit_summary
     from leibniz.align.report_gt import gather_gt, render_gt
     from leibniz.db import open_db
 
     t = date.fromisoformat(today) if today else date.today()
     with open_db(db_path) as conn:
-        rep = gather_gt(conn, today=t, editions_dir=editions_dir, edition_cache=edition_cache)
+        rep = gather_gt(
+            conn,
+            today=t,
+            editions_dir=editions_dir,
+            edition_cache=edition_cache,
+            audit_summary=load_audit_summary(),
+        )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_gt(rep), encoding="utf-8")
     _console.print(f"[bold]gt-report[/bold] → {out} ({rep.n_open:,} open-bucket lines)")
@@ -815,17 +933,24 @@ def audit_score(
         "--corrections-out",
         help="Corrections CSV (default: <verdicts stem>-corrections.csv).",
     ),
+    summary_out: Path = typer.Option(
+        Path("reports/gt-audit/audit-summary.json"),
+        "--summary",
+        help="The scored audit in numbers, for the dataset card and gt-report.",
+    ),
 ) -> None:
     """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
     from leibniz.align import audit_patterns as P
     from leibniz.align.audit import (
         STRATA,
+        audit_summary,
         read_verdicts,
         render_agreement,
         render_score,
         score_verdicts,
         text_evidence,
         verdict_agreement,
+        write_audit_summary,
     )
     from leibniz.db import open_db
 
@@ -855,6 +980,9 @@ def audit_score(
             }
         weight_note = f"stratum weights from `{db_path}`"
     score = score_verdicts(rows, weight_counts)
+    write_audit_summary(
+        summary_out, audit_summary(score, verdicts=verdicts.name, weights_source=weight_note)
+    )
     note = f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); {weight_note}."
     sections: list[list[str]] = []
     if compare is not None:

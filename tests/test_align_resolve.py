@@ -92,3 +92,29 @@ def test_select_folios_over_a_prebuilt_index_matches_resolve_canvases() -> None:
         )
     assert select_folios(index, "W", 164, 165).canvas_seqs == [3, 4, 5]
     assert not select_folios(index, "W", 170, 171).resolved
+
+
+def test_parse_bl_span_keeps_the_sides() -> None:
+    from leibniz.align.resolve import FolioSpan, parse_bl_span
+
+    assert parse_bl_span("12v-13r") == FolioSpan(12, 13, "v", "r")
+    assert parse_bl_span("108v°") == FolioSpan(108, 108, "v", "v")
+    assert parse_bl_span("12r°–13v°") == FolioSpan(12, 13, "r", "v")
+    assert parse_bl_span("164-169") == FolioSpan(164, 169)
+    assert parse_bl_span("13r-12v") == FolioSpan(12, 13, "v", "r")  # put in order, sides too
+    assert parse_bl_span("12v-13r").label == "Bl. 12v–13r"
+    assert FolioSpan(12, 12).label == "Bl. 12"
+    assert parse_bl_range("12v-13r") == (12, 13)  # the numeric form is unchanged
+
+
+def test_select_folios_respects_sides() -> None:
+    conn = _work_with_folios(["12r", "12v", "13r", "13v", "14", "15r"])
+    index = build_folio_index(conn, "W")
+    seqs = lambda **kw: select_folios(index, "W", **kw).canvas_seqs  # noqa: E731
+    assert seqs(folio_lo=12, folio_hi=13) == [1, 2, 3, 4]
+    assert seqs(folio_lo=12, folio_hi=13, side_lo="v", side_hi="r") == [2, 3]
+    assert seqs(folio_lo=12, folio_hi=12, side_lo="v", side_hi="v") == [2]
+    assert seqs(folio_lo=12, folio_hi=12, side_lo="r", side_hi="r") == [1]
+    # a label without a side is inside whenever its folio number is
+    assert seqs(folio_lo=14, folio_hi=14, side_lo="v", side_hi="v") == [5]
+    assert resolve_piece(conn, "W", "LH 1 Bl. 12 v°–13 r°").canvas_seqs == [2, 3]

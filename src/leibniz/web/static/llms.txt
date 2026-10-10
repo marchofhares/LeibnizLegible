@@ -15,16 +15,20 @@ quotation, and carry the confidence with it.
 ## Read it
 
 - [Search](https://leibnizlegible.com/search): typo-tolerant full-text search.
-- [Browse](https://leibnizlegible.com/browse): the whole Nachlass by shelfmark, every work linked: the manuscripts (LH) by section, the correspondence (LBr) by correspondent, the annotated books (Marginalien) by number. Each section has an anchor (`/browse#lh-35`, `#lbr`, `#marg`).
+- [Browse](https://leibnizlegible.com/browse): the whole Nachlass by shelfmark, every work linked: the manuscripts (LH) by section, the correspondence (LBr) by correspondent, the annotated books (Marginalien) by number. Each section has an anchor (`/browse#lh-35`, `#lbr`, `#marg`). Its filter also finds the convolute that holds a catalogue piece by the piece's title.
+- [Letters](https://leibnizlegible.com/letters): the letters by correspondent, date and place, as Eduard Bodemann catalogued them in 1889, each linked to its convolute.
 - [About](https://leibnizlegible.com/about): what this is, how wrong it is, who made it, licences, how to cite.
 - [Sitemap](https://leibnizlegible.com/sitemap.xml): one URL per archival unit (`/work/{id}`); each work page lists its pages (`/page/{id}`).
 
 ## Machine access (JSON and plain text, no key, CORS open, rate-limited per client)
 
-- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100). Returns page-level hits with a snippet, mean confidence and a thumbnail URL. Words match typo-tolerantly and multi-word queries are not phrase queries; "double quotes" match the exact words in that order, and a leading minus (-word, -"two words") leaves out pages that contain it. Quoted and excluded words match exactly, so they do not see past misread words.
+- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100), `match` (`all`, the default: a page holds every word; `any`: one is enough). Returns page-level hits with a snippet, mean confidence and a thumbnail URL; `reachable` says how many of `total` can be paged to (10,000). Words match typo-tolerantly and multi-word queries are not phrase queries; "double quotes" match the exact words in that order, and a leading minus (-word, -"two words") leaves out pages that contain it. Quoted and excluded words match exactly, so they do not see past misread words. Titles, shelfmarks, Akademie-Ausgabe references and the titles of the catalogue pieces on a page are searched too. A scan the library registered under two folio labels is one hit (`also` names the other labels); a two-page spread is two, one per half.
+- `GET /api/lookup?q=…`: where a citation points — a shelfmark with or without its folio (`LH IV, 6, 18 Bl. 1r`), an Akademie-Ausgabe piece (`A VI, 4 N. 109`), a work or page id — as `targets` with site URLs; `kind` is null when `q` is not a citation.
+- `GET /api/letters` with optional `who`, `place`, `from`, `to` (years), `direction` (`to`, `from` Leibniz), `work`, `page`, `limit`: Bodemann's letters (correspSearch, CC BY 4.0) with sender and addressee (GND), date, place (GeoNames), his number and the works that hold the convolute.
+- `GET /api/contents?q=…`: the convolutes whose catalogue pieces carry the words in a title, incipit, sender or addressee, with the matching pieces and their shelfmarks.
 - `GET /api/works`: every work in one list, a compact row each (`work_id`, `set`, `title`, `shelfmark`, `shelfmarks`, `family`, `section`, `section_label`, `label`, `n_canvases`, `has_katalog`), plus `groups`, the tree behind /browse (family → section → the work ids in order). `?set=` and `?family=` (`LH`, `LBr`, `Marg`, `Other`) narrow it. A letter convolute's `label` is its correspondent only where the linked catalogue records name one that fits the alphabetical order of the LBr numbers; otherwise it is the bare shelfmark, so a missing name means "not established here", not "unknown".
 - `GET /api/works/{work_id}`: title, shelfmarks, pages, catalogue records (with `sender` and `addressee` as the catalogue names them, Akademie-Ausgabe references and other printings where it knows them, and `text_url` where the piece can be placed on the scan), attribution, and `browse`, the work's section in that tree.
-- `GET /api/pages/{page_id}`: every line with text, confidence, status, geometry, model, run and source image.
+- `GET /api/pages/{page_id}`: every line with its number on the page (`n`, from 1), text, confidence, status, geometry, model, run and source image, and `cite`: the page's citation with a permalink pinned to its recognition run. `?run=N` reads the page as run N left it, so a quotation keeps its text after a later re-read; `/page/{page_id}#L3` is line 3 of the page in the viewer.
 - `GET /api/pages/{page_id}/text`: the page's transcription as plain UTF-8 text: a header of `# ` lines (page URL, work, folio, source image, model, run and run date, line count, mean confidence, licence, this wording rule), a blank line, then one recognised line per line in reading order. `?format=tsv` gives tab-separated `line_id`, `line_seq`, `conf`, `status`, `text` under a header row instead.
 - `GET /api/works/{work_id}/text`: the same for a whole work, every page in canvas order under a `## Folio <label> — <page_id>` line followed by `# ` lines naming its source image and model (`?format=tsv` too). Streamed; a work of a thousand pages is one request, not a thousand.
 - `GET /api/records/{record_id}/text`: the text of one catalogue piece — a letter, a draft, a treatise as the Arbeitskatalog lists it — across the folios its shelfmark names (`Bl. 164–169` → the canvases labelled 164r to 169v), in the work export's layout under a header naming the record (title, date, sender and addressee, Akademie-Ausgabe reference where known), the work, the folio range and the canvases (`?format=tsv` too). The record ids come from `/api/works/{work_id}`, whose `katalog` entries carry `text_url`, `folio_label`, `folio_range` and `n_pages` where the record can be placed; a record without a folio range, or whose folios the scan's labels cannot place, answers 404 and says why.
@@ -36,9 +40,12 @@ quotation, and carry the confidence with it.
 
 - Transcriptions: Leibniz Legible, CC BY 4.0, machine output; do not ingest as verified text; keep the provenance fields.
 - Page images: GWLB Hannover, Public Domain Mark 1.0.
-- Catalogue data: Arbeitskatalog der Leibniz-Edition, BBAW, CC BY 4.0.
+- Catalogue data: Arbeitskatalog der Leibniz-Edition, BBAW (Arbeitsstelle Potsdam I), CC BY 4.0.
+- Letters: Eduard Bodemann's catalogue (1889) via correspSearch (BBAW; data: Portal Der deutsche Brief im 18. Jahrhundert), CC BY 4.0.
 - Code: Apache-2.0, https://github.com/marchofhares/leibnizlegible
 
 ## Cite
 
 Leibniz Legible (2026), machine transcription of the digitized Leibniz Nachlass, https://leibnizlegible.com. Project statement: doi:10.5281/zenodo.22782813.
+
+A line: take `cite.permalink` from `/api/pages/{page_id}` and add `#L{n}` — the permalink names the recognition run, so the text it shows does not change when the page is read again.

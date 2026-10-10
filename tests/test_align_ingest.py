@@ -114,3 +114,33 @@ def test_edition_cache_jsonl_roundtrip_and_shard_filter(tmp_path: Path) -> None:
     I.write_edition_cache(legacy, cache)
     assert legacy.read_text(encoding="utf-8").startswith("{")
     assert I.load_edition_cache(legacy) == cache
+
+
+def test_edition_cache_records_the_printed_pieces_its_text_came_from(tmp_path: Path) -> None:
+    conn = db.init_db(":memory:")
+    db.upsert_katalog_record(
+        conn,
+        db.KatalogRecord(
+            record_id="R",
+            aa_refs=[
+                {"series": 1, "volume": 5, "piece": "7", "source": "aa_column"},  # no text
+                {"series": 1, "volume": 6, "piece": "012", "source": "aa_column"},
+                {"series": 1, "volume": 9, "piece": "3a", "source": "aa_column"},  # parent only
+            ],
+        ),
+    )
+    texts = {(1, 6): {"12": "x" * 50}, (1, 9): {"3": "y" * 50}}
+    channels = {(1, 6): {"12": "ia"}, (1, 9): {"3": "gwlb"}}
+    refs: dict[str, list[dict]] = {}
+    cache, _stats = I.build_edition_cache(conn, texts, channels=channels, refs_out=refs)
+    assert cache["R"] == "x" * 50 + "\n" + "y" * 50
+    assert refs["R"] == [
+        {"series": 1, "volume": 6, "piece": "012", "channel": "ia"},
+        {"series": 1, "volume": 9, "piece": "3a", "channel": "gwlb"},
+    ]
+    out = tmp_path / "cache.jsonl"
+    I.write_edition_cache(out, cache, refs)
+    assert I.load_edition_cache(out) == cache  # the text stream is unchanged
+    assert I.load_edition_refs(out) == refs
+    I.write_edition_cache(out, cache)  # an older-style cache: no refs
+    assert I.load_edition_refs(out) == {}
