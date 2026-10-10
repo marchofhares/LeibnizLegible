@@ -16,7 +16,7 @@ faults on the live site. Both are fixed on `claude/amazing-mayer-y6i9g0`,
 with the six features readers are most likely to ask for: duplicate scans
 folded and spreads split, citable lines, lookup of what scholars cite,
 letters by correspondent, date and place, a Faszikel index of the
-catalogue's pieces, and links out. Tests 705 → 806, ruff clean, the new views
+catalogue's pieces, and links out. Tests 705 → 808, ruff clean, the new views
 checked in a headless browser on the fixture store. **Nothing is deployed or
 re-run:** the factory fixes take effect with the re-mint (a full run, without
 `--resume`), the search fixes and the twin folding with the next index
@@ -622,7 +622,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   #41); the fixture store only — no store, server or live index. Live
   checks were polite GETs: the GWLB (an IIIF `info.json`, the resolver's
   page link, the repository's volume pages), correspSearch (sample pages),
-  the Leibniz-Katalog's extended search. Baseline 705 tests; 806 at the end,
+  the Leibniz-Katalog's extended search. Baseline 705 tests; 808 at the end,
   ruff clean.
 - **GT factory, before the re-mint** (`b725def`). Minted rows belong to their
   catalogue record (`gt_lines.record_id`, its index and the backfill from
@@ -668,7 +668,11 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   at the fold, verso left; triples, upright images and spreads with many
   lines across the fold are folded onto one page. The index build applies it
   as it reads the lines and writes the groups beside the index for the web
-  app; `leibniz images twins` writes the same file alone.
+  app; `leibniz images twins` writes the same file alone. Its figures reach
+  `/api/stats` as `scans` (each scan once), `lines_once` and `twins`;
+  `images` there has said where the images are served from since the
+  mirror, and the first draft's count under that key never reached the
+  About page (caught before the merge, tested through the API now).
 - **Citable lines** (`7cf6c06`). Lines numbered from 1; `/page/<id>#L<n>`;
   a Cite box with model, run and a permalink pinned to the run;
   `?run=N` reads a page as run N left it, so a citation keeps its text
@@ -2954,7 +2958,7 @@ pieces per record); back the store up; `leibniz align gt-reset` (deletes the
 lines the factory minted, keeps imported ground truth — a re-mint alone would
 leave the old lines of records the new rules no longer mint); the six shards
 without `--resume`; then `audit-reach`, `gt-report`, and `philiumm-vi4`
-match/compare; read the counts before quoting any. (6) Read `/api/stats` (`images`, `lines_once`, `twins`) and
+match/compare; read the counts before quoting any. (6) Read `/api/stats` (`scans`, `lines_once`, `twins`) and
 spot-check twins (Open questions #26) before the About page's figures are
 quoted anywhere.
 

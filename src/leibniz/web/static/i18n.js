@@ -356,7 +356,7 @@ const STRINGS = {
     'about.numbers.recognized': 'Pages recognised',
     'about.numbers.skipped': 'Pages skipped',
     'about.numbers.lines': 'Lines',
-    'about.numbers.images': 'Distinct scans',
+    'about.numbers.scans': 'Distinct scans',
     'about.numbers.linesOnce': 'Lines, each scan once',
     'about.numbers.version': 'Software version',
     'about.numbers.caveat':
@@ -795,7 +795,7 @@ const STRINGS = {
     'about.numbers.recognized': 'Erkannte Seiten',
     'about.numbers.skipped': 'Übersprungene Seiten',
     'about.numbers.lines': 'Zeilen',
-    'about.numbers.images': 'Verschiedene Scans',
+    'about.numbers.scans': 'Verschiedene Scans',
     'about.numbers.linesOnce': 'Zeilen, jeder Scan einmal',
     'about.numbers.version': 'Softwareversion',
     'about.numbers.caveat':

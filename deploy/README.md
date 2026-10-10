@@ -343,8 +343,10 @@ What is already on, and where to turn the knobs:
   `/etc/caddy` and, once Calculemus is installed, `/etc/calculemus` (a few
   KB) and you can rebuild the host from this file — except the game's own
   data, which §13 covers.
-- **Disk.** Watch `/var/lib/meilisearch` after a rebuild (the old index is
-  dropped first, so the peak is one index) and `/var/log/caddy`.
+- **Disk.** Watch `/var/lib/meilisearch` during a rebuild (both generations
+  sit on disk until the swap, so the peak is two indexes; `du -sh
+  /var/lib/meilisearch` before a build is roughly what the second one will
+  take) and `/var/log/caddy`.
 - **Monitoring.** `/healthz` from an uptime checker; `systemctl status
   leibniz-legible meilisearch caddy`; `journalctl -u leibniz-legible --since
   today | grep -c ' 5[0-9][0-9] '` for server errors.

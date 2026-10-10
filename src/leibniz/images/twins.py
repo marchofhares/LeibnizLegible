@@ -627,12 +627,14 @@ def twins_path_for(
 
 
 def dedup_stats(stats: Mapping, found: TwinStats, lines_indexed: int) -> dict:
-    """The corpus figures once each scan is counted once: ``images`` (page
+    """The corpus figures once each scan is counted once: ``scans`` (page
     images less the second registrations of a scan) and ``lines_once`` (the
-    lines the index holds, each scan's lines once), with what was found."""
+    lines the index holds, each scan's lines once), with what was found.
+    (``/api/stats`` already says where the images are served from under
+    ``images``.)"""
     pages = int(stats.get("pages") or 0)
     return {
-        "images": pages - found.second_registrations,
+        "scans": pages - found.second_registrations,
         "lines_once": lines_indexed,
         "twins": found.to_dict(),
     }

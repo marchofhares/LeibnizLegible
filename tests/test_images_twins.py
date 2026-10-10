@@ -336,9 +336,22 @@ def test_the_index_build_writes_the_twins_and_counts_each_scan_once(
     written = TwinIndex.load(tmp_path / "search.twins.json")
     assert written.stats["spreads"] == 1 and written.get(f"{LBR}:0002") is not None
     stats = Fts5Backend(index).meta()["stats"]
-    assert stats["images"] == stats["pages"] - 1  # 2v is a second registration of 1r's scan
+    assert stats["scans"] == stats["pages"] - 1  # 2v is a second registration of 1r's scan
     assert stats["lines_once"] == 7 + 4 + 4 + 1  # the fixture's 7 lines, the halves, page 1v
     assert stats["twins"]["second_registrations"] == 1
+    # what the About page reads: the figures reach /api/stats beside the image origin,
+    # which has had the key "images" since the mirror (the first draft wrote its
+    # count there, and /api/stats overwrote it)
+    app_ = create_app(
+        store_path,
+        search=Fts5Backend(index),
+        static_dir=None,
+        twins_path=tmp_path / "search.twins.json",
+    )
+    served = TestClient(app_).get("/api/stats").json()
+    assert served["scans"] == stats["scans"] and served["lines_once"] == stats["lines_once"]
+    assert served["twins"]["second_registrations"] == 1
+    assert served["images"]["origin"] == "gwlb"
     # a partial build leaves the file alone
     (tmp_path / "search.twins.json").unlink()
     args = ["index", "build", "--db", str(store_path), "--index", str(index), "--work", LBR]

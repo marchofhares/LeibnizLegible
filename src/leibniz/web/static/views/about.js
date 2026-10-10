@@ -37,7 +37,7 @@ function statTiles(data) {
   ];
   // each scan counted once: written by an index build that found the scans
   // registered under two labels (leibniz/images/twins.py)
-  if (typeof data.images === 'number') tiles.splice(2, 0, ['about.numbers.images', data.images]);
+  if (typeof data.scans === 'number') tiles.splice(2, 0, ['about.numbers.scans', data.scans]);
   if (typeof data.lines_once === 'number') tiles.push(['about.numbers.linesOnce', data.lines_once]);
   return (
     `<ul class="stats">` +
@@ -270,7 +270,7 @@ export async function render(ctx) {
       box.innerHTML =
         statTiles(data) +
         `<p class="muted">${esc(
-          t(typeof data.images === 'number' ? 'about.numbers.caveat' : 'about.numbers.caveatRaw'),
+          t(typeof data.scans === 'number' ? 'about.numbers.caveat' : 'about.numbers.caveatRaw'),
         )}</p>` +
         provenanceRows(data) +
         histogram(data);
