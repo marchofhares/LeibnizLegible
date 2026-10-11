@@ -3,11 +3,29 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-10 (**W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`, not yet deployed: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-11 (**W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-11: W5 live.** Merged as #42 (merge commit `aac0fc9`) after the
+operator's staging look on 2026-10-10 — twelve HTTP checks against the live
+store and index answered as designed, and the browser look was good except
+that `Monadologie` found nothing in the browse filter (the store's catalogue
+is part of the Arbeitskatalog: Open questions #27; `25961a1` makes the page
+say so) — and deployed the same evening (the §9 update; it carried K1's code
+along). Overnight the index was rebuilt with the staging unit stopped
+(runbook §14), into a second index swapped in at the end, so search stayed
+up; the letters were fetched beside it; one restart of both units. Live
+since 2026-10-11 (`/api/stats`): **196,439 distinct scans** among 236,795
+page records — 40,297 scans registered under more than one folio label,
+39,442 of them spreads split at the fold and 855 folded onto one page, 519
+candidates left as they were — and **9,846,450 lines once each** against
+13,508,625; **15,425 letters** on `/letters`, and 991 of the 1,060 letter
+convolutes named (680 before). The operator spot-checked six decisions (five
+spreads in LBr and LH, one fold): all correct. Still to come: the re-mint
+before C3 (Next).
 
 **2026-10-10: W5 — the review's fixes and six reader features, in code.** A
 review of the whole project — code, reports, the live site — found faults in
@@ -17,14 +35,14 @@ with the six features readers are most likely to ask for: duplicate scans
 folded and spreads split, citable lines, lookup of what scholars cite,
 letters by correspondent, date and place, a Faszikel index of the
 catalogue's pieces, and links out. Tests 705 → 808, ruff clean, the new views
-checked in a headless browser on the fixture store. **Nothing is deployed or
-re-run:** the factory fixes take effect with the re-mint (a full run, without
-`--resume`), the search fixes and the twin folding with the next index
-rebuild, the letters with `leibniz catalog letters`. The numbers the new
-code produces on the corpus (distinct scans, lines once each, spreads,
-letters filed) do not exist yet; the index build writes them to
-`/api/stats` and the twins file. The W5 entry in the Phase log has the
-detail and Next the operator's order.
+checked in a headless browser on the fixture store. **Not deployed or
+re-run by the session** (live since that evening: above): the factory fixes
+take effect with the re-mint (a full run, without `--resume`), the search
+fixes and the twin folding with the next index rebuild, the letters with
+`leibniz catalog letters`. The numbers the new code produces on the corpus
+(distinct scans, lines once each, spreads, letters filed) did not exist
+yet; the index build writes them to `/api/stats` and the twins file. The
+W5 entry in the Phase log has the detail and Next the operator's order.
 
 **2026-10-09: K1 — the Kurrent track, done; gate for K2: GO with
 `trocr-kurrent-xvi-xvii`.** The German question measured before any reader
@@ -616,7 +634,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ⏳ deploy · ⏳ index rebuild · ⏳ re-mint
+### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 
 - **Setting.** A cloud session on a fresh clone of main at `9c96c7f` (after
   #41); the fixture store only — no store, server or live index. Live
@@ -702,6 +720,46 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 - **Not decided here.** Kalliope holds per-convolute records for every LBr
   work (its ids are the work ids) with GND places and folio notes, but
   states no licence on its site; not used (Open questions #25).
+- **The staging look and the deploy (2026-10-10/11; the operator ran every
+  command on the box, this session read the outputs and checked the live
+  site over HTTP).** Staging ran the branch at `8d532da`, then `25961a1`.
+  Twelve HTTP checks against the live store and index answered as designed:
+  the shelfmark and AA lookups (`LH IV, 6, 18 Bl. 1r` and `A VI, 4 N. 109` →
+  `00068642:0001`); the piece texts pinned to their work; the Katalog links
+  with their catalogue numbers; the record and page links to the GWLB; the
+  source image a JPEG; the permalink pinned to run 74; two words 63 hits with
+  `match=all` against 376 with `match=any`, the old behaviour; page 600
+  clamped to 500 of 10,000 reachable; a malformed `set` refused with 422
+  (FastAPI's check of the parameter's shape; the plan page had said 400);
+  `/api/letters` 503 before the letters existed. The browser look was good
+  except `Monadologie` in the browse filter, which found nothing: the store
+  has no catalogue record for LH 4, 1, 1a or 1b (Open questions #27). Two
+  fixes on the way, both on staging before the merge: `8d532da` (the build
+  wrote its distinct-scan count under `images`, the key `/api/stats` already
+  used for the image origin, so the About tile could never show; now
+  `scans`, tested through the API) and `25961a1` (the browse page's status
+  line says what the catalogue found, and that the site holds part of it).
+  Merged as #42 (`aac0fc9`); the §9 update, which carried K1's code along
+  (it changes nothing the site runs); `staging.sh --main`. The index rebuild
+  under §5 with the staging unit stopped (§14): the live index 17 GB with
+  33 GB free before; the second generation swapped in at about 02:59 UTC on
+  2026-10-11, after about five and a half hours (49.5 minutes of CPU), and
+  the old one deleted (34 GB free after). `leibniz catalog letters` ran
+  beside it as a transient unit of its own, about half an hour. One restart
+  of both units after both.
+- **Live figures (`/api/stats`, read 2026-10-11).** works 2,225 · pages
+  236,795 · **scans 196,439** · lines 13,508,625 · **lines_once 9,846,450**
+  · twins: candidates 40,816, groups 40,297 (spreads 39,442, folds 855),
+  unconfirmed 519, registrations 80,653, second registrations 40,356 · index
+  built 2026-10-11T02:59:06Z. `/api/letters`: 15,425 letters (correspSearch
+  listed 15,439 on 2026-10-10). `/api/works`: 991 of the 1,060 LBr
+  convolutes named (680 before), 1,043 with the years of their letters.
+  Search: `monas` puts *monas* itself first (before: *Monasteriax*);
+  `characteristica universalis` 85 pages, the two copies of one text that
+  headed the list on 2026-10-10 (`DE-611-HS-855676:0004` and `:0005`) now
+  the left and right halves of a split spread; `AA VI,4 N. 109` 88 pages (the
+  review counted 123,980). The operator's spot-check of six decisions (five
+  spreads in LBr and LH, one fold): all correct.
 
 ### K1 — Kurrent track (2026-10-09) ✅ Tasks 0–4 · gate for K2: **GO** with `trocr-kurrent-xvi-xvii`
 
@@ -2487,7 +2545,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **704** (2026-10-09, K1, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **808** (2026-10-10, W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **W5 live (2026-10-11, `/api/stats`)** | 236,795 page records · **196,439 distinct scans** · 40,297 scans registered under more than one label: 39,442 spreads split, 855 folded, 519 candidates left · lines 13,508,625 · **9,846,450 lines once each** · 15,425 letters (Bodemann, from correspSearch) · 991 / 1,060 letter convolutes named (680 before) |
 | **K1 pilot on Leibniz's German (2026-10-09)** | 20 German pieces + 5 controls, 2,639 lines, GPU; German yield at the factory's gate: philiumm **12.5 %** · trocr-kurrent-xvi-xvii **20.2 %** · trocr-hanse-xvii **20.6 %** · trocr-hanse-xvi **22.5 %** · v1 **16.4 %**; control yield: philiumm 41.6 % · trocr-kurrent-xvi-xvii 23.6 % · trocr-hanse-xvii 18.2 % · trocr-hanse-xvi 30.5 % · v1 40.5 %; gate **GO** |
 | **K1 Dresden ranking (2026-10-09)** | 383 Kurrent Trace lines, GPU; CER under the `philiumm` policy: trocr-kurrent-xvi-xvii **7.4 %** · trocr-hanse-xvi **8.9 %** · trocr-hanse-xvii **10.9 %** · philiumm **29.5 %** · mccatmus **51.7 %**; the baseline `philiumm` at 29.5 % is not noise |
 | **K1 aligner noise tolerance (2026-10-09)** | 1,878 lines, 76 pieces; base CER 7.95 %; yield at 30 % CER 97.0 % / 94.0 % / 79.8 % / 46.0 % (fair / light / heavy / scrap); **break-even yield < 50 % at ≈ 55 / 48 / 38 / 29 % CER**, precision < 95 % at ≈ 51 / 48 / 42 / 39 % |
@@ -2566,8 +2625,12 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     check guards against folding two different pages that happen to share a
     size, but a pair whose pages carry no lines is never confirmed (left
     unfolded), and a spread photographed rotated by 180° (not seen) would
-    swap its halves. After the rebuild, read `twins.stats` and spot-check a
-    dozen spreads and folds per family before quoting the counts.
+    swap its halves. After the rebuild (2026-10-11), `twins` in `/api/stats`
+    reads 40,297 groups (39,442 spreads, 855 folds, 519 unconfirmed); the
+    operator spot-checked six decisions, five spreads in LBr and LH and one
+    fold: all correct (no Marginalien pair came up in that sample). A wider
+    sample per family would measure the error; until then the About page
+    states the counts as the rule makes them.
 25. **Kalliope's terms (2026-10-10, W5).** Kalliope has a record per LBr
     convolute (its ids are our work ids) with correspondents and places by
     GND and, for 387 convolutes, the letters by folio ("Darin: Blatt 1: Brief
@@ -2953,8 +3016,10 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
-**W5 (2026-10-10): in code on `claude/amazing-mayer-y6i9g0`; the operator's
-order.** (1) Open a pull request from the branch and read it; put it on
+**W5 (2026-10-10): ✅ live — merged as #42 and deployed on 2026-10-10, the
+index rebuilt and the letters fetched overnight (the W5 entry has the record).
+Steps (1) to (4) and (6) below are done; (5), the re-mint, remains, before
+C3.** The operator's order, as it was: (1) Open a pull request from the branch and read it; put it on
 staging (`staging.sh claude/amazing-mayer-y6i9g0`) and look: a search for
 two words, `LH IV, 6, 18 Bl. 1r` in the search box, a page's Cite box and
 `#L3`, `/letters` (empty until step 4), a work page's record links. (2) Merge;
