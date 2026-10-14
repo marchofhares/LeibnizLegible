@@ -31,7 +31,19 @@ def test_transcriptions_latest_run_and_nc_exclusion(store_path) -> None:
     assert {r["work_id"] for r in rows} == {W1, W2}
 
 
-def test_export_jsonl_all_datasets(store_path, tmp_path) -> None:
+def test_export_jsonl_all_datasets(store_path, tmp_path, monkeypatch) -> None:
+    import leibniz.release.export as E
+
+    summary = {
+        "n_rows": 200,
+        "n_judged": 199,
+        "n_scored": 185,
+        "gate": 0.95,
+        "weighted_precision": 0.723,
+        "weighted_usable": 0.922,
+        "passes_gate": False,
+    }
+    monkeypatch.setattr(E, "load_audit_summary", lambda: summary)
     conn = db.connect(store_path)
     out = tmp_path / "release"
     exports = export_all(
@@ -50,7 +62,18 @@ def test_export_jsonl_all_datasets(store_path, tmp_path) -> None:
     assert len(lines) == 7 and lines[0]["polygon"][0] == [100, 160]
     gt = _rows(out / "leibniz-gt" / "gt_lines-0001.jsonl.gz")
     assert len(gt) == 2 and all(r["license_bucket"] == "open" for r in gt)
-    assert "preliminary" in (out / "leibniz-gt" / "README.md").read_text()
+    gt_card = (out / "leibniz-gt" / "README.md").read_text()
+    # the scored audit, not the stale "97.5 % … preliminary (20 of 200)" of before 2026-10
+    assert "precision 72.3 % as written, which fails the 95 % gate" in gt_card
+    assert "92.2 %" in gt_card and "preliminary" not in gt_card and "97.5" not in gt_card
+    assert "`channel ia`" in gt_card
+
+
+def test_gt_card_without_a_scored_audit_quotes_no_number() -> None:
+    from leibniz.release.cards import GT_AUDIT_NOTE, gt_audit_note
+
+    assert gt_audit_note(None) == GT_AUDIT_NOTE
+    assert not any(ch.isdigit() for ch in GT_AUDIT_NOTE)
 
 
 def test_export_chunks_and_empty_tables(store_path, tmp_path) -> None:
@@ -79,3 +102,16 @@ def test_export_parquet_roundtrip(store_path, tmp_path) -> None:
     assert table.num_rows == 7 and exp.row_counts["lines"] == 7
     row = table.slice(0, 1).to_pylist()[0]
     assert json.loads(row["polygon"])[0] == [100, 160] and row["conf"] == 0.95
+
+
+def test_gt_export_gives_each_line_one_line_of_text() -> None:
+    from leibniz import db
+    from leibniz.align.pairs import GtPair, insert_gt_pairs
+    from leibniz.release.export import iter_gt
+
+    conn = db.init_db(":memory:")
+    insert_gt_pairs(
+        conn, [GtPair("P:0001:000", "J'ay fait\ncorriger", "src", "fair_copy", 0.9, "open")]
+    )
+    (row,) = list(iter_gt(conn))
+    assert row["text"] == "J'ay fait corriger"

@@ -11,6 +11,9 @@ Four subcommands:
 * ``leibniz images check-mirror`` — sample the mirror after an upload.
 * ``leibniz images duplicates`` — find sheet-sides registered under two folio
   labels (the same scan twice) by hashing the thumbnails.
+* ``leibniz images twins`` — the same, from the store alone (image size, file
+  size, line geometry), and decide spread or fold: the file the web
+  application reads (``leibniz index build`` writes it too).
 
 Every mutating run on the store is recorded in ``runs`` with the git SHA
 (provenance, §4.5); thumbnails are derived files outside the store.
@@ -33,6 +36,7 @@ from leibniz.images import duplicates as dup_mod
 from leibniz.images import fetch as fetch_mod
 from leibniz.images import pages as pages_mod
 from leibniz.images import thumbs as thumbs_mod
+from leibniz.images import twins as twins_mod
 from leibniz.net import PoliteClient
 
 app = typer.Typer(
@@ -374,4 +378,50 @@ def duplicates(
         f"{stats.pages_hashed:,} thumbnails hashed in {stats.works:,} works → "
         f"[bold]{stats.n_pairs:,} duplicate pairs[/bold] ({len(stats.pages_in_pairs):,} pages); "
         f"{stats.pages_missing:,} thumbnails missing. Report: {report}, pairs: {pairs}"
+    )
+
+
+@app.command()
+def twins(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    out: Path = typer.Option(
+        ...,
+        "--out",
+        help="The twins file to write; the web application reads it from LEIBNIZ_TWINS_PATH "
+        "or beside its index (search.twins.json, <store dir>/<index uid>.twins.json).",
+    ),
+    work: list[str] | None = typer.Option(None, "--work", "-w", help="Only these object id(s)."),
+    report: Path | None = typer.Option(
+        Path("reports/twins.md"), "--report", help="Markdown summary (none with --work)."
+    ),
+) -> None:
+    """Find the scans registered under more than one folio label, from the store
+    alone, and decide spread (two folios side by side, split at the fold) or fold
+    (one page carries the text). `leibniz index build` writes the same file."""
+    conn = db.connect(db_path)
+    try:
+        n_works = len(work) if work else conn.execute("SELECT COUNT(*) FROM works").fetchone()[0]
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=console,
+        ) as bar:
+            task = bar.add_task("works", total=n_works)
+            found = twins_mod.find_twins(
+                conn, work_ids=work or None, progress=lambda _wid: bar.advance(task)
+            )
+    finally:
+        conn.close()
+    found.write(out)
+    stats = found.stats
+    if report is not None and not work:
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(twins_mod.render_report(found), encoding="utf-8")
+    console.print(
+        f"{stats['works']:,} works: [bold]{stats['groups']:,} scans registered more than "
+        "once[/bold] "
+        f"({stats['spreads']:,} spreads, {stats['folds']:,} folded; "
+        f"{stats['second_registrations']:,} second registrations), "
+        f"{stats['unconfirmed']:,} candidates left as they are. Written to {out}."
     )

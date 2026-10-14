@@ -14,7 +14,12 @@ it is and what the channel asks (SPECS §7.3, §7.7: relationship > rights):
   attach to in §70-expired reading text, but the channel is a partner's; it is
   used here only where no IA scan exists and is flagged for the lawyer memo.
 * ``potsdam`` — the Potsdam Arbeitsstelle's born-digital text PDFs of Reihe IV
-  (clean text layer, no OCR); no terms stated on the page.
+  (clean text layer, no OCR). No terms were stated on the page in September
+  2026; the Arbeitsstelle's new site (leibnizp1.bbaw.de, checked 2026-10-10)
+  states that the files are for non-commercial use only. As with ``gwlb``,
+  the NC clause has nothing to attach to in §70-expired reading text, but the
+  channel is a partner's: flagged for the lawyer memo, and every minted row
+  names its channel (``source``: "…; channel potsdam; katalog …").
 * ``muenster`` — the Münster Forschungsstelle's Internetausgaben (Reihe II, VI):
   the download page requires accepting that they "may not be used … without
   express written permission" of the Göttingen Academy — an **operator ask**,
@@ -28,6 +33,9 @@ domain (view restricted to US IPs) — another operator path.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
+
+from leibniz.legal import REGISTRY
 
 IA_DOWNLOAD = "https://archive.org/download"
 GWLB_REPO = "https://www.gwlb.de/fileadmin/Leibniz/repositorium-des-leibniz-archivs"
@@ -36,7 +44,8 @@ POTSDAM = "https://leibniz-potsdam.bbaw.de/fileadmin/Webdateien/bilder"
 CHANNEL_TERMS: dict[str, str] = {
     "ia": "public-domain scan, no access restriction",
     "gwlb": "CC BY-NC 4.0 channel (text §70-free; flag for the lawyer memo)",
-    "potsdam": "no terms stated (edition's own site)",
+    "potsdam": "non-commercial use only per the Arbeitsstelle's site (checked 2026-10-10; "
+    "text §70-free; flag for the lawyer memo)",
     "muenster": "written permission required (operator ask; not auto-fetched)",
     "none": "no free digital source found",
 }
@@ -53,6 +62,10 @@ class EditionSource:
     pages: int | None = None  # leaves (IA imagecount) or PDF pages
     part: str | None = None  # multi-part volumes (VI,4 A–D)
     note: str = ""
+    # Which edition of the volume the copy prints, where the registry knows
+    # several (II,1: "1926" free, "2006" protected until 2032). Required for
+    # such a volume: :func:`source_is_free` refuses a copy that does not say.
+    edition: str | None = None
 
     @property
     def text_layer(self) -> str:
@@ -109,7 +122,11 @@ EDITION_SOURCES: dict[tuple[int, int], tuple[EditionSource, ...]] = {
     (1, 16): (_ia(1, 16, "samtlicheschrift0000leib_a6a0", 954), _gwlb(1, 16, "LAA-BdI16.pdf")),
     # Reihe II — Philosophischer Briefwechsel (the 1926 print; Münster's online
     # II,1 is the protected 2006 Neubearbeitung — never use it)
-    (2, 1): (EditionSource(2, 1, "none", note="1926 print; HathiTrust (US-PD) / TELOTA ask"),),
+    (2, 1): (
+        EditionSource(
+            2, 1, "none", note="1926 print; HathiTrust (US-PD) / TELOTA ask", edition="1926"
+        ),
+    ),
     # Reihe III — Mathematischer, naturwissenschaftlicher und technischer Briefwechsel
     (3, 1): (_ia(3, 1, "samtlicheschrift0001leib_n3h6", 956),),
     (3, 2): (EditionSource(3, 2, "none", note="1987; no free digital copy found"),),
@@ -149,6 +166,26 @@ def readable_sources(series: int, volume: int) -> list[EditionSource]:
     return [s for s in sources_for(series, volume) if s.url and s.text_layer]
 
 
+def source_is_free(source: EditionSource, today: date) -> bool:
+    """Whether the copy prints an edition whose reading text is free on ``today``.
+
+    A volume with one edition in :data:`leibniz.legal.REGISTRY` decides by its
+    own expiry. A volume with several (II,1 1926 / 2006) needs the copy to name
+    its edition, and that edition to be expired: a copy that does not say is
+    refused, so a re-edition's protected text can never pass as the free one.
+    """
+    entries = [
+        v for v in REGISTRY if v.series == source.series and str(v.volume) == str(source.volume)
+    ]
+    if not entries:
+        return False
+    if len(entries) == 1 and entries[0].edition is None:
+        return entries[0].is_expired(today)
+    if source.edition is None:
+        return False
+    return any(v.edition == source.edition and v.is_expired(today) for v in entries)
+
+
 def source_kind(series: int, volume: int) -> str:
     """The best available channel kind for a volume (``"none"`` if unreadable)."""
     rs = readable_sources(series, volume)
@@ -160,6 +197,7 @@ __all__ = [
     "EDITION_SOURCES",
     "EditionSource",
     "readable_sources",
+    "source_is_free",
     "source_kind",
     "sources_for",
 ]

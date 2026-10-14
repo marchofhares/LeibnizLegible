@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from leibniz import db
-from leibniz.align.resolve import folio_range_from_signature
+from leibniz.align.resolve import folio_span_from_signature
 from leibniz.htr.metrics import PHILIUMM_POLICY, score_line
 from leibniz.legal import Volume, expired_volumes
 
@@ -116,7 +116,15 @@ def expired_volume_index(today: date) -> dict[tuple[int, str], Volume]:
 
 @dataclass(slots=True)
 class PieceRef:
-    """One AA piece to be aligned: its katalog record, work, and localization."""
+    """One AA piece to be aligned: its katalog record, work, and localization.
+
+    ``folio_sides`` are the sides of the first and last folio of the range
+    (``("v", "r")`` for ``Bl. 12v–13r``; empty for whole folios). ``also`` names
+    further printed pieces whose text the record's edition text carries after
+    this one (``("I,7 N.4",)``), so the minted lines' label says all of them.
+    ``channel`` is the free copy the reading text was read from (``ia``,
+    ``gwlb``, ``potsdam``), when the edition cache recorded it.
+    """
 
     record_id: str
     series: int
@@ -128,6 +136,9 @@ class PieceRef:
     textart: str | None
     match_method: str | None
     match_conf: float | None
+    folio_sides: tuple[str, str] = ("", "")
+    also: tuple[str, ...] = ()
+    channel: str | None = None
 
     @property
     def volume_label(self) -> str:
@@ -138,7 +149,8 @@ class PieceRef:
 
     @property
     def aa_label(self) -> str:
-        return f"AA {self.volume_label} N.{self.piece}"
+        label = f"AA {self.volume_label} N.{self.piece}"
+        return " + ".join([label, *self.also]) if self.also else label
 
     @property
     def localizable(self) -> bool:
@@ -171,7 +183,10 @@ def enumerate_pieces(
     volume (optionally filtered to one ``series``/``volume``), emits a
     :class:`PieceRef` carrying the work id (best crosswalk link), the folio range
     (parsed from the record's signature), and the katalog text type. A record that
-    cites several expired volumes yields one piece per citation.
+    cites several expired volumes yields one piece per citation here; the
+    factory keeps the one whose printed text the edition cache actually holds
+    (:func:`leibniz.align.factory.select_text_pieces`), so a record is minted
+    once, under the volume its text came from.
     """
     expired = expired_volume_index(today)
     best_link = db.best_crosswalk_by_record(conn)
@@ -181,7 +196,9 @@ def enumerate_pieces(
     for rec in db.iter_katalog_records(conn):
         stats.records_scanned += 1
         signature = rec.shelfmark_refs[0] if rec.shelfmark_refs else None
-        folio_range = folio_range_from_signature(signature)
+        span = folio_span_from_signature(signature)
+        folio_range = span.range if span is not None else None
+        sides = (span.side_lo, span.side_hi) if span is not None else ("", "")
         textart = rec.metadata.get("textart") if rec.metadata else None
         link = best_link.get(rec.record_id)
         seen: set[tuple[int, str]] = set()
@@ -210,6 +227,7 @@ def enumerate_pieces(
                 textart=textart,
                 match_method=link.match_method if link else None,
                 match_conf=link.match_conf if link else None,
+                folio_sides=sides,
             )
             pieces.append(piece)
             stats.pieces += 1

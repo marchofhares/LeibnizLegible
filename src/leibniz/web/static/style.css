@@ -383,6 +383,15 @@ main:focus {
   border-left: 4px solid var(--rule-strong);
 }
 
+/* one scan, several registrations (views/page.js twinNotice) */
+.notice--twin {
+  border-left: 4px solid var(--rule-strong);
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
 .notice--inline {
   background: var(--bg-sunken);
   border: 1px solid var(--rule);
@@ -612,6 +621,12 @@ a.button--primary:hover {
   color: var(--fg);
 }
 
+.chip--fold {
+  background: var(--bg-sunken);
+  color: var(--fg);
+  border: 1px dashed var(--rule-strong);
+}
+
 .dot {
   display: inline-block;
   width: 0.55rem;
@@ -689,6 +704,16 @@ select {
 
 .field {
   margin: 0 0 0.7rem;
+}
+
+.field--check {
+  margin: 0.4rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.field--check input {
+  margin-inline-end: 0.35rem;
 }
 
 .field__range {
@@ -784,8 +809,8 @@ select {
 .hit__title {
   font-family: var(--sans);
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  /* no uppercase: a folio label's r/v is part of it ("Folio 137r", not "137R") */
+  letter-spacing: 0.02em;
 }
 
 .hit__snippet {
@@ -1064,6 +1089,104 @@ select {
 
 .canvas__link:hover .canvas__label {
   text-decoration: underline;
+}
+
+/* letters (views/letters.js, the work page) */
+.letters {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.letters th,
+.letters td {
+  text-align: left;
+  padding: 0.3rem 0.5rem 0.3rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.letters td.num {
+  white-space: nowrap;
+}
+
+.letters-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.4rem 0.8rem;
+  align-items: end;
+}
+
+.letters-form input,
+.letters-form select {
+  width: 100%;
+}
+
+.letters__all summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  margin: 0.4rem 0;
+}
+
+.entry__years {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-right: 0.4rem;
+}
+
+/* the catalogue's contents on /browse */
+.contents__works,
+.contents__pieces {
+  margin: 0.3rem 0;
+}
+
+.contents__pieces {
+  font-size: 0.88rem;
+}
+
+.katalog__folio {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+.lookup {
+  margin: 0 0 1rem;
+}
+
+.lookup h2 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.work-search {
+  margin: 0.8rem 0 0;
+}
+
+.work-search__row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.work-search__row input {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.canvas__twin {
+  margin: 0.1rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hit__also {
+  font-weight: normal;
+  color: var(--muted);
 }
 
 .canvas__meta {

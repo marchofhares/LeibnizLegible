@@ -583,6 +583,80 @@ class AuditScore:
         return None if p is None else p >= self.gate
 
 
+# The scored audit in numbers, beside ``reports/gt-audit.md``: what the dataset
+# card and ``leibniz align gt-report`` quote, so neither restates a number the
+# scorer did not produce (before 2026-10 both still said "97.5 %, preliminary").
+DEFAULT_SUMMARY = Path("reports/gt-audit/audit-summary.json")
+
+
+def audit_summary(score: AuditScore, *, verdicts: str, weights_source: str) -> dict:
+    """The scored audit as a small JSON-able dict (``leibniz align audit-score``)."""
+    pooled = score.pooled
+    strata = {}
+    for name, s in score.by_stratum.items():
+        lo_hi = s.interval
+        strata[name] = {
+            "judged": s.n_judged,
+            "scored": s.n_scored,
+            "correct": s.correct,
+            "boundary": s.boundary,
+            "wrong": s.wrong,
+            "unreadable": s.unreadable,
+            "precision": s.precision,
+            "interval": list(lo_hi) if lo_hi else None,
+            "usable": s.usable,
+            "weight": s.weight,
+        }
+    return {
+        "generated_by": "leibniz align audit-score",
+        "verdicts": verdicts,
+        "weights_source": weights_source,
+        "n_rows": score.n_rows,
+        "n_judged": pooled.n_judged,
+        "n_unjudged": score.n_unjudged,
+        "n_scored": pooled.n_scored,
+        "n_unreadable": pooled.unreadable,
+        "gate": score.gate,
+        "weighted_precision": score.weighted_precision,
+        "weighted_usable": score.weighted_usable,
+        "passes_gate": score.passes_gate,
+        "by_stratum": strata,
+    }
+
+
+def write_audit_summary(path: Path, summary: dict) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def load_audit_summary(path: Path = DEFAULT_SUMMARY) -> dict | None:
+    """The scored audit's summary, or ``None`` where none has been written."""
+    p = Path(path)
+    if not p.exists():
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def audit_sentence(summary: dict | None) -> str | None:
+    """One sentence a card or a report can carry, from the summary's own numbers."""
+    if not summary or summary.get("weighted_precision") is None:
+        return None
+    wp, wu = summary["weighted_precision"], summary.get("weighted_usable")
+    verdict = "passes" if summary.get("passes_gate") else "fails"
+    usable = (
+        f", and {100 * wu:.1f} % counting lines a letter or a word off at an end as usable"
+        if wu is not None
+        else ""
+    )
+    return (
+        f"Hand audit of {summary.get('n_judged', 0)} of {summary.get('n_rows', 0)} sampled "
+        f"lines ({summary.get('n_scored', 0)} scored, stratified): corpus-weighted precision "
+        f"{100 * wp:.1f} % as written, which {verdict} the {100 * summary.get('gate', 0.95):.0f} % "
+        f"gate{usable} (`reports/gt-audit.md`)."
+    )
+
+
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     """Wilson score interval for ``k`` successes in ``n`` trials."""
     if n == 0:

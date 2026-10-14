@@ -220,7 +220,13 @@ def select_controls(
         if index is None:
             index = index_pages(db.get_pages(conn, piece.work_id))
             indexes[piece.work_id] = index
-        pages = select_folios(index, piece.work_id, *piece.folio_range).pages
+        pages = select_folios(
+            index,
+            piece.work_id,
+            *piece.folio_range,
+            side_lo=piece.folio_sides[0],
+            side_hi=piece.folio_sides[1],
+        ).pages
         if not pages:
             continue
         page_ids = [pg.id for pg in pages]
@@ -929,14 +935,37 @@ def render_report(res: PilotResult) -> str:
         out.append(f"| {s.reader} | " + " | ".join(cells) + " |")
     out.append("")
     hands = sorted({k for s in res.summaries for k in s.by_hand})
-    out.append("| reader | " + " | ".join(hands) + " |")
-    out.append("|---|" + "---:|" * len(hands))
+    leibniz = [y for y in res.yields if y.role == "german" and y.leibniz_hand]
+    with_l = bool(leibniz)
+    out.append(
+        "| reader | "
+        + " | ".join(hands)
+        + (" | of them in Leibniz's own hand |" if with_l else " |")
+    )
+    out.append("|---|" + "---:|" * (len(hands) + int(with_l)))
     for s in res.summaries:
         cells = []
         for h in hands:
             row = s.by_hand.get(h)
             cells.append(f"{_pct(row['yield'])} ({_n(row['lines'])})" if row else "—")
+        if with_l:
+            mine = [y for y in leibniz if y.reader == s.reader]
+            n = sum(y.n_lines for y in mine)
+            a = sum(y.n_aligned for y in mine)
+            cells.append(f"{_pct(a / n if n else None)} ({_n(n)})")
         out.append(f"| {s.reader} | " + " | ".join(cells) + " |")
+    out.append("")
+    out.append(
+        "*own*: the piece is in its author's own hand (the catalogue's *eigh.* on the piece "
+        "itself), whoever the author is — on a letter Leibniz received, the correspondent's; "
+        "*partial*: only an address, a correction or a postscript is autograph; *other*: a "
+        "scribe's hand. The last column narrows *own* to the pieces whose author is Leibniz "
+        f"({len({y.record_id for y in leibniz})} pieces, marked (L) below)."
+        if with_l
+        else "*own*: the piece is in its author's own hand (the catalogue's *eigh.* on the "
+        "piece itself), whoever the author is; *partial*: only an address, a correction or a "
+        "postscript is autograph; *other*: a scribe's hand."
+    )
     out.append("")
     out.append("## The pieces")
     out.append("")
@@ -1007,6 +1036,93 @@ def render_report(res: PilotResult) -> str:
     )
     out.append("")
     return "\n".join(out)
+
+
+def read_yields(path: Path | str) -> list[PieceYield]:
+    """The per-piece, per-reader rows :func:`write_outputs` wrote to ``pilot-yield.csv``."""
+    out: list[PieceYield] = []
+    with Path(path).open(encoding="utf-8", newline="") as fh:
+        for r in csv.DictReader(fh):
+            out.append(
+                PieceYield(
+                    record_id=r["record_id"],
+                    role=r["role"],
+                    reader=r["reader"],
+                    volume_label=r["volume"],
+                    stratum=r["stratum"],
+                    hand=r["hand"],
+                    leibniz_hand=r["leibniz_hand"] == "1",
+                    threshold=float(r["threshold"]),
+                    n_lines=int(r["n_lines"]),
+                    n_read=int(r["n_read"]),
+                    n_aligned=int(r["n_aligned"]),
+                    mean_conf=float(r["mean_conf"]),
+                    mean_conf_aligned=(
+                        float(r["mean_conf_aligned"]) if r["mean_conf_aligned"] else None
+                    ),
+                )
+            )
+    return out
+
+
+def result_from_files(
+    summary_path: Path | str, yields_path: Path | str, *, operator_verdict: str | None = None
+) -> PilotResult:
+    """A finished pilot rebuilt from its own files, to re-render the report without
+    the store, the images or the readings (an operator's verdict added later).
+
+    The two files must come from one run: each reader's German and control line
+    and aligned counts in the yields must equal the summary's, or this refuses.
+    The committed 2026-10-09 report was re-rendered for the verdict with the
+    default page cap (3) over readings taken with a cap of 2, so its counts mixed
+    two selections; the re-render path below cannot.
+    """
+    d = json.loads(Path(summary_path).read_text(encoding="utf-8"))
+    yields = read_yields(yields_path)
+    summaries = [ReaderSummary(**s) for s in d["summaries"]]
+    for s in summaries:
+        for role, lines, aligned in (
+            ("german", s.german_lines, s.german_aligned),
+            ("control", s.control_lines, s.control_aligned),
+        ):
+            rows = [y for y in yields if y.reader == s.reader and y.role == role]
+            got = (sum(y.n_lines for y in rows), sum(y.n_aligned for y in rows))
+            if got != (lines, aligned):
+                raise ValueError(
+                    f"{yields_path} and {summary_path} are not one run: {s.reader} {role} "
+                    f"lines/aligned {got} in the yields, {(lines, aligned)} in the summary"
+                )
+    return PilotResult(
+        pieces=[PilotPiece(**p) for p in d["pieces"]],
+        yields=yields,
+        summaries=summaries,
+        verdict=Verdict(**d["verdict"]),
+        readers=list(d["readers"]),
+        sample=d.get("sample"),
+        max_pages=int(d["max_pages"]),
+        operator_verdict=operator_verdict
+        if operator_verdict is not None
+        else d.get("operator_verdict"),
+        generated=d.get("generated") or date.today().isoformat(),
+    )
+
+
+def uncovered_pages(
+    conn: sqlite3.Connection,
+    pieces: Sequence[PilotPiece],
+    readings: Mapping[str, Reading],
+    *,
+    sample: int | None = None,
+) -> list[str]:
+    """Selected pages with recognised lines but no reading in ``readings``: what a
+    ``--no-read`` re-render would count as unread (so as not aligned)."""
+    read_pages = {line_id.rpartition(":")[0] for line_id in readings}
+    missing: list[str] = []
+    for piece in pieces:
+        for pid in piece.page_ids:
+            if pid not in read_pages and page_lines(conn, pid, sample=sample):
+                missing.append(pid)
+    return missing
 
 
 def write_outputs(
@@ -1092,11 +1208,14 @@ __all__ = [
     "page_lines",
     "qualifying_readers",
     "read_pieces",
+    "read_yields",
     "render_report",
+    "result_from_files",
     "select_controls",
     "select_german",
     "side_by_side",
     "summarize_readers",
+    "uncovered_pages",
     "v1_readings",
     "verdict",
     "write_outputs",

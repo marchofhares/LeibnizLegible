@@ -70,3 +70,14 @@ def test_insert_into_gt_lines() -> None:
     assert rows[0]["license_bucket"] == "open"
     assert rows[1]["stratum"] == "light_revision"
     conn.close()
+
+
+def test_minted_text_is_one_line() -> None:
+    # A manuscript line spanning two print lines: the slice carried the print's
+    # newline (65 of the 200 audited lines did before 2026-10).
+    res = _result(_line("P:0001:000", " J'ay fait\ncorriger  à la plume ", 0.9, True))
+    (pair,) = result_to_pairs(res, source="s", record_id="R1")
+    assert pair.text == "J'ay fait corriger à la plume"
+    assert pair.record_id == "R1"
+    raw = result_to_pairs(res, source="s", strip=False)
+    assert "\n" in raw[0].text

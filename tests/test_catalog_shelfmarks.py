@@ -116,3 +116,23 @@ def test_signature_keys_dedupes_variant_spellings() -> None:
 def test_signature_keys_drops_foreign() -> None:
     keys = sm.signature_keys(["LBr. 57,1", "London BL 4294"])
     assert keys == {"LBr 57,1"}
+
+
+# -- The F series and folio sides (2026-10) --------------------------------- #
+
+
+@pytest.mark.parametrize("raw", ["LBrF 20 Bl. 1576", "LBr. F 20 Bl. 1576", "LBr F20", "LBrF20"])
+def test_lbr_f_series_spellings_share_one_key(raw: str) -> None:
+    s = sm.normalize_signature(raw)
+    assert s.family == "LBr" and s.key == "LBr f,20"
+
+
+def test_lbr_word_boundary_still_guards() -> None:
+    assert sm.normalize_signature("LBrief 3").family is None
+
+
+def test_blatt_keeps_spaced_and_raised_sides() -> None:
+    assert sm.normalize_signature("LBr 16 Bl. 46v-47r").blatt == "46v-47r"
+    assert sm.normalize_signature("LBr 16 Bl. 108v°").blatt == "108v°"
+    assert sm.normalize_signature("LH 4, 6, 18 Bl. 12 r°–13 v°").blatt == "12r°–13v°"
+    assert sm.normalize_signature("LH 35, 13, 2c Bl. 64").blatt == "64"

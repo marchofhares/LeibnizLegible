@@ -187,6 +187,8 @@ def build_edition_cache(
     volume_texts: dict[tuple[int, int], dict[str, str]],
     *,
     min_chars: int = 40,
+    channels: dict[tuple[int, int], dict[str, str]] | None = None,
+    refs_out: dict[str, list[dict]] | None = None,
 ) -> tuple[dict[str, str], CacheStats]:
     """Join extracted piece texts to katalog records → ``{record_id: text}``.
 
@@ -194,11 +196,18 @@ def build_edition_cache(
     witness that carries two printed pieces). A sub-piece (``130a``) falls back
     to its parent (``130``) when the print numbers only the parent. Texts
     shorter than ``min_chars`` are treated as missing.
+
+    ``refs_out``, when given, receives for every record with text the printed
+    pieces its text was joined from, in order — ``{series, volume, piece,
+    channel}``, the channel read from ``channels[(series, volume)][piece]`` —
+    so the factory mints the record once, under the volume its text came from,
+    and every minted row can name the free copy it was read from.
     """
     cache: dict[str, str] = {}
     stats = CacheStats()
     for rec in db.iter_katalog_records(conn):
         parts: list[str] = []
+        used: list[dict] = []
         cited_missing = False
         for ref in rec.aa_refs:
             if ref.get("source") != "aa_column":
@@ -211,39 +220,73 @@ def build_edition_cache(
                 continue
             texts = volume_texts[key]
             pk = piece_key(str(ref.get("piece", "")))
-            text = texts.get(pk) or texts.get(pk.rstrip("abcdefghijklmnopqrstuvwxyz")) or ""
+            found = pk if texts.get(pk) else pk.rstrip("abcdefghijklmnopqrstuvwxyz")
+            text = texts.get(found) or ""
             if len(text) >= min_chars:
                 parts.append(text)
                 vl = volume_label(key[0], key[1])
                 stats.by_volume[vl] = stats.by_volume.get(vl, 0) + 1
+                used.append(
+                    {
+                        "series": key[0],
+                        "volume": key[1],
+                        "piece": str(ref.get("piece", "")),
+                        "channel": ((channels or {}).get(key) or {}).get(found),
+                    }
+                )
             else:
                 cited_missing = True
         if parts:
             cache[rec.record_id] = "\n".join(parts)
             stats.records_with_text += 1
+            if refs_out is not None:
+                refs_out[rec.record_id] = used
         elif cited_missing:
             stats.records_cited_no_text += 1
     return cache, stats
 
 
-def write_edition_cache(path: Path, cache: dict[str, str]) -> None:
+def write_edition_cache(
+    path: Path, cache: dict[str, str], refs: dict[str, list[dict]] | None = None
+) -> None:
     """Write the ``{record_id: text}`` cache.
 
     ``.jsonl`` (the default since the first operator run) holds one
     ``{"record_id": …, "text": …}`` object per line so a shard worker can stream
     it and keep only its own records — twelve workers each parsing the whole
-    100 MB object at once exhausted an 11 GB WSL VM. Any other suffix writes the
-    original single JSON object.
+    100 MB object at once exhausted an 11 GB WSL VM. With ``refs`` each line
+    also carries ``"refs"``, the printed pieces the text came from
+    (:func:`build_edition_cache`). Any other suffix writes the original single
+    JSON object (without refs).
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.suffix == ".jsonl":
         with path.open("w", encoding="utf-8") as fh:
             for rid, text in cache.items():
-                fh.write(json.dumps({"record_id": rid, "text": text}, ensure_ascii=False))
+                obj: dict = {"record_id": rid, "text": text}
+                if refs is not None and rid in refs:
+                    obj["refs"] = refs[rid]
+                fh.write(json.dumps(obj, ensure_ascii=False))
                 fh.write("\n")
     else:
         path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+
+
+def load_edition_refs(path: Path) -> dict[str, list[dict]]:
+    """``record_id -> [{series, volume, piece, channel}]`` from a ``.jsonl``
+    cache written with refs (empty for an older cache, or the JSON-object form)."""
+    path = Path(path)
+    out: dict[str, list[dict]] = {}
+    if path.suffix != ".jsonl" or not path.exists():
+        return out
+    with path.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            if line.strip():
+                obj = json.loads(line)
+                if obj.get("refs"):
+                    out[obj["record_id"]] = obj["refs"]
+    return out
 
 
 def iter_edition_cache(path: Path) -> Iterator[tuple[str, str]]:
@@ -307,6 +350,7 @@ __all__ = [
     "ingest_volume",
     "iter_edition_cache",
     "load_edition_cache",
+    "load_edition_refs",
     "load_volume_texts",
     "piece_key",
     "raw_path",

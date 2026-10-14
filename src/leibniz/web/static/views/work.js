@@ -104,14 +104,42 @@ function katalogRecord(record) {
       `${esc(t('work.katalog.text', { range: record.folio_label || '' }))}</a></p>`
     : '';
 
-  const link = record.url
-    ? `<p><a href="${esc(record.url)}" rel="noopener">${esc(t('work.katalog.record'))}</a></p>`
+  // links out: the record in the Leibniz-Katalog, the piece's first folio at
+  // the GWLB, each cited volume of the edition, the Leibniz-Archiv's
+  // transcriptions of a late letter not yet edited
+  const out = [];
+  if (record.url) {
+    out.push(`<a href="${esc(record.url)}" rel="noopener">${esc(t('work.katalog.record'))}</a>`);
+  }
+  if (record.gwlb_url) {
+    out.push(`<a href="${esc(record.gwlb_url)}" rel="noopener">${esc(t('work.katalog.gwlb'))}</a>`);
+  }
+  for (const vol of record.aa_links || []) {
+    const key = vol.kind === 'volume' ? 'work.katalog.aa.volume' : 'work.katalog.aa.series';
+    out.push(
+      `<a href="${esc(vol.url)}" rel="noopener">${esc(t(key, { name: vol.name, where: vol.where }))}</a>` +
+        (vol.terms ? ` <span class="muted">(${esc(vol.terms)})</span>` : ''),
+    );
+  }
+  if (record.transcriptions) {
+    out.push(
+      `<a href="${esc(record.transcriptions.url)}" rel="noopener">` +
+        `${esc(t('work.katalog.transcriptions', { year: record.transcriptions.year }))}</a>`,
+    );
+  }
+  const link = out.length
+    ? `<ul class="linklist linklist--inline katalog__links">${out.map((l) => `<li>${l}</li>`).join('')}</ul>`
     : '';
 
   const title = record.title || record.record_id || '—';
+  // where the piece begins on the scan: the folio range, a link to its first page
+  const folio =
+    record.folio_label && record.first_page
+      ? `<a class="katalog__folio" href="/page/${esc(pathSeg(record.first_page))}">${esc(record.folio_label)}</a> `
+      : '';
   return (
     `<li class="katalog">` +
-    `<h3 class="katalog__title">${esc(title)}</h3>` +
+    `<h3 class="katalog__title">${folio}${esc(title)}</h3>` +
     (body ? `<dl class="deflist">${body}</dl>` : '') +
     text +
     link +
@@ -125,9 +153,13 @@ function katalogSection(data) {
   const body = records.length
     ? `<ul class="katalog-list">${records.map(katalogRecord).join('')}</ul>`
     : `<p class="muted">${esc(t('work.katalog.none'))}</p>`;
+  const order = records.some((r) => r.folio_label)
+    ? `<p class="hint">${esc(t('work.katalog.order'))}</p>`
+    : '';
   return (
     `<section class="panel" aria-labelledby="katalog-heading">` +
     `<h2 id="katalog-heading">${esc(t('work.katalog'))}</h2>` +
+    order +
     body +
     `<p class="attribution__line">${esc(t('work.katalog.attr'))}</p>` +
     `</section>`
@@ -154,7 +186,111 @@ function canvas(page) {
     `<p class="canvas__meta">` +
     `<span class="dot dot--${skipped ? 'skipped' : 'ok'}" aria-hidden="true"></span>` +
     `<span class="canvas__status">${esc(statusLabel + reason)}</span>${lines}</p>` +
+    twinLine(page) +
     `</li>`
+  );
+}
+
+/** One scan under several labels: "Spread with fol. 2v", "Same scan as fol. 1r". */
+export function twinLine(page) {
+  const twin = page.twin;
+  if (!twin) return '';
+  const labels = (twin.others || []).map((o) => folioLabel(o.label, o.page_id)).join(', ');
+  let key = 'work.twin.primary';
+  let vars = { labels };
+  if (twin.kind === 'spread') {
+    key = 'work.twin.spread';
+  } else if (!twin.is_primary) {
+    const primary = (twin.others || []).find((o) => o.page_id === twin.primary);
+    key = 'work.twin.secondary';
+    vars = { label: primary ? folioLabel(primary.label, primary.page_id) : '' };
+  }
+  return `<p class="canvas__twin">${esc(t(key, vars))}</p>`;
+}
+
+// ---------------------------------------------------------------------------
+// a letter convolute's letters, as Bodemann catalogued them (1889)
+// ---------------------------------------------------------------------------
+
+/** A letter's date as the catalogue writes it, else from its range. */
+export function letterDate(letter) {
+  if (letter.date_text) return letter.date_text;
+  if (letter.when) return letter.when;
+  const [from, to] = letter.years || [];
+  if (!from) return t('letters.undated');
+  return from === to ? String(from) : `${from}–${to}`;
+}
+
+/** The people on a letter other than Leibniz, linked to their GND record. */
+export function people(list) {
+  return (list || [])
+    .map((p) =>
+      p.ref
+        ? `<a href="${esc(p.ref)}" rel="noopener">${esc(p.name)}</a>`
+        : esc(p.name),
+    )
+    .join('; ');
+}
+
+export function letterRow(letter) {
+  const route = `${people(letter.senders)} → ${people(letter.addressees)}`;
+  const place = letter.place ? esc(letter.place.name) : '';
+  return (
+    `<tr><td class="num">${esc(letter.key)}</td><td>${esc(letterDate(letter))}</td>` +
+    `<td>${route}</td><td>${place}</td></tr>`
+  );
+}
+
+export function lettersTable(rows, caption) {
+  return (
+    `<table class="letters">` +
+    (caption ? `<caption class="sr-only">${esc(caption)}</caption>` : '') +
+    `<thead><tr><th scope="col">${esc(t('letters.col.key'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.date'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.people'))}</th>` +
+    `<th scope="col">${esc(t('letters.col.place'))}</th></tr></thead>` +
+    `<tbody>${rows.map(letterRow).join('')}</tbody></table>`
+  );
+}
+
+function lettersSection(data) {
+  const letters = data.letters;
+  if (!letters || !letters.n_items) return '';
+  const years = letters.years ? `${letters.years[0]}–${letters.years[1]}` : '';
+  const places = (letters.places || []).slice(0, 5).map((p) => p.name).join(', ');
+  const summary = tn('work.letters.summary', letters.n_items, {
+    n: num(letters.n_items),
+    years: years || t('letters.undated'),
+    places: places || '—',
+  });
+  const shown = letters.items || [];
+  const more =
+    letters.n_items > shown.length
+      ? `<p class="hint">${esc(t('work.letters.more', { n: num(letters.n_items - shown.length) }))}</p>`
+      : '';
+  return (
+    `<section class="panel" aria-labelledby="letters-heading">` +
+    `<h2 id="letters-heading">${esc(t('work.letters'))}</h2>` +
+    `<p>${esc(summary)} <a href="/letters?work=${esc(encodeURIComponent(data.work_id))}">${esc(t('work.letters.find'))}</a></p>` +
+    `<details class="letters__all"><summary>${esc(t('work.letters.list', { n: num(shown.length) }))}</summary>` +
+    lettersTable(shown, t('work.letters')) +
+    `</details>${more}` +
+    `<p class="attribution__line">${esc(t('letters.attr'))}</p>` +
+    `</section>`
+  );
+}
+
+/** Search inside this work: the search page, narrowed to it. */
+function workSearch(data) {
+  if (!(data.pages || []).some((p) => p.n_lines > 0)) return '';
+  return (
+    `<form class="work-search" action="/search" method="get" role="search">` +
+    `<label class="field__label" for="work-q">${esc(t('work.search'))}</label>` +
+    `<div class="work-search__row">` +
+    `<input id="work-q" name="q" type="search" required maxlength="500" autocomplete="off" />` +
+    `<input type="hidden" name="work" value="${esc(data.work_id)}" />` +
+    `<button type="submit" class="button button--primary">${esc(t('work.search.go'))}</button>` +
+    `</div></form>`
   );
 }
 
@@ -203,7 +339,9 @@ export async function render(ctx) {
     `<p class="muted work__id"><code>${esc(data.work_id || workId)}</code></p>` +
     identity(data) +
     links(data) +
+    workSearch(data) +
     `</header>` +
+    lettersSection(data) +
     katalogSection(data) +
     canvasStrip(data) +
     `</article>`;
