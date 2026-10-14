@@ -787,7 +787,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   review counted 123,980). The operator's spot-check of six decisions (five
   spreads in LBr and LH, one fold): all correct.
 
-### K1 — Kurrent track (2026-10-09) ✅ Tasks 0–4 · gate for K2: **GO** with `trocr-kurrent-xvi-xvii`
+### K1 — Kurrent track (2026-10-09) ✅ Tasks 0–4 · gate for K2: **GO** with `trocr-kurrent-xvi-xvii` · ✅ the operator's verdict · ✅ merged (#41)
 
 - **Setting.** The operator's desktop: the WSL checkout
   `/home/evana/LeibnizLegible` (the Claude Code session opened in the stale
@@ -3168,17 +3168,72 @@ quoted anywhere.
 `trocr-kurrent-xvi-xvii`.** The branch `claude/dazzling-hopper-uxji2x`
 carries it (compare:
 https://github.com/marchofhares/leibnizlegible/compare/main...claude/dazzling-hopper-uxji2x?expand=1);
-the operator merges. Read first: the gate verdict and the Task 4 bullet in
+**merged into main on 2026-10-09 (pull request #41, merge commit
+`9c96c7f`)**, nothing deployed: K1 changes nothing the website runs (checked
+from a cloud session: the web extra resolves to the same packages and `leibniz
+serve` starts without the `kurrent` extra). Read first: the gate verdict and the Task 4 bullet in
 the K1 entry, `reports/kurrent/census.md` (the German pieces and the mint
 check), `reports/kurrent/bootstrap-candidates.md` (the Dresden ranking and
 the licences table), `reports/kurrent/pilot.md`. Keep `data/kurrent/`:
 `german_pieces.jsonl` is K2's input, `pilot-readings/` and
 `pilot-side-by-side.html` are the pilot's evidence, `smoke/` the Dresden
-readings. One thing still to record: the operator's look at the side-by-side
-page — open `data/kurrent/pilot-side-by-side.html`, say whether any reader
-produces German words, then `UV_PROJECT_ENVIRONMENT=.venv-k1 uv run
---no-sync leibniz align kurrent-pilot --no-read --operator-verdict "…"` and
-commit `reports/kurrent/pilot*.md|json`. Nothing is deployed.
+readings. The operator's look at the side-by-side page is recorded verbatim
+in `reports/kurrent/pilot.md` (commit `d75cb5a`): "Yes, Partly."
+
+**The Kurrent path after K1, as proposed to the operator (2026-10-09; not
+yet scheduled).** (1) *K2, German ground truth:* read the German pieces'
+lines (`data/kurrent/german_pieces.jsonl`) with `trocr-kurrent-xvi-xvii`
+into JSONL beside the store, as the pilot did, and mint from those readings
+into `gt_lines` with a source string naming the reader. `lines` is not
+touched, so K2 needs no versioned-rows decision. (2) *K3, a Leibniz Kurrent
+model:* fine-tune on K2's German lines and evaluate on page-disjoint
+held-out German lines; compare a TrOCR fine-tune from the Bern model with a
+kraken fine-tune from the PHILIUMM checkpoint with a German codec (ß,
+umlauts, long s), by accuracy and by speed (the pilot timed
+`trocr-kurrent-xvi-xvii` at 353 ms a line against 17 for `philiumm`). An
+honest German CER needs a hand audit of minted German lines by a reader of
+Kurrent (PHILIUMM has none), or the GWLB Transkriptionspool as an
+internal-only test set (nc bucket, SPECS §1.4 and §7.3). (3) *German on the
+site:* `lines` is unique on `(page_id, line_seq, run_id)` and every reader
+of the store (viewer, index, exports: `latest_lines`) shows the newest run,
+so a second reader's text can be added as a new run without touching v1.
+Two decisions first: which pages are German beyond the edition pieces (a
+language pass over the v1 text, checked against the census's German
+pieces), and which reading wins per line once C4 adds a newer Latin and
+French run, since the newest-run rule would cover a German line's Kurrent
+reading with v2's. Then a new serving copy and an index rebuild, as for M1;
+the search fold already maps ß to ss and drops umlauts. The About page and
+llms.txt keep calling German unmeasured until K3 measures it.
+
+**The operator's choice (2026-10-09): the letter-pool route for the honest
+German test set**, not a hand audit: the GWLB's checked transcriptions of the
+correspondence of 1708–1716 (for example "Transkriptionen des
+Leibniz-Briefwechsels 1714 für die Leibniz-Akademie-Ausgabe (überprüft)", one
+PDF a year on the Leibniz-Archiv's repository pages at gwlb.de; CC BY-NC 4.0,
+so nc bucket, internal evaluation only, SPECS §1.4 and §7.3). An audit by a
+reader of Kurrent stays possible later, as a check on the ground truth itself.
+The path is now four steps with prompts on the operator's plan page: **K2**
+(German ground truth on the edition pieces), **K2b** (the letter-pool test
+set; independent of K2), **K3** (training both candidates; the reader for K4
+is the operator's choice on K3's numbers) and **K4** (German on the site: the
+language pass, a precedence rule so that a German page's Kurrent run outlives
+C4's newer unscoped run, the re-read, a new serving copy and index). Found
+while writing them (a cloud session, nothing run on the store): (a) every pool
+letter's "Überlieferung" block names its witness's siglum (L Leibniz's own
+hand, l his scribe, K the correspondent's own hand, k the correspondent's
+scribe) and its shelfmark with leaves ("LBr. 164 Bl. 31–32"), so the C2
+resolver can place it; it also notes a second text on the same leaves ("Auf
+Bl. 4 vo L von N. 69"); the PDFs' text layer decomposes umlauts, so NFC first.
+(b) A reader tag in the factory's source string must stand before "katalog":
+`audit_reach.parse_source` reads the record id up to ")" or a space, so
+"katalog 41800; reader …" parses as "41800;" (checked). (c) The re-mint before
+C3 runs the factory without `--resume`, and `write_pairs` replaces every row
+of a piece's line refs, so a K2 mint in `gt_lines` needs a guard in the
+factory or the re-mint undoes it; the K2 prompt adds one. (d) GPU time,
+estimated: re-reading every German page (about 15 % of the 236,795 pages)
+takes a Kraken-speed model one to two days rather than under one: the model
+reads a line in 17 ms, but the C1 recogniser kept about 940 pages an hour with
+the images read from D:. The Bern reader takes more than a week.
 
 **The final merge: ✅ merged and live** (pull request #40, merge commit
 `62711b3`, the evening of 8 October in New York, 2026-10-09 UTC), after the
