@@ -2667,7 +2667,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     Signatur string and a count of digital-copy links by domain, rendered
     as `reports/holdings.md`; the survey above is superseded by it and is
     not to be quoted on the site. Decisions, none taken: (a) an About
-    sentence on scope and a holdings page from the report, cheap, with the
+    sentence on scope now, in the short web session Open question 27 names
+    (it needs no numbers), and a holdings page from the report, with the
     import; (b) an ingestion phase for the IIIF-served institutions, each a
     source field through the store, a set in browse, an attribution line, a
     rights check (Gallica's terms restrict commercial reuse) and a
@@ -2701,11 +2702,13 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     new serving copy and restart; the search index carries catalogue
     titles, so a rebuild follows, best bundled with the next one M1 or K4
     needs. Refresh on the catalogue's half-year cycle, and say on About when
-    it was last refreshed. Two web items ride on the same session: a link
-    from every work page to the catalogue's search by shelfmark (`sign_ol=`
-    on the extended search, the form the reader's own link used), whether
-    or not the store holds the work's records (`1665058609`, Leibn. Marg.
-    196, has none), and an About sentence on scope (Open question 28).
+    it was last refreshed. Two web items need no export and go first, in a
+    short web session of their own: a link from every work page to the
+    catalogue's search by shelfmark (`sign_ol=` on the extended search, the
+    form the reader's own link used), whether or not the store holds the
+    work's records (`1665058609`, Leibn. Marg. 196, has none), and an About
+    sentence on scope, EN and DE (Open question 28). The holdings page waits
+    for the import, because its numbers come from `reports/holdings.md`.
 26. **The twin rule's corpus-wide error is unmeasured (2026-10-10, W5).** The
     thresholds come from 27 works (25 groups checked byte for byte). The line
     check guards against folding two different pages that happen to share a
