@@ -9,6 +9,22 @@ _Last updated: 2026-10-14 (**the Edition's replies of 12 and 13 October recorded
 
 ## Current state
 
+**2026-10-19: K2b — the letter-pool test set, begun on the desktop; Task 0
+done, waiting for the go.** The honest German test set from the GWLB's checked
+transcriptions of the correspondence of 1708–1716 (CC BY-NC 4.0, nc bucket:
+internal evaluation only), placed on the store's pages through the C2
+resolver, frozen in files, and the first measured German error rates (v1 and
+the K1 readers), as the plan page's K2b prompt and the preamble of 19 October
+say. Pre-flight: the WSL tree clean of tracked changes (the untracked logs and
+scripts are the operator's own), main at `82e2091` (#45) already up to date,
+the branch `k2b-letterpool` created from `origin/main`; `.venv-k1` as K1 left
+it (torch 2.12.0+cu130 sees the GTX 1660 Ti, transformers 5.12.1, pdfplumber
+0.11.10; no edlib, none planned); baseline ruff clean, **807 tests passed, 1
+skipped**; the store 17,061,699,584 bytes, the image cache on D:, the three
+TrOCR checkpoints cached from K1; the nine checked years' pages at gwlb.de
+each link a `-v1.pdf`. Nothing fetched, parsed or read yet; the K2b entry in
+the Phase log has the plan.
+
 **2026-10-14: the Edition's replies, recorded (no code, no data).** Two
 emails from the Leibniz-Edition Potsdam, both answered by the operator on
 14 October (roles, not names, by the operator's rule). (a) 12 October, from
@@ -659,6 +675,69 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### K2b — the letter-pool test set (2026-10-19) ⏳ Task 0 done · waiting for the go
+
+- **Setting.** The operator's desktop: the WSL checkout
+  `/home/evana/LeibnizLegible`, driven from a Claude Code session opened on the
+  `\wsl.localhost` path (the Windows side shows the `.sh` files and a CSV as
+  modified — the mode-bit artefact; inside WSL the tree is clean, and the
+  untracked `logs/`, `*.log`, `resume-run.sh`, `.python-version` and
+  `reports/gt-audit/gt-audit.html` are the operator's own, left alone).
+  `git pull --ff-only` on main: already up to date at `82e2091` (#45);
+  `k2b-letterpool` created with `git checkout -B k2b-letterpool origin/main`,
+  the branch the preamble of 19 October names. Disk: `/` 1007 G with 898 G
+  free, `/mnt/d` 932 G with 452 G free. GPU: GTX 1660 Ti, driver 610.57.01,
+  1,232 MiB of 6,144 MiB held by the desktop (Xwayland), nothing else on it.
+  `.venv-k1` from K1: Python 3.12.13, torch 2.12.0+cu130 with CUDA 13.0
+  available, transformers 5.12.1, pdfplumber 0.11.10, pypdfium2 5.13.0, numpy
+  2.4.6, Pillow 12.3.0, kraken 7.0.3; uv 0.12.0; no `edlib` and no `pypdf`
+  (nothing will be installed: the infix alignment is a numpy DP). Baseline in
+  `.venv-k1`: `ruff check` clean, `ruff format --check` 215 files formatted,
+  **pytest 807 passed, 1 skipped in 33.8 s**. The store
+  `data/inventory.sqlite` is 17,061,699,584 bytes (as K1 found it) and is
+  opened read-only throughout; `/mnt/d/leibniz-images` is mounted;
+  `data/kurrent/german_pieces.jsonl` has 2,173 rows (the K2 input, the
+  disjointness check's German side); `reports/philiumm/heldout_pages.csv` is
+  present; `data/models/hf/` holds the three TrOCR checkpoints K1 cached. The
+  nine repository pages for the checked years 1708–1716 answered 200 and each
+  links `LAA-Transkriptionen<year>-v1.pdf` (the 1714 page: Version 1 of 3
+  November 2020, 2.97 MB, "Lizenz: CC BY-NC 4.0", a Zitierhinweis and a
+  BibLaTeX entry). The go came after this pre-flight; nothing was fetched
+  before it.
+- **Plan, as printed for the go.** *Task 1* (no go needed; about 27 MB over
+  nine requests at one a second): `tools/fetch-letterpool.sh` and `leibniz
+  align letterpool-fetch` into `data/external/letterpool/` with
+  `reports/kurrent/letterpool-sources.json` (version, date, SHA-256, URL — no
+  text); `align/letterpool.py` on pdfplumber's characters (body size kept;
+  line numbers, running heads, Überlieferung block and footnotes dropped;
+  NFC; editorial brackets as the C2b flags describe them), the first witness's
+  siglum, kind, shelfmark and leaves through `normalize_signature`, the
+  language through `enrich.langid.classify`; tests on a synthetic PDF built in
+  the test; the per-year report; ten letters checked against the PDF by eye.
+  Checkpoint A. *Task 2* (store read-only, minutes): the work through the
+  crosswalk's signature keys, the pages through the C2 resolver; drops counted
+  by reason (no work, no folio-labelled canvas in range, no recognised lines,
+  shared leaves); disjointness against `german_pieces.jsonl`'s pages and
+  `heldout_pages.csv`; the draw seeded and stratified by siglum and year
+  (every L and l letter, a K and k sample of about the same size), split
+  once into a selection half and a test half per the amendment of 10 October;
+  `reports/kurrent/letterpool-testset.csv` (no text) and the texts under
+  `data/kurrent/letterpool/`. Checkpoint B. *Task 3*: the metric — the
+  letter's reference against the concatenation of every recognised line on
+  its pages in reading order, an infix (semi-global) alignment with the
+  machine text's prefix and suffix free, as a vectorised numpy DP checked
+  against the full DP on fixtures; CER pooled and per letter with a bootstrap
+  over letters, under the B1 harness's three policies and the Kurrent
+  package's reading policy, per siglum, year and half; a selected line-level
+  CER beside it; `v1` from the store (no GPU, minutes); then, **after a go**,
+  `philiumm`, `trocr-kurrent-xvi-xvii`, `trocr-hanse-xvi` and
+  `trocr-hanse-xvii` through the pilot's crop machinery into
+  `data/kurrent/letterpool-readings/<reader>.jsonl`, resumable, under nohup
+  with a log under `logs/` (K1's rates of 334 / 209 / 337 / 34 ms a line put
+  it at hours once the line count is known); `letterpool-eval.md` and
+  `.json`, numbers only. Checkpoint C. Then STATUS.md, PROMPTS.md, ruff and
+  pytest, push, the compare URL; no merge, nothing deployed.
 
 ### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 

@@ -1708,3 +1708,214 @@ they differ, this preamble wins.
    is still needed for anything on the box or the store, which a cloud
    session hands over anyway. A desktop session waits as the prompt says.
 ~~~~
+
+### Phase K2b — the letter-pool test set (run 2026-10-19)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session opened on the `\\wsl.localhost` path — under the session preamble of
+19 October (below the prompt), which replaces the preamble of 8 and 14
+October: one branch per step from main (`k2b-letterpool`), nothing merged or
+deployed, the operator's "go" waited for after Task 0 as the prompt says.
+The departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase K2b — An honest German test set from the GWLB letter pool, and the first
+measured German error rates. One local session on the operator's desktop
+(WSL2 Ubuntu), with the store, the image cache, the network and several hours
+of GPU. It does not depend on K2 and may run before it, but not at the same
+time.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), SPECS.md §1.4 and §7.3 (the nc
+quarantine) and STATUS.md: "Current state", the K1 entry, the K2 entry if
+present, "Next". If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence. Write the "K2b — the letter-pool test set" entry
+in STATUS.md after every task; if one exists, continue from its first
+unfinished task.
+
+## Where you run, and the rules that follow from it
+The checkout at /home/evana/LeibnizLegible, the branch the preamble names,
+.venv-k1 (`export UV_PROJECT_ENVIRONMENT=.venv-k1`; its gt extra brings
+pdfplumber). The store is opened read-only throughout; this phase writes
+nothing to it. The test set lives in files, so no training-set builder can
+ever pick it up. The page-image cache is /mnt/d/leibniz-images. Long jobs
+under nohup with a log under logs/; a go before any job over an hour, any
+download over 1 GB, any install. Never write a number you did not produce.
+The licence rule, hard: the letter pool is CC BY-NC 4.0 (nc bucket, SPECS
+§1.4 and §7.3). Its text serves internal evaluation only, under the TDM
+rules: never on the website, never in a release, never in a committed file,
+never in training, never for choosing a checkpoint. The PDFs and everything
+extracted from them stay under data/external/letterpool/ and
+data/kurrent/letterpool/ (gitignored); reports carry numbers, letter numbers
+and shelfmarks only. Cite the pool with its version, as its Zitierhinweis
+asks.
+
+## Background
+The GWLB's Leibniz-Archiv publishes "Transkriptionen des Leibniz-Briefwechsels
+<year> für die Leibniz-Akademie-Ausgabe", one PDF per year: checked
+("überprüft") for 1708 to 1716, unchecked ("nicht überprüft") for 1710 to
+1714; CC BY-NC 4.0. Each year has a page at
+https://www.gwlb.de/leibniz/digitale-ressourcen/repositorium-des-leibniz-archivs/laa-transkriptionen-<year>
+(the unchecked ones end in -nue) naming its PDF under
+https://www.gwlb.de/fileadmin/Leibniz/repositorium-des-leibniz-archivs/
+(1714: LAA-Transkriptionen1714-v1.pdf, 3 MB, 444 pages). Take the newest
+version of each checked year; use the checked ones only.
+The volumes are typeset like the Academy edition (EDMAC). Per letter: a
+number and a heading ("2. GEORG LUDEWIG RÖMELING AN LEIBNIZ", then place and
+date); an "Überlieferung:" block naming the witness, its hand and its leaves
+(siglum L = Leibniz's own hand, l = his scribe, K = the correspondent's own
+hand, k = the correspondent's scribe; for example "K Abfertigung: LBr. 164
+Bl. 31–32"); then the text, with line numbers in the margin, running heads,
+and footnotes below. The text layer decomposes umlauts (U+0308): normalise
+to NFC first. A rough look at the 1714 volume from a cloud session on 9
+October (a header regex and the stopword classifier, not a count): about 300
+letters, about 90 of them German, of those about 70 from correspondents (K)
+and 20 in Leibniz's hand (L); most name an LBr shelfmark with leaves. The
+letters are from years the §70-expired volumes do not reach, so they are
+disjoint from K2's training data by construction; check it anyway, page by
+page.
+Why this is the honest set: people made these transcriptions from the
+originals, for the edition, independently of every model here. An error rate
+measured on lines the aligner accepted is flattered by the selection (the
+aligner keeps the lines a reader already reads well); this set is selected
+by no reader.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+A clean tree; `git pull`; `df -h data /mnt/d`; `nvidia-smi`; baseline ruff +
+pytest in .venv-k1. Print the plan; wait for "go".
+
+## Task 1 — Fetch and parse the pool
+tools/fetch-letterpool.sh or a `leibniz align letterpool-fetch` command: the
+checked PDFs into data/external/letterpool/, each with its version, date,
+SHA-256 and URL in reports/kurrent/letterpool-sources.json (committed: no
+text in it). Then src/leibniz/align/letterpool.py: per letter its number, its
+heading (correspondents, place, date), its Überlieferung block (the first
+witness's siglum; its kind, Abfertigung, Konzept or Abschrift; its shelfmark
+and leaves through leibniz.catalog.shelfmarks.normalize_signature), and the
+letter's text alone. pdfplumber gives every character's font size and
+position: keep the body size and drop the line numbers, the running heads,
+the Überlieferung block and the footnotes. Editorial brackets go the way the
+C2b flags describe them (a supplied letter, "salutare[s]", keeps its letters;
+the brackets go). Language per letter with leibniz.enrich.langid.classify.
+Tests on a small synthetic PDF built in the test (no pool text in the repo).
+Report per year: letters, by language, by siglum, with a placeable shelfmark.
+Spot-check ten letters against the PDF by eye. CHECKPOINT A; stop and say so
+if the letters cannot be parsed reliably.
+
+## Task 2 — Place the letters and freeze the test set
+For each German letter (language de; mixed reported apart) whose first
+witness is in the GWLB's Leibniz collections (LBr, LH, LK, Marg): the work
+through the crosswalk's signature keys
+(leibniz.catalog.crosswalk.build_work_key_index), and the pages of its leaves
+through src/leibniz/align/resolve.py (the C2 resolver; src/leibniz/web/pieces.py
+places a catalogue record the same way). Drop, counted by reason: no work in
+the store, no folio-labelled canvas in range, no recognised lines, and leaves
+shared with another text ("Auf Bl. 4 vo L von N. 69": a second text on a leaf
+would charge the reader for text that is not in the reference). Check
+page-disjointness against K2's German pieces and against
+reports/philiumm/heldout_pages.csv and report any overlap. Draw the test set,
+seeded, stratified by siglum and spread over the years: every L and l letter,
+and a seeded sample of K and k letters of about the same size. Freeze it:
+reports/kurrent/letterpool-testset.csv (letter, year, siglum, shelfmark,
+leaves, page_ids, n_lines, the SHA-256 of the reference text; no text) and the
+texts under data/kurrent/letterpool/. CHECKPOINT B.
+
+## Task 3 — The metric and the first numbers
+The metric, letter by letter, nothing filtered: the letter's reference text
+against the concatenation, in reading order, of every recognised line on its
+pages, aligned so that machine text before and after the letter's text is
+free (the address, archival notes, a neighbour) and everything inside the
+aligned span counts (an infix alignment; edlib's HW mode does it, or a banded
+DP). CER under the three normalization policies of the B1 harness
+(src/leibniz/htr/bench.py, metrics.py) and under the Kurrent package's reading
+policy (long s folded, as K1 scored Dresden). Report the CER pooled over
+characters and as a per-letter distribution with a bootstrap interval over
+letters, per siglum and per year. A line-level CER over the lines the
+factory's aligner places may stand beside it, labelled as selected. Tests on
+fixtures. Then measure on the frozen set: v1, the stored text (no GPU; the
+German error rate of what the website shows today), and, read afresh through
+the crop machinery: philiumm, trocr-kurrent-xvi-xvii and, evaluate-only,
+trocr-hanse-xvi and trocr-hanse-xvii (K1's registry), each to
+data/kurrent/letterpool-readings/<reader>.jsonl, resumable, after a go for
+the GPU job. Write reports/kurrent/letterpool-eval.md and .json: numbers only,
+the pool cited with its versions. CHECKPOINT C.
+
+## Finish and hand-over
+The STATUS.md entry: the test set (letters, pages and lines, by siglum and
+year), the dropped letters by reason, the metric, the numbers per reader and
+per hand, the licence handling; "Key numbers"; "Next": K3 reports its German
+error rate on this set and never tunes on it; the About page may cite v1's
+German number in a later web step. Append this prompt verbatim to PROMPTS.md
+under "Follow-up phases (2026-10)". ruff + pytest clean, all tests offline.
+Push, print the compare URL, tell the operator what to read
+(letterpool-eval.md), that data/external/letterpool/ and
+data/kurrent/letterpool/ must be kept, and that nothing is deployed. Do not
+merge.
+
+## Amendment of 2026-10-10 (after the review; where it differs from the tasks above, it wins)
+- Two halves (Task 2). K3 and K4 must choose a reader on held-out letters
+  that are not the reported test set. When you draw the set, split it once,
+  seeded, stratified by siglum and year: a selection half (K3 and K4 may
+  choose a reader and set a margin on it) and a test half (reported only,
+  never used for a choice). letterpool-testset.csv gets a column naming the
+  half; Task 3 reports each half and the whole.
+~~~~
+
+The session preamble of 19 October, as given to this session (it replaces the
+preamble on the plan page of 8 and 14 October):
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026. Read it with the phase prompt that follows;
+where they differ, this preamble wins. It replaces the preamble on the plan
+page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (today:
+   k2b-letterpool) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 14, 11
+   and 10 October), the W5 and K1 entries, Open questions 27 and 28, "Next".
+   Prepend your entry to Current state and the Phase log as the prompt says;
+   append the prompt verbatim to PROMPTS.md under "Follow-up phases (2026-10)";
+   record departures from the prompt, this preamble included, under
+   "Divergences". Names of individuals stay out of STATUS.md and PROMPTS.md:
+   write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+~~~~
