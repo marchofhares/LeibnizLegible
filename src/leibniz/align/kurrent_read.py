@@ -1064,7 +1064,7 @@ def write_read_report(
             {
                 "generated": generated,
                 "reader": reader,
-                "plan": plan,
+                "plan": {k: v for k, v in plan.items() if k != "pages"} if plan else None,
                 "profile": profile,
                 "sweep": list(sweep_rows),
                 "dresden": dresden,

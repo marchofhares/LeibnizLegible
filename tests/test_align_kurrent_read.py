@@ -431,3 +431,5 @@ def test_cli_kurrent_read_with_echo_then_report(tmp_path: Path) -> None:
     text = (tmp_path / "reports" / "k2-read.md").read_text(encoding="utf-8")
     assert "## The pages" in text and "## The job" in text and "no_geometry 1" in text
     assert "None" not in text
+    js = json.loads((tmp_path / "reports" / "k2-read.json").read_text(encoding="utf-8"))
+    assert js["plan"]["n_pages"] == 3 and "pages" not in js["plan"]  # ids stay out of the report
