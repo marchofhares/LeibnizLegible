@@ -773,8 +773,69 @@ def dresden_row(path: Path | str, reader: str = DEFAULT_READER) -> dict | None:
                 "ms_per_line": r.get("ms_per_line"),
                 "n_lines": r.get("n_lines"),
                 "device": r.get("device"),
+                "hyps_path": _hyps_path(path, reader),
             }
     return None
+
+
+def _hyps_path(path: Path | str, reader: str) -> str | None:
+    """The ``<reader>.hyps.jsonl`` a kurrent-smoke run wrote next to its reports."""
+    cand = Path(path).parent.parent / f"{reader}.hyps.jsonl"
+    return str(cand) if cand.exists() else None
+
+
+def _texts_of(path: Path | str | None, key: str, text_key: str) -> dict[str, str] | None:
+    if path is None or not Path(path).exists():
+        return None
+    out: dict[str, str] = {}
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            r = json.loads(line)
+            out[r[key]] = r[text_key]
+    return out
+
+
+def _agree(base: Mapping[str, str] | None, mine: Mapping[str, str] | None) -> tuple:
+    if base is None or mine is None:
+        return None, None
+    common = set(base) & set(mine)
+    return len(common), sum(1 for k in common if base[k] == mine[k])
+
+
+def sweep_agreement(
+    scratch_dir: Path | str, rows: Sequence[Mapping], baseline_key: str | None = None
+) -> list[dict]:
+    """Each sweep row with ``compared`` and ``identical``: how many of its readings equal the
+    baseline setting's on the same lines (the first row's setting unless named). The kv cache
+    and half precision are taken only where the text stays the reader's."""
+    scratch = Path(scratch_dir)
+    base_key = baseline_key or (rows[0]["key"] if rows else None)
+    base = _texts_of(scratch / f"{base_key}.jsonl", "line_id", "text") if base_key else None
+    out: list[dict] = []
+    for r in rows:
+        compared, identical = _agree(
+            base, _texts_of(scratch / f"{r['key']}.jsonl", "line_id", "text")
+        )
+        out.append({**r, "baseline": base_key, "compared": compared, "identical": identical})
+    return out
+
+
+def dresden_agreement(
+    dresden: Mapping[str, Mapping | None], baseline: str | None = None
+) -> dict[str, dict | None]:
+    """Each Dresden row with ``compared`` and ``identical`` against the baseline run's
+    hypotheses (the first run unless named), read from the ``hyps_path`` of each row."""
+    labels = [k for k, v in dresden.items() if v is not None]
+    base_label = baseline or (labels[0] if labels else None)
+    base = _texts_of(dresden[base_label].get("hyps_path"), "line_id", "hyp") if base_label else None
+    out: dict[str, dict | None] = {}
+    for label, row in dresden.items():
+        if row is None:
+            out[label] = None
+            continue
+        compared, identical = _agree(base, _texts_of(row.get("hyps_path"), "line_id", "hyp"))
+        out[label] = {**row, "baseline": base_label, "compared": compared, "identical": identical}
+    return out
 
 
 def _pct(x: float | None, d: int = 1) -> str:
@@ -873,22 +934,31 @@ def render_read_report(
         A("")
         A("## The sweep")
         A("")
+        agree = any(r.get("compared") is not None for r in sweep_rows)
+        base = next((r.get("baseline") for r in sweep_rows if r.get("baseline")), None)
         A(
             "The same lines, a sample spread over the job's pages, read with each setting into a "
             "scratch file; wall time includes decoding and cutting."
+            + (
+                f" The last column counts the readings a setting left identical to `{base}`'s "
+                "on the lines both read."
+                if agree
+                else ""
+            )
         )
         A("")
         A(
             "| setting | batch | dtype | kv cache | lines | seconds | lines/s | ms/line | "
-            "GPU peak MiB |"
+            "GPU peak MiB |" + (" identical / compared |" if agree else "")
         )
-        A("|---|---:|---|---|---:|---:|---:|---:|---:|")
+        A("|---|---:|---|---|---:|---:|---:|---:|---:|" + ("---:|" if agree else ""))
         for r in sweep_rows:
             A(
                 f"| {r['key']} | {r['batch_size']} | {r['dtype']} | "
                 f"{'on' if r.get('use_cache') else 'default'} | {_n(r.get('lines'))} | "
                 f"{r.get('seconds')} | {r.get('lines_per_second')} | {r.get('ms_per_line')} | "
                 f"{_n(r.get('gpu_peak_mib'))} |"
+                + (f" {_n(r.get('identical'))} / {_n(r.get('compared'))} |" if agree else "")
             )
     if dresden:
         A("")
@@ -900,17 +970,26 @@ def render_read_report(
             "taken only where the CER stays within 0.2 points of K1's."
         )
         A("")
-        A("| run | CER | lenient | strict | ms/line | device |")
-        A("|---|---|---:|---:|---:|---|")
+        agree = any(r and r.get("compared") is not None for r in dresden.values())
+        base = next((r.get("baseline") for r in dresden.values() if r and r.get("baseline")), None)
+        if agree:
+            A(f"The last column counts the lines a run read identically to the run *{base}* did.")
+            A("")
+        A(
+            "| run | CER | lenient | strict | ms/line | device |"
+            + (" identical / compared |" if agree else "")
+        )
+        A("|---|---|---:|---:|---:|---|" + ("---:|" if agree else ""))
         for label, row in dresden.items():
             if row is None:
-                A(f"| {label} | — | — | — | — | — |")
+                A(f"| {label} | — | — | — | — | — |" + (" — |" if agree else ""))
                 continue
             A(
                 f"| {label} | {_pct(row['cer'])} ({_pct(row['cer_lo'])}–{_pct(row['cer_hi'])}) | "
                 f"{_pct(row['lenient_cer'])} | {_pct(row['strict_cer'])} | "
                 f"{'—' if row.get('ms_per_line') is None else f'{row["ms_per_line"]:.0f}'} | "
                 f"{row.get('device') or '—'} |"
+                + (f" {_n(row.get('identical'))} / {_n(row.get('compared'))} |" if agree else "")
             )
     if chosen:
         A("")
@@ -1013,6 +1092,7 @@ __all__ = [
     "SweepSetting",
     "count_lines_on",
     "crop_page",
+    "dresden_agreement",
     "dresden_row",
     "first_crops",
     "format_duration",
@@ -1029,6 +1109,7 @@ __all__ = [
     "sample_pages",
     "stats_path",
     "sweep",
+    "sweep_agreement",
     "write_read_report",
     "write_stats",
 ]

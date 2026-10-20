@@ -15,9 +15,11 @@ branch `k2-german-gt`; nothing deployed.** The Bern Kurrent reader
 census's German pieces, then the factory over those readings, as the plan
 page's K2 prompt (with its amendment of 10 October) and the preamble of 19
 October say. Task 0 done (the pre-flight; the go came after it); Task 1 in
-progress (the code built and tested; the throughput measurements running; the
-reading job starts after the go on its ETA). The K2 entry in the Phase log
-has the detail and says how to resume.
+progress (the code built and tested; the sweep and the Dresden check done:
+fp32 with the decoder's cache on at batch 16 reads 10.7 lines/s with every
+Dresden reading identical to the checkpoint's defaults, so the job takes
+about 8 h; it starts after the go). The K2 entry in the Phase log has the
+detail and says how to resume.
 
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
 `c2c-remint` waits for the operator's pull request, nothing deployed.** The
@@ -729,7 +731,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the code built; the measurements running) · ⏳ Task 2 · ⏳ Task 3
+### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the setting chosen; the reading job awaits the go) · ⏳ Task 2 · ⏳ Task 3
 
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
@@ -821,6 +823,41 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the checkpoint's generation config: `use_cache: false`, so each of the up
   to 160 decoding steps re-encodes the whole prefix. The sweep measures the
   cache switched on and half precision, each checked on Dresden before use.
+- **The sweep and the Dresden check (Task 1;** `reports/kurrent/k2-read.md`,
+  `k2-read.json`; the per-setting readings under
+  `data/kurrent/k2-readings/sweep/`, the Dresden runs under
+  `data/kurrent/smoke-k2-{fp32,fp32kv,fp16kv}/`**).** The same 2,000 lines,
+  a sample spread over the job's pages, read with nine settings; wall time
+  with decoding and cutting; the GPU's peak reserved memory for the process.
+  The checkpoint's defaults (fp32, no cache): batch 8 **313.9 ms** a line
+  (2,418 MiB), batch 16 321.2 (3,968), batch 32 339.2 (6,412) — a larger
+  batch buys nothing without the cache, since the longest line's steps are
+  re-encoded for the whole batch. **The cache on, fp32: batch 8 108.2 ms
+  (2,796 MiB), batch 16 93.7 (4,018), batch 32 82.2 (6,348).** Half
+  precision with the cache is slower on this card (363.1 / 303.4 / 270.1 ms;
+  the GTX 1660 Ti has no tensor cores). The readings agree: against the
+  defaults at batch 8, the cache changes **0 of 2,000** readings at batch 8
+  and 1 at batch 16 and 32 — a change of batch size alone changes 1 in 2,000
+  without the cache too; fp16 changes 39 of 2,000 (2 %). **Dresden** (383
+  Kurrent Trace lines, `philiumm` policy): the defaults re-read today 7.4 %
+  CER (6.7–8.2), lenient 5.2 %, strict 7.5 %, 343 ms a line — K1's numbers;
+  **fp32 with the cache 7.4 % (6.7–8.2), lenient 5.2 %, strict 7.5 %, 111 ms
+  a line, all 383 readings identical to the defaults'**; fp16 with the cache
+  7.4 %, lenient 5.3 %, 378 of 383 identical, 328 ms a line. **The setting:
+  `b16-float32-kv`** — fp32, the decoder's cache on, batch 16, 10.67 lines/s,
+  the fastest that fits in 6 GB (batch 32 reserved 6,348 MiB, past the
+  card's 6,144 MiB: under WSL2 the allocation spills into shared system
+  memory instead of failing, which is why it ran at all). **ETA for the
+  310,831 lines: about 8 h 05 min**; with Xwayland's 1,450 MiB the card holds
+  about 5.5 GB at the peak. Half precision is not taken (slower here, and it
+  changes readings). The reading job needs the operator's go (a job over an
+  hour); the command, which also resumes an interrupted run from its JSONL:
+  `cd /home/evana/LeibnizLegible && export UV_PROJECT_ENVIRONMENT=.venv-k1 &&
+  nohup uv run leibniz align kurrent-read --batch-size 16 --dtype float32
+  --kv-cache > logs/k2-read.log 2>&1 &` — progress every 180 s in the log and
+  in `data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.stats.json`; the
+  report afterwards with `leibniz align kurrent-read --report --chosen
+  b16-float32-kv` and the three `--dresden label=path` of the runs above.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 

@@ -484,10 +484,12 @@ def kurrent_read(
             json.loads(profile_path.read_text(encoding="utf-8")) if profile_path.exists() else None
         )
         rows = json.loads(sweep_path.read_text(encoding="utf-8")) if sweep_path.exists() else []
+        rows = R.sweep_agreement(readings_dir / "sweep", rows)
         dres = {}
         for item in dresden or []:
             label, _, path = item.partition("=")
             dres[label] = R.dresden_row(path, reader)
+        dres = R.dresden_agreement(dres)
         pick = next((r for r in rows if r["key"] == chosen), None) if chosen else None
         if pick is not None and note:
             pick = {**pick, "note": note}

@@ -277,6 +277,10 @@ def test_profile_and_sweep_on_the_stub(tmp_path: Path) -> None:
         assert [r["key"] for r in rows] == ["b2-float32", "b4-float16-kv"]
         assert all(r["lines"] == 3 and r["lines_per_second"] > 0 for r in rows)
         assert (tmp_path / "sweep" / "b2-float32.jsonl").exists()
+        rows = R.sweep_agreement(tmp_path / "sweep", rows)
+        assert rows[0]["compared"] == 3 and rows[0]["identical"] == 3
+        assert rows[1]["baseline"] == "b2-float32" and rows[1]["compared"] == 3
+        assert R.sweep_agreement(tmp_path / "sweep", [{"key": "none"}])[0]["compared"] is None
         text = R.render_read_report(
             plan=R.plan_pages(conn, _rows(), today=TODAY).as_dict(),
             profile=prof,
@@ -298,6 +302,7 @@ def test_profile_and_sweep_on_the_stub(tmp_path: Path) -> None:
             stats=None,
         )
         assert "## The sweep" in text and "b4-float16-kv" in text and "7.5 %" in text
+        assert "identical / compared" in text and "| 3 / 3 |" in text
         assert "chosen for the test" in text and "None" not in text
     finally:
         conn.close()
@@ -345,6 +350,43 @@ def test_dresden_row_reads_a_smoke_json(tmp_path: Path) -> None:
     assert row is not None and row["cer"] == 0.074 and row["lenient_cer"] == 0.052
     assert R.dresden_row(path, "philiumm") is None
     assert R.dresden_row(tmp_path / "missing.json") is None
+
+
+def test_dresden_agreement_counts_identical_hypotheses(tmp_path: Path) -> None:
+    def run(name: str, hyps: dict[str, str]) -> Path:
+        d = tmp_path / name
+        (d / "reports").mkdir(parents=True)
+        (d / "trocr-kurrent-xvi-xvii.hyps.jsonl").write_text(
+            "".join(
+                json.dumps({"line_id": k, "hyp": v, "conf": 0.9}) + "\n" for k, v in hyps.items()
+            ),
+            encoding="utf-8",
+        )
+        res = {
+            "key": "trocr-kurrent-xvi-xvii",
+            "status": "ok",
+            "n_lines": 2,
+            "scores": {
+                "philiumm": {"cer": 0.07, "cer_lo": 0.06, "cer_hi": 0.08},
+                "lenient": {"cer": 0.05},
+                "strict": {"cer": 0.08},
+            },
+        }
+        (d / "reports" / "bootstrap-candidates.json").write_text(
+            json.dumps({"results": [res]}), encoding="utf-8"
+        )
+        return d / "reports" / "bootstrap-candidates.json"
+
+    a = run("a", {"l1": "Wardt die", "l2": "Conradt"})
+    b = run("b", {"l1": "Wardt die", "l2": "Conrad"})
+    rows = R.dresden_agreement({"defaults": R.dresden_row(a), "kv": R.dresden_row(b), "x": None})
+    assert rows["defaults"]["compared"] == 2 and rows["defaults"]["identical"] == 2
+    assert rows["kv"]["compared"] == 2 and rows["kv"]["identical"] == 1
+    assert rows["kv"]["baseline"] == "defaults" and rows["x"] is None
+    text = R.render_read_report(
+        plan=None, profile=None, sweep_rows=[], dresden=rows, chosen=None, stats=None
+    )
+    assert "| 1 / 2 |" in text and "identical / compared" in text
 
 
 def test_cli_kurrent_read_with_echo_then_report(tmp_path: Path) -> None:
