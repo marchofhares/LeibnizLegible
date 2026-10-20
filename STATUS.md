@@ -16,9 +16,11 @@ census's German pieces, then the factory over those readings, as the plan
 page's K2 prompt (with its amendment of 10 October) and the preamble of 19
 October say. Task 0 done (the pre-flight; the go came after it); Task 1 in
 progress (the code built and tested; the sweep and the Dresden check done:
-fp32 with the decoder's cache on at batch 16 reads 10.7 lines/s with every
-Dresden reading identical to the checkpoint's defaults, so the job takes
-about 8 h; it starts after the go). The K2 entry in the Phase log has the
+fp32 with the decoder's cache on at batch 16 reads every Dresden line as
+the checkpoint's defaults do at a third of the time; **the reading job is
+running since 19:36 EDT** (restarted at 19:40 on an engine fix that
+silences a per-batch warning, resumed from its file), about 7 h at the
+measured 79 ms a line; Checkpoint A). The K2 entry in the Phase log has the
 detail and says how to resume.
 
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
@@ -731,7 +733,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the setting chosen; the reading job awaits the go) · ⏳ Task 2 · ⏳ Task 3
+### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the reading job running; Checkpoint A) · ⏳ Task 2 · ⏳ Task 3
 
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
@@ -858,6 +860,25 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   in `data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.stats.json`; the
   report afterwards with `leibniz align kurrent-read --report --chosen
   b16-float32-kv` and the three `--dresden label=path` of the runs above.
+- **The reading job (Task 1; Checkpoint A).** The operator said "go"; the
+  job started at 19:36 EDT under nohup with the command above, readings to
+  `data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl`, the log
+  `logs/k2-read.log` (the operator's directory, untracked). Its first 25
+  pages ran at **79 ms a line (45,351 lines/h, ETA 6 h 48 m)**, faster than
+  the sweep's sample. Found in the first minutes: transformers logged a
+  warning on every batch ("Both `max_new_tokens` (=160) and
+  `max_length`(=128) seem to have been set"), two lines per batch, some
+  19,000 batches to come — the checkpoint's generation config carries
+  `max_length: 128` and the engine bounds each call with `max_new_tokens`,
+  which takes precedence. Fixed in `htr/trocr.py`
+  (`_drop_checkpoint_max_length`: the loaded model's `max_length` cleared,
+  the generated length unchanged; +1 test), checked on CPU on a Dresden line
+  (`dresden1673-0001_00000007-tr_1_tl_13`: the same text as the GPU run's,
+  no warning). The job was stopped after 3,316 lines (its log kept as
+  `logs/k2-read-first-start.log`) and **restarted at 19:40 EDT on the
+  fixed code**, resuming from the JSONL (the stats say so: `lines_before`).
+  To resume after any interruption, run the same command again; to follow,
+  `grep -v '^\[transformers\]' logs/k2-read.log | tail` or the stats file.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 

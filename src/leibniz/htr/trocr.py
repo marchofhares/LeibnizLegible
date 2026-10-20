@@ -108,6 +108,18 @@ def mean_token_prob(ids: Sequence[int], logps: Sequence[float], skip: set[int]) 
     return sum(probs) / len(probs) if probs else None
 
 
+def _drop_checkpoint_max_length(model: object) -> None:
+    """Clear the checkpoint's ``generation_config.max_length``.
+
+    The engine bounds every call with ``max_new_tokens``, which takes precedence;
+    with both set, transformers logs a warning on every batch (and the Kurrent
+    checkpoints ship ``max_length: 128``). The generated length is unchanged.
+    """
+    cfg = getattr(model, "generation_config", None)
+    if cfg is not None and getattr(cfg, "max_length", None) is not None:
+        cfg.max_length = None
+
+
 def _special_ids(model: object) -> set[int]:
     out: set[int] = set()
     for cfg_name in ("config", "generation_config"):
@@ -180,6 +192,7 @@ class TrOCREngine:
         self._processor, self._model = self._loader(self.model_id, self.cache_dir, self.device)
         if self.dtype == "float16" and hasattr(self._model, "half"):
             self._model.half()
+        _drop_checkpoint_max_length(self._model)
         self._skip = _special_ids(self._model)
         dev = getattr(self._model, "device", None)
         if dev is not None:

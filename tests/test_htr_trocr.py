@@ -159,6 +159,22 @@ def test_transcribe_images_skips_the_decoder_and_profiles() -> None:
     assert eng.settings["dtype"] == "float32" and eng.settings["use_cache"] is None
 
 
+def test_load_drops_the_checkpoint_max_length_but_keeps_its_ids() -> None:
+    class _GenConfig:
+        max_length = 128
+        eos_token_id = EOS
+
+    eng, model = _engine()
+    model.generation_config = _GenConfig()  # type: ignore[attr-defined]
+    eng._ensure_loaded()
+    assert model.generation_config.max_length is None  # type: ignore[attr-defined]
+    assert EOS in eng._skip and PAD in eng._skip
+    # a model without a generation config is left alone
+    eng2, model2 = _engine()
+    eng2._ensure_loaded()
+    assert not hasattr(model2, "generation_config")
+
+
 def test_half_precision_and_kv_cache_reach_the_model() -> None:
     eng, model = _engine()
     model.half_calls = 0
