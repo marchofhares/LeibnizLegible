@@ -656,7 +656,7 @@ _BLATT_END_RE = re.compile(
     r"\bBl\.?\s*\d+\s*[a-z]?\s*[rv]?o?°?(?:\s*[-–]\s*\d+\s*[a-z]?\s*[rv]?o?°?)?", re.IGNORECASE
 )
 _SHARED_RE = re.compile(r"\bvon\s+N\.\s*\d+")
-_PAREN_RE = re.compile(r"\([^)]*\)")
+_PAREN_RE = re.compile(r"\([^)]*\)|\[[^\]]*\]")
 
 
 @dataclass(slots=True)
@@ -681,8 +681,9 @@ class Witness:
 
 
 def _signature(shelfmark: str) -> Signature:
-    """The shelfmark normalised with its parentheses gone (``LBr.98 (Bothmer) Bl.1–2``:
-    the A3 normaliser cuts at a parenthesis, which here sits before the leaves)."""
+    """The shelfmark normalised with its parentheses and brackets gone (``LBr.98 (Bothmer)
+    Bl.1–2``, ``LK-MOW Behrens10 [früher: LBr.46] Bl.352``: the A3 normaliser cuts at a
+    parenthesis, which here sits before the leaves, and a bracket would enter the key)."""
     return normalize_signature(" ".join(_PAREN_RE.sub(" ", shelfmark).split()))
 
 

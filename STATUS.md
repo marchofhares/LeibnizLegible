@@ -9,8 +9,8 @@ _Last updated: 2026-10-14 (**the Edition's replies of 12 and 13 October recorded
 
 ## Current state
 
-**2026-10-19: K2b — the letter-pool test set, on the desktop; Task 1 done
-(Checkpoint A), Task 2 next.** The honest German test set from the GWLB's
+**2026-10-19: K2b — the letter-pool test set, on the desktop; Tasks 1 and 2
+done (Checkpoint B), Task 3 next.** The honest German test set from the GWLB's
 checked transcriptions of the correspondence of 1708–1716 (CC BY-NC 4.0, nc
 bucket: internal evaluation only), to be placed on the store's pages through
 the C2 resolver, frozen in files, and measured (v1 and the K1 readers), as the
@@ -21,7 +21,14 @@ parsed (`align/letterpool.py`): **2,533 letters** — 835 German, 1,179 French,
 489 Latin — with heading, dateline, first witness (L 812, l 26, K 1,553, k 91)
 and reading text apart; **2,090 placeable** on the GWLB's Leibniz
 collections, **695 of them German (L 111, l 1, K 560, k 17)**; ten letters
-checked by eye against the page. Pre-flight: the WSL tree clean of tracked
+checked by eye against the page. Then placed on the store's pages (565 of the
+695: 72 have no work in the store, 10 no canvas, 48 share their leaves with
+another text), no page among K2's German pieces or the PHILIUMM held-out
+pages, and the set drawn and frozen: **134 letters — all 67 in Leibniz's hand
+that placed and 67 of the correspondents' — on 386 pages with 18,815
+recognised lines, split once into a selection half and a test half of 67
+each** (`reports/kurrent/letterpool-testset.csv`; the texts under
+`data/kurrent/letterpool/`). Pre-flight: the WSL tree clean of tracked
 changes, main at `82e2091` (#45), the branch `k2b-letterpool`; `.venv-k1` as
 K1 left it (no edlib, none planned); baseline 807 tests, now 825. Nothing
 read on the GPU yet, nothing written to the store; the K2b entry in the
@@ -678,7 +685,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2b — the letter-pool test set (2026-10-19) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
+### K2b — the letter-pool test set (2026-10-19) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
 
 - **Setting.** The operator's desktop: the WSL checkout
   `/home/evana/LeibnizLegible`, driven from a Claude Code session opened on the
@@ -799,6 +806,49 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   numbering written on the leaf ("N.44.") stays in the text, since it is on
   the page. ruff clean, 825 tests. **Checkpoint A: the letters parse
   reliably.**
+- **Task 2, the letters placed and the set frozen** (`align/letterpool_set.py`,
+  `leibniz align letterpool-set`, +5 tests on a seeded fixture store;
+  `reports/kurrent/letterpool-testset.csv` (the frozen set, no text),
+  `letterpool-placement.csv` (every German letter's placement and reason),
+  `letterpool-set.md` + `.json`; the reference texts in
+  `data/kurrent/letterpool/testset.jsonl`, gitignored, nc bucket). The store
+  read-only (`open_readonly`); 2.9 s. *Placement* as the factory and the web
+  layer place a piece: the first witness's key through the crosswalk's
+  signature index (`build_work_key_index`; where a key names several works the
+  first whose folio labels cover the leaves wins), the leaves through the C2
+  resolver (`select_span`, the sides kept), the recognised lines counted per
+  page (`lines.text` not null), a drop under the first reason that applies.
+  Of the **695 German letters with a placeable witness** (23 mixed-language
+  ones counted apart): **placed 565** (L 67, K 482, k 13, A 3), **no work 72**
+  (LBr 827 — 21 of them, Schöttel's letters — is not among the store's works;
+  the LK-MOW convolutes are not either, the store holds no LK key at all; two
+  `LH XLI` witnesses name no section), **no canvas 10**, **no lines 0**,
+  **shared leaves 48** (L 30, l 1, K 12, k 2, A 3: the block names a second
+  text on the leaves, "Auf Bl.4vo L von N.69"). The placed letters sit on
+  1,782 pages with 76,230 recognised lines (1,319,833 reference characters);
+  by year 1713 is the largest (170 letters). *Disjointness:* no page of a
+  placed letter is among K2's German pieces' pages
+  (`data/kurrent/german_pieces.jsonl`, 0 of 1,782) or the PHILIUMM held-out
+  pages (`reports/philiumm/heldout_pages.csv`, 0) — as expected from the
+  years, now checked page by page. *The draw* (seed 20261019): every placed
+  letter in Leibniz's hand — **67 L** (no l letter placed: the one l witness
+  shares its leaves) — and **67 correspondents' letters** (65 K, 2 k)
+  allocated over the (siglum, year) cells in proportion to the pool by
+  largest remainder and drawn seeded within each cell; the set split once,
+  seeded, within each (siglum, year) cell, into the **selection half (67)**
+  and the **test half (67)**, per the amendment of 10 October. **134 letters,
+  386 pages, 18,815 recognised lines, 325,624 reference characters** —
+  selection 186 pages, 7,696 lines, 138,942 characters; test 200 pages, 11,119
+  lines, 186,682 characters; letters from 2 (1708) to 48 (1713) a year; lines
+  per letter 46 / 102 / 187 at the quartiles, 1,088 at most, up to 8 pages.
+  Two groups of drawn letters share pages (short pieces on one leaf: 1713-166
+  and 167 on two pages; 1713-168, 171 and 172 on two pages), 380 distinct pages
+  in all; the metric's free prefix and suffix leave a neighbour's text
+  uncharged. The CSV carries letter, year, number, half, siglum, kind,
+  shelfmark, leaves, work, page ids, pages, lines, characters and the SHA-256
+  of the reference text; the texts file carries the text with the same
+  checksum, so a later session can verify the set it measures is the frozen
+  one. 830 tests, ruff clean. **Checkpoint B: the set is frozen.**
 
 ### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 

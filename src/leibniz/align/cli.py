@@ -1455,3 +1455,80 @@ def letterpool_parse(
         f"[bold]letterpool-parse[/bold] {t['letters']:,} letters, {t['german_placeable']} German "
         f"and placeable; wrote {reports_dir / 'letterpool-parse.md'}"
     )
+
+
+@app.command(name="letterpool-set")
+def letterpool_set(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store (opened read-only)."),
+    letters_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool"), "--letters-dir", help="letterpool-parse's letters."
+    ),
+    german: Path = typer.Option(
+        Path("data/kurrent/german_pieces.jsonl"), "--german", help="K2's German pieces."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="PHILIUMM's held-out pages."
+    ),
+    seed: int = typer.Option(20261019, "--seed", help="Seed of the draw and the halves."),
+    n_kk: int = typer.Option(
+        None, "--n-kk", help="Correspondents' letters to draw (default: as many as L and l)."
+    ),
+    testset_csv: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="The frozen set, no text."
+    ),
+    placement_csv: Path = typer.Option(
+        Path("reports/kurrent/letterpool-placement.csv"),
+        "--placement",
+        help="Every German letter's placement and reason, no text.",
+    ),
+    texts: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--texts", help="The reference texts (nc)."
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-set.md and .json."
+    ),
+) -> None:
+    """Place the pool's German letters on the store and freeze the test set (K2b Task 2)."""
+    import json as _json
+
+    from leibniz.align import letterpool_set as S
+    from leibniz.align.audit_reach import open_readonly
+
+    letters = S.load_all_letters(letters_dir)
+    if not letters:
+        raise typer.BadParameter(f"no letters under {letters_dir}; run letterpool-parse first")
+    conn = open_readonly(db_path)
+    try:
+        placed, summary = S.build_set(
+            conn,
+            letters,
+            seed=seed,
+            n_kk=n_kk,
+            german_pieces=german,
+            heldout=heldout,
+            log=lambda m: _console.print(f"  {m}"),
+        )
+    finally:
+        conn.close()
+    by_id = {ltr.letter_id: ltr for ltr in letters}
+    drawn = [p for p in placed if p.drawn]
+    S.write_testset(drawn, by_id, csv_path=testset_csv, texts_path=texts)
+    S.write_placement(placed, placement_csv)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    (reports_dir / "letterpool-set.json").write_text(
+        _json.dumps(summary, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    (reports_dir / "letterpool-set.md").write_text(S.render_report(summary), encoding="utf-8")
+    r = summary["by_reason"]
+    d = summary["drawn"]
+    _console.print(
+        f"[bold]letterpool-set[/bold] {summary['german_letters']} German letters: placed "
+        f"{r['placed']['all']}, no work {r['no_work']['all']}, no canvas {r['no_canvas']['all']}, "
+        f"no lines {r['no_lines']['all']}, shared {r['shared']['all']}; drawn {d['letters']} "
+        f"letters on {d['pages']} pages, {d['lines']:,} lines "
+        f"(selection {d['by_half']['selection']['letters']}, "
+        f"test {d['by_half']['test']['letters']}); "
+        f"overlaps K2 {summary['disjointness']['k2_german_pieces']['pages']} pages, PHILIUMM "
+        f"{summary['disjointness']['philiumm_heldout']['pages']} pages; wrote {testset_csv}, "
+        f"{texts}, {placement_csv}, {reports_dir / 'letterpool-set.md'}"
+    )
