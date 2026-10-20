@@ -488,13 +488,29 @@ class ReaderInfo:
     evaluate_only: bool
 
 
-def reader_info(reader: str, readings: Mapping[str, P.Reading], licence: str) -> ReaderInfo:
+def reader_info(
+    reader: str,
+    readings: Mapping[str, P.Reading],
+    licence: str,
+    lines: Mapping[str, Sequence[P.PilotLine]] | None = None,
+) -> ReaderInfo:
+    """A reader's model, device, pace and coverage; the lines read are counted per letter
+    (a page two letters share counts for each) when the set's ``lines`` are given."""
     ms = [r.ms for r in readings.values() if r.ms > 0]
+    if lines is not None:
+        lines_read = sum(
+            1
+            for ls in lines.values()
+            for ln in ls
+            if ln.line_id in readings and readings[ln.line_id].text.strip()
+        )
+    else:
+        lines_read = sum(1 for r in readings.values() if r.text.strip())
     return ReaderInfo(
         reader=reader,
         model=next((r.model for r in readings.values() if r.model), reader),
         device=next((r.device for r in readings.values() if r.device), ""),
-        lines_read=sum(1 for r in readings.values() if r.text.strip()),
+        lines_read=lines_read,
         ms_per_line=statistics.fmean(ms) if ms else None,
         licence=licence,
         evaluate_only=reader in EVALUATE_ONLY,
@@ -635,7 +651,7 @@ def build_result(
         lines=sum(len(lines[ltr.letter_id]) for ltr in letters),
         ref_chars=sum(ltr.n_chars for ltr in letters),
         by_half=by_half,
-        readers=[reader_info(k, v, licences.get(k, "—")) for k, v in readers.items()],
+        readers=[reader_info(k, v, licences.get(k, "—"), lines) for k, v in readers.items()],
         aggregate=aggregate(scores),
         selected=selected_scores(letters, lines, readers),
         scores=scores,
