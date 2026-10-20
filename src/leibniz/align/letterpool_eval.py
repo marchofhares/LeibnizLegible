@@ -138,20 +138,24 @@ def _hw_last_row(ref: str, text: str, *, free_prefix: bool = True):
     return prev
 
 
-def infix_distance(ref: str, text: str) -> Infix:
+def infix_distance(ref: str, text: str, *, with_span: bool = True) -> Infix:
     """Edits to turn the cheapest span of ``text`` into ``ref``, with that span.
 
     The reference is consumed whole; the text's prefix and suffix are free. An
     empty reference costs nothing; an empty text costs the whole reference. The
     span's end is the first column attaining the minimum, its start the
     matching column of the reversed problem on ``text[:end]``, its start pinned at
-    ``end``; among equal minima the longest span is taken.
+    ``end``; among equal minima the longest span is taken. ``with_span=False`` skips the
+    reverse pass and reports the span as ``(-1, -1)``: half the work when only the
+    distance is wanted.
     """
     if not ref:
         return Infix(0, 0, 0)
     if not text:
         return Infix(len(ref), 0, 0)
     last = _hw_last_row(ref, text)
+    if not with_span:
+        return Infix(int(last.min()), -1, -1)
     end = len(last) - 1 - int(last[::-1].argmin())  # the last minimum: the longest span
     distance = int(last[end])
     back = _hw_last_row(ref[::-1], text[:end][::-1], free_prefix=False)  # pinned at end
@@ -294,15 +298,19 @@ class LetterScore:
 
     @property
     def span_share(self) -> float:
-        """The share of the machine text inside the aligned span."""
-        return (self.span_end - self.span_start) / self.hyp_chars if self.hyp_chars else 0.0
+        """The share of the machine text inside the aligned span (0 when no span was kept)."""
+        if self.span_start < 0 or not self.hyp_chars:
+            return 0.0
+        return (self.span_end - self.span_start) / self.hyp_chars
 
 
-def score_letter(letter: SetLetter, mt: MachineText, reader: str, policy: str) -> LetterScore:
+def score_letter(
+    letter: SetLetter, mt: MachineText, reader: str, policy: str, *, with_span: bool = True
+) -> LetterScore:
     fn = POLICIES[policy]
     ref = fn(letter.text)
     hyp = fn(mt.text)
-    res = infix_distance(ref, hyp)
+    res = infix_distance(ref, hyp, with_span=with_span)
     return LetterScore(
         letter_id=letter.letter_id,
         year=letter.year,
@@ -327,16 +335,19 @@ def score_set(
     readers: Mapping[str, Mapping[str, P.Reading]],
     *,
     policies: Iterable[str] = tuple(POLICIES),
+    span_policies: Iterable[str] = (HEADLINE_POLICY,),
     log: Callable[[str], None] | None = None,
 ) -> list[LetterScore]:
-    """Every letter under every reader and policy, nothing filtered."""
+    """Every letter under every reader and policy, nothing filtered; the aligned span is
+    located only under ``span_policies`` (the distance needs one pass, the span two)."""
     out: list[LetterScore] = []
     pols = list(policies)
+    spans = set(span_policies)
     for reader, readings in readers.items():
         for k, ltr in enumerate(letters, start=1):
             mt = machine_text(lines[ltr.letter_id], readings)
             for pol in pols:
-                out.append(score_letter(ltr, mt, reader, pol))
+                out.append(score_letter(ltr, mt, reader, pol, with_span=pol in spans))
             if log and k % 25 == 0:
                 log(f"{reader}: {k} letters scored")
     return out
@@ -374,7 +385,11 @@ def pooled(
         "letter_cer_q3": q[2],
         "letter_cer_min": cers[0] if cers else 0.0,
         "letter_cer_max": cers[-1] if cers else 0.0,
-        "span_share_mean": statistics.fmean(s.span_share for s in scores) if scores else 0.0,
+        "span_share_mean": (
+            statistics.fmean(s.span_share for s in scores if s.span_start >= 0)
+            if any(s.span_start >= 0 for s in scores)
+            else 0.0
+        ),
     }
 
 
@@ -504,8 +519,10 @@ def read_set(
     batch_size: int = 8,
     sample: int | None = None,
     log: Callable[[str], None] | None = None,
+    crop_cache: Path | str | None = None,
 ) -> dict[str, dict[str, P.Reading]]:
-    """Read every line of the set's pages with each reader, resuming from its JSONL."""
+    """Read every line of the set's pages with each reader, resuming from its JSONL; with a
+    crop cache the first reader cuts the lines and the others read the cuts."""
     pieces = [_Piece(list(ltr.page_ids)) for ltr in letters]
     out: dict[str, dict[str, P.Reading]] = {}
     for key in readers:
@@ -519,6 +536,7 @@ def read_set(
             sample=sample,
             batch_size=batch_size,
             log=log,
+            crop_cache=crop_cache,
         )
     return out
 

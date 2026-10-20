@@ -1571,6 +1571,11 @@ def letterpool_eval(
     reports_dir: Path = typer.Option(
         Path("reports/kurrent"), "--reports-dir", help="letterpool-eval.md, .json, -letters.csv."
     ),
+    crop_cache: Path = typer.Option(
+        Path("data/kurrent/letterpool-crops"),
+        "--crop-cache",
+        help="Line crops kept on disk, cut once by the first reader (never committed).",
+    ),
 ) -> None:
     """Score the frozen letter-pool set: v1 and the K1 readers, nothing filtered (K2b Task 3)."""
     from leibniz.align import letterpool as LP
@@ -1607,6 +1612,7 @@ def letterpool_eval(
                 batch_size=batch_size,
                 sample=sample,
                 log=lambda m: _console.print(f"  {m}"),
+                crop_cache=crop_cache,
             )
         all_readings: dict = {E.V1: E.v1_for_set(conn, letters)}
         all_readings.update(E.readings_on_disk(keys, readings_dir))

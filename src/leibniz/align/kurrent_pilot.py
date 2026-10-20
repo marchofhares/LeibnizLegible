@@ -325,22 +325,56 @@ def crop(image_path: Path, line: PilotLine) -> bytes | None:
     )
 
 
-def crop_all(image_path: Path, lines: Sequence[PilotLine]) -> list[tuple[PilotLine, bytes]]:
-    """The reader's crops for one page, the page image decoded once."""
-    from PIL import Image
+def crop_cache_path(cache_dir: Path | str, line: PilotLine) -> Path:
+    """Where a line's crop is kept when a crop cache is used: ``<cache>/<page>/<seq>.png``."""
+    return Path(cache_dir) / line.page_id / f"{line.line_seq:03d}.png"
 
+
+def crop_all(
+    image_path: Path | None,
+    lines: Sequence[PilotLine],
+    *,
+    cache_dir: Path | str | None = None,
+) -> list[tuple[PilotLine, bytes]]:
+    """The reader's crops for one page, the page image decoded once.
+
+    With a ``cache_dir`` the crops are kept on disk, so a second reader of the
+    same lines neither opens the page image nor cuts the polygons again (the
+    cutting, not the model, is most of a fast reader's wall time); the image
+    may then be ``None`` when every line is cached.
+    """
     out: list[tuple[PilotLine, bytes]] = []
-    with Image.open(image_path) as im:
-        im.load()
-        for ln in lines:
-            try:
-                png = crop_from_image(
-                    im, ln.polygon, ln.baseline, pad=CROP_PAD, max_width=None, mask_polygon=True
-                )
-            except OSError:
-                png = None
-            if png is not None:
-                out.append((ln, png))
+    missing: list[PilotLine] = []
+    for ln in lines:
+        cached = crop_cache_path(cache_dir, ln) if cache_dir is not None else None
+        if cached is not None and cached.exists():
+            out.append((ln, cached.read_bytes()))
+        else:
+            missing.append(ln)
+    if missing:
+        if image_path is None:
+            raise FileNotFoundError("no page image and not every line is in the crop cache")
+        from PIL import Image
+
+        with Image.open(image_path) as im:
+            im.load()
+            for ln in missing:
+                try:
+                    png = crop_from_image(
+                        im, ln.polygon, ln.baseline, pad=CROP_PAD, max_width=None, mask_polygon=True
+                    )
+                except OSError:
+                    png = None
+                if png is not None:
+                    out.append((ln, png))
+                    if cache_dir is not None:
+                        target = crop_cache_path(cache_dir, ln)
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        tmp = target.with_suffix(".png.part")
+                        tmp.write_bytes(png)
+                        tmp.replace(target)
+    order = {ln.line_id: i for i, ln in enumerate(lines)}
+    out.sort(key=lambda t: order[t[0].line_id])
     return out
 
 
@@ -401,6 +435,7 @@ def read_pieces(
     sample: int | None = None,
     batch_size: int = 8,
     log: Callable[[str], None] | None = None,
+    crop_cache: Path | str | None = None,
 ) -> dict[str, Reading]:
     """Read every line of the pieces' pages with one reader, resuming from its JSONL.
 
@@ -420,7 +455,10 @@ def read_pieces(
             if not lines:
                 continue
             path = page_image_path(conn, page_id, Path(images_root))
-            if path is None:
+            all_cached = crop_cache is not None and all(
+                crop_cache_path(crop_cache, ln).exists() for ln in lines
+            )
+            if path is None and not all_cached:
                 n_skipped += len(lines)
                 if log:
                     log(
@@ -428,7 +466,7 @@ def read_pieces(
                     )
                 continue
             try:
-                crops = crop_all(path, lines)
+                crops = crop_all(path, lines, cache_dir=crop_cache)
             except OSError as exc:  # an unreadable cache file
                 n_skipped += len(lines)
                 if log:

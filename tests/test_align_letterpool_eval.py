@@ -360,3 +360,112 @@ def test_letterpool_eval_cli(tmp_path: Path) -> None:
     summary = json.loads((out / "letterpool-eval.json").read_text(encoding="utf-8"))
     assert summary["set"]["letters"] == 2 and "echo" in summary["aggregate"]
     assert summary["aggregate"]["echo"]["philiumm"]["all"]["cer"] > 0.9
+
+
+def test_infix_distance_without_the_span_gives_the_same_distance() -> None:
+    rng = random.Random(7)
+    for _ in range(100):
+        ref = "".join(rng.choice("ab c") for _ in range(rng.randint(0, 7)))
+        text = "".join(rng.choice("ab c") for _ in range(rng.randint(0, 9)))
+        full = E.infix_distance(ref, text)
+        fast = E.infix_distance(ref, text, with_span=False)
+        assert fast.distance == full.distance
+        assert (fast.start, fast.end) == (-1, -1) or not ref or not text
+    s = _score("z", 1, 10, span_start=-1, span_end=-1)
+    assert s.span_share == 0.0 and E.pooled([s])["span_share_mean"] == 0.0
+
+
+def test_score_set_locates_the_span_under_the_headline_policy_only(tmp_path: Path) -> None:
+    store = tmp_path / "inv.sqlite"
+    _seed(store)
+    csv_path, texts_path = _frozen(tmp_path)
+    letters = E.load_set(csv_path, texts_path)
+    from leibniz.align.audit_reach import open_readonly
+
+    conn = open_readonly(store)
+    try:
+        lines = E.set_lines(conn, letters)
+        v1 = E.v1_for_set(conn, letters)
+    finally:
+        conn.close()
+    scores = E.score_set(letters, lines, {"v1": v1})
+    by_policy = {s.policy: s for s in scores if s.letter_id == "1714-1"}
+    assert by_policy["philiumm"].span_start >= 0 and by_policy["reading"].span_start == -1
+    assert all(s.edits == 0 for s in scores)
+
+
+def test_read_set_with_a_crop_cache_cuts_once_and_reads_without_the_images(tmp_path: Path) -> None:
+    import shutil
+
+    store = tmp_path / "inv.sqlite"
+    _seed(store)
+    csv_path, texts_path = _frozen(tmp_path)
+    letters = E.load_set(csv_path, texts_path)
+    images = tmp_path / "images"
+    from PIL import Image
+
+    conn = db.connect(store)
+    for seq in (1, 2, 3):
+        local = f"W/{seq:04d}.jpg"
+        (images / "W").mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (400, 200), "white").save(images / local)
+        conn.execute(
+            "UPDATE pages SET local_path = ? WHERE work_id = 'W' AND seq = ?", (local, seq)
+        )
+        conn.execute(
+            "UPDATE lines SET polygon = ?, baseline = ? WHERE page_id = ?",
+            (
+                json.dumps([[10, 10], [390, 10], [390, 60], [10, 60]]),
+                json.dumps([[10, 55], [390, 55]]),
+                f"W:{seq:04d}",
+            ),
+        )
+    conn.commit()
+    conn.close()
+
+    class Scripted:
+        name = "scripted"
+        version = "scripted@1"
+        device = "cpu"
+
+        def transcribe_conf(self, imgs):
+            return [("gelesen", 0.9) for _ in imgs]
+
+    from leibniz.align.audit_reach import open_readonly
+
+    cache = tmp_path / "crops"
+    conn = open_readonly(store)
+    try:
+        first = E.read_set(
+            conn,
+            letters,
+            ["one"],
+            engine_factory=lambda k: Scripted(),
+            images_root=images,
+            readings_dir=tmp_path / "r1",
+            crop_cache=cache,
+        )
+        assert len(first["one"]) == 6 and len(list(cache.glob("*/*.png"))) == 6
+        shutil.rmtree(images)  # the second reader needs no page image
+        second = E.read_set(
+            conn,
+            letters,
+            ["two"],
+            engine_factory=lambda k: Scripted(),
+            images_root=images,
+            readings_dir=tmp_path / "r2",
+            crop_cache=cache,
+        )
+        assert len(second["two"]) == 6 and all(r.text == "gelesen" for r in second["two"].values())
+        # without the cache and without the images nothing can be read
+        third = E.read_set(
+            conn,
+            letters,
+            ["three"],
+            engine_factory=lambda k: Scripted(),
+            images_root=images,
+            readings_dir=tmp_path / "r3",
+        )
+        assert third["three"] == {}
+    finally:
+        conn.close()
