@@ -507,6 +507,89 @@ def load_decisions(path: Path | str) -> list[PieceDecision]:
     return out
 
 
+def pairs_path_for(decisions: Path | str) -> Path:
+    """The reader's pairs beside the decisions: ``k2-decisions.jsonl`` → ``k2-pairs.jsonl``."""
+    d = Path(decisions)
+    return d.with_name(
+        d.name.replace("decisions", "pairs") if "decisions" in d.name else d.stem + "-pairs.jsonl"
+    )
+
+
+def write_pairs(path: Path | str, run: DryRun) -> Path:
+    """Every pair of the dry run (minted pieces, won or not), one JSON row each, so the
+    write of Task 3 can use exactly what the report of Task 2 described."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as fh:
+        for rid, pairs in run.pairs.items():
+            for pr in pairs:
+                fh.write(
+                    json.dumps(
+                        {
+                            "record_id": rid,
+                            "ref": pr.line_image_ref,
+                            "text": pr.text,
+                            "source": pr.source,
+                            "stratum": pr.stratum,
+                            "align_conf": pr.align_conf,
+                            "license_bucket": pr.license_bucket,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+    return path
+
+
+def load_pairs(path: Path | str) -> dict[str, list[GtPair]]:
+    out: dict[str, list[GtPair]] = {}
+    for raw in Path(path).read_text(encoding="utf-8").splitlines():
+        if raw.strip():
+            r = json.loads(raw)
+            out.setdefault(r["record_id"], []).append(
+                GtPair(
+                    r["ref"],
+                    r["text"],
+                    r["source"],
+                    r["stratum"],
+                    float(r["align_conf"]),
+                    r["license_bucket"],
+                    r["record_id"],
+                )
+            )
+    return out
+
+
+def load_run(
+    conn: sqlite3.Connection,
+    decisions_path: Path | str,
+    pairs_path: Path | str,
+    *,
+    reader: str,
+    thresholds: Mapping[str, float],
+) -> DryRun:
+    """A dry run rebuilt from its two files for the write, checked against the store:
+    the rows on the German records must be what the dry run saw, else the store moved
+    since the report and this refuses."""
+    decisions = load_decisions(decisions_path)
+    pairs = load_pairs(pairs_path)
+    before = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+    run = DryRun(decisions, pairs, reader, dict(thresholds), before)
+    for d in decisions:
+        if d.winner == "bern" and d.record_id not in pairs:
+            raise ValueError(
+                f"{pairs_path} holds no pairs for {d.record_id}, which the rule gives to the reader"
+            )
+        n, _conf, who = stored_mint(conn, d.record_id)
+        if (n, who) != (d.stored_minted, d.stored_reader):
+            raise ValueError(
+                f"the store moved since the dry run: record {d.record_id} holds {n} rows "
+                f"({who or 'v1'}) now, {d.stored_minted} ({d.stored_reader or 'v1'}) then; "
+                "run the dry run again"
+            )
+    return run
+
+
 def _pct(x: float | None, d: int = 1) -> str:
     return "—" if x is None else f"{100 * x:.{d}f} %"
 
@@ -1092,6 +1175,8 @@ __all__ = [
     "dry_run",
     "dry_run_piece",
     "load_decisions",
+    "load_pairs",
+    "load_run",
     "load_stats",
     "new_lines",
     "reader_text_for",
@@ -1102,7 +1187,9 @@ __all__ = [
     "stored_refs",
     "summary",
     "tally_by",
+    "pairs_path_for",
     "write_decisions",
     "write_mint",
     "write_outputs",
+    "write_pairs",
 ]

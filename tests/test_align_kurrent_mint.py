@@ -233,9 +233,17 @@ def test_dry_run_decides_per_piece_and_writes_files(tmp_path: Path) -> None:
         assert (run.german_before, run.german_after) == (4, 8)
         assert run.store_rows_before == 4 and run.store_rows_after == 8
         # files
-        dec_path = M.write_decisions(tmp_path / "decisions.jsonl", run)
+        dec_path = M.write_decisions(tmp_path / "k2-decisions.jsonl", run)
         back = {d.record_id: d for d in M.load_decisions(dec_path)}
         assert back["g1"].winner == "bern" and back["g1"].bern_minted == 4
+        pairs_path = M.pairs_path_for(dec_path)
+        assert pairs_path.name == "k2-pairs.jsonl"
+        M.write_pairs(pairs_path, run)
+        loaded = M.load_pairs(pairs_path)
+        assert set(loaded) == {"g1"} and loaded["g1"] == run.pairs["g1"]
+        rebuilt = M.load_run(conn, dec_path, pairs_path, reader=READER, thresholds=run.thresholds)
+        assert rebuilt.german_after == 8 and rebuilt.store_rows_before == 4
+        assert M.pairs_path_for(Path("x/other.jsonl")).name == "other-pairs.jsonl"
         s = M.summary(run, plan={"n_pages": 4, "n_lines": 8}, stats={"lines_done": 8})
         assert s["won"] == {"bern": 1, "stored": 1, "none": 1}
         assert s["mint"]["german_after"] == 8 and s["mint"]["bern_rows_after"] == 4
@@ -367,7 +375,7 @@ def test_cli_kurrent_mint_dry_run_write_and_audit(tmp_path: Path) -> None:
         "--images",
         str(images),
         "--decisions",
-        str(tmp_path / "dec.jsonl"),
+        str(tmp_path / "decisions.jsonl"),
         "--side-by-side",
         str(tmp_path / "side.html"),
         "--reports-dir",
@@ -380,15 +388,23 @@ def test_cli_kurrent_mint_dry_run_write_and_audit(tmp_path: Path) -> None:
     result = runner.invoke(app, common)
     assert result.exit_code == 0, result.output
     assert "dry run" in result.output and "Bern 1" in result.output and "4 → 8" in result.output
-    assert (tmp_path / "side.html").exists() and (tmp_path / "dec.jsonl").exists()
+    assert (tmp_path / "side.html").exists() and (tmp_path / "decisions.jsonl").exists()
     text = (tmp_path / "reports" / "k2-mint.md").read_text(encoding="utf-8")
     assert "The reading job's pages: 4" in text
     assert db.init_db(db_path).execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0] == 4
+    assert (tmp_path / "pairs.jsonl").exists()
     result = runner.invoke(app, [*common, "--write"])
     assert result.exit_code == 0, result.output
+    assert "writing the saved dry run" in result.output
     assert "written" in result.output and "gt_lines now 8 rows" in result.output
     assert "difference +0" in result.output
     assert (readings_dir / "write-stats.json").exists()
+    # the store moved since the saved dry run: the write refuses; --recompute goes again
+    result = runner.invoke(app, [*common, "--write"])
+    assert result.exit_code != 0 and "the store moved" in result.output
+    result = runner.invoke(app, [*common, "--write", "--recompute"])
+    assert result.exit_code == 0, result.output
+    assert "gt_lines now 8 rows" in result.output
     result = runner.invoke(
         app, [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au")]
     )

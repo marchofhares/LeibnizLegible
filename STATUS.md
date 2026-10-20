@@ -9,6 +9,16 @@ _Last updated: 2026-10-20 (**C2c — the re-mint under W5's rules, done on the d
 
 ## Current state
 
+**2026-10-20: K2 — German ground truth, in progress on the desktop; the
+branch `k2-german-gt`; nothing deployed.** The Bern Kurrent reader
+(`trocr-kurrent-xvi-xvii`, K1's gate) over every recognised line of the
+census's German pieces, then the factory over those readings, as the plan
+page's K2 prompt (with its amendment of 10 October) and the preamble of 19
+October say. Task 0 done (the pre-flight; the go came after it); Task 1 in
+progress (the code built and tested; the throughput measurements running; the
+reading job starts after the go on its ETA). The K2 entry in the Phase log
+has the detail and says how to resume.
+
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
 `c2c-remint` waits for the operator's pull request, nothing deployed.** The
 one re-mint of the ground truth under W5's rules, before C3 and before K2
@@ -718,6 +728,99 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the code built; the measurements running) · ⏳ Task 2 · ⏳ Task 3
+
+- **Setting (Task 0).** The operator's desktop, the WSL checkout
+  `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
+  (#47, C2c merged) and `origin/main` the same; `k2-german-gt` created with
+  `git checkout -B k2-german-gt origin/main`, the name the operator gave in
+  chat. The tree clean apart from the operator's own untracked files
+  (`logs/`, `*.log`, `resume-run.sh`, `.python-version`, the two gt-audit
+  HTML sheets), left alone. GPU: GTX 1660 Ti, driver 610.57.01, 1,450 MiB of
+  6,144 MiB held by Xwayland, nothing else on it. Disk: `/` 1007 G with 895 G
+  free, `/mnt/d` 932 G with 433 G free; RAM 9.7 GiB, 16 cores. `.venv-k1`:
+  Python 3.12.13, torch 2.12.0+cu130 with CUDA available, transformers
+  5.12.1. **The operator's backup chore was running** (since 17:35, the
+  backup API from a `mode=ro` connection into
+  `/mnt/d/leibniz-backups/inventory-2026-10-20.sqlite`); it reads the store
+  only, and nothing has written to the store since the C2c mint at 15:00.
+  Baseline in `.venv-k1`: `ruff check` clean, `ruff format --check` 224 files
+  formatted, **pytest 841 passed, 1 skipped** in 37.4 s.
+- **The store, read-only (Task 0).** `data/inventory.sqlite` 17,085,796,352
+  bytes, modified 2026-10-20 15:00, WAL empty. `gt_lines` **315,797** rows,
+  every row owned by a record (`record_id` on all), **0 rows naming a
+  reader** — K2 has not run; **42,278 rows on the German records**, which is
+  Task 2's "before" (the amendment: the re-mint ran first; the prompt's
+  40,915 is K1's count on the C2 mint).
+- **The K1 inputs (Task 0).** `data/kurrent/german_pieces.jsonl`: 2,173 rows
+  (2,148 distinct records; the census lists a record once per citation),
+  1,665 with recognised lines, 47 of them in Leibniz's own hand under the
+  census's rule; the census summed 401,394 lines over pieces, which share
+  pages — distinct pages 4,734. C2c's edition-cache bullet read: no German
+  record lost or changed its text. Under today's factory (W5's folio sides,
+  the rebuilt cache) the same records resolve to 4,745 pages: 1,699
+  localizable (1,694 in the census), the page set the same for 1,901
+  records, narrower for 217, wider for 25, otherwise different for 5; 25
+  records are minted under another volume today (the volume their text came
+  from). **The union is 4,807 pages with 310,831 distinct recognised lines**;
+  all 4,807 page images are in `/mnt/d/leibniz-images`. The reading job
+  covers the union, so the mint of Task 3 finds a reading on every line the
+  factory places. The weights load: four lines of AA I,7 N.044 (katalog
+  10186, `Konz.; eigh.`) read on `cuda:0` in 27.2 s including the load;
+  333.9 M parameters, 1.3 GB in fp32 (allocated 1,292 MiB).
+- **Plan, as printed for the go.** Task 1: `leibniz align kurrent-read`
+  beside the pilot — crops cut in memory (no PNG round trip), one decode per
+  page, a resumable JSONL in the pilot's row format, skips counted by reason,
+  a progress line every few minutes; the profile of one batch, the sweep on
+  2,000 lines at batch 8/16/32, the fp16 check on Dresden into a cache dir of
+  its own (accepted within 0.2 CER points of K1's 7.4 %); the reading job
+  under nohup after a go on the measured ETA (310,831 lines: 30.5 h at the
+  pilot's 353 ms, 8.6 h at 100 ms, 4.3 h at 50 ms). Task 2: the dry run per
+  piece, the stored mint by `record_id`, the rule, the reports, the
+  side-by-side page. Task 3: the consumers decided and tested, the guard both
+  ways, the source string with the reader before `katalog`; the backup check
+  (the operator's copy of today, verified by size and SHA-256, proposed in
+  place of a second 30-minute copy) and the go; the write; `gt-report`.
+  Finish: the audit sheet in German beside English, STATUS, PROMPTS, push.
+  Nothing to download or install. The operator said "go".
+- **Task 1, the code** (`align/kurrent_read.py`, `leibniz align kurrent-read`;
+  `htr/trocr.py`; +8 tests on a stub reader, +2 on the engine's stub;
+  commit `27b7f9d`, which also carries the Task 2 and Task 3 code and its
+  tests, built while the measurements ran). The pages: the census's
+  `page_ids` united with the factory's resolver for the same records
+  (`plan_pages`; the plan written beside the readings as `plan.json`). The
+  reading: page by page, the image decoded once, each line cut in memory with
+  the pilot's crop (`audit.crop_image`, the polygon masked, no downscale),
+  the page's lines ordered by width so a batch's generation steps go to lines
+  of like length, batches handed to the engine as images
+  (`TrOCREngine.transcribe_images`: no PNG encoding and decoding), the page's
+  rows appended at once (an interrupted run loses one page at most), lines
+  without geometry or outside the image and pages without a cached image
+  skipped and counted by reason (`<reader>.skipped.jsonl` beside the
+  readings), the stats (`<reader>.stats.json`: lines total, done, read this
+  run, skipped by reason, lines/h, ms/line, ETA, the engine's settings)
+  rewritten and a progress line logged every 180 s. The engine gained
+  `dtype="float16"` (the model in half precision), `use_cache=True` (the
+  decoder's key/value cache: the Kurrent checkpoints' generation config
+  switches it off, so every step re-reads the whole prefix) and per-stage
+  timings; both knobs are off by default, so the readers measured in K1 and
+  K2b behave as they did, and `kurrent-smoke` takes them as `--dtype` and
+  `--kv-cache` for the Dresden check. `--profile` times one batch the pilot's
+  way and K2's; `--sweep` reads the same sample of lines with each setting
+  into scratch files and records lines/s and the GPU's peak memory;
+  `--report` renders `reports/kurrent/k2-read.md` from the files.
+- **The profile (Task 1).** One batch of 8 lines after a warm-up, ms per line,
+  the pilot's path against K2's: page decode 15.2 (one page decoded for eight
+  lines; on a full page it is a fraction of that), crop 1.6, PNG encode 11.4 →
+  —, PNG decode 1.3 → —, processor 8.0 → 7.7, transfer 0.4, **generation
+  250.2 → 254.6**, postprocess 0.5; **289 → 280 ms a line in all**. So the
+  amendment's premise — that the model's compute is a small part of the 353
+  ms — does not hold on this card: generation is nine tenths of the time, and
+  the image side (which the in-memory path removes) a tenth. The reason is in
+  the checkpoint's generation config: `use_cache: false`, so each of the up
+  to 160 decoding steps re-encodes the whole prefix. The sweep measures the
+  cache switched on and half precision, each checked on Dresden before use.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 

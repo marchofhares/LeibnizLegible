@@ -645,6 +645,12 @@ def kurrent_mint(
     resume: bool = typer.Option(
         False, "--resume", help="With --write: skip records whose rows already name the reader."
     ),
+    recompute: bool = typer.Option(
+        False,
+        "--recompute",
+        help="With --write: run the dry run again instead of writing the saved decisions and "
+        "pairs of the last dry run (the default writes what the report described).",
+    ),
     audit: bool = typer.Option(
         False,
         "--audit",
@@ -711,25 +717,46 @@ def kurrent_mint(
         if done["n"] % 200 == 0:
             _console.print(f"  {done['n']:,} pieces aligned")
 
+    pairs_file = M.pairs_path_for(decisions)
     if write:
         ctx = open_db(db_path)
         conn = ctx.__enter__()
     else:
         conn = P.open_readonly(db_path)
     try:
-        run = M.dry_run(
-            conn,
-            rows,
-            cache,
-            readings,
-            reader=reader,
-            refs=refs,
-            today=t,
-            config=config,
-            progress=_tick,
-        )
-        M.write_decisions(decisions, run)
-        paths = M.write_outputs(run, reports_dir=reports_dir, plan=plan, stats=stats)
+        if write and not recompute and decisions.exists() and pairs_file.exists():
+            try:
+                run = M.load_run(
+                    conn,
+                    decisions,
+                    pairs_file,
+                    reader=reader,
+                    thresholds=config.stratum_thresholds,
+                )
+            except ValueError as exc:
+                raise typer.BadParameter(str(exc)) from None
+            _console.print(
+                f"  writing the saved dry run: {decisions} and {pairs_file} "
+                f"({sum(1 for d in run.decisions if d.winner == 'bern'):,} pieces to the reader)"
+            )
+        else:
+            run = M.dry_run(
+                conn,
+                rows,
+                cache,
+                readings,
+                reader=reader,
+                refs=refs,
+                today=t,
+                config=config,
+                progress=_tick,
+            )
+            M.write_decisions(decisions, run)
+            M.write_pairs(pairs_file, run)
+            paths = M.write_outputs(run, reports_dir=reports_dir, plan=plan, stats=stats)
+            for name, path in paths.items():
+                _console.print(f"  wrote {name}: {path}")
+            _console.print(f"  wrote decisions: {decisions}; pairs: {pairs_file}")
         s = M.summary(run, plan=plan, stats=stats)
         w, m = s["won"], s["mint"]
         _console.print(
@@ -739,9 +766,6 @@ def kurrent_mint(
             f"{m['german_after']:,} lines · store {m['store_before']:,} → "
             f"{m['store_after_expected']:,} expected · {run.seconds:.0f} s"
         )
-        for name, path in paths.items():
-            _console.print(f"  wrote {name}: {path}")
-        _console.print(f"  wrote decisions: {decisions}")
         if not write:
             side_by_side.parent.mkdir(parents=True, exist_ok=True)
             side_by_side.write_text(
