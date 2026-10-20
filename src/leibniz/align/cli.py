@@ -16,6 +16,8 @@ Subcommands:
                 record, canvases, v1 lines, minted lines, stratum and hand; read-only.
 * ``kurrent-pilot`` — candidate readers on Leibniz's German as a factory dry run
                 (K1): readings to JSONL, yield at the gate, the side-by-side page.
+* ``letterpool-fetch`` / ``letterpool-parse`` — the GWLB letter pool (K2b): the
+                checked volumes fetched and recorded, then parsed into letters.
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -1364,3 +1366,92 @@ def _parse_indices(spec: str) -> list[int]:
 
 
 __all__ = ["app"]
+
+
+@app.command(name="letterpool-fetch")
+def letterpool_fetch(
+    years: str = typer.Option(
+        None, "--years", help="Comma-separated years (default: the checked years 1708–1716)."
+    ),
+    dest: Path = typer.Option(
+        Path("data/external/letterpool"), "--dest", help="Where the PDFs live (gitignored)."
+    ),
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"),
+        "--sources",
+        help="The committed registry: versions, dates, checksums, citations; no text.",
+    ),
+) -> None:
+    """Fetch the GWLB letter pool's checked volumes (K2b Task 1), cache-first, politely."""
+    from leibniz.align import letterpool as LP
+
+    ys = [int(y) for y in years.split(",")] if years else list(LP.CHECKED_YEARS)
+    rows = LP.fetch_volumes(
+        ys, dest_dir=dest, sources_path=sources, log=lambda m: _console.print(f"  {m}")
+    )
+    _console.print(
+        f"[bold]letterpool-fetch[/bold] {len(rows)} volumes recorded in {sources} "
+        f"({sum(r.bytes for r in rows):,} bytes; licence {LP.LICENCE}, bucket {LP.LICENCE_BUCKET})"
+    )
+
+
+@app.command(name="letterpool-parse")
+def letterpool_parse(
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"), "--sources", help="The fetch's registry."
+    ),
+    letters_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool"),
+        "--letters-dir",
+        help="Where the page cache and the parsed letters go (gitignored; nc text).",
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-parse.md and .json."
+    ),
+    years: str = typer.Option(None, "--years", help="Comma-separated years (default: all)."),
+    reextract: bool = typer.Option(
+        False, "--reextract", help="Read the PDFs again even where a page cache exists."
+    ),
+) -> None:
+    """Parse the fetched letter pool into letters (K2b Task 1); the text stays under data/."""
+    import json as _json
+
+    from leibniz.align import letterpool as LP
+
+    vols = LP.load_sources(sources)
+    if not vols:
+        raise typer.BadParameter(f"no volumes recorded in {sources}; run letterpool-fetch first")
+    want = {int(y) for y in years.split(",")} if years else None
+    results = []
+    for vol in vols:
+        if want is not None and vol.year not in want:
+            continue
+        cache = letters_dir / f"pages-{vol.year}.jsonl"
+        if cache.exists() and not reextract:
+            pages = LP.read_page_cache(cache)
+        else:
+            pages = list(LP.iter_pdf_pages(vol.path))
+            LP.write_page_cache(pages, cache)
+        res = LP.parse_volume(vol.year, pages)
+        LP.write_letters(res, letters_dir / f"letters-{vol.year}.jsonl")
+        results.append(res)
+        n_de = sum(1 for ltr in res.letters if ltr.language == "de")
+        _console.print(
+            f"  {vol.year}: {len(pages)} pages, {len(res.letters)} letters ({n_de} German), "
+            f"{sum(1 for ltr in res.letters if ltr.witness.placeable)} placeable, "
+            f"{len(res.anomalies)} anomalies; body {res.layout.body_size if res.layout else '?'} pt"
+        )
+    summary = LP.summarize(results)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    (reports_dir / "letterpool-parse.json").write_text(
+        _json.dumps(summary, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    (reports_dir / "letterpool-parse.md").write_text(
+        LP.render_parse_report(summary, [v for v in vols if want is None or v.year in want]),
+        encoding="utf-8",
+    )
+    t = summary["total"]
+    _console.print(
+        f"[bold]letterpool-parse[/bold] {t['letters']:,} letters, {t['german_placeable']} German "
+        f"and placeable; wrote {reports_dir / 'letterpool-parse.md'}"
+    )

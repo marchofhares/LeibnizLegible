@@ -9,21 +9,23 @@ _Last updated: 2026-10-14 (**the Edition's replies of 12 and 13 October recorded
 
 ## Current state
 
-**2026-10-19: K2b — the letter-pool test set, begun on the desktop; Task 0
-done, waiting for the go.** The honest German test set from the GWLB's checked
-transcriptions of the correspondence of 1708–1716 (CC BY-NC 4.0, nc bucket:
-internal evaluation only), placed on the store's pages through the C2
-resolver, frozen in files, and the first measured German error rates (v1 and
-the K1 readers), as the plan page's K2b prompt and the preamble of 19 October
-say. Pre-flight: the WSL tree clean of tracked changes (the untracked logs and
-scripts are the operator's own), main at `82e2091` (#45) already up to date,
-the branch `k2b-letterpool` created from `origin/main`; `.venv-k1` as K1 left
-it (torch 2.12.0+cu130 sees the GTX 1660 Ti, transformers 5.12.1, pdfplumber
-0.11.10; no edlib, none planned); baseline ruff clean, **807 tests passed, 1
-skipped**; the store 17,061,699,584 bytes, the image cache on D:, the three
-TrOCR checkpoints cached from K1; the nine checked years' pages at gwlb.de
-each link a `-v1.pdf`. Nothing fetched, parsed or read yet; the K2b entry in
-the Phase log has the plan.
+**2026-10-19: K2b — the letter-pool test set, on the desktop; Task 1 done
+(Checkpoint A), Task 2 next.** The honest German test set from the GWLB's
+checked transcriptions of the correspondence of 1708–1716 (CC BY-NC 4.0, nc
+bucket: internal evaluation only), to be placed on the store's pages through
+the C2 resolver, frozen in files, and measured (v1 and the K1 readers), as the
+plan page's K2b prompt and the preamble of 19 October say. Done so far: the
+nine checked volumes fetched (version 1 each, 25,422,200 bytes, 3,579 pages;
+checksums and citations in `reports/kurrent/letterpool-sources.json`) and
+parsed (`align/letterpool.py`): **2,533 letters** — 835 German, 1,179 French,
+489 Latin — with heading, dateline, first witness (L 812, l 26, K 1,553, k 91)
+and reading text apart; **2,090 placeable** on the GWLB's Leibniz
+collections, **695 of them German (L 111, l 1, K 560, k 17)**; ten letters
+checked by eye against the page. Pre-flight: the WSL tree clean of tracked
+changes, main at `82e2091` (#45), the branch `k2b-letterpool`; `.venv-k1` as
+K1 left it (no edlib, none planned); baseline 807 tests, now 825. Nothing
+read on the GPU yet, nothing written to the store; the K2b entry in the
+Phase log has the detail and the plan.
 
 **2026-10-14: the Edition's replies, recorded (no code, no data).** Two
 emails from the Leibniz-Edition Potsdam, both answered by the operator on
@@ -676,7 +678,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2b — the letter-pool test set (2026-10-19) ⏳ Task 0 done · waiting for the go
+### K2b — the letter-pool test set (2026-10-19) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
 
 - **Setting.** The operator's desktop: the WSL checkout
   `/home/evana/LeibnizLegible`, driven from a Claude Code session opened on the
@@ -738,6 +740,65 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   it at hours once the line count is known); `letterpool-eval.md` and
   `.json`, numbers only. Checkpoint C. Then STATUS.md, PROMPTS.md, ruff and
   pytest, push, the compare URL; no merge, nothing deployed.
+- **Task 1, the pool fetched and parsed** (`align/letterpool.py`, `leibniz
+  align letterpool-fetch` and `letterpool-parse`, +18 tests on a synthetic
+  two-page PDF built in the test; `reports/kurrent/letterpool-sources.json`,
+  `letterpool-parse.md` + `.json`; the PDFs under `data/external/letterpool/`,
+  the page cache and the letters under `data/kurrent/letterpool/`). *The
+  fetch:* each year's repository page names its newest PDF; all nine checked
+  years are at version 1 (1708–1712, 1715 and 1716 of 28 October 2020, 1713
+  and 1714 of 3 November 2020), 25,422,200 bytes and 3,579 pages in all, each
+  recorded with its SHA-256, URL, page count and the citation the page gives
+  (the Zitierhinweis names the volume's compiler and editor, as attribution
+  asks; licence CC BY-NC 4.0, bucket nc). *The parser:* pdfplumber's
+  characters per line with size, font and token edges; the volume's layout
+  learned once (body 12.0 pt, small type under 11.2 pt, the text block
+  49.0–508.1 pt, pitch 16.7 pt); per page the running head (the top 9 %)
+  dropped and its `N.` cross-checked, the margin line numbers (every fifth
+  typeset line, outside the block, on the side EDMAC alternates) stripped by
+  position, the notes at the foot dropped (small type, or a short body-type
+  run opening with a line-number key under a gap), a heading recognised by
+  its shape (number, full stop, capitals — the small-caps running head comes
+  out of the text layer in lowercase, the headings in capitals), the dateline
+  and any subtitle ("Beilage zu N.5") held until the *Überlieferung* line
+  arrives, the block parsed for its first witness (siglum, kind, the
+  shelfmark up to its leaves through `normalize_signature`, the
+  correspondent's parenthesis removed first because the A3 normaliser cuts at
+  one), a second text on the leaves noted ("Auf Bl.4vo L von N.69"), the
+  text's lines joined with the print's hyphenation undone
+  (`edition.join_lines`), the editorial brackets resolved as the C2b flags
+  describe them (a supplied letter or mark attached to a word keeps its
+  content, 5,009 of them; a bracketed insertion standing alone — an identified
+  name, a reference, a supplied word — goes, 3,085; an angle-bracket remark of
+  the editor goes, 437; nested groups innermost first), a letter printed in
+  several drafts (⟨L1⟩ … ⟨L2⟩; 25 letters) kept to its first witness's draft,
+  and the language by the K1 identifier. Three traps of the text layer: an
+  umlaut is a base vowel followed by a spacing diaeresis (U+00A8; 3,101 of
+  them, most the Ü of *Überlieferung*), which NFC never composes, so it is
+  composed first; the maths font's angle brackets come as CIDs; the other
+  CIDs (integral signs, a Greek font) are dropped. *Results:* **2,533
+  letters** on 3,579 pages — 835 German, 1,179 French, 489 Latin, 27 mixed, 3
+  unknown; by first witness L 812, l 26, K 1,553, k 91, other 51 (copies,
+  prints, none named); **2,090 placeable** (LBr, LH or LK with a `Bl.` range;
+  6 LK-MOW witnesses carry letter-prefixed folios and are not); **695 German
+  and placeable: L 111, l 1, K 560, k 17** (and 6 copies, siglum A); 353
+  letters name a second text on their leaves. The source's own numbering has
+  three faults, recorded as anomalies and kept as printed: 1709 prints "52."
+  for the letter after 40 and again for the fifty-second (ids `1709-52` and
+  `1709-52-2`), 1713 prints 473 twice and no 472, 1715 prints "290." for the
+  letter after 239 and again later; eleven running heads in 1716 and one each
+  in 1713 and 1714 name another letter than the page carries. *The spot
+  check:* ten letters drawn seeded (three German K, two German L, one German
+  k, one with shared leaves, one enclosure with a subtitle, one French, one
+  Latin) and read line by line against the page dump — heading, dateline,
+  witness and the text's start and end right on all ten, after two faults the
+  check itself found and the parser now handles: a letter printed in four
+  drafts had all four concatenated (now the first witness's draft alone,
+  recorded in `segment`), and a body-type footnote wrapping onto a second
+  line escaped the note splitter (now taken as a run). A correspondent's own
+  numbering written on the leaf ("N.44.") stays in the text, since it is on
+  the page. ruff clean, 825 tests. **Checkpoint A: the letters parse
+  reliably.**
 
 ### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 
