@@ -3,11 +3,40 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-20 (**K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-20 (**C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-20: C2c — the re-mint, done on the desktop; the branch
+`c2c-remint` waits for the operator's pull request, nothing deployed.** The
+one re-mint of the ground truth under W5's rules, before C3 and before K2
+writes, as the plan page's C2c prompt and the preamble of 19 October say.
+The store was written in two steps only, each after a backup and the
+operator's go: `gt-reset` (the ownership column filled, then **297,424
+minted lines deleted**, none kept) and the six shards, which minted
+**315,797 open-bucket lines** (fair 10,234 · light 100,085 · heavy 203,749
+· scrap 1,729) from 6,130 catalogue records on 17,669 pages in 66–71
+minutes, every skip structural (no `database is locked`, so no `--resume`).
+The edition cache was rebuilt first: the same 10,029 texts, byte for byte,
+now with the printed piece each came from, which moved 20 records to the
+volume their text came from and leaves nothing filed under II,1, I,2, I,4
+or I,5. The +18,373 lines are accounted for: 9,965 come from 710 `LBrF`
+records the old shelfmark parser could not place, 10,260 lie on pages the
+old code placed too (neighbours on a shared folio no longer erase each
+other's lines; a record aligns under its own volume), 634 on newly placed
+pages; 2,486 old lines are gone, 1,758 of them from pages the folio-side
+fix no longer gives their record. **The hyphen flag fell from 7,822 (2.6 %)
+to 848 (0.3 %)**, and 8,523 minted lines now end in the scribe's mark;
+brackets 4,811 and math 255 move with the count. **Leibniz's own hand
+under W5's strict rule: 14.9 %** of the lines with a Textart (the loose
+rule said 25.7 %; the strict rule gives 15.1 % on the old mint too, so the
+fall is the rule's). The A VI,4 cross-check: 62,164 paired lines, agree
+9,506, disagree 774, and **1,472 held-out pages** as before. The second
+judging sheet for the PHILIUMM team is drawn (`--seed 1`, 200 lines,
+`reports/gt-audit/round2/`). Store backup before the re-mint on D:, 30.7
+minutes. The C2c entry in the Phase log has the detail.
 
 **2026-10-20: K2b — the letter-pool test set, done on the desktop (Checkpoint
 C); the branch `k2b-letterpool` waits for the operator's pull request, nothing
@@ -689,6 +718,204 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
+
+- **Setting (Task 0).** The operator's desktop, the WSL checkout
+  `/home/evana/LeibnizLegible`; main at `e2e29de` (#46, K2b) and
+  `origin/main` the same; `c2c-remint` created with `git checkout -B
+  c2c-remint origin/main`. The tree is clean apart from the operator's own
+  untracked files (`logs/`, `*.log`, `resume-run.sh`, `.python-version`,
+  `reports/gt-audit/gt-audit.html`), left alone. `pgrep -af leibniz`: no
+  process. Disk: `/mnt/d` 932 G with 452 G free, `/` 1007 G with 896 G
+  free; RAM 9.7 GiB, 16 cores. Baseline in `.venv-w3`: ruff clean, 224
+  files formatted, **pytest 831 passed, 1 skipped** (the letter-pool test
+  needs numpy, which the w3 environment lacks) in 31.8 s.
+- **The store before (read-only, `mode=ro` + `query_only`).**
+  `data/inventory.sqlite` 17,061,699,584 bytes, last written 2026-09-15
+  20:16 (the C2 mint), WAL empty. `gt_lines` **297,424** rows, all `open`
+  (fair_copy 9,913 · light_revision 96,175 · heavy_revision 190,162 · scrap
+  1,174); the store predates W5, so `gt_lines` has no `record_id` column:
+  every row's source names its catalogue record (`AA I,8 N.094 (§70-expired
+  AA reading text; katalog 10000)`), so **297,424 owned by 5,526 records, 0
+  not owned**, which is what `gt-reset` will report; **0 rows whose source
+  names a reader** — K2 has not run. The schema the current code would
+  create differs from the store's in that one column only (checked against
+  a fresh `init_db` in the scratchpad), so `open_db`, which the
+  edition-cache, report, sheet and vi4 commands use, has nothing to migrate
+  here until `gt-reset` adds the column.
+- **The inputs.** `data/gt/edition_cache.jsonl`: 10,029 records, written
+  2026-09-15 13:12, keys `record_id` and `text` only — the format before W5
+  (no pieces per record, so the factory would warn and mint a record citing
+  two volumes under its first citation; Task 1 rebuilds it). 28 extracted
+  volume texts under `data/editions/text/`. `data/philiumm/noisy/` holds
+  735 PAGE files beside `hf-files.json` (P1's fetch): match and compare
+  re-run without a download. The last backup is
+  `/mnt/d/leibniz-backups/inventory-2026-10-19.sqlite` (17,061,699,584
+  bytes). The image cache `/mnt/d/leibniz-images` is mounted.
+- **The headline numbers as they stand.** `reports/gt-factory.md`: 297,424
+  open-bucket lines (generated 2026-09-15). `reports/gt-audit/reach.md`:
+  297,424 lines on 16,843 pages from 5,526 records; hyphen 7,822 (2.6 %),
+  math 249 (0.1 %), bracket 4,338 (1.5 %), own hand 118,928 (40.1 %),
+  Leibniz's hand 76,147 (25.7 %). `reports/philiumm/heldout_pages.csv`:
+  1,475 rows, 1,472 distinct pages; the cross-check 62,114 paired lines on
+  732 matched noisy files.
+- **Found in pre-flight.** `leibniz align gt-reset` without `--yes` writes
+  before it asks: it brings `gt_lines` up to ownership under the write lock
+  (adds `record_id`, two indexes, fills 297,424 owners from their sources)
+  and commits, and only then asks; answering no leaves that change in the
+  store. The plan therefore asks for the first go before that first
+  invocation, after the backup.
+- **Task 1 — the backup.** After the operator's go: SQLite's backup API
+  from a `mode=ro` connection (`python3 -c`, `pages=262144` a step) into
+  `/mnt/d/leibniz-backups/inventory-2026-10-20-pre-remint.sqlite`:
+  **17,061,699,584 bytes, the store's size, in 1,839 s (30.7 min)**, about
+  9 MB/s onto the Windows drive; it opens and holds the 297,424 rows
+  (`logs/c2c-backup.log`).
+- **Task 1 — the edition cache.** The old cache kept as
+  `data/gt/edition_cache.pre-c2c.jsonl`; `leibniz align edition-cache` (2 s;
+  `logs/c2c-edition-cache.log`): **10,029 records with reading text before
+  and after** (108,580,517 characters; 931 records cite an ingested volume
+  without a text found), by volume I,3 661 · I,6 583 · I,7 607 · I,8 540 ·
+  I,9 677 · I,10 645 · I,11 747 · I,12 662 · I,14 670 · I,15 782 · I,16 676
+  · III,1 356 · III,3 563 · III,4 423 · IV,1 153 · IV,2 154 · IV,3 263 ·
+  VI,1 40 · VI,3 228 · VI,4 566 · VI,6 33, the same as the volumes the old
+  records cite. **No record gained or lost a text and no text changed (all
+  10,029 byte-identical)**; what changed is that every record now carries
+  its refs — one printed piece each (none joins two), by channel ia 7,232 ·
+  gwlb 2,228 · potsdam 569. Against the C2 mint: of the 5,526 records it
+  filed (each under one volume label), **5,506 are minted under the same
+  volume now and 20 under another** — the volume their text came from: II,1
+  → I,3 7, II,1 → III,3 4, I,5 → I,6 2, I,3 → III,3 2, and one each I,5 →
+  III,4, I,2 → IV,3, III,3 → III,4, III,3 → I,3, I,4 → III,4 (lines that
+  were filed under II,1, I,2, I,4 and I,5, volumes with no text, are
+  gone). The store's modification time did not move (`open_db` found
+  nothing to migrate; the empty WAL was checkpointed away on close).
+  (`logs/c2c-cache-diff.log`.) **For K2's Task 0:** the K1 census and
+  `data/kurrent/german_pieces.jsonl` (2,173 pieces, 2,148 records, 1,676 of
+  them on localizable pieces) were built on the old cache; none of those
+  records lost or changed its text, so K2's input stands as built; the only
+  difference K2 sees is that a record's mint volume now follows its refs.
+- **Task 2 — gt-reset, asked (go A).** `leibniz align gt-reset`, answered
+  no (3 s; `logs/c2c-gt-reset-ask.log`): "297,424 minted lines owned by
+  catalogue records (297,424 owners filled in from their source just now);
+  0 other lines are kept." Checked read-only after: `gt_lines` now carries
+  `record_id` on all 297,424 rows (5,526 distinct) and the indexes
+  `ix_gt_record`, `ix_gt_ref` beside `ix_gt_bucket`; the store file
+  17,081,397,248 bytes (+19.7 MB, the column and the two indexes). Nothing
+  deleted.
+- **Task 2 — gt-reset (go B).** `leibniz align gt-reset --yes` (1.4 s;
+  `logs/c2c-gt-reset.log`): "deleted 297,424 lines (open 297,424)"; 0 kept;
+  `gt_lines` holds 0 rows after.
+- **Task 2 — the six shards (go C).** Launched 13:47 EDT, `.venv-w3`, each
+  `nohup uv run leibniz align factory data/gt/edition_cache.jsonl --shard
+  i/6` into `logs/c2c-shard-<i>.log`, no `--resume`. 16,807 pieces (one per
+  record now; C2 enumerated 17,162 citations), 2,801–2,802 a shard; about
+  33 pieces a minute a shard in the first twenty minutes, 58 in the next
+  twenty; 2.0–2.1 GiB of RAM in use throughout. All six ended between 14:55
+  and 15:00 (66–71 min). **Every skip is structural: no `error:` skip, no
+  `database is locked`, so no `--resume` pass.** Per shard, minted lines
+  from pieces: 59,225 from 1,240 · 50,191 from 1,285 · 55,294 from 1,207 ·
+  58,003 from 1,180 · 56,725 from 1,199 · 57,994 from 1,197 — **337,432
+  pairs from 7,308 pieces**; skips: not localizable 4,714 · no edition
+  text 4,632 · no canvases 141 · no HTR lines 12 (7,308 + 9,499 = 16,807).
+  (C2's pass 1: 317,365 pairs from 6,383 pieces; 5,567 · 4,314 · 141 · 11
+  · 746 locked.) **The store after (read-only): `gt_lines` 315,797 rows,
+  all `open`, every row owned (6,130 records), each line once; fair_copy
+  10,234 · light_revision 100,085 · heavy_revision 203,749 · scrap 1,729;
+  0 rows naming a reader.** The pairs exceed the rows because a line two
+  records mint is kept once, for the higher alignment confidence. Sources
+  now name the channel (`AA I,10 N.367 (§70-expired AA reading text;
+  channel ia; katalog 10034)`). **CHECKPOINT: the mint is complete.**
+  (The session's own watcher for the shards' end matched its own command
+  line in `pgrep` and never fired; the logs were read when the operator
+  asked, at 16:57.)
+- **Task 3 — the reports (read-only).** `gt-report` (18 s) →
+  `reports/gt-factory.md`: 315,797 open-bucket lines, 632 % of the 50k
+  target; with a folio range 12,367 (11,617 before), localizable 12,345
+  (71.9 %; 11,595, 67.6 % before). `audit-reach` (28 s) → `reach.md`,
+  `reach-summary.json`, `data/gt/flags.jsonl` (the old flags kept as
+  `flags.pre-c2c.jsonl`): 315,797 lines on 17,669 pages from 6,130 records
+  (6,115 with a Textart). `philiumm-vi4 match` (8 min 50 s) and `compare`
+  (2 min) → `reports/philiumm/`. `audit-sheet --seed 1 --images
+  /mnt/d/leibniz-images --out reports/gt-audit/round2` (45 s): 200 lines,
+  50 a stratum, 200 with image strips; `gt-audit.html` is 55.7 MB. The
+  first round's `reports/gt-audit/gt-audit-lines.csv` is untouched.
+- **Before → after, by stratum.** fair_copy 9,913 → 10,234 (+321) ·
+  light_revision 96,175 → 100,085 (+3,910) · heavy_revision 190,162 →
+  203,749 (+13,587) · scrap 1,174 → 1,729 (+555); **all 297,424 → 315,797
+  (+18,373, +6.2 %)**; records 5,526 → 6,130; pages 16,843 → 17,669. Mean
+  alignment confidence unchanged by stratum (fair 0.932, light 0.902, heavy
+  0.919; scrap 0.925 → 0.938). **By channel** (the old rows' channel read
+  from their record's refs, the texts being byte-identical): ia 202,448 →
+  213,520 · gwlb 45,584 → 52,057 · potsdam 49,392 → 50,220. **By volume**:
+  every volume with text gains (I,3 +3,749, I,6 +2,398, I,7 +1,842, I,14
+  +1,759, the rest +4 to +1,205); the four without text lose everything
+  they held: II,1 600, I,5 103, I,2 15, I,4 9 (727 lines).
+- **Why the mint grew, line by line** (the old mint read from the backup;
+  the placement of every record recomputed read-only under the code before
+  W5, `9c96c7f`, in a scratch worktree, and under today's). 294,938 of the
+  297,424 old lines are minted again (99.2 %); 2,486 are not; 20,859 are
+  new; 38,023 of the lines minted both times now belong to another record
+  (the C2 mint kept the last shard's writer, the factory now the higher
+  confidence). Of the **20,859 new lines**: 9,965 come from the **710
+  records localizable now and not before — all 710 `LBrF` shelfmarks**
+  (W5: "`LBrF 20` parses as LBr F 20"; the before/after placement found no
+  other new kind); 634 from pages newly placed for records localizable
+  before (folio sides); **10,260 on pages the old code placed too** —
+  the lines a neighbour's re-mint erased on a shared folio in C2
+  (`delete_gt_for_refs` cleared every line of a piece's pages; C2 stored
+  297,424 rows of 341,045 logged pairs, now 315,797 of 337,432) and lines
+  a record now aligns under the volume its text came from; the two are not
+  separated here. Of the **2,486 lines not minted again**: 1,758 lie on
+  pages the record is no longer placed on (924 records' page sets narrowed
+  by the folio-side fix, 18 widened), 728 on pages still placed (alignment
+  or ownership). The skips moved accordingly: not localizable 5,567 → 4,714
+  (citations then, records now); no edition text 4,314 → 4,632 — the
+  factory asks for a place before a text, and 471 of the 710 newly
+  localizable `LBrF` records have no text, so they moved from the first
+  skip to the second; no canvases 141 → 141; no HTR lines 11 → 12; locked
+  746 → 0.
+- **The hyphen.** Flag (HTR line ends in a mark, minted text in a letter):
+  **7,822 (2.6 %) → 848 (0.3 %)**; fair_copy 7.7 → 0.3 %, light 4.0 → 0.3
+  %, heavy 1.7 → 0.2 %, scrap 2.0 → 0.3 %. **Minted lines that end in a
+  hyphen mark: 271 → 8,523** (`-` 7,523, `–` 973, `=` 27). Of the 848
+  left, 540 are the last minted line before an unminted one (the next line
+  fell below the threshold or lies outside the piece, so the projection
+  has no word to carry on; a sample of 12 shows the dash at the passage's
+  edge, and at a word boundary in the edition: `plu-` → `plu`, `Argu-` →
+  `Argu`), the rest a cut the projection placed at a word boundary, which
+  the fix leaves dropped by design. The lines whose HTR read no mark (8 of
+  the audit's 14) are invisible to this flag, as C2b said; the re-mint
+  cannot invent a mark there.
+- **Bracket and math.** Bracket 4,338 (1.5 %) → 4,811 (1.5 %); math 249
+  (0.1 %) → 255 (0.1 %); both move with the line count. LH 35 9,145 →
+  9,162; Marginalien 0 → 0; the addition proxy 82.7 → 83.0 %.
+- **Leibniz's own hand.** Under W5's strict rule (`catalog/hands.py`: an
+  `eigh.` on an address, a correction or a postscript is *partial*; a
+  namesake is not Leibniz): **own hand 57,559 (18.3 %), Leibniz's hand
+  46,893 (14.9 %)** of the 313,917 lines with a Textart; by stratum
+  Leibniz's hand fair 0.4 · light 1.9 · heavy 22.2 · scrap 11.7 %. The
+  loose rule said 40.1 / 25.7 % on the old mint. **The fall is the rule,
+  not the mint**: the strict rule on the old mint gives 18.3 / 15.1 %, the
+  loose rule on the new mint 40.0 / 25.4 %. What the strict rule removes
+  is 64,604 old lines (68,114 new) whose `eigh.` qualifies a part only —
+  in IV,1 all of it (34.9 % → 0.0 %: `Konz. mit zahlr. eigh. Korr. &
+  Erg.`, scribes' copies with his corrections), in I,10 and I,12 nearly
+  all (31.8 → 1.7 %, 50.1 → 1.4 % own hand) — and 571 lines whose sender
+  is a namesake. VI,4 barely moves (64.7 → 60.6 %), IV,2 98.0 → 84.4 %.
+- **The A VI,4 cross-check.** Noisy files matched 732 → **735**, lines
+  paired 62,114 → **62,164** (their lines 93,021 → 93,410): the three LH 4,
+  5, 10 files that share a key were already paired in P1 and are counted
+  as matched now (P1's own fix `47721b9`, after its last committed run),
+  not a mint effect. Buckets: agree 9,307 → **9,506** (15.3 %) · near
+  2,886 → 2,924 · disagree 771 → **774** (1.2 %) · ours only 5,145 →
+  5,234 · theirs only 21,949 → 21,730 · neither 22,056 → 21,996; on the
+  minted heavy-revision lines agree 51.4 → 51.6 %, disagree 4.2 → 4.2 %.
+  The HTR witness on the disagreements: ours 384, theirs 383, tie 7.
+  Files with no minted line 161 of 731 → 159 of 734 (7,333 of their
+  lines). **Held-out pages: 1,472**, as before (1,475 rows; the report's
+  prose said 1,149 before W5's count fix).
 
 ### K2b — the letter-pool test set (2026-10-19/20) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: five readers measured) · ⏳ the operator's pull request
 
@@ -2896,6 +3123,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | Metric | Value |
 | --- | --- |
 | Tests passing | **841** (2026-10-20, K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
 | **K2b German CER, unfiltered (2026-10-20)** | `philiumm` policy, pooled, 95 % bootstrap over letters: v1 **46.6 %** (43.3–49.5 %) · philiumm **52.9 %** (49.8–55.6 %) · trocr-kurrent-xvi-xvii **37.0 %** (32.5–41.0 %) · trocr-hanse-xvi **35.6 %** (31.2–39.6 %) (evaluate only) · trocr-hanse-xvii **38.9 %** (34.6–42.8 %) (evaluate only); test half 48.2 / 54.6 / 39.2 / 38.0 / 41.2 %; the correspondents' hands (K/k) 38.5 / 45.5 / 23.2 / 22.8 / 26.4 %, Leibniz's own (L) 53.7 / 59.3 / 49.2 / 46.7 / 49.8 %; per-letter medians 42.9 / 49.4 / 31.5 / 28.3 / 32.8 %; **selected** (the aligner's accepted lines only): yield 21.6 / 15.0 / 26.5 / 28.7 / 26.6 %, CER 28.7 / 31.9 / 15.6 / 15.5 / 18.0 % |
 | **W5 live (2026-10-11, `/api/stats`)** | 236,795 page records · **196,439 distinct scans** · 40,297 scans registered under more than one label: 39,442 spreads split, 855 folded, 519 candidates left · lines 13,508,625 · **9,846,450 lines once each** · 15,425 letters (Bodemann, from correspSearch) · 991 / 1,060 letter convolutes named (680 before) |
@@ -3195,6 +3423,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     and C3's ablation as the empirical test. The threshold levers
     (`STRATUM_THRESHOLDS`) would not have helped: the failing lines are
     well-aligned.
+    **2026-10-20, after the re-mint (C2c):** the first lever is pulled. Of
+    the 315,797 re-minted lines, 848 (0.3 %) still end in a letter where
+    the HTR read a line-end mark (7,822, 2.6 %, before), 540 of them the
+    last minted line before an unminted one, and 8,523 lines now end in
+    the scribe's mark; the lines where the HTR read no mark remain, and only
+    a reader or C3 sees them. Editorial brackets 4,811 (1.5 %) and math
+    lines 255 (0.1 %, a floor) are flagged in `data/gt/flags.jsonl` for
+    C3's exclusions. **The second judging round is now possible**: a fresh
+    200 of the re-minted lines, drawn with `--seed 1`, 50 a stratum, in the
+    first round's CSV shape (`reports/gt-audit/round2/gt-audit.html` and
+    `gt-audit-lines.csv`), to offer the PHILIUMM team; its score against
+    the first round's would measure what the re-mint changed for a reader.
 17. **(C2) Edge-of-passage scatter under unit costs.** With the HTR ends not
     free (the piece's lines must all be consumed) and the edition ends free,
     the DP is indifferent between matching the passage's last few characters
@@ -3210,6 +3450,39 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-10-20 — C2c, departures from the prompt and from the preamble of
+  19 October.** (1) *Three goes for the writes, not two.* `leibniz align
+  gt-reset` without `--yes` fills the ownership column under the write lock
+  and commits before it asks, so answering no leaves the column, two
+  indexes and 297,424 owners in the store; found in pre-flight, the
+  operator gave a go for that invocation (after the backup), another for
+  `--yes`, a third for the shards. (2) *"Read-only" through a read-write
+  connection.* `edition-cache`, `gt-report`, `audit-sheet` and
+  `philiumm-vi4 match`/`compare` open the store with `open_db`, which
+  connects read-write and runs the schema's `IF NOT EXISTS` DDL and the
+  `pages` migration; a comparison against a fresh schema found nothing to
+  add except `gt_lines.record_id` (which `gt-reset` adds), and the store's
+  modification time did not move across `edition-cache`. The census, the
+  counts and the before/after analysis used `mode=ro` + `query_only`. (3)
+  *The second sheet's HTML is not committed.* `reports/gt-audit/round2/`
+  commits `gt-audit-lines.csv`; `gt-audit.html` (55.7 MB of embedded image
+  strips cut from the GWLB's scans) stays on the desktop like the first
+  round's, which was never committed. (4) *The analysis went past the
+  reports.* To explain the mint's growth, the old mint was read from the
+  backup and every record's placement recomputed under the code before W5
+  (`9c96c7f`, a scratch worktree, removed after) and today's, read-only;
+  scripts and outputs stayed in the session's scratchpad. (5) *The shards'
+  end was read late.* The session's watcher for the six processes matched
+  its own command line in `pgrep` and never fired; the shards ended by
+  15:00 EDT and their logs were read at 16:57 when the operator asked. No
+  effect on the data. (6) *The old cache and flags kept.*
+  `data/gt/edition_cache.pre-c2c.jsonl` (the prompt's) and
+  `data/gt/flags.pre-c2c.jsonl` (not asked; the before side of the
+  census), both under `data/`, uncommitted. (7) *Tests.* The baseline and
+  the final run are in `.venv-w3` (831 passed, 1 skipped: the letter-pool
+  test needs numpy, which the w3 extras do not bring); Key numbers keeps
+  K2b's 841 from `.venv-k1`. No code changed.
 
 - **2026-10-19/20 — K2b, departures from the prompt and from the preamble of
   19 October.** (1) *No `tools/fetch-letterpool.sh`.* The prompt offered a
@@ -3457,6 +3730,35 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Next
 
+**C2c (2026-10-20): the re-mint, done on the desktop; the branch
+`c2c-remint` carries the reports and docs (compare:
+https://github.com/marchofhares/leibnizlegible/compare/main...c2c-remint?expand=1);
+the operator opens and merges the pull request; nothing deployed** (the
+website serves its own copy of the store and no row of `gt_lines`). The
+master store changed today (`gt_lines`: 297,424 rows deleted and 315,797
+minted; the `record_id` column and two indexes added), so the backup
+chore's three lines run again with the date of the run, and the upload;
+the backup from before the re-mint is
+`/mnt/d/leibniz-backups/inventory-2026-10-20-pre-remint.sqlite`. Keep
+`data/gt/edition_cache.pre-c2c.jsonl` and `data/gt/flags.pre-c2c.jsonl`
+until C3 has read the new files. From here: **W5's step (5) is done.**
+**C3 may start** on the re-minted lines under Amendment 2 — hyphens kept
+(done); the `math` and Marginalien lines excluded and the `bracket` lines
+cleaned or dropped, from `data/gt/flags.jsonl`; the 1,472 pages of
+`reports/philiumm/heldout_pages.csv` held out; strata by hand with
+`catalog/hands.py` (its strict rule: Leibniz's own hand 14.9 % of the lines
+with a Textart); the first round's judged lines as a sanity set — 196 of
+its 200 lines are minted again, 195 with the same text apart from a kept
+end mark, so C3 checks each line's presence. **K2 writes after this
+merge**: its Task 0 reads the C2c entry's edition-cache bullet (its input
+`german_pieces.jsonl` stands as built), and it mints only with the K2
+prompt's factory guard, because a full re-mint replaces every row a record
+owns. **The D3 ground-truth release** takes its inputs from the store as it
+now stands — 315,797 open-bucket lines whose sources name channel and
+record — with `reports/gt-factory.md` and `reports/gt-audit/audit-summary.json`
+for the card. The second judging round (Open question 18) is the
+operator's to offer: `reports/gt-audit/round2/gt-audit.html`.
+
 **K2b (2026-10-20): done on the desktop; the branch `k2b-letterpool` carries
 it (compare:
 https://github.com/marchofhares/leibnizlegible/compare/main...k2b-letterpool?expand=1);
@@ -3521,8 +3823,8 @@ English ones; names of individuals stay out of this file and of PROMPTS.md.
 
 **W5 (2026-10-10): ✅ live — merged as #42 and deployed on 2026-10-10, the
 index rebuilt and the letters fetched overnight (the W5 entry has the record).
-Steps (1) to (4) and (6) below are done; (5), the re-mint, remains, before
-C3.** The operator's order, as it was: (1) Open a pull request from the branch and read it; put it on
+Steps (1) to (6) below are done; (5), the re-mint, on 2026-10-20 (C2c, on
+`c2c-remint`).** The operator's order, as it was: (1) Open a pull request from the branch and read it; put it on
 staging (`staging.sh claude/amazing-mayer-y6i9g0`) and look: a search for
 two words, `LH IV, 6, 18 Bl. 1r` in the search box, a page's Cite box and
 `#L3`, `/letters` (empty until step 4), a work page's record links. (2) Merge;
@@ -3702,7 +4004,7 @@ unchanged: after the PHILIUMM team has seen the numbers.
 2. ✅ Done 2026-10-08, evening: the scored report (`reports/gt-audit.md`)
    went to Denisa and David with the reply to their notes of 7 October.
    They have seen the score first, so the merge is no longer held by it.
-3. **Before C3, once:** the re-mint with hyphens kept. The factory is
+3. ✅ Done 2026-10-20 (C2c; the C2c entry has the numbers). **Before C3, once:** the re-mint with hyphens kept. The factory is
    idempotent and the aligner's default is now `keep_hyphen=True`, so it is
    the C2 runbook line **without `--resume`** (resume skips every piece
    already minted): six shards of
@@ -3713,7 +4015,9 @@ unchanged: after the PHILIUMM team has seen the numbers.
    `reports/philiumm/heldout_pages.csv`, so one re-mint carries every C2b
    flag.
 4. Offer PHILIUMM a second judging round on a fresh 200 of the re-minted
-   lines (`audit-sheet --seed 1`), same CSV shape.
+   lines (`audit-sheet --seed 1`), same CSV shape. The sheet exists since
+   2026-10-20: `reports/gt-audit/round2/gt-audit.html` (on the desktop; not
+   committed, like the first round's), the operator's to offer.
 
 **W3 fix (2026-10-06), operator:** merge `web-versioned-modules`, then the §9
 update on the VPS — code only. Then, over HTTP: the shell of any page names
