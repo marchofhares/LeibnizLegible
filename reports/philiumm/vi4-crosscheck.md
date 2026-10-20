@@ -6,11 +6,11 @@ Their dataset `DenisaBumba/htr_leibniz_dataset_v1` (Hugging Face, revision `b53f
 
 | split | files | matched (lines paired) | resolved (pages only) | ambiguous work | no work | no page | no layout | unparsed | no xml |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| noisy | 735 | 732 | 0 | 3 | 0 | 0 | 0 | 0 | 0 |
+| noisy | 735 | 735 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | clean | 248 | 0 | 233 | 0 | 0 | 9 | 0 | 6 | 0 |
 | val | 27 | 0 | 23 | 0 | 0 | 2 | 0 | 2 | 0 |
 
-1149 distinct pages of this project resolve from the three splits (`heldout_pages.csv`; the clean and val files are resolved to pages only, their XML is not needed). On the 732 matched noisy files: 93,021 of their lines, 131,457 of this project's (both folio registrations of a sheet scan counted), **62,114 paired** by bounding-box IoU ≥ 0.5 (at ≥ 0.3: 68,351, ≥ 0.5: 62,114, ≥ 0.7: 54,492). Layouts chosen: one scan (registered under both labels) 419, single 312, single (first folio only) 1.
+1472 distinct pages of this project resolve from the three splits (`heldout_pages.csv`; the clean and val files are resolved to pages only, their XML is not needed). On the 735 matched noisy files: 93,410 of their lines, 131,603 of this project's (both folio registrations of a sheet scan counted), **62,164 paired** by bounding-box IoU ≥ 0.5 (at ≥ 0.3: 68,433, ≥ 0.5: 62,164, ≥ 0.7: 54,521). Layouts chosen: one scan (registered under both labels) 419, single 315, single (first folio only) 1.
 
 19 files did not resolve:
 
@@ -40,36 +40,36 @@ For each paired line, their aligned text against this project's minted text unde
 
 | group | lines | agree | near | disagree | ours_only | theirs_only | neither |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **all** | 62114 | 9307 (15.0 %) | 2886 (4.6 %) | 771 (1.2 %) | 5145 (8.3 %) | 21949 (35.3 %) | 22056 (35.5 %) |
-| stratum: heavy_revision | 17997 | 9255 (51.4 %) | 2872 (16.0 %) | 764 (4.2 %) | 5106 (28.4 %) | 0 (0.0 %) | 0 (0.0 %) |
-| stratum: light_revision | 112 | 52 (46.4 %) | 14 (12.5 %) | 7 (6.2 %) | 39 (34.8 %) | 0 (0.0 %) | 0 (0.0 %) |
-| stratum: unminted | 44005 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 21949 (49.9 %) | 22056 (50.1 %) |
+| **all** | 62164 | 9506 (15.3 %) | 2924 (4.7 %) | 774 (1.2 %) | 5234 (8.4 %) | 21730 (35.0 %) | 21996 (35.4 %) |
+| stratum: heavy_revision | 18316 | 9450 (51.6 %) | 2905 (15.9 %) | 767 (4.2 %) | 5194 (28.4 %) | 0 (0.0 %) | 0 (0.0 %) |
+| stratum: light_revision | 122 | 56 (45.9 %) | 19 (15.6 %) | 7 (5.7 %) | 40 (32.8 %) | 0 (0.0 %) | 0 (0.0 %) |
+| stratum: unminted | 43726 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 21730 (49.7 %) | 21996 (50.3 %) |
 | zone: GraphicZone-figure | 1 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 1 (100.0 %) | 0 (0.0 %) |
 | zone: GraphicZone-formula-complex | 1 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 1 (100.0 %) |
-| zone: MainZone | 51965 | 9012 (17.3 %) | 2800 (5.4 %) | 752 (1.4 %) | 4949 (9.5 %) | 17393 (33.5 %) | 17059 (32.8 %) |
-| zone: MarginTextZone | 10128 | 295 (2.9 %) | 86 (0.8 %) | 19 (0.2 %) | 196 (1.9 %) | 4554 (45.0 %) | 4978 (49.2 %) |
+| zone: MainZone | 52014 | 9191 (17.7 %) | 2834 (5.4 %) | 755 (1.5 %) | 5035 (9.7 %) | 17198 (33.1 %) | 17001 (32.7 %) |
+| zone: MarginTextZone | 10129 | 315 (3.1 %) | 90 (0.9 %) | 19 (0.2 %) | 199 (2.0 %) | 4530 (44.7 %) | 4976 (49.1 %) |
 | zone: NumberingZone | 19 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | 1 (5.3 %) | 18 (94.7 %) |
 
-On the *disagree* lines the HTR reading of the strip is closer to this project's text on 383, to theirs on 381, equally close on 7; on the *near* lines 1159 / 1682 / 45. The HTR is a noisy witness, not a judge.
+On the *disagree* lines the HTR reading of the strip is closer to this project's text on 384, to theirs on 383, equally close on 7; on the *near* lines 1178 / 1701 / 45. The HTR is a noisy witness, not a judge.
 
 
 ## Coverage: pages where this project minted nothing
 
-On 161 of the 731 judged files this project minted no line at all; their text covers 7,838 paired lines there, all counted *theirs only* above. That part of the gap is coverage — a piece the C2 factory did not localize, had no edition text for, or declined whole — not alignment. On the files where it minted something: agree 9,307, near 2,886, disagree 771, ours_only 5,145, theirs_only 14,111, neither 16,763.
+On 159 of the 734 judged files this project minted no line at all; their text covers 7,333 paired lines there, all counted *theirs only* above. That part of the gap is coverage — a piece the C2 factory did not localize, had no edition text for, or declined whole — not alignment. On the files where it minted something: agree 9,506, near 2,924, disagree 774, ours_only 5,234, theirs_only 14,397, neither 16,847.
 
 | shelfmark | files | without a minted line |
 |---|---:|---:|
 | LH 1, 1 | 1 | 1 |
 | LH 1, 12 | 2 | 0 |
 | LH 1, 2 | 56 | 0 |
-| LH 1, 20 | 38 | 14 |
-| LH 1, 3 | 42 | 20 |
+| LH 1, 20 | 38 | 12 |
+| LH 1, 3 | 42 | 19 |
 | LH 1, 4 | 17 | 6 |
 | LH 1, 6 | 34 | 9 |
-| LH 1, 7 | 12 | 4 |
+| LH 1, 7 | 12 | 5 |
 | LH 2, 3 | 44 | 6 |
 | LH 2, 6 | 3 | 0 |
-| LH 35, 1 | 22 | 3 |
+| LH 35, 1 | 22 | 4 |
 | LH 35, 10 | 4 | 0 |
 | LH 35, 11 | 13 | 9 |
 | LH 35, 12 | 2 | 1 |
@@ -77,17 +77,17 @@ On 161 of the 731 judged files this project minted no line at all; their text co
 | LH 35, 3 | 2 | 0 |
 | LH 35, 8 | 1 | 0 |
 | LH 35, 9 | 4 | 0 |
-| LH 37, 3 | 11 | 5 |
+| LH 37, 3 | 11 | 1 |
 | LH 37, 4 | 9 | 0 |
 | LH 37, 5 | 10 | 2 |
 | LH 4, 1 | 17 | 13 |
 | LH 4, 2 | 3 | 3 |
 | LH 4, 3 | 6 | 5 |
 | LH 4, 4 | 4 | 0 |
-| LH 4, 5 | 33 | 0 |
+| LH 4, 5 | 36 | 3 |
 | LH 4, 6 | 42 | 14 |
-| LH 4, 7A | 55 | 1 |
-| LH 4, 7B | 136 | 18 |
+| LH 4, 7A | 55 | 2 |
+| LH 4, 7B | 136 | 17 |
 | LH 4, 7C | 70 | 11 |
 | LH 4, 7D | 7 | 1 |
 | LH 4, 8 | 30 | 15 |
@@ -110,15 +110,15 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_1_20_0070v-0069r | 117 | 19 | 5 | 0 | 8 | 43 | 42 |
 | LH_1_20_0071r | 71 | 27 | 2 | 0 | 14 | 16 | 12 |
 | LH_1_20_0071v | 62 | 16 | 5 | 1 | 17 | 6 | 17 |
-| LH_1_20_0111r-0110v | 89 | 0 | 0 | 0 | 0 | 60 | 29 |
-| LH_1_20_0111v-0110r | 113 | 0 | 0 | 0 | 0 | 62 | 51 |
+| LH_1_20_0111r-0110v | 89 | 45 | 4 | 0 | 20 | 11 | 9 |
+| LH_1_20_0111v-0110r | 113 | 27 | 3 | 0 | 24 | 32 | 27 |
 | LH_1_20_0135r | 6 | 3 | 0 | 0 | 0 | 3 | 0 |
 | LH_1_20_0140r | 20 | 0 | 0 | 0 | 0 | 15 | 5 |
 | LH_1_20_0159r | 30 | 6 | 2 | 0 | 2 | 10 | 10 |
 | LH_1_20_0161r-0160v | 55 | 0 | 0 | 0 | 0 | 50 | 5 |
 | LH_1_20_0161v-0160r | 41 | 0 | 0 | 0 | 0 | 36 | 5 |
 | LH_1_20_0164r-0163v | 83 | 19 | 9 | 1 | 4 | 23 | 27 |
-| LH_1_20_0164v-0163r | 74 | 15 | 5 | 3 | 10 | 24 | 17 |
+| LH_1_20_0164v-0163r | 74 | 15 | 6 | 2 | 10 | 24 | 17 |
 | LH_1_20_0169r-0168v | 84 | 8 | 4 | 2 | 2 | 39 | 29 |
 | LH_1_20_0169v-0168r | 65 | 12 | 7 | 5 | 5 | 17 | 19 |
 | LH_1_20_0207r | 35 | 0 | 0 | 0 | 0 | 17 | 18 |
@@ -210,8 +210,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_1_3_1_0012v-0011r | 131 | 0 | 0 | 0 | 0 | 67 | 64 |
 | LH_1_3_4_0002r-0001v | 124 | 72 | 6 | 3 | 8 | 24 | 11 |
 | LH_1_3_4_0002v-0001r | 98 | 37 | 9 | 1 | 6 | 34 | 11 |
-| LH_1_3_4_0003r | 103 | 0 | 0 | 0 | 0 | 44 | 59 |
-| LH_1_3_4_0003v | 103 | 4 | 2 | 3 | 15 | 27 | 52 |
+| LH_1_3_4_0003r | 103 | 17 | 7 | 2 | 15 | 18 | 44 |
+| LH_1_3_4_0003v | 103 | 3 | 1 | 2 | 12 | 30 | 55 |
 | LH_1_3_4_0008v-0007r | 98 | 0 | 0 | 0 | 0 | 75 | 23 |
 | LH_1_3_4_0009r-0006v | 126 | 34 | 4 | 5 | 8 | 23 | 52 |
 | LH_1_3_4_0009v-0006r | 59 | 0 | 0 | 0 | 0 | 36 | 23 |
@@ -250,8 +250,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_1_4_7_0015r-0014v | 96 | 15 | 0 | 2 | 7 | 28 | 44 |
 | LH_1_4_8_0002r-0001v | 43 | 22 | 4 | 1 | 9 | 1 | 6 |
 | LH_1_4_8_0002v-0001r | 30 | 17 | 2 | 3 | 5 | 1 | 2 |
-| LH_1_4_8_0016r-0015v | 159 | 19 | 9 | 1 | 9 | 71 | 50 |
-| LH_1_4_8_0016v-0015r | 141 | 24 | 5 | 0 | 25 | 37 | 50 |
+| LH_1_4_8_0016r-0015v | 159 | 19 | 9 | 1 | 10 | 71 | 49 |
+| LH_1_4_8_0016v-0015r | 141 | 22 | 7 | 0 | 25 | 37 | 50 |
 | LH_1_4_8_0018r-0017v | 93 | 39 | 3 | 1 | 23 | 16 | 11 |
 | LH_1_4_8_0018v-0017r | 61 | 36 | 1 | 2 | 17 | 3 | 2 |
 | LH_1_6_11_0002r-0001v | 116 | 15 | 0 | 3 | 24 | 21 | 53 |
@@ -298,8 +298,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_1_7_6_0012v-0011r | 51 | 17 | 5 | 0 | 10 | 6 | 13 |
 | LH_1_7_6_0041r-0040v | 88 | 20 | 7 | 1 | 9 | 12 | 39 |
 | LH_1_7_6_0041v-0040r | 54 | 18 | 4 | 1 | 9 | 5 | 17 |
-| LH_1_7_6_0043r-0042v | 114 | 1 | 0 | 0 | 4 | 24 | 85 |
-| LH_1_7_6_0043v-0042r | 135 | 5 | 1 | 2 | 8 | 26 | 93 |
+| LH_1_7_6_0043r-0042v | 114 | 0 | 0 | 0 | 0 | 25 | 89 |
+| LH_1_7_6_0043v-0042r | 135 | 5 | 1 | 2 | 10 | 26 | 91 |
 | LH_2_3_1_0002r-0001v | 31 | 9 | 1 | 0 | 4 | 7 | 10 |
 | LH_2_3_1_0002v-0001r | 61 | 3 | 2 | 0 | 10 | 16 | 30 |
 | LH_2_3_1_0004r-0003v | 33 | 5 | 1 | 0 | 6 | 3 | 18 |
@@ -322,8 +322,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_2_3_1_0060v-0059r | 109 | 0 | 0 | 0 | 0 | 29 | 80 |
 | LH_2_3_1_0061r | 45 | 16 | 1 | 0 | 13 | 1 | 14 |
 | LH_2_3_1_0061v | 15 | 6 | 0 | 0 | 7 | 0 | 2 |
-| LH_2_3_1_0065r-0062v | 114 | 30 | 5 | 0 | 27 | 24 | 28 |
-| LH_2_3_1_0065v-0062r | 109 | 30 | 9 | 1 | 7 | 44 | 18 |
+| LH_2_3_1_0065r-0062v | 114 | 30 | 5 | 0 | 26 | 24 | 29 |
+| LH_2_3_1_0065v-0062r | 109 | 30 | 9 | 1 | 6 | 44 | 19 |
 | LH_2_3_1_0069r-0068v | 163 | 27 | 7 | 2 | 25 | 60 | 42 |
 | LH_2_3_1_0069v-0068r | 160 | 20 | 4 | 2 | 10 | 83 | 41 |
 | LH_2_3_3_0002r-0001v | 137 | 18 | 5 | 0 | 4 | 51 | 59 |
@@ -364,7 +364,7 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_35_11_14_0020v-0019r | 71 | 0 | 0 | 0 | 0 | 48 | 23 |
 | LH_35_11_14_0021r-0017v | 84 | 0 | 0 | 0 | 0 | 49 | 35 |
 | LH_35_11_14_0021v-0017r | 96 | 0 | 0 | 0 | 0 | 49 | 47 |
-| LH_35_12_1_0074v-0073r | 68 | 5 | 3 | 0 | 12 | 4 | 44 |
+| LH_35_12_1_0074v-0073r | 68 | 5 | 4 | 0 | 13 | 3 | 43 |
 | LH_35_12_2_0022r | 21 | 0 | 0 | 0 | 0 | 12 | 9 |
 | LH_35_13_1_0428r-0427v | 61 | 14 | 4 | 1 | 4 | 8 | 30 |
 | LH_35_1_14_0037r | 38 | 24 | 3 | 1 | 8 | 1 | 1 |
@@ -377,8 +377,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_35_1_26_0009v | 40 | 0 | 0 | 0 | 0 | 20 | 20 |
 | LH_35_1_26_0011r | 22 | 11 | 2 | 1 | 1 | 3 | 4 |
 | LH_35_1_26_0011v | 24 | 0 | 0 | 0 | 0 | 14 | 10 |
-| LH_35_1_27_0014r | 45 | 15 | 7 | 4 | 8 | 2 | 9 |
-| LH_35_1_27_0014v | 24 | 9 | 2 | 0 | 0 | 1 | 12 |
+| LH_35_1_27_0014r | 45 | 0 | 0 | 0 | 0 | 28 | 17 |
+| LH_35_1_27_0014v | 24 | 9 | 3 | 0 | 0 | 0 | 12 |
 | LH_35_1_28_0002r-0001v | 111 | 36 | 7 | 0 | 12 | 23 | 33 |
 | LH_35_1_28_0002v-0001r | 167 | 12 | 3 | 3 | 8 | 61 | 80 |
 | LH_35_1_2_0003r-0002v | 144 | 16 | 3 | 0 | 4 | 61 | 60 |
@@ -396,12 +396,12 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_35_9_16_0012v | 22 | 2 | 2 | 0 | 15 | 1 | 2 |
 | LH_35_9_26_0001r | 28 | 7 | 7 | 2 | 5 | 2 | 5 |
 | LH_35_9_26_0001v | 57 | 7 | 5 | 2 | 10 | 4 | 29 |
-| LH_37_3_0002r-0001v | 140 | 35 | 15 | 3 | 11 | 42 | 34 |
-| LH_37_3_0002v-0001r | 154 | 10 | 6 | 1 | 8 | 42 | 87 |
-| LH_37_3_0004r-0003v | 144 | 0 | 0 | 0 | 0 | 107 | 37 |
-| LH_37_3_0004v-0003r | 167 | 0 | 0 | 0 | 0 | 128 | 39 |
-| LH_37_3_0006r-0005v | 137 | 0 | 0 | 0 | 0 | 101 | 36 |
-| LH_37_3_0006v-0005r | 123 | 0 | 0 | 0 | 0 | 71 | 52 |
+| LH_37_3_0002r-0001v | 140 | 19 | 10 | 1 | 5 | 65 | 40 |
+| LH_37_3_0002v-0001r | 154 | 10 | 5 | 1 | 6 | 43 | 89 |
+| LH_37_3_0004r-0003v | 144 | 32 | 6 | 0 | 3 | 69 | 34 |
+| LH_37_3_0004v-0003r | 167 | 26 | 7 | 1 | 4 | 94 | 35 |
+| LH_37_3_0006r-0005v | 137 | 61 | 7 | 1 | 6 | 32 | 30 |
+| LH_37_3_0006v-0005r | 123 | 11 | 3 | 1 | 22 | 56 | 30 |
 | LH_37_3_0007v | 72 | 0 | 0 | 0 | 0 | 42 | 30 |
 | LH_37_3_0008r | 72 | 13 | 6 | 1 | 12 | 22 | 18 |
 | LH_37_3_0008v-0007r | 165 | 32 | 2 | 1 | 5 | 51 | 74 |
@@ -423,8 +423,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_37_5_0165v-0164r | 84 | 5 | 1 | 2 | 4 | 17 | 55 |
 | LH_37_5_0167r-0166v | 168 | 34 | 14 | 2 | 12 | 77 | 29 |
 | LH_37_5_0167v-0166r | 9 | 0 | 0 | 0 | 0 | 4 | 5 |
-| LH_37_5_0169r-0168v | 164 | 13 | 4 | 1 | 7 | 55 | 84 |
-| LH_37_5_0169v-0168r | 72 | 10 | 7 | 1 | 25 | 12 | 17 |
+| LH_37_5_0169r-0168v | 164 | 15 | 4 | 1 | 10 | 53 | 81 |
+| LH_37_5_0169v-0168r | 72 | 10 | 7 | 2 | 25 | 11 | 17 |
 | LH_37_5_0173r | 120 | 5 | 1 | 0 | 2 | 2 | 110 |
 | LH_4_1_11_0001r | 42 | 0 | 0 | 0 | 0 | 25 | 17 |
 | LH_4_1_11_0001v | 30 | 0 | 0 | 0 | 0 | 23 | 7 |
@@ -437,8 +437,8 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_1_14c_0011v | 46 | 0 | 0 | 0 | 0 | 33 | 13 |
 | LH_4_1_15_0003r | 22 | 0 | 0 | 0 | 0 | 15 | 7 |
 | LH_4_1_15_0003v | 21 | 0 | 0 | 0 | 0 | 17 | 4 |
-| LH_4_1_4d_0002r-0001v | 157 | 0 | 0 | 0 | 1 | 65 | 91 |
-| LH_4_1_4d_0002v-0001r | 153 | 0 | 1 | 0 | 0 | 39 | 113 |
+| LH_4_1_4d_0002r-0001v | 158 | 7 | 7 | 0 | 12 | 51 | 81 |
+| LH_4_1_4d_0002v-0001r | 153 | 5 | 2 | 3 | 7 | 30 | 106 |
 | LH_4_1_4k_0025r | 69 | 0 | 0 | 0 | 0 | 49 | 20 |
 | LH_4_1_4k_0025v | 63 | 0 | 0 | 0 | 0 | 44 | 19 |
 | LH_4_1_4k_0031r | 67 | 0 | 0 | 0 | 0 | 37 | 30 |
@@ -456,6 +456,9 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_4_13c_0034r | 33 | 8 | 1 | 0 | 13 | 1 | 10 |
 | LH_4_4_8_0002r-0001v | 110 | 9 | 2 | 0 | 27 | 26 | 46 |
 | LH_4_4_8_0002v-0001r | 150 | 15 | 4 | 0 | 12 | 39 | 80 |
+| LH_4_5_10_0048r | 8 | 0 | 0 | 0 | 0 | 4 | 4 |
+| LH_4_5_10_0051r | 23 | 0 | 0 | 0 | 0 | 8 | 15 |
+| LH_4_5_10_0051v | 18 | 0 | 0 | 0 | 0 | 9 | 9 |
 | LH_4_5_3_0002r-0001v | 71 | 22 | 10 | 2 | 1 | 21 | 15 |
 | LH_4_5_3_0002v-0001r | 85 | 12 | 2 | 2 | 9 | 26 | 34 |
 | LH_4_5_3_0003r | 38 | 24 | 4 | 1 | 0 | 3 | 6 |
@@ -506,7 +509,7 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_6_12f_0015r | 34 | 0 | 0 | 0 | 0 | 22 | 12 |
 | LH_4_6_12f_0017r-0016v | 63 | 11 | 5 | 0 | 3 | 24 | 20 |
 | LH_4_6_12f_0017v-0016r | 73 | 18 | 10 | 2 | 2 | 20 | 21 |
-| LH_4_6_12f_0018r | 10 | 3 | 5 | 0 | 1 | 1 | 0 |
+| LH_4_6_12f_0018r | 10 | 4 | 5 | 0 | 1 | 0 | 0 |
 | LH_4_6_12f_0019r | 43 | 15 | 6 | 0 | 5 | 3 | 14 |
 | LH_4_6_12f_0019v | 41 | 4 | 1 | 0 | 27 | 1 | 8 |
 | LH_4_6_12f_0020r | 14 | 0 | 0 | 0 | 1 | 8 | 5 |
@@ -533,14 +536,14 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_6_9_0004v | 100 | 0 | 0 | 0 | 0 | 73 | 27 |
 | LH_4_7A_0002r-0001v | 41 | 10 | 0 | 0 | 0 | 19 | 12 |
 | LH_4_7A_0002v-0001r | 35 | 0 | 0 | 0 | 0 | 25 | 10 |
-| LH_4_7A_0005r-0004v | 127 | 13 | 2 | 0 | 17 | 28 | 67 |
-| LH_4_7A_0005v-0004r | 99 | 5 | 6 | 1 | 3 | 37 | 47 |
+| LH_4_7A_0005r-0004v | 127 | 13 | 2 | 0 | 21 | 28 | 63 |
+| LH_4_7A_0005v-0004r | 99 | 6 | 6 | 1 | 4 | 36 | 46 |
 | LH_4_7A_0007r-0006v | 39 | 15 | 8 | 0 | 6 | 1 | 9 |
 | LH_4_7A_0007v-0006r | 32 | 6 | 3 | 0 | 4 | 5 | 14 |
 | LH_4_7A_0013r | 101 | 14 | 6 | 0 | 8 | 8 | 65 |
 | LH_4_7A_0013v | 129 | 11 | 7 | 0 | 10 | 8 | 93 |
-| LH_4_7A_0014r | 79 | 8 | 2 | 2 | 0 | 38 | 29 |
-| LH_4_7A_0014v | 33 | 2 | 1 | 0 | 9 | 2 | 19 |
+| LH_4_7A_0014r | 79 | 6 | 1 | 1 | 0 | 42 | 29 |
+| LH_4_7A_0014v | 33 | 0 | 0 | 0 | 0 | 5 | 28 |
 | LH_4_7A_0015r | 45 | 11 | 5 | 0 | 4 | 2 | 23 |
 | LH_4_7A_0016r | 58 | 3 | 0 | 0 | 21 | 4 | 30 |
 | LH_4_7A_0016v | 29 | 6 | 4 | 2 | 9 | 6 | 2 |
@@ -626,7 +629,7 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_7B_2_0035v-0034r | 66 | 20 | 4 | 1 | 12 | 14 | 15 |
 | LH_4_7B_2_0036r | 72 | 16 | 4 | 0 | 16 | 9 | 27 |
 | LH_4_7B_2_0036v | 17 | 3 | 4 | 0 | 5 | 3 | 2 |
-| LH_4_7B_2_0037v | 14 | 0 | 0 | 0 | 0 | 11 | 3 |
+| LH_4_7B_2_0037v | 14 | 3 | 3 | 3 | 0 | 2 | 3 |
 | LH_4_7B_2_0040r | 23 | 7 | 3 | 1 | 7 | 2 | 3 |
 | LH_4_7B_2_0041v | 28 | 13 | 3 | 0 | 3 | 5 | 4 |
 | LH_4_7B_2_0043r | 17 | 1 | 4 | 1 | 7 | 0 | 4 |
@@ -765,7 +768,7 @@ What agreement does not prove: both aligners were fed the same edition text, so 
 | LH_4_7C_0072v-0071r | 89 | 3 | 3 | 2 | 7 | 20 | 54 |
 | LH_4_7C_0074r-0073v | 55 | 1 | 1 | 5 | 6 | 18 | 24 |
 | LH_4_7C_0074v-0073r | 91 | 9 | 6 | 2 | 12 | 17 | 45 |
-| LH_4_7C_0079r | 49 | 7 | 9 | 0 | 3 | 12 | 18 |
+| LH_4_7C_0079r | 49 | 7 | 10 | 0 | 2 | 11 | 19 |
 | LH_4_7C_0079v | 36 | 17 | 4 | 2 | 3 | 7 | 3 |
 | LH_4_7C_0081r | 37 | 8 | 5 | 2 | 15 | 0 | 7 |
 | LH_4_7C_0098r | 65 | 34 | 7 | 2 | 9 | 4 | 9 |

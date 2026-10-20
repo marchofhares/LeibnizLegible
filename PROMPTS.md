@@ -1919,3 +1919,121 @@ page of 8 and 14 October.
    If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
    both sides' entries, the newer above, and say so.
 ~~~~
+
+### Phase C2c — the re-mint (run 2026-10-20)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session — under the session preamble of 19 October, which this session was
+given again word for word (it is printed above, under K2b): the branch
+`c2c-remint` from main as the prompt names it, nothing merged or deployed,
+the operator's "go" waited for after Task 0 and before every write to the
+store. The departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase C2c — The one re-mint of the ground truth under W5's rules, before C3
+and before K2 writes. One local session on the operator's desktop (WSL2
+Ubuntu), about three hours, two of them an unattended job; the store is
+written in two steps only, each after a backup and a go.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies in full), SPECS.md §7
+and STATUS.md: "Current state" (the K2b entry and the entries of 14, 11 and 10
+October), the W5 entry ("GT factory, before the re-mint"), the C2b entry ("The
+fix", "Reach census"), the C2 entries on the mint's passes, Open question 18,
+and "Next" (the W5 paragraph's step (5); the C2b list's step 3). If this
+prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence. This phase is C2c; write its entry in STATUS.md after every task;
+if one exists, continue from its first unfinished task.
+
+## Where you run, and the rules that follow from it
+The checkout /home/evana/LeibnizLegible; the branch `c2c-remint`, created from
+an up-to-date main as the preamble's clause 1 says (this name, not the
+preamble's example). `.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3; its
+gt extra carries the factory; syncing this side environment is allowed,
+`.venv` is never touched). The master store data/inventory.sqlite is written
+in exactly two steps of this phase, gt-reset and the factory's shards, each
+after the operator's go; every other command opens it read-only. The
+page-image cache is /mnt/d/leibniz-images. Long jobs under nohup with logs
+under logs/. Never write a number you did not produce. Nothing is deployed:
+the website serves its own copy of the store and no row of gt_lines; the
+operator merges.
+
+## Why
+The C2 mint of 16 September (297,424 open-bucket lines) predates C2b's hyphen
+fix and W5's factory fixes: the line-end hyphen is now kept (7,822 lines lost
+it), minted rows belong to their catalogue record, `Bl.` ranges keep their
+sides, a record is minted once under the volume its text came from, the en
+dash and the double oblique hyphen are line-end hyphens. None of it is in the
+store yet. C3 trains on the re-minted lines (its Amendment 2), the
+ground-truth release D3 waits for it, and K2's write must come after it,
+since the factory replaces every row a record owns. K2 has not run; Task 0
+asserts it.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+A clean tree (the operator's own untracked files aside); the branch created;
+`pgrep -af leibniz` shows nothing; `df -h /mnt/d ~`; baseline ruff + pytest in
+.venv-w3, counts recorded. Read-only on the store: the gt_lines counts (all;
+owned by a catalogue record, record_id not null; not owned; by
+license_bucket; rows whose source names a reader, expected 0); the edition
+cache's record count and modification date; the headline numbers of
+reports/gt-factory.md and reports/gt-audit/reach.md as they stand (297,424;
+hyphen 7,822). Confirm data/philiumm/noisy/ and its listing exist (P1 Task 2's
+fetch), so match and compare can re-run without a download; if not, plan the
+fetch (about fifteen minutes, polite) as its own step with a go. Print the
+plan with time estimates and wait for "go".
+
+## Task 1 — The backup and the edition cache (read-only on the store)
+1. A fresh backup, whatever the operator took on 19 October: SQLite's backup
+   API from a read-only connection (python3 -c, as the operator's chore did)
+   into /mnt/d/leibniz-backups/inventory-2026-10-20-pre-remint.sqlite; report
+   its size and the time it took; stop if the size is not the store's.
+2. Copy data/gt/edition_cache.jsonl to data/gt/edition_cache.pre-c2c.jsonl,
+   then `leibniz align edition-cache` (the default output path). Report
+   records with text before and after, by volume, and how many records
+   gained or lost a text or changed their refs. The K1 census and K2's input
+   (data/kurrent/german_pieces.jsonl) were built on the old cache; put the
+   difference in the STATUS entry for K2's Task 0 to read.
+
+## Task 2 — gt-reset, then the six shards (two goes)
+1. Run `leibniz align gt-reset` without --yes so that it prints the owned and
+   kept counts and asks; answer no; show the counts to the operator and wait
+   for "go"; then `leibniz align gt-reset --yes`. Record what it deleted.
+2. Wait for "go"; then six shards without --resume, each under nohup with its
+   own log, logs/c2c-shard-<i>.log:
+   `uv run leibniz align factory data/gt/edition_cache.jsonl --shard <i>/6`
+   for i = 1 … 6. About two hours (C2: 30–45 pieces a minute a shard, about
+   1 GB of RAM in all). Report progress from the logs while they run. When
+   all six have ended, read each log's last lines and its skips. If a shard
+   reports `error:` skips (C2's pass 1 had 746 `database is locked`), run
+   that shard again with --resume, which skips the records already minted,
+   until only the structural skips remain (not localizable, no edition text,
+   no canvases, no HTR lines). CHECKPOINT: the mint is complete.
+
+## Task 3 — The reports, from the data (read-only from here)
+`leibniz align gt-report` (reports/gt-factory.md); `leibniz align audit-reach`
+(reports/gt-audit/reach.md and reach-summary.json; data/gt/flags.jsonl);
+`leibniz align philiumm-vi4 match` then `compare` (reports/philiumm/,
+heldout_pages.csv and the disagreement sample included); and the second
+judging sheet for the PHILIUMM team, `leibniz align audit-sheet --seed 1
+--images /mnt/d/leibniz-images --out reports/gt-audit/round2` — its own
+directory: reports/gt-audit/gt-audit-lines.csv is the first round's and
+stays as it is. Then, in the STATUS entry, before against after: lines
+minted by stratum and by channel; the hyphen flag's share (7,822 should fall
+to the lines whose HTR read no mark); the bracket and math flags; the share
+in Leibniz's own hand under W5's strict rule (the loose rule said 25.7 %);
+the A VI,4 cross-check's agreement figures and the held-out page count
+(1,472 before). Explain every number that moved by more than the fixes
+predict, or say that you cannot.
+
+## Finish and hand-over
+STATUS.md: the "C2c — the re-mint" entry in Current state and the Phase log;
+Key numbers (the new mint beside the old); Open question 18 restated with the
+new hyphen and bracket counts and the second judging round now possible;
+"Next": the W5 step (5) done, C3 may start, K2 writes after this merge, the
+D3 release's inputs. Append this prompt verbatim to PROMPTS.md under
+"Follow-up phases (2026-10)". ruff + pytest; commit in sensible pieces,
+reports and docs only, nothing under data/; push; print the compare URL. Then
+tell the operator, in order: the pull request to open and merge; that the
+store changed, so the backup chore's three lines run again with today's date
+and the upload; that reports/gt-audit/round2/gt-audit.html is the sheet to
+offer the PHILIUMM team; and that nothing is deployed. Do not merge.
+~~~~
