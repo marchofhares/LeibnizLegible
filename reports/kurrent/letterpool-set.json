@@ -1,0 +1,426 @@
+{
+ "generated": "2026-10-19",
+ "seed": 20261019,
+ "german_letters": 695,
+ "mixed_letters_apart": 23,
+ "by_reason": {
+  "placed": {
+   "L": 67,
+   "l": 0,
+   "K": 482,
+   "k": 13,
+   "other": 3,
+   "all": 565
+  },
+  "no_work": {
+   "L": 14,
+   "l": 0,
+   "K": 57,
+   "k": 1,
+   "other": 0,
+   "all": 72
+  },
+  "no_canvas": {
+   "L": 0,
+   "l": 0,
+   "K": 9,
+   "k": 1,
+   "other": 0,
+   "all": 10
+  },
+  "no_lines": {
+   "L": 0,
+   "l": 0,
+   "K": 0,
+   "k": 0,
+   "other": 0,
+   "all": 0
+  },
+  "shared": {
+   "L": 30,
+   "l": 1,
+   "K": 12,
+   "k": 2,
+   "other": 3,
+   "all": 48
+  }
+ },
+ "placed": {
+  "letters": 565,
+  "pages": 1782,
+  "lines": 76230,
+  "chars": 1319833,
+  "by_siglum": {
+   "K": {
+    "letters": 482,
+    "pages": 1542,
+    "lines": 62824,
+    "chars": 1113803
+   },
+   "L": {
+    "letters": 67,
+    "pages": 176,
+    "lines": 10756,
+    "chars": 173755
+   },
+   "k": {
+    "letters": 13,
+    "pages": 52,
+    "lines": 2093,
+    "chars": 17741
+   },
+   "other": {
+    "letters": 3,
+    "pages": 12,
+    "lines": 557,
+    "chars": 14534
+   }
+  },
+  "by_year": {
+   "1708": {
+    "letters": 10,
+    "pages": 44,
+    "lines": 1843,
+    "chars": 46824
+   },
+   "1709": {
+    "letters": 34,
+    "pages": 104,
+    "lines": 4635,
+    "chars": 74990
+   },
+   "1710": {
+    "letters": 17,
+    "pages": 44,
+    "lines": 1613,
+    "chars": 32848
+   },
+   "1711": {
+    "letters": 42,
+    "pages": 122,
+    "lines": 4599,
+    "chars": 110950
+   },
+   "1712": {
+    "letters": 31,
+    "pages": 76,
+    "lines": 2372,
+    "chars": 49965
+   },
+   "1713": {
+    "letters": 170,
+    "pages": 516,
+    "lines": 21763,
+    "chars": 348776
+   },
+   "1714": {
+    "letters": 76,
+    "pages": 232,
+    "lines": 9004,
+    "chars": 178362
+   },
+   "1715": {
+    "letters": 65,
+    "pages": 242,
+    "lines": 12312,
+    "chars": 179247
+   },
+   "1716": {
+    "letters": 120,
+    "pages": 402,
+    "lines": 18089,
+    "chars": 297871
+   }
+  }
+ },
+ "disjointness": {
+  "k2_german_pieces": {
+   "letters": 0,
+   "pages": 0,
+   "examples": {}
+  },
+  "philiumm_heldout": {
+   "letters": 0,
+   "pages": 0,
+   "examples": {}
+  }
+ },
+ "drawn": {
+  "letters": 134,
+  "pages": 386,
+  "lines": 18815,
+  "chars": 325624,
+  "by_siglum": {
+   "K": {
+    "letters": 65,
+    "pages": 202,
+    "lines": 7807,
+    "chars": 148631
+   },
+   "L": {
+    "letters": 67,
+    "pages": 176,
+    "lines": 10756,
+    "chars": 173755
+   },
+   "k": {
+    "letters": 2,
+    "pages": 8,
+    "lines": 252,
+    "chars": 3238
+   }
+  },
+  "by_year": {
+   "1708": {
+    "letters": 2,
+    "pages": 6,
+    "lines": 271,
+    "chars": 5272
+   },
+   "1709": {
+    "letters": 10,
+    "pages": 26,
+    "lines": 998,
+    "chars": 18553
+   },
+   "1710": {
+    "letters": 3,
+    "pages": 8,
+    "lines": 319,
+    "chars": 5966
+   },
+   "1711": {
+    "letters": 6,
+    "pages": 14,
+    "lines": 404,
+    "chars": 13730
+   },
+   "1712": {
+    "letters": 5,
+    "pages": 10,
+    "lines": 170,
+    "chars": 5440
+   },
+   "1713": {
+    "letters": 48,
+    "pages": 132,
+    "lines": 5943,
+    "chars": 95726
+   },
+   "1714": {
+    "letters": 15,
+    "pages": 48,
+    "lines": 2208,
+    "chars": 42138
+   },
+   "1715": {
+    "letters": 19,
+    "pages": 64,
+    "lines": 4102,
+    "chars": 70847
+   },
+   "1716": {
+    "letters": 26,
+    "pages": 78,
+    "lines": 4400,
+    "chars": 67952
+   }
+  },
+  "by_half": {
+   "selection": {
+    "letters": 67,
+    "pages": 186,
+    "lines": 7696,
+    "chars": 138942
+   },
+   "test": {
+    "letters": 67,
+    "pages": 200,
+    "lines": 11119,
+    "chars": 186682
+   }
+  },
+  "by_half_siglum": {
+   "selection": {
+    "K": {
+     "letters": 33,
+     "pages": 104,
+     "lines": 3919,
+     "chars": 70166
+    },
+    "L": {
+     "letters": 33,
+     "pages": 78,
+     "lines": 3718,
+     "chars": 68114
+    },
+    "k": {
+     "letters": 1,
+     "pages": 4,
+     "lines": 59,
+     "chars": 662
+    }
+   },
+   "test": {
+    "K": {
+     "letters": 32,
+     "pages": 98,
+     "lines": 3888,
+     "chars": 78465
+    },
+    "L": {
+     "letters": 34,
+     "pages": 98,
+     "lines": 7038,
+     "chars": 105641
+    },
+    "k": {
+     "letters": 1,
+     "pages": 4,
+     "lines": 193,
+     "chars": 2576
+    }
+   }
+  },
+  "by_half_year": {
+   "selection": {
+    "1708": {
+     "letters": 1,
+     "pages": 2,
+     "lines": 47,
+     "chars": 1655
+    },
+    "1709": {
+     "letters": 5,
+     "pages": 14,
+     "lines": 593,
+     "chars": 9968
+    },
+    "1710": {
+     "letters": 2,
+     "pages": 4,
+     "lines": 85,
+     "chars": 1785
+    },
+    "1711": {
+     "letters": 3,
+     "pages": 8,
+     "lines": 213,
+     "chars": 4201
+    },
+    "1712": {
+     "letters": 2,
+     "pages": 4,
+     "lines": 68,
+     "chars": 1930
+    },
+    "1713": {
+     "letters": 24,
+     "pages": 66,
+     "lines": 2630,
+     "chars": 45662
+    },
+    "1714": {
+     "letters": 8,
+     "pages": 22,
+     "lines": 782,
+     "chars": 17433
+    },
+    "1715": {
+     "letters": 10,
+     "pages": 32,
+     "lines": 1428,
+     "chars": 27509
+    },
+    "1716": {
+     "letters": 12,
+     "pages": 34,
+     "lines": 1850,
+     "chars": 28799
+    }
+   },
+   "test": {
+    "1708": {
+     "letters": 1,
+     "pages": 4,
+     "lines": 224,
+     "chars": 3617
+    },
+    "1709": {
+     "letters": 5,
+     "pages": 12,
+     "lines": 405,
+     "chars": 8585
+    },
+    "1710": {
+     "letters": 1,
+     "pages": 4,
+     "lines": 234,
+     "chars": 4181
+    },
+    "1711": {
+     "letters": 3,
+     "pages": 6,
+     "lines": 191,
+     "chars": 9529
+    },
+    "1712": {
+     "letters": 3,
+     "pages": 6,
+     "lines": 102,
+     "chars": 3510
+    },
+    "1713": {
+     "letters": 24,
+     "pages": 66,
+     "lines": 3313,
+     "chars": 50064
+    },
+    "1714": {
+     "letters": 7,
+     "pages": 26,
+     "lines": 1426,
+     "chars": 24705
+    },
+    "1715": {
+     "letters": 9,
+     "pages": 32,
+     "lines": 2674,
+     "chars": 43338
+    },
+    "1716": {
+     "letters": 14,
+     "pages": 44,
+     "lines": 2550,
+     "chars": 39153
+    }
+   }
+  },
+  "pages_shared_among_drawn": {
+   "distinct_pages": 380,
+   "groups": [
+    {
+     "letters": [
+      "1713-166",
+      "1713-167"
+     ],
+     "pages": [
+      "00068549:0075",
+      "00068549:0076"
+     ]
+    },
+    {
+     "letters": [
+      "1713-168",
+      "1713-171",
+      "1713-172"
+     ],
+     "pages": [
+      "00068549:0079",
+      "00068549:0080"
+     ]
+    }
+   ]
+  }
+ }
+}

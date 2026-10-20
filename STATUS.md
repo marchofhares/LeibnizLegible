@@ -3,11 +3,41 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-14 (**the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-20 (**K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-20: K2b — the letter-pool test set, done on the desktop (Checkpoint
+C); the branch `k2b-letterpool` waits for the operator's pull request, nothing
+deployed.** The honest German test set from the GWLB's checked transcriptions
+of the correspondence of 1708–1716 (CC BY-NC 4.0, nc bucket: internal
+evaluation only — the texts stay under `data/`, the reports carry numbers and
+letter numbers), placed on the store's pages through the C2 resolver, frozen,
+and measured, as the plan page's K2b prompt and the preamble of 19 October
+say. The nine checked volumes (version 1 each) parse into **2,533 letters**
+(835 German), **695 of them German and placeable**; **565 placed** on the
+store (72 no work, 10 no canvas, 48 shared leaves), no page among K2's German
+pieces or the PHILIUMM held-out pages; the set drawn seeded and stratified by
+siglum and year: **134 letters — all 67 in Leibniz's hand that placed and 67
+of the correspondents' — on 386 pages with 18,815 recognised lines and 325,624
+reference characters, split once into a selection half and a test half of 67
+letters each** (`reports/kurrent/letterpool-testset.csv`). The metric is the
+letter's reference against every recognised line on its pages, an infix
+alignment, nothing filtered. **The first measured German error rates (CER,
+`philiumm` policy, 95 % bootstrap over letters): the stored v1 text 46.6 %
+(43.3–49.5 %), philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 % (32.5–41.0 %),
+trocr-hanse-xvi 35.6 % (31.2–39.6 %) (evaluate only), trocr-hanse-xvii 38.9 %
+(evaluate only); on the test half 48.2 / 54.6 / 39.2 / 38.0 / 41.2 %; the
+correspondents' hands 38.5 / 45.5 / 23.2 / 22.8 / 26.4 %, Leibniz's own 53.7 /
+59.3 / 49.2 / 46.7 / 49.8 %. The lines the factory's aligner would accept
+(15–29 % of them) read at 15–32 %, 18 to 21 points under the unfiltered
+rates** (`reports/kurrent/letterpool-eval.md`). K1's gate holds:
+trocr-kurrent-xvi-xvii (MIT) is K2's reader; K3 reports its rate on this set
+and never tunes on it. The GPU read 18,445 distinct lines four times in 4 h 31
+min; the store was opened read-only; ruff clean, 841 tests. The K2b entry in
+the Phase log has the detail.
 
 **2026-10-14: the Edition's replies, recorded (no code, no data).** Two
 emails from the Leibniz-Edition Potsdam, both answered by the operator on
@@ -659,6 +689,300 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### K2b — the letter-pool test set (2026-10-19/20) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: five readers measured) · ⏳ the operator's pull request
+
+- **Setting.** The operator's desktop: the WSL checkout
+  `/home/evana/LeibnizLegible`, driven from a Claude Code session opened on the
+  `\wsl.localhost` path (the Windows side shows the `.sh` files and a CSV as
+  modified — the mode-bit artefact; inside WSL the tree is clean, and the
+  untracked `logs/`, `*.log`, `resume-run.sh`, `.python-version` and
+  `reports/gt-audit/gt-audit.html` are the operator's own, left alone).
+  `git pull --ff-only` on main: already up to date at `82e2091` (#45);
+  `k2b-letterpool` created with `git checkout -B k2b-letterpool origin/main`,
+  the branch the preamble of 19 October names. Disk: `/` 1007 G with 898 G
+  free, `/mnt/d` 932 G with 452 G free. GPU: GTX 1660 Ti, driver 610.57.01,
+  1,232 MiB of 6,144 MiB held by the desktop (Xwayland), nothing else on it.
+  `.venv-k1` from K1: Python 3.12.13, torch 2.12.0+cu130 with CUDA 13.0
+  available, transformers 5.12.1, pdfplumber 0.11.10, pypdfium2 5.13.0, numpy
+  2.4.6, Pillow 12.3.0, kraken 7.0.3; uv 0.12.0; no `edlib` and no `pypdf`
+  (nothing will be installed: the infix alignment is a numpy DP). Baseline in
+  `.venv-k1`: `ruff check` clean, `ruff format --check` 215 files formatted,
+  **pytest 807 passed, 1 skipped in 33.8 s**. The store
+  `data/inventory.sqlite` is 17,061,699,584 bytes (as K1 found it) and is
+  opened read-only throughout; `/mnt/d/leibniz-images` is mounted;
+  `data/kurrent/german_pieces.jsonl` has 2,173 rows (the K2 input, the
+  disjointness check's German side); `reports/philiumm/heldout_pages.csv` is
+  present; `data/models/hf/` holds the three TrOCR checkpoints K1 cached. The
+  nine repository pages for the checked years 1708–1716 answered 200 and each
+  links `LAA-Transkriptionen<year>-v1.pdf` (the 1714 page: Version 1 of 3
+  November 2020, 2.97 MB, "Lizenz: CC BY-NC 4.0", a Zitierhinweis and a
+  BibLaTeX entry). The go came after this pre-flight; nothing was fetched
+  before it.
+- **Plan, as printed for the go.** *Task 1* (no go needed; about 27 MB over
+  nine requests at one a second): `tools/fetch-letterpool.sh` and `leibniz
+  align letterpool-fetch` into `data/external/letterpool/` with
+  `reports/kurrent/letterpool-sources.json` (version, date, SHA-256, URL — no
+  text); `align/letterpool.py` on pdfplumber's characters (body size kept;
+  line numbers, running heads, Überlieferung block and footnotes dropped;
+  NFC; editorial brackets as the C2b flags describe them), the first witness's
+  siglum, kind, shelfmark and leaves through `normalize_signature`, the
+  language through `enrich.langid.classify`; tests on a synthetic PDF built in
+  the test; the per-year report; ten letters checked against the PDF by eye.
+  Checkpoint A. *Task 2* (store read-only, minutes): the work through the
+  crosswalk's signature keys, the pages through the C2 resolver; drops counted
+  by reason (no work, no folio-labelled canvas in range, no recognised lines,
+  shared leaves); disjointness against `german_pieces.jsonl`'s pages and
+  `heldout_pages.csv`; the draw seeded and stratified by siglum and year
+  (every L and l letter, a K and k sample of about the same size), split
+  once into a selection half and a test half per the amendment of 10 October;
+  `reports/kurrent/letterpool-testset.csv` (no text) and the texts under
+  `data/kurrent/letterpool/`. Checkpoint B. *Task 3*: the metric — the
+  letter's reference against the concatenation of every recognised line on
+  its pages in reading order, an infix (semi-global) alignment with the
+  machine text's prefix and suffix free, as a vectorised numpy DP checked
+  against the full DP on fixtures; CER pooled and per letter with a bootstrap
+  over letters, under the B1 harness's three policies and the Kurrent
+  package's reading policy, per siglum, year and half; a selected line-level
+  CER beside it; `v1` from the store (no GPU, minutes); then, **after a go**,
+  `philiumm`, `trocr-kurrent-xvi-xvii`, `trocr-hanse-xvi` and
+  `trocr-hanse-xvii` through the pilot's crop machinery into
+  `data/kurrent/letterpool-readings/<reader>.jsonl`, resumable, under nohup
+  with a log under `logs/` (K1's rates of 334 / 209 / 337 / 34 ms a line put
+  it at hours once the line count is known); `letterpool-eval.md` and
+  `.json`, numbers only. Checkpoint C. Then STATUS.md, PROMPTS.md, ruff and
+  pytest, push, the compare URL; no merge, nothing deployed.
+- **Task 1, the pool fetched and parsed** (`align/letterpool.py`, `leibniz
+  align letterpool-fetch` and `letterpool-parse`, +18 tests on a synthetic
+  two-page PDF built in the test; `reports/kurrent/letterpool-sources.json`,
+  `letterpool-parse.md` + `.json`; the PDFs under `data/external/letterpool/`,
+  the page cache and the letters under `data/kurrent/letterpool/`). *The
+  fetch:* each year's repository page names its newest PDF; all nine checked
+  years are at version 1 (1708–1712, 1715 and 1716 of 28 October 2020, 1713
+  and 1714 of 3 November 2020), 25,422,200 bytes and 3,579 pages in all, each
+  recorded with its SHA-256, URL, page count and the citation the page gives
+  (the Zitierhinweis names the volume's compiler and editor, as attribution
+  asks; licence CC BY-NC 4.0, bucket nc). *The parser:* pdfplumber's
+  characters per line with size, font and token edges; the volume's layout
+  learned once (body 12.0 pt, small type under 11.2 pt, the text block
+  49.0–508.1 pt, pitch 16.7 pt); per page the running head (the top 9 %)
+  dropped and its `N.` cross-checked, the margin line numbers (every fifth
+  typeset line, outside the block, on the side EDMAC alternates) stripped by
+  position, the notes at the foot dropped (small type, or a short body-type
+  run opening with a line-number key under a gap), a heading recognised by
+  its shape (number, full stop, capitals — the small-caps running head comes
+  out of the text layer in lowercase, the headings in capitals), the dateline
+  and any subtitle ("Beilage zu N.5") held until the *Überlieferung* line
+  arrives, the block parsed for its first witness (siglum, kind, the
+  shelfmark up to its leaves through `normalize_signature`, the
+  correspondent's parenthesis removed first because the A3 normaliser cuts at
+  one), a second text on the leaves noted ("Auf Bl.4vo L von N.69"), the
+  text's lines joined with the print's hyphenation undone
+  (`edition.join_lines`), the editorial brackets resolved as the C2b flags
+  describe them (a supplied letter or mark attached to a word keeps its
+  content, 5,009 of them; a bracketed insertion standing alone — an identified
+  name, a reference, a supplied word — goes, 3,085; an angle-bracket remark of
+  the editor goes, 437; nested groups innermost first), a letter printed in
+  several drafts (⟨L1⟩ … ⟨L2⟩; 25 letters) kept to its first witness's draft,
+  and the language by the K1 identifier. Three traps of the text layer: an
+  umlaut is a base vowel followed by a spacing diaeresis (U+00A8; 3,101 of
+  them, most the Ü of *Überlieferung*), which NFC never composes, so it is
+  composed first; the maths font's angle brackets come as CIDs; the other
+  CIDs (integral signs, a Greek font) are dropped. *Results:* **2,533
+  letters** on 3,579 pages — 835 German, 1,179 French, 489 Latin, 27 mixed, 3
+  unknown; by first witness L 812, l 26, K 1,553, k 91, other 51 (copies,
+  prints, none named); **2,090 placeable** (LBr, LH or LK with a `Bl.` range;
+  6 LK-MOW witnesses carry letter-prefixed folios and are not); **695 German
+  and placeable: L 111, l 1, K 560, k 17** (and 6 copies, siglum A); 353
+  letters name a second text on their leaves. The source's own numbering has
+  three faults, recorded as anomalies and kept as printed: 1709 prints "52."
+  for the letter after 40 and again for the fifty-second (ids `1709-52` and
+  `1709-52-2`), 1713 prints 473 twice and no 472, 1715 prints "290." for the
+  letter after 239 and again later; eleven running heads in 1716 and one each
+  in 1713 and 1714 name another letter than the page carries. *The spot
+  check:* ten letters drawn seeded (three German K, two German L, one German
+  k, one with shared leaves, one enclosure with a subtitle, one French, one
+  Latin) and read line by line against the page dump — heading, dateline,
+  witness and the text's start and end right on all ten, after two faults the
+  check itself found and the parser now handles: a letter printed in four
+  drafts had all four concatenated (now the first witness's draft alone,
+  recorded in `segment`), and a body-type footnote wrapping onto a second
+  line escaped the note splitter (now taken as a run). A correspondent's own
+  numbering written on the leaf ("N.44.") stays in the text, since it is on
+  the page. ruff clean, 825 tests. **Checkpoint A: the letters parse
+  reliably.**
+- **Task 2, the letters placed and the set frozen** (`align/letterpool_set.py`,
+  `leibniz align letterpool-set`, +5 tests on a seeded fixture store;
+  `reports/kurrent/letterpool-testset.csv` (the frozen set, no text),
+  `letterpool-placement.csv` (every German letter's placement and reason),
+  `letterpool-set.md` + `.json`; the reference texts in
+  `data/kurrent/letterpool/testset.jsonl`, gitignored, nc bucket). The store
+  read-only (`open_readonly`); 2.9 s. *Placement* as the factory and the web
+  layer place a piece: the first witness's key through the crosswalk's
+  signature index (`build_work_key_index`; where a key names several works the
+  first whose folio labels cover the leaves wins), the leaves through the C2
+  resolver (`select_span`, the sides kept), the recognised lines counted per
+  page (`lines.text` not null), a drop under the first reason that applies.
+  Of the **695 German letters with a placeable witness** (23 mixed-language
+  ones counted apart): **placed 565** (L 67, K 482, k 13, A 3), **no work 72**
+  (LBr 827 — 21 of them, Schöttel's letters — is not among the store's works;
+  the LK-MOW convolutes are not either, the store holds no LK key at all; two
+  `LH XLI` witnesses name no section), **no canvas 10**, **no lines 0**,
+  **shared leaves 48** (L 30, l 1, K 12, k 2, A 3: the block names a second
+  text on the leaves, "Auf Bl.4vo L von N.69"). The placed letters sit on
+  1,782 pages with 76,230 recognised lines (1,319,833 reference characters);
+  by year 1713 is the largest (170 letters). *Disjointness:* no page of a
+  placed letter is among K2's German pieces' pages
+  (`data/kurrent/german_pieces.jsonl`, 0 of 1,782) or the PHILIUMM held-out
+  pages (`reports/philiumm/heldout_pages.csv`, 0) — as expected from the
+  years, now checked page by page. *The draw* (seed 20261019): every placed
+  letter in Leibniz's hand — **67 L** (no l letter placed: the one l witness
+  shares its leaves) — and **67 correspondents' letters** (65 K, 2 k)
+  allocated over the (siglum, year) cells in proportion to the pool by
+  largest remainder and drawn seeded within each cell; the set split once,
+  seeded, within each (siglum, year) cell, into the **selection half (67)**
+  and the **test half (67)**, per the amendment of 10 October. **134 letters,
+  386 pages, 18,815 recognised lines, 325,624 reference characters** —
+  selection 186 pages, 7,696 lines, 138,942 characters; test 200 pages, 11,119
+  lines, 186,682 characters; letters from 2 (1708) to 48 (1713) a year; lines
+  per letter 46 / 102 / 187 at the quartiles, 1,088 at most, up to 8 pages.
+  Two groups of drawn letters share pages (short pieces on one leaf: 1713-166
+  and 167 on two pages; 1713-168, 171 and 172 on two pages), 380 distinct pages
+  in all; the metric's free prefix and suffix leave a neighbour's text
+  uncharged. The CSV carries letter, year, number, half, siglum, kind,
+  shelfmark, leaves, work, page ids, pages, lines, characters and the SHA-256
+  of the reference text; the texts file carries the text with the same
+  checksum, so a later session can verify the set it measures is the frozen
+  one. 830 tests, ruff clean. **Checkpoint B: the set is frozen.**
+- **Task 3 (i), the metric built and v1 measured**
+  (`align/letterpool_eval.py`, `leibniz align letterpool-eval` with `--read`
+  for the GPU step, +11 tests in all; `reports/kurrent/letterpool-eval.md`, `.json`
+  and `letterpool-eval-letters.csv`, one row per letter, reader and policy,
+  numbers only). *The metric, letter by letter, nothing filtered:* the
+  reference text against the concatenation, in reading order, of every
+  recognised line on the letter's pages, aligned so that machine text before
+  and after the letter is free and everything inside the span counts — the
+  infix (semi-global, edlib's HW) alignment as a vectorised numpy dynamic
+  programme, one row per reference character (the diagonal and vertical
+  moves element-wise, the horizontal move as a cumulative minimum), checked
+  against the full table on 300 random pairs; the span's end is the last
+  minimum of the final row, its start the reverse problem pinned at that end.
+  No new dependency. CER = edits ÷ reference characters, pooled, with the B1
+  harness's bootstrap over the letters as atoms (1,000 resamples, seed 12345),
+  and as a per-letter distribution; four policies — the harness's `philiumm`
+  (NFD, whitespace collapsed; case and diacritics kept: the headline),
+  `lenient`, `strict` (NFC; the lines are joined by single spaces on both
+  sides) and the Kurrent Trace package's `reading` (NFC, long s folded, as K1
+  scored Dresden); per hand (L; K/k), year and half. Beside it, labelled
+  *selected*, the line-level CER over the lines `align_piece` accepts at the
+  factory's unknown-stratum threshold 0.65 (the minted slice against the
+  reader's line). The frozen set is verified against its checksums before
+  anything is scored; a changed text refuses. **`v1`, the stored text of the
+  C1 run — the German error rate of what the website shows today — on the
+  134 letters (18,815 lines, 17,399 of them, counted per letter, with a non-empty stored
+  reading; 17,032 distinct lines): CER 46.6 % (95 % interval 43.3–49.5 %) under `philiumm`, 45.2 %
+  lenient, 46.8 % strict, 46.8 % reading; selection half 44.5 % (41.4–47.6
+  %), test half 48.2 % (43.1–52.4 %); by hand, the correspondents' letters
+  (K/k, 67 letters, 8,059 lines) 38.5 % (35.9–41.9 %) and Leibniz's own (L,
+  67 letters, 10,756 lines) 53.7 % (49.9–56.9 %); per letter the median is
+  42.9 % (quartiles 34.7 % and 57.9 %, from 20.8 % to 73.6 %); on average
+  68.2 % of a letter's machine text lies inside the aligned span. The
+  selected number says what the selection hides: the aligner accepts 4,056
+  of the 18,815 lines (21.6 %) and on those v1 reads at 28.7 % — eighteen
+  points under the unfiltered rate.** Scoring one reader under four policies
+  took 7 minutes.
+- **Task 3 (ii), the four readers read on the GPU** (the go given on
+  2026-10-19; `leibniz align letterpool-eval --read --crop-cache
+  data/kurrent/letterpool-crops` under nohup, `logs/k2b-read-2.log`; the
+  readings in `data/kurrent/letterpool-readings/<reader>.jsonl`, one JSON line
+  per page line with the reader's text and timing, gitignored). `philiumm`,
+  `trocr-kurrent-xvi-xvii` and, evaluate-only, `trocr-hanse-xvi` and
+  `trocr-hanse-xvii` read the set's lines afresh through the pilot's crop
+  machinery (the v1 geometry, the polygon masked, no downscaling, batches of 8
+  on the GTX 1660 Ti): 18,445 distinct lines, since the set's 18,815 count a
+  page two letters share once per letter. The first launch (20:34, New York
+  time) was stopped at 20:39 with 4,218 philiumm readings: at 64 ms of wall
+  time a line against 15 ms in the model, the loop was spending most of its
+  time on the page images read from D: and the polygon cuts, which every
+  reader would repeat; a crop cache was added to the pilot's reader
+  (`crop_all(cache_dir=…)`: a PNG per line under
+  `data/kurrent/letterpool-crops/`, cut once and read by the next reader; 1.9
+  GB, re-creatable) and the job relaunched at 20:40 with the 4,218 readings
+  kept. philiumm was done at 20:56, trocr-kurrent-xvi-xvii at 22:44,
+  trocr-hanse-xvi at 23:22, trocr-hanse-xvii at 01:11 — 4 h 31 min of reading,
+  no line skipped, 3.3 GB of GPU memory in use when checked; model time per
+  line as the readers measured it 15 / 340 / 124 / 352 ms. The job scored the
+  set at its end (01:42) with the module as imported at launch; the set was
+  re-scored at 09:23 on 20 October with the readers' lines-read count changed
+  to count per letter — the same numbers, that column apart — and that run's
+  reports are the committed ones. Nothing was written to the store. (The host
+  stopped the session's background watcher for memory during the run and it
+  was not restarted, as instructed; the operator prompted the session once the
+  job had ended.)
+- **Task 3 (iii), the numbers — Checkpoint C**
+  (`reports/kurrent/letterpool-eval.md`, `.json` and
+  `letterpool-eval-letters.csv`: 2,680 rows, one per letter, reader and
+  policy, counts and rates with letter numbers only; the pool cited volume by
+  volume with its version). Five readers on the 134 letters, nothing filtered;
+  CER under the `philiumm` policy, pooled over characters, with the 95 %
+  bootstrap interval over letters: **v1 46.6 % (43.3–49.5 %), philiumm 52.9 %
+  (49.8–55.6 %), trocr-kurrent-xvi-xvii 37.0 % (32.5–41.0 %), trocr-hanse-xvi
+  35.6 % (31.2–39.6 %), trocr-hanse-xvii 38.9 % (34.6–42.8 %)**; the other
+  policies move each reader by under two points (lenient 45.2 / 51.6 / 35.8 /
+  34.4 / 37.6; strict 46.8 / 53.0 / 37.1 / 35.7 / 38.9; reading 46.8 / 53.0 /
+  37.0 / 35.7 / 38.9 %). *The halves:* selection 44.5 / 50.5 / 34.1 / 32.3 /
+  35.8 %, test 48.2 / 54.6 / 39.2 / 38.0 / 41.2 % — the test half is the
+  harder one for every reader, by 3.8 to 5.7 points. *By hand:* the
+  correspondents' letters (K/k, 67 letters, 8,059 lines) v1 38.5 % (35.9–41.9
+  %), philiumm 45.5 % (43.0–48.6 %), trocr-kurrent-xvi-xvii 23.2 % (19.6–27.3
+  %), trocr-hanse-xvi 22.8 % (19.3–27.1 %), trocr-hanse-xvii 26.4 % (22.7–30.8
+  %); Leibniz's own hand (L, 67 letters, 10,756 lines) 53.7 % (49.9–56.9 %),
+  59.3 % (55.8–62.3 %), 49.2 % (44.8–52.9 %), 46.7 % (42.1–50.7 %), 49.8 %
+  (45.3–53.5 %). *By year:* 1712 (5 letters) is the easiest for every reader
+  (30.5 / 40.6 / 13.8 / 13.8 / 17.0 %) and 1715 (19) the hardest (52.6 / 58.6
+  / 45.3 / 43.8 / 47.0 %); 1713, the largest year (48), reads at 44.7 / 50.7 /
+  34.6 / 33.2 / 36.4 %. *Per letter:* the medians 42.9 / 49.4 / 31.5 / 28.3 /
+  32.8 %, the quartiles 34.7–57.9 % for v1 and 17.0–47.9 % for
+  trocr-hanse-xvi; the best letter of any reader at 7.5 % (trocr-hanse-xvi),
+  the worst at 73.6 % (v1); 68 % of a letter's machine text lies inside the
+  aligned span, the same for every reader. *Selected* — the lines
+  `align_piece` accepts at 0.65, the factory's gate: v1 4,056 lines (21.6 %)
+  at 28.7 %, philiumm 2,821 (15.0 %) at 31.9 %, trocr-kurrent-xvi-xvii 4,993
+  (26.5 %) at 15.6 %, trocr-hanse-xvi 5,408 (28.7 %) at 15.5 %,
+  trocr-hanse-xvii 5,006 (26.6 %) at 18.0 % — 18 to 21 points under the
+  unfiltered rates, which is the size of the flattery an aligner-filtered
+  evaluation carries. *What it says:* the three TrOCR readers read the
+  correspondents' hands at 23–26 % against v1's 38.5 % and Leibniz's own at
+  47–50 % against 53.7 %; their intervals overlap pairwise, trocr-hanse-xvi
+  1.5 points under trocr-kurrent-xvi-xvii; philiumm, the kraken baseline K1
+  would fine-tune from, is the worst reader on every cut. K1's gate holds:
+  trocr-kurrent-xvi-xvii (MIT) is the reader for K2, the two Hanse models
+  stating no licence and evaluated only. The lines read per reader, of the
+  18,815: v1 17,399 (a stored reading that is not empty), philiumm 17,848,
+  trocr-kurrent-xvi-xvii 18,807, the two Hanse readers 18,815; an empty
+  reading counts as deleted. The frozen set's checksums were verified before
+  scoring. **Checkpoint C: the German error rates are measured, on a set no
+  reader chose.**
+- **Licence handling, and what is where.** The pool is CC BY-NC 4.0 (nc
+  bucket, SPECS §1.4 and §7.3): its text serves internal evaluation only.
+  Committed, numbers and identifiers only:
+  `reports/kurrent/letterpool-sources.json` (each volume's version, date,
+  SHA-256, URL and Zitierhinweis), `letterpool-parse.md` + `.json` (counts),
+  `letterpool-placement.csv` and `letterpool-testset.csv` (letter numbers,
+  shelfmarks, page ids, counts and the texts' checksums), `letterpool-set.md`
+  + `.json`, `letterpool-eval.md` + `.json` and `letterpool-eval-letters.csv`.
+  Never committed, under the gitignored `data/`: the nine PDFs
+  (`data/external/letterpool/`, 25 MB), the page cache, the letters and the
+  frozen set's texts (`data/kurrent/letterpool/`, 33 MB), the readers' output
+  (`data/kurrent/letterpool-readings/`, 13 MB — the project's machine text of
+  the store's pages, kept beside the set it was read for) and the crop cache
+  (`data/kurrent/letterpool-crops/`, 1.9 GB, rebuilt by the next `--read`). No
+  reader was chosen or tuned on the set; nothing reached the website, a
+  release or training; the store was opened read-only throughout. The README
+  gained a Kurrent-track section with the commands. ruff clean; **841 tests**
+  (807 at the pre-flight, +18 parser, +5 set, +11 metric; 1 skipped as
+  before). The branch `k2b-letterpool` carries five commits and this
+  close-out; the pull request and the merge are the operator's.
 
 ### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 
@@ -2571,7 +2895,9 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **808** (2026-10-10, W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **841** (2026-10-20, K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
+| **K2b German CER, unfiltered (2026-10-20)** | `philiumm` policy, pooled, 95 % bootstrap over letters: v1 **46.6 %** (43.3–49.5 %) · philiumm **52.9 %** (49.8–55.6 %) · trocr-kurrent-xvi-xvii **37.0 %** (32.5–41.0 %) · trocr-hanse-xvi **35.6 %** (31.2–39.6 %) (evaluate only) · trocr-hanse-xvii **38.9 %** (34.6–42.8 %) (evaluate only); test half 48.2 / 54.6 / 39.2 / 38.0 / 41.2 %; the correspondents' hands (K/k) 38.5 / 45.5 / 23.2 / 22.8 / 26.4 %, Leibniz's own (L) 53.7 / 59.3 / 49.2 / 46.7 / 49.8 %; per-letter medians 42.9 / 49.4 / 31.5 / 28.3 / 32.8 %; **selected** (the aligner's accepted lines only): yield 21.6 / 15.0 / 26.5 / 28.7 / 26.6 %, CER 28.7 / 31.9 / 15.6 / 15.5 / 18.0 % |
 | **W5 live (2026-10-11, `/api/stats`)** | 236,795 page records · **196,439 distinct scans** · 40,297 scans registered under more than one label: 39,442 spreads split, 855 folded, 519 candidates left · lines 13,508,625 · **9,846,450 lines once each** · 15,425 letters (Bodemann, from correspSearch) · 991 / 1,060 letter convolutes named (680 before) |
 | **K1 pilot on Leibniz's German (2026-10-09)** | 20 German pieces + 5 controls, 2,639 lines, GPU; German yield at the factory's gate: philiumm **12.5 %** · trocr-kurrent-xvi-xvii **20.2 %** · trocr-hanse-xvii **20.6 %** · trocr-hanse-xvi **22.5 %** · v1 **16.4 %**; control yield: philiumm 41.6 % · trocr-kurrent-xvi-xvii 23.6 % · trocr-hanse-xvii 18.2 % · trocr-hanse-xvi 30.5 % · v1 40.5 %; gate **GO** |
 | **K1 Dresden ranking (2026-10-09)** | 383 Kurrent Trace lines, GPU; CER under the `philiumm` policy: trocr-kurrent-xvi-xvii **7.4 %** · trocr-hanse-xvi **8.9 %** · trocr-hanse-xvii **10.9 %** · philiumm **29.5 %** · mccatmus **51.7 %**; the baseline `philiumm` at 29.5 % is not noise |
@@ -2885,6 +3211,32 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-19/20 — K2b, departures from the prompt and from the preamble of
+  19 October.** (1) *No `tools/fetch-letterpool.sh`.* The prompt offered a
+  script or a `leibniz align letterpool-fetch` command; the command alone was
+  built, since it records the registry as it fetches. (2) *No edlib.* The
+  infix alignment is a vectorised numpy dynamic programme, which the prompt
+  allowed ("or a banded DP"); nothing was installed. (3) *"K2's German
+  pieces".* K2 has not run, so the page-disjointness check used the K1
+  census's `data/kurrent/german_pieces.jsonl`, the pieces K2 will mint from;
+  the check is to be repeated against K2's minted pages when they exist. (4)
+  *The citation names people.* The pool's Zitierhinweis names the volume's
+  compiler and editor; it is carried as given in `letterpool-sources.json` and
+  `letterpool-eval.md`, as attribution under CC BY-NC asks, while STATUS.md
+  and PROMPTS.md say "the volume's compiler and editor". (5) *The reading job
+  was stopped and relaunched once.* Five minutes into the first launch
+  (philiumm, 4,218 lines) the loop was spending most of its wall time on the
+  page images and the polygon cuts, repeated for every reader (64 ms a line
+  against 15 in the model); a crop cache was added to the pilot's reader as a
+  backwards-compatible option, and the job relaunched resumably with the 4,218
+  readings kept. (6) *The scoring ran twice.* The reading job scores at its
+  end and did so with the module as imported at launch, before the readers'
+  table's lines-read count was changed to count per letter; the set was
+  re-scored from the same readings the next morning (the same numbers, that
+  column apart), and that run's reports are committed. (7) *The spot check.*
+  The ten letters were checked against the PDF's text layer dumped line by
+  line with positions and sizes (what the parser reads), not against the
+  rendered page.
 - **2026-10-09 — K1, departures from the prompt and from the plan's
   preamble.** (1) *Where it ran.* The Claude Code session opened in
   `C:\Users\evana\LeibnizLegible`, a Windows clone from July (a 96 MB store,
@@ -3104,6 +3456,33 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**K2b (2026-10-20): done on the desktop; the branch `k2b-letterpool` carries
+it (compare:
+https://github.com/marchofhares/leibnizlegible/compare/main...k2b-letterpool?expand=1);
+the operator opens and merges the pull request; nothing deployed** (K2b
+changes nothing the website runs). Read first:
+`reports/kurrent/letterpool-eval.md` (the readers' numbers, the metric, what
+it measures and what it does not), then `letterpool-set.md` (the placement,
+the drops, the draw) and `letterpool-parse.md`. Keep
+`data/external/letterpool/` (the nine PDFs), `data/kurrent/letterpool/` (the
+parsed letters and the frozen set's texts) and
+`data/kurrent/letterpool-readings/` (the four readers' readings) — all
+gitignored, nc bucket; `data/kurrent/letterpool-crops/` (1.9 GB) is a cache
+the next `--read` rebuilds. Standing rules for the set: **K3 reports its
+German error rate on this set — the test half's number beside the whole — and
+never tunes on it**; a reader may be chosen on the selection half;
+`letterpool-eval` verifies the set's checksums before any scoring and a
+changed text refuses; the pool's text is never on the website, in a release,
+in a committed file or in training (SPECS §1.4 and §7.3), and every report
+carries numbers and letter numbers only. The page-disjointness check used the
+K1 census's German pieces (K2's input); repeat it against K2's minted pages
+once K2 has run (`leibniz align letterpool-set` prints it). The About page may
+cite v1's German number (46.6 % CER on 134 letters of 1708–1716, nothing
+filtered) in a later web step; until then it keeps calling German unmeasured.
+For K2 the gate holds: trocr-kurrent-xvi-xvii (MIT), 37.0 % on the whole set
+and 23.2 % on the correspondents' hands; the K3 target is Leibniz's own hand,
+which every reader reads at 46.7 % or worse.
 
 **L1 (2026-10-14): inputs from the Edition, in writing, for Task 0.** On
 2026-10-12 the head of the Potsdam Arbeitsstellen (Reihen IV, V and VIII)

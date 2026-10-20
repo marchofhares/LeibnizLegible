@@ -16,6 +16,8 @@ Subcommands:
                 record, canvases, v1 lines, minted lines, stratum and hand; read-only.
 * ``kurrent-pilot`` — candidate readers on Leibniz's German as a factory dry run
                 (K1): readings to JSONL, yield at the gate, the side-by-side page.
+* ``letterpool-fetch`` / ``letterpool-parse`` — the GWLB letter pool (K2b): the
+                checked volumes fetched and recorded, then parsed into letters.
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -1364,3 +1366,280 @@ def _parse_indices(spec: str) -> list[int]:
 
 
 __all__ = ["app"]
+
+
+@app.command(name="letterpool-fetch")
+def letterpool_fetch(
+    years: str = typer.Option(
+        None, "--years", help="Comma-separated years (default: the checked years 1708–1716)."
+    ),
+    dest: Path = typer.Option(
+        Path("data/external/letterpool"), "--dest", help="Where the PDFs live (gitignored)."
+    ),
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"),
+        "--sources",
+        help="The committed registry: versions, dates, checksums, citations; no text.",
+    ),
+) -> None:
+    """Fetch the GWLB letter pool's checked volumes (K2b Task 1), cache-first, politely."""
+    from leibniz.align import letterpool as LP
+
+    ys = [int(y) for y in years.split(",")] if years else list(LP.CHECKED_YEARS)
+    rows = LP.fetch_volumes(
+        ys, dest_dir=dest, sources_path=sources, log=lambda m: _console.print(f"  {m}")
+    )
+    _console.print(
+        f"[bold]letterpool-fetch[/bold] {len(rows)} volumes recorded in {sources} "
+        f"({sum(r.bytes for r in rows):,} bytes; licence {LP.LICENCE}, bucket {LP.LICENCE_BUCKET})"
+    )
+
+
+@app.command(name="letterpool-parse")
+def letterpool_parse(
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"), "--sources", help="The fetch's registry."
+    ),
+    letters_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool"),
+        "--letters-dir",
+        help="Where the page cache and the parsed letters go (gitignored; nc text).",
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-parse.md and .json."
+    ),
+    years: str = typer.Option(None, "--years", help="Comma-separated years (default: all)."),
+    reextract: bool = typer.Option(
+        False, "--reextract", help="Read the PDFs again even where a page cache exists."
+    ),
+) -> None:
+    """Parse the fetched letter pool into letters (K2b Task 1); the text stays under data/."""
+    import json as _json
+
+    from leibniz.align import letterpool as LP
+
+    vols = LP.load_sources(sources)
+    if not vols:
+        raise typer.BadParameter(f"no volumes recorded in {sources}; run letterpool-fetch first")
+    want = {int(y) for y in years.split(",")} if years else None
+    results = []
+    for vol in vols:
+        if want is not None and vol.year not in want:
+            continue
+        cache = letters_dir / f"pages-{vol.year}.jsonl"
+        if cache.exists() and not reextract:
+            pages = LP.read_page_cache(cache)
+        else:
+            pages = list(LP.iter_pdf_pages(vol.path))
+            LP.write_page_cache(pages, cache)
+        res = LP.parse_volume(vol.year, pages)
+        LP.write_letters(res, letters_dir / f"letters-{vol.year}.jsonl")
+        results.append(res)
+        n_de = sum(1 for ltr in res.letters if ltr.language == "de")
+        _console.print(
+            f"  {vol.year}: {len(pages)} pages, {len(res.letters)} letters ({n_de} German), "
+            f"{sum(1 for ltr in res.letters if ltr.witness.placeable)} placeable, "
+            f"{len(res.anomalies)} anomalies; body {res.layout.body_size if res.layout else '?'} pt"
+        )
+    summary = LP.summarize(results)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    (reports_dir / "letterpool-parse.json").write_text(
+        _json.dumps(summary, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    (reports_dir / "letterpool-parse.md").write_text(
+        LP.render_parse_report(summary, [v for v in vols if want is None or v.year in want]),
+        encoding="utf-8",
+    )
+    t = summary["total"]
+    _console.print(
+        f"[bold]letterpool-parse[/bold] {t['letters']:,} letters, {t['german_placeable']} German "
+        f"and placeable; wrote {reports_dir / 'letterpool-parse.md'}"
+    )
+
+
+@app.command(name="letterpool-set")
+def letterpool_set(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store (opened read-only)."),
+    letters_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool"), "--letters-dir", help="letterpool-parse's letters."
+    ),
+    german: Path = typer.Option(
+        Path("data/kurrent/german_pieces.jsonl"), "--german", help="K2's German pieces."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="PHILIUMM's held-out pages."
+    ),
+    seed: int = typer.Option(20261019, "--seed", help="Seed of the draw and the halves."),
+    n_kk: int = typer.Option(
+        None, "--n-kk", help="Correspondents' letters to draw (default: as many as L and l)."
+    ),
+    testset_csv: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="The frozen set, no text."
+    ),
+    placement_csv: Path = typer.Option(
+        Path("reports/kurrent/letterpool-placement.csv"),
+        "--placement",
+        help="Every German letter's placement and reason, no text.",
+    ),
+    texts: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--texts", help="The reference texts (nc)."
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-set.md and .json."
+    ),
+) -> None:
+    """Place the pool's German letters on the store and freeze the test set (K2b Task 2)."""
+    import json as _json
+
+    from leibniz.align import letterpool_set as S
+    from leibniz.align.audit_reach import open_readonly
+
+    letters = S.load_all_letters(letters_dir)
+    if not letters:
+        raise typer.BadParameter(f"no letters under {letters_dir}; run letterpool-parse first")
+    conn = open_readonly(db_path)
+    try:
+        placed, summary = S.build_set(
+            conn,
+            letters,
+            seed=seed,
+            n_kk=n_kk,
+            german_pieces=german,
+            heldout=heldout,
+            log=lambda m: _console.print(f"  {m}"),
+        )
+    finally:
+        conn.close()
+    by_id = {ltr.letter_id: ltr for ltr in letters}
+    drawn = [p for p in placed if p.drawn]
+    S.write_testset(drawn, by_id, csv_path=testset_csv, texts_path=texts)
+    S.write_placement(placed, placement_csv)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    (reports_dir / "letterpool-set.json").write_text(
+        _json.dumps(summary, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    (reports_dir / "letterpool-set.md").write_text(S.render_report(summary), encoding="utf-8")
+    r = summary["by_reason"]
+    d = summary["drawn"]
+    _console.print(
+        f"[bold]letterpool-set[/bold] {summary['german_letters']} German letters: placed "
+        f"{r['placed']['all']}, no work {r['no_work']['all']}, no canvas {r['no_canvas']['all']}, "
+        f"no lines {r['no_lines']['all']}, shared {r['shared']['all']}; drawn {d['letters']} "
+        f"letters on {d['pages']} pages, {d['lines']:,} lines "
+        f"(selection {d['by_half']['selection']['letters']}, "
+        f"test {d['by_half']['test']['letters']}); "
+        f"overlaps K2 {summary['disjointness']['k2_german_pieces']['pages']} pages, PHILIUMM "
+        f"{summary['disjointness']['philiumm_heldout']['pages']} pages; wrote {testset_csv}, "
+        f"{texts}, {placement_csv}, {reports_dir / 'letterpool-set.md'}"
+    )
+
+
+@app.command(name="letterpool-eval")
+def letterpool_eval(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store (opened read-only)."),
+    testset: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="The frozen set."
+    ),
+    texts: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--texts", help="Its reference texts."
+    ),
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"), "--sources", help="The pool's citations."
+    ),
+    readers: str = typer.Option(
+        None,
+        "--readers",
+        help="Comma-separated reader keys (K1's registry); default: philiumm, "
+        "trocr-kurrent-xvi-xvii, trocr-hanse-xvi, trocr-hanse-xvii. v1 is always scored.",
+    ),
+    read: bool = typer.Option(
+        False, "--read", help="Read the set's lines with the readers first (GPU; resumable)."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    batch_size: int = typer.Option(8, "--batch-size", help="Lines per model call."),
+    sample: int | None = typer.Option(
+        None, "--sample", help="Read only the first N lines of each page (a smoke run)."
+    ),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool-readings"),
+        "--readings-dir",
+        help="One resumable JSONL per reader (never committed).",
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-eval.md, .json, -letters.csv."
+    ),
+    crop_cache: Path = typer.Option(
+        Path("data/kurrent/letterpool-crops"),
+        "--crop-cache",
+        help="Line crops kept on disk, cut once by the first reader (never committed).",
+    ),
+) -> None:
+    """Score the frozen letter-pool set: v1 and the K1 readers, nothing filtered (K2b Task 3)."""
+    from leibniz.align import letterpool as LP
+    from leibniz.align import letterpool_eval as E
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import kurrent as K
+
+    keys = (
+        [k.strip() for k in readers.split(",") if k.strip()] if readers else list(E.DEFAULT_READERS)
+    )
+    unknown = [k for k in keys if k not in K.CANDIDATES]
+    if unknown:
+        raise typer.BadParameter(f"unknown readers {unknown}; known: {sorted(K.CANDIDATES)}")
+    letters = E.load_set(testset, texts)
+    conn = open_readonly(db_path)
+    try:
+        lines = E.set_lines(conn, letters)
+        _console.print(
+            f"[bold]letterpool-eval[/bold] {len(letters)} letters, "
+            f"{sum(len(v) for v in lines.values()):,} lines; readers {', '.join(keys)}"
+        )
+        if read:
+            dev = K.pick_device(device)
+            _console.print(f"  reading on {dev}")
+            E.read_set(
+                conn,
+                letters,
+                keys,
+                engine_factory=lambda k: K.build_engine(
+                    K.CANDIDATES[k], device=dev, batch_size=batch_size
+                ),
+                images_root=images,
+                readings_dir=readings_dir,
+                batch_size=batch_size,
+                sample=sample,
+                log=lambda m: _console.print(f"  {m}"),
+                crop_cache=crop_cache,
+            )
+        all_readings: dict = {E.V1: E.v1_for_set(conn, letters)}
+        all_readings.update(E.readings_on_disk(keys, readings_dir))
+    finally:
+        conn.close()
+    missing = [k for k in keys if k not in all_readings]
+    if missing:
+        _console.print(f"  no readings on disk for {', '.join(missing)}: scored without them")
+    licences = {E.V1: "the store (the C1 run)"}
+    licences.update({k: K.CANDIDATES[k].licence for k in keys if k in K.CANDIDATES})
+    res = E.build_result(
+        letters,
+        lines,
+        all_readings,
+        licences=licences,
+        sources=LP.load_sources(sources) if Path(sources).exists() else [],
+        log=lambda m: _console.print(f"  {m}"),
+    )
+    paths = E.write_outputs(res, reports_dir)
+    for reader in all_readings:
+        head = res.aggregate[reader][E.HEADLINE_POLICY]
+        _console.print(
+            f"  [bold]{reader}[/bold]: CER {_fmt_pct(head['all']['cer'])} "
+            f"({_fmt_pct(head['all']['cer_lo'])}–{_fmt_pct(head['all']['cer_hi'])}); selection "
+            f"{_fmt_pct(head['half'].get('selection', {}).get('cer'))}, test "
+            f"{_fmt_pct(head['half'].get('test', {}).get('cer'))}; reading policy "
+            f"{_fmt_pct(res.aggregate[reader]['reading']['all']['cer'])}"
+        )
+    for name, path in paths.items():
+        _console.print(f"  wrote {name}: {path}")

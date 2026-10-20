@@ -1,0 +1,410 @@
+{
+ "years": [
+  {
+   "year": 1708,
+   "pages": 81,
+   "letters": 44,
+   "by_language": {
+    "de": 13,
+    "fr": 31
+   },
+   "by_siglum": {
+    "L": 17,
+    "l": 1,
+    "K": 24,
+    "k": 1,
+    "other": 1
+   },
+   "placeable": 34,
+   "german_placeable": 11,
+   "german_placeable_by_siglum": {
+    "L": 1,
+    "l": 0,
+    "K": 9,
+    "k": 0
+   },
+   "shared_leaves": 5,
+   "multi_draft": 0,
+   "chars": 146041,
+   "margin_numbers": 381,
+   "note_lines": 24,
+   "small_dropped_in_body": 13,
+   "brackets": {
+    "attached": 29,
+    "standalone": 34,
+    "angle": 12
+   },
+   "anomalies": [],
+   "body_size": 12.0
+  },
+  {
+   "year": 1709,
+   "pages": 121,
+   "letters": 82,
+   "by_language": {
+    "de": 38,
+    "fr": 20,
+    "la": 24
+   },
+   "by_siglum": {
+    "L": 22,
+    "l": 0,
+    "K": 58,
+    "k": 0,
+    "other": 2
+   },
+   "placeable": 73,
+   "german_placeable": 37,
+   "german_placeable_by_siglum": {
+    "L": 7,
+    "l": 0,
+    "K": 30,
+    "k": 0
+   },
+   "shared_leaves": 6,
+   "multi_draft": 0,
+   "chars": 207073,
+   "margin_numbers": 563,
+   "note_lines": 21,
+   "small_dropped_in_body": 5,
+   "brackets": {
+    "attached": 78,
+    "standalone": 97,
+    "angle": 6
+   },
+   "anomalies": [
+    "page 59: heading N.52 follows N.40",
+    "page 60: heading N.42 follows N.52",
+    "page 77: heading N.52 printed again"
+   ],
+   "body_size": 12.0
+  },
+  {
+   "year": 1710,
+   "pages": 47,
+   "letters": 32,
+   "by_language": {
+    "de": 18,
+    "fr": 5,
+    "la": 8,
+    "mixed": 1
+   },
+   "by_siglum": {
+    "L": 7,
+    "l": 0,
+    "K": 24,
+    "k": 0,
+    "other": 1
+   },
+   "placeable": 27,
+   "german_placeable": 17,
+   "german_placeable_by_siglum": {
+    "L": 1,
+    "l": 0,
+    "K": 16,
+    "k": 0
+   },
+   "shared_leaves": 2,
+   "multi_draft": 0,
+   "chars": 64583,
+   "margin_numbers": 176,
+   "note_lines": 13,
+   "small_dropped_in_body": 1,
+   "brackets": {
+    "attached": 11,
+    "standalone": 17,
+    "angle": 4
+   },
+   "anomalies": [],
+   "body_size": 12.0
+  },
+  {
+   "year": 1711,
+   "pages": 124,
+   "letters": 79,
+   "by_language": {
+    "de": 46,
+    "fr": 12,
+    "la": 21
+   },
+   "by_siglum": {
+    "L": 13,
+    "l": 0,
+    "K": 65,
+    "k": 0,
+    "other": 1
+   },
+   "placeable": 74,
+   "german_placeable": 46,
+   "german_placeable_by_siglum": {
+    "L": 0,
+    "l": 0,
+    "K": 46,
+    "k": 0
+   },
+   "shared_leaves": 7,
+   "multi_draft": 1,
+   "chars": 226506,
+   "margin_numbers": 592,
+   "note_lines": 22,
+   "small_dropped_in_body": 7,
+   "brackets": {
+    "attached": 47,
+    "standalone": 55,
+    "angle": 3
+   },
+   "anomalies": [],
+   "body_size": 12.0
+  },
+  {
+   "year": 1712,
+   "pages": 105,
+   "letters": 83,
+   "by_language": {
+    "de": 49,
+    "fr": 9,
+    "la": 25
+   },
+   "by_siglum": {
+    "L": 31,
+    "l": 1,
+    "K": 50,
+    "k": 0,
+    "other": 1
+   },
+   "placeable": 57,
+   "german_placeable": 33,
+   "german_placeable_by_siglum": {
+    "L": 2,
+    "l": 0,
+    "K": 31,
+    "k": 0
+   },
+   "shared_leaves": 13,
+   "multi_draft": 0,
+   "chars": 165719,
+   "margin_numbers": 465,
+   "note_lines": 26,
+   "small_dropped_in_body": 2,
+   "brackets": {
+    "attached": 67,
+    "standalone": 91,
+    "angle": 2
+   },
+   "anomalies": [],
+   "body_size": 12.0
+  },
+  {
+   "year": 1713,
+   "pages": 591,
+   "letters": 501,
+   "by_language": {
+    "de": 252,
+    "fr": 198,
+    "la": 47,
+    "mixed": 4
+   },
+   "by_siglum": {
+    "L": 202,
+    "l": 1,
+    "K": 288,
+    "k": 7,
+    "other": 3
+   },
+   "placeable": 418,
+   "german_placeable": 205,
+   "german_placeable_by_siglum": {
+    "L": 46,
+    "l": 0,
+    "K": 156,
+    "k": 3
+   },
+   "shared_leaves": 69,
+   "multi_draft": 4,
+   "chars": 1011657,
+   "margin_numbers": 2951,
+   "note_lines": 79,
+   "small_dropped_in_body": 21,
+   "brackets": {
+    "attached": 390,
+    "standalone": 1044,
+    "angle": 22
+   },
+   "anomalies": [
+    "page 102: running head N.67 over N.69, N.70",
+    "page 564: heading N.473 follows N.471",
+    "page 565: heading N.473 follows N.473",
+    "page 565: heading N.473 printed again"
+   ],
+   "body_size": 12.0
+  },
+  {
+   "year": 1714,
+   "pages": 444,
+   "letters": 303,
+   "by_language": {
+    "de": 106,
+    "fr": 169,
+    "la": 24,
+    "mixed": 3,
+    "unknown": 1
+   },
+   "by_siglum": {
+    "L": 123,
+    "l": 2,
+    "K": 163,
+    "k": 10,
+    "other": 5
+   },
+   "placeable": 239,
+   "german_placeable": 93,
+   "german_placeable_by_siglum": {
+    "L": 13,
+    "l": 0,
+    "K": 79,
+    "k": 1
+   },
+   "shared_leaves": 37,
+   "multi_draft": 3,
+   "chars": 835203,
+   "margin_numbers": 2278,
+   "note_lines": 84,
+   "small_dropped_in_body": 11,
+   "brackets": {
+    "attached": 647,
+    "standalone": 552,
+    "angle": 17
+   },
+   "anomalies": [
+    "page 272: running head N.16 over N.170, N.171"
+   ],
+   "body_size": 12.0
+  },
+  {
+   "year": 1715,
+   "pages": 804,
+   "letters": 555,
+   "by_language": {
+    "de": 128,
+    "fr": 289,
+    "la": 134,
+    "mixed": 3,
+    "unknown": 1
+   },
+   "by_siglum": {
+    "L": 192,
+    "l": 14,
+    "K": 321,
+    "k": 26,
+    "other": 2
+   },
+   "placeable": 476,
+   "german_placeable": 103,
+   "german_placeable_by_siglum": {
+    "L": 22,
+    "l": 1,
+    "K": 75,
+    "k": 5
+   },
+   "shared_leaves": 72,
+   "multi_draft": 11,
+   "chars": 1534800,
+   "margin_numbers": 4170,
+   "note_lines": 217,
+   "small_dropped_in_body": 21,
+   "brackets": {
+    "attached": 1081,
+    "standalone": 323,
+    "angle": 25
+   },
+   "anomalies": [
+    "page 380: heading N.290 follows N.239",
+    "page 381: heading N.241 follows N.290",
+    "page 442: heading N.290 printed again"
+   ],
+   "body_size": 12.0
+  },
+  {
+   "year": 1716,
+   "pages": 1262,
+   "letters": 854,
+   "by_language": {
+    "de": 185,
+    "fr": 446,
+    "la": 206,
+    "mixed": 16,
+    "unknown": 1
+   },
+   "by_siglum": {
+    "L": 205,
+    "l": 7,
+    "K": 560,
+    "k": 47,
+    "other": 35
+   },
+   "placeable": 692,
+   "german_placeable": 150,
+   "german_placeable_by_siglum": {
+    "L": 19,
+    "l": 0,
+    "K": 118,
+    "k": 8
+   },
+   "shared_leaves": 142,
+   "multi_draft": 6,
+   "chars": 2437705,
+   "margin_numbers": 6534,
+   "note_lines": 253,
+   "small_dropped_in_body": 128,
+   "brackets": {
+    "attached": 2657,
+    "standalone": 872,
+    "angle": 290
+   },
+   "anomalies": [
+    "page 284: running head N.133 over N.178, N.179",
+    "page 363: running head N.785 over N.237, N.238",
+    "page 364: running head N.785 over N.238",
+    "page 365: running head N.785 over N.238",
+    "page 612: running head N.692 over N.417",
+    "page 613: running head N.692 over N.417",
+    "page 618: running head N.369 over N.420, N.421",
+    "page 619: running head N.369 over N.421",
+    "page 620: running head N.369 over N.421",
+    "page 1233: running head N.731 over N.836, N.837",
+    "page 1234: running head N.731 over N.837"
+   ],
+   "body_size": 12.0
+  }
+ ],
+ "total": {
+  "letters": 2533,
+  "pages": 3579,
+  "by_language": {
+   "de": 835,
+   "fr": 1179,
+   "la": 489,
+   "mixed": 27,
+   "unknown": 3
+  },
+  "by_siglum": {
+   "L": 812,
+   "l": 26,
+   "K": 1553,
+   "k": 91,
+   "other": 51
+  },
+  "placeable": 2090,
+  "german_placeable": 695,
+  "german_placeable_by_siglum": {
+   "L": 111,
+   "l": 1,
+   "K": 560,
+   "k": 17
+  },
+  "shared_leaves": 353,
+  "multi_draft": 25,
+  "chars": 6629287,
+  "anomalies": 22
+ }
+}

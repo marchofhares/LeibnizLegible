@@ -119,6 +119,28 @@ records the channel and its terms per volume) by a layout-aware extractor
 margin numbers) — apparatus, commentary and introductions never enter it
 (SPECS §7.2). Minting itself runs where the C1 corpus store lives.
 
+### Kurrent track (K1, K2b)
+
+```bash
+uv sync --extra bench --extra gt --extra kurrent   # kraken + pdfplumber + transformers (TrOCR), in a side environment
+uv run leibniz align kurrent-tolerance          # how much HTR noise the aligner survives → reports/kurrent/align-tolerance.md
+uv run leibniz align kurrent-census             # the German pieces of the edition cache → reports/kurrent/census.md
+uv run leibniz bench kurrent-smoke              # the candidate readers ranked on Dresden → reports/kurrent/bootstrap-candidates.md
+uv run leibniz align kurrent-pilot --images /path/to/image-cache   # readers on Leibniz's German, a factory dry run → reports/kurrent/pilot.md
+uv run leibniz align letterpool-fetch           # the GWLB letter pool's checked volumes (1708–1716) → data/external/letterpool/, the registry in reports/kurrent/letterpool-sources.json
+uv run leibniz align letterpool-parse           # the PDFs into letters (heading, witness, reading text) → data/kurrent/letterpool/, counts in reports/kurrent/letterpool-parse.md
+uv run leibniz align letterpool-set             # the German letters placed on the store's pages, the test set drawn and frozen → reports/kurrent/letterpool-testset.csv
+uv run leibniz align letterpool-eval --read     # the readers on the frozen set (GPU, resumable), then the error rates → reports/kurrent/letterpool-eval.md
+```
+
+The German stratum has no ground truth of its own, so the Kurrent track measures
+before it trains: K1 ranked the public Kurrent readers and piloted them on
+Leibniz's German without ground truth; K2b built the honest test set from the
+GWLB Leibniz-Archiv's checked transcriptions of the correspondence of
+1708–1716 (CC BY-NC 4.0: internal evaluation only, never on the site, in a
+release or in training — the texts stay under `data/`, the reports carry
+numbers) and measures every reader on it letter by letter, nothing filtered.
+
 ### Search, viewer, IIIF (Phases D1/D2)
 
 The viewer shell is stamped per route (title, description, canonical URL, share
