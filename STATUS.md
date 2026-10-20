@@ -10,7 +10,8 @@ _Last updated: 2026-10-14 (**the Edition's replies of 12 and 13 October recorded
 ## Current state
 
 **2026-10-19: K2b — the letter-pool test set, on the desktop; Tasks 1 and 2
-done (Checkpoint B), Task 3 next.** The honest German test set from the GWLB's
+done (Checkpoint B), the metric built and v1 measured, the GPU readers waiting
+for a go.** The honest German test set from the GWLB's
 checked transcriptions of the correspondence of 1708–1716 (CC BY-NC 4.0, nc
 bucket: internal evaluation only), to be placed on the store's pages through
 the C2 resolver, frozen in files, and measured (v1 and the K1 readers), as the
@@ -28,7 +29,12 @@ pages, and the set drawn and frozen: **134 letters — all 67 in Leibniz's hand
 that placed and 67 of the correspondents' — on 386 pages with 18,815
 recognised lines, split once into a selection half and a test half of 67
 each** (`reports/kurrent/letterpool-testset.csv`; the texts under
-`data/kurrent/letterpool/`). Pre-flight: the WSL tree clean of tracked
+`data/kurrent/letterpool/`). The metric — the letter's reference against every
+recognised line on its pages, an infix alignment, nothing filtered — gives the
+**first measured German error rate: the stored v1 text reads the set at 46.6 %
+CER (43.3–49.5 %), the correspondents' hands at 38.5 % and Leibniz's own at
+53.7 %; the lines the factory's aligner would accept (21.6 % of them) read at
+28.7 %** (`reports/kurrent/letterpool-eval.md`). Pre-flight: the WSL tree clean of tracked
 changes, main at `82e2091` (#45), the branch `k2b-letterpool`; `.venv-k1` as
 K1 left it (no edlib, none planned); baseline 807 tests, now 825. Nothing
 read on the GPU yet, nothing written to the store; the K2b entry in the
@@ -685,7 +691,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2b — the letter-pool test set (2026-10-19) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
+### K2b — the letter-pool test set (2026-10-19) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3 (the metric built, v1 measured; the readers wait for a go)
 
 - **Setting.** The operator's desktop: the WSL checkout
   `/home/evana/LeibnizLegible`, driven from a Claude Code session opened on the
@@ -849,6 +855,48 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   of the reference text; the texts file carries the text with the same
   checksum, so a later session can verify the set it measures is the frozen
   one. 830 tests, ruff clean. **Checkpoint B: the set is frozen.**
+- **Task 3, the metric built and v1 measured; the readers wait for a go**
+  (`align/letterpool_eval.py`, `leibniz align letterpool-eval` with `--read`
+  for the GPU step, +8 tests; `reports/kurrent/letterpool-eval.md`, `.json`
+  and `letterpool-eval-letters.csv`, one row per letter, reader and policy,
+  numbers only). *The metric, letter by letter, nothing filtered:* the
+  reference text against the concatenation, in reading order, of every
+  recognised line on the letter's pages, aligned so that machine text before
+  and after the letter is free and everything inside the span counts — the
+  infix (semi-global, edlib's HW) alignment as a vectorised numpy dynamic
+  programme, one row per reference character (the diagonal and vertical
+  moves element-wise, the horizontal move as a cumulative minimum), checked
+  against the full table on 300 random pairs; the span's end is the last
+  minimum of the final row, its start the reverse problem pinned at that end.
+  No new dependency. CER = edits ÷ reference characters, pooled, with the B1
+  harness's bootstrap over the letters as atoms (1,000 resamples, seed 12345),
+  and as a per-letter distribution; four policies — the harness's `philiumm`
+  (NFD, whitespace collapsed; case and diacritics kept: the headline),
+  `lenient`, `strict` (NFC; the lines are joined by single spaces on both
+  sides) and the Kurrent Trace package's `reading` (NFC, long s folded, as K1
+  scored Dresden); per hand (L; K/k), year and half. Beside it, labelled
+  *selected*, the line-level CER over the lines `align_piece` accepts at the
+  factory's unknown-stratum threshold 0.65 (the minted slice against the
+  reader's line). The frozen set is verified against its checksums before
+  anything is scored; a changed text refuses. **`v1`, the stored text of the
+  C1 run — the German error rate of what the website shows today — on the
+  134 letters (18,815 lines, 17,032 of them with a non-empty stored
+  reading): CER 46.6 % (95 % interval 43.3–49.5 %) under `philiumm`, 45.2 %
+  lenient, 46.8 % strict, 46.8 % reading; selection half 44.5 % (41.4–47.6
+  %), test half 48.2 % (43.1–52.4 %); by hand, the correspondents' letters
+  (K/k, 67 letters, 8,059 lines) 38.5 % (35.9–41.9 %) and Leibniz's own (L,
+  67 letters, 10,756 lines) 53.7 % (49.9–56.9 %); per letter the median is
+  42.9 % (quartiles 34.7 % and 57.9 %, from 20.8 % to 73.6 %); on average
+  68.2 % of a letter's machine text lies inside the aligned span. The
+  selected number says what the selection hides: the aligner accepts 4,056
+  of the 18,815 lines (21.6 %) and on those v1 reads at 28.7 % — eighteen
+  points under the unfiltered rate.** Scoring one reader under four policies
+  took 7 minutes. The GPU step — `philiumm`, `trocr-kurrent-xvi-xvii` and,
+  evaluate-only, `trocr-hanse-xvi` and `trocr-hanse-xvii` reading the 18,815
+  lines afresh through the pilot's crop machinery into
+  `data/kurrent/letterpool-readings/<reader>.jsonl`, resumable — is at K1's
+  rates (34 / 334 / 209 / 337 ms a line) about five hours and waits for the
+  operator's go.
 
 ### W5 — the review's fixes and six reader features (2026-10-10) ✅ code · ✅ deploy · ✅ index rebuild · ✅ letters · ⏳ re-mint
 

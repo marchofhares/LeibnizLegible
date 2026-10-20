@@ -1532,3 +1532,108 @@ def letterpool_set(
         f"{summary['disjointness']['philiumm_heldout']['pages']} pages; wrote {testset_csv}, "
         f"{texts}, {placement_csv}, {reports_dir / 'letterpool-set.md'}"
     )
+
+
+@app.command(name="letterpool-eval")
+def letterpool_eval(
+    db_path: str = typer.Option(str(DEFAULT_DB), "--db", help="SQLite store (opened read-only)."),
+    testset: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="The frozen set."
+    ),
+    texts: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--texts", help="Its reference texts."
+    ),
+    sources: Path = typer.Option(
+        Path("reports/kurrent/letterpool-sources.json"), "--sources", help="The pool's citations."
+    ),
+    readers: str = typer.Option(
+        None,
+        "--readers",
+        help="Comma-separated reader keys (K1's registry); default: philiumm, "
+        "trocr-kurrent-xvi-xvii, trocr-hanse-xvi, trocr-hanse-xvii. v1 is always scored.",
+    ),
+    read: bool = typer.Option(
+        False, "--read", help="Read the set's lines with the readers first (GPU; resumable)."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    batch_size: int = typer.Option(8, "--batch-size", help="Lines per model call."),
+    sample: int | None = typer.Option(
+        None, "--sample", help="Read only the first N lines of each page (a smoke run)."
+    ),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/letterpool-readings"),
+        "--readings-dir",
+        help="One resumable JSONL per reader (never committed).",
+    ),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="letterpool-eval.md, .json, -letters.csv."
+    ),
+) -> None:
+    """Score the frozen letter-pool set: v1 and the K1 readers, nothing filtered (K2b Task 3)."""
+    from leibniz.align import letterpool as LP
+    from leibniz.align import letterpool_eval as E
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import kurrent as K
+
+    keys = (
+        [k.strip() for k in readers.split(",") if k.strip()] if readers else list(E.DEFAULT_READERS)
+    )
+    unknown = [k for k in keys if k not in K.CANDIDATES]
+    if unknown:
+        raise typer.BadParameter(f"unknown readers {unknown}; known: {sorted(K.CANDIDATES)}")
+    letters = E.load_set(testset, texts)
+    conn = open_readonly(db_path)
+    try:
+        lines = E.set_lines(conn, letters)
+        _console.print(
+            f"[bold]letterpool-eval[/bold] {len(letters)} letters, "
+            f"{sum(len(v) for v in lines.values()):,} lines; readers {', '.join(keys)}"
+        )
+        if read:
+            dev = K.pick_device(device)
+            _console.print(f"  reading on {dev}")
+            E.read_set(
+                conn,
+                letters,
+                keys,
+                engine_factory=lambda k: K.build_engine(
+                    K.CANDIDATES[k], device=dev, batch_size=batch_size
+                ),
+                images_root=images,
+                readings_dir=readings_dir,
+                batch_size=batch_size,
+                sample=sample,
+                log=lambda m: _console.print(f"  {m}"),
+            )
+        all_readings: dict = {E.V1: E.v1_for_set(conn, letters)}
+        all_readings.update(E.readings_on_disk(keys, readings_dir))
+    finally:
+        conn.close()
+    missing = [k for k in keys if k not in all_readings]
+    if missing:
+        _console.print(f"  no readings on disk for {', '.join(missing)}: scored without them")
+    licences = {E.V1: "the store (the C1 run)"}
+    licences.update({k: K.CANDIDATES[k].licence for k in keys if k in K.CANDIDATES})
+    res = E.build_result(
+        letters,
+        lines,
+        all_readings,
+        licences=licences,
+        sources=LP.load_sources(sources) if Path(sources).exists() else [],
+        log=lambda m: _console.print(f"  {m}"),
+    )
+    paths = E.write_outputs(res, reports_dir)
+    for reader in all_readings:
+        head = res.aggregate[reader][E.HEADLINE_POLICY]
+        _console.print(
+            f"  [bold]{reader}[/bold]: CER {_fmt_pct(head['all']['cer'])} "
+            f"({_fmt_pct(head['all']['cer_lo'])}–{_fmt_pct(head['all']['cer_hi'])}); selection "
+            f"{_fmt_pct(head['half'].get('selection', {}).get('cer'))}, test "
+            f"{_fmt_pct(head['half'].get('test', {}).get('cer'))}; reading policy "
+            f"{_fmt_pct(res.aggregate[reader]['reading']['all']['cer'])}"
+        )
+    for name, path in paths.items():
+        _console.print(f"  wrote {name}: {path}")
