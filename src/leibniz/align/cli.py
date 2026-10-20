@@ -16,6 +16,10 @@ Subcommands:
                 record, canvases, v1 lines, minted lines, stratum and hand; read-only.
 * ``kurrent-pilot`` — candidate readers on Leibniz's German as a factory dry run
                 (K1): readings to JSONL, yield at the gate, the side-by-side page.
+* ``kurrent-read`` — every line of the German pieces' pages read by one Kurrent
+                reader (K2): resumable JSONL, the profile and the throughput sweep.
+* ``kurrent-mint`` — the factory over the Kurrent readings, piece by piece (K2):
+                the dry run and its report; ``--write`` after a backup and a go.
 * ``letterpool-fetch`` / ``letterpool-parse`` — the GWLB letter pool (K2b): the
                 checked volumes fetched and recorded, then parsed into letters.
 
@@ -389,6 +393,384 @@ def kurrent_pilot(
     for name, path in paths.items():
         _console.print(f"  wrote {name}: {path}")
     _console.print(f"  wrote side-by-side: {side_by_side}")
+
+
+@app.command("kurrent-read")
+def kurrent_read(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    german: Path = typer.Option(
+        Path("data/kurrent/german_pieces.jsonl"), "--german", help="The census's German pieces."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.jsonl"),
+        "--edition-cache",
+        help="The edition cache: its refs place each record under the volume the factory uses.",
+    ),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    reader: str = typer.Option(
+        "trocr-kurrent-xvi-xvii", "--reader", help="A reader key of the K1 registry."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/k2-readings"),
+        "--readings-dir",
+        help="The resumable JSONL per reader, its stats and skipped lines beside it.",
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    batch_size: int = typer.Option(16, "--batch-size", help="Lines per model call."),
+    dtype: str = typer.Option("float32", "--dtype", help="float32 | float16 (TrOCR readers)."),
+    kv_cache: bool = typer.Option(
+        False,
+        "--kv-cache/--no-kv-cache",
+        help="Turn the TrOCR decoder's key/value cache on (the checkpoint's config has it off).",
+    ),
+    no_resolve: bool = typer.Option(
+        False, "--no-resolve", help="Read the census's pages only, not the factory's placement."
+    ),
+    max_lines: int = typer.Option(None, "--max-lines", help="Stop after this many new lines."),
+    log_every: float = typer.Option(180.0, "--log-every", help="Seconds between progress lines."),
+    profile: bool = typer.Option(
+        False, "--profile", help="Time one batch the pilot's way and K2's way, then exit."
+    ),
+    sweep: bool = typer.Option(
+        False, "--sweep", help="Lines per second per setting on a sample of the lines, then exit."
+    ),
+    sweep_lines: int = typer.Option(2000, "--sweep-lines", help="Lines each sweep setting reads."),
+    sweep_batches: str = typer.Option("8,16,32", "--sweep-batches", help="Batch sizes to sweep."),
+    sweep_dtypes: str = typer.Option("float32", "--sweep-dtypes", help="e.g. float32,float16."),
+    sweep_kv: str = typer.Option(
+        "default", "--sweep-kv", help="default | on | both: the kv-cache settings to sweep."
+    ),
+    report: bool = typer.Option(
+        False, "--report", help="Render reports/kurrent/k2-read.md from the files, then exit."
+    ),
+    dresden: list[str] = typer.Option(
+        None,
+        "--dresden",
+        help="label=path of a kurrent-smoke bootstrap-candidates.json for the report; repeatable.",
+    ),
+    chosen: str = typer.Option(None, "--chosen", help="The sweep key the job runs with (report)."),
+    note: str = typer.Option(None, "--note", help="A sentence on the choice (report)."),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+) -> None:
+    """Read every line of the German pieces' pages with one Kurrent reader (K2 Task 1)."""
+    from datetime import date, datetime
+
+    from leibniz.align import kurrent_pilot as P
+    from leibniz.align import kurrent_read as R
+    from leibniz.align.ingest import load_edition_refs
+    from leibniz.htr import kurrent as K
+
+    if reader not in K.CANDIDATES:
+        raise typer.BadParameter(f"unknown reader {reader!r}; known: {sorted(K.CANDIDATES)}")
+    if dtype not in ("float32", "float16"):
+        raise typer.BadParameter("--dtype must be float32 or float16")
+    t = date.fromisoformat(today) if today else date.today()
+    readings_dir.mkdir(parents=True, exist_ok=True)
+    plan_path = readings_dir / "plan.json"
+    profile_path = readings_dir / "profile.json"
+    sweep_path = readings_dir / "sweep.json"
+
+    def _log(msg: str) -> None:
+        _console.print(f"{datetime.now():%H:%M:%S} {msg}")
+
+    if report:
+        plan_d = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path.exists() else None
+        prof = (
+            json.loads(profile_path.read_text(encoding="utf-8")) if profile_path.exists() else None
+        )
+        rows = json.loads(sweep_path.read_text(encoding="utf-8")) if sweep_path.exists() else []
+        dres = {}
+        for item in dresden or []:
+            label, _, path = item.partition("=")
+            dres[label] = R.dresden_row(path, reader)
+        pick = next((r for r in rows if r["key"] == chosen), None) if chosen else None
+        if pick is not None and note:
+            pick = {**pick, "note": note}
+        md, js = R.write_read_report(
+            reports_dir=reports_dir,
+            plan=plan_d,
+            profile=prof,
+            sweep_rows=rows,
+            dresden=dres,
+            chosen=pick,
+            stats=R.load_stats(readings_dir, reader),
+            reader=reader,
+        )
+        _console.print(f"wrote {md} and {js}")
+        return
+
+    rows = P.load_german_pieces(german)
+    refs = load_edition_refs(edition_cache) if edition_cache.exists() else {}
+    conn = P.open_readonly(db_path)
+    try:
+        plan = R.plan_pages(conn, rows, refs=refs, today=t, resolve=not no_resolve)
+        plan_path.write_text(
+            json.dumps({**plan.as_dict(), "pages": plan.pages}, ensure_ascii=False, indent=1)
+            + "\n",
+            encoding="utf-8",
+        )
+        _console.print(
+            f"[bold]kurrent-read[/bold] {plan.n_records:,} German records → {plan.n_pages:,} pages "
+            f"(census {plan.n_pages_census:,}, resolver {plan.n_pages_resolver:,}), "
+            f"{plan.n_lines:,} recognised lines; reader {reader}; device {K.pick_device(device)}"
+        )
+        cand = K.CANDIDATES[reader]
+        dev = K.pick_device(device)
+
+        def factory(bs: int = batch_size, dt: str = dtype, kv: bool = kv_cache, prof: bool = False):
+            return K.build_engine(
+                cand,
+                device=dev,
+                batch_size=bs,
+                dtype=None if dt == "float32" else dt,
+                use_cache=True if kv else None,
+                profile=prof,
+            )
+
+        if profile:
+            pages = R.sample_pages(conn, plan.pages, batch_size * 4)
+            engine = factory(prof=True)
+            result = R.profile_batch(conn, pages, engine, images_root=images, batch_size=batch_size)
+            P.release(engine)
+            profile_path.write_text(
+                json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+            )
+            _console.print(
+                f"  profile on {result['n_lines']} lines: before {result['ms_per_line_before']} "
+                f"ms/line, after {result['ms_per_line_after']} ms/line"
+            )
+            for stage in dict.fromkeys([*result["stages_before_ms"], *result["stages_after_ms"]]):
+                b = result["stages_before_ms"].get(stage)
+                a = result["stages_after_ms"].get(stage)
+                _console.print(
+                    f"    {stage:<12} before {'—' if b is None else f'{b:7.1f}'}   "
+                    f"after {'—' if a is None else f'{a:7.1f}'}"
+                )
+            _console.print(f"  wrote {profile_path}")
+            return
+        if sweep:
+            batches = [int(b) for b in sweep_batches.split(",") if b.strip()]
+            dtypes = [d.strip() for d in sweep_dtypes.split(",") if d.strip()]
+            kvs = {"default": [None], "on": [True], "both": [None, True]}[sweep_kv]
+            settings = [R.SweepSetting(b, d, kv) for d in dtypes for kv in kvs for b in batches]
+            pages = R.sample_pages(conn, plan.pages, sweep_lines)
+            _console.print(
+                f"  sweep over {len(settings)} settings on {len(pages)} pages "
+                f"({R.count_lines_on(conn, pages):,} lines, {sweep_lines:,} read per setting)"
+            )
+            result = R.sweep(
+                conn,
+                pages,
+                settings,
+                lambda st: factory(st.batch_size, st.dtype, bool(st.use_cache)),
+                images_root=images,
+                scratch_dir=readings_dir / "sweep",
+                n_lines=sweep_lines,
+                log=_log,
+            )
+            have = (
+                {r["key"]: r for r in json.loads(sweep_path.read_text(encoding="utf-8"))}
+                if sweep_path.exists()
+                else {}
+            )
+            for r in result:
+                have[r["key"]] = r
+            sweep_path.write_text(
+                json.dumps(list(have.values()), ensure_ascii=False, indent=1) + "\n",
+                encoding="utf-8",
+            )
+            _console.print(f"  wrote {sweep_path}")
+            return
+        stats = R.read_pages(
+            conn,
+            plan.pages,
+            reader,
+            factory,
+            images_root=images,
+            readings_dir=readings_dir,
+            batch_size=batch_size,
+            log=_log,
+            log_every_s=log_every,
+            max_lines=max_lines,
+        )
+    finally:
+        conn.close()
+    _console.print(
+        f"  {'finished' if stats.finished else 'stopped'}: {R.progress_line(stats)}; "
+        f"stats {R.stats_path(readings_dir, reader)}"
+    )
+
+
+@app.command("kurrent-mint")
+def kurrent_mint(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (read-only unless --write)."
+    ),
+    german: Path = typer.Option(
+        Path("data/kurrent/german_pieces.jsonl"), "--german", help="The census's German pieces."
+    ),
+    edition_cache: Path = typer.Option(
+        Path("data/gt/edition_cache.jsonl"), "--edition-cache", help="The edition cache."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/k2-readings"),
+        "--readings-dir",
+        help="The reader's JSONL (kurrent-read).",
+    ),
+    reader: str = typer.Option("trocr-kurrent-xvi-xvii", "--reader", help="The reader key."),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    decisions: Path = typer.Option(
+        Path("data/kurrent/k2-decisions.jsonl"), "--decisions", help="Per-piece decisions."
+    ),
+    side_by_side: Path = typer.Option(
+        Path("data/kurrent/k2-side-by-side.html"), "--side-by-side", help="The operator's page."
+    ),
+    n_side: int = typer.Option(40, "--n-side", help="Lines on the side-by-side page."),
+    seed: int = typer.Option(20261020, "--seed", help="Seed of the line draws."),
+    reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    write: bool = typer.Option(
+        False,
+        "--write",
+        help="After the dry run, replace the rows of the pieces the rule gives to the reader "
+        "(Task 3: a backup and the operator's go first).",
+    ),
+    resume: bool = typer.Option(
+        False, "--resume", help="With --write: skip records whose rows already name the reader."
+    ),
+    audit: bool = typer.Option(
+        False,
+        "--audit",
+        help="Build data/kurrent/k2-audit.html from the reader's rows in the store, then exit.",
+    ),
+    audit_n: int = typer.Option(200, "--audit-n", help="Lines on the audit sheet."),
+    audit_dir: Path = typer.Option(Path("data/kurrent"), "--audit-dir"),
+    english_only: bool = typer.Option(
+        False, "--english-only", help="Audit sheet labels in English only (default: German too)."
+    ),
+) -> None:
+    """The factory over the Kurrent readings, piece by piece: dry run, report, write (K2)."""
+    from datetime import date
+
+    from leibniz.align import kurrent_mint as M
+    from leibniz.align import kurrent_pilot as P
+    from leibniz.align import kurrent_read as R
+    from leibniz.align.factory import FactoryConfig
+    from leibniz.align.ingest import load_edition_cache, load_edition_refs
+    from leibniz.db import open_db
+
+    t = date.fromisoformat(today) if today else date.today()
+    readings = P.load_readings(readings_dir, reader)
+    if not readings:
+        raise typer.BadParameter(f"no readings for {reader} under {readings_dir}")
+    if audit:
+        conn = P.open_readonly(db_path)
+        try:
+            html_path, csv_path, by_stratum = M.build_audit_sheet(
+                conn,
+                readings,
+                reader=reader,
+                images_root=images,
+                out_dir=audit_dir,
+                n=audit_n,
+                seed=seed,
+                bilingual=not english_only,
+            )
+        finally:
+            conn.close()
+        _console.print(
+            f"[bold]k2 audit sheet[/bold] → {html_path} ({sum(by_stratum.values())} lines: "
+            + ", ".join(f"{k} {v}" for k, v in sorted(by_stratum.items()))
+            + f"); lines CSV {csv_path}"
+        )
+        return
+    rows = P.load_german_pieces(german)
+    cache = load_edition_cache(edition_cache, needed={str(r["record_id"]) for r in rows})
+    refs = load_edition_refs(edition_cache)
+    config = FactoryConfig(today=t)
+    plan_path = readings_dir / "plan.json"
+    plan = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path.exists() else None
+    if plan is not None:
+        plan.pop("pages", None)
+    stats = R.load_stats(readings_dir, reader)
+    _console.print(
+        f"[bold]kurrent-mint[/bold] {len(rows):,} census rows, {len(readings):,} readings by "
+        f"{reader}; {'WRITE' if write else 'dry run'}"
+    )
+    done = {"n": 0}
+
+    def _tick(d) -> None:
+        done["n"] += 1
+        if done["n"] % 200 == 0:
+            _console.print(f"  {done['n']:,} pieces aligned")
+
+    if write:
+        ctx = open_db(db_path)
+        conn = ctx.__enter__()
+    else:
+        conn = P.open_readonly(db_path)
+    try:
+        run = M.dry_run(
+            conn,
+            rows,
+            cache,
+            readings,
+            reader=reader,
+            refs=refs,
+            today=t,
+            config=config,
+            progress=_tick,
+        )
+        M.write_decisions(decisions, run)
+        paths = M.write_outputs(run, reports_dir=reports_dir, plan=plan, stats=stats)
+        s = M.summary(run, plan=plan, stats=stats)
+        w, m = s["won"], s["mint"]
+        _console.print(
+            f"  pieces {s['pieces']:,} ({s['pieces_aligned']:,} aligned) · "
+            f"won: Bern {w['bern']:,}, "
+            f"v1 {w['stored']:,}, none {w['none']:,} · German records {m['german_before']:,} → "
+            f"{m['german_after']:,} lines · store {m['store_before']:,} → "
+            f"{m['store_after_expected']:,} expected · {run.seconds:.0f} s"
+        )
+        for name, path in paths.items():
+            _console.print(f"  wrote {name}: {path}")
+        _console.print(f"  wrote decisions: {decisions}")
+        if not write:
+            side_by_side.parent.mkdir(parents=True, exist_ok=True)
+            side_by_side.write_text(
+                M.side_by_side(conn, run, readings, images_root=images, n=n_side, seed=seed),
+                encoding="utf-8",
+            )
+            _console.print(f"  wrote side-by-side: {side_by_side}")
+            return
+        ws = M.write_mint(conn, run, config=config, resume=resume)
+        conn.commit()
+        after = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+        _console.print(
+            f"  [bold]written[/bold] run {ws.run_id}: {ws.written_pieces:,}/{ws.pieces:,} pieces "
+            f"({ws.skipped_resume:,} skipped on resume), rows removed {ws.rows_removed:,}, "
+            f"written {ws.rows_written:,}, won {ws.rows_won:,}, lost {ws.rows_lost:,}"
+            + (f", errors {ws.errors}" if ws.errors else "")
+            + f"; {ws.seconds:.0f} s. gt_lines now {after:,} rows "
+            f"(expected {m['store_after_expected']:,}; "
+            f"difference {after - m['store_after_expected']:+,})"
+        )
+        (readings_dir / "write-stats.json").write_text(
+            json.dumps({**ws.as_dict(), "gt_lines_after": after}, indent=1) + "\n",
+            encoding="utf-8",
+        )
+    finally:
+        if write:
+            ctx.__exit__(None, None, None)
+        else:
+            conn.close()
 
 
 @app.command()

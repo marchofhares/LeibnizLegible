@@ -349,3 +349,36 @@ def test_verdict_agreement_matrix() -> None:
     assert "No line was judged by both" in "\n".join(
         audit.render_agreement(audit.verdict_agreement([], b))
     )
+
+
+def test_sample_lines_leaves_reader_rows_out_unless_asked(tmp_path: Path) -> None:
+    from leibniz.align.audit import render_sheet, sample_lines
+
+    db_path, images = tmp_path / "inv.sqlite", tmp_path / "images"
+    _seed(db_path, images)
+    conn = db.init_db(db_path)
+    k2 = "AA I,3 N.7 (§70-expired AA reading text; reader trocr-kurrent-xvi-xvii; katalog R7)"
+    insert_gt_pairs(
+        conn,
+        [
+            GtPair(f"W:0001:{k:03d}", f"bern {k}", k2, "fair_copy", 0.9, "open", "R7")
+            for k in (6, 7)
+        ],
+    )
+    conn.commit()
+    plain = sample_lines(conn, 20, seed=0)
+    assert len(plain) == 8 and all("reader" not in ln.source for ln in plain)
+    theirs = sample_lines(conn, 20, seed=0, reader="trocr-kurrent-xvi-xvii")
+    assert len(theirs) == 2 and all(ln.gt_text.startswith("bern") for ln in theirs)
+    assert sample_lines(conn, 20, seed=0, reader="other") == []
+    page = render_sheet(
+        theirs,
+        seed=3,
+        title="t",
+        help_html="<div class='help'>Hilfe</div>",
+        verdict_labels={"correct": "correct · richtig"},
+    )
+    assert "Hilfe" in page and "correct · richtig" in page and "value='correct'" in page
+    assert "For each line" not in page
+    assert "For each line" in render_sheet(theirs)
+    conn.close()

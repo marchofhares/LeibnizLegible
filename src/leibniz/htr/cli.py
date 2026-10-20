@@ -258,10 +258,24 @@ def kurrent_smoke(
     vision_n: int = typer.Option(150, "--vision-n", help="Subsample for the vision row."),
     smoke_dir: Path = typer.Option(None, "--smoke-dir", help="Where raw readings are cached."),
     reports_dir: Path = typer.Option(None, "--reports-dir", help="Where the two reports go."),
+    dtype: str = typer.Option(
+        None,
+        "--dtype",
+        help="TrOCR readers: float32 (the default) or float16 (K2's throughput check; use a "
+        "--smoke-dir of its own, the cache is keyed by reader).",
+    ),
+    kv_cache: bool = typer.Option(
+        False,
+        "--kv-cache",
+        help="TrOCR readers: turn the decoder's key/value cache on (the checkpoints' generation "
+        "config switches it off); K2's throughput check.",
+    ),
 ) -> None:
     """Read the Dresden Kurrent lines with every candidate reader and rank them (K1 Task 3)."""
     from leibniz.htr import kurrent as K
 
+    if dtype not in (None, "float32", "float16"):
+        raise typer.BadParameter("--dtype must be float32 or float16")
     pkg = package or K.DEFAULT_PACKAGE
     smoke = smoke_dir or K.DEFAULT_SMOKE_DIR
     reports = reports_dir or K.DEFAULT_REPORTS_DIR
@@ -279,6 +293,15 @@ def kurrent_smoke(
         f"[bold]kurrent-smoke[/bold] {len(pairs):,} Dresden lines from {pkg}; candidates "
         f"{', '.join(keys)}; device {dev}"
     )
+    factory = None
+    if dtype or kv_cache:
+        factory = lambda c: K.build_engine(  # noqa: E731 — a one-line closure over the knobs
+            c, device=dev, batch_size=batch_size, dtype=dtype, use_cache=True if kv_cache else None
+        )
+        console.print(
+            f"  TrOCR settings: dtype {dtype or 'float32'}, "
+            f"kv cache {'on' if kv_cache else 'default'}"
+        )
     res = K.run_smoke(
         pairs,
         [K.CANDIDATES[k] for k in keys],
@@ -289,6 +312,7 @@ def kurrent_smoke(
         force=force,
         vision=vision,
         vision_n=vision_n,
+        engine_factory=factory,
         log=lambda msg: console.print(f"  {msg}"),
     )
     for r in sorted(res.results, key=lambda r: r.scores.get("philiumm", {}).get("cer", 9.0)):

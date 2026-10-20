@@ -52,6 +52,7 @@ from leibniz.align.audit_patterns import (
     htr_ends_hyphenated,
     is_math_dense,
 )
+from leibniz.align.pairs import READER_SQL
 from leibniz.align.stratum import HEAVY_MIN_OVERLAP_FRAC, HEAVY_MIN_SHORT_FRAC
 from leibniz.catalog.hands import hand_from_textart, is_leibniz_hand
 from leibniz.catalog.shelfmarks import normalize_signature
@@ -117,6 +118,7 @@ class ReachCensus:
     n_records: int
     n_records_with_textart: int
     n_skipped: int = 0  # rows whose line_image_ref is not "{page_id}:{line_seq:03d}"
+    n_reader_rows: int = 0  # rows aligned on a reader's text (K2), left out of the flags
 
     @property
     def n(self) -> int:
@@ -133,9 +135,15 @@ def _group(lines: Sequence[ReachLine], key: str) -> dict[str, list[ReachLine]]:
 
 def census(conn: sqlite3.Connection) -> ReachCensus:
     """Flag every open-bucket minted line (see the module docstring)."""
+    # Rows whose source names a reader (K2's mint from the Bern Kurrent reading)
+    # are left out: the hyphen flag compares the minted text with the HTR text
+    # the line was aligned on, and that text is the reader's, not the store's.
+    n_reader_rows = conn.execute(
+        f"SELECT COUNT(*) FROM gt_lines WHERE license_bucket = 'open' AND {READER_SQL}"
+    ).fetchone()[0]
     rows = conn.execute(
         "SELECT line_image_ref, text, stratum, source FROM gt_lines "
-        "WHERE license_bucket = 'open' ORDER BY id"
+        f"WHERE license_bucket = 'open' AND NOT ({READER_SQL}) ORDER BY id"
     ).fetchall()
     htr_cache: dict[str, dict[int, str]] = {}
     page_flags: dict[str, bool] = {}
@@ -193,6 +201,7 @@ def census(conn: sqlite3.Connection) -> ReachCensus:
         n_records=len(textart),
         n_records_with_textart=sum(1 for v in textart.values() if v[0]),
         n_skipped=skipped,
+        n_reader_rows=n_reader_rows,
     )
 
 
@@ -276,6 +285,7 @@ def summary(c: ReachCensus, *, strata: Sequence[str]) -> dict:
         "n_records": c.n_records,
         "n_records_with_textart": c.n_records_with_textart,
         "n_skipped": c.n_skipped,
+        "n_reader_rows": c.n_reader_rows,
         "flags": FLAGS,
         "all": all_rows[0] if all_rows else {},
         "by_stratum": _table(_group(c.lines, "stratum"), order=strata),
@@ -300,6 +310,15 @@ def render(c: ReachCensus, *, strata: Sequence[str], flags_path: Path | None) ->
         if flags_path
         else f"{c.n:,} open-bucket minted lines on {c.n_pages:,} pages."
     )
+    if c.n_reader_rows:
+        A("")
+        A(
+            f"{c.n_reader_rows:,} open-bucket rows were aligned on a reader's text, not the "
+            "store's (their source names the reader: K2's mint of the German pieces from the "
+            "Bern Kurrent reading), and are left out of every count here: the hyphen flag "
+            "compares the minted text with the HTR text the line was aligned on, which for "
+            "those rows is the reader's."
+        )
     if c.n_skipped:
         A("")
         A(

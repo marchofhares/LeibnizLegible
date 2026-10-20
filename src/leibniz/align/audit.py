@@ -40,13 +40,14 @@ import json
 import math
 import random
 import sqlite3
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from leibniz import db
 from leibniz.align import dp
 from leibniz.align.normalize import normalize_indexed
+from leibniz.align.pairs import READER_SQL
 from leibniz.align.report import GATE_PRECISION
 from leibniz.images.fetch import local_relpath
 
@@ -120,18 +121,36 @@ def allocate(available: dict[str, int], n: int) -> dict[str, int]:
     return {s: k for s, k in alloc.items() if k}
 
 
-def sample_lines(conn: sqlite3.Connection, n: int = DEFAULT_N, *, seed: int = 0) -> list[AuditLine]:
-    """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``."""
+def sample_lines(
+    conn: sqlite3.Connection, n: int = DEFAULT_N, *, seed: int = 0, reader: str | None = None
+) -> list[AuditLine]:
+    """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``.
+
+    The sheet for the PHILIUMM team draws from the lines aligned on the store's
+    v1 text: rows whose source names a reader (K2's mint from the Bern Kurrent
+    reading) are left out, since that model does not read Kurrent. ``reader``
+    draws from that reader's rows instead (K2's own audit sheet).
+    """
+    pick = f"{READER_SQL}" if reader else f"NOT ({READER_SQL})"
+    if reader:
+        pick = "source LIKE ?"
     counts = {
         (row[0] or "unknown"): row[1]
-        for row in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+        for row in conn.execute(
+            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {pick} GROUP BY stratum",
+            (f"%; reader {reader};%",) if reader else (),
+        )
     }
     rng = random.Random(seed)
     out: list[AuditLine] = []
     for stratum, k in allocate(counts, n).items():
         where = "stratum IS NULL" if stratum == "unknown" else "stratum = ?"
         params: tuple = () if stratum == "unknown" else (stratum,)
-        ids = [r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where}", params)]
+        if reader:
+            params = (*params, f"%; reader {reader};%")
+        ids = [
+            r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where} AND {pick}", params)
+        ]
         for gid in sorted(rng.sample(ids, k)):
             row = conn.execute(
                 "SELECT line_image_ref, text, source, stratum, align_conf "
@@ -237,7 +256,7 @@ def crop_line(
         )
 
 
-def crop_from_image(
+def crop_image(
     im,
     polygon: Sequence | None,
     baseline: Sequence | None,
@@ -245,8 +264,12 @@ def crop_from_image(
     pad: int = CROP_PAD,
     max_width: int | None = CROP_MAX_WIDTH,
     mask_polygon: bool = False,
-) -> bytes | None:
-    """:func:`crop_line` over an opened PIL page image (decoded once per page)."""
+):
+    """The line's crop as a PIL RGB image from an opened page image, or ``None``.
+
+    The in-memory form of :func:`crop_from_image`: a reader that takes images
+    as they are (K2's reading job) skips the PNG encoding and its decoding.
+    """
     from PIL import Image
 
     box = crop_box(polygon, baseline, width=im.width, height=im.height, pad=pad)
@@ -264,6 +287,24 @@ def crop_from_image(
     if max_width is not None and crop.width > max_width:
         scale = max_width / crop.width
         crop = crop.resize((max_width, max(1, int(crop.height * scale))))
+    return crop
+
+
+def crop_from_image(
+    im,
+    polygon: Sequence | None,
+    baseline: Sequence | None,
+    *,
+    pad: int = CROP_PAD,
+    max_width: int | None = CROP_MAX_WIDTH,
+    mask_polygon: bool = False,
+) -> bytes | None:
+    """:func:`crop_line` over an opened PIL page image (decoded once per page)."""
+    crop = crop_image(
+        im, polygon, baseline, pad=pad, max_width=max_width, mask_polygon=mask_polygon
+    )
+    if crop is None:
+        return None
     buf = io.BytesIO()
     crop.save(buf, format="PNG", optimize=True)
     return buf.getvalue()
@@ -336,14 +377,28 @@ def write_sheet(
     csv_name: str = "gt-audit-lines.csv",
     seed: int = 0,
     title: str = "Ground-truth hand audit",
+    help_html: str | None = None,
+    verdict_labels: Mapping[str, str] | None = None,
+    attach: bool = True,
 ) -> AuditSheet:
-    """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``."""
-    attach_images(conn, lines, images_root)
+    """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``.
+
+    ``help_html`` and ``verdict_labels`` reach :func:`render_sheet` (a sheet in
+    another language); ``attach=False`` keeps crops and HTR texts the caller
+    attached itself.
+    """
+    if attach:
+        attach_images(conn, lines, images_root)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     html_path = out_dir / html_name
     csv_path = out_dir / csv_name
-    html_path.write_text(render_sheet(lines, seed=seed, title=title), encoding="utf-8")
+    html_path.write_text(
+        render_sheet(
+            lines, seed=seed, title=title, help_html=help_html, verdict_labels=verdict_labels
+        ),
+        encoding="utf-8",
+    )
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image"])
@@ -450,28 +505,41 @@ restore();
 """
 
 
+DEFAULT_HELP_HTML = (
+    "<div class='help'>For each line, compare the <b>minted text</b> with the "
+    "<b>image strip</b> and pick one:<br>"
+    "<b>correct</b> — the text is what is written on this strip (spelling "
+    "modernised, abbreviations expanded and punctuation changed are fine);<br>"
+    "<b>boundary</b> — it is this line, but the text starts or ends a word or "
+    "more early or late;<br>"
+    "<b>wrong</b> — it is another line's text, or garbage;<br>"
+    "<b>unreadable</b> — you cannot tell. The grey line is the machine "
+    "reading of the same strip, for orientation only. Your choices are saved "
+    "in this browser as you go; when done, click <b>Download verdicts</b>.</div>"
+)
+
+
 def render_sheet(
-    lines: Sequence[AuditLine], *, seed: int = 0, title: str = "Ground-truth hand audit"
+    lines: Sequence[AuditLine],
+    *,
+    seed: int = 0,
+    title: str = "Ground-truth hand audit",
+    help_html: str | None = None,
+    verdict_labels: Mapping[str, str] | None = None,
 ) -> str:
-    """The self-contained audit page (crops inlined as data URIs)."""
+    """The self-contained audit page (crops inlined as data URIs).
+
+    ``help_html`` replaces the instructions block; ``verdict_labels`` maps a
+    verdict value to the text shown beside its radio button (the value in the
+    downloaded CSV stays the C2 one, so one scorer reads every sheet).
+    """
     parts: list[str] = []
     A = parts.append
     A("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
     A(f"<title>Leibniz Legible — {html.escape(title)}</title>")
     A(f"<style>{_SHEET_CSS}</style></head><body data-seed='{seed}'>")
     A(f"<h1>{html.escape(title)}</h1>")
-    A(
-        "<div class='help'>For each line, compare the <b>minted text</b> with the "
-        "<b>image strip</b> and pick one:<br>"
-        "<b>correct</b> — the text is what is written on this strip (spelling "
-        "modernised, abbreviations expanded and punctuation changed are fine);<br>"
-        "<b>boundary</b> — it is this line, but the text starts or ends a word or "
-        "more early or late;<br>"
-        "<b>wrong</b> — it is another line's text, or garbage;<br>"
-        "<b>unreadable</b> — you cannot tell. The grey line is the machine "
-        "reading of the same strip, for orientation only. Your choices are saved "
-        "in this browser as you go; when done, click <b>Download verdicts</b>.</div>"
-    )
+    A(help_html if help_html is not None else DEFAULT_HELP_HTML)
     A("<div id='toolbar'><button id='dl'>Download verdicts (CSV)</button> ")
     A("<span id='count'></span></div>")
     for k, ln in enumerate(lines, start=1):
@@ -497,7 +565,8 @@ def render_sheet(
         A(f"<div class='htr'>HTR: {html.escape(ln.htr_text or '—')}</div>")
         A("<div class='verdicts'>")
         for v in VERDICTS:
-            A(f"<label><input type='radio' name='v-{k}' value='{v}'> {v}</label>")
+            shown = html.escape((verdict_labels or {}).get(v, v))
+            A(f"<label><input type='radio' name='v-{k}' value='{v}'> {shown}</label>")
         A("</div>")
         A("<input class='note' placeholder='note (optional)'>")
         A("</div>")
@@ -954,6 +1023,7 @@ def _cell(text: str, limit: int = 70) -> str:
 
 
 __all__ = [
+    "DEFAULT_HELP_HTML",
     "DEFAULT_N",
     "STRATA",
     "VERDICTS",
@@ -966,6 +1036,7 @@ __all__ = [
     "allocate",
     "build_sheet",
     "crop_box",
+    "crop_image",
     "lines_for_refs",
     "read_verdicts",
     "render_agreement",

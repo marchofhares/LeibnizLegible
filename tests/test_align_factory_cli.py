@@ -105,3 +105,31 @@ def test_factory_and_gt_report_commands(tmp_path) -> None:
     text = out.read_text(encoding="utf-8")
     assert "GT factory" in text
     assert "VI,4" in text  # minted volume surfaces in the report
+
+
+def test_gt_reset_keeps_the_reader_rows(tmp_path) -> None:
+    from leibniz.align.pairs import GtPair, ensure_gt_ownership, insert_gt_pairs
+
+    db_path = tmp_path / "inv.sqlite"
+    _seed(db_path)
+    conn = db.init_db(db_path)
+    ensure_gt_ownership(conn)
+    v1 = "AA VI,4 N.109 (§70-expired AA reading text; katalog REC1)"
+    k2 = "AA I,3 N.7 (§70-expired AA reading text; reader trocr-kurrent-xvi-xvii; katalog REC7)"
+    insert_gt_pairs(
+        conn,
+        [
+            GtPair("W:0002:000", "a", v1, "fair_copy", 0.9, "open", "REC1"),
+            GtPair("W:0002:001", "b", v1, "fair_copy", 0.9, "open", "REC1"),
+            GtPair("W:0003:000", "c", k2, "fair_copy", 0.9, "open", "REC7"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+    res = runner.invoke(app, ["align", "gt-reset", "--db", str(db_path), "--yes"])
+    assert res.exit_code == 0, res.output
+    assert "deleted 2 lines" in res.output
+    conn = db.init_db(db_path)
+    rows = conn.execute("SELECT text, record_id FROM gt_lines").fetchall()
+    assert [(r[0], r[1]) for r in rows] == [("c", "REC7")]
+    conn.close()

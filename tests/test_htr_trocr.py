@@ -141,3 +141,51 @@ def test_tidy_closes_the_space_before_punctuation() -> None:
     )
     assert tidy("bekleidet : Der  Umbhang ( so ) .") == "bekleidet: Der Umbhang (so)."
     assert tidy("  vnd daß  ") == "vnd daß"
+
+
+def test_transcribe_images_skips_the_decoder_and_profiles() -> None:
+    eng, model = _engine(batch_size=2)
+    eng._decode = lambda b: (_ for _ in ()).throw(AssertionError("decoded"))  # never called
+    eng.profile = True
+    out = eng.transcribe_images([b"img1", b"img2", b"img3"])
+    assert [t for t, _ in out] == ["Sonnabend", "Den", "Decembris"]
+    assert model.calls == [2, 1]
+    assert set(eng.timings) == {"processor", "transfer", "generate", "postprocess"}
+    assert eng.counts["lines"] == 3 and eng.counts["batches"] == 2
+    # steps: the longest line of each batch (3 and 4 tokens incl. EOS); tokens: specials out
+    assert eng.counts["steps"] == 3 + 4 and eng.counts["tokens"] == 2 + 1 + 3
+    eng.reset_timings()
+    assert eng.timings == {} and eng.counts == {}
+    assert eng.settings["dtype"] == "float32" and eng.settings["use_cache"] is None
+
+
+def test_half_precision_and_kv_cache_reach_the_model() -> None:
+    eng, model = _engine()
+    model.half_calls = 0
+
+    def half():
+        model.half_calls += 1
+
+    model.half = half  # type: ignore[attr-defined]
+    seen: dict = {}
+    orig = model.generate
+
+    def generate(pixel, **kw):
+        seen.update(kw)
+        return orig(pixel, **kw)
+
+    model.generate = generate  # type: ignore[method-assign]
+    eng.dtype = "float16"
+    eng.use_cache = True
+    assert eng.transcribe([b"img2"]) == ["Den"]
+    assert model.half_calls == 1 and seen["use_cache"] is True
+    assert eng.settings["dtype"] == "float16" and eng.settings["use_cache"] is True
+    # the default leaves the checkpoint's generation config alone
+    eng2, model2 = _engine()
+    seen2: dict = {}
+    orig2 = model2.generate
+    model2.generate = lambda pixel, **kw: (seen2.update(kw), orig2(pixel, **kw))[1]  # type: ignore[method-assign]
+    eng2.transcribe([b"img2"])
+    assert "use_cache" not in seen2
+    with pytest.raises(ValueError):
+        TrOCREngine("x", dtype="bfloat16")

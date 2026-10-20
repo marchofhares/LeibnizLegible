@@ -266,3 +266,20 @@ def test_cli_kurrent_census(tmp_path: Path) -> None:
     conn = db.connect(db_path)
     assert conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0] == 4
     conn.close()
+
+
+def test_minted_by_record_reads_a_reader_row(tmp_path: Path) -> None:
+    from leibniz.align.pairs import GtPair, insert_gt_pairs
+
+    db_path = tmp_path / "inv.sqlite"
+    _seed(db_path)
+    conn = db.init_db(db_path)
+    k2 = (
+        "AA I,3 N.d1 (§70-expired AA reading text; channel ia; "
+        "reader trocr-kurrent-xvi-xvii; katalog d1)"
+    )
+    insert_gt_pairs(conn, [GtPair("W:0002:000", "vnd daß", k2, "fair_copy", 0.7, "open", "d1")])
+    conn.commit()
+    tally = K.minted_by_record(conn)
+    conn.close()
+    assert tally["d1"].n == 2 and tally["d1"].de == 1  # the seed's row plus the reader's

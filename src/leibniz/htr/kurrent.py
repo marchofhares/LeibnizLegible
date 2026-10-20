@@ -259,8 +259,21 @@ def fetch_mccatmus(dest_dir: Path | str = MCCATMUS_DIR) -> Path:
     return download_file(MCCATMUS_URL, Path(dest_dir) / MCCATMUS_FILE)
 
 
-def build_engine(cand: Candidate, *, device: str = "cpu", batch_size: int = 8):
-    """The reader for a candidate; heavy stacks imported here, lazily."""
+def build_engine(
+    cand: Candidate,
+    *,
+    device: str = "cpu",
+    batch_size: int = 8,
+    dtype: str | None = None,
+    use_cache: bool | None = None,
+    profile: bool = False,
+):
+    """The reader for a candidate; heavy stacks imported here, lazily.
+
+    ``dtype``, ``use_cache`` and ``profile`` are the TrOCR engine's throughput
+    knobs (K2; see :class:`~leibniz.htr.trocr.TrOCREngine`); a kraken reader
+    ignores them.
+    """
     if cand.kind == "kraken":
         from leibniz.htr.engines import KrakenEngine
 
@@ -271,7 +284,14 @@ def build_engine(cand: Candidate, *, device: str = "cpu", batch_size: int = 8):
     if cand.kind == "trocr":
         from leibniz.htr.trocr import TrOCREngine
 
-        return TrOCREngine(cand.source, device=device, batch_size=batch_size)
+        return TrOCREngine(
+            cand.source,
+            device=device,
+            batch_size=batch_size,
+            dtype=dtype,
+            use_cache=use_cache,
+            profile=profile,
+        )
     if cand.kind == "echo":
         return bench.EchoEngine(default="")
     raise ValueError(f"unknown candidate kind {cand.kind!r}")

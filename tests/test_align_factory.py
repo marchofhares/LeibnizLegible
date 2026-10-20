@@ -255,3 +255,69 @@ def test_run_bookkeeping_retries_a_lock_collision(monkeypatch) -> None:
     ).fetchone()
     assert row["n_ok"] == 1 and row["finished_at"] is not None
     assert not conn.in_transaction
+
+
+def test_reader_mint_names_the_reader_and_the_guard_holds_both_ways() -> None:
+    from leibniz.align.align import HtrLine
+    from leibniz.align.pairs import reader_from_source, record_id_from_source
+
+    conn = db.init_db(":memory:")
+    _seed_piece(conn)
+    pieces, _ = enumerate_pieces(conn, today=TODAY)
+    piece = pieces[0]
+    cfg = F.FactoryConfig(today=TODAY)
+    src = F.source_string(piece, reader="trocr-kurrent-xvi-xvii")
+    assert src == (
+        "AA VI,4 N.109 (§70-expired AA reading text; reader trocr-kurrent-xvi-xvii; katalog REC1)"
+    )
+    assert (
+        record_id_from_source(src) == "REC1" and reader_from_source(src) == "trocr-kurrent-xvi-xvii"
+    )
+    assert reader_from_source(F.source_string(piece)) is None
+
+    def swap(lines):  # the reader read the lines right, but only the first six
+        return [
+            HtrLine(ref=ln.ref, text=ln.text if i < 6 else "", meta=ln.meta)
+            for i, ln in enumerate(lines)
+        ]
+
+    dry = F.mint_piece(
+        conn,
+        piece,
+        _edition(),
+        cfg,
+        insert=False,
+        reader="trocr-kurrent-xvi-xvii",
+        reader_text=swap,
+        keep_pairs=True,
+    )
+    assert dry.minted and dry.n_minted == 6 and len(dry.pairs) == 6
+    assert all(reader_from_source(p.source) == "trocr-kurrent-xvi-xvii" for p in dry.pairs)
+    assert count_gt_lines(conn) == 0  # a dry run
+    assert F.mint_piece(conn, piece, _edition(), cfg, insert=False).pairs == []  # not asked for
+    # the reader's mint, written; then a v1 mint must leave it alone
+    res = F.mint_piece(
+        conn, piece, _edition(), cfg, reader="trocr-kurrent-xvi-xvii", reader_text=swap
+    )
+    assert res.minted and count_gt_lines(conn) == 6
+    v1 = F.mint_piece(conn, piece, _edition(), cfg)
+    assert v1.status == "skipped:reader_minted" and count_gt_lines(conn) == 6
+    stats = F.run_factory(conn, config=cfg, edition_text_for=F.dict_provider({"REC1": _edition()}))
+    assert stats.skips == {"reader_minted": 1} and stats.lines_minted == 0
+    assert count_gt_lines(conn) == 6
+    # the reader's own re-mint replaces its rows and only those
+    again = F.mint_piece(
+        conn, piece, _edition(), cfg, reader="trocr-kurrent-xvi-xvii", reader_text=swap
+    )
+    assert again.minted and count_gt_lines(conn) == 6
+    full = F.mint_piece(
+        conn,
+        piece,
+        _edition(),
+        cfg,
+        reader="trocr-kurrent-xvi-xvii",
+        reader_text=lambda lines: list(lines),
+    )
+    assert full.n_minted == 12 and count_gt_lines(conn) == 12
+    # a resumed v1 run reports the guard, not "already minted"
+    assert F.mint_piece(conn, piece, _edition(), cfg, resume=True).status == "skipped:reader_minted"

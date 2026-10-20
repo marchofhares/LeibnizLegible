@@ -106,12 +106,42 @@ def result_to_pairs(
 
 # The record a factory row was minted from: "… (…; katalog 41800)".
 _RECORD_RE = re.compile(r"katalog\s+([^)\s]+)")
+# The reader whose text a row was aligned on, where one is named: "…; reader
+# trocr-kurrent-xvi-xvii; katalog 41800)" (K2). A row without the mark was
+# aligned on the stored v1 text. The mark sits BEFORE ``katalog``, which stays
+# last: the censuses read the record id up to the closing parenthesis.
+READER_MARK = "; reader "
+_READER_RE = re.compile(r";\s*reader\s+([^;)\s]+)")
+READER_SQL = "source LIKE '%; reader %'"  # the rows a reader minted, in SQL
 
 
 def record_id_from_source(source: str | None) -> str | None:
     """The catalogue record id a factory ``source`` string names, or ``None``."""
     m = _RECORD_RE.search(source or "")
     return m.group(1) if m else None
+
+
+def reader_from_source(source: str | None) -> str | None:
+    """The reader a factory ``source`` string names (K2's rows), or ``None`` for a
+    row minted from the stored v1 text."""
+    m = _READER_RE.search(source or "")
+    return m.group(1) if m else None
+
+
+def record_readers(conn: sqlite3.Connection, record_id: str) -> set[str | None]:
+    """The readers named by a record's rows (``None`` for the v1 text); empty if none."""
+    rows = conn.execute(
+        "SELECT DISTINCT source FROM gt_lines WHERE record_id = ?", (record_id,)
+    ).fetchall()
+    return {reader_from_source(r[0]) for r in rows}
+
+
+def has_reader_rows(conn: sqlite3.Connection, record_id: str) -> bool:
+    """True if any of the record's rows names a reader (a K2 mint the factory must keep)."""
+    row = conn.execute(
+        f"SELECT 1 FROM gt_lines WHERE record_id = ? AND {READER_SQL} LIMIT 1", (record_id,)
+    ).fetchone()
+    return row is not None
 
 
 def has_record_column(conn: sqlite3.Connection) -> bool:
@@ -232,21 +262,34 @@ def has_gt_for_record(conn: sqlite3.Connection, record_id: str) -> bool:
 
 
 def delete_minted(conn: sqlite3.Connection) -> dict[str, int]:
-    """Delete every row a catalogue record owns — the factory's output — and
-    return the counts removed by licence bucket; rows without an owner
-    (ground truth imported from elsewhere) stay. For the one full re-mint: a
-    re-mint replaces each record it mints, so a record the new rules no longer
-    mint would keep its old rows. The caller holds the write lock and commits;
+    """Delete every row a catalogue record owns from the stored v1 text — the
+    factory's own output — and return the counts removed by licence bucket;
+    rows without an owner (ground truth imported from elsewhere) stay, and so
+    do the rows whose source names a reader (K2's mint from the Bern reading:
+    a v1 re-mint must not undo it). For the one full re-mint: a re-mint
+    replaces each record it mints, so a record the new rules no longer mint
+    would keep its old rows. The caller holds the write lock and commits;
     :func:`ensure_gt_ownership` has run."""
+    where = f"record_id IS NOT NULL AND NOT ({READER_SQL})"
     counts = {
         row[0]: row[1]
         for row in conn.execute(
-            "SELECT license_bucket, COUNT(*) FROM gt_lines WHERE record_id IS NOT NULL "
-            "GROUP BY license_bucket"
+            f"SELECT license_bucket, COUNT(*) FROM gt_lines WHERE {where} GROUP BY license_bucket"
         )
     }
-    conn.execute("DELETE FROM gt_lines WHERE record_id IS NOT NULL")
+    conn.execute(f"DELETE FROM gt_lines WHERE {where}")
     return counts
+
+
+def count_reader_rows(conn: sqlite3.Connection) -> dict[str, int]:
+    """Rows per reader named in ``source`` (K2's mint), over the whole table."""
+    out: dict[str, int] = {}
+    for row in conn.execute(
+        f"SELECT source, COUNT(*) FROM gt_lines WHERE {READER_SQL} GROUP BY source"
+    ):
+        reader = reader_from_source(row[0]) or "?"
+        out[reader] = out.get(reader, 0) + row[1]
+    return out
 
 
 def count_open_bucket(pairs: Sequence[GtPair]) -> int:
@@ -294,19 +337,25 @@ def count_gt_lines(conn: sqlite3.Connection, *, license_bucket: str | None = Non
 
 
 __all__ = [
+    "READER_MARK",
+    "READER_SQL",
     "GtPair",
     "RecordWrite",
     "collapse_whitespace",
     "count_gt_lines",
     "count_open_bucket",
+    "count_reader_rows",
     "delete_gt_for_refs",
     "delete_minted",
     "ensure_gt_ownership",
     "has_gt_for_record",
     "has_gt_for_refs",
+    "has_reader_rows",
     "has_record_column",
     "insert_gt_pairs",
+    "reader_from_source",
     "record_id_from_source",
+    "record_readers",
     "replace_record_pairs",
     "result_to_pairs",
 ]
