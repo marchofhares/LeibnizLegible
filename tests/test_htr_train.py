@@ -189,3 +189,125 @@ def test_score_weights_with_a_stub_engine(tmp_path: Path) -> None:
         imgs.append(T.Sample(p, text))
     sc = K.score_weights("w", imgs, engine_factory=lambda _w: Echo())
     assert sc["n"] == 2 and abs(sc["cer"] - 1 / 6) < 1e-9 and sc["exact"] == 1
+
+
+# --------------------------------------------------------------------------- #
+# The CLI (no torch: the pilot and the training are stubbed)
+# --------------------------------------------------------------------------- #
+
+
+def _train_root(tmp_path: Path) -> Path:
+    root = tmp_path / "set"
+    for split, n in (("train", 6), ("val", 2)):
+        d = root / split / "P"
+        d.mkdir(parents=True)
+        for i in range(n):
+            (d / f"{i:03d}.png").write_bytes(b"png")
+            (d / f"{i:03d}.gt.txt").write_text(f"t{i}\n", encoding="utf-8")
+        (root / f"{split}.txt").write_text(
+            "".join(str(d / f"{i:03d}.png") + "\n" for i in range(n)), encoding="utf-8"
+        )
+    rows = [
+        {
+            "image": f"train/P/{i:03d}.png",
+            "screen": ["ratio_high"] if i == 1 else [],
+            "reader": "v1",
+            "group": "other",
+        }
+        for i in range(6)
+    ]
+    (root / "manifest.jsonl").write_text(
+        "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8"
+    )
+    return root
+
+
+def test_cli_train_kraken_prints_and_accounts(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    runner = CliRunner()
+    root = _train_root(tmp_path)
+    out = tmp_path / "kr"
+    res = runner.invoke(
+        app,
+        [
+            "bench",
+            "train-kraken",
+            "--train-root",
+            str(root),
+            "--out",
+            str(out),
+            "--pilot",
+            "--pilot-lines",
+            "3",
+            "--drop-screen",
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    flat = " ".join(res.output.split())
+    assert "ketos" in flat and "not started" in flat and "1 screened lines left out" in flat
+    assert len((out / "pilot-train.txt").read_text(encoding="utf-8").splitlines()) == 3
+    res = runner.invoke(
+        app, ["bench", "train-kraken", "--train-root", str(root), "--out", str(out), "--account"]
+    )
+    assert res.exit_code == 0, res.output
+    assert (out / "account.json").exists() and "no score" in " ".join(res.output.split())
+
+
+def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    runner = CliRunner()
+    root = _train_root(tmp_path)
+    out = tmp_path / "tr"
+    calls: list[tuple] = []
+
+    def fake_pilot(base, settings, train, *, device, max_lines, val, log, plan_lines, plan_epochs):
+        calls.append((settings.key, len(train), max_lines, len(val or ())))
+        row = T.PilotRow(
+            settings=settings.as_dict(),
+            status="ok",
+            lines=3,
+            seconds=1.5,
+            lines_per_s=2.0,
+            peak_mib=100,
+            steps=1,
+            val={"cer": 0.25, "hyps": {}},
+        )
+        row.projection = T.extrapolate(2.0, train_lines=plan_lines, epochs=plan_epochs)
+        return row
+
+    monkeypatch.setattr(T, "pilot_setting", fake_pilot)
+    monkeypatch.setattr("leibniz.htr.kurrent.pick_device", lambda _r: "cpu")
+    res = runner.invoke(
+        app,
+        [
+            "bench",
+            "train-trocr",
+            "--train-root",
+            str(root),
+            "--out",
+            str(out),
+            "--pilot",
+            "--pilot-lines",
+            "3",
+            "--settings",
+            "adafactor-b8,adamw-b8",
+            "--batch-size",
+            "2",
+            "--drop-screen",
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert [c[0] for c in calls] == ["adafactor-b2", "adamw-b2"]
+    assert calls[0][1] == 5  # the screened line left out
+    data = json.loads((out / "pilot.json").read_text(encoding="utf-8"))
+    assert len(data["rows"]) == 2 and data["rows"][0]["val"]["cer"] == 0.25
+    res = runner.invoke(
+        app, ["bench", "train-trocr", "--train-root", str(root), "--pilot", "--settings", "nope"]
+    )
+    assert res.exit_code != 0

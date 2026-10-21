@@ -16,6 +16,14 @@ Subcommands:
   it): the minted lines selected, tagged, screened, split into a frozen
   page-disjoint validation set and training, and cut into Kraken's
   image + ``.gt.txt`` format (``htr/trainset.py``).
+* ``leibniz bench train-trocr`` — fine-tune a TrOCR checkpoint on it: the
+  timing pilot over the memory settings (``--pilot``), or the staged,
+  resumable training with checkpoints chosen on the validation set
+  (``htr/train_trocr.py``).
+* ``leibniz bench train-kraken`` — the same for a kraken model through
+  ``ketos train`` (``htr/train_kraken.py``): the command printed and started
+  in the background, its checkpoints read back, the best weights scored
+  with the project's metric.
 
 The kraken + torch stack is an optional dependency, imported lazily; ``fetch``,
 ``protocol`` and the metrics/harness all work without it.
@@ -717,6 +725,322 @@ def train_set(
     paths = T.write_outputs(ts, out_root=out_root, reports_dir=reports_dir, val_pieces=vp)
     for k, p in paths.items():
         console.print(f"  wrote {k}: {p}")
+
+
+# --------------------------------------------------------------------------- #
+# train-trocr / train-kraken (K3 Tasks 2 and 3)
+# --------------------------------------------------------------------------- #
+
+
+def _record_training_run(
+    db_path: str, stage: str, model: str, params: dict, *, n_input: int
+) -> int | None:
+    """One runs row for a training (the only write K3 makes to the store); ``None``
+    when no store is given."""
+    if not db_path:
+        return None
+    conn = db.init_db(db_path)
+    try:
+        run_id = db.start_run(conn, stage, model=model, params=params, git_sha=db.git_sha())
+        conn.commit()
+    finally:
+        conn.close()
+    console.print(f"  runs row {run_id} opened ({stage}, {model})")
+    return run_id
+
+
+def _finish_training_run(db_path: str, run_id: int | None, *, n_input: int, n_ok: int) -> None:
+    if not db_path or run_id is None:
+        return
+    conn = db.init_db(db_path)
+    try:
+        db.finish_run(conn, run_id, n_input=n_input, n_ok=n_ok, n_failed=0)
+        conn.commit()
+    finally:
+        conn.close()
+    console.print(f"  runs row {run_id} finished")
+
+
+@app.command("train-trocr")
+def train_trocr(
+    base: str = typer.Option(
+        "dh-unibe/trocr-kurrent-XVI-XVII", "--base", help="Hub id or local checkpoint directory."
+    ),
+    train_root: Path = typer.Option(
+        Path("data/train/k3"), "--train-root", help="The training set (train.txt, val.txt)."
+    ),
+    out: Path = typer.Option(Path("data/models/k3/trocr"), "--out", help="Artefacts root."),
+    pilot: bool = typer.Option(False, "--pilot", help="Time the settings on a bounded run."),
+    pilot_lines: int = typer.Option(20_000, "--pilot-lines", help="Lines per pilot setting."),
+    settings_keys: str = typer.Option(
+        None,
+        "--settings",
+        help="Comma-separated setting keys to run (pilot: default every PILOT_SETTINGS row; "
+        "training: one key, default adafactor-b8).",
+    ),
+    pilot_val: bool = typer.Option(
+        True, "--pilot-val/--no-pilot-val", help="Score the validation set after each pilot run."
+    ),
+    val_limit: int | None = typer.Option(
+        None, "--val-limit", help="Score only the first N validation lines (pilot)."
+    ),
+    epochs: int = typer.Option(6, "--epochs", help="Epochs of the full training."),
+    plan_epochs: float = typer.Option(6.0, "--plan-epochs", help="Epochs the pilot projects."),
+    batch_size: int | None = typer.Option(None, "--batch-size", help="Override the batch size."),
+    lr: float | None = typer.Option(None, "--lr", help="Override the learning rate."),
+    accumulate: int | None = typer.Option(None, "--accumulate", help="Gradient accumulation."),
+    drop_screen: bool = typer.Option(
+        False, "--drop-screen", help="The ablation: leave out the lines the screen flagged."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    seed: int = typer.Option(20261021, "--seed", help="The epoch order's seed."),
+    patience: int = typer.Option(3, "--patience", help="Epochs without gain before stopping."),
+    db_path: str = typer.Option(
+        "", "--db", help="Store for the runs row of a full training (none by default)."
+    ),
+    log_path: Path | None = typer.Option(None, "--log", help="Append the loop's lines here."),
+) -> None:
+    """Fine-tune a TrOCR checkpoint on the training set (K3 Task 2a pilot / Task 3)."""
+    from leibniz.htr import kurrent as K
+    from leibniz.htr import train_trocr as T
+
+    dev = K.pick_device(device)
+    train = T.read_list(train_root / "train.txt")
+    val = T.read_list(train_root / "val.txt")
+    if drop_screen:
+        manifest = _read_manifest_rows(train_root / "manifest.jsonl")
+        before = len(train)
+        train = T.stage_samples(train, manifest, drop_screen=True)
+        console.print(f"  ablation: {before - len(train):,} screened lines left out")
+    if val_limit:
+        val = val[:val_limit]
+    console.print(
+        f"[bold]train-trocr[/bold] base {base}; {len(train):,} training lines, {len(val):,} "
+        f"validation lines; device {dev}"
+    )
+
+    def _log(msg: str) -> None:
+        console.print(f"  {msg}")
+        if log_path:
+            with Path(log_path).open("a", encoding="utf-8") as fh:
+                fh.write(msg + "\n")
+
+    def _override(s: T.Settings) -> T.Settings:
+        kw = {}
+        if batch_size:
+            kw["batch_size"] = batch_size
+        if lr:
+            kw["lr"] = lr
+        if accumulate:
+            kw["accumulate"] = accumulate
+        return T.Settings(**{**s.as_dict_plain(), **kw}) if kw else s
+
+    all_settings = {s.key: s for s in T.PILOT_SETTINGS}
+    if pilot:
+        keys = (
+            [k.strip() for k in settings_keys.split(",") if k.strip()]
+            if settings_keys
+            else list(all_settings)
+        )
+        unknown = [k for k in keys if k not in all_settings]
+        if unknown:
+            raise typer.BadParameter(f"unknown settings {unknown}; known: {sorted(all_settings)}")
+        rows = []
+        out.mkdir(parents=True, exist_ok=True)
+        pilot_path = out / "pilot.json"
+        for key in keys:
+            s = _override(all_settings[key])
+            _log(f"pilot {s.key}: up to {pilot_lines:,} lines")
+            row = T.pilot_setting(
+                base,
+                s,
+                train,
+                device=dev,
+                max_lines=pilot_lines,
+                val=val if pilot_val else None,
+                log=_log,
+                plan_lines=len(train),
+                plan_epochs=plan_epochs,
+            )
+            rows.append(row)
+            v = row.val or {}
+            _log(
+                f"pilot {s.key}: {row.status}; {row.lines:,} lines in {row.seconds:.0f} s "
+                f"({row.lines_per_s or 0:.2f} lines/s), peak {row.peak_mib} MiB"
+                + (f"; val CER {100 * v['cer']:.2f} %" if v.get("cer") is not None else "")
+                + (
+                    f"; projected {row.projection['days']:.1f} days for {plan_epochs:g} epochs"
+                    if row.projection and row.projection.get("days") is not None
+                    else ""
+                )
+            )
+            T.write_pilot(
+                pilot_path,
+                rows,
+                {
+                    "base": base,
+                    "device": dev,
+                    "pilot_lines": pilot_lines,
+                    "train_lines": len(train),
+                    "val_lines": len(val),
+                    "plan_epochs": plan_epochs,
+                },
+            )
+        console.print(f"  wrote {pilot_path}")
+        return
+    key = settings_keys or "adafactor-b8"
+    if key not in all_settings:
+        raise typer.BadParameter(f"unknown settings {key!r}; known: {sorted(all_settings)}")
+    s = _override(all_settings[key])
+    params = {
+        "base": base,
+        "settings": s.as_dict(),
+        "epochs": epochs,
+        "train_lines": len(train),
+        "val_lines": len(val),
+        "drop_screen": drop_screen,
+        "seed": seed,
+    }
+    run_id = _record_training_run(
+        db_path, "htr_train", f"trocr-k3@{base}", params, n_input=len(train)
+    )
+    state = T.train(
+        base,
+        out,
+        train_samples=train,
+        val_samples=val,
+        settings=s,
+        device=dev,
+        epochs=epochs,
+        seed=seed,
+        log=_log,
+        patience=patience,
+    )
+    _finish_training_run(db_path, run_id, n_input=len(train), n_ok=len(train))
+    best = T.choose_best(state.history)
+    console.print(
+        f"  done: best epoch {best['epoch'] if best else '—'}, val CER {100 * best['cer']:.2f} %"
+        if best
+        else "  done: no epoch finished"
+    )
+
+
+def _read_manifest_rows(path: Path) -> list[dict]:
+    rows: list[dict] = []
+    with Path(path).open(encoding="utf-8") as fh:
+        for raw in fh:
+            if raw.strip():
+                rows.append(json.loads(raw))
+    return rows
+
+
+@app.command("train-kraken")
+def train_kraken(
+    base: Path = typer.Option(
+        Path("data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors"),
+        "--base",
+        help="The kraken weights to start from.",
+    ),
+    train_root: Path = typer.Option(
+        Path("data/train/k3"), "--train-root", help="The training set (train.txt, val.txt)."
+    ),
+    out: Path = typer.Option(Path("data/models/k3/kraken"), "--out", help="Artefacts root."),
+    pilot: bool = typer.Option(False, "--pilot", help="One fixed epoch on a subset of lines."),
+    pilot_lines: int = typer.Option(20_000, "--pilot-lines", help="Lines of the pilot subset."),
+    epochs: int = typer.Option(-1, "--epochs", help="Fixed epochs; -1 for early stopping."),
+    lag: int = typer.Option(5, "--lag", help="Early stopping: evaluations without gain."),
+    batch_size: int = typer.Option(16, "--batch-size", help="ketos -B."),
+    lr: float = typer.Option(1e-4, "--lr", help="ketos -r."),
+    augment: bool = typer.Option(False, "--augment", help="ketos --augment."),
+    freeze_backbone: int = typer.Option(0, "--freeze-backbone", help="ketos --freeze-backbone."),
+    precision: str = typer.Option("32-true", "--precision", help="ketos --precision."),
+    workers: int = typer.Option(4, "--workers", help="ketos --workers."),
+    device: str = typer.Option("cuda:0", "--device", help="ketos -d."),
+    seed: int = typer.Option(20261021, "--seed", help="ketos -s and the subset's seed."),
+    drop_screen: bool = typer.Option(
+        False, "--drop-screen", help="The ablation: leave out the lines the screen flagged."
+    ),
+    start: bool = typer.Option(
+        False, "--start", help="Start ketos in the background (else print the command only)."
+    ),
+    account: bool = typer.Option(
+        False, "--account", help="Read a finished run back: checkpoints, best weights, score."
+    ),
+    score_device: str = typer.Option("auto", "--score-device", help="For --account's scoring."),
+    db_path: str = typer.Option(
+        "", "--db", help="Store for the runs row of a started training (none by default)."
+    ),
+    log_path: Path | None = typer.Option(None, "--log", help="ketos' output file."),
+) -> None:
+    """Fine-tune the PHILIUMM kraken model on the training set through ketos (K3 2b / 3)."""
+    from leibniz.htr import kurrent as KU
+    from leibniz.htr import train_kraken as K
+
+    s = K.KetosSettings(
+        base=str(base),
+        batch_size=batch_size,
+        lr=lr,
+        epochs=1 if pilot else epochs,
+        quit="fixed" if pilot or epochs > 0 else "early",
+        lag=lag,
+        augment=augment,
+        freeze_backbone=freeze_backbone,
+        precision=precision,
+        workers=workers,
+        device=device,
+        seed=seed,
+    )
+    out.mkdir(parents=True, exist_ok=True)
+    train_list = train_root / "train.txt"
+    val_list = train_root / "val.txt"
+    if drop_screen or pilot:
+        lines = [ln for ln in train_list.read_text(encoding="utf-8").splitlines() if ln.strip()]
+        if drop_screen:
+            manifest = _read_manifest_rows(train_root / "manifest.jsonl")
+            screened = {
+                str(train_root / r["image"]) for r in manifest if r.get("image") and r.get("screen")
+            }
+            before = len(lines)
+            lines = [ln for ln in lines if ln not in screened]
+            console.print(f"  ablation: {before - len(lines):,} screened lines left out")
+        sub = out / ("pilot-train.txt" if pilot else "train.txt")
+        sub.write_text("".join(ln + "\n" for ln in lines), encoding="utf-8")
+        train_list = sub
+        if pilot:
+            train_list = K.subset_list(sub, out / "pilot-train.txt", n=pilot_lines, seed=seed)
+    cmd = K.ketos_command(s, train_list=train_list, val_list=val_list, out_dir=out)
+    log_file = log_path or out / "ketos.log"
+    if account:
+        text = Path(log_file).read_text(encoding="utf-8") if Path(log_file).exists() else ""
+        acc = K.account(out, s, cmd, text)
+        if acc.best:
+            val = K.read_list(val_list)
+            dev = KU.pick_device(score_device)
+            console.print(f"  scoring {acc.best['weights']} on {len(val):,} lines ({dev})")
+            acc.score = K.score_weights(acc.best["weights"], val, device=dev)
+            K.install_best(out, out / "best.safetensors")
+        p = K.write_account(out / "account.json", acc)
+        console.print(
+            f"  checkpoints {len(acc.checkpoints)}; epoch seconds "
+            f"{[round(t) for t in acc.epoch_seconds]}; best {acc.best}; "
+            + (f"val CER {100 * acc.score['cer']:.2f} %" if acc.score else "no score")
+        )
+        console.print(f"  wrote {p}")
+        return
+    console.print("[bold]train-kraken[/bold] " + " ".join(cmd))
+    if not start:
+        console.print("  (not started: pass --start to run it in the background)")
+        return
+    params = {"settings": s.as_dict(), "command": cmd, "pilot": pilot, "drop_screen": drop_screen}
+    run_id = _record_training_run(db_path, "htr_train", f"kraken-k3@{base.name}", params, n_input=0)
+    proc = K.run(cmd, log_path=log_file)
+    (out / "run.json").write_text(
+        json.dumps(
+            {"pid": proc.pid, "command": cmd, "log": str(log_file), "run_id": run_id}, indent=1
+        ),
+        encoding="utf-8",
+    )
+    console.print(f"  started pid {proc.pid}; log {log_file}; account with --account when done")
 
 
 __all__ = ["app"]

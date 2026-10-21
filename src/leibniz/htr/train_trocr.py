@@ -86,6 +86,10 @@ class Settings:
         d["key"] = self.key
         return d
 
+    def as_dict_plain(self) -> dict:
+        """The fields alone (what the constructor takes)."""
+        return asdict(self)
+
 
 # The pilot's candidate settings, in the order the prompt names them: AdamW on
 # every parameter first (to show the memory), then each remedy on its own and
