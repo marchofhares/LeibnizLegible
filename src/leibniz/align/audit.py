@@ -40,13 +40,14 @@ import json
 import math
 import random
 import sqlite3
-from collections.abc import Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from leibniz import db
 from leibniz.align import dp
 from leibniz.align.normalize import normalize_indexed
+from leibniz.align.pairs import READER_SQL
 from leibniz.align.report import GATE_PRECISION
 from leibniz.images.fetch import local_relpath
 
@@ -74,6 +75,7 @@ class AuditLine:
     image_note: str = ""
     alt_text: str | None = None  # a second reading to show (P1: PHILIUMM's aligned text)
     alt_label: str = ""  # how to name it on the sheet
+    group: str = ""  # a grouping the lines CSV carries (K2: the hand); not shown on the sheet
 
 
 @dataclass(slots=True)
@@ -120,18 +122,52 @@ def allocate(available: dict[str, int], n: int) -> dict[str, int]:
     return {s: k for s, k in alloc.items() if k}
 
 
-def sample_lines(conn: sqlite3.Connection, n: int = DEFAULT_N, *, seed: int = 0) -> list[AuditLine]:
-    """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``."""
+def sample_lines(
+    conn: sqlite3.Connection,
+    n: int = DEFAULT_N,
+    *,
+    seed: int = 0,
+    reader: str | None = None,
+    record_ids: Iterable[str] | None = None,
+    exclude_records: bool = False,
+) -> list[AuditLine]:
+    """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``.
+
+    The sheet for the PHILIUMM team draws from the lines aligned on the store's
+    v1 text: rows whose source names a reader (K2's mint from the Bern Kurrent
+    reading) are left out, since that model does not read Kurrent. ``reader``
+    draws from that reader's rows instead (K2's own audit sheet). ``record_ids``
+    narrows the pool to those records' rows — or, with ``exclude_records``, to
+    every other record's (K2: the lines in Leibniz's own hand against the rest).
+    """
+    pick = f"NOT ({READER_SQL})"
+    base: list = []
+    if reader:
+        pick = "source LIKE ?"
+        base = [f"%; reader {reader};%"]
+    if record_ids is not None:
+        ids_in = sorted({str(r) for r in record_ids})
+        if ids_in:
+            op = "NOT IN" if exclude_records else "IN"
+            pick += f" AND CAST(record_id AS TEXT) {op} ({','.join('?' * len(ids_in))})"
+            base += ids_in
+        elif not exclude_records:
+            pick += " AND 0"
     counts = {
         (row[0] or "unknown"): row[1]
-        for row in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+        for row in conn.execute(
+            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {pick} GROUP BY stratum", base
+        )
     }
     rng = random.Random(seed)
     out: list[AuditLine] = []
     for stratum, k in allocate(counts, n).items():
         where = "stratum IS NULL" if stratum == "unknown" else "stratum = ?"
         params: tuple = () if stratum == "unknown" else (stratum,)
-        ids = [r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where}", params)]
+        params = (*params, *base)
+        ids = [
+            r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where} AND {pick}", params)
+        ]
         for gid in sorted(rng.sample(ids, k)):
             row = conn.execute(
                 "SELECT line_image_ref, text, source, stratum, align_conf "
@@ -237,7 +273,7 @@ def crop_line(
         )
 
 
-def crop_from_image(
+def crop_image(
     im,
     polygon: Sequence | None,
     baseline: Sequence | None,
@@ -245,8 +281,12 @@ def crop_from_image(
     pad: int = CROP_PAD,
     max_width: int | None = CROP_MAX_WIDTH,
     mask_polygon: bool = False,
-) -> bytes | None:
-    """:func:`crop_line` over an opened PIL page image (decoded once per page)."""
+):
+    """The line's crop as a PIL RGB image from an opened page image, or ``None``.
+
+    The in-memory form of :func:`crop_from_image`: a reader that takes images
+    as they are (K2's reading job) skips the PNG encoding and its decoding.
+    """
     from PIL import Image
 
     box = crop_box(polygon, baseline, width=im.width, height=im.height, pad=pad)
@@ -264,6 +304,24 @@ def crop_from_image(
     if max_width is not None and crop.width > max_width:
         scale = max_width / crop.width
         crop = crop.resize((max_width, max(1, int(crop.height * scale))))
+    return crop
+
+
+def crop_from_image(
+    im,
+    polygon: Sequence | None,
+    baseline: Sequence | None,
+    *,
+    pad: int = CROP_PAD,
+    max_width: int | None = CROP_MAX_WIDTH,
+    mask_polygon: bool = False,
+) -> bytes | None:
+    """:func:`crop_line` over an opened PIL page image (decoded once per page)."""
+    crop = crop_image(
+        im, polygon, baseline, pad=pad, max_width=max_width, mask_polygon=mask_polygon
+    )
+    if crop is None:
+        return None
     buf = io.BytesIO()
     crop.save(buf, format="PNG", optimize=True)
     return buf.getvalue()
@@ -336,17 +394,33 @@ def write_sheet(
     csv_name: str = "gt-audit-lines.csv",
     seed: int = 0,
     title: str = "Ground-truth hand audit",
+    help_html: str | None = None,
+    verdict_labels: Mapping[str, str] | None = None,
+    attach: bool = True,
 ) -> AuditSheet:
-    """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``."""
-    attach_images(conn, lines, images_root)
+    """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``.
+
+    ``help_html`` and ``verdict_labels`` reach :func:`render_sheet` (a sheet in
+    another language); ``attach=False`` keeps crops and HTR texts the caller
+    attached itself.
+    """
+    if attach:
+        attach_images(conn, lines, images_root)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     html_path = out_dir / html_name
     csv_path = out_dir / csv_name
-    html_path.write_text(render_sheet(lines, seed=seed, title=title), encoding="utf-8")
+    html_path.write_text(
+        render_sheet(
+            lines, seed=seed, title=title, help_html=help_html, verdict_labels=verdict_labels
+        ),
+        encoding="utf-8",
+    )
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image"])
+        w.writerow(
+            ["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image", "group"]
+        )
         for ln in lines:
             w.writerow(
                 [
@@ -357,6 +431,7 @@ def write_sheet(
                     ln.gt_text,
                     ln.htr_text or "",
                     "yes" if ln.crop_png else ln.image_note,
+                    ln.group,
                 ]
             )
     by_stratum: dict[str, int] = {}
@@ -450,33 +525,49 @@ restore();
 """
 
 
+DEFAULT_HELP_HTML = (
+    "<div class='help'>For each line, compare the <b>minted text</b> with the "
+    "<b>image strip</b> and pick one:<br>"
+    "<b>correct</b> — the text is what is written on this strip (spelling "
+    "modernised, abbreviations expanded and punctuation changed are fine);<br>"
+    "<b>boundary</b> — it is this line, but the text starts or ends a word or "
+    "more early or late;<br>"
+    "<b>wrong</b> — it is another line's text, or garbage;<br>"
+    "<b>unreadable</b> — you cannot tell. The grey line is the machine "
+    "reading of the same strip, for orientation only. Your choices are saved "
+    "in this browser as you go; when done, click <b>Download verdicts</b>.</div>"
+)
+
+
 def render_sheet(
-    lines: Sequence[AuditLine], *, seed: int = 0, title: str = "Ground-truth hand audit"
+    lines: Sequence[AuditLine],
+    *,
+    seed: int = 0,
+    title: str = "Ground-truth hand audit",
+    help_html: str | None = None,
+    verdict_labels: Mapping[str, str] | None = None,
 ) -> str:
-    """The self-contained audit page (crops inlined as data URIs)."""
+    """The self-contained audit page (crops inlined as data URIs).
+
+    ``help_html`` replaces the instructions block; ``verdict_labels`` maps a
+    verdict value to the text shown beside its radio button (the value in the
+    downloaded CSV stays the C2 one, so one scorer reads every sheet).
+    """
     parts: list[str] = []
     A = parts.append
     A("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
     A(f"<title>Leibniz Legible — {html.escape(title)}</title>")
     A(f"<style>{_SHEET_CSS}</style></head><body data-seed='{seed}'>")
     A(f"<h1>{html.escape(title)}</h1>")
-    A(
-        "<div class='help'>For each line, compare the <b>minted text</b> with the "
-        "<b>image strip</b> and pick one:<br>"
-        "<b>correct</b> — the text is what is written on this strip (spelling "
-        "modernised, abbreviations expanded and punctuation changed are fine);<br>"
-        "<b>boundary</b> — it is this line, but the text starts or ends a word or "
-        "more early or late;<br>"
-        "<b>wrong</b> — it is another line's text, or garbage;<br>"
-        "<b>unreadable</b> — you cannot tell. The grey line is the machine "
-        "reading of the same strip, for orientation only. Your choices are saved "
-        "in this browser as you go; when done, click <b>Download verdicts</b>.</div>"
-    )
+    A(help_html if help_html is not None else DEFAULT_HELP_HTML)
     A("<div id='toolbar'><button id='dl'>Download verdicts (CSV)</button> ")
     A("<span id='count'></span></div>")
     for k, ln in enumerate(lines, start=1):
         ref = html.escape(ln.ref)
-        A(f"<div class='item' data-ref='{ref}' data-stratum='{html.escape(ln.stratum)}'>")
+        A(
+            f"<div class='item' data-ref='{ref}' data-stratum='{html.escape(ln.stratum)}' "
+            f"data-group='{html.escape(ln.group)}'>"
+        )
         conf = "" if ln.align_conf is None else f" · conf {ln.align_conf:.2f}"
         folio = f" · fol. {html.escape(ln.label)}" if ln.label else ""
         A(
@@ -497,7 +588,8 @@ def render_sheet(
         A(f"<div class='htr'>HTR: {html.escape(ln.htr_text or '—')}</div>")
         A("<div class='verdicts'>")
         for v in VERDICTS:
-            A(f"<label><input type='radio' name='v-{k}' value='{v}'> {v}</label>")
+            shown = html.escape((verdict_labels or {}).get(v, v))
+            A(f"<label><input type='radio' name='v-{k}' value='{v}'> {shown}</label>")
         A("</div>")
         A("<input class='note' placeholder='note (optional)'>")
         A("</div>")
@@ -697,6 +789,53 @@ def score_verdicts(
     for stratum, s in by.items():
         s.weight = ((weights or {}).get(stratum, 0) / total) if total else 1.0 / len(by)
     return AuditScore(by_stratum=by, n_rows=len(rows), n_unjudged=unjudged)
+
+
+def score_by_group(
+    rows: Sequence[dict[str, str]], lines_csv: Path | str
+) -> dict[str, StratumScore]:
+    """Tally the verdicts by the lines CSV's ``group`` column (K2: the hand), joined on
+    ``ref``; empty when the CSV has no group or every group is blank."""
+    with Path(lines_csv).open(newline="", encoding="utf-8-sig") as fh:
+        groups = {r["ref"]: (r.get("group") or "").strip() for r in csv.DictReader(fh)}
+    if not any(groups.values()):
+        return {}
+    by: dict[str, StratumScore] = {}
+    for r in rows:
+        group = groups.get((r.get("ref") or "").strip(), "") or "ungrouped"
+        verdict = (r.get("verdict") or "").strip().lower()
+        if verdict not in VERDICTS:
+            continue
+        s = by.setdefault(group, StratumScore(group))
+        s.n_judged += 1
+        setattr(s, verdict, getattr(s, verdict) + 1)
+    return dict(sorted(by.items()))
+
+
+def render_group_scores(by_group: Mapping[str, StratumScore]) -> list[str]:
+    """A markdown block: precision by the lines CSV's group (K2: Leibniz's own hand against
+    the other hands), pooled over strata, with Wilson intervals."""
+    out = ["## By group", ""]
+    out.append(
+        "| group | judged | correct | boundary | wrong | unreadable | precision | 95 % CI | "
+        "usable |"
+    )
+    out.append("|---|---:|---:|---:|---:|---:|---:|---|---:|")
+    for name, s in by_group.items():
+        p = "—" if s.precision is None else f"{100 * s.precision:.1f} %"
+        ci = "—" if s.interval is None else f"{100 * s.interval[0]:.0f}–{100 * s.interval[1]:.0f} %"
+        u = "—" if s.usable is None else f"{100 * s.usable:.1f} %"
+        out.append(
+            f"| {name} | {s.n_judged} | {s.correct} | {s.boundary} | {s.wrong} | {s.unreadable} | "
+            f"{p} | {ci} | {u} |"
+        )
+    out.append("")
+    out.append(
+        "*group* is the lines CSV's `group` column (K2's sheet: `leibniz_hand`, the lines on "
+        "records in Leibniz's own hand, against `other_hands`), each group pooled over its strata "
+        "and unweighted — the draw was half and half, equal per stratum within each half."
+    )
+    return out
 
 
 # Folded minted↔HTR similarity above which a "wrong"/"unreadable" verdict, or
@@ -954,6 +1093,7 @@ def _cell(text: str, limit: int = 70) -> str:
 
 
 __all__ = [
+    "DEFAULT_HELP_HTML",
     "DEFAULT_N",
     "STRATA",
     "VERDICTS",
@@ -966,12 +1106,15 @@ __all__ = [
     "allocate",
     "build_sheet",
     "crop_box",
+    "crop_image",
     "lines_for_refs",
     "read_verdicts",
     "render_agreement",
+    "render_group_scores",
     "render_score",
     "render_sheet",
     "sample_lines",
+    "score_by_group",
     "score_verdicts",
     "text_evidence",
     "verdict_agreement",

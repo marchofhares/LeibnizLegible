@@ -41,6 +41,7 @@ from leibniz.align.pairs import (
     RecordWrite,
     ensure_gt_ownership,
     has_gt_for_record,
+    has_reader_rows,
     replace_record_pairs,
     result_to_pairs,
 )
@@ -101,6 +102,7 @@ class PieceResult:
     yield_rate: float = 0.0
     n_won: int = 0  # lines taken over from another record on confidence
     n_lost: int = 0  # aligned lines another record holds more confidently
+    pairs: list[GtPair] = field(default_factory=list)  # kept only when asked (dry runs)
 
     @property
     def minted(self) -> bool:
@@ -152,6 +154,12 @@ def page_stats_for_pages(conn, pages: Sequence[db.Page]) -> list[db.PageStats]:
     return out
 
 
+# The text a line is aligned on comes from the store's v1 reading by default;
+# a reader (K2: the Bern Kurrent model) supplies its own text for the same
+# lines, keyed by line id, and the minted rows then name it in their source.
+ReaderText = Callable[[Sequence[HtrLine]], Sequence[HtrLine]]
+
+
 def mint_piece(
     conn,
     piece: PieceRef,
@@ -160,6 +168,9 @@ def mint_piece(
     *,
     insert: bool = True,
     resume: bool = False,
+    reader: str | None = None,
+    reader_text: ReaderText | None = None,
+    keep_pairs: bool = False,
 ) -> PieceResult:
     """Resolve → gather HTR → align → stratum-threshold → mint one piece.
 
@@ -170,10 +181,22 @@ def mint_piece(
     a record that already owns minted rows is skipped instead (an interrupted run
     picks up where it stopped); a neighbour minted on a shared folio no longer
     counts.
+
+    **The guard (K2).** A record whose rows name a reader was minted from that
+    reader's text, which places more of its lines than the v1 text does; a
+    mint from the v1 text (``reader`` is ``None``) leaves it alone and reports
+    ``skipped:reader_minted``. A reader's own mint (``reader`` given) replaces
+    the record's rows, whichever text they came from: one reader per piece.
+    With ``reader``, ``reader_text`` maps the piece's HTR lines (the store's
+    geometry and v1 text) to the lines carrying the reader's text; a line the
+    reader did not read is aligned as empty. ``keep_pairs`` returns the minted
+    pairs on the result (a dry run that wants to look at them).
     """
     if not piece.localizable:
         return PieceResult(piece, "skipped:not_localizable")
     assert piece.folio_range is not None and piece.work_id is not None
+    if reader is None and has_reader_rows(conn, piece.record_id):
+        return PieceResult(piece, "skipped:reader_minted")
     if resume and has_gt_for_record(conn, piece.record_id):
         return PieceResult(piece, "skipped:already_minted")
     res = resolve_canvases(
@@ -191,6 +214,8 @@ def mint_piece(
         return PieceResult(piece, "skipped:no_htr_lines", n_canvases=len(res.pages))
     if not edition_text.strip():
         return PieceResult(piece, "skipped:no_edition_text", n_canvases=len(res.pages))
+    if reader is not None and reader_text is not None:
+        htr = list(reader_text(htr))
 
     stratum = classify_piece(page_stats_for_pages(conn, res.pages), textart=piece.textart).stratum
     threshold = config.threshold_for(stratum)
@@ -198,7 +223,7 @@ def mint_piece(
 
     pairs = result_to_pairs(
         alignment,
-        source=source_string(piece),
+        source=source_string(piece, reader=reader),
         stratum=stratum,
         license_bucket=config.license_bucket,
         record_id=piece.record_id,
@@ -215,17 +240,22 @@ def mint_piece(
         yield_rate=alignment.yield_rate,
         n_won=written.won if written is not None else 0,
         n_lost=written.lost if written is not None else 0,
+        pairs=list(pairs) if keep_pairs else [],
     )
 
 
-def source_string(piece: PieceRef) -> str:
+def source_string(piece: PieceRef, *, reader: str | None = None) -> str:
     """The provenance a minted row carries: the printed piece(s), the free copy
-    the reading text was read from (where the edition cache recorded it), and
-    the catalogue record — ``"AA I,9 N.12 (§70-expired AA reading text; channel
-    ia; katalog 4711)"``. ``katalog <id>`` stays last: the reach census and the
-    K1 census read the record id up to the closing parenthesis."""
+    the reading text was read from (where the edition cache recorded it), the
+    reader whose text the lines were aligned on where it is not the store's v1
+    text (K2), and the catalogue record — ``"AA I,9 N.12 (§70-expired AA
+    reading text; channel ia; reader trocr-kurrent-xvi-xvii; katalog 4711)"``.
+    ``katalog <id>`` stays last: the reach census and the K1 census read the
+    record id up to the closing parenthesis, and ``reader`` is read by
+    :func:`~leibniz.align.pairs.reader_from_source`."""
     via = f"; channel {piece.channel}" if piece.channel else ""
-    return f"{piece.aa_label} (§70-expired AA reading text{via}; katalog {piece.record_id})"
+    by = f"; reader {reader}" if reader else ""
+    return f"{piece.aa_label} (§70-expired AA reading text{via}{by}; katalog {piece.record_id})"
 
 
 def select_text_pieces(
@@ -452,6 +482,7 @@ __all__ = [
     "FactoryConfig",
     "FactoryStats",
     "PieceResult",
+    "ReaderText",
     "dict_provider",
     "htr_lines_for_pages",
     "mint_piece",

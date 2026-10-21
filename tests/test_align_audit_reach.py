@@ -15,6 +15,7 @@ from leibniz.align.pairs import GtPair, insert_gt_pairs
 from leibniz.cli import app
 
 runner = CliRunner()
+R_STRATA = ("fair_copy", "light_revision", "heavy_revision", "scrap", "unknown")
 
 
 def _seed(path: Path) -> None:
@@ -178,3 +179,27 @@ def test_audit_reach_cli(tmp_path: Path) -> None:
     assert summ["n_lines"] == 7 and (out / "reach.md").exists()
     res2 = runner.invoke(app, ["align", "audit-reach", "--db", str(tmp_path / "missing.sqlite")])
     assert res2.exit_code != 0
+
+
+def test_census_leaves_reader_rows_out_and_counts_them(tmp_path: Path) -> None:
+    store = tmp_path / "inv.sqlite"
+    _seed(store)
+    conn = db.init_db(store)
+    k2 = (
+        "AA III,3 N.12 (§70-expired AA reading text; channel ia; "
+        "reader trocr-kurrent-xvi-xvii; katalog k-1)"
+    )
+    assert R.parse_source(k2) == ("III,3", "k-1")
+    insert_gt_pairs(
+        conn, [GtPair("W1:0001:000", "minis pro", k2, "heavy_revision", 0.9, "open", "k-1")]
+    )
+    conn.commit()
+    conn.close()
+    conn = R.open_readonly(store)
+    c = R.census(conn)
+    conn.close()
+    assert c.n == 7 and c.n_reader_rows == 1
+    s = R.summary(c, strata=R_STRATA)
+    assert s["n_reader_rows"] == 1
+    text = R.render(c, strata=R_STRATA, flags_path=None)
+    assert "1 open-bucket rows were aligned on a reader's text" in text

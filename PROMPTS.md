@@ -2037,3 +2037,214 @@ store changed, so the backup chore's three lines run again with today's date
 and the upload; that reports/gt-audit/round2/gt-audit.html is the sheet to
 offer the PHILIUMM team; and that nothing is deployed. Do not merge.
 ~~~~
+
+### Phase K2 — German ground truth (run 2026-10-20)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session — under the session preamble of 19 October, which this session was
+given again word for word (it is printed above, under K2b): the branch
+`k2-german-gt` from main as the operator named it in chat, nothing merged or
+deployed, the operator's "go" waited for after Task 0, before the reading job
+and before the write to the store. The departures are in `STATUS.md`,
+Divergences._
+
+~~~~text
+Phase K2 — German ground truth: read the German edition pieces with the Bern
+Kurrent reader and mint them through the factory. One local session on the
+operator's desktop (WSL2 Ubuntu), with the store, the image cache and the GPU;
+a reading job of about two days runs under nohup between checkpoints.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies in full), SPECS.md
+§1.4 and §7, and STATUS.md: "Current state", the K1 entry in the Phase log
+(the gate verdict and Task 4), "Next" (the Kurrent path after K1), and the C2
+and C2b entries. Then reports/kurrent/census.md and reports/kurrent/pilot.md.
+If this prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence in STATUS.md. Write the "K2 — German ground truth" entry in
+STATUS.md after every task, not only at the end; if one exists, continue from
+its first unfinished task.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible, on the branch the preamble names.
+- data/inventory.sqlite is the MASTER store (16 GB). Tasks 0 to 2 open it
+  read-only (`uv run leibniz …` opens it mode=ro; your own Python uses a
+  `file:…?mode=ro` URI). Task 3 writes to gt_lines and runs only, through
+  project code, after a dated backup copy and the operator's go: `VACUUM INTO`
+  /mnt/d/leibniz-inventory-backup-<date>.sqlite in the manner of
+  deploy/prepare-store.sh, with its SHA-256 (about ten minutes; D: needs 20 GB
+  free). Never VACUUM or move the store itself, never delete anything under
+  data/. The lines table is not touched in this phase: K2 adds ground truth,
+  not a reading.
+- The page-image cache is /mnt/d/leibniz-images (pages.local_path is relative
+  to it).
+- Environment: .venv-k1 from K1 (bench, gt and kurrent extras: kraken, torch
+  with CUDA, transformers); `export UV_PROJECT_ENVIRONMENT=.venv-k1` in your
+  shell. Never `uv sync` against .venv. Check
+  `python -c "import torch; print(torch.cuda.is_available())"` before any GPU
+  step.
+- Inputs from K1, all on this desktop: data/kurrent/german_pieces.jsonl (the
+  German pieces: record_id, work_id, page_ids, stratum, hand, language; 1,665
+  of them have recognised lines, 401,394 lines on 5,874 pages);
+  data/gt/edition_cache.jsonl (each piece's edition reading text by
+  record_id); the reader `trocr-kurrent-xvi-xvii`
+  (dh-unibe/trocr-kurrent-XVI-XVII, MIT; the CANDIDATES registry in
+  src/leibniz/htr/kurrent.py, TrOCREngine in src/leibniz/htr/trocr.py,
+  weights under data/models/hf/ from K1); and the
+  pilot's machinery in src/leibniz/align/kurrent_pilot.py (page_lines,
+  crop_all, read_pieces with its resumable JSONL, release, dry_run_piece).
+  Reuse it; generalise what is pilot-shaped (the page cap, the role field)
+  without changing the pilot's behaviour or its tests.
+- Long jobs run under nohup with a log under logs/, polled, never blocking.
+  Ask the operator for a go before any job over an hour, any download over
+  1 GB and any install. Results in reports/kurrent/ as small committed files
+  rendered by code from data; readings and bulky files under data/kurrent/
+  (gitignored). Never write a number you did not produce.
+- Nothing is deployed in this phase. The operator merges; you push and hand
+  over.
+
+## Background
+K1 measured the German question (STATUS.md, K1). The Bern TrOCR model reads a
+1670s chancery Kurrent at 7.4 % CER, and in the pilot on 20 German pieces it
+let the factory mint 20.2 % of the lines at its gate, against 16.4 % for the
+stored v1 text and 12.5 % for PHILIUMM's model read afresh; on autograph
+pieces 25.4 % against 8.1 % (on the two pieces in Leibniz's own hand, 417
+lines, 27.6 % against 3.1 %). The C2 factory had already minted 40,915 lines on
+the German pieces from the v1 text. K2 reads every line of the German pieces
+with the Bern reader (at the pilot's 353 ms a line, about two days on this
+GPU) and mints from those readings. What the factory mints is always the
+edition's text, never the reader's: a better reader places more lines, and
+places them better. K3 trains on the result; K2b builds the honest German
+test set from the GWLB letter pool; nothing here changes the website.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. A clean tree apart from the operator's own untracked files; on the branch,
+   `git pull`. `nvidia-smi` (nothing else on the GPU); `df -h data /mnt/d`;
+   the K1 inputs present (count the rows of german_pieces.jsonl; one line
+   through the reader to prove the weights load).
+2. Baseline in .venv-k1: `uv run ruff check .`, `uv run ruff format --check .`,
+   `uv run pytest -q`. Record the counts.
+3. Print the plan with durations and what needs a go; wait for "go".
+
+## Task 1 — The reading job
+`leibniz align kurrent-read` (beside kurrent-pilot): every line of the German
+pieces' pages, no page cap, read by one reader into
+data/kurrent/k2-readings/<reader>.jsonl in the pilot's row format (line_id,
+text, conf, model, device, ms), resumable, page by page, each page image
+decoded once. Lines without geometry and pages without a cached image are
+skipped and counted by reason. Throughput first: on 2,000 lines measure lines
+per second at batch sizes 8, 16 and 32, and in half precision only if K1's
+Dresden CER for this reader stays within 0.2 points (rerun `leibniz bench
+kurrent-smoke` for this reader alone); take the fastest setting that fits in
+6 GB and print the ETA. Every few minutes the log gets lines done, lines per
+hour and the ETA. Tests on the stub engine. Ask for a go, start it under
+nohup. CHECKPOINT A: the STATUS.md entry says how to resume (the command, the
+log, the JSONL); commit and push. The session may stop here while the job
+runs; a fresh session resumes from the entry.
+
+## Task 2 — The dry run and the report (store read-only)
+When the reading is complete: per piece, the factory's alignment over the Bern
+readings (HtrLine lists built from the JSONL in line order), at the
+per-stratum thresholds of src/leibniz/align/factory.py, with the aligner's
+defaults (hyphens kept, as since C2b) and the edition text from the cache, as
+the pilot's dry_run_piece does; nothing written. Beside it, per piece, what
+gt_lines holds today: the C2 mint from the v1 text (rows whose source names
+"katalog <record_id>"; leibniz.align.audit_reach.parse_source reads it). The
+rule: one reader per piece, never a mix of two alignments within a piece
+(their line boundaries differ, and a mix duplicates or drops words at the
+seams). The Bern mint replaces the stored one where it mints more lines at the
+same gate; elsewhere the stored mint stays. Write reports/kurrent/k2-mint.md,
+k2-mint.json and k2-mint-by-volume.csv: lines read and skipped, and why; Bern
+yield and mean confidence by stratum, hand (eigh. or not), volume and language
+(German, mixed); the pieces won by each reader; the mint after K2 against
+before (40,915); the training set this leaves for K3. Also render
+data/kurrent/k2-side-by-side.html (not committed): 40 newly minted lines,
+seeded, each with its crop, the minted text and the Bern reading, for the
+operator's eye. CHECKPOINT B: STATUS.md entry; commit; push. The operator
+reads the report before Task 3.
+
+## Task 3 — The mint (writes; backup and go first)
+1. Every reader of gt_lines first: grep the code (align/factory.py,
+   align/pairs.py, align/audit.py, align/audit_reach.py, align/report_gt.py,
+   align/kurrent_census.py, release/export.py and any other). K2's rows carry
+   the factory's source string with the reader named BEFORE the record id:
+   "<aa_label> (§70-expired AA reading text; reader trocr-kurrent-xvi-xvii;
+   katalog <record_id>)". After it would break parse_source, which reads the
+   record id up to ")" or a space: "katalog 41800; reader …" parses as
+   "41800;". Test that the census and the reach census still read K2's rows.
+   Decide per consumer, test, and record: the GT report counts K2's lines as
+   their own row; the PHILIUMM audit sheet and the reach census leave them
+   out (PHILIUMM does not read Kurrent); the release export keeps them,
+   labelled by source; C3's training set already holds German-piece lines
+   apart (K1's index).
+2. The guard: the factory (mint_piece) must never overwrite a piece whose
+   rows name a reader; it skips it with its own status
+   ("skipped:reader_minted"), counted in the run's stats. The re-mint before
+   C3 (STATUS.md, Next) runs without --resume over every piece, so without
+   this guard it would undo K2. Test both directions: a v1 re-mint leaves a
+   K2 piece alone; a K2 re-mint replaces its own rows and only those.
+3. The backup copy (above), the operator's go, then the write: one runs row
+   (stage gt_factory, model "retro-aligner+trocr-kurrent-xvi-xvii", params
+   naming the reader, the thresholds and the rule), the replacement piece by
+   piece through write_pairs (one transaction per piece, with_write_lock),
+   idempotent and resumable. Then `uv run leibniz align gt-report`; check the
+   counts against Task 2's expectation and say if they differ.
+CHECKPOINT C: STATUS.md entry; commit; push.
+
+## Finish and hand-over
+Complete the "K2 — German ground truth" entry: what was built, the numbers
+(lines read and skipped, the mint before and after, yield by stratum and hand,
+pieces won by each reader), the backup's path and SHA-256, the consumers'
+decisions, and what K3 needs (where the lines are and how to select them: the
+source names "reader trocr-kurrent-xvi-xvii"). Update "Key numbers" and
+"Next". Append this prompt verbatim to PROMPTS.md under "Follow-up phases
+(2026-10)". ruff + pytest clean in .venv-k1, all tests offline. Push, print the
+compare URL, tell the operator what to read (the report, the side-by-side
+page), that data/kurrent/ and the backup must be kept until K3 is merged, and
+that nothing is deployed. Do not merge.
+
+## Amendment of 2026-10-10 (after the review and W5; where it differs from the tasks above, it wins)
+Read STATUS.md's W5 entry first; the preamble's merge line brings W5 in.
+- Record ownership (Tasks 2 and 3): every factory row now carries its owning
+  catalogue record in gt_lines.record_id, and its source names the channel
+  of its text. Task 2 reads a piece's stored mint by record_id, not by
+  parsing the source. K2's rows carry their record_id like any factory row,
+  with the reader named in the source as Task 3 says, and the factory's
+  ownership rule applies (a line two records mint goes to the higher
+  alignment confidence).
+- The guard (Task 3, item 2) covers `leibniz align gt-reset` as well: it
+  deletes every row a catalogue record owns, so it must keep the rows whose
+  source names a reader; test both. Better still, the re-mint before C3 runs
+  before Task 3 writes (STATUS.md says whether it has); then "before" in
+  Task 2 is the re-mint's count, not 40,915.
+- The overhead first (Task 1): K1 measured 353 ms a line; the model's own
+  compute on this card should be a small part of that (the operator's plan
+  estimates 25-50 ms). Before the batch-size sweep, profile one batch and
+  report where the time goes (image decoding, cropping, the processor,
+  generation, transfers); decode each page image once, crop in memory, batch,
+  keep the tensors on the GPU. Report the time per line before and after, and
+  the job's ETA (at 353 ms about 39 hours of reading; at 50 ms about 6).
+- An audit before K3 (Finish): build data/kurrent/k2-audit.html, 200 seeded
+  newly minted German lines through the C2 sheet machinery (the crop, the
+  minted text, the Bern reading; verdicts downloadable as a CSV of ref,
+  stratum, verdict, note). TrOCR errs fluently, so a misplaced edition line
+  can look plausible. K3 starts after the sheet is judged, or after the
+  operator decides to go without; say so in the hand-over.
+- The judge (Finish, 2026-10-14): if the operator says the judge comes from
+  the Leibniz-Edition, label the audit sheet in German beside English (the
+  verdict values stay the C2 CSV's), and keep the judge's name out of the
+  repo: write "a reader at the Leibniz-Edition" and the date.
+~~~~
+
+The operator's additions in chat with the go for the write (2026-10-21),
+verbatim:
+
+~~~~
+Two additions for after the write: (1) the 200-line audit sheet is
+stratified by hand, half from lines in Leibniz's own hand and half from the
+others, seeded as before, so the judge's verdicts give a precision figure
+for his hand on its own; K2b put the Bern reader near 49 % CER there, close
+to the aligner's precision break-even on drafts, so that is where misplaced
+lines would hide. (2) After gt-report, run audit-reach and confirm it treats
+K2's rows the way your Task 3 decision says and skips no row as
+non-canonical; put both counts in the STATUS entry.
+~~~~

@@ -24,6 +24,7 @@ from leibniz.align.ingest import (
     text_path,
     volume_label,
 )
+from leibniz.align.pairs import reader_from_source
 from leibniz.align.volumes import enumerate_pieces
 from leibniz.align.volumes_sources import CHANNEL_TERMS, readable_sources, sources_for
 from leibniz.legal import expired_volumes
@@ -56,6 +57,9 @@ class GtReport:
     extraction: list[VolumeExtraction] = field(default_factory=list)
     cache_records: int = 0  # katalog records with reading text in the edition cache
     cache_by_volume: dict[str, int] = field(default_factory=dict)
+    # open-bucket lines aligned on a reader's text rather than the store's v1 text
+    # (K2: the Bern Kurrent reader on the German pieces), by reader
+    by_reader: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -116,6 +120,7 @@ def gather_gt(
 
     by_volume: dict[str, int] = {}
     by_series: dict[str, int] = {}
+    by_reader: dict[str, int] = {}
     for row in conn.execute(
         "SELECT source, COUNT(*) FROM gt_lines WHERE license_bucket = 'open' GROUP BY source"
     ):
@@ -124,6 +129,9 @@ def gather_gt(
             by_volume[vol] = by_volume.get(vol, 0) + row[1]
             series = vol.split(",")[0]
             by_series[series] = by_series.get(series, 0) + row[1]
+        reader = reader_from_source(row[0])
+        if reader:
+            by_reader[reader] = by_reader.get(reader, 0) + row[1]
 
     try:
         _pieces, enum = enumerate_pieces(conn, today=today)
@@ -151,6 +159,7 @@ def gather_gt(
         extraction=extraction,
         cache_records=cache_records,
         cache_by_volume=cache_by_volume,
+        by_reader=by_reader,
     )
 
 
@@ -494,6 +503,20 @@ def _render_yield(A, rep: GtReport) -> None:
         A("| --- | ---: |")
         for vol, n in sorted(rep.by_volume.items()):
             A(f"| {vol} | {n:,} |")
+        A("")
+    if rep.by_reader:
+        A("| Aligned on a reader's text | Open lines |")
+        A("| --- | ---: |")
+        for reader, n in sorted(rep.by_reader.items()):
+            A(f"| `{reader}` | {n:,} |")
+        A(f"| v1 text (the store's reading) | {rep.n_open - sum(rep.by_reader.values()):,} |")
+        A("")
+        A(
+            "The lines above are counted in every table of this report; the reader rows are "
+            "the German pieces K2 minted from the Bern Kurrent reader's text (their source "
+            "names the reader before the record). The hand audit's sheets and the reach census "
+            "leave them out: the PHILIUMM model does not read Kurrent."
+        )
         A("")
 
 

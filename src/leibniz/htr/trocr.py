@@ -22,6 +22,16 @@ imported lazily; the loader and the image decoder are injectable, so the
 engine's logic is tested on a stub without either. Weights go to
 ``data/models/hf`` (gitignored) on first use, cache-first, inference files
 only: the checkpoints' optimizer states are never fetched.
+
+**Throughput (K2).** A caller with the line images already in memory passes
+them to :meth:`TrOCREngine.transcribe_images` and spares the PNG round trip
+the byte protocols imply. ``dtype="float16"`` runs the model in half
+precision and ``use_cache=True`` turns the decoder's key/value cache on (the
+Kurrent checkpoints' generation config switches it off, so every step
+re-reads the whole prefix); both are off by default so that the readers
+measured in K1 and K2b behave as they did, and K2 switches them on only
+where the Dresden error rate holds. With ``profile`` set, the engine keeps
+per-stage seconds in :attr:`TrOCREngine.timings`.
 """
 
 from __future__ import annotations
@@ -29,6 +39,7 @@ from __future__ import annotations
 import io
 import math
 import re
+import time
 from collections.abc import Callable, Sequence
 from contextlib import nullcontext
 from pathlib import Path
@@ -97,6 +108,18 @@ def mean_token_prob(ids: Sequence[int], logps: Sequence[float], skip: set[int]) 
     return sum(probs) / len(probs) if probs else None
 
 
+def _drop_checkpoint_max_length(model: object) -> None:
+    """Clear the checkpoint's ``generation_config.max_length``.
+
+    The engine bounds every call with ``max_new_tokens``, which takes precedence;
+    with both set, transformers logs a warning on every batch (and the Kurrent
+    checkpoints ship ``max_length: 128``). The generated length is unchanged.
+    """
+    cfg = getattr(model, "generation_config", None)
+    if cfg is not None and getattr(cfg, "max_length", None) is not None:
+        cfg.max_length = None
+
+
 def _special_ids(model: object) -> set[int]:
     out: set[int] = set()
     for cfg_name in ("config", "generation_config"):
@@ -127,6 +150,9 @@ class TrOCREngine:
         clean_up_spaces: bool = True,
         loader: Loader | None = None,
         decode: Decoder | None = None,
+        dtype: str | None = None,
+        use_cache: bool | None = None,
+        profile: bool = False,
     ) -> None:
         self.model_id = model_id
         self.version = version or model_id
@@ -134,6 +160,17 @@ class TrOCREngine:
         self.batch_size = max(1, batch_size)
         self.cache_dir = Path(cache_dir)
         self.max_new_tokens = max_new_tokens
+        if dtype not in (None, "float32", "float16"):
+            raise ValueError("dtype must be None, 'float32' or 'float16'")
+        self.dtype = dtype
+        self.use_cache = use_cache
+        self.profile = profile
+        # Seconds per stage and counts, accumulated while ``profile`` is set
+        # (:meth:`reset_timings` clears them). ``steps`` are generation steps
+        # (the longest line of a batch sets them), ``tokens`` the generated
+        # tokens over all lines, padding and specials left out.
+        self.timings: dict[str, float] = {}
+        self.counts: dict[str, int] = {}
         # The Kurrent fine-tunes were trained on labels that set a space before
         # every punctuation mark ("Wardt die ,"), a Transkribus export convention,
         # and they reproduce it. A diplomatic scorer charges each such space as
@@ -153,10 +190,29 @@ class TrOCREngine:
         if self._model is not None:
             return
         self._processor, self._model = self._loader(self.model_id, self.cache_dir, self.device)
+        if self.dtype == "float16" and hasattr(self._model, "half"):
+            self._model.half()
+        _drop_checkpoint_max_length(self._model)
         self._skip = _special_ids(self._model)
         dev = getattr(self._model, "device", None)
         if dev is not None:
             self.device = str(dev)
+
+    @property
+    def settings(self) -> dict:
+        """The knobs a reading's provenance should record beside the model id."""
+        return {
+            "model": self.model_id,
+            "batch_size": self.batch_size,
+            "dtype": self.dtype or "float32",
+            "use_cache": self.use_cache,
+            "max_new_tokens": self.max_new_tokens,
+            "clean_up_spaces": self.clean_up_spaces,
+        }
+
+    def reset_timings(self) -> None:
+        self.timings = {}
+        self.counts = {}
 
     # -- inference ---------------------------------------------------------- #
 
@@ -168,28 +224,76 @@ class TrOCREngine:
         """Transcribe line images to ``(text, mean token probability)``, in order."""
         return self._run(images)
 
-    def _run(self, images: Sequence[bytes]) -> list[tuple[str, float | None]]:
+    def transcribe_images(self, images: Sequence[object]) -> list[tuple[str, float | None]]:
+        """Transcribe decoded line images (PIL, RGB) to ``(text, confidence)``, in order.
+
+        The in-memory path: a caller that cuts its crops from a page image it
+        has already decoded hands them over as they are, without encoding each
+        to PNG for :meth:`transcribe_conf` to decode again.
+        """
         self._ensure_loaded()
-        assert self._processor is not None and self._model is not None
+        guard = self._guard()
+        out: list[tuple[str, float | None]] = []
+        for start in range(0, len(images), self.batch_size):
+            with guard():
+                out.extend(self._generate(list(images[start : start + self.batch_size])))
+        return out
+
+    def _guard(self):
         try:
             import torch
 
-            guard = torch.inference_mode
+            return torch.inference_mode
         except ModuleNotFoundError:  # the stub path
-            guard = nullcontext
+            return nullcontext
+
+    def _run(self, images: Sequence[bytes]) -> list[tuple[str, float | None]]:
+        self._ensure_loaded()
+        assert self._processor is not None and self._model is not None
+        guard = self._guard()
         out: list[tuple[str, float | None]] = []
         for start in range(0, len(images), self.batch_size):
+            t0 = time.perf_counter()
             batch = [self._decode(data) for data in images[start : start + self.batch_size]]
+            self._tick("png_decode", t0)
             with guard():
                 out.extend(self._generate(batch))
         return out
 
+    def _tick(self, stage: str, t0: float) -> float:
+        """Add the seconds since ``t0`` to ``stage`` (profiling only); return now."""
+        now = time.perf_counter()
+        if self.profile:
+            self.timings[stage] = self.timings.get(stage, 0.0) + (now - t0)
+        return now
+
+    def _sync(self) -> None:
+        """Wait for the GPU so a stage's time is its own (profiling only)."""
+        if not self.profile:
+            return
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+        except ModuleNotFoundError:
+            pass
+
     def _generate(self, pil_images: list) -> list[tuple[str, float | None]]:
         processor, model = self._processor, self._model
+        t0 = time.perf_counter()
         inputs = processor(images=pil_images, return_tensors="pt")  # type: ignore[operator]
         pixel = inputs.pixel_values
+        t0 = self._tick("processor", t0)
         if hasattr(pixel, "to"):
             pixel = pixel.to(getattr(model, "device", self.device))
+            if self.dtype == "float16":
+                pixel = pixel.half()
+        self._sync()
+        t0 = self._tick("transfer", t0)
+        kwargs: dict = {}
+        if self.use_cache is not None:
+            kwargs["use_cache"] = self.use_cache
         gen = model.generate(  # type: ignore[attr-defined]
             pixel,
             max_new_tokens=self.max_new_tokens,
@@ -197,7 +301,10 @@ class TrOCREngine:
             do_sample=False,
             output_scores=True,
             return_dict_in_generate=True,
+            **kwargs,
         )
+        self._sync()
+        t0 = self._tick("generate", t0)
         texts = processor.batch_decode(  # type: ignore[attr-defined]
             gen.sequences,
             skip_special_tokens=True,
@@ -213,6 +320,15 @@ class TrOCREngine:
             # sequences carry the decoder-start token first; the scores do not
             conf = mean_token_prob(ids[1:], lps, self._skip)
             result.append((tidy(text) if self.clean_up_spaces else text.strip(), conf))
+        self._tick("postprocess", t0)
+        if self.profile:
+            self.counts["lines"] = self.counts.get("lines", 0) + len(result)
+            self.counts["batches"] = self.counts.get("batches", 0) + 1
+            width = max((len(r) for r in ids_rows), default=1) - 1
+            self.counts["steps"] = self.counts.get("steps", 0) + max(0, width)
+            self.counts["tokens"] = self.counts.get("tokens", 0) + sum(
+                1 for ids in ids_rows for tid in ids[1:] if tid not in self._skip
+            )
         return result
 
 

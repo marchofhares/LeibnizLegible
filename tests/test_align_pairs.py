@@ -81,3 +81,44 @@ def test_minted_text_is_one_line() -> None:
     assert pair.record_id == "R1"
     raw = result_to_pairs(res, source="s", strip=False)
     assert "\n" in raw[0].text
+
+
+def test_reader_rows_are_told_apart_and_kept_by_the_reset() -> None:
+    from leibniz import db
+    from leibniz.align.pairs import (
+        count_reader_rows,
+        delete_minted,
+        ensure_gt_ownership,
+        has_reader_rows,
+        insert_gt_pairs,
+        reader_from_source,
+        record_readers,
+    )
+
+    v1 = "AA I,3 N.1 (§70-expired AA reading text; channel ia; katalog r1)"
+    k2 = (
+        "AA I,3 N.2 (§70-expired AA reading text; channel ia; "
+        "reader trocr-kurrent-xvi-xvii; katalog r2)"
+    )
+    assert reader_from_source(v1) is None
+    assert reader_from_source(k2) == "trocr-kurrent-xvi-xvii"
+    assert reader_from_source(None) is None and reader_from_source("transkriptionspool") is None
+    conn = db.init_db(":memory:")
+    ensure_gt_ownership(conn)
+    insert_gt_pairs(
+        conn,
+        [
+            GtPair("P:0001:000", "eins", v1, "fair_copy", 0.9, "open", "r1"),
+            GtPair("P:0001:001", "zwei", k2, "fair_copy", 0.9, "open", "r2"),
+            GtPair("P:0001:002", "drei", k2, "fair_copy", 0.9, "open", "r2"),
+            GtPair("P:0001:003", "nc", "transkriptionspool", "fair_copy", 0.9, "nc"),
+        ],
+    )
+    assert has_reader_rows(conn, "r2") and not has_reader_rows(conn, "r1")
+    assert record_readers(conn, "r2") == {"trocr-kurrent-xvi-xvii"}
+    assert record_readers(conn, "r1") == {None} and record_readers(conn, "r9") == set()
+    assert count_reader_rows(conn) == {"trocr-kurrent-xvi-xvii": 2}
+    removed = delete_minted(conn)
+    assert removed == {"open": 1}
+    left = [r[0] for r in conn.execute("SELECT text FROM gt_lines ORDER BY id")]
+    assert left == ["zwei", "drei", "nc"]  # the reader's rows and the unowned row stay

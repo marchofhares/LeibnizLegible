@@ -115,3 +115,15 @@ def test_gt_export_gives_each_line_one_line_of_text() -> None:
     )
     (row,) = list(iter_gt(conn))
     assert row["text"] == "J'ay fait corriger"
+
+
+def test_gt_export_keeps_reader_rows_labelled_by_source() -> None:
+    from leibniz import db
+    from leibniz.align.pairs import GtPair, insert_gt_pairs
+    from leibniz.release.export import iter_gt
+
+    k2 = "AA I,3 N.7 (§70-expired AA reading text; reader trocr-kurrent-xvi-xvii; katalog R7)"
+    conn = db.init_db(":memory:")
+    insert_gt_pairs(conn, [GtPair("P:0001:000", "vnd daß", k2, "fair_copy", 0.9, "open", "R7")])
+    (row,) = list(iter_gt(conn))
+    assert row["source"] == k2 and row["text"] == "vnd daß"
