@@ -2383,3 +2383,233 @@ pieces; push the branch; print:
   sentence, and that the records themselves follow the export. Do not send.
 Do not merge. Do not deploy.
 ~~~~
+
+### Phase K3 — a Leibniz Kurrent model (run 2026-10-21)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session — under the session preamble of 19 October, given again with the
+prompt and printed first below; the branch `k3-kurrent-model` from main as
+the operator named it; nothing merged or deployed; the operator's "go"
+waited for after Task 0, before the timing pilots and before the kraken 7.1
+side environment, as the preamble says. The machine crashed during Task 2
+and the session resumed from Checkpoint A under the operator's instruction
+printed last. The departures are in `STATUS.md`, Divergences._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026. Read it with the phase prompt that follows;
+where they differ, this preamble wins. It replaces the preamble on the plan
+page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (today:
+   k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K2, C2c, K2b, W5 and K1 entries, Open questions
+   27 and 28, "Next". Prepend your entry to Current state and the Phase log as
+   the prompt says; append the prompt verbatim to PROMPTS.md under "Follow-up
+   phases (2026-10)"; record departures from the prompt, this preamble
+   included, under "Divergences". Names of individuals stay out of STATUS.md
+   and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+Phase K3 — A Leibniz Kurrent model: fine-tune on K2's German ground truth,
+measure it on the letter pool, and put the choice of reader for K4 to the
+operator. One local session on the operator's desktop (WSL2 Ubuntu), stopped
+and resumed at its checkpoints over several days; the GPU.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT; the C3 prompt and its two amendments,
+whose lessons apply here too: staged training, checkpoints chosen on a
+page-disjoint set, the normalization tax of edition text, the error
+composition), SPECS.md, and STATUS.md (the K1, K2 and K2b entries; C3 if
+present; "Next"). If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence. Write the "K3 — a Leibniz Kurrent model" entry in
+STATUS.md after every task; if one exists, continue from its first unfinished
+task.
+
+## Where you run, and the rules that follow from it
+The checkout at /home/evana/LeibnizLegible, the branch the preamble names,
+.venv-k1 (`export UV_PROJECT_ENVIRONMENT=.venv-k1`; kraken, torch with CUDA,
+transformers). The store is read-only, except one runs row per training
+written through db.start_run and db.finish_run, as C3 will (ask before the
+first). Page images from /mnt/d/leibniz-images. Long jobs under nohup with
+logs under logs/, polled, never blocking; a go before any job over an hour,
+any download over 1 GB, any install, and before renting anything. Training
+artefacts under data/train/k3/ and data/models/k3/ (gitignored), described in
+the reports, never committed. Results in reports/kurrent/ as small committed
+files rendered by code from data. Never write a number you did not produce.
+Nothing is deployed in this phase. New Python dependencies join the kurrent
+extra, locked with `uv lock`, torch never bumped; imports stay lazy so the
+tests run without the extra.
+Prerequisites, each verified or the session stops and says which is missing:
+K2 merged (gt_lines rows whose source names "reader trocr-kurrent-xvi-xvii",
+reports/kurrent/k2-mint.md); K2b merged (reports/kurrent/letterpool-testset.csv,
+the texts under data/kurrent/letterpool/, its metric in code). The letter pool
+is nc: evaluation only, never training, never checkpoint selection, numbers
+only in the reports.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+A clean tree, `git pull`; `nvidia-smi`; `df -h data /mnt/d`; baseline ruff +
+pytest. Print the plan (sizes, the two timing pilots, the expected days);
+wait for "go".
+
+## Task 1 — Training data
+One training-set tool serves K3 and C3. If C3 has landed it, reuse it; if not,
+build it under the existing `bench` group (K1 kept the HTR commands there; C3's
+prompt calls the same tool `leibniz htr train-set`), so that C3 reuses it.
+Line crops through the crop machinery into data/train/k3/ (image + .gt.txt,
+Kraken's format; the TrOCR loader reads the same files); estimate the disk
+from a 1,000-line sample first. Training lines: K2's German mint, with the C2b
+exclusions that apply (math, leaked editorial brackets: data/gt/flags.jsonl,
+or the same patterns run over the new lines). A validation set for choosing
+checkpoints, drawn before any training and frozen: whole pieces held out (so
+page-disjoint), stratified by stratum and hand, about 5 % of the lines.
+Nothing from the letter pool and nothing from Dresden (both nc: evaluation
+only). Bullinger's German lines (CC BY-SA) only if the operator asks, as an
+ablation, with the ShareAlike question noted. Report every size. CHECKPOINT A.
+
+## Task 2 — Timing pilots
+Two candidates, each timed on one epoch of 20,000 lines (seconds, VRAM,
+throughput) and extrapolated to the full plan:
+(a) TrOCR from trocr-kurrent-xvi-xvii (VisionEncoderDecoderModel, MIT). A
+model of about 334M parameters does not fine-tune with AdamW in 6 GB: measure,
+then choose among Adafactor, a frozen encoder, gradient checkpointing and fp16,
+and say what each costs in validation CER. A plain PyTorch loop needs nothing
+new; the Trainer would bring accelerate into the kurrent extra.
+(b) Kraken from the PHILIUMM checkpoint
+(data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors, CC BY 4.0;
+ketos, as C3 will use it), its codec grown to German: ß, the umlauts in the
+normalization the harness uses, long s, and any letter the training text has
+that the codec lacks (check the installed kraken's resize option).
+If the plan exceeds a week on this GPU, write tools/k3-rented-gpu.md (what to
+rent, how to move the data, the exact commands, the cost against SPECS §10)
+and ask before any further training. CHECKPOINT B.
+
+## Task 3 — Training
+Both candidates, each a background job with a log and a runs row, staged as
+C3's amendment describes where it applies, checkpoints chosen on the
+validation set only. Artefacts under data/models/k3/<candidate>/. CHECKPOINT
+C after each.
+
+## Task 4 — Evaluation and the choice
+On the frozen letter-pool set, with K2b's metric and code, once per final
+model: overall, per siglum (L, l, K, k) and per year, with the bootstrap
+interval, beside K2b's rows (v1, philiumm, the Bern model as it came). On the
+validation set: CER per stratum and hand, and the error composition
+(insertions and deletions at abbreviation sites, the normalization tax).
+Dresden as a sanity check (a chancery hand not forgotten), numbers only.
+Speed: ms per line on this GPU measured as K1 measured it, and the projected
+time to read every German page from K2's all-in throughput (model, image
+loading from D:, crops). Write reports/kurrent/k3-eval.md and .json, and a
+model card draft per model (data statement with licences: the Bern model MIT,
+PHILIUMM's checkpoint CC BY 4.0, K2's lines open; intended use; "machine
+output, not an edition"; the licence of the result as L1's registry decides,
+or open if L1 has not run). The choice for K4 is the operator's, on the
+numbers: the better letter-pool CER, unless the faster model comes within a
+margin the report proposes, since every re-read of the German pages pays the
+speed difference again. Put the choice to the operator in two sentences and
+record the answer verbatim in STATUS.md ("Next"); K4 starts from it. If the
+operator wants time, record that the choice is open. CHECKPOINT D.
+
+## Finish and hand-over
+The STATUS.md entry: the numbers, the operator's choice (or that it is open)
+with its cost in GPU days, and what K4 needs (the model's path, its version
+string, how to load it as a reader: a CANDIDATES entry). "Key numbers",
+"Next". Append this prompt verbatim to PROMPTS.md under "Follow-up phases
+(2026-10)". ruff + pytest clean, all tests offline. Push, print the compare
+URL, tell the operator what to read (k3-eval.md, the choice), that
+data/models/k3/ and data/train/k3/ must be kept, and that nothing is deployed.
+Do not merge.
+
+## Amendment of 2026-10-10 (after the review; where it differs from the tasks above, it wins)
+- The choice (Task 4) is made on the letter pool's selection half (K2b's
+  split) and reported on its test half. Checkpoints within a candidate are
+  still chosen on the validation set (Task 3). Not the choice between
+  candidates: K2's lines were placed by the Bern reader's readings, so a set
+  drawn from them favours the Bern model.
+- Candidate (b), the fast German model: consider kraken's PP-OCRv6 model
+  (Apache-2.0, released August 2026) as its base, instead of the PHILIUMM
+  checkpoint or beside it. It needs kraken 7.1 (.venv-k1 has 7.0.3 and stays
+  as it is): a load test in a separate environment first. It was trained on
+  the Dresdner Hofdiarium, so the Dresden sanity check in Task 4 does not
+  rank it; the report says so.
+- Prerequisite: K2's audit sheet of 200 lines judged, or the operator's
+  decision to go without (STATUS.md, the K2 entry).
+
+## Operator's note of 21 October (where it differs from the prompt and its amendment, this note wins)
+- Branch: k3-kurrent-model, created from main as the preamble says.
+- The prerequisite "K2's audit sheet judged": the operator decides to go
+  without, conditionally. The sheet (data/kurrent/k2-audit.html, 200 lines,
+  half in Leibniz's own hand) is being sent to a judge at the Leibniz-Edition;
+  no verdict exists yet. Record the decision verbatim in STATUS.md, in the K2
+  entry and in K3's. Consequences:
+  (a) Task 1 keeps every training line tagged in the training set's manifest
+  by hand (Leibniz's own hand under W5's strict rule, against the rest) and by
+  reader (K2's reader rows against the v1-minted rows), so that a later
+  verdict can remove a class of lines without rebuilding the crops.
+  (b) Task 1 adds a cheap screen for misplaced lines before any training,
+  since no judge has looked: per K2 line, the alignment confidence and the
+  ratio of the minted text's length to the Bern reading's length, summarised
+  by hand group against the band the v1-minted Latin and French lines occupy;
+  the share outside the band per group, and the twenty worst line ids, go
+  into the STATUS entry (no new sheet, nothing under data/ committed). If more
+  than about one line in ten of the Leibniz-hand lines falls outside the band,
+  stop at CHECKPOINT A and say so before the timing pilots.
+  (c) Task 3 plans one more ablation for the stronger candidate, to run only
+  if verdicts arrive during the phase or the screen in (b) flags a class: the
+  same training without that class. If neither happens, record the ablation
+  as planned, not run.
+  (d) The model cards state that the precision of the German training lines
+  is unmeasured, the audit pending, with the screen's figures beside the
+  statement.
+- Renting: the operator is willing to rent a 24 GB card for Task 3 if it saves
+  more than two days against this GPU. If so, write tools/k3-rented-gpu.md at
+  CHECKPOINT B with the cost and ask before spending, as the prompt says.
+- A backup of the store may be running in another window (a read-only SQLite
+  backup to D: and an rclone upload). It holds no lock and needs nothing from
+  you.
+~~~~
+
+The operator's instruction after the crash of 21 October, verbatim:
+
+~~~~
+The WSL machine crashed with Bus errors on every process, almost certainly because Ubuntu's virtual disk on the host's C: drive could not grow; C: now has about 40 GB free. Before anything else: run df -h /mnt/c and treat that free space, not df /, as the budget for every write from now on. The state on disk: the branch k3-kurrent-model exists but HEAD is on main at aafcb05 (W6 merged); data/train/k3 holds manifest.jsonl, train, val, train.txt, val.txt and sample; data/models/k3/kraken-pilot exists; no job survived, the machine restarted; the store passed PRAGMA quick_check after the crash. Check out k3-kurrent-model, list its commits against main, read STATUS.md's K3 entry, git status and the logs under logs/, and say which task you were in and whether the training set on disk matches the manifest (sizes and counts) or needs rebuilding. Then: keep the crops where they are and report their total size; write every model checkpoint and optimizer state under /mnt/d/leibniz-train/k3/ instead of data/models/k3/, moving kraken-pilot there and symlinking data/models/k3 to it so the paths in the reports stay as the prompt says; and before each training job state its expected disk use against the C: figure. Continue from the last completed checkpoint.
+~~~~

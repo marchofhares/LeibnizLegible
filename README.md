@@ -126,7 +126,7 @@ records the channel and its terms per volume) by a layout-aware extractor
 margin numbers) — apparatus, commentary and introductions never enter it
 (SPECS §7.2). Minting itself runs where the C1 corpus store lives.
 
-### Kurrent track (K1, K2b)
+### Kurrent track (K1, K2, K2b, K3)
 
 ```bash
 uv sync --extra bench --extra gt --extra kurrent   # kraken + pdfplumber + transformers (TrOCR), in a side environment
@@ -138,6 +138,13 @@ uv run leibniz align letterpool-fetch           # the GWLB letter pool's checked
 uv run leibniz align letterpool-parse           # the PDFs into letters (heading, witness, reading text) → data/kurrent/letterpool/, counts in reports/kurrent/letterpool-parse.md
 uv run leibniz align letterpool-set             # the German letters placed on the store's pages, the test set drawn and frozen → reports/kurrent/letterpool-testset.csv
 uv run leibniz align letterpool-eval --read     # the readers on the frozen set (GPU, resumable), then the error rates → reports/kurrent/letterpool-eval.md
+uv run leibniz align kurrent-read               # every line of the German pieces read by the Bern reader into data/kurrent/k2-readings/ (K2; resumable)
+uv run leibniz align kurrent-mint               # the factory over those readings, the rule, the dry run → reports/kurrent/k2-mint.md; --write mints after a backup and a go
+uv run leibniz bench train-set --sample 1000    # K3: the German mint selected, tagged, screened, split (the validation pieces frozen) and sized → reports/kurrent/k3-trainset.md
+uv run leibniz bench train-set --workers 8      # … then cut into data/train/k3/ (image + .gt.txt, Kraken's format; the TrOCR loop reads the same files)
+uv run leibniz bench train-trocr --pilot        # the memory settings timed on the Bern checkpoint (AdamW, Adafactor, frozen encoder, checkpointing, fp16)
+uv run leibniz bench train-kraken --pilot --start   # one ketos epoch from the PHILIUMM checkpoint with the codec grown; --account reads it back and scores it
+uv run leibniz bench k3-report pilots           # the two pilots against the week → reports/kurrent/k3-pilots.md
 ```
 
 The German stratum has no ground truth of its own, so the Kurrent track measures
