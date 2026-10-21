@@ -1,0 +1,62 @@
+{
+ "account": {
+  "reader": "trocr-kurrent-xvi-xvii",
+  "gt_lines": 333680,
+  "distinct_refs": 333680,
+  "reader_rows": 50720,
+  "german_rows": 60163,
+  "won_rows": 50720,
+  "won_rows_reader": 50720,
+  "won_rows_v1": 0,
+  "reader_rows_outside_won": 0,
+  "leibniz_hand_rows": 2612,
+  "leibniz_hand_rows_reader": 2093,
+  "n_won_pieces": 1178,
+  "n_german_records": 2148,
+  "n_leibniz_hand_records": 81,
+  "reader_rows_by_stratum": {
+   "fair_copy": 58,
+   "heavy_revision": 34149,
+   "light_revision": 16260,
+   "scrap": 253
+  },
+  "german_rows_by_stratum": {
+   "fair_copy": 59,
+   "heavy_revision": 40641,
+   "light_revision": 19057,
+   "scrap": 406
+  },
+  "won_pairs": 58991,
+  "won_pairs_distinct_refs": 51435,
+  "refs_claimed_twice": 6344,
+  "excess_claims": 7556,
+  "refs_now_reader_row": 50720,
+  "refs_now_v1_row": 715,
+  "refs_now_v1_row_german": 714,
+  "refs_now_no_row": 0,
+  "v1_margin_mean": 0.059804195804195805,
+  "v1_ties": 123,
+  "run": {
+   "run_id": 609,
+   "started_at": "2026-10-21T11:36:52Z",
+   "finished_at": "2026-10-21T11:36:55Z",
+   "n_input": 1178,
+   "n_ok": 1178,
+   "n_failed": 0,
+   "git_sha": "92828ac629259171ee776b662ed61e0dd827ae6a"
+  }
+ },
+ "stats": {
+  "run_id": 609,
+  "pieces": 1178,
+  "written_pieces": 1178,
+  "skipped_resume": 0,
+  "rows_removed": 32497,
+  "rows_written": 50723,
+  "rows_won": 343,
+  "rows_lost": 8268,
+  "errors": {},
+  "seconds": 3.1104012000141665,
+  "gt_lines_after": 333680
+ }
+}

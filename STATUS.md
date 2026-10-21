@@ -9,8 +9,8 @@ _Last updated: 2026-10-20 (**C2c — the re-mint under W5's rules, done on the d
 
 ## Current state
 
-**2026-10-20/21: K2 — German ground truth, in progress on the desktop; the
-branch `k2-german-gt`; nothing deployed.** The Bern Kurrent reader
+**2026-10-20/21: K2 — German ground truth, done on the desktop; the
+branch `k2-german-gt`, the pull request the operator's; nothing deployed.** The Bern Kurrent reader
 (`trocr-kurrent-xvi-xvii`, K1's gate) over every recognised line of the
 census's German pieces, then the factory over those readings, as the plan
 page's K2 prompt (with its amendment of 10 October) and the preamble of 19
@@ -23,9 +23,17 @@ engine fix at 19:40): 310,831 lines read, none skipped; Checkpoint A). Task
 2 done (the dry run, 1 h 05 min: **the Bern reading lifts the German yield at
 the same gate from 10.8 % to 16.9 %, Leibniz's own hand 9.5 → 12.5 %; the
 rule gives 1,178 pieces to it and leaves 402; the German records' mint
-42,278 → 68,769 lines expected**; Checkpoint B). Task 3 (the write) awaits
-the go; the backup copy of 20 October verified byte-identical past the
-header. The K2 entry in the Phase log has the detail.
+42,278 → 68,769 lines expected**; Checkpoint B). Task 3 done (the backup
+copy of 20 October verified byte-identical past the header; the go; the
+write in 7.8 s, run 609: **`gt_lines` 315,797 → 333,680 rows, 50,720 of them
+the reader's; the German records 42,278 → 60,163 lines, Leibniz's own hand
+1,888 → 2,612** — the dry run's expectation counted lines two pieces share
+twice, the store keeps each once; gt-report and audit-reach count the reader
+rows as decided, 50,720 and none skipped; Checkpoint C). Finish done: the
+200-line audit sheet half from Leibniz's own hand, half from the others;
+`k2-write.md`; 866 tests. **K3 starts after the sheet is judged, or after the
+operator decides to go without.** The K2 entry in the Phase log has the
+detail.
 
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
 `c2c-remint` waits for the operator's pull request, nothing deployed.** The
@@ -737,7 +745,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3 (the write awaits the go)
+### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C) · ✅ Finish · ⏳ the operator's pull request
 
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
@@ -939,6 +947,102 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   (`cmp -i 100`, exit 0, no differing byte; 1 min 32 s to hash the store on
   `/`, 3 min 59 s the copy on `/mnt/d`). The copy is a faithful backup by
   content; the Task 3 write waits for the operator's go.
+- **The write (Task 3; Checkpoint C;** `logs/k2-mint-write.log`,
+  `data/kurrent/k2-readings/write-stats.json`; the account in
+  `reports/kurrent/k2-write.md` and `k2-write.json`**).** The operator said
+  "go" (with two additions for after the write, below). `leibniz align
+  kurrent-mint --write` replayed the saved dry run, 2026-10-21 07:36 EDT,
+  **7.8 s** wall: every record's stored mint re-read and found as the dry run
+  saw it; **runs row 609** (`gt_factory`, model
+  `retro-aligner+trocr-kurrent-xvi-xvii`, 1,178 pieces in, 1,178 written, 0
+  failed, code `92828ac`); **rows removed 32,497, written 50,723**; the
+  factory's ownership rule: 343 lines won from another record's row, 8,268
+  pairs lost to one. **`gt_lines` 315,797 → 333,680 rows** (+17,883, +5.7 %),
+  against the dry run's 342,288 expected — the 8,608 the account explains:
+  the dry run's 58,991 pairs on the won pieces name **51,435 distinct lines**
+  (6,344 lines were claimed by two or more Bern-won pieces sharing a page,
+  7,556 claims beyond the first — the dry run counted each piece's pairs,
+  the store keeps one row per line); of the distinct lines, **50,720 are
+  the reader's rows now**, **715 stayed with a v1 row of another record**
+  (714 of them German pieces the rule left to v1, 1 of another language)
+  whose alignment confidence was higher or tied (mean margin +0.060; 123
+  ties, where the lower record id keeps the line), 0 have no row; the 3
+  rows written and gone again were won by a later piece's higher
+  confidence. Every line is in `gt_lines` once (333,680 distinct
+  references). **Rows on the 2,148 German records 42,278 → 60,163 (+42.3 %;
+  the dry run's 68,769 counted shared lines twice)**: reader 50,720, v1
+  9,443; by stratum fair_copy 59, light_revision 19,057, heavy_revision
+  40,641, scrap 406; reader rows fair 58 · light 16,260 · heavy 34,149 ·
+  scrap 253, all `open`. **Leibniz's own hand: 1,888 → 2,612 rows** on the
+  records `catalog/hands.py` gives him (81 records, 54 of them with lines
+  at the gate), 2,093 of them the reader's. Reader rows outside the won
+  pieces 0; v1 rows left on them 0.
+- **The consumers after the write (Task 3).** `leibniz align gt-report`
+  (17 s): **333,680 open-bucket lines**, a table "aligned on a reader's
+  text" — `trocr-kurrent-xvi-xvii` **50,720**, the v1 text 282,960 — the
+  reader rows counted in every table of `reports/gt-factory.md`.
+  `leibniz align audit-reach` (25 s, the operator's addition: confirm it
+  treats K2's rows as the Task 3 decision says and skips none as
+  non-canonical): **`n_reader_rows` 50,720, left out of every flag count
+  as decided** (the hyphen flag compares the minted text with the store's
+  v1 HTR text, which is not the text those rows were aligned on);
+  **`n_skipped` 0** — no row's reference fails the canonical
+  `{page_id}:{line_seq:03d}` form. The reach census therefore covers the
+  282,960 v1 rows on 14,834 pages from 5,167 records (was 315,797 / 17,669
+  / 6,130 before K2 replaced 1,178 German pieces' rows); its flags moved
+  with them — hyphen 848 → 736 (0.26 %), math 255 → 254, addition 262,243 →
+  234,896 (83.0 %), eigh 57,559 → 55,309 (18.3 → 19.7 %), Leibniz's hand
+  (strict) 46,893 → 45,524 (14.9 → 16.2 %), bracket 4,811 → 4,170, lh35
+  9,162 → 9,124; `data/gt/flags.jsonl` rewritten (gitignored). The
+  pre-K2 flags file for C3 is the one C2c wrote; C3 should re-run
+  `audit-reach` or read this one. `gt-reset` keeps reader rows (tested),
+  the v1 factory skips a reader-minted record (tested), the release export
+  carries the reader in the source string (tested).
+- **The audit sheet (Finish; the operator's addition: stratified by hand).**
+  `leibniz align kurrent-mint --audit` (46 s) → `data/kurrent/k2-audit.html`
+  (69.6 MB, every crop inlined) and `k2-audit-lines.csv`, gitignored, bilingual
+  (German beside English; the verdict values stay the C2 CSV's). **200 of the
+  reader's rows, seed 20261020: 100 from the 2,093 in Leibniz's own hand
+  (98 heavy_revision, 2 light_revision — all that pool has of them), 100
+  from the 48,627 in other hands (25 per stratum: fair_copy, light_revision,
+  heavy_revision, scrap)**, each half drawn equal per stratum under the
+  seed, the two mixed under the seed again. The sheet does not say which
+  half a line is from (a `data-group` attribute carries it, invisibly; the
+  help text says the sheet is half and half); the lines CSV's new `group`
+  column (`leibniz_hand` / `other_hands`) does — **to score by hand, join
+  the judge's verdict CSV with `k2-audit-lines.csv` on `ref`** (the scorer
+  `leibniz align audit-score` does it when the lines CSV carries a group:
+  a table by group beside the one by stratum). Why by hand: K2b put this reader near 49 % CER on
+  Leibniz's own letters, close to the aligner's break-even on drafts (K1:
+  ≈ 48 % CER on heavy revision), so misplaced lines would hide there; a
+  precision figure for his hand on its own is what K3 needs before it
+  weights those lines. Every one of the 200 lines has its crop.
+- **What K3 needs (the hand-over).** The German training rows are the
+  60,163 on the German records — the 50,720 reader rows
+  (`gt_lines.source LIKE '%; reader trocr-kurrent-xvi-xvii;%'`, or
+  `record_id` in `data/kurrent/k2-decisions.jsonl` with `winner = bern`)
+  and the 9,443 v1 rows on the 402 pieces the rule left (`winner =
+  stored`); hold out the 1,472 pages of `reports/philiumm/heldout_pages.csv`
+  and the 134 letters of K2b's pool; the 2,612 lines in Leibniz's own hand
+  carry the audit's verdict once judged. **K3 starts after the sheet is
+  judged, or after the operator decides to go without**; the precision
+  figures by hand come from the join above. The readings
+  (`data/kurrent/k2-readings/`, 310,831 rows) are the reader's text on
+  every German line, usable as a weak teacher; the backup copy
+  `/mnt/d/leibniz-backups/inventory-2026-10-20.sqlite` is the store before
+  K2's write — keep it, and `data/kurrent/`, until K3 is merged. The store
+  changed, so the backup chore runs again with today's date.
+- **Code of the finish.** `audit.sample_lines` takes `record_ids` /
+  `exclude_records`; `AuditLine.group` and the lines CSV's `group` column
+  (every sheet, empty where unused); `kurrent_mint.build_audit_sheet` draws
+  by hand and returns the counts by group; `account_write` /
+  `render_write_report` / `write_write_report` and `kurrent-mint --account`
+  (read-only) wrote `k2-write.md`; the write saves its counters beside the
+  readings. Ruff clean; **pytest 866 passed, 1 skipped**. Branch
+  `k2-german-gt`, pushed; compare
+  https://github.com/marchofhares/leibnizlegible/compare/main...k2-german-gt?expand=1
+  — the operator opens and merges the pull request. Nothing deployed,
+  nothing sent; the website serves its own copy of the store.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 
@@ -3343,7 +3447,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **841** (2026-10-20, K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **866** (2026-10-21, K2, in `.venv-k1`; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
 | **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
 | **K2b German CER, unfiltered (2026-10-20)** | `philiumm` policy, pooled, 95 % bootstrap over letters: v1 **46.6 %** (43.3–49.5 %) · philiumm **52.9 %** (49.8–55.6 %) · trocr-kurrent-xvi-xvii **37.0 %** (32.5–41.0 %) · trocr-hanse-xvi **35.6 %** (31.2–39.6 %) (evaluate only) · trocr-hanse-xvii **38.9 %** (34.6–42.8 %) (evaluate only); test half 48.2 / 54.6 / 39.2 / 38.0 / 41.2 %; the correspondents' hands (K/k) 38.5 / 45.5 / 23.2 / 22.8 / 26.4 %, Leibniz's own (L) 53.7 / 59.3 / 49.2 / 46.7 / 49.8 %; per-letter medians 42.9 / 49.4 / 31.5 / 28.3 / 32.8 %; **selected** (the aligner's accepted lines only): yield 21.6 / 15.0 / 26.5 / 28.7 / 26.6 %, CER 28.7 / 31.9 / 15.6 / 15.5 / 18.0 % |
@@ -3950,6 +4055,30 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**K2 (2026-10-21): German ground truth, done on the desktop; the branch
+`k2-german-gt` carries the code, the reports and the docs (compare:
+https://github.com/marchofhares/leibnizlegible/compare/main...k2-german-gt?expand=1);
+the operator opens and merges the pull request; nothing deployed** (the
+website serves its own copy of the store). Read first:
+`reports/kurrent/k2-mint.md` (the yields, the rule's verdicts, what it
+measures and what it does not), then `k2-write.md` (what the store holds
+now and where the dry run's expectation went) and `k2-read.md` (the
+reading job and the setting). The master store changed today (`gt_lines`:
+32,497 rows deleted, 50,723 written under run 609), so the backup chore
+runs again with today's date; the copy from before the write is
+`/mnt/d/leibniz-backups/inventory-2026-10-20.sqlite` — keep it, and
+`data/kurrent/` (the readings, the decisions, the pairs, the sheets),
+until K3 is merged. **The audit sheet `data/kurrent/k2-audit.html` is the
+operator's to hand to a judge** (half the lines in Leibniz's own hand,
+half in other hands, mixed, the sheet silent on which; the verdict CSV
+joins `k2-audit-lines.csv` on `ref` for the figure by hand, which
+`leibniz align audit-score` reports as a table by group). **K3 starts after the sheet is judged,
+or after the operator decides to go without** — on the 60,163 lines of the
+German records (50,720 the reader's), the held-out pages and K2b's 134
+letters excluded, with the precision by hand as the weight on Leibniz's
+own lines. C3 reads `data/gt/flags.jsonl` as `audit-reach` wrote it today
+(the reader rows left out, 282,960 v1 rows flagged).
 
 **C2c (2026-10-20): the re-mint, done on the desktop; the branch
 `c2c-remint` carries the reports and docs (compare:

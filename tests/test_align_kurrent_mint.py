@@ -319,14 +319,39 @@ def test_write_mint_replaces_only_the_won_pieces_and_is_idempotent(tmp_path: Pat
     assert res2.minted and res2.n_minted == 4
     assert conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0] == 8
     # the audit sheet from the reader's rows, bilingual
-    html_path, csv_path, by_stratum = M.build_audit_sheet(
+    html_path, csv_path, by_stratum, by_group = M.build_audit_sheet(
         conn, readings, reader=READER, images_root=images, out_dir=tmp_path / "audit", n=3, seed=2
     )
     page = html_path.read_text(encoding="utf-8")
     assert by_stratum == {"fair_copy": 3} and page.count("data:image/png;base64,") == 3
+    assert by_group == {} and "Half of the lines" not in page
     assert "richtig" in page and "unlesbar" in page and "Deutsch." in page
     assert f"{READER} (0.90)" in page and "value='correct'" in page
     assert csv_path.read_text(encoding="utf-8").count("\n") == 4
+    # stratified by hand: g1 is Leibniz's, nothing of the reader's lies outside it
+    split = M.build_audit_sheet(
+        conn,
+        readings,
+        reader=READER,
+        images_root=images,
+        out_dir=tmp_path / "audit-hand",
+        n=4,
+        seed=2,
+        leibniz_hand_ids={"g1"},
+    )
+    assert split[3] == {"leibniz_hand": 2} and split[2] == {"fair_copy": 2}
+    rows = split[1].read_text(encoding="utf-8").splitlines()
+    assert rows[0].endswith(",group") and all(r.endswith(",leibniz_hand") for r in rows[1:])
+    split_page = split[0].read_text(encoding="utf-8")
+    assert "data-group='leibniz_hand'" in split_page and "Die Hälfte der Zeilen" in split_page
+    assert "leibniz_hand" not in split_page.replace("data-group='leibniz_hand'", "")
+    # the write, accounted from the store
+    acc = M.account_write(conn, run2.decisions, run2.pairs, reader=READER)
+    assert acc["reader_rows"] == 4 and acc["won_pairs"] == 4 and acc["won_pairs_distinct_refs"] == 4
+    assert acc["refs_now_reader_row"] == 4 and acc["refs_now_v1_row"] == 0
+    assert acc["refs_now_no_row"] == 0 and acc["run"]["run_id"] == ws3.run_id  # the latest run
+    text = M.render_write_report(acc, {**ws2.as_dict(), "gt_lines_after": 8})
+    assert "**4 distinct lines**" in text and f"run {ws3.run_id}" in text and "None" not in text
     english = M.build_audit_sheet(
         conn,
         readings,
@@ -406,9 +431,21 @@ def test_cli_kurrent_mint_dry_run_write_and_audit(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "gt_lines now 8 rows" in result.output
     result = runner.invoke(
-        app, [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au")]
+        app,
+        [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au"), "--no-by-hand"],
     )
     assert result.exit_code == 0, result.output
     assert (tmp_path / "au" / "k2-audit.html").exists() and "2 lines" in result.output
+    assert "not split by hand" in result.output
+    # by hand (the default): g1 is Leibniz's and holds every reader row, so one half is empty
+    result = runner.invoke(
+        app, [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au2")]
+    )
+    assert result.exit_code == 0, result.output
+    assert "leibniz_hand 1" in result.output.replace("\n", "")
+    result = runner.invoke(app, [*common, "--account"])
+    assert result.exit_code == 0, result.output
+    assert "k2 write accounted" in result.output.replace("\n", "")
+    assert (tmp_path / "reports" / "k2-write.md").exists()
     result = runner.invoke(app, [*common, "--readings-dir", str(tmp_path / "nothing")])
     assert result.exit_code != 0

@@ -382,3 +382,35 @@ def test_sample_lines_leaves_reader_rows_out_unless_asked(tmp_path: Path) -> Non
     assert "For each line" not in page
     assert "For each line" in render_sheet(theirs)
     conn.close()
+
+
+def test_score_by_group_joins_the_lines_csv(tmp_path: Path) -> None:
+    lines = tmp_path / "k2-audit-lines.csv"
+    lines.write_text(
+        "ref,stratum,align_conf,folio,gt_text,htr_text,image,group\n"
+        "W:0001:001,heavy_revision,0.9,,a,a,yes,leibniz_hand\n"
+        "W:0001:002,heavy_revision,0.9,,b,b,yes,leibniz_hand\n"
+        "W:0002:001,fair_copy,0.9,,c,c,yes,other_hands\n"
+        "W:0002:002,scrap,0.9,,d,d,yes,other_hands\n",
+        encoding="utf-8",
+    )
+    rows = [
+        {"ref": "W:0001:001", "stratum": "heavy_revision", "verdict": "correct", "note": ""},
+        {"ref": "W:0001:002", "stratum": "heavy_revision", "verdict": "wrong", "note": ""},
+        {"ref": "W:0002:001", "stratum": "fair_copy", "verdict": "correct", "note": ""},
+        {"ref": "W:0002:002", "stratum": "scrap", "verdict": "", "note": ""},
+        {"ref": "W:0009:001", "stratum": "scrap", "verdict": "boundary", "note": ""},
+    ]
+    by = audit.score_by_group(rows, lines)
+    assert list(by) == ["leibniz_hand", "other_hands", "ungrouped"]
+    assert by["leibniz_hand"].n_scored == 2 and by["leibniz_hand"].precision == 0.5
+    assert by["other_hands"].n_scored == 1 and by["other_hands"].precision == 1.0
+    text = "\n".join(audit.render_group_scores(by))
+    assert "| leibniz_hand | 2 | 1 | 0 | 1 | 0 | 50.0 %" in text and "## By group" in text
+    # a lines CSV without groups (every other sheet) gives nothing
+    plain = tmp_path / "gt-audit-lines.csv"
+    plain.write_text(
+        "ref,stratum,align_conf,folio,gt_text,htr_text,image,group\nW:0001:001,fair_copy,,,a,a,yes,\n",
+        encoding="utf-8",
+    )
+    assert audit.score_by_group(rows, plain) == {}

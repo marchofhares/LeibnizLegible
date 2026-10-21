@@ -663,6 +663,18 @@ def kurrent_mint(
     english_only: bool = typer.Option(
         False, "--english-only", help="Audit sheet labels in English only (default: German too)."
     ),
+    by_hand: bool = typer.Option(
+        True,
+        "--by-hand/--no-by-hand",
+        help="Audit sheet: half the lines from the records in Leibniz's own hand (per the "
+        "decisions file), half from the others.",
+    ),
+    account: bool = typer.Option(
+        False,
+        "--account",
+        help="After a write: account for the dry run's pairs in the store (read-only) into "
+        "reports/kurrent/k2-write.md, then exit.",
+    ),
 ) -> None:
     """The factory over the Kurrent readings, piece by piece: dry run, report, write (K2)."""
     from datetime import date
@@ -678,10 +690,35 @@ def kurrent_mint(
     readings = P.load_readings(readings_dir, reader)
     if not readings:
         raise typer.BadParameter(f"no readings for {reader} under {readings_dir}")
-    if audit:
+    pairs_file = M.pairs_path_for(decisions)
+    if account:
+        if not (decisions.exists() and pairs_file.exists()):
+            raise typer.BadParameter(f"no dry run to account for: {decisions} / {pairs_file}")
         conn = P.open_readonly(db_path)
         try:
-            html_path, csv_path, by_stratum = M.build_audit_sheet(
+            acc = M.account_write(
+                conn, M.load_decisions(decisions), M.load_pairs(pairs_file), reader=reader
+            )
+        finally:
+            conn.close()
+        stats_path = readings_dir / "write-stats.json"
+        stats = json.loads(stats_path.read_text(encoding="utf-8")) if stats_path.exists() else None
+        md, js = M.write_write_report(acc, stats, reports_dir=reports_dir)
+        _console.print(
+            f"[bold]k2 write accounted[/bold] → {md} and {js}: gt_lines {acc['gt_lines']:,}, "
+            f"reader rows {acc['reader_rows']:,}; the won pieces' {acc['won_pairs']:,} pairs name "
+            f"{acc['won_pairs_distinct_refs']:,} lines — {acc['refs_now_reader_row']:,} reader "
+            f"rows now, {acc['refs_now_v1_row']:,} kept by a v1 row, "
+            f"{acc['refs_now_no_row']:,} without a row"
+        )
+        return
+    if audit:
+        own_ids: set[str] = set()
+        if by_hand and decisions.exists():
+            own_ids = {d.record_id for d in M.load_decisions(decisions) if d.leibniz_hand}
+        conn = P.open_readonly(db_path)
+        try:
+            html_path, csv_path, by_stratum, by_group = M.build_audit_sheet(
                 conn,
                 readings,
                 reader=reader,
@@ -690,12 +727,18 @@ def kurrent_mint(
                 n=audit_n,
                 seed=seed,
                 bilingual=not english_only,
+                leibniz_hand_ids=own_ids or None,
             )
         finally:
             conn.close()
         _console.print(
             f"[bold]k2 audit sheet[/bold] → {html_path} ({sum(by_stratum.values())} lines: "
             + ", ".join(f"{k} {v}" for k, v in sorted(by_stratum.items()))
+            + (
+                "; by hand " + ", ".join(f"{k} {v}" for k, v in sorted(by_group.items()))
+                if by_group
+                else "; not split by hand"
+            )
             + f"); lines CSV {csv_path}"
         )
         return
@@ -719,7 +762,6 @@ def kurrent_mint(
         if done["n"] % 200 == 0:
             _console.print(f"  {done['n']:,} pieces aligned")
 
-    pairs_file = M.pairs_path_for(decisions)
     if write:
         ctx = open_db(db_path)
         conn = ctx.__enter__()
@@ -1356,7 +1398,9 @@ def audit_score(
         audit_summary,
         read_verdicts,
         render_agreement,
+        render_group_scores,
         render_score,
+        score_by_group,
         score_verdicts,
         text_evidence,
         verdict_agreement,
@@ -1395,6 +1439,12 @@ def audit_score(
     )
     note = f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); {weight_note}."
     sections: list[list[str]] = []
+    groups = score_by_group(rows, lines_csv) if lines_csv is not None else {}
+    if groups:
+        sections.append(render_group_scores(groups))
+        for name, g in groups.items():
+            gp = "—" if g.precision is None else f"{100 * g.precision:.1f} %"
+            _console.print(f"[bold]{name}[/bold]: precision {gp} on {g.n_scored} scored lines")
     if compare is not None:
         la, _, lb = compare_labels.partition(",")
         agr = verdict_agreement(

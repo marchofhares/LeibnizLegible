@@ -2234,3 +2234,17 @@ Read STATUS.md's W5 entry first; the preamble's merge line brings W5 in.
   verdict values stay the C2 CSV's), and keep the judge's name out of the
   repo: write "a reader at the Leibniz-Edition" and the date.
 ~~~~
+
+The operator's additions in chat with the go for the write (2026-10-21),
+verbatim:
+
+~~~~
+Two additions for after the write: (1) the 200-line audit sheet is
+stratified by hand, half from lines in Leibniz's own hand and half from the
+others, seeded as before, so the judge's verdicts give a precision figure
+for his hand on its own; K2b put the Bern reader near 49 % CER there, close
+to the aligner's precision break-even on drafts, so that is where misplaced
+lines would hide. (2) After gt-report, run audit-reach and confirm it treats
+K2's rows the way your Task 3 decision says and skips no row as
+non-canonical; put both counts in the STATUS entry.
+~~~~

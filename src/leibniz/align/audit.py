@@ -40,7 +40,7 @@ import json
 import math
 import random
 import sqlite3
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -75,6 +75,7 @@ class AuditLine:
     image_note: str = ""
     alt_text: str | None = None  # a second reading to show (P1: PHILIUMM's aligned text)
     alt_label: str = ""  # how to name it on the sheet
+    group: str = ""  # a grouping the lines CSV carries (K2: the hand); not shown on the sheet
 
 
 @dataclass(slots=True)
@@ -122,23 +123,40 @@ def allocate(available: dict[str, int], n: int) -> dict[str, int]:
 
 
 def sample_lines(
-    conn: sqlite3.Connection, n: int = DEFAULT_N, *, seed: int = 0, reader: str | None = None
+    conn: sqlite3.Connection,
+    n: int = DEFAULT_N,
+    *,
+    seed: int = 0,
+    reader: str | None = None,
+    record_ids: Iterable[str] | None = None,
+    exclude_records: bool = False,
 ) -> list[AuditLine]:
     """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``.
 
     The sheet for the PHILIUMM team draws from the lines aligned on the store's
     v1 text: rows whose source names a reader (K2's mint from the Bern Kurrent
     reading) are left out, since that model does not read Kurrent. ``reader``
-    draws from that reader's rows instead (K2's own audit sheet).
+    draws from that reader's rows instead (K2's own audit sheet). ``record_ids``
+    narrows the pool to those records' rows — or, with ``exclude_records``, to
+    every other record's (K2: the lines in Leibniz's own hand against the rest).
     """
-    pick = f"{READER_SQL}" if reader else f"NOT ({READER_SQL})"
+    pick = f"NOT ({READER_SQL})"
+    base: list = []
     if reader:
         pick = "source LIKE ?"
+        base = [f"%; reader {reader};%"]
+    if record_ids is not None:
+        ids_in = sorted({str(r) for r in record_ids})
+        if ids_in:
+            op = "NOT IN" if exclude_records else "IN"
+            pick += f" AND CAST(record_id AS TEXT) {op} ({','.join('?' * len(ids_in))})"
+            base += ids_in
+        elif not exclude_records:
+            pick += " AND 0"
     counts = {
         (row[0] or "unknown"): row[1]
         for row in conn.execute(
-            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {pick} GROUP BY stratum",
-            (f"%; reader {reader};%",) if reader else (),
+            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {pick} GROUP BY stratum", base
         )
     }
     rng = random.Random(seed)
@@ -146,8 +164,7 @@ def sample_lines(
     for stratum, k in allocate(counts, n).items():
         where = "stratum IS NULL" if stratum == "unknown" else "stratum = ?"
         params: tuple = () if stratum == "unknown" else (stratum,)
-        if reader:
-            params = (*params, f"%; reader {reader};%")
+        params = (*params, *base)
         ids = [
             r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where} AND {pick}", params)
         ]
@@ -401,7 +418,9 @@ def write_sheet(
     )
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image"])
+        w.writerow(
+            ["ref", "stratum", "align_conf", "folio", "gt_text", "htr_text", "image", "group"]
+        )
         for ln in lines:
             w.writerow(
                 [
@@ -412,6 +431,7 @@ def write_sheet(
                     ln.gt_text,
                     ln.htr_text or "",
                     "yes" if ln.crop_png else ln.image_note,
+                    ln.group,
                 ]
             )
     by_stratum: dict[str, int] = {}
@@ -544,7 +564,10 @@ def render_sheet(
     A("<span id='count'></span></div>")
     for k, ln in enumerate(lines, start=1):
         ref = html.escape(ln.ref)
-        A(f"<div class='item' data-ref='{ref}' data-stratum='{html.escape(ln.stratum)}'>")
+        A(
+            f"<div class='item' data-ref='{ref}' data-stratum='{html.escape(ln.stratum)}' "
+            f"data-group='{html.escape(ln.group)}'>"
+        )
         conf = "" if ln.align_conf is None else f" · conf {ln.align_conf:.2f}"
         folio = f" · fol. {html.escape(ln.label)}" if ln.label else ""
         A(
@@ -766,6 +789,53 @@ def score_verdicts(
     for stratum, s in by.items():
         s.weight = ((weights or {}).get(stratum, 0) / total) if total else 1.0 / len(by)
     return AuditScore(by_stratum=by, n_rows=len(rows), n_unjudged=unjudged)
+
+
+def score_by_group(
+    rows: Sequence[dict[str, str]], lines_csv: Path | str
+) -> dict[str, StratumScore]:
+    """Tally the verdicts by the lines CSV's ``group`` column (K2: the hand), joined on
+    ``ref``; empty when the CSV has no group or every group is blank."""
+    with Path(lines_csv).open(newline="", encoding="utf-8-sig") as fh:
+        groups = {r["ref"]: (r.get("group") or "").strip() for r in csv.DictReader(fh)}
+    if not any(groups.values()):
+        return {}
+    by: dict[str, StratumScore] = {}
+    for r in rows:
+        group = groups.get((r.get("ref") or "").strip(), "") or "ungrouped"
+        verdict = (r.get("verdict") or "").strip().lower()
+        if verdict not in VERDICTS:
+            continue
+        s = by.setdefault(group, StratumScore(group))
+        s.n_judged += 1
+        setattr(s, verdict, getattr(s, verdict) + 1)
+    return dict(sorted(by.items()))
+
+
+def render_group_scores(by_group: Mapping[str, StratumScore]) -> list[str]:
+    """A markdown block: precision by the lines CSV's group (K2: Leibniz's own hand against
+    the other hands), pooled over strata, with Wilson intervals."""
+    out = ["## By group", ""]
+    out.append(
+        "| group | judged | correct | boundary | wrong | unreadable | precision | 95 % CI | "
+        "usable |"
+    )
+    out.append("|---|---:|---:|---:|---:|---:|---:|---|---:|")
+    for name, s in by_group.items():
+        p = "—" if s.precision is None else f"{100 * s.precision:.1f} %"
+        ci = "—" if s.interval is None else f"{100 * s.interval[0]:.0f}–{100 * s.interval[1]:.0f} %"
+        u = "—" if s.usable is None else f"{100 * s.usable:.1f} %"
+        out.append(
+            f"| {name} | {s.n_judged} | {s.correct} | {s.boundary} | {s.wrong} | {s.unreadable} | "
+            f"{p} | {ci} | {u} |"
+        )
+    out.append("")
+    out.append(
+        "*group* is the lines CSV's `group` column (K2's sheet: `leibniz_hand`, the lines on "
+        "records in Leibniz's own hand, against `other_hands`), each group pooled over its strata "
+        "and unweighted — the draw was half and half, equal per stratum within each half."
+    )
+    return out
 
 
 # Folded minted↔HTR similarity above which a "wrong"/"unreadable" verdict, or
@@ -1040,9 +1110,11 @@ __all__ = [
     "lines_for_refs",
     "read_verdicts",
     "render_agreement",
+    "render_group_scores",
     "render_score",
     "render_sheet",
     "sample_lines",
+    "score_by_group",
     "score_verdicts",
     "text_evidence",
     "verdict_agreement",

@@ -1,6 +1,6 @@
 # GT factory — retro-aligned ground truth at scale (Phase C2)
 
-_Leibniz Legible, Phase C2. Generated 2026-10-20. Deliverable of PROMPTS C2 (SPECS §1.4, §6, §7). Counts are queried from the store by `leibniz align gt-report`; prose is templated._
+_Leibniz Legible, Phase C2. Generated 2026-10-21. Deliverable of PROMPTS C2 (SPECS §1.4, §6, §7). Counts are queried from the store by `leibniz align gt-report`; prose is templated._
 
 ## The factory
 
@@ -104,42 +104,49 @@ The one factory step that cannot be unit-tested offline — vision-LLM extractio
 
 ## Minted ground truth
 
-- **Open-bucket aligned lines (CC BY):** 315,797
+- **Open-bucket aligned lines (CC BY):** 333,680
 - **NC-bucket lines (internal only, never exported):** 0
-- **vs the ≥50k target:** 632% · **vs PHILIUMM's ~63k baseline:** 501%
+- **vs the ≥50k target:** 667% · **vs PHILIUMM's ~63k baseline:** 530%
 
 | Volume | Open lines |
 | --- | ---: |
-| I,10 | 15,428 |
-| I,11 | 14,985 |
-| I,12 | 14,487 |
-| I,14 | 19,822 |
-| I,15 | 16,489 |
-| I,16 | 15,596 |
-| I,3 | 14,062 |
-| I,6 | 16,674 |
-| I,7 | 14,736 |
-| I,8 | 15,866 |
-| I,9 | 16,215 |
-| III,1 | 5,583 |
-| III,3 | 9,730 |
-| III,4 | 10,047 |
-| IV,1 | 23,959 |
-| IV,2 | 4,641 |
-| IV,3 | 21,883 |
+| I,10 | 16,550 |
+| I,11 | 16,075 |
+| I,12 | 15,515 |
+| I,14 | 20,742 |
+| I,15 | 17,738 |
+| I,16 | 16,381 |
+| I,3 | 14,073 |
+| I,6 | 17,648 |
+| I,7 | 15,232 |
+| I,8 | 16,230 |
+| I,9 | 17,197 |
+| III,1 | 5,636 |
+| III,3 | 12,250 |
+| III,4 | 11,910 |
+| IV,1 | 25,920 |
+| IV,2 | 5,042 |
+| IV,3 | 23,741 |
 | VI,1 | 2,219 |
-| VI,3 | 13,565 |
-| VI,4 | 47,508 |
+| VI,3 | 13,657 |
+| VI,4 | 47,622 |
 | VI,6 | 2,302 |
+
+| Aligned on a reader's text | Open lines |
+| --- | ---: |
+| `trocr-kurrent-xvi-xvii` | 50,720 |
+| v1 text (the store's reading) | 282,960 |
+
+The lines above are counted in every table of this report; the reader rows are the German pieces K2 minted from the Bern Kurrent reader's text (their source names the reader before the record). The hand audit's sheets and the reach census leave them out: the PHILIUMM model does not read Kurrent.
 
 ## By stratum
 
 | Stratum | Open lines | Audited | Est. precision |
 | --- | ---: | ---: | ---: |
-| fair_copy | 10,234 | 2 | 50.0% |
-| light_revision | 100,085 | 2 | 100.0% |
-| heavy_revision | 203,749 | 2 | 100.0% |
-| scrap | 1,729 | 2 | 100.0% |
+| fair_copy | 10,247 | 2 | 50.0% |
+| light_revision | 103,676 | 2 | 100.0% |
+| heavy_revision | 217,856 | 2 | 100.0% |
+| scrap | 1,901 | 2 | 100.0% |
 
 Hand audit of 8 of 8 sampled lines (8 scored, stratified): corpus-weighted precision 95.0 % as written, which passes the 95 % gate, and 95.0 % counting lines a letter or a word off at an end as usable (`reports/gt-audit.md`). The audit was drawn in equal numbers per stratum; the corpus-weighted figure weights each stratum by its share of the mint.
 

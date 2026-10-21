@@ -52,7 +52,13 @@ from pathlib import Path
 
 from leibniz import db
 from leibniz.align.align import HtrLine
-from leibniz.align.audit import AuditLine, attach_images, sample_lines, write_sheet
+from leibniz.align.audit import (
+    DEFAULT_HELP_HTML,
+    AuditLine,
+    attach_images,
+    sample_lines,
+    write_sheet,
+)
 from leibniz.align.factory import (
     FactoryConfig,
     PieceResult,
@@ -1108,6 +1114,17 @@ AUDIT_HELP_HTML = (
     "Ihre Urteile werden in diesem Browser gespeichert; am Ende klicken Sie <b>Download "
     "verdicts</b>.</p></div>"
 )
+AUDIT_GROUPS = {"own": "leibniz_hand", "other": "other_hands"}  # the lines CSV's `group`
+AUDIT_SPLIT_NOTE = (
+    "<p><b>English.</b> Half of the lines are in Leibniz's own hand and half in other hands, "
+    "mixed; the sheet does not say which. "
+    "<b>Deutsch.</b> Die Hälfte der Zeilen stammt von Leibniz' eigener Hand, die Hälfte von "
+    "anderen Händen, gemischt; das Blatt sagt nicht, welche.</p>"
+)
+AUDIT_SPLIT_NOTE_EN = (
+    "<p>Half of the lines are in Leibniz's own hand and half in other hands, mixed; the sheet "
+    "does not say which.</p>"
+)
 AUDIT_VERDICT_LABELS = {
     "correct": "correct · richtig",
     "boundary": "boundary · Grenze",
@@ -1126,12 +1143,34 @@ def build_audit_sheet(
     n: int = AUDIT_LINES,
     seed: int = SEED,
     bilingual: bool = True,
-) -> tuple[Path, Path, dict[str, int]]:
+    leibniz_hand_ids: Iterable[str] | None = None,
+) -> tuple[Path, Path, dict[str, int], dict[str, int]]:
     """``data/kurrent/k2-audit.html`` and its lines CSV: ``n`` of the reader's minted lines,
     seeded, equal per stratum, through the C2 sheet machinery — the crop, the minted
     text, the Bern reading and the v1 reading; verdicts download as the C2 CSV
-    (``ref, stratum, verdict, note``). Labels in German beside English by default."""
-    lines: list[AuditLine] = sample_lines(conn, n, seed=seed, reader=reader)
+    (``ref, stratum, verdict, note``). Labels in German beside English by default.
+
+    With ``leibniz_hand_ids`` (the records in Leibniz's own hand) the draw is stratified
+    by hand: half the lines from those records' rows, half from every other record's,
+    each half equal per stratum under the same seed, the two mixed under the seed again;
+    the lines CSV's ``group`` column (``leibniz_hand`` / ``other_hands``) tells them
+    apart, the sheet itself does not. Returns the paths and the counts by stratum and
+    by group."""
+    own_ids = sorted({str(r) for r in leibniz_hand_ids}) if leibniz_hand_ids else []
+    if own_ids:
+        half = n // 2
+        own = sample_lines(conn, half, seed=seed, reader=reader, record_ids=own_ids)
+        rest = sample_lines(
+            conn, n - half, seed=seed, reader=reader, record_ids=own_ids, exclude_records=True
+        )
+        for ln in own:
+            ln.group = AUDIT_GROUPS["own"]
+        for ln in rest:
+            ln.group = AUDIT_GROUPS["other"]
+        lines: list[AuditLine] = [*own, *rest]
+        random.Random(seed).shuffle(lines)
+    else:
+        lines = sample_lines(conn, n, seed=seed, reader=reader)
     attach_images(conn, lines, Path(images_root))
     for ln in lines:
         r = readings.get(ln.ref)
@@ -1147,11 +1186,249 @@ def build_audit_sheet(
         seed=seed,
         title="K2 — German lines minted from the Kurrent reading · deutsche Zeilen, "
         "aus der Kurrent-Lesung zugeordnet",
-        help_html=AUDIT_HELP_HTML if bilingual else None,
+        help_html=_audit_help(bilingual, split=bool(own_ids)),
         verdict_labels=AUDIT_VERDICT_LABELS if bilingual else None,
         attach=False,
     )
-    return sheet.html_path, sheet.csv_path, sheet.by_stratum
+    by_group: dict[str, int] = {}
+    for ln in lines:
+        if ln.group:
+            by_group[ln.group] = by_group.get(ln.group, 0) + 1
+    return sheet.html_path, sheet.csv_path, sheet.by_stratum, by_group
+
+
+def _audit_help(bilingual: bool, *, split: bool) -> str | None:
+    """The sheet's instructions: bilingual or the C2 default, plus the hand-split note."""
+    if not split:
+        return AUDIT_HELP_HTML if bilingual else None
+    if bilingual:
+        head, sep, tail = AUDIT_HELP_HTML.rpartition("</div>")
+        return head + AUDIT_SPLIT_NOTE + sep + tail
+    head, sep, tail = DEFAULT_HELP_HTML.rpartition("</div>")
+    return (
+        (head + AUDIT_SPLIT_NOTE_EN + sep + tail)
+        if sep
+        else DEFAULT_HELP_HTML + AUDIT_SPLIT_NOTE_EN
+    )
+
+
+def _count(conn: sqlite3.Connection, where: str, params: Sequence = ()) -> int:
+    return int(conn.execute(f"SELECT COUNT(*) FROM gt_lines WHERE {where}", params).fetchone()[0])
+
+
+def _in(ids: Sequence[str]) -> str:
+    return "(" + (",".join("?" * len(ids)) if ids else "NULL") + ")"
+
+
+def account_write(
+    conn: sqlite3.Connection,
+    decisions: Sequence[PieceDecision],
+    pairs: Mapping[str, Sequence[GtPair]],
+    *,
+    reader: str = DEFAULT_READER,
+) -> dict:
+    """Where the dry run's pairs went, read from the store after the write (read-only).
+
+    The dry run counted each piece's pairs; the factory's ownership rule keeps one row
+    per line, so a line two won pieces both mint is written once, and a line another
+    record's row holds at a higher alignment confidence stays with that record. This
+    accounts for every pair of the won pieces: now a reader row, now a v1 row of
+    another record, or a duplicate claim; and counts the store by record group.
+    """
+    like = f"%; reader {reader};%"
+    reader_sql = "source LIKE ?"
+    won = sorted(d.record_id for d in decisions if d.winner == "bern")
+    german = sorted(d.record_id for d in decisions)
+    own = sorted(d.record_id for d in decisions if d.leibniz_hand)
+    rid = "CAST(record_id AS TEXT)"
+    out: dict = {
+        "reader": reader,
+        "gt_lines": _count(conn, "1"),
+        "distinct_refs": int(
+            conn.execute("SELECT COUNT(DISTINCT line_image_ref) FROM gt_lines").fetchone()[0]
+        ),
+        "reader_rows": _count(conn, reader_sql, (like,)),
+        "german_rows": _count(conn, f"{rid} IN {_in(german)}", german),
+        "won_rows": _count(conn, f"{rid} IN {_in(won)}", won),
+        "won_rows_reader": _count(conn, f"{rid} IN {_in(won)} AND {reader_sql}", (*won, like)),
+        "won_rows_v1": _count(conn, f"{rid} IN {_in(won)} AND NOT ({reader_sql})", (*won, like)),
+        "reader_rows_outside_won": _count(
+            conn, f"{reader_sql} AND {rid} NOT IN {_in(won)}", (like, *won)
+        ),
+        "leibniz_hand_rows": _count(conn, f"{rid} IN {_in(own)}", own),
+        "leibniz_hand_rows_reader": _count(
+            conn, f"{rid} IN {_in(own)} AND {reader_sql}", (*own, like)
+        ),
+        "n_won_pieces": len(won),
+        "n_german_records": len(german),
+        "n_leibniz_hand_records": len(own),
+    }
+    out["reader_rows_by_stratum"] = {
+        (r[0] or "unknown"): r[1]
+        for r in conn.execute(
+            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {reader_sql} GROUP BY stratum", (like,)
+        )
+    }
+    out["german_rows_by_stratum"] = {
+        (r[0] or "unknown"): r[1]
+        for r in conn.execute(
+            f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {rid} IN {_in(german)} GROUP BY stratum",
+            german,
+        )
+    }
+    # the won pieces' pairs
+    claims: dict[str, int] = {}
+    best: dict[str, float] = {}
+    n_pairs = 0
+    for r in won:
+        for pr in pairs.get(r, []):
+            n_pairs += 1
+            claims[pr.line_image_ref] = claims.get(pr.line_image_ref, 0) + 1
+            best[pr.line_image_ref] = max(best.get(pr.line_image_ref, 0.0), pr.align_conf or 0.0)
+    refs = sorted(claims)
+    out["won_pairs"] = n_pairs
+    out["won_pairs_distinct_refs"] = len(refs)
+    out["refs_claimed_twice"] = sum(1 for c in claims.values() if c > 1)
+    out["excess_claims"] = sum(c - 1 for c in claims.values() if c > 1)
+    held_reader = held_v1 = held_v1_german = 0
+    v1_margins: list[float] = []
+    gset = set(german)
+    for i in range(0, len(refs), 900):
+        chunk = refs[i : i + 900]
+        rows = conn.execute(
+            f"SELECT line_image_ref, source, record_id, align_conf FROM gt_lines "
+            f"WHERE line_image_ref IN {_in(chunk)}",
+            chunk,
+        ).fetchall()
+        for ref, source, record_id, conf in rows:
+            if f"; reader {reader};" in (source or ""):
+                held_reader += 1
+            else:
+                held_v1 += 1
+                if str(record_id) in gset:
+                    held_v1_german += 1
+                v1_margins.append(float(conf or 0.0) - best.get(ref, 0.0))
+    out["refs_now_reader_row"] = held_reader
+    out["refs_now_v1_row"] = held_v1
+    out["refs_now_v1_row_german"] = held_v1_german
+    out["refs_now_no_row"] = len(refs) - held_reader - held_v1
+    out["v1_margin_mean"] = sum(v1_margins) / len(v1_margins) if v1_margins else None
+    out["v1_ties"] = sum(1 for m in v1_margins if abs(m) < 1e-9)
+    run = conn.execute(
+        "SELECT run_id, started_at, finished_at, n_input, n_ok, n_failed, git_sha FROM runs "
+        "WHERE stage = 'gt_factory' AND model = ? ORDER BY run_id DESC LIMIT 1",
+        (f"retro-aligner+{reader}",),
+    ).fetchone()
+    out["run"] = (
+        dict(
+            zip(
+                ("run_id", "started_at", "finished_at", "n_input", "n_ok", "n_failed", "git_sha"),
+                run,
+                strict=True,
+            )
+        )
+        if run
+        else None
+    )
+    return out
+
+
+def render_write_report(
+    acc: Mapping, stats: Mapping | None, *, generated: str | None = None
+) -> str:
+    """``reports/kurrent/k2-write.md``: the write's own counters and the store's account."""
+    n = lambda x: "—" if x is None else f"{x:,}"  # noqa: E731
+    A: list[str] = []
+    A.append("# K2: the write, accounted")
+    A.append("")
+    A.append(
+        f"The reader `{acc['reader']}`'s rows after `leibniz align kurrent-mint --write`, read "
+        "from the store read-only, against the dry run's pairs. Generated "
+        f"{generated or date.today().isoformat()}."
+    )
+    run = acc.get("run")
+    if run:
+        A.append("")
+        A.append(
+            f"The runs row: **run {run['run_id']}**, {run['started_at']} → {run['finished_at']}, "
+            f"{n(run['n_input'])} pieces in, {n(run['n_ok'])} written, {n(run['n_failed'])} "
+            f"failed, code `{(run['git_sha'] or '')[:7]}`."
+        )
+    if stats:
+        A.append("")
+        A.append("## The write's counters")
+        A.append("")
+        A.append(
+            f"{n(stats.get('written_pieces'))} of {n(stats.get('pieces'))} pieces written "
+            f"({n(stats.get('skipped_resume'))} skipped on resume); rows removed "
+            f"**{n(stats.get('rows_removed'))}**, written **{n(stats.get('rows_written'))}**; the "
+            f"ownership rule: {n(stats.get('rows_won'))} lines won from another record's row, "
+            f"{n(stats.get('rows_lost'))} pairs lost to one; {stats.get('seconds', 0):.0f} s; "
+            f"`gt_lines` after the write {n(stats.get('gt_lines_after'))} rows."
+        )
+    A.append("")
+    A.append("## The store after the write")
+    A.append("")
+    A.append("| count | rows |")
+    A.append("|---|---:|")
+    A.append(f"| `gt_lines` | {n(acc['gt_lines'])} |")
+    A.append(f"| distinct line references (one row per line) | {n(acc['distinct_refs'])} |")
+    A.append(f"| rows whose source names the reader | {n(acc['reader_rows'])} |")
+    A.append(
+        f"| rows on the {n(acc['n_german_records'])} German records | {n(acc['german_rows'])} |"
+    )
+    A.append(
+        f"| rows on the {n(acc['n_won_pieces'])} pieces the rule gave to the reader | "
+        f"{n(acc['won_rows'])} (reader {n(acc['won_rows_reader'])}, v1 {n(acc['won_rows_v1'])}) |"
+    )
+    A.append(f"| reader rows outside those pieces | {n(acc['reader_rows_outside_won'])} |")
+    A.append(
+        f"| rows on the {n(acc['n_leibniz_hand_records'])} records in Leibniz's own hand | "
+        f"{n(acc['leibniz_hand_rows'])} (reader {n(acc['leibniz_hand_rows_reader'])}) |"
+    )
+    A.append("")
+    A.append("| stratum | reader rows | rows on the German records |")
+    A.append("|---|---:|---:|")
+    for st in STRATA:
+        a, b = acc["reader_rows_by_stratum"].get(st), acc["german_rows_by_stratum"].get(st)
+        if a or b:
+            A.append(f"| {st} | {n(a or 0)} | {n(b or 0)} |")
+    A.append("")
+    A.append("## Where the won pieces' pairs went")
+    A.append("")
+    A.append(
+        f"The dry run's **{n(acc['won_pairs'])} pairs** on the won pieces name "
+        f"**{n(acc['won_pairs_distinct_refs'])} distinct lines**: "
+        f"{n(acc['refs_claimed_twice'])} lines were claimed by two or more won pieces sharing a "
+        f"page ({n(acc['excess_claims'])} claims beyond the first). Of the distinct lines, "
+        f"**{n(acc['refs_now_reader_row'])}** are the reader's rows now; "
+        f"**{n(acc['refs_now_v1_row'])}** stayed with a v1 row of another record "
+        f"({n(acc['refs_now_v1_row_german'])} of them German pieces the rule left to v1) whose "
+        f"alignment confidence was higher or tied"
+        + (
+            f" (mean margin {acc['v1_margin_mean']:+.3f}; {n(acc['v1_ties'])} ties, where the "
+            "lower record id keeps the line)"
+            if acc.get("v1_margin_mean") is not None
+            else ""
+        )
+        + f"; {n(acc['refs_now_no_row'])} have no row. Every line is in `gt_lines` once."
+    )
+    A.append("")
+    return "\n".join(A)
+
+
+def write_write_report(
+    acc: Mapping, stats: Mapping | None, *, reports_dir: Path | str = DEFAULT_REPORTS_DIR
+) -> tuple[Path, Path]:
+    reports = Path(reports_dir)
+    reports.mkdir(parents=True, exist_ok=True)
+    md, js = reports / "k2-write.md", reports / "k2-write.json"
+    md.write_text(render_write_report(acc, stats), encoding="utf-8")
+    js.write_text(
+        json.dumps({"account": acc, "stats": stats}, indent=1, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return md, js
 
 
 def readings_for(readings_dir: Path | str = DEFAULT_READINGS_DIR, reader: str = DEFAULT_READER):
@@ -1159,6 +1436,7 @@ def readings_for(readings_dir: Path | str = DEFAULT_READINGS_DIR, reader: str = 
 
 
 __all__ = [
+    "AUDIT_GROUPS",
     "AUDIT_LINES",
     "AUDIT_VERDICT_LABELS",
     "DEFAULT_DECISIONS",
@@ -1170,6 +1448,7 @@ __all__ = [
     "PieceDecision",
     "Tally",
     "WriteStats",
+    "account_write",
     "build_audit_sheet",
     "decide",
     "dry_run",
@@ -1182,6 +1461,7 @@ __all__ = [
     "reader_text_for",
     "readings_for",
     "render_report",
+    "render_write_report",
     "side_by_side",
     "stored_mint",
     "stored_refs",
@@ -1192,4 +1472,5 @@ __all__ = [
     "write_mint",
     "write_outputs",
     "write_pairs",
+    "write_write_report",
 ]
