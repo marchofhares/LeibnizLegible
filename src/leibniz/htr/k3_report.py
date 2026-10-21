@@ -12,7 +12,7 @@ and the week the prompt holds the plan to. Numbers only, from the files.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import date
 from pathlib import Path
 
@@ -106,6 +106,7 @@ def build_pilots(
     *,
     trocr: Mapping | None,
     kraken: Mapping | None,
+    trocr_probes: Sequence[Mapping | None] = (),
     train_lines: int,
     val_lines: int,
     plan_epochs_trocr: float,
@@ -113,6 +114,9 @@ def build_pilots(
     rented_note: str = "",
 ) -> dict:
     t = trocr_pilot_summary(trocr, plan_epochs=plan_epochs_trocr)
+    probe_rows: list[dict] = []
+    for pr in trocr_probes:
+        probe_rows.extend(trocr_pilot_summary(pr, plan_epochs=plan_epochs_trocr)["rows"])
     k = kraken_pilot_summary(kraken, train_lines=train_lines, plan_epochs=plan_epochs_kraken)
     feasible = [r for r in t["rows"] if r["status"] == "ok" and r["projection_hours"]]
     fastest = min(feasible, key=lambda r: r["projection_hours"]) if feasible else None
@@ -127,6 +131,7 @@ def build_pilots(
         "val_lines": val_lines,
         "week_hours": WEEK_HOURS,
         "trocr": t,
+        "trocr_probe": probe_rows,
         "kraken": k,
         "trocr_fastest": fastest["key"] if fastest else None,
         "trocr_best_cer": best_cer["key"] if best_cer else None,
@@ -149,6 +154,22 @@ def render_pilots(s: Mapping) -> str:
         "## (a) TrOCR from the Bern checkpoint",
         "",
     ]
+    probe = s.get("trocr_probe") or []
+    if probe:
+        L += [
+            "The memory probe first: every setting on the same 2,000 training lines under a hard "
+            "allocator cap of 4,000 MiB for the process (an allocation past it fails in-process "
+            "instead of spilling into host memory under WSL2).",
+            "",
+            "| setting | status | lines | seconds | lines/s | peak MiB | six epochs |",
+            "|---|---|---:|---:|---:|---:|---:|",
+        ]
+        for r in probe:
+            L.append(
+                f"| {r['key']} | {r['status']} | {_n(r['lines'])} | {_f(r['seconds'], 0)} | "
+                f"{_f(r['lines_per_s'])} | {_n(r['peak_mib'])} | {_hours(r['projection_hours'])} |"
+            )
+        L += ["", "Then the 20,000-line epochs with the validation set scored:", ""]
     t = s["trocr"]
     if t["status"] != "ok":
         L.append("Not run.")

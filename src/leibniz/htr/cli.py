@@ -1101,6 +1101,9 @@ def k3_report(
     which: str = typer.Argument("pilots", help="pilots (Task 2)."),
     train_root: Path = typer.Option(Path("data/train/k3"), "--train-root"),
     trocr_pilot: Path = typer.Option(Path("data/models/k3/trocr/pilot.json"), "--trocr-pilot"),
+    trocr_probe: list[Path] = typer.Option(
+        None, "--trocr-probe", help="The memory probes' pilot.json files (repeatable)."
+    ),
     kraken_account: Path = typer.Option(
         Path("data/models/k3/kraken-pilot/account.json"), "--kraken-account"
     ),
@@ -1117,6 +1120,7 @@ def k3_report(
     s = R.build_pilots(
         trocr=R.load_json(trocr_pilot),
         kraken=R.load_json(kraken_account),
+        trocr_probes=[R.load_json(p) for p in (trocr_probe or [])],
         train_lines=R.count_lines(train_root / "train.txt"),
         val_lines=R.count_lines(train_root / "val.txt"),
         plan_epochs_trocr=plan_epochs_trocr,

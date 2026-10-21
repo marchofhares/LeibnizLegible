@@ -383,12 +383,14 @@ def test_pilot_report_from_the_two_files(tmp_path: Path) -> None:
     s = R.build_pilots(
         trocr=trocr,
         kraken=kraken,
+        trocr_probes=[trocr, None],
         train_lines=55_000,
         val_lines=3_000,
         plan_epochs_trocr=6,
         plan_epochs_kraken=30,
     )
     assert s["trocr_fastest"] == "adafactor-b8" and s["trocr_best_cer"] == "adafactor-b8"
+    assert len(s["trocr_probe"]) == 2 and "The memory probe first" in R.render_pilots(s)
     k = s["kraken"]
     assert abs(k["lines_per_s"] - 20000 / 600) < 1e-9
     assert abs(k["projection_hours"] - 55_000 * 30 / (20000 / 600) / 3600) < 1e-9
