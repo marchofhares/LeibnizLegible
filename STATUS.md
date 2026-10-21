@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-21 (**K3 — a Leibniz Kurrent model, in progress on the desktop on `k3-kurrent-model`: Task 0 done, the operator's decision to go without the judged audit sheet recorded**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-21 (**K3 — a Leibniz Kurrent model, in progress on the desktop on `k3-kurrent-model`: Task 0 done, the operator's decision to go without the judged audit sheet recorded**; **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -22,6 +22,44 @@ verdict can remove a class without rebuilding the crops, a cheap screen for
 misplaced lines runs before any training, an ablation without a flagged
 class is planned, and the model cards say the precision of the German
 training lines is unmeasured. The K3 entry in the Phase log has the detail.
+
+**2026-10-21: W6 — two reader's items from the Leibniz-Edition (13 October),
+built in a cloud session on the fixture store; the branch
+`claude/busy-dirac-n30a43`, the pull request the operator's; nothing
+deployed.** (a) Every work page links the Leibniz-Katalog's own search by the
+work's shelfmark (`sign_ol=`, a substring match on the catalogue's Signatur),
+whether or not the store holds the work's records: `1665058609` (Leibn. Marg.
+196) has none and now links
+https://leibniz-katalog.bbaw.de/de/extended-search?sign_ol=Leibn.+Marg.+196,
+which answers its one record. The catalogue's spelling was checked live, one
+search per family and a few more to settle its forms: Arabic numerals
+throughout (`LH 4, 6, 18` answers the two records on the work's folios),
+**`LBr` without the period the library writes (`LBr 464` answers eleven
+records; `LBr. 464` and the prompt's `LBr. 164` none)**, `Leibn. Marg.`, the
+F series run together (`LBrF 1`), `, Stück 1` and `175:1` as the library has
+them; `links.katalog_spelling` turns the library's `LH IV, 6, 18` /
+`LBr. 464` / `ZEN Leibn. Marg. 40` into the catalogue's. `/api/works/{id}`
+gains `katalog_search_urls` (one entry per distinct shelfmark, stored order:
+`shelfmark`, `query`, `url`) and an OpenAPI summary; the server-rendered page
+carries the link after "IIIF manifest" and, where no record is held, a
+"Catalogue records" heading with one sentence (the site holds part of the
+Arbeitskatalog so far; search it for the shelfmark); the viewer lists it
+after the manifests and in the catalogue section, which says the same
+instead of the bare "none", EN and DE. Over the live works list of
+2026-10-21, **2,184 of the 2,225 works get a link** (24 carry no shelfmark,
+17 only a foreign one: `Ms`, `Nm-A`, `P-A` …). (b) A scope paragraph on About
+after "What this is", EN and DE, without numbers — the site covers the scans
+the GWLB has published of its Leibniz collections, not all of Leibniz's
+papers; much is not yet digitised at the GWLB and elsewhere, other
+institutions hold manuscripts, the Niedersächsisches Landesarchiv Hannover
+among them; the Arbeitskatalog records them all and the site holds part of
+its records so far — and the same in one line under "Scope" in `llms.txt`
+and the README. Tests 856 → 859, ruff clean; 51 browser checks in headless
+Chromium on the fixture store (EN, DE, 390 px, axe-core 0 violations in nine
+states, no console errors). **The records themselves and the holdings page
+wait for the Arbeitskatalog export** (Open question 27). The W6 entry in the
+Phase log has the detail; Next has the staging checks and the three
+sentences for the editor.
 
 **2026-10-20/21: K2 — German ground truth, done on the desktop; the
 branch `k2-german-gt`, the pull request the operator's; nothing deployed.** The Bern Kurrent reader
@@ -965,6 +1003,127 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   inference rates — 87 ms a line for the Bern reader on this card (K2) and
   34 ms for the PHILIUMM model on Dresden (K1). Nothing to download before
   the pilots; the kraken 7.1 environment and any rental need a go.
+
+### W6 — two reader's items from the Leibniz-Edition (2026-10-21) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and staging look
+
+- **Setting and pre-flight (Task 0).** A cloud session on the branch it was
+  given, `claude/busy-dirac-n30a43`, from main at `af8a1b9` (#48, K2 merged);
+  `git status --porcelain` clean; `git fetch origin main && git merge
+  origin/main` already up to date. No store: the fixture store of
+  `tests/conftest.py`. `.venv-cloud` made with `uv sync --extra web --extra gt
+  --extra release` (uv 0.11.32; Python 3.13.16, uv's default here). Baseline:
+  `ruff check` clean, `ruff format --check` 231 files already formatted,
+  **856 passed, 1 skipped** (`test_align_letterpool_eval` needs numpy, which
+  these extras do not bring). `node` v22.22.0; Chromium build 1194
+  preinstalled under `/opt/pw-browsers/`. The live API
+  `https://leibnizlegible.com/api/works/1665058609`: set
+  `LeibnizMarginalien`, shelfmarks `["Leibn. Marg. 196"]`, 566 canvases,
+  **`katalog` empty**, browse family `Marg`; the two fixture works read live
+  beside it: `00068642` (shelfmarks `["LH 4, 6, 18"]`, two records whose
+  shelfmarks are `LH 4, 6, 18 Bl. 1` and `Bl. 2`) and `DE-611-HS-854976`
+  (`["LBr. 464"]`, no record). The pre-flight recorded, the session proceeded
+  (the preamble's item 6).
+- **What the catalogue answered (Task 1, 2026-10-21; eight polite GETs, one
+  per 1.5 s, with the project's User-Agent `leibniz-legible/0.1`).** The
+  extended search takes `sign_ol` and runs `select where (Signatur contains
+  "…")`, as its result page prints; the Signatur column's own tooltip says
+  "Römische Zahlen werden als arabische wiedergegeben".
+  - `…/de/extended-search?sign_ol=Leibn.+Marg.+196` → **1 Ergebnis**: id
+    1585, Kat.-Nr. 70248, Signatur `Hannover NLB Leibn. Marg. 196`, "[Marg.
+    in: Dal Pozzo, Maraviglie heroiche del sesso donnesco …, 1678]" — the
+    record the editor's own link found and the store does not hold.
+  - `…?sign_ol=LH+4%2C+6%2C+18` → **2 Ergebnisse**: `LH 4, 6, 18 Bl. 1`,
+    `LH 4, 6, 18 Bl. 2` — the two records the store holds for `00068642`.
+  - `…?sign_ol=LBr.+464` → **0**; `…?sign_ol=LBr+464` → **11 Ergebnisse**,
+    `LBr 464 Bl. 1` … `LBr 464 Bl. 19-20`; `…?sign_ol=LBr.+164` (the prompt's
+    example) → **0**. The catalogue writes the correspondence **without the
+    library's period**.
+  - `…?sign_ol=LBrF+1` → **600 Ergebnisse** (`LBrF 1 Bl. 3`, `LBrF 12 Bl.
+    107`, …: the substring takes LBrF 1, 10–19 and 100–199 with it, the price
+    of the catalogue's own match, which the editor's link pays too): the F
+    series runs together, as W5 found in the records.
+  - `…?sign_ol=Leibn.+Marg.+135` → **4**: `Hannover NLB Leibn. Marg. 135,
+    Stück 1` to `Stück 4`; `…?sign_ol=Leibn.+Marg.+175` → **6 Ergebnisse**
+    under five Signaturen, `Hannover NLB Leibn. Marg. 175:1, Stück 1`, `175:1,
+    Stück 2`, `175:2, Stück 1` to `3`: the Stück and the colon forms are the
+    library's too, so they stay in the search.
+- **The spelling rule (`web/links.py`: `katalog_spelling`,
+  `katalog_search_url`; in the module docstring beside the `id` note).**
+  `split_family` names the family; the label takes the catalogue's form
+  (`LH`, `LBr`, `Leibn. Marg.`, `LK`/`LK-MOW`); a comma group that is one
+  Roman numeral becomes Arabic (`LH IV, 6, 18` → `LH 4, 6, 18`, `LH XXXV, I,
+  17` → `LH 35, 1, 17`; `7 C` is a sub-part and stays); the groups are joined
+  with `, `; a leaf reference (`Bl.`), a parenthesis, a page (`S.`) and what
+  follows them are dropped, since the search is for the work; the library's
+  `ZEN` shelf prefix falls away with the label; `LBr. F 1` → `LBrF 1`; the
+  library's `Lh 35, 4, 14` and `LH35, 7, 3` are read as `LH`. A foreign
+  signature (`Ms XXIII, 23a`, `Nm-A 605`) gives `None` and no link. Over
+  `/api/works` as read on 2026-10-21: **2,184 of the 2,225 works get at least
+  one link** (LH 750, LBr 1,059, Marg 370, and 5 whose `LH` shelfmark has
+  Roman sub-groups and browses as "Other"); 24 works carry no shelfmark and
+  17 only foreign ones; 205 carry more than one link (several shelfmarks);
+  1,225 shelfmark strings are respelled for the search, nearly all by
+  dropping `ZEN `, the rest Roman → Arabic, `Lh`/`LH35` → `LH`, comma
+  spacing. Tests for each family, the respellings and strings of no family
+  (`tests/test_web_links.py`).
+- **The surfaces (Task 1).** `GET /api/works/{work_id}`: `katalog_search_urls`,
+  one entry per distinct shelfmark in stored order — `shelfmark` as the
+  library writes it, `query` as the catalogue spells it, `url` — empty when
+  the work has none; two spellings of one shelfmark give one entry; the route
+  gains an OpenAPI summary and description. The server-rendered work page
+  (`_ssr_work`): ` · Search the Leibniz-Katalog for <shelfmark>` after "IIIF
+  manifest" in the first paragraph and, where no record is held, the heading
+  "Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)" over
+  one sentence, "No catalogue record is linked to this work yet, and this
+  site holds part of the Arbeitskatalog so far; search it for LBr. 464."
+  with the shelfmark linked (no link where the work has no shelfmark). The
+  viewer (`views/work.js`): the link(s) after "IIIF manifest with our
+  transcriptions" in the header's link list, and in the catalogue section,
+  which says the browse page's sentence instead of the bare
+  `work.katalog.none` (removed) — EN "No catalogue record is linked to this
+  work yet. This site holds part of the Arbeitskatalog so far, not yet every
+  record.", DE "Diesem Werk ist bisher kein Katalogisat zugeordnet. Diese
+  Seite führt bisher einen Teil des Arbeitskatalogs, noch nicht jeden
+  Eintrag." — then the link(s); `work.katalog.search` EN "Search the
+  Leibniz-Katalog for {shelfmark}", DE "Im Leibniz-Katalog nach {shelfmark}
+  suchen"; `rel="noopener"` and the `linklist` styling of the other links
+  out. The link text shows the shelfmark as the library writes it (what the
+  page shows); the address carries the catalogue's spelling.
+- **The scope sentence (Task 2).** `about.what.scope`, after `about.what.p1`
+  in both tables and rendered between p1 and p2: EN "The site covers the
+  scans the GWLB has published of its Leibniz collections. That is not all
+  of Leibniz's papers: much is not yet digitised, at the GWLB and elsewhere,
+  and other institutions hold manuscripts of his, the Niedersächsisches
+  Landesarchiv Hannover among them. The Arbeitskatalog der Leibniz-Edition
+  records them all, wherever they lie; this site holds part of its records
+  so far, and every work here links to the catalogue's own search by
+  shelfmark." and its German. No numbers (Open question 28's survey is not
+  quoted). The same in one line under `## Scope` in `static/llms.txt` and as
+  a **Scope.** paragraph where the README describes the site. A test that
+  the EN and DE tables carry the same keys, each once (none existed;
+  `tests/test_web_api.py`).
+- **Verified (Task 3).** `ruff check` and `ruff format --check` clean; **859
+  passed, 1 skipped** (+1 links, +2 api). `leibniz serve --backend none
+  --port 8765` on a seeded fixture store; Playwright 1.64.1 from npm in the
+  scratchpad driving the preinstalled Chromium by `executablePath`, the
+  GWLB's thumbnails answered with a stub JPEG and a level-0 `info.json`,
+  axe-core 4.14.0 served from the app's own origin through a route because
+  the CSP is `script-src 'self'`: **51 checks, all passed** — `00068642` in
+  EN, DE and at 390 px (the header link after the manifests, its text, its
+  `href` and `rel="noopener"`, the catalogue section still listing its
+  records); `DE-611-HS-854976`, which has no record, in EN, DE and at 390 px
+  (the sentence and the same link in the section); `/about` in EN, DE and at
+  390 px (the scope paragraph second under "What this is"); no horizontal
+  scroll at 390 px; no console, page or failed-request errors; **axe-core 0
+  violations in all nine states**. Screenshots in the session's scratchpad.
+  The server stopped.
+- **Not done here.** The master store was not opened (none in the cloud);
+  staging is the operator's (the hand-over under Next); Firefox and Safari
+  were not run. Nothing in Key numbers was measured anew except the test
+  count.
+- **Noticed.** `PROMPTS.md` has no "Phase W5" section: the W5 prompt was
+  never appended (W4 and K1 are; the W5 entry in this file stands).
+  Housekeeping for a later session.
 
 ### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C) · ✅ Finish · ⏳ the operator's pull request
 
@@ -3676,7 +3835,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **866** (2026-10-21, K2, in `.venv-k1`; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **866** (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
 | **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
 | **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
@@ -3783,7 +3942,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     rights check (Gallica's terms restrict commercial reuse) and a
     licence-registry entry; (c) the Landesarchiv as its own track, gated on
     a contact, its written consent and a fetch route. (b) and (c) come
-    after L1, the re-mint, C3 and the Kurrent steps.
+    after L1, the re-mint, C3 and the Kurrent steps. **2026-10-21 (W6):**
+    (a)'s sentence is on About, EN and DE, in `llms.txt` and the README,
+    without numbers; the holdings page waits for the export and the import.
 27. **The catalogue in the store is part of the Arbeitskatalog (2026-10-10,
     W5's staging look).** The store holds the records of the §70 volumes'
     sweep (C2) and the July sample (A3): 24,916 records, 1,197 of 2,225 works
@@ -3818,6 +3979,11 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     work's records (`1665058609`, Leibn. Marg. 196, has none), and an About
     sentence on scope, EN and DE (Open question 28). The holdings page waits
     for the import, because its numbers come from `reports/holdings.md`.
+    **2026-10-21 (W6):** the two web items are built on
+    `claude/busy-dirac-n30a43`: the search by shelfmark on every work page
+    (the catalogue's spelling checked live — `LBr` without a period, Arabic
+    numerals) and the About sentence; the import step and the holdings page
+    still wait for the export.
 26. **The twin rule's corpus-wide error is unmeasured (2026-10-10, W5).** The
     thresholds come from 27 works (25 groups checked byte for byte). The line
     check guards against folding two different pages that happen to share a
@@ -4005,6 +4171,32 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-10-21 — W6, departures from the prompt and from the preamble of
+  19 October.** (1) *The LBr spelling.* The prompt's context said the
+  catalogue writes the correspondence with a period (`LBr. 164`); live,
+  `LBr. 164` and `LBr. 464` answer nothing and `LBr 464` eleven records, so
+  the rule, the docstring and the tests say `LBr` without the period. (2)
+  *Eight live searches, not three.* One per family as the prompt asked
+  (Marg. 196, LH 4, 6, 18, LBr. 464 → 0 and then LBr 464) and four more to
+  settle the forms the rule depends on (`LBr. 164`, `LBrF 1`, `Leibn. Marg.
+  135`, `Leibn. Marg. 175`); one request per 1.5 s with the project's
+  User-Agent, all recorded in the W6 entry. (3) *A third key.* Each
+  `katalog_search_urls` entry carries `query`, the catalogue's spelling,
+  beside `shelfmark` and `url`, so an API reader sees what is searched when
+  the library's spelling differs. (4) *`work.katalog.none` removed*, as
+  "replaces" said; a work with neither records nor a shelfmark shows the
+  sentence alone, on the server-rendered page and in the viewer. (5) *The
+  prompt verbatim.* The phase prompt is appended to PROMPTS.md in full; the
+  preamble of 19 October, word for word the one printed under K2b (checked
+  with `diff`), is referenced there, as K2 did. (6) *No go waited for*, per
+  the preamble's item 6 for a cloud session; nothing touched the box or the
+  store. (7) *The environment.* `.venv-cloud` resolved to Python 3.13.16
+  (uv's default in this container); 856 → 859 tests there, the letter-pool
+  evaluation skipped for want of numpy, as in `.venv-w3`. (8) *The browser.*
+  Playwright 1.64.1 drove the preinstalled Chromium
+  (`/opt/pw-browsers/chromium`) against a local server, so the proxy's CA
+  was not needed; the GWLB's thumbnails were stubbed as W4 did.
 
 - **2026-10-20 — C2c, departures from the prompt and from the preamble of
   19 October.** (1) *Three goes for the writes, not two.* `leibniz align
@@ -4284,6 +4476,40 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**W6 (2026-10-21): built in a cloud session on the fixture store; the branch
+`claude/busy-dirac-n30a43` carries it (compare:
+https://github.com/marchofhares/leibnizlegible/compare/main...claude/busy-dirac-n30a43?expand=1);
+the operator opens and merges the pull request; nothing deployed.** Before
+the merge, the staging look: `ssh <target> sudo
+/opt/leibniz-legible/deploy/staging.sh claude/busy-dirac-n30a43` (the target
+and the user name on the plan page), then over HTTP, each line asking for the
+password once, the expected answer after the arrow:
+   - `curl -su USER https://staging.leibnizlegible.com/api/works/1665058609 | python3 -c 'import sys, json; print(json.load(sys.stdin)["katalog_search_urls"])'` → `[{'shelfmark': 'Leibn. Marg. 196', 'query': 'Leibn. Marg. 196', 'url': 'https://leibniz-katalog.bbaw.de/de/extended-search?sign_ol=Leibn.+Marg.+196'}]`;
+   - `curl -su USER https://staging.leibnizlegible.com/work/1665058609 | grep -o 'sign_ol=[^"]*' | sort | uniq -c` → `2 sign_ol=Leibn.+Marg.+196` (the header's link and the sentence's), and `… | grep -c 'this site holds part of the Arbeitskatalog so far; search it for'` → `1`;
+   - `curl -su USER https://staging.leibnizlegible.com/work/00068642 | grep -o 'Search the Leibniz-Katalog for [^<]*'` → `Search the Leibniz-Katalog for LH 4, 6, 18` (the live store's spelling), its two records still listed under the heading;
+   - `B=$(curl -su USER https://staging.leibnizlegible.com/about | grep -o '/static/m/[0-9a-f]*/' | head -1); curl -su USER "https://staging.leibnizlegible.com${B}i18n.js" | grep -c "'about.what.scope':"` → `2`, and the same file `| grep -c 'Landesarchiv Hannover'` → `2` (EN and DE);
+   - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep -c '^Allow\|^Disallow'` → `10`, and `diff <(curl -su USER https://staging.leibnizlegible.com/robots.txt) <(curl -s https://leibnizlegible.com/robots.txt)` → nothing, or the `Sitemap:` line alone if staging names its own host (W6 touches no robots rule; the live file's md5 on 2026-10-21 is `b8e54f8c99497e55d3800ca9e49a5280`).
+   In the browser, with the password: `/work/1665058609` (the link in the
+   header and under "Catalogue records", EN and DE), `/work/00068642` (the
+   link and the records), `/about` (the second paragraph of "What this is").
+   Then merge and the §9 update; no index rebuild is needed (nothing in the
+   index changed). **The reply to the editor** (three sentences; the operator
+   sends): (1) every work page now links the Leibniz-Katalog's own search by
+   the work's shelfmark, whether or not the site yet holds the work's records
+   — for Leibn. Marg. 196 that is
+   https://leibniz-katalog.bbaw.de/de/extended-search?sign_ol=Leibn.+Marg.+196;
+   (2) the About page now says, in English and German, that the site covers
+   the scans the GWLB has published of its Leibniz collections and not all of
+   Leibniz's papers, since much is not yet digitised at the GWLB and elsewhere
+   and other institutions hold manuscripts, the Niedersächsisches Landesarchiv
+   Hannover among them, all of them recorded in the Arbeitskatalog; (3) the
+   records themselves, Marg. 196's included, follow once the Arbeitskatalog
+   export the Arbeitsstelle offered arrives and is imported, and until then
+   the site holds the part of the catalogue it has and says so on every work
+   page without records. **The holdings page and the records wait for the
+   export** (Open question 27). Housekeeping: the W5 prompt is missing from
+   `PROMPTS.md`.
 
 **K2 (2026-10-21): German ground truth, done on the desktop; the branch
 `k2-german-gt` carries the code, the reports and the docs (compare:

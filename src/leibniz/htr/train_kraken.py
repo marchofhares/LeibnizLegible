@@ -47,6 +47,7 @@ class KetosSettings:
 
     base: str = str(DEFAULT_BASE)
     batch_size: int = 16
+    accumulate: int = 1  # ketos --accumulate-grad-batches: the effective batch is batch × this
     lr: float = 1e-4
     epochs: int = -1  # -1: early stopping
     min_epochs: int = 0
@@ -71,6 +72,8 @@ class KetosSettings:
     @property
     def key(self) -> str:
         parts = ["ketos", f"b{self.batch_size}", f"lr{self.lr:g}", self.resize]
+        if self.accumulate > 1:
+            parts.append(f"x{self.accumulate}")
         if self.augment:
             parts.append("augment")
         if self.freeze_backbone:
@@ -143,6 +146,8 @@ def ketos_command(
         "-o",
         str(out / "checkpoints"),
     ]
+    if settings.accumulate > 1:
+        cmd += ["--accumulate-grad-batches", str(settings.accumulate)]
     if settings.warmup:
         cmd += ["--warmup", str(settings.warmup)]
     if settings.freeze_backbone:

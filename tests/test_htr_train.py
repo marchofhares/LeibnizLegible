@@ -129,6 +129,9 @@ def test_ketos_command_carries_the_settings(tmp_path: Path) -> None:
     assert f"-i {K.DEFAULT_BASE}" in joined
     assert f"-o {tmp_path / 'o' / 'checkpoints'}" in joined and "--checkpoint-path" not in joined
     assert s.key == "ketos-b8-lr0.0002-union-augment"
+    s4 = K.KetosSettings(batch_size=4, accumulate=4)
+    cmd4 = K.ketos_command(s4, train_list="t", val_list="v", out_dir=tmp_path)
+    assert "--accumulate-grad-batches 4" in " ".join(cmd4) and s4.key.endswith("-x4")
 
 
 def test_subset_list_is_seeded(tmp_path: Path) -> None:
@@ -266,8 +269,20 @@ def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
     out = tmp_path / "tr"
     calls: list[tuple] = []
 
-    def fake_pilot(base, settings, train, *, device, max_lines, val, log, plan_lines, plan_epochs):
-        calls.append((settings.key, len(train), max_lines, len(val or ())))
+    def fake_pilot(
+        base,
+        settings,
+        train,
+        *,
+        device,
+        max_lines,
+        val,
+        log,
+        plan_lines,
+        plan_epochs,
+        memory_limit_mib,
+    ):
+        calls.append((settings.key, len(train), max_lines, len(val or ()), memory_limit_mib))
         row = T.PilotRow(
             settings=settings.as_dict(),
             status="ok",
@@ -305,6 +320,7 @@ def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
     assert res.exit_code == 0, res.output
     assert [c[0] for c in calls] == ["adafactor-b2", "adamw-b2"]
     assert calls[0][1] == 5  # the screened line left out
+    assert calls[0][4] == 4500  # the loop's memory guard, on by default
     data = json.loads((out / "pilot.json").read_text(encoding="utf-8"))
     assert len(data["rows"]) == 2 and data["rows"][0]["val"]["cer"] == 0.25
     res = runner.invoke(

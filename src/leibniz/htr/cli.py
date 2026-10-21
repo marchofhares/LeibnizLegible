@@ -799,12 +799,19 @@ def train_trocr(
         "", "--db", help="Store for the runs row of a full training (none by default)."
     ),
     log_path: Path | None = typer.Option(None, "--log", help="Append the loop's lines here."),
+    max_mib: int | None = typer.Option(
+        4500,
+        "--max-mib",
+        help="The loop fails a run whose reserved GPU memory passes this (WSL2 spills past the "
+        "card into host memory instead of failing; 0 disables).",
+    ),
 ) -> None:
     """Fine-tune a TrOCR checkpoint on the training set (K3 Task 2a pilot / Task 3)."""
     from leibniz.htr import kurrent as K
     from leibniz.htr import train_trocr as T
 
     dev = K.pick_device(device)
+    limit = max_mib or None
     train = T.read_list(train_root / "train.txt")
     val = T.read_list(train_root / "val.txt")
     if drop_screen:
@@ -861,6 +868,7 @@ def train_trocr(
                 log=_log,
                 plan_lines=len(train),
                 plan_epochs=plan_epochs,
+                memory_limit_mib=limit,
             )
             rows.append(row)
             v = row.val or {}
@@ -915,6 +923,7 @@ def train_trocr(
         seed=seed,
         log=_log,
         patience=patience,
+        memory_limit_mib=limit,
     )
     _finish_training_run(db_path, run_id, n_input=len(train), n_ok=len(train))
     best = T.choose_best(state.history)
@@ -950,6 +959,9 @@ def train_kraken(
     epochs: int = typer.Option(-1, "--epochs", help="Fixed epochs; -1 for early stopping."),
     lag: int = typer.Option(5, "--lag", help="Early stopping: evaluations without gain."),
     batch_size: int = typer.Option(16, "--batch-size", help="ketos -B."),
+    accumulate: int = typer.Option(
+        1, "--accumulate", help="ketos --accumulate-grad-batches (effective batch = -B × this)."
+    ),
     lr: float = typer.Option(1e-4, "--lr", help="ketos -r."),
     augment: bool = typer.Option(False, "--augment", help="ketos --augment."),
     freeze_backbone: int = typer.Option(0, "--freeze-backbone", help="ketos --freeze-backbone."),
@@ -982,6 +994,7 @@ def train_kraken(
     s = K.KetosSettings(
         base=str(base),
         batch_size=batch_size,
+        accumulate=accumulate,
         lr=lr,
         epochs=1 if pilot else epochs,
         quit="fixed" if pilot or epochs > 0 else "early",

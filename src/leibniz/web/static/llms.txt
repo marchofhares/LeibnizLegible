@@ -12,6 +12,10 @@ rate of about 8% on Latin and French (word error rate 27%); German in Kurrent is
 unmeasured and worse. Cite the page URL and, ideally, the line id with every
 quotation, and carry the confidence with it.
 
+## Scope
+
+The site covers the scans the GWLB has published of its Leibniz collections, not all of Leibniz's papers: much is not yet digitised, at the GWLB and elsewhere, and other institutions hold manuscripts too (the Niedersächsisches Landesarchiv Hannover among them); the Arbeitskatalog der Leibniz-Edition records them all, this site holds part of its records so far, and every work page links to the catalogue's own search by shelfmark (`katalog_search_urls` in `/api/works/{work_id}`).
+
 ## Read it
 
 - [Search](https://leibnizlegible.com/search): typo-tolerant full-text search.

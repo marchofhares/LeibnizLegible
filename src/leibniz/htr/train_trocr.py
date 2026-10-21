@@ -321,11 +321,16 @@ def train_steps(
     optimizer=None,
     total_steps: int | None = None,
     stop_check: Callable[[], bool] | None = None,
+    memory_limit_mib: int | None = None,
 ) -> tuple[list[StepLog], dict]:
     """The optimisation loop: ``epochs`` passes over ``samples`` (or until
     ``max_steps`` / ``max_lines``), seeded order, gradient accumulation, the
     linear schedule, autocast and scaling when ``fp16``. Returns the step log and
-    the tally (lines, seconds, peak MiB, steps)."""
+    the tally (lines, seconds, peak MiB, steps). ``memory_limit_mib`` raises
+    :class:`torch.OutOfMemoryError` once the process's reserved GPU memory passes
+    it: under WSL2 an allocation past the card spills into host memory instead of
+    failing (K2), and the machine crashed that way on 21 October, so the loop
+    fails itself first."""
     import torch
 
     opt = optimizer or build_optimizer(model, settings)
@@ -392,6 +397,13 @@ def train_steps(
                 opt.step()
             opt.zero_grad(set_to_none=True)
             step += 1
+            if memory_limit_mib is not None:
+                peak = _gpu_peak_mib()
+                if peak is not None and peak > memory_limit_mib:
+                    raise torch.OutOfMemoryError(
+                        f"reserved {peak} MiB exceeds the {memory_limit_mib} MiB limit "
+                        "(the loop's own guard against WSL2's spill into host memory)"
+                    )
             if step % log_every == 0 or step == total:
                 row = StepLog(
                     step=step,
@@ -541,6 +553,7 @@ def pilot_setting(
     log: Callable[[str], None] | None = None,
     plan_lines: int = 0,
     plan_epochs: float = 1.0,
+    memory_limit_mib: int | None = None,
 ) -> PilotRow:
     """Load the base, train ``max_lines`` lines under ``settings`` (an out-of-memory
     error is a result, not a crash), score the validation set if given, project."""
@@ -559,6 +572,7 @@ def pilot_setting(
             max_lines=max_lines,
             epochs=1.0,
             log=log,
+            memory_limit_mib=memory_limit_mib,
         )
     except torch.OutOfMemoryError as exc:
         row.status = "oom"
@@ -665,6 +679,7 @@ def train(
     log: Callable[[str], None] | None = None,
     patience: int = 3,
     stop_file: Path | str | None = None,
+    memory_limit_mib: int | None = None,
 ) -> TrainState:
     """Epoch by epoch: train, validate, save the epoch's weights when its CER is the
     best so far (``<out>/best/``, a loadable checkpoint), record the history in
@@ -712,6 +727,7 @@ def train(
             optimizer=optimizer,
             total_steps=total_steps,
             stop_check=stop_path.exists,
+            memory_limit_mib=memory_limit_mib,
         )
         state.step += tally["steps"]
         v = validate(model, processor, val_samples, device=device, log=log)

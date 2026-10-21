@@ -291,6 +291,23 @@ def _aa_links(aa_refs: list[dict]) -> list[dict]:
     return out
 
 
+def _katalog_searches(shelfmarks: list[str] | None) -> list[dict]:
+    """The Leibniz-Katalog's own search by shelfmark, one entry per distinct
+    shelfmark a work carries, in stored order: ``shelfmark`` as the library
+    writes it, ``query`` as the catalogue spells it, ``url``. Two spellings of
+    one shelfmark give one entry; a signature of no family (a foreign one) gives
+    none. Stands in for the records this site does not hold (W6)."""
+    out: list[dict] = []
+    seen: set[str] = set()
+    for mark in shelfmarks or []:
+        url = links.katalog_search_url(mark)
+        if url is None or url in seen:
+            continue
+        seen.add(url)
+        out.append({"shelfmark": mark, "query": links.katalog_spelling(mark), "url": url})
+    return out
+
+
 def _katalog_for_work(
     conn: sqlite3.Connection, work_id: str, pages: list[db.Page] | None = None
 ) -> list[dict]:
@@ -583,10 +600,17 @@ def _crumbs(place: dict | None) -> str:
 
 
 def _ssr_work(
-    work: db.Work, pages: list, katalog: list[dict], gwlb_url: str, place: dict | None = None
+    work: db.Work,
+    pages: list,
+    katalog: list[dict],
+    gwlb_url: str,
+    place: dict | None = None,
+    searches: list[dict] | tuple[dict, ...] = (),
 ) -> tuple:
     """(title, description, html) for a work's server-rendered summary; ``place``
-    is where the work sits in the browse index (:func:`browse.places`)."""
+    is where the work sits in the browse index (:func:`browse.places`),
+    ``searches`` the Leibniz-Katalog's search by each of the work's shelfmarks
+    (:func:`_katalog_searches`), linked whether or not ``katalog`` has records."""
     title = work.title or work.gwlb_object_id
     marks = ", ".join(work.shelfmarks or [])
     n = len(pages)
@@ -600,6 +624,11 @@ def _ssr_work(
         if any(p.status == "recognized" for p in pages)
         else ""
     )
+    search = "".join(
+        f' · <a href="{_esc(s["url"])}" rel="noopener">Search the Leibniz-Katalog for '
+        f"{_esc(s['shelfmark'])}</a>"
+        for s in searches
+    )
     parts = [
         '<article class="panel ssr" id="ssr">',
         _crumbs(place),
@@ -607,8 +636,10 @@ def _ssr_work(
         f"<p>{_esc(marks)}</p>" if marks else "",
         f"<p>{_esc(work.set_name or '')} · {n:,} page images · "
         f'<a href="{_esc(gwlb_url)}">Original at the GWLB</a> · '
-        f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a>{download}</p>',
+        f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a>'
+        f"{search}{download}</p>",
     ]
+    heading = "<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>"
     if katalog:
         items = []
         for rec in katalog:
@@ -628,8 +659,19 @@ def _ssr_work(
                 else ""
             )
             items.append(f"<li>{_esc(' · '.join(b for b in bits if b))}{text}</li>")
-        parts.append("<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>")
+        parts.append(heading)
         parts.append("<ul>" + "".join(items) + "</ul>")
+    else:
+        # No record held here: the catalogue may still have them (W6).
+        where = " or ".join(
+            f'<a href="{_esc(s["url"])}" rel="noopener">{_esc(s["shelfmark"])}</a>'
+            for s in searches
+        )
+        parts.append(heading)
+        parts.append(
+            "<p>No catalogue record is linked to this work yet, and this site holds part of "
+            f"the Arbeitskatalog so far{'; search it for ' + where if where else ''}.</p>"
+        )
     if pages:
         links = "".join(
             f'<li><a href="/page/{_esc(p.id)}">{_esc(p.label or p.seq)}</a></li>' for p in pages
@@ -1522,7 +1564,19 @@ def create_app(
 
     # /api/works/{work_id} does not shadow the list above, nor the list it: the
     # ``str`` convertor needs at least one character and never matches a slash.
-    @app.get("/api/works/{work_id}")
+    @app.get(
+        "/api/works/{work_id}",
+        summary="A work: its pages, catalogue records and links out",
+        description=(
+            "Title, shelfmarks, pages with their line counts, the catalogue records this "
+            "site holds for the work (`katalog`, each linked to its record in the "
+            "Leibniz-Katalog), `katalog_search_urls` — the Leibniz-Katalog's own search by "
+            "shelfmark, one entry per distinct shelfmark the work carries (`shelfmark` as the "
+            "library writes it, `query` as the catalogue spells it, `url`), there whether or "
+            "not any record is held here, since this site holds part of the Arbeitskatalog so "
+            "far — attribution, and `browse`, the work's place in the browse index."
+        ),
+    )
     def api_work(work_id: str) -> JSONResponse:
         conn = _open(db_path)
         try:
@@ -1546,6 +1600,7 @@ def create_app(
                     for p in pages
                 ],
                 "katalog": _katalog_for_work(conn, work_id, pages),
+                "katalog_search_urls": _katalog_searches(work.shelfmarks),
                 "attribution": attr.attribution(images.mirrored),
             }
         finally:
@@ -1885,7 +1940,9 @@ def create_app(
                 conn.close()
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
             place = browse_index()["places"].get(work.gwlb_object_id)
-            title, description, ssr = _ssr_work(titled(work), pages, katalog, gwlb_url, place)
+            title, description, ssr = _ssr_work(
+                titled(work), pages, katalog, gwlb_url, place, _katalog_searches(work.shelfmarks)
+            )
             body = _stamp_shell(
                 shell,
                 path=f"/work/{work_id}",
