@@ -3,7 +3,18 @@
 * ``inventory``      (D1, CC0 + CC BY katalog) — works, pages, crosswalk, katalog records
 * ``transcriptions`` (D2, CC BY 4.0) — one row per recognised line, latest run per
   line, with the full §4.5 provenance tuple; NC-derived rows excluded
-* ``gt``             (D3, CC BY 4.0) — the retro-aligned ground truth, open bucket only
+* ``gt``             (D3, CC BY 4.0) — the open deposit of the retro-aligned ground
+  truth: lines whose edition text came through a channel with no terms of its own
+* ``gt-nc``          (D3, CC BY-NC 4.0) — the NC-derived deposit: lines whose text came
+  through a channel with non-commercial terms (the Potsdam Reihe IV PDFs, the GWLB
+  repository's PDFs), released separately since 2026-10 (SPECS §7, amendment of
+  2026-10-21)
+
+The deposit of a ``gt_lines`` row follows from the channel(s) its ``source`` names
+and its licence bucket, through the licence registry
+(:func:`leibniz.legal.deposit_for`); a row of a channel the registry does not
+release (the letter pool) goes to neither deposit, and the cards count what each
+deposit holds by channel and what was left out.
 
 Rows stream from the store; Parquet needs ``pyarrow`` (the ``release`` extra),
 JSONL needs nothing. Every file's row count and sha256 land in ``MANIFEST.json``.
@@ -20,12 +31,14 @@ from collections.abc import Callable, Iterator
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from leibniz import __version__, db
+from leibniz import __version__, db, legal
 from leibniz.align.audit import load_audit_summary
+from leibniz.align.pairs import channels_from_source
 from leibniz.release.cards import render_card
 from leibniz.web.geometry import line_bbox
 
-DATASETS = ("inventory", "transcriptions", "gt")
+DATASETS = ("inventory", "transcriptions", "gt", "gt-nc")
+GT_DATASETS = {"gt": "open", "gt-nc": "nc"}  # dataset → D3 deposit
 DEFAULT_OUT = Path("data/release")
 DEFAULT_CHUNK_ROWS = 1_000_000
 
@@ -257,12 +270,25 @@ def iter_transcriptions(conn: sqlite3.Connection) -> Iterator[dict]:
         yield pending
 
 
-def iter_gt(conn: sqlite3.Connection) -> Iterator[dict]:
-    """Open-bucket ground truth, one line of text per row: rows minted before
+def gt_deposit(source: str | None, license_bucket: str) -> str | None:
+    """The D3 deposit of one ``gt_lines`` row (``"open"``, ``"nc"`` or ``None``)."""
+    return legal.deposit_for(channels_from_source(source), license_bucket)
+
+
+def channel_label(source: str | None) -> str:
+    """The channel(s) a row's source names, as one label (``"ia"``, ``"ia+gwlb"``,
+    ``"(not recorded)"``)."""
+    return "+".join(channels_from_source(source)) or "(not recorded)"
+
+
+def _iter_gt_deposit(conn: sqlite3.Connection, deposit: str) -> Iterator[dict]:
+    """The ground truth of one deposit, one line of text per row: rows minted before
     2026-10 can carry the edition print's own line break inside a manuscript
     line, and a line's ground truth is one line (the factory now mints it so)."""
-    cur = conn.execute("SELECT * FROM gt_lines WHERE license_bucket = 'open' ORDER BY id")
+    cur = conn.execute("SELECT * FROM gt_lines ORDER BY id")
     for r in cur:
+        if gt_deposit(r["source"], r["license_bucket"]) != deposit:
+            continue
         yield {
             "gt_id": r["id"],
             "line_image_ref": r["line_image_ref"],
@@ -274,6 +300,30 @@ def iter_gt(conn: sqlite3.Connection) -> Iterator[dict]:
         }
 
 
+def iter_gt(conn: sqlite3.Connection) -> Iterator[dict]:
+    """The open deposit (CC BY 4.0): open-bucket rows whose channels carry no terms."""
+    yield from _iter_gt_deposit(conn, "open")
+
+
+def iter_gt_nc(conn: sqlite3.Connection) -> Iterator[dict]:
+    """The NC-derived deposit (CC BY-NC 4.0): rows read through an NC channel."""
+    yield from _iter_gt_deposit(conn, "nc")
+
+
+def gt_deposit_census(conn: sqlite3.Connection) -> dict:
+    """What each deposit holds, by channel label, and what no deposit takes —
+    ``{"open": {label: n}, "nc": {...}, "none": {...}, "rows": total}``. One pass
+    over ``gt_lines``; the cards quote it."""
+    census: dict = {"open": {}, "nc": {}, "none": {}, "rows": 0}
+    cur = conn.execute("SELECT source, license_bucket FROM gt_lines")
+    for source, bucket in cur:
+        dep = gt_deposit(source, bucket) or "none"
+        label = channel_label(source)
+        census[dep][label] = census[dep].get(label, 0) + 1
+        census["rows"] += 1
+    return census
+
+
 TABLES: dict[str, list[TableSpec]] = {
     "inventory": [
         TableSpec("works", WORKS_SCHEMA, iter_works),
@@ -283,6 +333,7 @@ TABLES: dict[str, list[TableSpec]] = {
     ],
     "transcriptions": [TableSpec("lines", LINES_SCHEMA, iter_transcriptions)],
     "gt": [TableSpec("gt_lines", GT_SCHEMA, iter_gt)],
+    "gt-nc": [TableSpec("gt_lines", GT_SCHEMA, iter_gt_nc)],
 }
 
 
@@ -429,13 +480,15 @@ def export_dataset(
     (out_dir / "MANIFEST.json").write_text(
         json.dumps(exp.manifest(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    is_gt = dataset in GT_DATASETS
     (out_dir / "README.md").write_text(
         render_card(
             dataset,
             TABLES[dataset],
             exp,
             stats=stats,
-            audit_summary=load_audit_summary() if dataset == "gt" else None,
+            audit_summary=load_audit_summary() if is_gt else None,
+            deposit_census=gt_deposit_census(conn) if is_gt else None,
         ),
         encoding="utf-8",
     )
@@ -462,14 +515,19 @@ __all__ = [
     "DATASETS",
     "DEFAULT_CHUNK_ROWS",
     "DEFAULT_OUT",
+    "GT_DATASETS",
     "TABLES",
     "DatasetExport",
     "FileRecord",
     "TableSpec",
+    "channel_label",
     "export_all",
     "export_dataset",
+    "gt_deposit",
+    "gt_deposit_census",
     "iter_crosswalk",
     "iter_gt",
+    "iter_gt_nc",
     "iter_katalog",
     "iter_pages",
     "iter_transcriptions",

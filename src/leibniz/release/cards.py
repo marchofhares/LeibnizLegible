@@ -9,16 +9,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from leibniz import legal
 from leibniz.align.audit import audit_sentence
 from leibniz.web import attribution as attr
 
 if TYPE_CHECKING:  # pragma: no cover
     from leibniz.release.export import DatasetExport, TableSpec
 
+# The licence of each card comes from the licence registry (legal.OUTPUTS), so a
+# card can never say something the registry does not; ``why`` is quoted under it.
 CARD_META = {
     "inventory": {
         "title": "leibniz-inventory — page-level inventory of the digitized Leibniz Nachlass",
-        "license": "CC0 1.0 (inventory) · katalog records CC BY 4.0 (BBAW/TELOTA)",
+        "license": legal.output("inventory").licence,
+        "output": "inventory",
         "summary": (
             "The canonical page-level inventory (deliverable D1): every GWLB work "
             "(object) with its shelfmarks and IIIF manifest, every page image with its "
@@ -28,7 +32,8 @@ CARD_META = {
     },
     "transcriptions": {
         "title": "leibniz-transcriptions — machine transcription of the Leibniz Nachlass",
-        "license": "CC BY 4.0",
+        "license": legal.output("transcriptions").licence,
+        "output": "transcriptions",
         "summary": (
             "One row per recognised manuscript line (deliverable D2): the machine text, "
             "its confidence, the model and run that produced it, its status, and the "
@@ -37,8 +42,13 @@ CARD_META = {
         ),
     },
     "gt": {
-        "title": "leibniz-gt — retro-aligned ground truth (open bucket)",
-        "license": "CC BY 4.0 (open bucket only; NC-derived pairs are never exported)",
+        "title": "leibniz-gt — retro-aligned ground truth (the open deposit)",
+        "license": (
+            f"{legal.output('gt-open').licence} (the open deposit: lines whose edition text "
+            "came through a channel with no terms of its own; the NC-derived lines are the "
+            "separate deposit leibniz-gt-nc)"
+        ),
+        "output": "gt-open",
         "summary": (
             "Line image references paired with the reading text of §70-expired "
             "Akademie-Ausgabe volumes, minted by forced alignment onto machine "
@@ -46,7 +56,33 @@ CARD_META = {
             "per line. Precision is estimated, not verified: see the audit note."
         ),
     },
+    "gt-nc": {
+        "title": "leibniz-gt-nc — retro-aligned ground truth (the NC-derived deposit)",
+        "license": (
+            f"{legal.output('gt-nc').licence} (the NC-derived deposit: lines whose edition "
+            "text came through a channel with non-commercial terms; the rest is the deposit "
+            "leibniz-gt)"
+        ),
+        "output": "gt-nc",
+        "summary": (
+            "Line image references paired with the reading text of §70-expired "
+            "Akademie-Ausgabe volumes, read from copies whose publishers state "
+            "non-commercial terms (deliverable D3, the second deposit), minted by forced "
+            "alignment onto machine transcriptions, with the stratum and alignment "
+            "confidence per line. Precision is estimated, not verified: see the audit note."
+        ),
+    },
 }
+
+# The NC deposit names the publishers whose copies its text was read from.
+GT_NC_ATTRIBUTION = (
+    "Edition text (the NC channels): Gottfried Wilhelm Leibniz, Sämtliche Schriften und "
+    "Briefe (Akademie-Ausgabe) — Reihe IV from the text files of the Leibniz-Edition Potsdam "
+    "(Berlin-Brandenburgische Akademie der Wissenschaften), CC BY-NC 4.0 as stated in writing "
+    "on 2026-10-12; Reihe I from the volume PDFs of the GWLB's Repositorium des "
+    "Leibniz-Archivs, CC BY-NC 4.0. Only the constituted reading text was read, and only "
+    "from volumes whose §70 term has run out."
+)
 
 ANTI_CONTAMINATION = (
     "**Machine output — do not ingest as verified text.** Every row carries the model, "
@@ -82,6 +118,46 @@ GT_PROVENANCE_NOTE = (
 )
 
 
+def _bare_licence(output_key: str) -> str:
+    """The output's licence name alone (``"CC0 1.0"``, ``"CC BY-NC 4.0"``), for the
+    citation line."""
+    return legal.output(output_key).licence.split(" ·")[0].split(" (")[0]
+
+
+def licence_section(dataset: str, census: dict | None = None) -> list[str]:
+    """The card's licence paragraph(s): the registry's reason, and for a ground-truth
+    deposit what it holds by channel (from :func:`leibniz.release.export.gt_deposit_census`)
+    and what no deposit takes."""
+    meta = CARD_META[dataset]
+    out_ = legal.output(meta["output"])
+    lines = ["## Licence", "", f"**{out_.licence}.** {out_.why}.", ""]
+    if dataset in ("gt", "gt-nc") and census is not None:
+        deposit = "open" if dataset == "gt" else "nc"
+        held = census.get(deposit) or {}
+        other = "nc" if deposit == "open" else "open"
+        other_n = sum((census.get(other) or {}).values())
+        none_n = sum((census.get("none") or {}).values())
+        if held:
+            by = " · ".join(f"`{ch}` {n:,}" for ch, n in sorted(held.items()))
+            lines.append(
+                f"Channels in this deposit (the `channel` each row's `source` names), lines: {by}."
+            )
+        else:
+            lines.append("This deposit holds no lines in this export.")
+        lines.append(
+            f"Left to the other deposit (`leibniz-gt{'-nc' if deposit == 'open' else ''}`): "
+            f"{other_n:,} lines; released in neither (a channel the registry does not release, "
+            f"or an nc-bucket row without a channel): {none_n:,} of {census.get('rows', 0):,} rows."
+        )
+        lines.append("")
+        lines.append(
+            "The registry: `src/leibniz/legal.py` (`leibniz legal licences`); the channels' "
+            "terms as the factory recorded them: `src/leibniz/align/volumes_sources.py`."
+        )
+        lines.append("")
+    return lines
+
+
 def gt_audit_note(summary: dict | None) -> str:
     """The audit paragraph, quoting the scored audit where its summary exists."""
     sentence = audit_sentence(summary)
@@ -108,8 +184,10 @@ def render_card(
     *,
     stats: dict | None = None,
     audit_summary: dict | None = None,
+    deposit_census: dict | None = None,
 ) -> str:
     meta = CARD_META[dataset]
+    is_gt = dataset in ("gt", "gt-nc")
     lines = [
         f"# {meta['title']}",
         "",
@@ -125,7 +203,9 @@ def render_card(
         f"- {attr.IMAGES}",
         f"- {attr.KATALOG}",
         f"- {attr.TRANSCRIPTIONS}",
+        *([f"- {GT_NC_ATTRIBUTION}"] if dataset == "gt-nc" else []),
         "",
+        *licence_section(dataset, deposit_census),
         "## Provenance",
         "",
         "- Images: GWLB digital collections, harvested via OAI-PMH/METS and IIIF "
@@ -161,7 +241,7 @@ def render_card(
         ERROR_RATES,
         "",
     ]
-    if dataset == "gt":
+    if is_gt:
         lines += [gt_audit_note(audit_summary), "", GT_PROVENANCE_NOTE, ""]
     lines += [
         "## Use with care",
@@ -171,7 +251,7 @@ def render_card(
         "## Citation",
         "",
         f"{attr.PROJECT_NAME} ({exp.generated_at[:4]}). {meta['title'].split(' — ')[0]}. "
-        f"{attr.PROJECT_URL}. Licensed {meta['license'].split(' ·')[0]}.",
+        f"{attr.PROJECT_URL}. Licensed {_bare_licence(meta['output'])}.",
         "",
         "Files, row counts and SHA-256 checksums are listed in `MANIFEST.json`.",
         "",
@@ -184,7 +264,9 @@ __all__ = [
     "CARD_META",
     "ERROR_RATES",
     "GT_AUDIT_NOTE",
+    "GT_NC_ATTRIBUTION",
     "GT_PROVENANCE_NOTE",
     "gt_audit_note",
+    "licence_section",
     "render_card",
 ]

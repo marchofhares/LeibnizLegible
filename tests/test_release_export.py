@@ -127,3 +127,100 @@ def test_gt_export_keeps_reader_rows_labelled_by_source() -> None:
     insert_gt_pairs(conn, [GtPair("P:0001:000", "vnd daß", k2, "fair_copy", 0.9, "open", "R7")])
     (row,) = list(iter_gt(conn))
     assert row["source"] == k2 and row["text"] == "vnd daß"
+
+
+# ---- the two ground-truth deposits (L1) --------------------------------------- #
+
+
+def _seed_channels(conn) -> None:
+    from leibniz.align.pairs import GtPair, insert_gt_pairs
+
+    def src(label: str, channel: str | None, rec: str, reader: str | None = None) -> str:
+        via = f"; channel {channel}" if channel else ""
+        by = f"; reader {reader}" if reader else ""
+        return f"{label} (§70-expired AA reading text{via}{by}; katalog {rec})"
+
+    insert_gt_pairs(
+        conn,
+        [
+            GtPair("P:0001:000", "ia one", src("AA I,9 N.1", "ia", "1"), "fair_copy", 0.9, "open"),
+            GtPair("P:0001:001", "ia two", src("AA I,9 N.1", "ia", "1"), "fair_copy", 0.9, "open"),
+            GtPair(
+                "P:0002:000", "potsdam", src("AA IV,1 N.2", "potsdam", "2"), "scrap", 0.9, "open"
+            ),
+            GtPair(
+                "P:0003:000", "joined", src("AA I,9 N.3", "ia+gwlb", "3"), "fair_copy", 0.9, "open"
+            ),
+            GtPair(
+                "P:0004:000",
+                "vnd daß",
+                src("AA I,3 N.4", "gwlb", "4", "trocr-kurrent-xvi-xvii"),
+                "heavy_revision",
+                0.8,
+                "open",
+            ),
+            GtPair("P:0005:000", "old", "AA VI,4 N.109", "fair_copy", 0.9, "open"),
+            GtPair(
+                "P:0006:000", "pool", "letter 1714 N.1 (channel letterpool)", "unknown", 0.9, "nc"
+            ),
+        ],
+    )
+
+
+def test_gt_deposits_follow_the_channel_and_the_cards_count_them(tmp_path) -> None:
+    from leibniz.release.export import (
+        DATASETS,
+        GT_DATASETS,
+        export_dataset,
+        gt_deposit_census,
+        iter_gt,
+        iter_gt_nc,
+    )
+
+    assert "gt-nc" in DATASETS and GT_DATASETS == {"gt": "open", "gt-nc": "nc"}
+    conn = db.init_db(":memory:")
+    _seed_channels(conn)
+    open_rows = list(iter_gt(conn))
+    nc_rows = list(iter_gt_nc(conn))
+    assert [r["text"] for r in open_rows] == ["ia one", "ia two", "old"]
+    assert [r["text"] for r in nc_rows] == ["potsdam", "joined", "vnd daß"]
+    census = gt_deposit_census(conn)
+    assert census == {
+        "open": {"ia": 2, "(not recorded)": 1},
+        "nc": {"potsdam": 1, "ia+gwlb": 1, "gwlb": 1},
+        "none": {"letterpool": 1},
+        "rows": 7,
+    }
+
+    exp_open = export_dataset(conn, "gt", tmp_path, fmt="jsonl")
+    exp_nc = export_dataset(conn, "gt-nc", tmp_path, fmt="jsonl")
+    assert exp_open.row_counts == {"gt_lines": 3} and exp_nc.row_counts == {"gt_lines": 3}
+    assert exp_nc.out_dir.name == "leibniz-gt-nc"
+    card = (tmp_path / "leibniz-gt" / "README.md").read_text()
+    nc_card = (tmp_path / "leibniz-gt-nc" / "README.md").read_text()
+    assert "**License:** CC BY 4.0 (the open deposit" in card
+    assert "**License:** CC BY-NC 4.0 (the NC-derived deposit" in nc_card
+    assert "`ia` 2" in card and "`(not recorded)` 1" in card
+    assert "Left to the other deposit (`leibniz-gt-nc`): 3 lines" in card
+    assert "released in neither" in card and "1 of 7 rows" in card
+    assert "`potsdam` 1" in nc_card and "`gwlb` 1" in nc_card and "`ia+gwlb` 1" in nc_card
+    assert "Left to the other deposit (`leibniz-gt`): 3 lines" in nc_card
+    assert "stated in writing" in nc_card and "2026-10-12" in nc_card  # the Potsdam channel
+    assert "Repositorium des Leibniz-Archivs" in nc_card
+    for text in (card, nc_card):
+        assert "## Licence" in text and "do not ingest as verified text" in text
+        assert "`channel ia`" in text  # the provenance note names the channels
+    # the citation line carries the deposit's licence alone
+    assert "Licensed CC BY 4.0." in card and "Licensed CC BY-NC 4.0." in nc_card
+
+
+def test_cards_take_their_licence_lines_from_the_registry() -> None:
+    from leibniz import legal
+    from leibniz.release.cards import CARD_META
+
+    assert CARD_META["transcriptions"]["license"] == legal.output("transcriptions").licence
+    assert CARD_META["inventory"]["license"] == legal.output("inventory").licence
+    assert CARD_META["gt"]["license"].startswith(legal.deposit_licence("open") + " ")
+    assert CARD_META["gt-nc"]["license"].startswith(legal.deposit_licence("nc") + " ")
+    for meta in CARD_META.values():
+        assert meta["output"] in {o.key for o in legal.OUTPUTS}
