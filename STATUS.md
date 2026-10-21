@@ -3,15 +3,15 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-21 (**G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; on `claude/keen-keller-rvxmzf`, the pull request the operator's; the real pack is the operator's command (Next)**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-21 (**G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
 
 **2026-10-21: G1 — the Calculemus seam, built in a cloud session on the
-fixture store; the branch `claude/keen-keller-rvxmzf`, the pull request the
-operator's; nothing deployed, no store opened (none in the cloud).**
+fixture store and merged as #51; the real pack built and checked on the
+desktop the same day; nothing deployed, nothing yet copied to the box.**
 Calculemus played on a synthetic pack because this seam was never built
 (NOTES.md B); it now exists in `src/leibniz/pack/`. (a) `leibniz pack
 fragments` reads the store read-only, K2's readings and K1's German pieces
@@ -42,9 +42,24 @@ game's converged judgments as new `corrected` lines under one `crowd` run
 row verbatim as `source`), never updating or deleting a machine row,
 idempotent on the line and `decided_at`; the both-rejected lines go to
 `reports/scriptorium-queue.md`, a section per judgment pack. SPECS §11
-records the seam. Tests 880 → 948, ruff clean. **No corpus number exists
-yet: the real pack is the operator's command on the desktop (Next); the
-judgments import is P8's.** The G1 entry in the Phase log has the detail.
+records the seam. Tests 880 → 948, ruff clean. **The real pack** (the
+operator's run, 16:15 EDT, 390 s, the store read-only; `pack check` OK): the
+2,148 German records' 4,734 pages carry 305,602 lines, **112,513 of them
+(36.8 %) another registration's** (W5's twins), 90,727 outside 10–50
+characters, none refused under §70 — **79,453 eligible, 2,000 selected**
+(fair copy 55, all there are; light 649, heavy 648, scrap 648; Leibniz's own
+hand 131, 6.5 %, its share of the pool). **Gold 56 (2.8 %; the cap allows
+500): truth 42, both-wrong 14** — the supply is the limit. Of the 2,000, 553
+lines have a row K2's reader minted: 282 in the NC deposit (withheld) and 271
+in the open, and on those 271 one reading equals the minted text under the
+fold on **43 (15.9 %): the Bern reading on 42, the v1 text on none**, both on
+1; neither on 228 (84.1 %). v1 is never the truth because K2 aligned the
+edition on the Bern reading and v1 reads German at 46.6 % CER (K2b), so every
+truth-gold row is a line the Bern model reads exactly. That 15.9 % is a
+first, biased indication of the number NOTES B asks for before an A/B design
+(it wants about 70 % on heavy revision): the owner's choices before the copy
+to the box are Open question 30 (g)–(i). The judgments import is P8's. The
+G1 entry in the Phase log has the detail.
 
 **2026-10-21: L1 — the licence registry, built in a cloud session on the
 branch it was given, `claude/relaxed-dijkstra-uus9rz`; the pull request the
@@ -866,7 +881,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### G1 — the Calculemus seam (2026-10-21) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pack and pull request
+### G1 — the Calculemus seam (2026-10-21) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ✅ merged (#51) · ✅ the real pack, built and checked (the operator's run) · ⏳ the owner's choices and the copy to the box
 
 - **Setting and pre-flight (Task 0).** A cloud session on the branch it was
   given, `claude/keen-keller-rvxmzf`, under the session preamble of 19
@@ -1059,6 +1074,83 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   without a machine row), `--write` (a run, 2 rows), `--write` again (0 to
   import, `already_imported` 2, no run). **No number from the corpus**: this
   session had no store.
+- **The real pack (the operator's run on the desktop, 2026-10-21, after #51
+  was merged at 16:05 EDT).** `uv run --no-sync leibniz pack fragments
+  --readings data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl --pieces
+  data/kurrent/german_pieces.jsonl --limit 2000 --seed 20261022 --out
+  /mnt/d/leibniz-packs/fragments-2026-10-22.jsonl` in `.venv-w3`: the pack
+  under `/mnt/d/leibniz-packs/` rather than `packs/` (the operator's choice),
+  and `--today` left to its default, so the §70 check and the pack id carry
+  the run's day, 2026-10-21, while the file name says 22 (no volume changes
+  its status between the two). Built 20:15:58Z in **390.0 s**, the store
+  read-only; pack `ll-fragments-2026-10-21-s20261022-e86be52b1c`; 77 runs in
+  its header (the v1 rows' 76 recognition runs, and 609, K2's mint). What it
+  printed, and what follows from it:
+  *Pieces and lines:* 2,148 records on 4,734 pages, all in the store, none
+  without a cached image; 305,602 lines on them (the latest run of each);
+  310,831 readings in the file.
+  *Skipped, under the first rule each line failed:* `twin_elsewhere`
+  **112,513** (36.8 % of the lines; corpus-wide, W5's index keeps 9,846,450
+  of 13,508,625, so 27.1 % are second registrations: the German pages,
+  letters among them, carry more spreads than the average); `no_v1_text`
+  21,419; `empty_reading` 49; `same_text` 1,441; `too_short` 50,176 and
+  `too_long` 40,551 (together 53.3 % of the 170,180 lines that reached the
+  length rule); `not_70_expired` 0; every other rule 0 (no line lacked a
+  reading, its provenance, geometry or a shelfmark, and none was a crowd
+  row).
+  *Eligible:* **79,453** (26.0 % of the lines): fair copy 55 (0.1 %), light
+  revision 18,904 (23.8 %), heavy revision 59,345 (74.7 %), scrap 1,149
+  (1.4 %); Leibniz's own hand 5,188 (6.5 %).
+  *Selected:* **2,000** — fair copy 55 (2.8 %), light 649 (32.5 %), heavy
+  648 (32.4 %), scrap 648 (32.4 %): the equal allocation took every
+  fair-copy line and shared its remainder among the others; Leibniz's own
+  hand 131 (6.5 %, the ceiling of his share of the pool), other hands
+  1,869; de 1,939, mixed 61.
+  *Lengths* (characters, whitespace normalised): v1 min 1 · median 34 ·
+  mean 31.9 · max 50; Bern min 1 · median 33 · mean 31.2 · max 50; the
+  longer of the two 10–19 380 · 20–29 330 · 30–39 497 · 40–50 793. The
+  window bounds the longer reading only, as the prompt set it, so the
+  shorter can be a single character.
+  *Order:* v1 first in 1,007 rows, the Bern reading first in 993.
+  *Gold:* **56 of 2,000 (2.8 %; the cap 0.25 × 2,000 = 500): truth 42 (v1
+  0, Bern 42), both-wrong 14** (25 % of the gold: at its cap). Of the
+  2,000, 553 lines (27.6 %) have a row K2's reader minted: **282 withheld**
+  (the NC deposit: the Potsdam Reihe IV PDFs or the GWLB repository's;
+  51.0 % of those lines) and **271 open**; on the 271, the fold makes one
+  candidate equal to the minted text on 42 (15.5 %) — always the Bern
+  reading —, both on 1, neither on 228 (84.1 %), unfoldable 0. The truths
+  bound the gold: with 42 of them, 14 both-wrong rows fit under the 25 %
+  cap, 56 in all.
+  *The check:* `uv run --no-sync leibniz pack check
+  /mnt/d/leibniz-packs/fragments-2026-10-22.jsonl` → "OK — fragment pack,
+  schema_version 1", "rows 2,000; gold 56 (truth 42, both wrong 14);
+  license_bucket 'open' on every row", "lang: de 1,939 · mixed 61",
+  "stratum: fair_copy 55 · heavy_revision 648 · light_revision 649 · scrap
+  648", "first candidate: htr_best 1,007 · model_alt 993".
+  *What the numbers say.* (1) Every count adds up: the skips and the
+  eligible lines to the 305,602 lines; the strata, the length bins, the
+  languages and the orders each to 2,000; his hand to the ceiling of 6.5 %
+  of 2,000. (2) The gold supply, not the cap, sets the gold, and two things
+  shrink it: half the reader rows on the selected lines came through an NC
+  channel, and the open half rarely holds an exact reading. (3) The truth
+  is never v1, by construction: K2 aligned the edition text on the Bern
+  reading, so the minted span follows that reading's line, and v1 reads
+  German at 46.6 % CER (K2b); the calibration set is "lines the Bern model
+  reads exactly", likely the easier lines. (4) On the 271 selected lines
+  with an open reader row, either reading equals the edition's text under
+  the fold on 43 (15.9 %): the first number of the kind NOTES B asks for
+  before an A/B design ("the fraction of disagreements where either reading
+  is exactly right"; it wants about 70 % on heavy revision) — biased upward,
+  since these are lines the aligner accepted on the Bern reading, and
+  downward, since the fold does not forgive the edition's expansions of
+  abbreviations and the aligner's boundary slips count as "neither"; and
+  the reader rows' precision by hand is not yet judged (K2's sheet). Read
+  with those caveats, it says that most German A/B fragments will end
+  both-rejected, in the Scriptorium queue. (5) The equal allocation gives
+  scrap a third of the pack (1.4 % of the pool) and heavy revision a third
+  (74.7 %); NOTES B would aim A/B at fair copy and light revision. The
+  choices are the owner's, before the copy to the box: Open question 30
+  (g)–(i).
 - **Noticed, for P8 and the game** (Open question 30). What the site shows
   of a line is its latest run, so an imported judgment is what the viewer,
   the index and the exports show next — until a later machine run (C4)
@@ -4080,7 +4172,8 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **880** (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **948** (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **G1 fragment pack (2026-10-21, the operator's run)** | the 2,148 German records on 4,734 pages: **305,602 lines** (the latest run of each) → another registration's (W5's twins) **112,513 (36.8 %)** · no v1 text 21,419 · empty reading 49 · the same text 1,441 · under 10 characters 50,176 · over 50 40,551 · refused under §70 0 → **79,453 eligible** (fair 55 · light 18,904 · heavy 59,345 · scrap 1,149; Leibniz's own hand 5,188, 6.5 %) → **2,000 rows** (fair 55 · light 649 · heavy 648 · scrap 648; his hand 131, 6.5 %; de 1,939 · mixed 61; the longer reading 10–19 380 · 20–29 330 · 30–39 497 · 40–50 793) · **gold 56 (2.8 %): truth 42 (the Bern reading every time, v1 never) · both-wrong 14**; of the 2,000, 553 lines with a reader-minted row: 282 withheld (NC deposit), 271 open — **one reading equal to the minted text under the fold on 43 (15.9 %)**, neither on 228 (84.1 %); `pack check` OK; 390 s, the store read-only |
 | **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
 | **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
@@ -4168,7 +4261,30 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
     the K2 audit sheet will give; a both-wrong verdict can also be an
     edition expansion the fold does not forgive, hence its cap. (f) The
     demand weight is 1 on every row until search logs or the Reference Desk
-    give better (NOTES.md B).
+    give better (NOTES.md B). **2026-10-21, the first real pack** (the
+    operator's run; the G1 entry in the Phase log), three choices for the
+    owner before the copy to the box: (g) *The gold is 56 rows, 2.8 % of the
+    pack:* the cap allows 500, the supply gives 42 truths, all of them the
+    Bern reading, and so 14 both-wrong rows. Whether 56 rows calibrate the
+    players is the game's question. If they do not, the change is a
+    gold-first draw: the gold-eligible lines among all the eligible drawn
+    first, up to the caps, then the strata filled — the prompt's "gold among
+    the selected lines" would become "among the eligible lines"; the truth
+    gold would stay lines the Bern model reads exactly, mostly heavy
+    revision. Code, tests and a rebuild of six and a half minutes. (h) *The
+    shorter reading can be one character:* the 10–50 window bounds the longer
+    reading only, as the prompt set it, so a pair where one reader failed
+    asks nothing; a floor on the shorter reading, or on the ratio of the two
+    lengths, would drop such pairs. The pack file alone says how many there
+    are (the line under Next). (i) *The aim:* the equal allocation gives
+    scrap and heavy revision a third of the pack each (1.4 % and 74.7 % of
+    the pool), and either reading equals the edition's text on 15.9 % of the
+    selected lines with an open reader row — far under the 70 % NOTES B asks
+    on heavy revision before an A/B design, so most German fragments will end
+    both-rejected. Ship this pack as a trial, whose both-rejected rate per
+    stratum is the measurement the game can make, or aim the next pack
+    (NOTES B: fair copy and light revision; German has 55 eligible lines of
+    fair copy).
 
 29. **Licence asks open after L1 (2026-10-21).** The registry
     (`src/leibniz/legal.py`, `leibniz legal licences`) records them with
@@ -4861,44 +4977,29 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Next
 
-**G1 (2026-10-21): built in a cloud session on the fixture store; the branch
-`claude/keen-keller-rvxmzf` carries it (compare:
-https://github.com/marchofhares/leibnizlegible/compare/main...claude/keen-keller-rvxmzf?expand=1);
-the operator opens and merges the pull request; nothing deployed** (nothing
-the website runs changed). **The real pack is the operator's**: after the
-merge and `git pull` on the desktop, in `.venv-w3` (`export
-UV_PROJECT_ENVIRONMENT=.venv-w3`),
-   - `uv run --no-sync leibniz pack fragments --readings data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl --pieces data/kurrent/german_pieces.jsonl --limit 2000 --seed 20261022 --out packs/fragments-2026-10-22.jsonl`
-   - `uv run --no-sync leibniz pack check packs/fragments-2026-10-22.jsonl`
-   Both open the store read-only (`mode=ro`, `query_only`) and take minutes
-   (the 310,831 readings load whole, and every line on the German pieces'
-   pages is read once). The expected shape — no number of it is this
-   session's: the skips by rule (`twin_elsewhere` counts the lines a second
-   registration of the same scan carries), with `not_70_expired` 0 (every
-   volume in K1's census is §70-free on 2026-10-22; I,17 and IV,4 follow on
-   2027-01-01) and `no_image` 0 if the store records every German page as
-   cached (K2 found all 4,807 page images in the cache); "Eligible: …", at
-   most the lines K2 read; "Selected: 2,000" if at least that many qualify
-   (else all of them), the strata as equal as their supply allows (fair copy
-   is scarce among the German pieces, so its remainder goes to the others),
-   Leibniz's own hand at or above its share of the eligible lines; each
-   candidate's lengths, and the longer one's in four bins 10–19, 20–29,
-   30–39, 40–50; "Gold: …" at most 500 of 2,000 (25 %), both-wrong at most a
-   quarter of the gold — fewer if the selected lines hold fewer reader rows
-   in the open deposit (no committed report counts the German rows by
-   channel; those minted through the Potsdam channel are counted as
-   withheld); then the check: "OK — fragment pack, schema_version 1 …",
-   "rows 2,000; gold …; license_bucket 'open' on every row". Paste both
-   outputs back: they are G1's first corpus numbers. **The copy to the box**:
-   `scp packs/fragments-2026-10-22.jsonl root@<target>:/root/` (the target
-   on the plan page); the import into the game is the game's runbook. **The
-   judgments import is P8's**: when the game's judgment pack comes back,
-   `uv run --no-sync leibniz pack judgments --in <judgments.jsonl>
-   --fragments packs/fragments-2026-10-22.jsonl` (a dry run: the plan, and
-   the Scriptorium queue rendered) and, after a backup of the store and the
-   operator's go, the same with `--write`; keep
-   `packs/fragments-2026-10-22.jsonl` until then (the winners are checked
-   against it). Open question 30 has the seam's open points.
+**G1 (2026-10-21): merged as #51; the real pack built and checked on the
+desktop the same day** (`/mnt/d/leibniz-packs/fragments-2026-10-22.jsonl`,
+pack `ll-fragments-2026-10-21-s20261022-e86be52b1c`: 2,000 rows, gold 56;
+the G1 entry in the Phase log). **Before the copy to the box, the owner's
+choice** (Open question 30 (g)–(i)): ship this pack as the trial it is, or
+have a cloud session add a gold-first draw (and, if the count below is
+large, a floor on the shorter reading) and rebuild — six and a half minutes
+on the desktop. The count, from the pack file alone (no store):
+   - `python3 -c 'import json,sys; rows=[json.loads(l) for l in open(sys.argv[1], encoding="utf-8")][1:]; short=[r for r in rows if 2*min(len(c["text"]) for c in r["candidates"]) < r["n_chars"]]; print(len(short), "of", len(rows), "rows: the shorter reading under half the longer;", sum(r["gold"]["is_gold"] for r in short), "of them gold")' /mnt/d/leibniz-packs/fragments-2026-10-22.jsonl` → "N of 2000 rows: the shorter reading under half the longer; G of them gold".
+   **The copy to the box**, once chosen: `scp
+   /mnt/d/leibniz-packs/fragments-2026-10-22.jsonl root@<target>:/root/`
+   (the target on the plan page); the import into the game is the game's
+   runbook. **The judgments import is P8's**: when the game's judgment pack
+   comes back, `uv run --no-sync leibniz pack judgments --in
+   <judgments.jsonl> --fragments
+   /mnt/d/leibniz-packs/fragments-2026-10-22.jsonl` (a dry run: the plan,
+   and the Scriptorium queue rendered) and, after a backup of the store and
+   the operator's go, the same with `--write`; keep the pack file until then
+   (the winners are checked against it). This record is on
+   `claude/keen-keller-rvxmzf`, restarted from main after the merge
+   (compare:
+   https://github.com/marchofhares/leibnizlegible/compare/main...claude/keen-keller-rvxmzf?expand=1);
+   the operator opens and merges its pull request.
 
 **L1 (2026-10-21): built in a cloud session; the branch
 `claude/relaxed-dijkstra-uus9rz` carries it (compare:
