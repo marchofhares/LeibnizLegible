@@ -781,6 +781,9 @@ def train_trocr(
     pilot_val: bool = typer.Option(
         True, "--pilot-val/--no-pilot-val", help="Score the validation set after each pilot run."
     ),
+    pilot_save: bool = typer.Option(
+        False, "--pilot-save", help="Keep each pilot's weights under <out>/<setting>/."
+    ),
     val_limit: int | None = typer.Option(
         None, "--val-limit", help="Score only the first N validation lines (pilot)."
     ),
@@ -870,6 +873,7 @@ def train_trocr(
                 plan_lines=len(train),
                 plan_epochs=plan_epochs,
                 memory_limit_mib=limit,
+                save_to=(out / s.key) if pilot_save else None,
             )
             rows.append(row)
             v = row.val or {}

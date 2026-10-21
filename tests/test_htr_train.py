@@ -293,6 +293,7 @@ def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
         plan_lines,
         plan_epochs,
         memory_limit_mib,
+        save_to=None,
     ):
         calls.append((settings.key, len(train), max_lines, len(val or ()), memory_limit_mib))
         row = T.PilotRow(

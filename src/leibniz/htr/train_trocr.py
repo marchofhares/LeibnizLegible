@@ -482,17 +482,25 @@ def validate(
     samples: Sequence[Sample],
     *,
     device: str,
-    batch_size: int = 16,
+    batch_size: int = 8,
     max_new_tokens: int = 160,
     policy: metrics.NormPolicy = metrics.PHILIUMM_POLICY,
     log: Callable[[str], None] | None = None,
 ) -> dict:
     """Greedy decoding over the validation samples through the engine's path, scored
-    under ``policy``; the lines sorted by width so a batch's steps match."""
+    under ``policy``; the lines sorted by width so a batch's steps match. No per-step
+    scores (no confidence is needed) and batch 8 by default: the pilots of 21 October
+    ran out of memory validating at batch 16 with the scores kept, beside the
+    training state."""
+    import gc
+
     import torch
 
     from leibniz.htr.trocr import TrOCREngine, _drop_checkpoint_max_length
 
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     _drop_checkpoint_max_length(model)  # the engine's loader does this; the pair is handed over
     engine = TrOCREngine(
         "local",
@@ -500,6 +508,7 @@ def validate(
         batch_size=batch_size,
         max_new_tokens=max_new_tokens,
         use_cache=True,
+        with_scores=False,
     )
     engine._processor, engine._model = processor, model  # the loaded pair, no loader
     engine._skip = _special_ids(model)
@@ -565,6 +574,7 @@ class PilotRow:
     val: dict | None = None
     projection: dict | None = None
     error: str = ""
+    saved: str = ""  # where the pilot's weights went, if kept
 
     def as_dict(self) -> dict:
         d = asdict(self)
@@ -585,9 +595,11 @@ def pilot_setting(
     plan_lines: int = 0,
     plan_epochs: float = 1.0,
     memory_limit_mib: int | None = None,
+    save_to: Path | str | None = None,
 ) -> PilotRow:
     """Load the base, train ``max_lines`` lines under ``settings`` (an out-of-memory
-    error is a result, not a crash), score the validation set if given, project."""
+    error is a result, not a crash), save the weights to ``save_to`` if given, drop
+    the training state, score the validation set if given, project."""
     import torch
 
     row = PilotRow(settings=settings.as_dict(), status="ok")
@@ -619,6 +631,15 @@ def pilot_setting(
         tally["peak_mib"],
         tally["steps"],
     )
+    if save_to is not None:
+        save_checkpoint(model, processor, save_to, settings=settings, epoch=0)
+        row.saved = str(save_to)
+    # the optimizer's states and the gradients go before the validation generates
+    opt = tally.pop("optimizer", None)
+    del opt
+    for p in model.parameters():
+        p.grad = None
+    _gpu_reset_peak()
     if val:
         try:
             v = validate(model, processor, val, device=device, log=log)
