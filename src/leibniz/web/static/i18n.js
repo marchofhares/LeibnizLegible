@@ -346,6 +346,8 @@ const STRINGS = {
     'about.what.h': 'What this is',
     'about.what.p1':
       'Leibniz Legible is an access layer for the digitized Leibniz Nachlass held by the Gottfried Wilhelm Leibniz Bibliothek (GWLB) in Hannover. Every page image the library has published is run through handwritten-text recognition, and the result is made searchable and readable line by line, each line carrying its own confidence score and its full provenance.',
+    'about.what.scope':
+      'The site covers the scans the GWLB has published of its Leibniz collections. That is not all of Leibniz’s papers: much is not yet digitised, at the GWLB and elsewhere, and other institutions hold manuscripts of his, the Niedersächsisches Landesarchiv Hannover among them. The Arbeitskatalog der Leibniz-Edition records them all, wherever they lie; this site holds part of its records so far, and every work here links to the catalogue’s own search by shelfmark.',
     'about.what.p2':
       'This is machine output with honest labels. It is Vorausedition-grade at best, and it is explicitly subordinate to the Akademie-Ausgabe, which remains the scholarly edition of Leibniz. Nothing here is an edition, and nothing here should be quoted as one. By its own count the Akademie-Ausgabe is about half way through the volumes it plans, and one of its editors estimates that three quarters of Leibniz’s papers have never been published anywhere (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); making all of it legible and findable is the whole of the ambition.',
     'about.what.p3':
@@ -790,6 +792,8 @@ const STRINGS = {
     'about.what.h': 'Was das hier ist',
     'about.what.p1':
       'Leibniz Legible ist eine Zugangsschicht zum digitalisierten Leibniz-Nachlass der Gottfried Wilhelm Leibniz Bibliothek (GWLB) in Hannover. Jedes von der Bibliothek veröffentlichte Seitenbild wird durch eine Handschriftenerkennung geführt; das Ergebnis wird Zeile für Zeile lesbar und durchsuchbar gemacht, wobei jede Zeile ihren eigenen Konfidenzwert und ihre vollständige Provenienz mitführt.',
+    'about.what.scope':
+      'Die Seite umfasst die Scans, die die GWLB aus ihren Leibniz-Beständen veröffentlicht hat. Das sind nicht alle Papiere von Leibniz: Vieles ist noch nicht digitalisiert, bei der GWLB wie andernorts, und auch andere Einrichtungen bewahren Handschriften von ihm, darunter das Niedersächsische Landesarchiv Hannover. Der Arbeitskatalog der Leibniz-Edition verzeichnet sie alle, wo immer sie liegen; diese Seite führt bisher einen Teil seiner Einträge, und jedes Werk hier verweist auf die Signatursuche des Katalogs.',
     'about.what.p2':
       'Das ist maschinelle Ausgabe mit ehrlicher Kennzeichnung. Sie hat bestenfalls den Rang einer Vorausedition und ist der Akademie-Ausgabe ausdrücklich nachgeordnet; diese bleibt die wissenschaftliche Edition der Schriften von Leibniz. Nichts hier ist eine Edition, und nichts hier sollte als solche zitiert werden. Nach eigener Zählung ist die Akademie-Ausgabe etwa bei der Hälfte der geplanten Bände, und eine ihrer Editorinnen schätzt, dass drei Viertel der Leibniz-Papiere nie irgendwo veröffentlicht wurden (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); alles lesbar und auffindbar zu machen ist der ganze Anspruch dieses Projekts.',
     'about.what.p3':

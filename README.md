@@ -15,6 +15,13 @@ around 2055), and one of its editors estimates that three quarters of Leibniz's
 papers have never been published anywhere (Kliege-Biller, Münster, 2023);
 making all of it *legible and findable* is the point.
 
+**Scope.** The site covers the scans the GWLB has published of its Leibniz
+collections, not all of Leibniz's papers: much is not yet digitised, at the
+GWLB and elsewhere, and other institutions hold manuscripts too, the
+Niedersächsisches Landesarchiv Hannover among them; the Arbeitskatalog der
+Leibniz-Edition records them all, this site holds part of its records so far,
+and every work page links to the catalogue's own search by shelfmark.
+
 - **`SPECS.md`** — the project's law (mission, deliverables, architecture, legal rails).
 - **`PROMPTS.md`** — the phase-by-phase build plan.
 - **`STATUS.md`** — living state; read it first.

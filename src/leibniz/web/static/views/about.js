@@ -164,6 +164,7 @@ export async function render(ctx) {
     `<section class="panel" aria-labelledby="about-what">` +
     `<h2 id="about-what">${esc(t('about.what.h'))}</h2>` +
     `<p>${esc(t('about.what.p1'))}</p>` +
+    `<p>${esc(t('about.what.scope'))}</p>` +
     `<p>${esc(t('about.what.p2'))}</p>` +
     `<p>${esc(t(imageOrigin() === 'mirror' ? 'about.what.p3.mirror' : 'about.what.p3'))}</p>` +
     `</section>` +
