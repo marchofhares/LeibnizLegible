@@ -311,3 +311,96 @@ def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
         app, ["bench", "train-trocr", "--train-root", str(root), "--pilot", "--settings", "nope"]
     )
     assert res.exit_code != 0
+
+
+# --------------------------------------------------------------------------- #
+# The pilots' report
+# --------------------------------------------------------------------------- #
+
+
+def test_pilot_report_from_the_two_files(tmp_path: Path) -> None:
+    from leibniz.htr import k3_report as R
+
+    trocr = {
+        "meta": {"base": "b", "pilot_lines": 100},
+        "rows": [
+            {"settings": {"key": "adamw-b8"}, "status": "oom", "error": "CUDA out of memory"},
+            {
+                "settings": {"key": "adafactor-b8"},
+                "status": "ok",
+                "lines": 100,
+                "seconds": 50.0,
+                "lines_per_s": 2.0,
+                "peak_mib": 5000,
+                "val": {"cer": 0.2, "lines_per_s": 10.0},
+                "projection": {"total_hours": 30.0},
+            },
+        ],
+    }
+    kraken = {
+        "settings": {
+            "base": "p.safetensors",
+            "resize": "union",
+            "normalization": "NFD",
+            "batch_size": 16,
+            "lr": 0.0001,
+        },
+        "checkpoints": [{"epoch": 0, "val_metric": 0.9}],
+        "epoch_seconds": [],
+        "run_seconds": 600.0,
+        "pilot_lines": 20000,
+        "score": {"cer": 0.15, "lines_per_s": 50.0},
+        "log": {"resized": 32},
+    }
+    s = R.build_pilots(
+        trocr=trocr,
+        kraken=kraken,
+        train_lines=55_000,
+        val_lines=3_000,
+        plan_epochs_trocr=6,
+        plan_epochs_kraken=30,
+    )
+    assert s["trocr_fastest"] == "adafactor-b8" and s["trocr_best_cer"] == "adafactor-b8"
+    k = s["kraken"]
+    assert abs(k["lines_per_s"] - 20000 / 600) < 1e-9
+    assert abs(k["projection_hours"] - 55_000 * 30 / (20000 / 600) / 3600) < 1e-9
+    assert s["over_a_week"] is False
+    md = R.render_pilots(s)
+    assert "adamw-b8 | oom (CUDA out of memory)" in md and "20.00 %" in md and "15.00 %" in md
+    paths = R.write_pilots(s, tmp_path)
+    assert paths["md"].exists() and json.loads(paths["json"].read_text())["train_lines"] == 55_000
+    empty = R.build_pilots(
+        trocr=None,
+        kraken=None,
+        train_lines=1,
+        val_lines=1,
+        plan_epochs_trocr=1,
+        plan_epochs_kraken=1,
+    )
+    assert "Not run." in R.render_pilots(empty)
+
+
+def test_cli_k3_report_pilots(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    root = _train_root(tmp_path)
+    res = CliRunner().invoke(
+        app,
+        [
+            "bench",
+            "k3-report",
+            "pilots",
+            "--train-root",
+            str(root),
+            "--trocr-pilot",
+            str(tmp_path / "none.json"),
+            "--kraken-account",
+            str(tmp_path / "none2.json"),
+            "--reports-dir",
+            str(tmp_path / "rep"),
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert (tmp_path / "rep" / "k3-pilots.md").exists()

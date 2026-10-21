@@ -313,6 +313,9 @@ class KetosRun:
     best: dict | None = None
     log: dict = field(default_factory=dict)
     score: dict | None = None  # the project's CER of the best weights
+    pilot_lines: int | None = None  # lines in the training list the run used
+    run_seconds: float | None = None  # start to the best weights' conversion
+    peak_mib: int | None = None  # sampled from nvidia-smi while it ran, where given
 
     def as_dict(self) -> dict:
         d = asdict(self)
@@ -322,11 +325,31 @@ class KetosRun:
 
 
 def account(
-    out_dir: Path | str, settings: KetosSettings, command: Sequence[str], log_text: str
+    out_dir: Path | str,
+    settings: KetosSettings,
+    command: Sequence[str],
+    log_text: str,
+    *,
+    train_list: Path | str | None = None,
+    started: float | None = None,
+    peak_mib: int | None = None,
 ) -> KetosRun:
     cks = read_checkpoints(out_dir)
     bw = best_weights(out_dir)
+    n_lines = None
+    if train_list is not None and Path(train_list).exists():
+        n_lines = sum(
+            1 for ln in Path(train_list).read_text(encoding="utf-8").splitlines() if ln.strip()
+        )
+    run_seconds = None
+    if started is not None:
+        end = bw[0].stat().st_mtime if bw else (cks[-1].mtime if cks else None)
+        if end is not None:
+            run_seconds = end - started
     return KetosRun(
+        pilot_lines=n_lines,
+        run_seconds=run_seconds,
+        peak_mib=peak_mib,
         out_dir=str(out_dir),
         settings=settings.as_dict(),
         command=list(command),

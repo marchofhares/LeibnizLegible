@@ -967,6 +967,9 @@ def train_kraken(
         False, "--account", help="Read a finished run back: checkpoints, best weights, score."
     ),
     score_device: str = typer.Option("auto", "--score-device", help="For --account's scoring."),
+    peak_mib: int | None = typer.Option(
+        None, "--peak-mib", help="The GPU's peak memory sampled while it ran (for --account)."
+    ),
     db_path: str = typer.Option(
         "", "--db", help="Store for the runs row of a started training (none by default)."
     ),
@@ -1012,7 +1015,20 @@ def train_kraken(
     log_file = log_path or out / "ketos.log"
     if account:
         text = Path(log_file).read_text(encoding="utf-8") if Path(log_file).exists() else ""
-        acc = K.account(out, s, cmd, text)
+        run_info = (
+            json.loads((out / "run.json").read_text(encoding="utf-8"))
+            if (out / "run.json").exists()
+            else {}
+        )
+        acc = K.account(
+            out,
+            s,
+            cmd,
+            text,
+            train_list=train_list,
+            started=run_info.get("started"),
+            peak_mib=peak_mib,
+        )
         if acc.best:
             val = K.read_list(val_list)
             dev = KU.pick_device(score_device)
@@ -1022,7 +1038,9 @@ def train_kraken(
         p = K.write_account(out / "account.json", acc)
         console.print(
             f"  checkpoints {len(acc.checkpoints)}; epoch seconds "
-            f"{[round(t) for t in acc.epoch_seconds]}; best {acc.best}; "
+            f"{[round(t) for t in acc.epoch_seconds]}; run seconds "
+            f"{'—' if acc.run_seconds is None else round(acc.run_seconds)}; "
+            f"{acc.pilot_lines} lines; best {acc.best}; "
             + (f"val CER {100 * acc.score['cer']:.2f} %" if acc.score else "no score")
         )
         console.print(f"  wrote {p}")
@@ -1033,14 +1051,59 @@ def train_kraken(
         return
     params = {"settings": s.as_dict(), "command": cmd, "pilot": pilot, "drop_screen": drop_screen}
     run_id = _record_training_run(db_path, "htr_train", f"kraken-k3@{base.name}", params, n_input=0)
+    import time as _time
+
     proc = K.run(cmd, log_path=log_file)
     (out / "run.json").write_text(
         json.dumps(
-            {"pid": proc.pid, "command": cmd, "log": str(log_file), "run_id": run_id}, indent=1
+            {
+                "pid": proc.pid,
+                "command": cmd,
+                "log": str(log_file),
+                "run_id": run_id,
+                "started": _time.time(),
+            },
+            indent=1,
         ),
         encoding="utf-8",
     )
     console.print(f"  started pid {proc.pid}; log {log_file}; account with --account when done")
+
+
+@app.command("k3-report")
+def k3_report(
+    which: str = typer.Argument("pilots", help="pilots (Task 2)."),
+    train_root: Path = typer.Option(Path("data/train/k3"), "--train-root"),
+    trocr_pilot: Path = typer.Option(Path("data/models/k3/trocr/pilot.json"), "--trocr-pilot"),
+    kraken_account: Path = typer.Option(
+        Path("data/models/k3/kraken-pilot/account.json"), "--kraken-account"
+    ),
+    plan_epochs_trocr: float = typer.Option(6.0, "--plan-epochs-trocr"),
+    plan_epochs_kraken: int = typer.Option(30, "--plan-epochs-kraken"),
+    rented_note: str = typer.Option("", "--rented-note", help="A sentence on renting."),
+    reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+) -> None:
+    """Render a K3 report from the artefacts' JSON (numbers only)."""
+    from leibniz.htr import k3_report as R
+
+    if which != "pilots":
+        raise typer.BadParameter("only 'pilots' is rendered here")
+    s = R.build_pilots(
+        trocr=R.load_json(trocr_pilot),
+        kraken=R.load_json(kraken_account),
+        train_lines=R.count_lines(train_root / "train.txt"),
+        val_lines=R.count_lines(train_root / "val.txt"),
+        plan_epochs_trocr=plan_epochs_trocr,
+        plan_epochs_kraken=plan_epochs_kraken,
+        rented_note=rented_note,
+    )
+    paths = R.write_pilots(s, reports_dir)
+    console.print(
+        f"  fastest TrOCR setting {s['trocr_fastest']}, best CER {s['trocr_best_cer']}; "
+        f"kraken {s['kraken'].get('status')}; over a week: {s['over_a_week']}"
+    )
+    for k, p in paths.items():
+        console.print(f"  wrote {k}: {p}")
 
 
 __all__ = ["app"]
