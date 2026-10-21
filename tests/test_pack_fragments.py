@@ -333,6 +333,21 @@ def test_the_section_70_refusal(german_store_path: Path) -> None:
         )
 
 
+def test_a_scan_registered_twice_gives_each_line_once(german_store_path: Path) -> None:
+    # W5's twins: W3's two pages become one upright scan registered under 1r and
+    # 1v (file sizes within the tolerance, the lines in the same places) — a
+    # fold, whose text the first registration carries, as the index counts it
+    conn = db.connect(german_store_path)
+    for seq, size in ((1, 1_500_000), (2, 1_500_300)):
+        conn.execute("UPDATE pages SET n_bytes = ? WHERE page_id = ?", (size, f"{W3}:{seq:04d}"))
+    conn.commit()
+    conn.close()
+    pack = _build(german_store_path)
+    assert sorted(_rows(pack)) == [f"{W3}:0001:000", f"{W3}:0001:001", f"{W3}:0001:003"]
+    assert pack.pool.skipped["twin_elsewhere"] == 5  # every line of the second registration
+    assert "no_reading" not in pack.pool.skipped  # W3:0002's lines were not looked at
+
+
 def test_a_crowd_row_takes_the_line_out(german_store_path: Path) -> None:
     conn = db.connect(german_store_path)
     run = db.start_run(conn, "crowd", model="crowd_ab_v1@abc")

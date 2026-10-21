@@ -14,7 +14,9 @@ rows; ``leibniz pack fragments`` opens the store read-only and writes the pack.
   and differ after whitespace normalisation, the longer ``min_chars`` to
   ``max_chars`` characters, on a page the image mirror serves (a cached
   ``local_path``; the mirror is the cache's layout, so the polygons sit on its
-  pixels), with geometry and complete provenance. The candidates' order is
+  pixels), with geometry and complete provenance; a scan the library
+  registered twice gives each line one row, as the index counts it
+  (``images/twins.py``). The candidates' order is
   drawn per line under the seed. The page's stratum, the hand and the
   language are the piece's; a page two pieces share goes to the piece the
   line's reader-minted row names, else to the lower record id.
@@ -67,6 +69,7 @@ from leibniz.align.pairs import (
 from leibniz.align.volumes import expired_volume_index
 from leibniz.catalog.hands import is_leibniz_hand
 from leibniz.db import GT_STRATA
+from leibniz.images.twins import TwinGroup, resolve_work
 from leibniz.search.documents import latest_lines
 from leibniz.web import attribution as attr
 from leibniz.web.iiif import canvas_id as site_canvas_id
@@ -96,6 +99,7 @@ GOLD_SOURCE = "aa_aligned"
 SKIP_REASONS = (
     "no_image",  # the page has no cached image (no local_path): the mirror lacks it
     "no_page_size",  # the page has no width/height to clamp the box to
+    "twin_elsewhere",  # another registration of the same scan carries the line (W5)
     "already_corrected",  # the row latest_lines shows is not machine text (a crowd row)
     "no_v1_text",
     "no_reading",  # the readings file has no row for the line
@@ -483,6 +487,7 @@ def gather(
             by_page[pid].append(p)
     pool = Pool(pieces=len(pieces), pages=len(by_page), readings=len(readings))
     works: dict[str, db.Work | None] = {}
+    twins: dict[str, TwinGroup] = {}  # page id → its group, the work's resolved once
     run_at: dict[int, str | None] = {}
     for page_id in sorted(by_page):
         page = db.get_page(conn, page_id)
@@ -500,7 +505,12 @@ def gather(
             continue
         if page.work_id not in works:
             works[page.work_id] = db.get_work(conn, page.work_id)
+            groups, _ = resolve_work(
+                db.get_pages(conn, page.work_id), lambda pid: latest_lines(conn, pid)
+            )
+            twins.update({pid: g for g in groups for pid in g.pages})
         work = works[page.work_id]
+        lines = _carried(twins.get(page_id), page_id, lines, pool)
         for ln in lines:
             reason, item = _examine(
                 conn,
@@ -520,6 +530,22 @@ def gather(
             else:
                 pool.eligible.append(item)
     return pool
+
+
+def _carried(
+    twin: TwinGroup | None, page_id: str, lines: list[db.Line], pool: Pool
+) -> list[db.Line]:
+    """The lines this registration carries once, as the index and the exports
+    count them (W5): a scan registered twice gives each line one row — a
+    spread's half on its own page, a fold's text on its primary."""
+    if twin is None:
+        return lines
+    if not twin.carries_text(page_id):
+        pool.skipped["twin_elsewhere"] += len(lines)
+        return []
+    keep = {ln.line_seq for ln, _ in twin.own_lines(page_id, lines, for_index=True)}
+    pool.skipped["twin_elsewhere"] += len(lines) - len(keep)
+    return [ln for ln in lines if ln.line_seq in keep]
 
 
 def _examine(
