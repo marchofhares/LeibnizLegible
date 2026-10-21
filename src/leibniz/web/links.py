@@ -11,6 +11,19 @@ Every address here was checked live on 2026-10-10. Two traps decided the shape:
 * The GWLB's repository answers an unknown address with its index page and a
   200, so a volume is linked only where its own page was seen: Reihe I
   volumes 3, 9, 11, 12, 14–27, Reihe III 5–9, Reihe VII 3–8 (CC BY-NC 4.0).
+* The same search takes ``sign_ol`` and matches it as a substring of the
+  record's Signatur, so a work's shelfmark finds the records on its folios
+  whether or not this site holds them. The catalogue spells a shelfmark its
+  own way, and the search is a plain substring match, so the spelling must be
+  its: Arabic numerals throughout (its Signatur column says so: "Römische
+  Zahlen werden als arabische wiedergegeben"), ``LBr`` *without* the period
+  the library writes, ``Leibn. Marg.``, the F series run together as
+  ``LBrF 20``, ``, Stück 1`` and ``175:1`` as the library has them. Checked
+  live on 2026-10-21: ``LH 4, 6, 18`` answers the two records on its folios,
+  ``LBr 464`` eleven and ``LBr. 464`` none, ``Leibn. Marg. 196`` one,
+  ``LBrF 1`` the F series, ``Leibn. Marg. 135`` its four Stücke.
+  :func:`katalog_spelling` turns the library's ``LH IV, 6, 18`` / ``LBr. 464``
+  into the catalogue's.
 
 Other volumes go to the page that offers them — the Potsdam Arbeitsstellen
 (Reihe IV, VIII), the Münster Forschungsstelle (Reihe II, VI: a permission
@@ -21,6 +34,8 @@ from __future__ import annotations
 
 import re
 from urllib.parse import urlencode
+
+from leibniz.catalog.shelfmarks import roman_to_int, split_family
 
 KATALOG_SEARCH = "https://leibniz-katalog.bbaw.de/de/extended-search"
 GWLB_REPOSITORY = "https://www.gwlb.de/leibniz/digitale-ressourcen/repositorium-des-leibniz-archivs"
@@ -54,6 +69,60 @@ SERIES_PAGES: dict[int, tuple[str, str, str]] = {
 }
 # The Leibniz-Archiv's checked transcriptions of the letters not yet edited.
 TRANSCRIPTION_YEARS = range(1708, 1717)
+
+
+# How the catalogue writes each family's label in its Signatur field.
+KATALOG_LABELS = {"LH": "LH", "LBr": "LBr", "Marg": "Leibn. Marg.", "LK": "LK"}
+# The library's run-together or lower-cased "LH35", "Lh 35" (a few works).
+_LH_LABEL = re.compile(r"^L[Hh](?=\s*\d)")
+# A leaf reference and what follows it: the search is for the work.
+_LEAF = re.compile(r"\bBl(?:att|\.|\b)", re.IGNORECASE)
+# The F series of the correspondence, as the library writes its tail: "F 20".
+_F_SERIES = re.compile(r"^F\.?\s*(?=\d)", re.IGNORECASE)
+
+
+def katalog_spelling(shelfmark: str) -> str | None:
+    """A work's shelfmark as the Leibniz-Katalog writes it in its Signatur
+    field — the string its ``sign_ol`` search matches as a substring — or
+    ``None`` when :mod:`leibniz.catalog.shelfmarks` finds no family in it (a
+    foreign signature: the British Library's, a Hanover ``Ms``).
+
+    The family label takes the catalogue's form (``LBr``, ``Leibn. Marg.``),
+    a group that is one Roman numeral becomes Arabic (``LH IV, 6, 18`` →
+    ``LH 4, 6, 18``; a letter after a number, ``7 C``, is a sub-part and
+    stays), the groups are joined with ``, ``, and a leaf reference (``Bl.``),
+    a parenthesis or a page (``S.``) and what follows them are dropped, since
+    the search is for the work's records on every folio.
+    """
+    text = _LH_LABEL.sub("LH ", " ".join((shelfmark or "").split()))
+    family, tail = split_family(text)
+    if family is None:
+        return None
+    tail = tail.split("(", 1)[0]
+    tail = re.split(r"\bS\.\s", tail, maxsplit=1)[0]
+    tail = _LEAF.split(tail, maxsplit=1)[0]
+    groups = [g for g in (" ".join(g.split()) for g in tail.split(",")) if g]
+    if not groups:
+        return None
+    groups = [str(n) if (n := roman_to_int(g)) is not None else g for g in groups]
+    label = KATALOG_LABELS[family]
+    if family == "LBr" and _F_SERIES.match(groups[0]):
+        label, groups[0] = "LBrF", _F_SERIES.sub("", groups[0])
+    elif family == "LK" and groups[0].upper().startswith("MOW"):
+        label, groups[0] = "LK-MOW", groups[0][3:].strip()
+        if not groups[0]:
+            groups = groups[1:]
+    return " ".join(part for part in (label, ", ".join(groups)) if part)
+
+
+def katalog_search_url(shelfmark: str) -> str | None:
+    """The Leibniz-Katalog's extended search for every record whose Signatur
+    contains the shelfmark, in the catalogue's spelling; ``None`` for a
+    shelfmark of no family. Stands in for the records this site does not hold."""
+    spelled = katalog_spelling(shelfmark)
+    if spelled is None:
+        return None
+    return f"{KATALOG_SEARCH}?{urlencode({'sign_ol': spelled})}"
 
 
 def katalog_record_url(record_id: str, katnr: object = None) -> str:
@@ -128,8 +197,11 @@ def transcriptions_link(date: object) -> dict | None:
 __all__ = [
     "REPOSITORY_VOLUMES",
     "TRANSCRIPTION_YEARS",
+    "KATALOG_LABELS",
     "aa_volume_link",
     "katalog_record_url",
+    "katalog_search_url",
+    "katalog_spelling",
     "transcriptions_link",
     "year_of",
 ]

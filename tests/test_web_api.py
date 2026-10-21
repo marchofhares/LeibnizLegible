@@ -693,6 +693,88 @@ def test_record_text_is_documented_crawlable_and_linked(store_path, tmp_path) ->
     assert "navigator.clipboard" in page_js
 
 
+# ---- the catalogue's search by shelfmark, on every work page (W6) -------------- #
+
+
+def test_every_work_links_the_catalogue_search_by_shelfmark(store_path, tmp_path) -> None:
+    """The Leibniz-Katalog's own search by shelfmark, whether or not the store
+    holds the work's records (the live 1665058609, Leibn. Marg. 196, has none)."""
+    conn = db.connect(store_path)
+    db.upsert_work(conn, db.Work("BARE", "Leibnitiana", title="No shelfmark", n_canvases=0))
+    db.upsert_work(
+        conn,
+        db.Work(
+            "TWICE",
+            "LeibnizHandschriften",
+            title="LH 35, 3 A 1",
+            shelfmarks=["LH XXXV, 3 A 1", "LH 35, 3 A 1", "Ms XXIII, 23a"],
+            n_canvases=0,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    search = "https://leibniz-katalog.bbaw.de/de/extended-search?sign_ol="
+    assert c.get(f"/api/works/{W1}").json()["katalog_search_urls"] == [
+        {"shelfmark": "LH IV, 6, 18", "query": "LH 4, 6, 18", "url": search + "LH+4%2C+6%2C+18"}
+    ]
+    assert c.get("/api/works/BARE").json()["katalog_search_urls"] == []
+    # one entry per distinct shelfmark: two spellings of one are one, a foreign signature none
+    twice = c.get("/api/works/TWICE").json()["katalog_search_urls"]
+    assert [(s["shelfmark"], s["query"]) for s in twice] == [("LH XXXV, 3 A 1", "LH 35, 3 A 1")]
+    get = c.get("/openapi.json").json()["paths"]["/api/works/{work_id}"]["get"]
+    assert get["summary"] and "katalog_search_urls" in get["description"]
+    # the server-rendered page: the link in the first paragraph after the manifest
+    page = c.get(f"/work/{W1}").text
+    assert (
+        '<a href="/manifests/00068642">IIIF manifest</a> · '
+        f'<a href="{search}LH+4%2C+6%2C+18" rel="noopener">'
+        "Search the Leibniz-Katalog for LH IV, 6, 18</a>" in page
+    )
+    assert "sign_ol" in page
+    # a work without records: the heading, one sentence, the same link; a work
+    # without a shelfmark: the sentence alone
+    none = c.get(f"/work/{W2}").text
+    assert "<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>" in none
+    assert (
+        "<p>No catalogue record is linked to this work yet, and this site holds part of the "
+        f'Arbeitskatalog so far; search it for <a href="{search}LBr+464" rel="noopener">'
+        "LBr. 464</a>.</p>" in none
+    )
+    bare = c.get("/work/BARE").text
+    assert "holds part of the Arbeitskatalog so far.</p>" in bare and "sign_ol" not in bare
+    # the viewer: the strings in both languages, the bare "none" gone
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for key in ("work.katalog.search", "work.katalog.partial", "about.what.scope"):
+        assert strings.count(f"'{key}':") == 2, key  # EN and DE
+    assert "'work.katalog.none':" not in strings
+    assert "Search the Leibniz-Katalog for {shelfmark}" in strings
+    assert "Im Leibniz-Katalog nach {shelfmark} suchen" in strings
+    work_js = (STATIC_DIR / "views" / "work.js").read_text(encoding="utf-8")
+    assert "katalog_search_urls" in work_js and "work.katalog.none" not in work_js
+    assert "about.what.scope" in (STATIC_DIR / "views" / "about.js").read_text(encoding="utf-8")
+    # the scope, in one line, where machines and the README describe the site
+    llms = c.get("/llms.txt").text
+    assert "## Scope" in llms and "Niedersächsisches Landesarchiv Hannover" in llms
+    readme = (STATIC_DIR.parents[3] / "README.md").read_text(encoding="utf-8")
+    assert "**Scope.**" in readme and "Niedersächsisches Landesarchiv Hannover" in readme
+
+
+def _string_table_keys(source: str, lang: str) -> list[str]:
+    """The keys of one language's table in i18n.js (``en: {`` … ``},``)."""
+    block = source.split(f"\n  {lang}: {{\n", 1)[1]
+    block = re.split(r"^  \},?\s*$", block, maxsplit=1, flags=re.M)[0]
+    return re.findall(r"^\s+'([^']+)':", block, flags=re.M)
+
+
+def test_the_string_tables_carry_the_same_keys() -> None:
+    """EN and DE carry the same keys, each once, so no view falls back silently."""
+    source = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    en, de = _string_table_keys(source, "en"), _string_table_keys(source, "de")
+    assert len(en) > 300 and len(en) == len(set(en)) and len(de) == len(set(de))
+    assert set(en) == set(de), set(en) ^ set(de)
+
+
 # ---- the browse index (W3) ----------------------------------------------------- #
 
 

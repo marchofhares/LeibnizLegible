@@ -2248,3 +2248,138 @@ lines would hide. (2) After gt-report, run audit-reach and confirm it treats
 K2's rows the way your Task 3 decision says and skips no row as
 non-canonical; put both counts in the STATUS entry.
 ~~~~
+
+### Phase W6 — two reader's items from the Leibniz-Edition (run 2026-10-21)
+
+_Run in a cloud session on the branch it was given (`claude/busy-dirac-n30a43`),
+under the session preamble of 19 October, which this session was given again
+word for word (it is printed above, under K2b): nothing merged or deployed,
+the fixture store only, the pre-flight recorded and the session proceeding as
+the preamble's item 6 says for a cloud session. The departures are in
+`STATUS.md`, Divergences._
+
+~~~~text
+Phase W6 — Two reader's items from the Leibniz-Edition (13 October): a search
+link into the Leibniz-Katalog by shelfmark on every work page, whether or not
+the store holds the work's records; and a sentence on scope, EN and DE, saying
+what the site covers and what it does not. One cloud session; no store, no GPU,
+no box. About an hour.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies in full), SPECS.md §1.1
+and §1.2, and STATUS.md: "Current state" (the entry of 2026-10-14), the W5 entry
+("Links out", "Browse: say what the catalogue found"), Open questions 27 and 28,
+and "Next". If this prompt conflicts with the repo, the repo + STATUS.md win;
+record the divergence. This phase is W6; W1 to W5 exist, do not reuse their
+labels. Names of individuals stay out of STATUS.md and PROMPTS.md: write "an
+editor at the Leibniz-Edition Potsdam, 13 October".
+
+## Where you run, and the rules that follow from it
+A cloud checkout without data/inventory.sqlite: build and test on the fixture
+store (tests/conftest.py); make .venv-cloud with the web, gt and release extras
+(export UV_PROJECT_ENVIRONMENT=.venv-cloud; uv sync --extra web --extra gt
+--extra release). The live site and the catalogue may be read over HTTPS (the
+W1 log in STATUS.md says how the proxy's CA is pinned for Playwright and curl);
+nothing on the box is touched. The branch is the one this session was given;
+push to it; never merge, never deploy. Every external address you build must
+be checked live with curl before it is committed, as W5 did; stay polite (a
+handful of requests, the project's User-Agent).
+
+## Task 0 — Pre-flight (record it, then proceed)
+`git status --porcelain` clean; `git fetch origin main && git merge origin/main`;
+baseline `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -q`
+in .venv-cloud, counts recorded; `node --version` (Chromium is preinstalled for
+Playwright in this environment). Read https://leibnizlegible.com/api/works/1665058609
+and note its shelfmarks and that its `katalog` list is empty. Write the
+pre-flight into the STATUS.md entry.
+
+## Context
+On 13 October an editor at the Leibniz-Edition Potsdam reported that
+https://leibnizlegible.com/work/1665058609 (Leibn. Marg. 196) is not linked to
+https://leibniz-katalog.bbaw.de/de/extended-search?sign_ol=Leibn.+Marg.+196 and
+asked that the site say that the GWLB's scans cover only part of Leibniz's
+writings: much is not yet digitised at the GWLB, and other institutions hold
+manuscripts, the Niedersächsisches Landesarchiv Hannover among them. The first
+point is coverage, not a bug: the store holds the records of the §70 volumes'
+sweep and the July sample, 24,916 of the Arbeitskatalog's 70,000-odd records,
+so 1,028 of the 2,225 works have no record at all, and their work page's
+"Catalogue records" section shows only `work.katalog.none`. The record links
+W5 added (src/leibniz/web/links.py, katalog_record_url) exist only where a
+record exists. The full catalogue arrives with the Arbeitskatalog export (Open
+question 27); this phase is what needs no export. The catalogue's extended
+search takes `sign_ol=` and matches it as a substring (W5 found the same for
+`id=`), so a search by the work's shelfmark stands in for the missing records.
+The catalogue writes shelfmarks in its own spelling (Arabic numerals as in
+"LH 4, 6, 18 Bl. 1", a period as in "LBr. 164", "Leibn. Marg. 196") while the
+GWLB's works carry the library's ("LH IV, 6, 18"); src/leibniz/catalog/
+shelfmarks.py normalises both (normalize_signature, signature_key,
+split_family).
+
+## Task 1 — The search link, on every work page
+1. src/leibniz/web/links.py: `katalog_search_url(shelfmark: str) -> str | None`,
+   the extended search with `sign_ol=` set to the shelfmark in the catalogue's
+   spelling, derived through shelfmarks.py; None when the string yields no
+   family. Verify the spelling live, once per family: the LH work 00068642
+   ("LH IV, 6, 18"), one LBr work, and 1665058609. Each result page must list
+   records for that shelfmark, not an empty result. Record the three addresses
+   and what they returned in the STATUS.md entry; put the spelling rule and its
+   date in the module docstring beside the `id` note. Tests in
+   tests/test_web_links.py for each family and for a string with no family.
+2. src/leibniz/web/api.py: `/api/works/{work_id}` gains `katalog_search_urls`,
+   one entry per distinct shelfmark the work carries, in stored order
+   (`[{"shelfmark": …, "url": …}]`, empty when none), with an OpenAPI summary.
+   The server-rendered work page (`_ssr_work`) carries the same link(s) in its
+   first paragraph after "IIIF manifest", worded "Search the Leibniz-Katalog
+   for <shelfmark>", and, when the record list is empty, one sentence under a
+   "Catalogue records" heading: this site holds part of the Arbeitskatalog so
+   far; search it for this shelfmark. Tests in tests/test_web_api.py on the
+   fixture store: W1 (00068642) carries one url with the LH spelling; a work
+   without shelfmarks carries an empty list; W1's server-rendered page contains
+   `sign_ol`.
+3. static/views/work.js: `links(data)` adds the item(s) after "IIIF manifest";
+   `katalogSection` replaces the bare `work.katalog.none` with the browse
+   page's wording ("It holds part of the Arbeitskatalog so far, not yet every
+   record", i18n.js) followed by the same link(s). static/i18n.js: the new keys
+   in EN and DE, both tables, same section: EN "Search the Leibniz-Katalog for
+   {shelfmark}", DE "Im Leibniz-Katalog nach {shelfmark} suchen". rel="noopener"
+   and the styling of the other links out.
+
+## Task 2 — The scope sentence
+A new paragraph in the About page's "What this is" section (static/i18n.js, EN
+and DE, after about.what.p1; static/views/about.js renders it where its
+siblings are rendered), in the register of the page and without numbers (Open
+question 28's survey is not to be quoted), to this effect: this site covers
+the scans the GWLB has published of its Leibniz collections; it is not all of
+Leibniz's papers, since much is not yet digitised, at the GWLB and elsewhere,
+and other institutions hold manuscripts, the Niedersächsisches Landesarchiv
+Hannover among them; the Arbeitskatalog der Leibniz-Edition records them all,
+and the site holds part of its records so far. The same, in one line, under a
+"Scope" heading in static/llms.txt and in README.md where the site is
+described. A test that the EN and DE string tables carry the same keys: extend
+it if one exists, else add it to tests/test_web_api.py.
+
+## Task 3 — Verify, record, hand over
+ruff + pytest in .venv-cloud. Start the app on the fixture store on a spare
+port, as W4's log describes, and check in headless Chromium with Playwright
+(npm in scratchpad/pw, the preinstalled browser): the work page of 00068642
+shows the new link in EN and DE; a work without records shows the sentence and
+the link; /about shows the paragraph in EN and DE; 390 px wide without
+horizontal scroll; no console errors; axe-core zero violations, served from the
+app's own origin because of the CSP, as W4 did. Stop the server. STATUS.md: a
+"W6" entry in Current state and the Phase log (what the catalogue answered to
+the three live searches, what changed on which surface, the test counts) and
+"Next" (the holdings page and the records themselves wait for the export, Open
+question 27); nothing in Key numbers unless you measured it. Append this prompt
+verbatim to PROMPTS.md under "Follow-up phases (2026-10)". Commit in sensible
+pieces; push the branch; print:
+- the compare URL against main;
+- the staging line for the operator,
+  `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` (the
+  target and the user name are on the operator's plan page, not in the repo);
+- the checks as `curl -su USER …` lines with expected answers: the
+  `katalog_search_urls` field for 1665058609; `sign_ol` in its server-rendered
+  page; the About paragraph through the served i18n.js under
+  /static/m/<build>/; robots.txt unchanged;
+- three sentences for the operator's reply to the editor: the link, the
+  sentence, and that the records themselves follow the export. Do not send.
+Do not merge. Do not deploy.
+~~~~
