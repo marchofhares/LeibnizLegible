@@ -1,0 +1,515 @@
+{
+ "33": {
+  "metadata": {
+   "katnr": "Cc2 1505/C",
+   "signatur": "London BL Add.Mss. 4294 Bl. 67-70",
+   "titel": "Leibniz an Heinrich Oldenburg",
+   "incipit": "[...] Pendet negotium ex re longe majore, arte scilicet combinatoria g",
+   "datum": "1676-08-27",
+   "sigle": "L2",
+   "absender": "Leibniz (GND)",
+   "adressat": "Oldenburg (KorrespDB) (GND)",
+   "ort": "Paris",
+   "textart": "Abf., eigh.",
+   "umfang": "Quart, 6.2 Seiten/Spalten",
+   "drucke": "-E2: Turnbull, Corresp. of Newton 2 (1960), S.57-64. -E3: LAA III,1 (1976) N.89.2. -Teildr.: LAA II,1 (2006) N.130a."
+  },
+  "shelfmark_refs": [
+   "London BL Add.Mss. 4294 Bl. 67-70"
+  ],
+  "aa_refs": [
+   {
+    "series": 2,
+    "volume": 1,
+    "piece": "130a",
+    "source": "aa_column"
+   },
+   {
+    "series": 3,
+    "volume": 1,
+    "piece": "89",
+    "source": "bezuege"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "891": {
+  "metadata": {
+   "katnr": "58472",
+   "signatur": "LH 35, 6, 2 Bl. 2v°",
+   "titel": "Aequatio differentialis rationalis primi gradus generalis",
+   "incipit": "11adx [+] 12ady + 21xdx [+] 22ydy +31xdy [+] 32ydx = 0",
+   "datum": "1691",
+   "textart": "Notiz, eigh.",
+   "umfang": "°, 1 Seite/Spalte",
+   "gwlb_ids": [
+    "00068047"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 35, 6, 2 Bl. 2v°"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "1585": {
+  "metadata": {
+   "katnr": "70248",
+   "signatur": "Hannover NLB Leibn. Marg. 196",
+   "titel": "[Marg. in: Dal Pozzo, Maraviglie heroiche del sesso donnesco memorabilie nella duchessa Matilda, 1678]",
+   "textart": "Marg.; eigh."
+  },
+  "shelfmark_refs": [
+   "Hannover NLB Leibn. Marg. 196"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "4140": {
+  "metadata": {
+   "katnr": "K 2070",
+   "signatur": "LH 1, 20 Bl. 188-191",
+   "titel": "[Ernst v.H. für L u.a.]: Observat: sur la nouvelle défense de la version de Mons. pag. 528. Raisons de Mr. Arnaud.",
+   "incipit": "Si les manieres pleines d'aigreur et les invectives",
+   "datum": "1685-03-02",
+   "sigle": "?",
+   "absender": "Hessen-Rheinfels,Ernst v. (KorrespDB) (GND)",
+   "adressat": "Leibniz (GND)",
+   "textart": "Abf.(& Abschr., Schr.d.Ldgr.E.",
+   "umfang": "Folio, 8 Seiten/Spalten",
+   "gwlb_ids": [
+    "00068378"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 1, 20 Bl. 188-191"
+  ],
+  "aa_refs": [
+   {
+    "series": 1,
+    "volume": 4,
+    "piece": "306",
+    "source": "aa_column",
+    "note": "?"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "10270": {
+  "metadata": {
+   "katnr": "40531",
+   "signatur": "LBr 501 Bl. 368a (liegt in Bl.367-368)",
+   "titel": "[J. D. Crafft] an [Leibniz]: [PS]",
+   "incipit": "Es passiret diesen tag etwass allhier",
+   "datum": "1692-05-14",
+   "absender": "Crafft,J.D. (KorrespDB) (GND)",
+   "adressat": "Leibniz (GND)",
+   "textart": "Abf., eigh., Streifen,3½ Z.",
+   "umfang": "Vigesimoquart, 1 Seite/Spalte",
+   "gwlb_ids": [
+    "DE-611-HS-958572"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBr 501 Bl. 368a (liegt in Bl.367-368)"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "10555": {
+  "metadata": {
+   "katnr": "41793",
+   "signatur": "LH 37, 4 Bl. 108v° (=53446; r° L: Lineam rectam infinitam..",
+   "titel": "an Leibniz",
+   "incipit": "[Faks. auf Rücks. d. Kat.-Zettels!]",
+   "datum": "1692",
+   "adressat": "Leibniz (GND)",
+   "textart": "Adresse",
+   "gwlb_ids": [
+    "00068606"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 37, 4 Bl. 108v° (=53446; r° L: Lineam rectam infinitam.."
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "15051": {
+  "metadata": {
+   "katnr": "K 22257",
+   "signatur": "Oxford Bodl. Ms.Locke c. 13 Bl. 158cr°-161r°",
+   "titel": "Quelques remarques sur le livre de Mons. Lock intitulé Essay of understanding.",
+   "datum": "1696-03-17",
+   "sigle": "k2",
+   "textart": "Abschr., Schr. oder L?"
+  },
+  "shelfmark_refs": [
+   "Oxford Bodl. Ms.Locke c. 13 Bl. 158cr°-161r°"
+  ],
+  "aa_refs": [
+   {
+    "series": 6,
+    "volume": 6,
+    "piece": "001",
+    "source": "aa_column",
+    "note": "1"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "22250": {
+  "metadata": {
+   "katnr": "14860",
+   "signatur": "LBr 629 Bl. 80",
+   "titel": "Joachim Meier für Leibniz: Liste der erbetenen Titel zu Fragen des Postregals.",
+   "incipit": "In Quarto | Emeran Ackolds Gründlicher Unterricht von dem Post-Regal d",
+   "datum": "1699-06-04",
+   "sigle": "K",
+   "absender": "Meier,J. (KorrespDB) (GND)",
+   "adressat": "Leibniz (GND)",
+   "textart": "Abf.",
+   "umfang": "Quart, 1 Seite/Spalte",
+   "gwlb_ids": [
+    "DE-611-HS-859639"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBr 629 Bl. 80"
+  ],
+  "aa_refs": [
+   {
+    "series": 1,
+    "volume": 17,
+    "piece": "155",
+    "source": "aa_column",
+    "note": "Beil.zu"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "22579": {
+  "metadata": {
+   "katnr": "7401",
+   "signatur": "LBr 703 Bl. 30",
+   "titel": "Kirchengesch. Notizen",
+   "incipit": "Faustus Regiensis de Creaturis quos nihil in eis",
+   "datum": "1700",
+   "textart": "Aufz.; eigh.; kurzer Streifen",
+   "gwlb_ids": [
+    "DE-611-HS-861244"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBr 703 Bl. 30"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": "Faustus Regiensis de Creaturis quos nihil in eis incorpooreum, contra eum Claudianus Mamercus in Bibl. Hamburg. Ms. fol. 62[.] <vid> et in Ms. Reginae Christinae[.]"
+ },
+ "24633": {
+  "metadata": {
+   "katnr": "15058",
+   "signatur": "LBrF 27 Bl. 20-21",
+   "titel": "Leibniz an Kurfürstin Sophie Charlotte",
+   "incipit": "Lors que M.Stepney passa chez nous, il ne pût assez exalter toutes les",
+   "datum": "1699-12-08 (99-11-28)",
+   "sigle": "L",
+   "absender": "Leibniz (GND)",
+   "adressat": "Sophie Charlotte (KorrespDB) (GND)",
+   "ort": "Wolfenbüttel",
+   "textart": "Konz. mit zahlr. Streichgn & Erg.; eigh. Anschr.",
+   "umfang": "Quart, 3.2 Seiten/Spalten",
+   "drucke": "Klopp, Werke 10, 1877, S.54-56.",
+   "gwlb_ids": [
+    "DE-611-HS-3619537"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBrF 27 Bl. 20-21"
+  ],
+  "aa_refs": [
+   {
+    "series": 1,
+    "volume": 17,
+    "piece": "403",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "28335": {
+  "metadata": {
+   "katnr": "55841",
+   "signatur": "LH 38 Bl. 253",
+   "titel": "[betr. Wagenräder]",
+   "incipit": "Si qvis rotam vel polygonum ...",
+   "textart": "Konz.; eigh.",
+   "umfang": "Oktav, 2 Seiten/Spalten",
+   "drucke": "-vor 1700 -Gerland, Nachgelassene Schriften S. 216f.",
+   "gwlb_ids": [
+    "00068537"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 38 Bl. 253"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "39739": {
+  "metadata": {
+   "katnr": "57273",
+   "signatur": "LH 37, 5 Bl. 146-147",
+   "titel": "[De centro potentiae. De servanda potentia et directione in duorum corporum concursu]",
+   "incipit": "Corporis a celeritas prior e posterior i",
+   "datum": "1677-05",
+   "sigle": "L",
+   "textart": "Konz.; eigh.",
+   "umfang": "Quart, 4 Seiten/Spalten",
+   "drucke": "Leibniz: La réforme de la dynamique, hrsg. von Fichant, 1994, S.390-391.",
+   "gwlb_ids": [
+    "00068534"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 37, 5 Bl. 146-147"
+  ],
+  "aa_refs": [
+   {
+    "series": 8,
+    "volume": 3,
+    "piece": "044",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "46308": {
+  "metadata": {
+   "katnr": "47667",
+   "signatur": "LBrF 1 Bl. 219-220",
+   "titel": "[für Anton Ulrich]: [Specimen, zur Verständigung zwischen Katholischen und Evangelischen]",
+   "incipit": "Es sind gewiße Irrthümer,... sie an sich befinden.| Es muß sich auch |",
+   "datum": "1708-02-09",
+   "absender": "Leibniz (GND)",
+   "adressat": "Wolfenbüttel,Anton Ulrich v. (KorrespDB) (GND)",
+   "textart": "Abf., eigh.",
+   "umfang": "Folio, 4 Seiten/Spalten",
+   "drucke": "-Bodemann, Briefwechsel mit Anton Ulrich; in: Zeitschr. d. histor. Vereins für Niedersachsen 1888, S.174-178 (mit Schluß nach A). -Odelem [Irenophilius], Bedencken S.11-15. -Odelem, Rechtssachen S.83-86. -Hoeck S.115-120.",
+   "gwlb_ids": [
+    "DE-611-HS-3617045"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBrF 1 Bl. 219-220"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "51898": {
+  "metadata": {
+   "katnr": "38809",
+   "signatur": "LH 5, 4, 3 Bl. 152",
+   "titel": "[auf Werlhof's Tod]: [Epigramm], Scriptum April.1712, cum à me peteretur Carmen",
+   "incipit": "Te qvoqve cum minimè",
+   "datum": "1711-04",
+   "textart": "Abschr.(?), eigh.; nur eine Korr.!",
+   "umfang": "Duodez, 1 Seite/Spalte",
+   "drucke": "-Pertz, Werke 1,4 S.338. -Roenick 1 (1749) S.467.",
+   "gwlb_ids": [
+    "00068745"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 5, 4, 3 Bl. 152"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "55356": {
+  "metadata": {
+   "katnr": "20056",
+   "signatur": "LBr 879 Bl. 33",
+   "titel": "[Gallia plus pacis]",
+   "incipit": "Gallia plus pacis specie quam praestitit armis",
+   "datum": "1715",
+   "textart": "eigh. L",
+   "umfang": "Sedez, 1 Seite/Spalte",
+   "gwlb_ids": [
+    "DE-611-HS-866786"
+   ]
+  },
+  "shelfmark_refs": [
+   "LBr 879 Bl. 33"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "60528": {
+  "metadata": {
+   "katnr": "57113",
+   "signatur": "LH 35, 13, 1 Bl. 193-194",
+   "titel": "[Aufzeichnung über eine Differentialgleichung vom Typ y' = f(1/x, 1/y)]",
+   "incipit": "aequatio resolvenda differentialis: quam mihi hoc mense proposuit Huge",
+   "datum": "1693",
+   "textart": "Konz.; eigh.",
+   "umfang": "Folio, 2.5 Seiten/Spalten",
+   "gwlb_ids": [
+    "00068196"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 35, 13, 1 Bl. 193-194"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "61940": {
+  "metadata": {
+   "katnr": "24246",
+   "signatur": "Ms 23, 333 Bl. 146 (alt: Ms 23, 333a Bl. 110)",
+   "titel": "[Exzerpt aus Ughelli, Italia sacra, Bd. 3]",
+   "incipit": "Rainaldus Coloniensis A[rchie]piscopus et italie archicancellarius",
+   "sigle": "L",
+   "textart": "Aufz.; eigh.; kurzer Streifen"
+  },
+  "shelfmark_refs": [
+   "Ms 23, 333 Bl. 146 (alt: Ms 23, 333a Bl. 110)"
+  ],
+  "aa_refs": [
+   {
+    "series": 5,
+    "volume": 4700,
+    "piece": "129",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": "Rainaldus Coloniensis A[rchie]piscopus et Italiae Archicancellarius 1164 Kal. April. venit Pisas et Tuscia fidelitatem juravit in manus ArchiCancellarii Chron. Pisan. apud Ughell. T. 3. p. 869[.]"
+ },
+ "63135": {
+  "metadata": {
+   "katnr": "61003",
+   "signatur": "Acta Eruditorum, 1686, S. 161-163 (März)",
+   "titel": "LSB VI.4, N. 369 = Brevis Demonstratio erroris memorabilis Cartesii",
+   "datum": "1686-03",
+   "textart": "Druck",
+   "umfang": "Quart",
+   "drucke": "Acta Eruditorum, 1686.03, 161-163 -Leibniz: Variaciones sobre la ciencia general. Textos, Hrsg. B. Orio de Miguel, Madrid 2021, S. 269-272 (span., teilw.) -Leibniz: Journal articles on natural philosophy, Hrsg. R. Arthur, Oxford 2023, S. 56-60 (engl.)"
+  },
+  "shelfmark_refs": [
+   "Acta Eruditorum, 1686, S. 161-163 (März)"
+  ],
+  "aa_refs": [
+   {
+    "series": 6,
+    "volume": 4,
+    "piece": "369",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": null
+ },
+ "63399": {
+  "metadata": {
+   "katnr": "81413",
+   "signatur": "LH 4, 2, 2a Bl. 1a- 8a",
+   "titel": "Reponse à ce qu'il y a dans la seconde Edition",
+   "incipit": "J'avois fait inserer",
+   "datum": "1702-08",
+   "textart": "Verb.Reinschr",
+   "gwlb_ids": [
+    "00068556"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 4, 2, 2a Bl. 1a- 8a"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ },
+ "63431": {
+  "metadata": {
+   "katnr": "70365",
+   "signatur": "LH 6, 2 Bl. 9",
+   "titel": "[Exzerpt aus Adamus Bremensis, Historia Ecclesiastica]",
+   "incipit": "Marachi sunt populi Slavorum qui sunt ab oriente",
+   "sigle": "L",
+   "textart": "Aufz.; eigh.; Streifen",
+   "umfang": "1 Seite/Spalte",
+   "gwlb_ids": [
+    "00068749"
+   ]
+  },
+  "shelfmark_refs": [
+   "LH 6, 2 Bl. 9"
+  ],
+  "aa_refs": [
+   {
+    "series": 5,
+    "volume": 1250,
+    "piece": "007",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": "Marachi sunt populi Slavorum qui sunt ab oriente Boëmorum, habentque in circuitu hinc Pomeranos et Poldanos, inde Ungros, et crudelissimam gentem Postinagos (+ an hi reliquiae Bastarnarum +) qui humanis vescuntur Carnibus[.] Ungros a Pastinacis pulsos alibi[.] Quis hoc dicit?"
+ },
+ "64358": {
+  "metadata": {
+   "katnr": "24550",
+   "signatur": "Ms 13, 869, 1 Bl. 88",
+   "titel": "[Aufz.]",
+   "incipit": "Greg. Tur. lib. 2 c. 38: ab Anastasio imperatore",
+   "sigle": "L",
+   "textart": "Aufz.; eigh.; unregelm.Zettel"
+  },
+  "shelfmark_refs": [
+   "Ms 13, 869, 1 Bl. 88"
+  ],
+  "aa_refs": [
+   {
+    "series": 5,
+    "volume": 4100,
+    "piece": "086",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": "Greg. Tur. lib. 2 c. 38: ab Anastasio imperatore codecillos de consolato accepit (Clodovech), et in Basilica sancti Martini (apud < - >) Tunica blatea indutus et chlamyde, imponens vertice diadema. Tunc ascenso equite (equo) aurum argentumque in itinere illo quod inter portam atrii et ecclesiam civitatis est, praesentibus populis manu propria spargens, voluntate benignissima erogavit, et ab ea die tanquam consul aut augustus est vocitatus."
+ },
+ "64499": {
+  "metadata": {
+   "katnr": "24774",
+   "signatur": "Ms 13, 889 Bl. 84",
+   "titel": "[Exzerpt aus Melle, Epistola de nummis]",
+   "incipit": "Lotharii saxonis nummus apud Sagittarium",
+   "sigle": "L",
+   "textart": "Aufz.; eigh.; Streifen"
+  },
+  "shelfmark_refs": [
+   "Ms 13, 889 Bl. 84"
+  ],
+  "aa_refs": [
+   {
+    "series": 5,
+    "volume": 4300,
+    "piece": "084",
+    "source": "aa_column"
+   }
+  ],
+  "transcription_snippet": "Lotharii Saxonis Nummus apud Sagittarium descript. ex. Jac. de Mellen Epistola (ad Sagittar.) de numinis Germanicis, excerptum ist gelegt zu Numism. Brunsv."
+ },
+ "70639": {
+  "metadata": {
+   "signatur": "Hannover NLA Hann. 153 Acc. 2018/55 Nr. 76 Bl. 111",
+   "titel": "[Chappuzeau: Quittung über Buchausleihe]",
+   "incipit": "Monsieur le Conseiller de Lebniz m’a fait la grace de",
+   "datum": "169760113",
+   "textart": "Aufz.; nicht eigh.",
+   "umfang": "Quart, 0.5 Seiten/Spalten"
+  },
+  "shelfmark_refs": [
+   "Hannover NLA Hann. 153 Acc. 2018/55 Nr. 76 Bl. 111"
+  ],
+  "aa_refs": [],
+  "transcription_snippet": null
+ }
+}
