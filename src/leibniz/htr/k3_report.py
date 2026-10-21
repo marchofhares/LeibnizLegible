@@ -70,7 +70,9 @@ def kraken_pilot_summary(account: Mapping | None, *, train_lines: int, plan_epoc
         "val_cer": score.get("cer"),
         "val_lines_per_s": score.get("lines_per_s"),
         "peak_mib": account.get("peak_mib"),
-        "resized": (account.get("log") or {}).get("resized"),
+        "resized": (account.get("codec") or {}).get("added")
+        if account.get("codec")
+        else (account.get("log") or {}).get("resized"),
         "projection_hours": proj_h,
         "plan_epochs": plan_epochs,
     }

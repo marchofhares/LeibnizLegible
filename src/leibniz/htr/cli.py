@@ -1051,6 +1051,7 @@ def train_kraken(
             dev = KU.pick_device(score_device)
             console.print(f"  scoring {acc.best['weights']} on {len(val):,} lines ({dev})")
             acc.score = K.score_weights(acc.best["weights"], val, device=dev)
+            acc.codec = K.codec_growth(base, acc.best["weights"])
             K.install_best(out, out / "best.safetensors")
             (out / "best-val-hyps.json").write_text(
                 json.dumps(acc.score["hyps"], ensure_ascii=False, indent=0), encoding="utf-8"

@@ -319,6 +319,7 @@ class KetosRun:
     best: dict | None = None
     log: dict = field(default_factory=dict)
     score: dict | None = None  # the project's CER of the best weights
+    codec: dict | None = None  # the codec's growth from the base (``--resize union``)
     pilot_lines: int | None = None  # lines in the training list the run used
     run_seconds: float | None = None  # start to the best weights' conversion
     peak_mib: int | None = None  # sampled from nvidia-smi while it ran, where given
@@ -366,6 +367,27 @@ def account(
     )
 
 
+def codec_growth(base: Path | str, weights: Path | str) -> dict | None:
+    """How the codec grew from the base weights to the trained ones (``--resize union``):
+    the counts and the added code points; ``None`` without kraken or a file."""
+    try:
+        from kraken.models.loaders import load_models
+    except ModuleNotFoundError:  # pragma: no cover - env-dependent
+        return None
+    if not Path(base).exists() or not Path(weights).exists():
+        return None
+    a = load_models(str(base), tasks=["recognition"])[0]
+    b = load_models(str(weights), tasks=["recognition"])[0]
+    ca, cb = set(a.codec.c2l), set(b.codec.c2l)
+    return {
+        "before": len(ca),
+        "after": len(cb),
+        "added": len(cb - ca),
+        "removed": len(ca - cb),
+        "added_chars": "".join(sorted(cb - ca)),
+    }
+
+
 def install_best(out_dir: Path | str, dest: Path | str) -> Path | None:
     """Copy the best weights to a stable path (``<out>/best.safetensors``)."""
     bw = best_weights(out_dir)
@@ -394,6 +416,7 @@ __all__ = [
     "KetosSettings",
     "account",
     "best_weights",
+    "codec_growth",
     "epoch_times",
     "install_best",
     "ketos_command",
