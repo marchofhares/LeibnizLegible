@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/marchofhares/leibnizlegible/blob/main/src/leibniz/pack/fragment_pack.schema.json",
+  "title": "Fragment pack (Leibniz Legible => Calculemus), schema_version 1",
+  "description": "JSONL, one object per line: the header (#/$defs/header), then one row per fragment (#/$defs/row). The contract is Calculemus SPECS §6.6, frozen for both repositories; this file mirrors it for `leibniz pack check`. One addition, named in the G1 prompt: provenance.model_alt, the model of the 'model_alt' candidate.",
+  "$defs": {
+    "header": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "schema_version", "pack_id", "built_at", "source"],
+      "properties": {
+        "kind": {"const": "fragment_pack_header"},
+        "schema_version": {"const": 1},
+        "pack_id": {"type": "string", "minLength": 1},
+        "built_at": {"type": "string", "minLength": 1},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repo", "git_sha", "run_ids"],
+          "properties": {
+            "repo": {"type": "string", "minLength": 1},
+            "git_sha": {"type": ["string", "null"]},
+            "run_ids": {"type": "array", "items": {"type": "integer"}}
+          }
+        }
+      }
+    },
+    "bbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": {"type": "integer", "minimum": 0},
+        "y": {"type": "integer", "minimum": 0},
+        "w": {"type": "integer", "minimum": 1},
+        "h": {"type": "integer", "minimum": 1}
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delivery", "bbox", "canvas_id", "folio_label"],
+      "properties": {
+        "delivery": {"enum": ["iiif", "static"]},
+        "service_url": {"type": "string", "minLength": 1},
+        "page_image_url": {"type": "string", "minLength": 1},
+        "bbox": {"$ref": "#/$defs/bbox"},
+        "canvas_id": {"type": "string", "minLength": 1},
+        "folio_label": {"type": "string", "minLength": 1}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cand_id", "text", "source"],
+      "properties": {
+        "cand_id": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "source": {
+          "enum": [
+            "htr_best",
+            "htr_nbest",
+            "model_alt",
+            "llm_corrected",
+            "confusion_variant",
+            "crowd"
+          ]
+        },
+        "prior_conf": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "gold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["is_gold"],
+      "properties": {
+        "is_gold": {"type": "boolean"},
+        "truth_cand_id": {"type": "string", "minLength": 1},
+        "both_wrong": {"type": "boolean"},
+        "source": {"const": "aa_aligned"},
+        "align_conf": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image_uri", "model", "run_at", "status", "shelfmark"],
+      "properties": {
+        "image_uri": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1},
+        "model_alt": {"type": "string", "minLength": 1},
+        "run_at": {"type": "string", "minLength": 1},
+        "status": {"enum": ["machine", "aligned"]},
+        "shelfmark": {"type": "string", "minLength": 1},
+        "katalog_record_id": {"type": "string", "minLength": 1},
+        "aa_ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fragment_id",
+        "line_id",
+        "page_id",
+        "work_id",
+        "image",
+        "candidates",
+        "stratum",
+        "lang",
+        "machine_conf",
+        "n_chars",
+        "demand_weight",
+        "license_bucket",
+        "gold",
+        "provenance",
+        "attribution"
+      ],
+      "properties": {
+        "fragment_id": {"type": "string", "minLength": 1},
+        "line_id": {"type": "string", "minLength": 1},
+        "page_id": {"type": "string", "minLength": 1},
+        "work_id": {"type": "string", "minLength": 1},
+        "image": {"$ref": "#/$defs/image"},
+        "candidates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/candidate"}
+        },
+        "stratum": {
+          "enum": ["fair_copy", "light_revision", "heavy_revision", "scrap", "unknown"]
+        },
+        "lang": {"enum": ["la", "fr", "de", "mixed", "unknown"]},
+        "machine_conf": {"type": "number", "minimum": 0, "maximum": 1},
+        "n_chars": {"type": "integer", "minimum": 1},
+        "demand_weight": {"type": "number", "minimum": 0},
+        "license_bucket": {"const": "open"},
+        "gold": {"$ref": "#/$defs/gold"},
+        "provenance": {"$ref": "#/$defs/provenance"},
+        "attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

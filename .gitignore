@@ -6,6 +6,10 @@ data/*
 !data/.gitkeep
 !data/README.md
 
+# --- Fragment packs for Calculemus (G1): built on the desktop from the store,
+# checked, copied to the box; never committed (`leibniz pack fragments`).
+packs/
+
 # --- Secrets -----------------------------------------------------------------
 .env
 .env.*

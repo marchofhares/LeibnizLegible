@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/marchofhares/leibnizlegible/blob/main/src/leibniz/pack/judgment_pack.schema.json",
+  "title": "Judgment pack (Calculemus => Leibniz Legible), schema_version 1",
+  "description": "JSONL, one object per line: the header (#/$defs/header), then one row per retired fragment (#/$defs/row). The contract is Calculemus SPECS §6.6, frozen for both repositories; this file mirrors it for `leibniz pack judgments`, which refuses a pack that does not validate.",
+  "$defs": {
+    "header": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "schema_version", "pack_id", "built_at", "game"],
+      "properties": {
+        "kind": {"const": "judgment_pack_header"},
+        "schema_version": {"const": 1},
+        "pack_id": {"type": "string", "minLength": 1},
+        "built_at": {"type": "string", "minLength": 1},
+        "game": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["git_sha"],
+          "properties": {
+            "git_sha": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "contributor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id_opaque"],
+      "properties": {
+        "id_opaque": {"type": "string", "minLength": 1},
+        "display_name": {"type": "string"}
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "line_id",
+        "retirement",
+        "posterior",
+        "n_votes",
+        "n_effective",
+        "decided_at",
+        "method",
+        "contributors"
+      ],
+      "properties": {
+        "line_id": {"type": "string", "minLength": 1},
+        "retirement": {"enum": ["converged", "both_rejected"]},
+        "winning_cand_id": {"type": "string", "minLength": 1},
+        "winning_text": {"type": "string", "minLength": 1},
+        "winning_source": {
+          "enum": [
+            "htr_best",
+            "htr_nbest",
+            "model_alt",
+            "llm_corrected",
+            "confusion_variant",
+            "crowd"
+          ]
+        },
+        "posterior": {"type": "number", "minimum": 0, "maximum": 1},
+        "n_votes": {"type": "integer", "minimum": 0},
+        "n_effective": {"type": "number", "minimum": 0},
+        "decided_at": {"type": "string", "minLength": 1},
+        "method": {"const": "crowd_ab_v1"},
+        "contributors": {"type": "array", "items": {"$ref": "#/$defs/contributor"}}
+      }
+    }
+  }
+}

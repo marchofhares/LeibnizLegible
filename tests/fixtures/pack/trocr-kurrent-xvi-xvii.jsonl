@@ -1,0 +1,10 @@
+{"line_id": "00069377:0001:000", "text": "Ich habe Ew. Excellenz Schreiben erhalten", "conf": 0.81, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0001:001", "text": "die Sache wegen der Münze", "conf": 0.77, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0001:002", "text": "und so weiter fort", "conf": 0.9, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0001:003", "text": "und daß solches geschehen", "conf": 0.74, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0001:004", "text": "jo", "conf": 0.3, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0002:000", "text": "Seiner Churfürstl. Durchl. zu Braunschweig und", "conf": 0.69, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0002:001", "text": "so ich vernomen habe", "conf": 0.72, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0002:002", "text": "", "conf": 0.12, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "00069377:0002:004", "text": "und weil nun die gantze Sache auf der Cammer beruhet so ist es", "conf": 0.6, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}
+{"line_id": "DE-611-HS-870001:0001:000", "text": "Mein Herr, ich habe dero schreiben", "conf": 0.79, "model": "dh-unibe/trocr-kurrent-XVI-XVII", "device": "cuda", "ms": 87.0}

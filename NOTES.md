@@ -68,8 +68,13 @@ links here from its Open questions. Numbers cite `reports/` unless stated._
   open-bucket `gt_lines`, `license_bucket='open'` enforced) and `leibniz pack
   judgments` (import `converged` rows as `status='corrected'` with the judgment
   row verbatim in `source`; `both_rejected` → a Scriptorium queue report).
-  Neither exists. Demand weights should come from search logs and Reference
-  Desk misses once D1 is live.
+  ~~Neither exists.~~ **Both exist since 2026-10-21 (G1, `src/leibniz/pack/`),
+  with `leibniz pack check`;** the contract is now Calculemus SPECS §6.6
+  (schema_version 1), mirrored beside the code as two JSON schemas (SPECS §11).
+  The first pack is German: the v1 text against K2's Bern reading, gold from
+  K2's reader-minted rows in the open deposit (STATUS.md, G1). Demand weights
+  should come from search logs and Reference Desk misses once D1 is live (the
+  first pack carries 1 on every row).
 - **Cheapest scientifically valuable deployment:** finish the stalled 200-line
   GT audit with a gold-heavy, scholar-mode-only pack (minted text vs HTR
   reading over the strip). Caveat for players: edition text is normalized
