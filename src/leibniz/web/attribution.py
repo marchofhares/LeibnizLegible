@@ -3,6 +3,8 @@ viewer and the dataset cards (SPECS §7.1, §3.4/§3.5)."""
 
 from __future__ import annotations
 
+from leibniz import legal
+
 GWLB_NAME = "Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover"
 GWLB_COLLECTIONS = "https://digitale-sammlungen.gwlb.de/"
 GWLB_RESOLVE = "https://digitale-sammlungen.gwlb.de/resolve?id={work_id}"
@@ -42,10 +44,21 @@ IMAGES_MIRROR = (
     "the authoritative source."
 )
 KATALOG = f"Catalogue: {KATALOG_NAME} ({KATALOG_URL}), {KATALOG_PUBLISHER}, CC BY 4.0."
+# The model's licence state comes from the licence registry: obtained under CC BY
+# 4.0 (2026-07-29), published by its makers under CC BY-NC 4.0 since 2026-10-15.
+_HTR_MODEL = legal.artifact("philiumm-htr-model")
+_MODEL_TERMS = (
+    f"obtained under {_HTR_MODEL.obtained.licence}; published by its makers under "
+    f"{_HTR_MODEL.licence_now.licence} since {_HTR_MODEL.licence_now.since.isoformat()}"
+    if _HTR_MODEL.current and _HTR_MODEL.current.since
+    else _HTR_MODEL.obtained.licence
+)
+TRANSCRIPTIONS_LICENCE = legal.output("transcriptions").licence
 TRANSCRIPTIONS = (
     f"Transcriptions: {PROJECT_NAME}, machine output of the PHILIUMM HTR model "
-    f"{PHILIUMM_MODEL} (ERC PHILIUMM, doi:{PHILIUMM_MODEL_DOI}, CC BY 4.0), with per-line "
-    "confidence and provenance. Not an edition; subordinate to the Akademie-Ausgabe. CC BY 4.0."
+    f"{PHILIUMM_MODEL} (ERC PHILIUMM, doi:{PHILIUMM_MODEL_DOI}, {_MODEL_TERMS}), with per-line "
+    "confidence and provenance. Not an edition; subordinate to the Akademie-Ausgabe. "
+    f"{TRANSCRIPTIONS_LICENCE}."
 )
 HONESTY = (
     "Machine transcription. Not an edition. Errors are expected: about 8% character error "
@@ -107,6 +120,7 @@ __all__ = [
     "PROJECT_URL",
     "TEXT_LICENCE",
     "TRANSCRIPTIONS",
+    "TRANSCRIPTIONS_LICENCE",
     "WORDING_RULE",
     "attribution",
     "gwlb_page_url",

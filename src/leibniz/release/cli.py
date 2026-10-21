@@ -26,7 +26,7 @@ def export(
     out: Path = typer.Option(DEFAULT_OUT, "--out", help="Output root (one dir per dataset)."),
     fmt: str = typer.Option("parquet", "--format", help="parquet (needs pyarrow) or jsonl."),
     dataset: list[str] = typer.Option(
-        [], "--dataset", help="Which datasets (inventory, transcriptions, gt); default all."
+        [], "--dataset", help="Which datasets (inventory, transcriptions, gt, gt-nc); default all."
     ),
     chunk_rows: int = typer.Option(DEFAULT_CHUNK_ROWS, "--chunk-rows", help="Rows per file."),
     no_stats: bool = typer.Option(False, "--no-stats", help="Skip the corpus statistics scan."),

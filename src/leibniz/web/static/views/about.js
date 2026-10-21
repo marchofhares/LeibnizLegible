@@ -117,6 +117,9 @@ function licensing() {
     ['about.license.images.h', images],
     ['about.license.katalog.h', 'about.license.katalog.p'],
     ['about.license.transcriptions.h', 'about.license.transcriptions.p'],
+    ['about.license.gt.h', 'about.license.gt.p'],
+    ['about.license.models.h', 'about.license.models.p'],
+    ['about.license.letters.h', 'about.license.letters.p'],
     ['about.license.code.h', 'about.license.code.p'],
   ];
   return blocks

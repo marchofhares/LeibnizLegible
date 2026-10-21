@@ -1299,3 +1299,55 @@ def test_contents_search_finds_the_convolute_that_holds_a_piece(store_path, tmp_
     for key in ("browse.filter.onlyContents", "browse.filter.noneAnywhere"):
         assert strings.count(f"'{key}':") == 2, key  # EN and DE
         assert key in browse_js, key
+
+
+# ---- the licence section of About follows the registry (L1) --------------------- #
+
+
+def _string(source: str, lang: str, key: str) -> str:
+    """One value of one language's table in i18n.js."""
+    block = source.split(f"\n  {lang}: {{\n", 1)[1]
+    block = re.split(r"^  \},?\s*$", block, maxsplit=1, flags=re.M)[0]
+    m = re.search(rf"'{re.escape(key)}':\s*'((?:[^'\\]|\\.)*)'", block, flags=re.S)
+    assert m is not None, (lang, key)
+    return m.group(1)
+
+
+def test_about_licence_strings_follow_the_registry() -> None:
+    from leibniz import legal
+
+    source = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    model = legal.artifact("philiumm-htr-model")
+    potsdam = legal.artifact("edition-potsdam")
+    for lang in ("en", "de"):
+        tr = _string(source, lang, "about.license.transcriptions.p")
+        assert tr.startswith(f"Leibniz Legible, {legal.output('transcriptions').licence}.")
+        assert model.obtained.licence in tr and model.licence_now.licence in tr
+        assert model.source.removeprefix("doi:") in tr
+        gt = _string(source, lang, "about.license.gt.p")
+        assert legal.deposit_licence("open") in gt and legal.deposit_licence("nc") in gt
+        assert "Reihe IV" in gt and "Repositorium" in gt and "Leibniz-Archiv" in gt
+        assert potsdam.current is not None and potsdam.current.licence.startswith(
+            legal.deposit_licence("nc")
+        )
+        models = _string(source, lang, "about.license.models.p")
+        assert legal.output("model-v2").licence in models
+        assert legal.output("model-k3-trocr").licence.split(" (")[0] in models
+        assert "MIT" in models and "legal.py" in models
+        letters = _string(source, lang, "about.license.letters.p")
+        assert legal.artifact("bodemann-correspsearch").obtained.licence in letters
+        assert "correspSearch" in letters and "Bodemann" in letters
+        assert _string(source, lang, "about.license.code.p").startswith(
+            legal.output("code").licence
+        )
+    about_js = (STATIC_DIR / "views" / "about.js").read_text(encoding="utf-8")
+    for key in ("gt", "models", "letters"):
+        assert f"'about.license.{key}.h', 'about.license.{key}.p'" in about_js
+    llms = (STATIC_DIR / "llms.txt").read_text(encoding="utf-8")
+    assert "obtained under CC BY 4.0" in llms
+    assert llms.count("CC BY-NC 4.0") >= 3  # the model, the NC deposit, a fine-tuned model
+    assert "leibniz legal licences" in llms
+    # the attribution line the API and the manifests carry says the same
+    assert "obtained under CC BY 4.0" in attr.TRANSCRIPTIONS
+    assert "CC BY-NC 4.0 since 2026-10-15" in attr.TRANSCRIPTIONS
+    assert attr.TRANSCRIPTIONS.endswith(f"{legal.output('transcriptions').licence}.")

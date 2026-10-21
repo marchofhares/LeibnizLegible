@@ -404,7 +404,16 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
     'about.license.transcriptions.h': 'Transcriptions',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Machine output. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
+      'Leibniz Legible, CC BY 4.0. Machine output of a model obtained under CC BY 4.0: the PHILIUMM HTR model (doi:10.5281/zenodo.21457538), which its makers have published under CC BY-NC 4.0 since 15 October 2026, agreeing that these transcriptions stay CC BY 4.0. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
+    'about.license.gt.h': 'Ground truth',
+    'about.license.gt.p':
+      'Two deposits, by the copy of the edition each line’s text was read from. The open deposit, CC BY 4.0: the reading text of Akademie-Ausgabe volumes free of § 70 UrhG, read from public-domain library scans, on line images under the Public Domain Mark. The second deposit, CC BY-NC 4.0: the same kind of text read from the Potsdam Arbeitsstelle’s Reihe IV files, which the Leibniz-Edition Potsdam released to this project under CC BY-NC 4.0 in writing on 12 October 2026, and from the volume PDFs of the GWLB’s Repositorium des Leibniz-Archivs (CC BY-NC 4.0). Each deposit’s card says which channels it holds. This site shows the machine transcription only; no text read through a non-commercial channel is displayed here.',
+    'about.license.models.h': 'Models',
+    'about.license.models.p':
+      'The corpus is read by the PHILIUMM HTR model, obtained under CC BY 4.0 and published by its makers under CC BY-NC 4.0 since 15 October 2026. A model this project fine-tunes from it is released under CC BY-NC 4.0. A model trained without any non-commercial input — one fine-tuned from the Bern Kurrent model (MIT) on open edition text, for instance — is released under CC BY 4.0. Each release’s licence is fixed from the project’s licence registry (src/leibniz/legal.py) when it is deposited.',
+    'about.license.letters.h': 'Letters',
+    'about.license.letters.p':
+      'Eduard Bodemann’s catalogue of the correspondence (1889), letter by letter from correspSearch (Berlin-Brandenburgische Akademie der Wissenschaften; data from the portal Der deutsche Brief im 18. Jahrhundert). CC BY 4.0.',
     'about.license.code.h': 'Code',
     'about.license.code.p': 'Apache-2.0, in the project repository.',
 
@@ -850,7 +859,16 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
     'about.license.transcriptions.h': 'Transkriptionen',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',
+      'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe eines unter CC BY 4.0 bezogenen Modells: des PHILIUMM-HTR-Modells (doi:10.5281/zenodo.21457538), das seine Urheber seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlichen, im Einvernehmen darüber, dass diese Transkriptionen CC BY 4.0 bleiben. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',
+    'about.license.gt.h': 'Ground Truth',
+    'about.license.gt.p':
+      'Zwei Deposita, je nach der Ausgabenkopie, aus der der Text einer Zeile gelesen wurde. Das offene Depositum, CC BY 4.0: der Lesetext von Bänden der Akademie-Ausgabe, deren Schutz nach § 70 UrhG abgelaufen ist, gelesen aus gemeinfreien Bibliotheksscans, auf Zeilenbildern unter der Public Domain Mark. Das zweite Depositum, CC BY-NC 4.0: Text derselben Art, gelesen aus den Dateien der Potsdamer Arbeitsstelle zu Reihe IV, die die Leibniz-Edition Potsdam diesem Projekt am 12. Oktober 2026 schriftlich unter CC BY-NC 4.0 freigegeben hat, und aus den Band-PDFs des Repositoriums des Leibniz-Archivs der GWLB (CC BY-NC 4.0). Die Karte jedes Depositums nennt die Kanäle, die es enthält. Diese Seite zeigt allein die maschinelle Transkription; kein über einen nichtkommerziellen Kanal gelesener Text wird hier angezeigt.',
+    'about.license.models.h': 'Modelle',
+    'about.license.models.p':
+      'Das Korpus wird vom PHILIUMM-HTR-Modell gelesen, bezogen unter CC BY 4.0 und von seinen Urhebern seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlicht. Ein Modell, das dieses Projekt daraus feinabstimmt, erscheint unter CC BY-NC 4.0. Ein Modell ohne jede nichtkommerzielle Eingabe — etwa eines, das aus dem Berner Kurrent-Modell (MIT) auf offenem Ausgabentext feinabgestimmt wird — erscheint unter CC BY 4.0. Die Lizenz jeder Veröffentlichung wird bei der Hinterlegung aus dem Lizenzregister des Projekts (src/leibniz/legal.py) festgelegt.',
+    'about.license.letters.h': 'Briefe',
+    'about.license.letters.p':
+      'Eduard Bodemanns Katalog des Briefwechsels (1889), Brief für Brief aus correspSearch (Berlin-Brandenburgische Akademie der Wissenschaften; Daten aus dem Portal Der deutsche Brief im 18. Jahrhundert). CC BY 4.0.',
     'about.license.code.h': 'Quellcode',
     'about.license.code.p': 'Apache-2.0, im Projekt-Repositorium.',
 
