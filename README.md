@@ -345,5 +345,13 @@ its own mirror of the GWLB's delivery scans instead (`LEIBNIZ_IMAGE_BASE_URL`;
 an operator decision recorded in `STATUS.md`, Divergences), with every page
 linking to its original at the GWLB. Only §70/§71-expired AA *reading text* is
 ever redistributed; NC-licensed sources stay in a quarantined bucket excluded
-from public releases and the UI. Provenance is mandatory on every stored and
-exported line.
+from CC BY releases and the UI. The transcriptions are CC BY 4.0, machine
+output of a model obtained under CC BY 4.0 (the PHILIUMM HTR model, published by
+its makers under CC BY-NC 4.0 since 2026-10-15, with their agreement that the
+transcriptions stay CC BY). The ground truth is two deposits by channel: open
+(CC BY 4.0) and NC-derived (CC BY-NC 4.0: the Potsdam Reihe IV PDFs, the GWLB
+repository's PDFs). A model fine-tuned from the PHILIUMM checkpoint is CC BY-NC
+4.0; one with no NC input CC BY 4.0. The licence state of every third-party
+artifact and the licence of every output are in `src/leibniz/legal.py`
+(`uv run leibniz legal licences`, `leibniz legal outputs`; SPECS §7, amendment of
+2026-10-21). Provenance is mandatory on every stored and exported line.

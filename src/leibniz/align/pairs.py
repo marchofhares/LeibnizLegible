@@ -121,6 +121,18 @@ def record_id_from_source(source: str | None) -> str | None:
     return m.group(1) if m else None
 
 
+_CHANNEL_RE = re.compile(r"(?<![A-Za-z])channel\s+([A-Za-z0-9_+\-]+)")
+
+
+def channels_from_source(source: str | None) -> tuple[str, ...]:
+    """The edition channel(s) a factory ``source`` string names (``"; channel ia"``,
+    ``"; channel ia+gwlb"`` for a text joined from two copies), or ``()`` for a
+    row minted before the factory recorded the channel. The licence registry
+    (:func:`leibniz.legal.deposit_for`) turns them into the D3 deposit."""
+    m = _CHANNEL_RE.search(source or "")
+    return tuple(m.group(1).split("+")) if m else ()
+
+
 def reader_from_source(source: str | None) -> str | None:
     """The reader a factory ``source`` string names (K2's rows), or ``None`` for a
     row minted from the stored v1 text."""
@@ -343,6 +355,7 @@ __all__ = [
     "RecordWrite",
     "collapse_whitespace",
     "count_gt_lines",
+    "channels_from_source",
     "count_open_bucket",
     "count_reader_rows",
     "delete_gt_for_refs",
