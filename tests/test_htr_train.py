@@ -128,7 +128,12 @@ def test_ketos_command_carries_the_settings(tmp_path: Path) -> None:
     assert "--augment" in cmd and "--normalize-whitespace" in cmd
     assert f"-i {K.DEFAULT_BASE}" in joined
     assert f"-o {tmp_path / 'o' / 'checkpoints'}" in joined and "--checkpoint-path" not in joined
-    assert s.key == "ketos-b8-lr0.0002-union-augment"
+    assert s.key == "FoNDUE-GD_v2_ft_Leibniz-b8-lr0.0002-union-augment"
+    side = K.KetosSettings(base="m/medium.safetensors", ketos=".venv-x/bin/ketos")
+    assert K.ketos_command(side, train_list="t", val_list="v", out_dir=tmp_path)[0] == (
+        ".venv-x/bin/ketos"
+    )
+    assert side.key.startswith("medium-")
     s4 = K.KetosSettings(batch_size=4, accumulate=4)
     cmd4 = K.ketos_command(s4, train_list="t", val_list="v", out_dir=tmp_path)
     assert "--accumulate-grad-batches 4" in " ".join(cmd4) and s4.key.endswith("-x4")

@@ -46,6 +46,7 @@ class KetosSettings:
     """The knobs of a ``ketos train`` run (recorded in the runs row)."""
 
     base: str = str(DEFAULT_BASE)
+    ketos: str = "ketos"  # the ketos to run (the kraken 7.1 side environment's for PP-OCRv6)
     batch_size: int = 16
     accumulate: int = 1  # ketos --accumulate-grad-batches: the effective batch is batch × this
     lr: float = 1e-4
@@ -71,7 +72,7 @@ class KetosSettings:
 
     @property
     def key(self) -> str:
-        parts = ["ketos", f"b{self.batch_size}", f"lr{self.lr:g}", self.resize]
+        parts = [Path(self.base).stem, f"b{self.batch_size}", f"lr{self.lr:g}", self.resize]
         if self.accumulate > 1:
             parts.append(f"x{self.accumulate}")
         if self.augment:
@@ -94,12 +95,12 @@ def ketos_command(
     train_list: Path | str,
     val_list: Path | str,
     out_dir: Path | str,
-    ketos: str = "ketos",
+    ketos: str | None = None,
 ) -> list[str]:
     """The ``ketos train`` command line for the settings and the split lists."""
     out = Path(out_dir)
     cmd = [
-        ketos,
+        ketos or settings.ketos,
         "-d",
         settings.device,
         "--precision",

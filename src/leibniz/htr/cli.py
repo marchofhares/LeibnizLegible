@@ -967,6 +967,9 @@ def train_kraken(
     freeze_backbone: int = typer.Option(0, "--freeze-backbone", help="ketos --freeze-backbone."),
     precision: str = typer.Option("32-true", "--precision", help="ketos --precision."),
     workers: int = typer.Option(4, "--workers", help="ketos --workers."),
+    ketos: str = typer.Option(
+        "ketos", "--ketos", help="The ketos executable (a side environment's for PP-OCRv6)."
+    ),
     device: str = typer.Option("cuda:0", "--device", help="ketos -d."),
     seed: int = typer.Option(20261021, "--seed", help="ketos -s and the subset's seed."),
     drop_screen: bool = typer.Option(
@@ -993,6 +996,7 @@ def train_kraken(
 
     s = K.KetosSettings(
         base=str(base),
+        ketos=ketos,
         batch_size=batch_size,
         accumulate=accumulate,
         lr=lr,
