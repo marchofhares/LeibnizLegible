@@ -797,7 +797,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
+### K3 — a Leibniz Kurrent model (2026-10-21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 (the kraken pilot and the TrOCR memory probe done; the TrOCR epochs running)
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -965,6 +965,68 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   processes, the page image decoded once: **3,850 pages, ok 58,729; 9.42 GB of
   PNGs**; `train.txt` and `val.txt` list the crops for ketos, `manifest.jsonl`
   every row with its tags and its split. **Checkpoint A.**
+- **Task 2 (b), the kraken pilot** (`leibniz bench train-kraken --pilot
+  --start`, `--account`; `data/models/k3/kraken-pilot/` on D: with
+  `account.json`, the best weights and their validation hypotheses; the log
+  `logs/k3-kraken-pilot.log`, the guard's record `k3-kraken-pilot-guard.csv`).
+  `ketos train` (kraken 7.0.3, `.venv-k1`) from the PHILIUMM checkpoint with
+  `--resize union` (the codec grew from 178 to 198 code points, the twenty
+  added all symbols: `¬`, the em dash, the apostrophe and typographic quotes,
+  `æ`, `ı`, `£`, `$`, `%`, `*`, `{}`, `\\`, `º`, a combining macron and
+  cedilla — the umlauts decompose in NFD onto marks it had), `-u NFD
+  --normalize-whitespace`, batch 4 with 4-step gradient accumulation, learning
+  rate 1e-4 (AdamW, cosine), two loader workers, one fixed epoch over a seeded
+  **20,000 lines** of the training list, under
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. Two earlier attempts
+  failed on memory: at batch 16 the card reached 4.8 GB and the run died at
+  its first steps with `CUDA error: unknown error`; at batch 8 (and again at
+  batch 4 without expandable segments) the reserved memory climbed past 5.4 GB
+  over half an hour — the caching allocator fragmenting on the lines' variable
+  widths — and the machine, or the guard, stopped it (the batch-8 run was the
+  one running when the machine crashed; the batch-4 run was killed by the
+  guard at 5,411 MiB after 4,014 batches, 16,056 lines, in 34 min). With
+  expandable segments the same batch-4 run peaked at **2,776 MiB** and
+  finished: **47.9 min for the epoch, validation and conversion (6.95 lines/s
+  all-in; GPU utilisation 16 % on average — the run is bound by the loader,
+  not the card)**; kraken's own validation accuracy 0.7676; the best weights
+  scored by the project's engine on the **3,133 validation lines: CER 24.74
+  %** (philiumm policy; WER 65.2 %; 49 lines exact; 46.0 lines/s at inference,
+  batch 16). By hand group 32.1 % on Leibniz's own (164 lines) and 24.3 % on
+  the other hands; by stratum heavy_revision 27.6 %, light_revision 18.0 %,
+  scrap 9.5 % (60 lines), fair_copy 44.8 % (7); on the reader's rows 24.6 %,
+  the v1 rows 25.7 %; deletions 39 % of its edits, substitutions 53 %,
+  insertions 8 %; the normalization tax on this set 2.1 points (24.74 %
+  against 22.68 % under the aligner's fold). Extrapolated: **one epoch over
+  the 55,596 training lines ≈ 2.2 h; thirty epochs ≈ 2.8 days** (early
+  stopping will take fewer). Disk: 66 MB on D: (one lightning checkpoint, the
+  weights), the logs on C:.
+- **Task 2 (a), the TrOCR memory probe** (`leibniz bench train-trocr --pilot
+  --pilot-lines 2000 --no-pilot-val --max-mib 4000`;
+  `data/models/k3/trocr-probe/pilot.json`; the loop's log
+  `logs/k3-trocr-probe-loop.log`). Each setting of `PILOT_SETTINGS` on the
+  same 2,000 training lines under a hard allocator cap of 4,000 MiB for the
+  process (`torch.cuda.set_per_process_memory_fraction`; with Xwayland's 1.2
+  GB and the CUDA context the card then holds about 5.6 GB at most, under its
+  6,144 MiB, so an allocation past the cap raises an out-of-memory error in
+  the process instead of spilling into host memory as WSL2 otherwise does —
+  the first attempt without the cap reached 5.7 GB in one burst at the first
+  AdamW step and the guard killed the whole probe). The rows: adamw-b8 out of
+  memory at the cap; adafactor-b8 out of memory at the cap;
+  adamw-frozen-encoder-b8 out of memory at the cap;
+  adafactor-frozen-encoder-b8 8.19 lines/s at a peak of 3,988 MiB (11.3 h for
+  six epochs); adafactor-grad-ckpt-b8 3.55 lines/s at a peak of 3,436 MiB
+  (26.1 h for six epochs); adafactor-fp16-b8 out of memory at the cap;
+  adafactor-grad-ckpt-fp16-b8 0.97 lines/s at a peak of 4,000 MiB (95.1 h for
+  six epochs). So on this card the Bern model fine-tunes only with Adafactor,
+  and either the encoder frozen (the fastest, 8.2 lines/s, the decoder's 248 M
+  parameters trained) or gradient checkpointing (the whole model, at less than
+  half the pace); half precision is slower by a factor of eight on the GTX
+  1660 Ti (no tensor cores; K2 saw the same at inference) and out of the
+  question. Two more settings were added for the 20,000-line epochs —
+  Adafactor on everything at batch 4 with 2-step accumulation, and the frozen
+  encoder at batch 16 — and the 20,000-line epochs with the validation CER run
+  for the frozen encoder, the batch-4 whole model and the checkpointed whole
+  model (in progress; Checkpoint B follows).
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
