@@ -42,10 +42,12 @@ The site covers the scans the GWLB has published of its Leibniz collections, not
 
 ## Licences
 
-- Transcriptions: Leibniz Legible, CC BY 4.0, machine output; do not ingest as verified text; keep the provenance fields.
+- Transcriptions: Leibniz Legible, CC BY 4.0, machine output of a model obtained under CC BY 4.0 (the PHILIUMM HTR model, doi:10.5281/zenodo.21457538, published by its makers under CC BY-NC 4.0 since 2026-10-15, who agreed that these transcriptions stay CC BY 4.0); do not ingest as verified text; keep the provenance fields.
 - Page images: GWLB Hannover, Public Domain Mark 1.0.
 - Catalogue data: Arbeitskatalog der Leibniz-Edition, BBAW (Arbeitsstelle Potsdam I), CC BY 4.0.
 - Letters: Eduard Bodemann's catalogue (1889) via correspSearch (BBAW; data: Portal Der deutsche Brief im 18. Jahrhundert), CC BY 4.0.
+- Ground truth (dataset D3, at release; not shown on this site): two deposits by the copy of the edition each line's text was read from. The open deposit, CC BY 4.0: Akademie-Ausgabe reading text free of § 70 UrhG, read from public-domain library scans, on line images under the Public Domain Mark. The NC deposit, CC BY-NC 4.0: the same kind of text read from the Potsdam Arbeitsstelle's Reihe IV files (CC BY-NC 4.0, stated in writing 2026-10-12) and from the GWLB repository's volume PDFs (CC BY-NC 4.0). Each deposit's card says which channels it holds.
+- Models: the corpus is read by the PHILIUMM HTR model (obtained under CC BY 4.0; CC BY-NC 4.0 since 2026-10-15). A model fine-tuned from it: CC BY-NC 4.0. A model without non-commercial input (from the Bern Kurrent model, MIT, on open edition text): CC BY 4.0. Fixed at release from the registry `src/leibniz/legal.py` (`leibniz legal licences`).
 - Code: Apache-2.0, https://github.com/marchofhares/leibnizlegible
 
 ## Cite
