@@ -19,9 +19,13 @@ progress (the code built and tested; the sweep and the Dresden check done:
 fp32 with the decoder's cache on at batch 16 reads every Dresden line as
 the checkpoint's defaults do at a third of the time; **the reading job ran
 from 19:36 EDT to 03:07 the next morning** (7 h 26 min after a restart on an
-engine fix at 19:40): 310,831 lines read, none skipped; Checkpoint A).
-Task 2 in progress (the dry run over the complete readings). The K2 entry in
-the Phase log has the detail.
+engine fix at 19:40): 310,831 lines read, none skipped; Checkpoint A). Task
+2 done (the dry run, 1 h 05 min: **the Bern reading lifts the German yield at
+the same gate from 10.8 % to 16.9 %, Leibniz's own hand 9.5 → 12.5 %; the
+rule gives 1,178 pieces to it and leaves 402; the German records' mint
+42,278 → 68,769 lines expected**; Checkpoint B). Task 3 (the write) awaits
+the go; the backup copy of 20 October verified byte-identical past the
+header. The K2 entry in the Phase log has the detail.
 
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
 `c2c-remint` waits for the operator's pull request, nothing deployed.** The
@@ -733,7 +737,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 (the dry run running) · ⏳ Task 3
+### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3 (the write awaits the go)
 
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
@@ -890,6 +894,51 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   median 0.815, deciles 0.43 / 0.97; 27.4 characters a line on average
   (median 27, longest 238; 4 readings of 150 characters or more, the
   160-token cap never the binding one).
+- **The dry run (Task 2; Checkpoint B;** `reports/kurrent/k2-mint.md`,
+  `k2-mint.json`, `k2-mint-by-volume.csv`, `k2-mint-pieces.csv`; the
+  per-piece decisions `data/kurrent/k2-decisions.jsonl`, the reader's pairs
+  `data/kurrent/k2-pairs.jsonl` (66,084 rows, 1,532 records), the operator's
+  page `data/kurrent/k2-side-by-side.html` (40 lines, seed 20261020), all
+  three gitignored**).** `leibniz align kurrent-mint` over the complete
+  readings, the store read-only, 2026-10-21 03:13–04:18 EDT: **1 h 05 min**
+  (3,903 s, 441 MB peak). *That is over the preamble's hour without a go:*
+  a scratch dry run on the first 5,246 readings had taken 19 min and the
+  session took that as the estimate; with every line read, every piece's
+  alignment was real work. Nothing was written. The pieces: 2,148 German
+  records, **1,668 aligned** (skipped as the census knew: 449 not
+  localizable, 29 without canvases, 2 without recognised lines), 390,548
+  lines on their pages (shared pages counted per piece), 390,417 of them
+  with a reading (100.0 %). **Yield at the factory's gate, the same lines,
+  the same thresholds: v1 10.8 % (42,278 lines, mean matched fraction
+  0.839) → Bern 16.9 % (66,084 lines, 0.897)**; by stratum fair_copy 40.4 →
+  50.9 %, light_revision 19.5 → 26.7 %, heavy_revision 8.7 → 14.5 %, scrap
+  4.2 → 7.3 %; by hand own 8.1 → 14.5 %, partial 10.4 → 18.0 %, other 11.4 →
+  16.8 %, **Leibniz's hand 9.5 → 12.5 %**; German 11.0 → 17.0 %, mixed with
+  German leading 7.8 → 16.0 %; every volume up except VI,4 (22.3 → 19.6 %,
+  12 pieces). **The rule's verdict: 1,178 pieces to the Bern reading, 402
+  keep the v1 mint (77 of them ties), 568 mint nothing under either** (88
+  aligned pieces where neither clears the gate, 480 skipped). **The German
+  records' mint: 42,278 → 68,769 lines (+62.7 %)** — 58,991 on the Bern
+  reading on the pieces it won, replacing 32,500 v1 rows there, 9,778 v1
+  rows staying on the pieces it did not win; Leibniz's own hand 1,888 →
+  2,714 lines on 54 pieces (2,187 of them on the Bern reading). The whole
+  store: 315,797 rows → **342,288 expected** (before the factory's ownership
+  rule, which can move a few lines between records at the write).
+- **The backup check (for Task 3).** The operator's copy
+  `/mnt/d/leibniz-backups/inventory-2026-10-20.sqlite`, 17,085,796,352
+  bytes, written 2026-10-20 18:03 by the backup API from a `mode=ro`
+  connection — the store's size to the byte (the store last written 15:00,
+  WAL empty since). The whole-file hashes differ — store
+  `32411cbaf80a8d2c928607ca470fac2b80005ae687b1c579da8e2f168fbaab4c`, copy
+  `13aa65ff0626d756c75d9d4257c1009959398900479bd25cca8618badde8e0ce` — and
+  `cmp -l` on the first 100 bytes names why: the backup API rewrites the
+  header's change counter (offset 24), its "version-valid-for" copy (92),
+  the schema cookie (40; it sets the destination's old value plus one) and
+  the writing library's version (96; 3.46.1 in the copy, 3.53.1 in the
+  store). **Past the 100-byte header the two files are byte-identical**
+  (`cmp -i 100`, exit 0, no differing byte; 1 min 32 s to hash the store on
+  `/`, 3 min 59 s the copy on `/mnt/d`). The copy is a faithful backup by
+  content; the Task 3 write waits for the operator's go.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 
