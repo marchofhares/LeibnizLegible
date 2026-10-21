@@ -692,7 +692,7 @@ def render_report(s: Mapping, *, generated: str | None = None) -> str:
     A("")
     A(_TALLY_HEAD)
     A(_TALLY_SEP)
-    A(_tally_row("**all aligned pieces**", t))
+    A(_tally_row("**all German records** (the skipped ones with 0 lines)", t))
     for k, tt in s["by_stratum"].items():
         A(_tally_row(k, tt))
     A("")
