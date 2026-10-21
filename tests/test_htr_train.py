@@ -425,3 +425,38 @@ def test_cli_k3_report_pilots(tmp_path: Path) -> None:
     )
     assert res.exit_code == 0, res.output
     assert (tmp_path / "rep" / "k3-pilots.md").exists()
+
+
+def test_model_card_draft_renders_from_partial_data() -> None:
+    from leibniz.htr import k3_report as R
+
+    card = R.render_model_card(
+        {
+            "key": "trocr",
+            "version": "leibniz-kurrent-trocr-k3",
+            "trained": {
+                "train_lines": 55_596,
+                "val_lines": 3_133,
+                "settings_key": "adafactor-b8",
+                "epochs": 6,
+                "best_epoch": 4,
+                "best_cer": 0.12,
+                "hours": 30.0,
+            },
+            "trainset": {
+                "selection": {"rows": 60_163, "by_reader": {"v1": {"lines": 9_443}}},
+                "exclusions": {"total": 1_434, "by_reason": {"audit": 215}},
+                "screen": {"by_group": {"leibniz": {"outside_share": 0.074, "n": 1949}}},
+            },
+            "letterpool": {"all": {"cer": 0.3, "cer_lo": 0.28, "cer_hi": 0.32}},
+            "validation": {
+                "overall": {"cer": 0.1, "sub_share": 0.5, "ins_share": 0.3, "del_share": 0.2}
+            },
+            "dresden": {"cer": 0.08, "note": "a chancery hand"},
+            "speed": {"ms_per_line": 80.0, "german_hours": 30.0},
+            "licence": "open",
+            "precision_note": "K2's audit sheet awaits its judge.",
+        }
+    )
+    assert "Machine output, not an edition" in card and "MIT" in card and "30.00 %" in card
+    assert "7.4 % of 1,949 lines" in card and "Dresden" in card

@@ -208,6 +208,134 @@ def render_pilots(s: Mapping) -> str:
     return "\n".join(L)
 
 
+# --------------------------------------------------------------------------- #
+# Model cards (Task 4): a draft per model, from the evaluation's JSON
+# --------------------------------------------------------------------------- #
+
+BASES = {
+    "trocr": {
+        "name": "dh-unibe/trocr-kurrent-XVI-XVII",
+        "licence": "MIT",
+        "origin": "https://huggingface.co/dh-unibe/trocr-kurrent-XVI-XVII",
+        "what": "a TrOCR vision-encoder–decoder fine-tuned on German Kurrent of the 16th–18th "
+        "centuries (Bern; the card reports test CER 5.4 %)",
+    },
+    "kraken": {
+        "name": "FoNDUE-GD_v2_ft_Leibniz.safetensors (PHILIUMM)",
+        "licence": "CC BY 4.0",
+        "origin": "Zenodo 10.5281/zenodo.21457538",
+        "what": "the PHILIUMM project's kraken recognition model for Leibniz's Latin and "
+        "French (FoNDUE-GD v2 fine-tuned; self-reported CER 8.33 %)",
+    },
+    "ppocr": {
+        "name": "small-models-for-glam/kraken-ppocrv6-medium (medium.safetensors)",
+        "licence": "Apache-2.0",
+        "origin": "https://huggingface.co/small-models-for-glam/kraken-ppocrv6-medium",
+        "what": "kraken's PP-OCRv6 medium recognition model (15.9 M parameters), trained on "
+        "many printed and handwritten sets including German Kurrent ones and the Dresdner "
+        "Hofdiarium",
+    },
+}
+
+
+def render_model_card(c: Mapping) -> str:
+    """A model card draft. ``c`` carries: ``key`` (trocr | kraken | ppocr), ``version``,
+    ``path``, ``trained`` (the training's account: lines, epochs, settings, the best epoch),
+    ``trainset`` (the k3-trainset summary), ``letterpool`` (the pool rows for this model:
+    overall, test half, by hand, with intervals), ``validation`` (the breakdown),
+    ``dresden`` (CER, or None), ``speed`` (ms per line and the projection), ``licence``
+    (the result's licence as L1's registry decides, or "open"), ``precision_note``."""
+    base = BASES[c["key"]]
+    ts = c.get("trainset") or {}
+    sel, ex, sc = ts.get("selection", {}), ts.get("exclusions", {}), ts.get("screen", {})
+    lp = c.get("letterpool") or {}
+    v = c.get("validation") or {}
+    sp = c.get("speed") or {}
+    tr = c.get("trained") or {}
+    L = [
+        f"# Model card (draft): {c['version']}",
+        "",
+        f"A Leibniz Kurrent reader for the German stratum of the Nachlass: {base['what']}, "
+        f"fine-tuned on K2's German ground truth. **Machine output, not an edition**: the "
+        "model's text is Vorausedition-grade machine transcription with per-line confidence "
+        "and provenance, subordinate to the Akademie-Ausgabe; it is never a reading of record.",
+        "",
+        "## Data statement",
+        "",
+        f"- **Base model:** {base['name']} ({base['licence']}; {base['origin']}).",
+        f"- **Training lines:** {_n(tr.get('train_lines'))} minted lines of the German pieces "
+        f"of the §70-expired Akademie-Ausgabe volumes, placed on the GWLB's scans by the "
+        f"factory ({_n(sel.get('rows'))} rows selected, {_n(ex.get('total'))} excluded: "
+        + ", ".join(f"{k} {_n(n)}" for k, n in (ex.get("by_reason") or {}).items())
+        + "); the text is the edition's reading text (CC BY 4.0 in this project's release as "
+        "K2's lines are open-bucket), the images the GWLB's (Public Domain Mark 1.0). "
+        "By reader: "
+        + ", ".join(f"{k} {_n(d.get('lines'))}" for k, d in (sel.get("by_reader") or {}).items())
+        + ".",
+        f"- **Validation lines:** {_n(tr.get('val_lines'))}, whole pieces held out, page-disjoint, "
+        "stratified by stratum and hand; checkpoints were chosen on them alone.",
+        "- **Never trained on:** the GWLB letter pool (CC BY-NC 4.0; evaluation only), the "
+        "Dresdner Hofdiarium lines of the Kurrent Trace package (nc; evaluation only), "
+        "PHILIUMM's held-out pages, K2's audit sheet lines.",
+        f"- **Precision of the training lines: unmeasured.** {c.get('precision_note', '')} The "
+        "screen before training (the length ratio of the minted text to the reading and the "
+        "alignment confidence against the band the Latin and French mint occupies) put "
+        + ", ".join(
+            f"{g} {_pct(d.get('outside_share'), 1)} of {_n(d.get('n'))} lines"
+            for g, d in (sc.get("by_group") or {}).items()
+        )
+        + " outside the band.",
+        f"- **Licence of this model:** {c.get('licence', 'open')}.",
+        "",
+        "## Training",
+        "",
+        f"- Settings: `{tr.get('settings_key', '—')}`; epochs {_n(tr.get('epochs'))}, the best "
+        f"at epoch {_n(tr.get('best_epoch'))} (validation CER {_pct(tr.get('best_cer'))}).",
+        f"- Hardware: one GTX 1660 Ti (6 GB) under WSL2; {_hours(tr.get('hours'))} of training.",
+        "",
+        "## Error rates",
+        "",
+        "| set | CER | 95 % interval | note |",
+        "|---|---:|---|---|",
+    ]
+    for label, key in (
+        ("letter pool, all 134 letters", "all"),
+        ("letter pool, test half", "test"),
+        ("letter pool, Leibniz's own hand (L)", "L"),
+        ("letter pool, the correspondents' hands (K/k)", "K/k"),
+    ):
+        row = lp.get(key) or {}
+        L.append(
+            f"| {label} | {_pct(row.get('cer'))} | {_pct(row.get('cer_lo'))}–"
+            f"{_pct(row.get('cer_hi'))} | unfiltered, philiumm policy |"
+        )
+    ov = v.get("overall") or {}
+    L.append(
+        f"| validation set | {_pct(ov.get('cer'))} | — | the edition's text as reference; "
+        f"substitutions {_pct(ov.get('sub_share'))}, insertions {_pct(ov.get('ins_share'))}, "
+        f"deletions {_pct(ov.get('del_share'))} of the edits |"
+    )
+    if c.get("dresden") is not None:
+        d = c["dresden"]
+        L.append(f"| Dresden (sanity) | {_pct(d.get('cer'))} | — | {d.get('note', '')} |")
+    L += [
+        "",
+        "## Intended use",
+        "",
+        "Reading the German pages of the digitised Leibniz Nachlass line by line for search "
+        "and browsing (K4), with every line labelled machine output and its confidence shown; "
+        "not a substitute for the Akademie-Ausgabe, not for other hands or centuries without "
+        "measurement.",
+        "",
+        "## Speed",
+        "",
+        f"{_f(sp.get('ms_per_line'), 0)} ms a line on the GTX 1660 Ti as K1 measured it; "
+        f"reading every German page at K2's all-in throughput: {_hours(sp.get('german_hours'))}.",
+        "",
+    ]
+    return "\n".join(L)
+
+
 def write_pilots(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dict[str, Path]:
     d = Path(reports_dir)
     d.mkdir(parents=True, exist_ok=True)
@@ -226,7 +354,9 @@ def count_lines(path: Path | str) -> int:
 
 
 __all__ = [
+    "BASES",
     "WEEK_HOURS",
+    "render_model_card",
     "build_pilots",
     "count_lines",
     "kraken_pilot_summary",
