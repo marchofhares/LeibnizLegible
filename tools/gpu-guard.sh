@@ -9,21 +9,28 @@
 # of 21 October 2026 climbed to 5.9 GB that way and the machine crashed. The
 # guard stops a job before it gets there; the CSV is the job's memory record.
 #
-#   tools/gpu-guard.sh '<pgrep pattern>' <limit MiB> <csv> [interval s]
+# A second floor guards the host: the job is killed when MemAvailable falls
+# under RAM_FLOOR MiB (the pilot of 10:10 took the host down to 1.5 GB).
+#
+#   tools/gpu-guard.sh '<pgrep pattern>' <limit MiB> <csv> [interval s] [ram floor MiB]
 set -u
 pattern=${1:?pgrep pattern}
 limit=${2:?limit in MiB}
 csv=${3:?csv path}
 interval=${4:-2}
+ram_floor=${5:-1500}
 mkdir -p "$(dirname "$csv")"
-echo "# guard start $(date -Is) pattern=$pattern limit=${limit}MiB" >> "$csv"
+echo "# guard start $(date -Is) pattern=$pattern limit=${limit}MiB ram_floor=${ram_floor}MiB" >> "$csv"
 while pgrep -f "$pattern" >/dev/null; do
   line=$(nvidia-smi --query-gpu=memory.used,utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1)
   avail=$(awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo)
   echo "$(date +%s),${line// /},$avail" >> "$csv"
   used=${line%%,*}
-  if [ -n "$used" ] && [ "$used" -gt "$limit" ]; then
-    echo "# guard kill $(date -Is): used ${used} MiB > ${limit} MiB" >> "$csv"
+  why=""
+  if [ -n "$used" ] && [ "$used" -gt "$limit" ]; then why="used ${used} MiB > ${limit} MiB"; fi
+  if [ -n "$avail" ] && [ "$avail" -lt "$ram_floor" ]; then why="host MemAvailable ${avail} MiB < ${ram_floor} MiB"; fi
+  if [ -n "$why" ]; then
+    echo "# guard kill $(date -Is): $why" >> "$csv"
     pkill -TERM -f "$pattern"
     sleep 10
     pkill -KILL -f "$pattern" 2>/dev/null

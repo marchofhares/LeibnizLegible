@@ -1068,6 +1068,7 @@ def train_kraken(
         return
     params = {"settings": s.as_dict(), "command": cmd, "pilot": pilot, "drop_screen": drop_screen}
     run_id = _record_training_run(db_path, "htr_train", f"kraken-k3@{base.name}", params, n_input=0)
+    import os as _os
     import time as _time
 
     proc = K.run(cmd, log_path=log_file)
@@ -1079,6 +1080,9 @@ def train_kraken(
                 "log": str(log_file),
                 "run_id": run_id,
                 "started": _time.time(),
+                # the allocator settings the job inherits (K3 runs with
+                # expandable segments against fragmentation on the 6 GB card)
+                "env": {k: v for k, v in _os.environ.items() if k.startswith("PYTORCH_CUDA_ALLOC")},
             },
             indent=1,
         ),
