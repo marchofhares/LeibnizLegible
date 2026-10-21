@@ -180,7 +180,9 @@ const STRINGS = {
     'work.ourManifest': 'IIIF manifest with our transcriptions',
     'work.download': 'Download the text of this work',
     'work.katalog': 'Catalogue records',
-    'work.katalog.none': 'No catalogue record is linked to this work yet.',
+    'work.katalog.partial':
+      'No catalogue record is linked to this work yet. This site holds part of the Arbeitskatalog so far, not yet every record.',
+    'work.katalog.search': 'Search the Leibniz-Katalog for {shelfmark}',
     'work.katalog.incipit': 'Incipit',
     'work.katalog.date': 'Date',
     'work.katalog.sender': 'Sender',
@@ -627,7 +629,9 @@ const STRINGS = {
     'work.ourManifest': 'IIIF-Manifest mit unseren Transkriptionen',
     'work.download': 'Text dieses Werks herunterladen',
     'work.katalog': 'Katalogisate',
-    'work.katalog.none': 'Diesem Werk ist bisher kein Katalogisat zugeordnet.',
+    'work.katalog.partial':
+      'Diesem Werk ist bisher kein Katalogisat zugeordnet. Diese Seite führt bisher einen Teil des Arbeitskatalogs, noch nicht jeden Eintrag.',
+    'work.katalog.search': 'Im Leibniz-Katalog nach {shelfmark} suchen',
     'work.katalog.incipit': 'Incipit',
     'work.katalog.date': 'Datierung',
     'work.katalog.sender': 'Absender',

@@ -37,6 +37,19 @@ function identity(data) {
   return body ? `<dl class="deflist">${body}</dl>` : '';
 }
 
+/**
+ * The Leibniz-Katalog's own search by each of the work's shelfmarks, as the
+ * API spells it for the catalogue: the records exist there whether or not this
+ * site holds them, so the link is offered on every work page.
+ */
+function searchLinks(data) {
+  return (data.katalog_search_urls || []).map(
+    (s) =>
+      `<a href="${esc(s.url)}" rel="noopener">` +
+      `${esc(t('work.katalog.search', { shelfmark: s.shelfmark }))}</a>`,
+  );
+}
+
 function links(data) {
   const items = [
     `<a href="${esc(api.gwlbRecordUrl(data.work_id))}" rel="noopener">${esc(t('work.gwlb'))}</a>`,
@@ -47,6 +60,7 @@ function links(data) {
   items.push(
     `<a href="${esc(api.manifestUrl(data.work_id))}">${esc(t('work.ourManifest'))}</a>`,
   );
+  items.push(...searchLinks(data));
   // The whole work as one plain-text download, when any page has text.
   if ((data.pages || []).some((p) => p.n_lines > 0)) {
     items.push(
@@ -150,9 +164,15 @@ function katalogRecord(record) {
 
 function katalogSection(data) {
   const records = data.katalog || [];
+  // No record held here: say that the site holds part of the catalogue, and
+  // offer the catalogue's own search by the work's shelfmark(s).
+  const searches = searchLinks(data);
   const body = records.length
     ? `<ul class="katalog-list">${records.map(katalogRecord).join('')}</ul>`
-    : `<p class="muted">${esc(t('work.katalog.none'))}</p>`;
+    : `<p class="muted">${esc(t('work.katalog.partial'))}</p>` +
+      (searches.length
+        ? `<ul class="linklist linklist--inline katalog__links">${searches.map((l) => `<li>${l}</li>`).join('')}</ul>`
+        : '');
   const order = records.some((r) => r.folio_label)
     ? `<p class="hint">${esc(t('work.katalog.order'))}</p>`
     : '';
