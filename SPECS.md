@@ -23,7 +23,7 @@ Everything below was verified against primary sources in July 2026. Re-verify an
 
 ### 1.2 Catalogue: the join table exists
 
-- **Ritter-Katalog / Arbeitskatalog der Leibniz-Edition**: https://leibniz-katalog.bbaw.de/ — **>70,200 records**, the metadata spine of the whole field. Covers nearly all known writings and letters; filters for date, correspondent, shelfmark (LH/LBr signature), AA volume/piece number, other prints; links out to GWLB scans; includes rough transcriptions of >5,000 short notes. **License CC BY 4.0** (covers database rights). **No public API** — scrape politely or request a dump from TELOTA (BBAW's DH department, which runs it).
+- **Ritter-Katalog / Arbeitskatalog der Leibniz-Edition**: https://leibniz-katalog.bbaw.de/ — **>70,200 records**, the metadata spine of the whole field. Covers nearly all known writings and letters; filters for date, correspondent, shelfmark (LH/LBr signature), AA volume/piece number, other prints; links out to GWLB scans; includes rough transcriptions of >5,000 short notes. **License CC BY 4.0** (covers database rights). **No public API** — scrape politely or request a dump from TELOTA (BBAW's DH department, which runs it). _(2026-10-21: the Leibniz-Edition Potsdam provided its Access database as a one-time export under CC BY 4.0; `leibniz catalog import-access` loads the whole catalogue from it and replaces the scrape; refresh on the catalogue's half-year cycle.)_
 - Auxiliary: Leibniz-Connection (persons/correspondence DB, https://leibniz-connection.adw-goe.de/); Bodemann's catalogues (1889 LBr / 1895 LH) define the shelfmark system.
 
 ### 1.3 HTR: a foundation shipped in July 2026 (build on it, verify it first)
@@ -123,7 +123,7 @@ GT factory: AA PDFs → reading-text extraction → piece↔scan match
 - `works` — gwlb_object_id (PK), set, shelfmark(s), title, mets/mods metadata (JSON), manifest_url, n_canvases.
 - `pages` — work_id, seq, canvas_id, image_service_url, width, height, status (pending/segmented/recognized/skipped+reason).
 - `lines` — page_id, line_seq, baseline/polygon (JSON), `text`, `conf` (0–1), `model` (name@version), `run_id`, `status` ENUM(`machine`,`aligned`,`corrected`,`verified`), `lang` (la/fr/de/mixed/unknown), source fields for non-machine statuses.
-- `katalog_records` — record_id, katalog metadata (JSON), shelfmark refs, AA volume/piece refs, transcription snippet if any.
+- `katalog_records` — record_id, katalog metadata (JSON), shelfmark refs, AA volume/piece refs, transcription snippet if any. _(2026-10-21, A3b: the metadata carries the website parser's keys and, from the Arbeitsstelle's export, the holding institution, the catalogue's link to a digitised copy, the edition's PDF per piece, the Ordnungsvermerk and the last change; the import run in `runs` dates the refresh.)_
 - `crosswalk` — katalog_record_id ↔ work_id (+ page range where derivable), match_method, match_conf.
 - `gt_lines` — line image ref, text, source (AA volume/page | transkriptionspool | manual), stratum ENUM(`fair_copy`,`light_revision`,`heavy_revision`,`scrap`,`unknown`), align_conf, license_bucket ENUM(`open`,`nc`).
 - `runs` — pipeline run bookkeeping: stage, model, params, started/finished, counts, git SHA.

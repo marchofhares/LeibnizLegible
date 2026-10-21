@@ -2917,3 +2917,201 @@ plan page of 8 and 14 October.
    If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
    both sides' entries, the newer above, and say so.
 ~~~~
+
+### Phase A3b — the Arbeitskatalog import (run 2026-10-21)
+
+_Run in a cloud session on the branch it was given (`claude/adoring-volta-eogav8`),
+under the session preamble of 19 October as updated on 21 October (printed
+under G1 above and again below), which came with the prompt and the export
+attached as `arbeitskatalog-csv.zip`: nothing merged or deployed, the fixture
+store and fixtures cut from the export only, the pre-flight recorded and the
+session proceeding as the prompt's Task 0 and the preamble's item 6 say. The
+departures are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase A3b — The Arbeitskatalog import: the whole catalogue in the store from
+the Potsdam Arbeitsstelle's export, replacing the 24,916 records fetched from
+the website, with the holdings by institution and the digitised-copy links
+the export adds. One cloud session on fixtures; the store steps are the
+operator's, handed over as exact commands; nothing is deployed here.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), SPECS.md §4.3 (katalog_records,
+crosswalk), and STATUS.md: "Current state" (the G1, L1, W6 and W5 entries),
+the W5 entry ("Links out", the Faszikel index), the W6 entry (the
+catalogue's spelling), Open questions 27 and 28, "Next". If this prompt
+conflicts with the repo, the repo + STATUS.md win; record the divergence.
+This phase is A3b; K3 is in flight on the desktop on its own branch (the
+preamble's clause 7). Names of individuals stay out of STATUS.md and
+PROMPTS.md.
+
+## Where you run, and the rules that follow from it
+A cloud checkout without the store: build and test on the fixture store and
+on fixtures cut from the export. The export is attached to this session as
+arbeitskatalog-csv.zip: CSV files exported with mdbtools from the Access
+database the Arbeitsstelle provided on 21 October under CC BY 4.0, stated in
+writing on 12 October (legal.py, entry `arbeitskatalog`). Unpack it under
+data/external/arbeitskatalog/csv/ (gitignored); never commit it; a fixture
+of at most thirty rows per table may be committed under tests/fixtures/
+with the attribution. The desktop holds the same files at the same path.
+The branch is the one this session was given; push; never merge.
+
+## The export, as inspected on 21 October
+ritter.csv: 70,405 records, 46 columns, `ID` distinct and equal to the
+public catalogue's record id (verified on four records against the live
+catalogue), `KAT_NR` the Kat.-Nr. the store keeps as `katnr`, `SIGN` and
+`SIGN_oL` the shelfmark (the latter normalised), `REIHE`/`bd`/`nr`/`UNr`/`TZ`
+the Academy reference and witness, `TITEL`, `INCIPIT`, `JJJJMMTT` (the date
+as digits), `ORT`, `ABSENDER`, `ADRESSAT`, `UEBERLFG`, `FORMAT`, `UMFANG`,
+`BEZUG`, `BEMERKGN`, `DRUCKE`, `wortlaut`, `URL_Ms` (49,341 rows; 39,257 of
+them a GWLB `resolve?id=` link, the works key), `Ordnungsvermerk`,
+`Ordnungsvermerk_normiert`, `Ordnungsnummer`, `Identisch_mit`,
+`Letzte_Aenderg`; `Aufbew` is an internal storage code, not the holding
+institution. Side tables: pdf_url.csv (18,995 rows: reihe, bd, nr, UNr,
+Teil, Seite, URL, id: the edition's PDF per piece and page), OV_mit_Infos,
+OV_mit_Inhalt and Faszikel_Ms_mit_Infos (the Ordnungsvermerk level with
+titles), Drucke (917 printed books with marg_id), Handschriften, HAB, Orte,
+Orte_Hannover, pers_norm, personen_xlsx, Jahre, Ordnr, RegNr, Tabelle1,
+export, Bogen, Wasserzeichen. Multi-line text fields are quoted; read with
+the csv module, field_size_limit raised.
+
+## Task 0 — Pre-flight (record it, then proceed)
+`git status --porcelain` clean; `git fetch origin main && git merge
+origin/main`; baseline ruff + pytest in .venv-cloud; the zip unpacked; the
+row counts of every CSV as the csv module reads them.
+
+## Task 1 — The mapping, proved on the records the store already holds
+src/leibniz/catalog/arbeitskatalog.py (pure, tested): one ritter row → a
+db.KatalogRecord with the metadata keys the website parser produces
+(catalog/scrape.py _HEADER_FIELDS: record_id, katnr, signatur, titel,
+incipit, datum, aa, sigle, absender, adressat, ort, textart, umfang,
+wortlaut, drucke, bemerkungen, bezuege) so that every reader of
+katalog_records (the work page, the browse index, the Faszikel index, the
+piece-text links, catalog/hands.py's rule on textart, align/volumes.py's AA
+references) keeps working unchanged; plus new keys: holding (the institution
+parsed from SIGN by a token table you build from the data: the GWLB
+collections LH, LBr, LK, Marg carry no prefix; everything else starts with
+a place and an institution), url_ms, ordnungsvermerk, ordnungsvermerk_norm,
+ordnungsnummer, identisch_mit, last_change. gwlb_ids from URL_Ms's resolve
+links (scrape.GWLB_RESOLVE_RE); aa_refs from REIHE/bd/nr/UNr and BEZUG
+through the existing parsers. Which Access column feeds which key is not to
+be guessed: `leibniz catalog import-access --dry-run` compares, for every
+record the store already holds, each metadata key against the export's row
+and reports agreement per key (exact, whitespace-only differences, other),
+with examples; the mapping is settled when textart, signatur, titel, datum
+and aa agree on at least 99 % of the 24,916, and the rest is explained. On
+the fixture store the test does the same on its rows. The hand rule must
+give the same answer on every existing record before and after.
+
+## Task 2 — The import and the crosswalk
+`leibniz catalog import-access --csv-dir PATH [--write]`: dry run by
+default; with --write, after the operator's backup and go, replaces
+katalog_records by record_id (every row of the export; idempotent), then
+runs the crosswalk (`leibniz catalog crosswalk`: gwlb_link first, shelfmark
+second, as A3 did) and reports records per work, works with no record, and
+the records whose URL_Ms points outside the GWLB. Before any write it
+asserts that every record_id gt_lines and crosswalk already reference exists
+in the export; if one is missing it stops and prints the ids. The piece-text
+route (web/pieces.py) and the Faszikel index are re-run on the fixture.
+
+## Task 3 — What the export adds to the site
+1. reports/holdings.md rendered by code from the store: records by holding
+   institution, digitised copies by domain of URL_Ms, the GWLB works with and
+   without records; and a holdings page (/holdings, EN and DE, from the same
+   data, linked from About's scope paragraph), replacing the survey of 14
+   October in STATUS.md Open question 28.
+2. The work page and the record API carry url_ms where it points outside the
+   GWLB (a link out, rel noopener) and, from pdf_url, the edition's PDF for
+   the piece with its page ("in the Academy edition, vol. …, p. …") where the
+   URL is public; the registry says the PDFs' terms per channel (L1).
+3. The Faszikel index gains the Ordnungsvermerk level with its title where
+   the OV tables give one; the browse page's "part of the Arbeitskatalog"
+   sentences become "the whole Arbeitskatalog, refreshed <date>" with the
+   export's date, on About, llms.txt and the README; Open question 27 closed,
+   its Monadologie numbers corrected (39739, 39743, 39744 are other pieces;
+   the Monadologie's records are found by shelfmark LH 4, 1, 1a and 1b).
+4. Persons and places (pers_norm, personen_xlsx, Orte): record in STATUS.md
+   what they hold and leave them for a later step; the letters page keeps
+   Bodemann's catalogue.
+Tests throughout; the browser checks on the fixture store as W6 ran them.
+
+## Task 4 — Verify, record, hand over
+ruff + pytest. STATUS.md: the A3b entry (the mapping's agreement figures on
+the fixture; no corpus numbers you did not produce); Open questions 27 and
+28; "Next". Append this prompt to PROMPTS.md. Push; print the compare URL
+and, for the operator, in order: the dry run on the desktop from the second
+checkout updated to main after the merge (`git -C ~/LeibnizLegible-g1 fetch
+origin main && git -C ~/LeibnizLegible-g1 checkout --detach origin/main`,
+`uv sync` in its .venv-g1, then `leibniz catalog import-access --db
+/home/evana/LeibnizLegible/data/inventory.sqlite --csv-dir
+/home/evana/LeibnizLegible/data/external/arbeitskatalog/csv --dry-run`) with
+the agreement table to read; the backup chore; `--write` with a go; the new
+serving copy (deploy/README.md §2) and restart, the index rebuild bundled
+with K4's; the staging line and the curl checks for /holdings, a work page
+with an outside link, About in EN and DE. Do not merge. Do not deploy.
+~~~~
+
+The session preamble as given to this session, before the prompt (the
+preamble of 19 October as updated on 21 October, the same text as printed
+under G1 above):
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+~~~~
