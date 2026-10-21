@@ -59,7 +59,9 @@ from fastapi.responses import (
 )
 
 from leibniz import __version__, db
+from leibniz.catalog import holdings as holdings_mod
 from leibniz.catalog import letters as letters_mod
+from leibniz.catalog.arbeitskatalog import is_gwlb_url
 from leibniz.catalog.shelfmarks import signature_keys
 from leibniz.images.twins import TwinGroup, TwinIndex
 from leibniz.search.backend import (
@@ -91,6 +93,7 @@ INDEX_ROUTES = (
     "/search",
     "/browse",
     "/letters",
+    "/holdings",
     "/about",
     "/work/{work_id}",
     "/page/{page_id}",
@@ -278,6 +281,41 @@ def _record_dict(rec: db.KatalogRecord) -> dict:
             and (meta.get("absender") or meta.get("adressat"))
             else None
         ),
+        **_export_keys(meta, aa_refs),
+    }
+
+
+def _ordnungsvermerk(meta: dict) -> dict | None:
+    """The Ordnungsvermerk an excerpt was filed under (the Arbeitskatalog export,
+    A3b): its normalised ``name``, the slip's own wording, and the title, Komplex
+    and epoch the catalogue's OV tables give it, where they do."""
+    name = meta.get("ordnungsvermerk_norm") or meta.get("ordnungsvermerk")
+    if not name:
+        return None
+    return {
+        "name": str(name),
+        "written": meta.get("ordnungsvermerk") or None,
+        "title": meta.get("ordnungsvermerk_title") or None,
+        "komplex": meta.get("ordnungsvermerk_komplex") or None,
+        "epoche": meta.get("ordnungsvermerk_epoche") or None,
+        "nummer": meta.get("ordnungsnummer") or None,
+    }
+
+
+def _export_keys(meta: dict, aa_refs: list[dict]) -> dict:
+    """What the Arbeitskatalog export adds to a record (A3b): the catalogue's
+    link to a digitised copy where it points outside the GWLB (``url_ms``; a
+    GWLB link is the work itself), the edition's PDF for the piece where its
+    channel is open to a link (``aa_pdf``), the Ordnungsvermerk of an excerpt,
+    the holding institution. Empty on a record the website parser produced."""
+    url_ms = str(meta.get("url_ms") or "").strip()
+    outside = url_ms if url_ms and not is_gwlb_url(url_ms) else None
+    return {
+        "url_ms": outside,
+        "url_ms_domain": holdings_mod.domain_of(outside) if outside else None,
+        "aa_pdf": links.edition_pdf_link(meta.get("aa_pdf"), aa_refs),
+        "ordnungsvermerk": _ordnungsvermerk(meta),
+        "holding": meta.get("holding") or None,
     }
 
 
@@ -606,11 +644,14 @@ def _ssr_work(
     gwlb_url: str,
     place: dict | None = None,
     searches: list[dict] | tuple[dict, ...] = (),
+    coverage: dict | None = None,
 ) -> tuple:
     """(title, description, html) for a work's server-rendered summary; ``place``
     is where the work sits in the browse index (:func:`browse.places`),
     ``searches`` the Leibniz-Katalog's search by each of the work's shelfmarks
-    (:func:`_katalog_searches`), linked whether or not ``katalog`` has records."""
+    (:func:`_katalog_searches`), linked whether or not ``katalog`` has records;
+    ``coverage`` how much of the Arbeitskatalog the store holds (its ``refreshed``
+    date once the export is imported)."""
     title = work.title or work.gwlb_object_id
     marks = ", ".join(work.shelfmarks or [])
     n = len(pages)
@@ -652,12 +693,25 @@ def _ssr_work(
                 bits.append(", ".join(rec["aa_planned"]) + " (assigned, not yet published)")
             if rec.get("drucke"):
                 bits.append("Other printings: " + str(rec["drucke"]))
+            if rec.get("ordnungsvermerk"):
+                bits.append("Ordnungsvermerk: " + _ov_label(rec["ordnungsvermerk"]))
             text = (
                 f' · <a href="{_esc(rec["text_url"])}" download>Text of this piece '
                 f"({_esc(rec['folio_label'])})</a>"
                 if rec.get("text_url")
                 else ""
             )
+            # links out the export added: a digitised copy elsewhere, the edition's PDF
+            if rec.get("url_ms"):
+                text += (
+                    f' · <a href="{_esc(rec["url_ms"])}" rel="noopener">Digitised copy at '
+                    f"{_esc(rec['url_ms_domain'])}</a>"
+                )
+            if rec.get("aa_pdf"):
+                text += (
+                    f' · <a href="{_esc(rec["aa_pdf"]["url"])}" rel="noopener">'
+                    f"{_esc(_pdf_label(rec['aa_pdf']))}</a>"
+                )
             items.append(f"<li>{_esc(' · '.join(b for b in bits if b))}{text}</li>")
         parts.append(heading)
         parts.append("<ul>" + "".join(items) + "</ul>")
@@ -668,10 +722,18 @@ def _ssr_work(
             for s in searches
         )
         parts.append(heading)
-        parts.append(
-            "<p>No catalogue record is linked to this work yet, and this site holds part of "
-            f"the Arbeitskatalog so far{'; search it for ' + where if where else ''}.</p>"
-        )
+        refreshed = (coverage or {}).get("refreshed")
+        if refreshed:  # the whole catalogue is held: the record is not linked, not missing
+            lead, held = (
+                "No catalogue record is linked to this work",
+                f"this site holds the whole Arbeitskatalog, refreshed {_esc(refreshed)}",
+            )
+        else:
+            lead, held = (
+                "No catalogue record is linked to this work yet",
+                "this site holds part of the Arbeitskatalog so far",
+            )
+        parts.append(f"<p>{lead}, and {held}{'; search it for ' + where if where else ''}.</p>")
     if pages:
         links = "".join(
             f'<li><a href="/page/{_esc(p.id)}">{_esc(p.label or p.seq)}</a></li>' for p in pages
@@ -736,6 +798,12 @@ def _ssr_page(
 
 
 BROWSE_TITLE = "Browse by shelfmark"
+HOLDINGS_TITLE = "Where Leibniz's papers lie"
+HOLDINGS_DESCRIPTION = (
+    "The Arbeitskatalog der Leibniz-Edition by holding institution: how many of its records "
+    "name each library and archive, which link a digitised copy and where, and how many of "
+    "the GWLB's digitised works carry a record. CC BY 4.0."
+)
 BROWSE_NOTE = (
     "Titles and shelfmarks are the library's. Section names are cut from its titles. "
     "Correspondent names come from the linked records of the Arbeitskatalog der "
@@ -1069,7 +1137,31 @@ def _record_rows(rec: dict) -> list[str]:
         rows.append(f"{link['label']}: {link['url']}")
     if rec.get("transcriptions"):
         rows.append(f"{rec['transcriptions']['label']}: {rec['transcriptions']['url']}")
+    if rec.get("url_ms"):
+        rows.append(f"Digitised copy ({rec['url_ms_domain']}): {rec['url_ms']}")
+    if rec.get("aa_pdf"):
+        rows.append(f"{_pdf_label(rec['aa_pdf'])}: {rec['aa_pdf']['url']}")
+    if rec.get("ordnungsvermerk"):
+        rows.append(f"Ordnungsvermerk: {_ov_label(rec['ordnungsvermerk'])}")
     return rows
+
+
+def _pdf_label(pdf: dict) -> str:
+    """``In the Akademie-Ausgabe: AA VIII,3, p. 464 (PDF, Leibniz-Edition Potsdam II,
+    CC BY-NC 4.0)``."""
+    where = pdf.get("volume") or "the Akademie-Ausgabe"
+    if pdf.get("page"):
+        where += f", p. {pdf['page']}"
+    terms = ", ".join(x for x in (pdf.get("where"), pdf.get("terms")) if x)
+    return (
+        f"In the Akademie-Ausgabe: {where} (PDF, {terms})"
+        if terms
+        else f"In the Akademie-Ausgabe: {where} (PDF)"
+    )
+
+
+def _ov_label(ov: dict) -> str:
+    return ov["name"] + (f" ({ov['title']})" if ov.get("title") else "")
 
 
 def _record_text(
@@ -1206,6 +1298,33 @@ def create_app(
             }
         return state["browse"]
 
+    def katalog_coverage() -> dict:
+        """How much of the Arbeitskatalog the store holds (A3b): its records'
+        count and, once the Arbeitsstelle's export is imported, the export's date
+        as ``refreshed`` (``None`` while the store holds the website's records).
+        Built on first use; the store changes only with an import and a restart."""
+        if state.get("coverage") is None:
+            conn = _open(db_path)
+            try:
+                state["coverage"] = {
+                    "records": db.count_katalog_records(conn),
+                    "refreshed": holdings_mod.catalog_refreshed(conn),
+                }
+            finally:
+                conn.close()
+        return state["coverage"]
+
+    def holdings_data() -> dict:
+        """The holdings report's figures from the store, built on first use."""
+        if state.get("holdings") is None:
+            conn = _open(db_path)
+            try:
+                data = holdings_mod.holdings_from_store(conn, generated_at=db.utcnow_iso())
+            finally:
+                conn.close()
+            state["holdings"] = data.to_dict()
+        return state["holdings"]
+
     def letters() -> letters_mod.LettersIndex:
         """Bodemann's letters, read on first use and kept for the life of the process."""
         if state.get("letters") is None:
@@ -1254,7 +1373,15 @@ def create_app(
                     meta = record.get("metadata") or {}
                     words = " ".join(
                         str(meta.get(k) or "")
-                        for k in ("titel", "title", "incipit", "absender", "adressat")
+                        for k in (
+                            "titel",
+                            "title",
+                            "incipit",
+                            "absender",
+                            "adressat",
+                            "ordnungsvermerk_norm",
+                            "ordnungsvermerk_title",
+                        )
                     )
                     items.append((letters_mod.fold(words), record))
                 out[work_id] = items
@@ -1333,8 +1460,26 @@ def create_app(
             stats["index_built_at"] = meta.get("built_at")
             stats.setdefault("model", None)
             stats["images"] = {"origin": images.origin, "base_url": images.base_url}
+            stats["katalog"] = katalog_coverage()
             state["stats"] = stats
         return JSONResponse(state["stats"], headers=CACHE_HEADERS)
+
+    @app.get(
+        "/api/holdings",
+        summary="Where Leibniz's papers lie: the Arbeitskatalog by holding institution",
+        description=(
+            "The catalogue's records by the institution their shelfmark names (`by_holding`, "
+            "`by_place`; the GWLB's own collections under `Hannover NLB`), the digitised copies "
+            "the catalogue links, by domain (`by_domain`, `gwlb_links`), and the GWLB's "
+            "digitised works with and without records (`works`, `works_with_records`, "
+            "`by_set`). `refreshed` is the date of the Arbeitsstelle's export the records come "
+            "from, null while the store holds the website's records. Records, not pages: a "
+            "convolute of many pieces counts many times, a printed or lost witness counts too. "
+            "Arbeitskatalog der Leibniz-Edition, CC BY 4.0."
+        ),
+    )
+    def api_holdings() -> JSONResponse:
+        return JSONResponse(holdings_data(), headers=DAY_CACHE)
 
     @app.get("/api/search")
     def api_search(
@@ -1401,10 +1546,12 @@ def create_app(
         description=(
             "The Faszikel index's search: the convolutes whose catalogue records (the "
             "Arbeitskatalog der Leibniz-Edition, CC BY 4.0) carry `q` in a piece's title, "
-            "incipit, sender or addressee — a title word such as `Praefatio`, a name — "
-            "case- and accent-blind, with up to five of the matching pieces per convolute "
-            "and where they sit (their shelfmark with its folios). The most matches first. "
-            "Only the records this site holds: part of the Arbeitskatalog so far."
+            "incipit, sender or addressee, or in the Ordnungsvermerk an excerpt was filed "
+            "under — a title word such as `Praefatio`, a name — case- and accent-blind, with "
+            "up to five of the matching pieces per convolute and where they sit (their "
+            "shelfmark with its folios, their Ordnungsvermerk). The most matches first. Only "
+            "the records this site holds: `katalog` says how many, and the date of the "
+            "Arbeitsstelle's export they come from (null while part of the catalogue is held)."
         ),
     )
     def api_contents(
@@ -1435,12 +1582,24 @@ def create_app(
                             "title": piece_title(record) or record["record_id"],
                             "where": next(iter(record.get("shelfmark_refs") or []), None),
                             "date": (record.get("metadata") or {}).get("datum"),
+                            # the heading an excerpt was filed under, where there is one
+                            **(
+                                {"ordnungsvermerk": ov}
+                                if (ov := _ordnungsvermerk(record.get("metadata") or {}))
+                                else {}
+                            ),
                         }
                         for record in matched[:5]
                     ],
                 }
             )
-        body = {"query": q, "total": len(hits), "works": works, "attribution": attr.KATALOG}
+        body = {
+            "query": q,
+            "total": len(hits),
+            "works": works,
+            "katalog": katalog_coverage(),
+            "attribution": attr.KATALOG,
+        }
         return JSONResponse(body, headers=CACHE_HEADERS)
 
     @app.get(
@@ -1573,8 +1732,13 @@ def create_app(
             "Leibniz-Katalog), `katalog_search_urls` — the Leibniz-Katalog's own search by "
             "shelfmark, one entry per distinct shelfmark the work carries (`shelfmark` as the "
             "library writes it, `query` as the catalogue spells it, `url`), there whether or "
-            "not any record is held here, since this site holds part of the Arbeitskatalog so "
-            "far — attribution, and `browse`, the work's place in the browse index."
+            "not any record is held here — `katalog_coverage` says how many records the site "
+            "holds and the date of the Arbeitsstelle's export they come from (null while part "
+            "of the catalogue is held) — attribution, and `browse`, the work's place in the "
+            "browse index. Each record carries, where the export gives them, `url_ms` (the "
+            "catalogue's link to a digitised copy outside the GWLB), `aa_pdf` (the edition's "
+            "PDF for the piece, with the printed page, where its channel is open) and "
+            "`ordnungsvermerk` (the heading an excerpt was filed under)."
         ),
     )
     def api_work(work_id: str) -> JSONResponse:
@@ -1601,6 +1765,7 @@ def create_app(
                 ],
                 "katalog": _katalog_for_work(conn, work_id, pages),
                 "katalog_search_urls": _katalog_searches(work.shelfmarks),
+                "katalog_coverage": katalog_coverage(),
                 "attribution": attr.attribution(images.mirrored),
             }
         finally:
@@ -1901,6 +2066,16 @@ def create_app(
         def serve_about(request: Request) -> Response:
             return respond(request, _stamp_shell(shell, path="/about", title="About", site=site))
 
+        def serve_holdings(request: Request) -> Response:
+            body = _stamp_shell(
+                shell,
+                path="/holdings",
+                title=HOLDINGS_TITLE,
+                description=HOLDINGS_DESCRIPTION,
+                site=site,
+            )
+            return respond(request, body)
+
         def serve_letters(request: Request) -> Response:
             body = _stamp_shell(
                 shell,
@@ -1941,7 +2116,13 @@ def create_app(
             gwlb_url = attr.GWLB_RESOLVE.format(work_id=work.gwlb_object_id)
             place = browse_index()["places"].get(work.gwlb_object_id)
             title, description, ssr = _ssr_work(
-                titled(work), pages, katalog, gwlb_url, place, _katalog_searches(work.shelfmarks)
+                titled(work),
+                pages,
+                katalog,
+                gwlb_url,
+                place,
+                _katalog_searches(work.shelfmarks),
+                katalog_coverage(),
             )
             body = _stamp_shell(
                 shell,
@@ -1999,6 +2180,7 @@ def create_app(
             "/browse": serve_browse,
             "/about": serve_about,
             "/letters": serve_letters,
+            "/holdings": serve_holdings,
             "/work/{work_id}": serve_index_work,
             "/page/{page_id}": serve_index_page,
         }

@@ -635,7 +635,10 @@ LICENCES: tuple[Artifact, ...] = (
         name="Arbeitskatalog der Leibniz-Edition (Leibniz-Katalog, BBAW / Arbeitsstelle Potsdam I)",
         kind="catalogue",
         source="https://leibniz-katalog.bbaw.de/",
-        version="scraped 2026-07-29 (A3 sample) and 2026-09 (the §70 volumes' sweep, C2)",
+        version=(
+            "scraped 2026-07-29 (A3 sample) and 2026-09 (the §70 volumes' sweep, C2); the "
+            "Arbeitsstelle's Access export of 2026-10-21 (70,405 records, CSV via mdbtools; A3b)"
+        ),
         obtained=Terms("CC BY 4.0", _d(2026, 7, 29), "the catalogue's site, SPECS §1.2"),
         current=Terms(
             "CC BY 4.0, stated in writing 2026-10-12",
@@ -644,8 +647,16 @@ LICENCES: tuple[Artifact, ...] = (
             since=_d(2026, 10, 12),
         ),
         bucket="open",
-        built="the crosswalk, the piece texts, the Faszikel index, the links out",
-        notes="A one-time export has been offered (STATUS.md Open question 27).",
+        built=(
+            "the crosswalk, the piece texts, the Faszikel index, the links out; from the "
+            "export: the whole catalogue in the store (`leibniz catalog import-access`), the "
+            "holdings page and reports/holdings.md, the edition's PDF per piece"
+        ),
+        notes=(
+            "The one-time export offered on 2026-10-12 arrived on 2026-10-21 (STATUS.md Open "
+            "question 27); a fixture of at most thirty rows per table is committed under "
+            "tests/fixtures/arbeitskatalog/ with the attribution, the export itself never."
+        ),
     ),
     Artifact(
         key="bodemann-correspsearch",

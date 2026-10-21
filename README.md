@@ -19,8 +19,12 @@ making all of it *legible and findable* is the point.
 collections, not all of Leibniz's papers: much is not yet digitised, at the
 GWLB and elsewhere, and other institutions hold manuscripts too, the
 Niedersächsisches Landesarchiv Hannover among them; the Arbeitskatalog der
-Leibniz-Edition records them all, this site holds part of its records so far,
-and every work page links to the catalogue's own search by shelfmark.
+Leibniz-Edition records them all, this site holds the whole Arbeitskatalog as
+the Arbeitsstelle exported it on 21 October 2026 (70,405 records, refreshed with
+each export: `leibniz catalog import-access`), and every work page links to the
+catalogue's own search by shelfmark. Where Leibniz's papers lie, institution by
+institution, is on the [holdings page](https://leibnizlegible.com/holdings) and
+in `reports/holdings.md`.
 
 - **`SPECS.md`** — the project's law (mission, deliverables, architecture, legal rails).
 - **`PROMPTS.md`** — the phase-by-phase build plan.
@@ -179,8 +183,9 @@ alphabet (u≡v, i≡j, ſ→s, diacritics, ligatures), so *ut* finds *vt*. A pa
 must hold every word (`match=any` for one of them); titles, shelfmarks, AA
 references, folio labels and the titles of the catalogue pieces on a page are
 folded the same way, so `AA VI,4 N. 109` or `Praefatio` find their pages. The
-pieces are those of the catalogue records the store holds: part of the
-Arbeitskatalog (`reports/crosswalk.md`), so far not, for one, the Monadologie's.
+pieces are those of the catalogue records the store holds: the whole
+Arbeitskatalog since its import from the Arbeitsstelle's export of 21 October
+2026 (`reports/crosswalk.md`, `reports/holdings.md`).
 `/api/lookup` reads a query as a citation — a shelfmark with its folio, an
 Akademie-Ausgabe number, an id — and the search page offers where it points.
 Queries take two operators: `"…"` (or „…“, «…») for words that must stand exactly so

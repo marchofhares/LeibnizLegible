@@ -167,7 +167,11 @@ export async function render(ctx) {
     `<section class="panel" aria-labelledby="about-what">` +
     `<h2 id="about-what">${esc(t('about.what.h'))}</h2>` +
     `<p>${esc(t('about.what.p1'))}</p>` +
-    `<p>${esc(t('about.what.scope'))}</p>` +
+    // the scope: the partial-catalogue wording until /api/stats says the
+    // whole Arbeitskatalog is held (katalog.refreshed, below)
+    `<p id="about-scope">${esc(t('about.what.scope'))}</p>` +
+    `<p>${esc(t('about.what.holdings'))} ` +
+    `<a href="/holdings">${esc(t('about.what.holdings.link'))}</a>.</p>` +
     `<p>${esc(t('about.what.p2'))}</p>` +
     `<p>${esc(t(imageOrigin() === 'mirror' ? 'about.what.p3.mirror' : 'about.what.p3'))}</p>` +
     `</section>` +
@@ -270,6 +274,9 @@ export async function render(ctx) {
     .stats(signal)
     .then((data) => {
       if (signal.aborted) return;
+      const refreshed = data.katalog && data.katalog.refreshed;
+      const scope = root.querySelector('#about-scope');
+      if (refreshed && scope) scope.textContent = t('about.what.scope.whole', { date: refreshed });
       box.setAttribute('aria-busy', 'false');
       box.innerHTML =
         statTiles(data) +

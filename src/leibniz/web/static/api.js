@@ -122,6 +122,11 @@ export function contents(q, signal) {
   return getJSON(`${API}/contents?q=${encodeURIComponent(q)}`, signal);
 }
 
+/** GET /api/holdings — the Arbeitskatalog by holding institution, digitised copies by domain. */
+export function holdings(signal) {
+  return getJSON(`${API}/holdings`, signal);
+}
+
 /** GET /api/works — every work as a compact row, and the browse tree. */
 export function works(signal) {
   return getJSON(`${API}/works`, signal);

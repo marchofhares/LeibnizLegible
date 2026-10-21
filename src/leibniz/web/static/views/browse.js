@@ -75,7 +75,17 @@ export function contentsBlock(found) {
       const pieces = (work.matches || [])
         .map(
           (m) =>
-            `<li>${esc(m.title)}${m.where ? ` <span class="muted">${esc(m.where)}</span>` : ''}</li>`,
+            `<li>${esc(m.title)}${m.where ? ` <span class="muted">${esc(m.where)}</span>` : ''}` +
+            (m.ordnungsvermerk
+              ? ` <span class="muted">· ${esc(
+                  t('browse.contents.ov', {
+                    name: m.ordnungsvermerk.title
+                      ? `${m.ordnungsvermerk.name} (${m.ordnungsvermerk.title})`
+                      : m.ordnungsvermerk.name,
+                  }),
+                )}</span>`
+              : '') +
+            `</li>`,
         )
         .join('');
       const more =
@@ -378,7 +388,12 @@ export async function render(ctx) {
         // only part of the Arbeitskatalog so far (reports/crosswalk.md).
         if (lastShown === 0) {
           const any = Boolean(found && found.total);
-          status.textContent = t(any ? 'browse.filter.onlyContents' : 'browse.filter.noneAnywhere');
+          const refreshed = found && found.katalog && found.katalog.refreshed;
+          status.textContent = any
+            ? t('browse.filter.onlyContents')
+            : refreshed
+              ? t('browse.filter.noneAnywhere.whole', { date: refreshed })
+              : t('browse.filter.noneAnywhere');
         }
       })
       .catch(() => {
