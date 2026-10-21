@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections import Counter
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
@@ -40,6 +41,8 @@ SCHEMA_VERSION = 1
 FRAGMENT_HEADER = "fragment_pack_header"
 JUDGMENT_HEADER = "judgment_pack_header"
 MAX_SHOWN = 50  # errors printed by the command; the report keeps them all
+# This project's canonical line id: "{work_id}:{seq:04d}:{line_seq:03d}" (SPECS §4.4).
+LINE_ID = re.compile(r"(?P<page>(?P<work>[^:\s]+):\d{4}):\d{3}")
 
 # The JSON Schema keywords this validator enforces, and the annotations it reads past.
 KEYWORDS = frozenset(
@@ -291,9 +294,19 @@ def _keep(report: CheckReport, keep: list[bool]) -> None:
 # --------------------------------------------------------------------------- #
 
 
+def line_id_errors(line_id: str) -> list[str]:
+    """A line id not in this project's canonical form (SPECS §4.4)."""
+    if LINE_ID.fullmatch(line_id):
+        return []
+    return [f"$.line_id: {_show(line_id)} is not a line id ('{{work}}:{{seq:04d}}:{{line:03d}}')"]
+
+
 def fragment_row_errors(row: Mapping) -> list[str]:
     """The contract's rules for one row that the schema cannot state."""
-    errors: list[str] = []
+    errors = line_id_errors(row["line_id"])
+    m = LINE_ID.fullmatch(row["line_id"])
+    if m and (row["page_id"], row["work_id"]) != (m["page"], m["work"]):
+        errors.append(f"$.page_id/$.work_id: not the page and work of {_show(row['line_id'])}")
     cands = row["candidates"]
     ids = [c["cand_id"] for c in cands]
     if len(cands) != 2:
@@ -367,6 +380,8 @@ def check_fragment_pack(path: Path | str, schema: Mapping | None = None) -> Chec
 
 def judgment_row_errors(row: Mapping) -> list[str]:
     """The contract's rules for one judgment the schema cannot state."""
+    if bad := line_id_errors(row["line_id"]):
+        return bad
     winner = [k for k in ("winning_cand_id", "winning_text", "winning_source") if k in row]
     if row["retirement"] == "converged":
         missing = [k for k in ("winning_cand_id", "winning_text") if k not in row]
@@ -438,6 +453,7 @@ __all__ = [
     "JUDGMENT_HEADER",
     "JUDGMENT_SCHEMA",
     "KEYWORDS",
+    "LINE_ID",
     "SCHEMA_VERSION",
     "CheckReport",
     "SchemaError",
@@ -446,6 +462,7 @@ __all__ = [
     "check_judgment_pack",
     "fragment_row_errors",
     "judgment_row_errors",
+    "line_id_errors",
     "load_schema",
     "parse_line",
     "report_lines",

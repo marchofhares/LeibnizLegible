@@ -22,9 +22,11 @@ from leibniz.align.audit_reach import open_readonly
 
 from . import check as C
 from . import fragments as F
+from . import judgments as J
 
 app = typer.Typer(
-    help="The Calculemus seam: fragment packs out (fragments, check), judgment packs in.",
+    help="The Calculemus seam: fragment packs out (fragments, check), judgment packs in "
+    "(judgments).",
     no_args_is_help=True,
 )
 console = Console()
@@ -37,6 +39,11 @@ def _day(value: str | None) -> date:
         return date.fromisoformat(value)
     except ValueError as exc:
         raise typer.BadParameter(f"--today must be YYYY-MM-DD, got {value!r}") from exc
+
+
+def _say(lines: list[str]) -> None:
+    for line in lines:
+        console.print(line, highlight=False, markup=False, soft_wrap=True)
 
 
 @app.command()
@@ -105,14 +112,13 @@ def fragments(
     finally:
         conn.close()
     F.write_pack(target, pack)
-    for line in F.summary_lines(pack):
-        console.print(line, highlight=False, markup=False, soft_wrap=True)
-    console.print(
-        f"Wrote {target} ({len(pack.rows):,} rows and the header) in "
-        f"{time.perf_counter() - t0:.1f} s; the store was opened read-only. "
-        f"Next: leibniz pack check {target}",
-        highlight=False,
-        markup=False,
+    _say(F.summary_lines(pack))
+    _say(
+        [
+            f"Wrote {target} ({len(pack.rows):,} rows and the header) in "
+            f"{time.perf_counter() - t0:.1f} s; the store was opened read-only. "
+            f"Next: leibniz pack check {target}"
+        ]
     )
 
 
@@ -129,7 +135,58 @@ def check_pack(
     if not file.exists():
         raise typer.BadParameter(f"{file} not found")
     report = C.check_judgment_pack(file) if judgments else C.check_fragment_pack(file)
-    for line in C.report_lines(report):
-        console.print(line, highlight=False, markup=False, soft_wrap=True)
+    _say(C.report_lines(report))
     if not report.ok:
         raise typer.Exit(1)
+
+
+@app.command()
+def judgments(
+    in_path: Path = typer.Option(..., "--in", help="The judgment pack (JSONL) from the game."),
+    write: bool = typer.Option(
+        False, "--write", help="Import into the store (default: a dry run, the store read-only)."
+    ),
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="The store."),
+    fragments_path: Path | None = typer.Option(
+        None,
+        "--fragments",
+        help="The fragment pack the judgments answer: the queue's two readings, and every "
+        "winner checked against its candidates.",
+    ),
+    queue: Path = typer.Option(J.DEFAULT_QUEUE, "--queue", help="The Scriptorium queue report."),
+) -> None:
+    """Import the game's converged judgments as 'corrected' lines; queue the both-rejected."""
+    for label, path in (("--in", in_path), ("--db", db_path), ("--fragments", fragments_path)):
+        if path is not None and not path.exists():
+            raise typer.BadParameter(f"{label}: {path} not found")
+    report = C.check_judgment_pack(in_path)
+    if not report.ok:
+        _say(C.report_lines(report) + ["Refused: nothing was read from the pack."])
+        raise typer.Exit(1)
+    frags: dict[str, dict] | None = None
+    frag_id: str | None = None
+    if fragments_path is not None:
+        frag_report = C.check_fragment_pack(fragments_path)
+        if not frag_report.ok:
+            _say(C.report_lines(frag_report) + ["Refused: the fragment pack does not check."])
+            raise typer.Exit(1)
+        frags = {r["line_id"]: r for r in frag_report.rows}
+        frag_id = frag_report.header["pack_id"] if frag_report.header else None
+    conn = db.connect(db_path) if write else open_readonly(db_path)
+    try:
+        plan = J.plan_import(conn, report, fragments=frags, fragments_pack_id=frag_id)
+        run_id = None
+        if write:
+            params = {
+                "judgment_pack": plan.header["pack_id"],
+                "file": in_path.name,
+                "built_at": plan.header["built_at"],
+                "fragment_pack": frag_id,
+                "n_rows": plan.n_rows,
+            }
+            run_id = J.apply_import(conn, plan, git_sha=db.git_sha(), params=params)
+    finally:
+        conn.close()
+    J.write_queue(queue, plan, file_label=in_path.name, read_on=date.today().isoformat())
+    _say(J.summary_lines(plan, wrote=write, run_id=run_id))
+    _say([f"Queue: {queue} (the section of {plan.header['pack_id']})"])

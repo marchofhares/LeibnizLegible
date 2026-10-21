@@ -158,6 +158,8 @@ def test_a_doctored_nc_row_fails(good_pack: Path, tmp_path: Path) -> None:
         (lambda o: o[1]["provenance"].pop("model"), "missing 'model'"),
         (lambda o: o[2].update(line_id=o[1]["line_id"]), 'line_id "00069377:0001:000" again'),
         (lambda o: o[0].update(schema_version=2), "$.schema_version: must be 1, got 2"),
+        (lambda o: o[1].update(line_id="00069377:1:0"), "is not a line id"),
+        (lambda o: o[1].update(page_id="00069377:0002"), "not the page and work of"),
         (lambda o: o.pop(0), "the first line must be the header"),
         (lambda o: o.append(o[0]), "a second header"),
     ],
@@ -201,9 +203,11 @@ def test_judgment_packs_are_checked_too(tmp_path: Path) -> None:
     objs[1].pop("winning_text")  # a converged row without its winner
     objs[4]["winning_text"] = "x"  # a both_rejected row with one
     objs[2]["method"] = "majority"
+    objs[3]["line_id"] = "nowhere"  # the import splits it into page and line
     report = C.check_judgment_pack(_write(tmp_path / "bad.jsonl", objs))
     assert not report.ok
     text = "\n".join(report.errors)
     assert "a converged row needs winning_text" in text
     assert "a both_rejected row names a winner (winning_text)" in text
     assert '$.method: must be "crowd_ab_v1"' in text
+    assert '"nowhere" is not a line id' in text
