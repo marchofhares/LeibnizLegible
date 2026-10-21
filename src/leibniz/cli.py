@@ -18,6 +18,7 @@ from leibniz.harvest.cli import app as harvest_app
 from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
 from leibniz.legal_cli import app as legal_app
+from leibniz.pack.cli import app as pack_app
 from leibniz.pipeline.cli import app as pipeline_app
 from leibniz.release.cli import app as release_app
 from leibniz.search.cli import app as index_app
@@ -41,6 +42,7 @@ app.add_typer(pipeline_app, name="pipeline")
 app.add_typer(index_app, name="index")
 app.add_typer(release_app, name="release")
 app.add_typer(legal_app, name="legal")
+app.add_typer(pack_app, name="pack")
 app.command(name="serve")(serve_command)
 
 _console = Console()
