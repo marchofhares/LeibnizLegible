@@ -3,11 +3,57 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-21 (**W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-21 (**L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-21: L1 — the licence registry, built in a cloud session on the
+branch it was given, `claude/relaxed-dijkstra-uus9rz`; the pull request the
+operator's; nothing deployed.** `src/leibniz/legal.py` carries, beside the
+§70 volume registry, one entry per third-party artifact (31): name, source,
+version, the licence as obtained with its date, the licence as currently
+published where it changed with the date seen, the bucket consequence
+(SPECS §7.3), what this project built from it, and for the edition's
+channels the D3 deposit their lines go to; and the table of this project's
+own outputs (9) with the licence each carries and why. The public records
+were re-read on 2026-10-21: the PHILIUMM HTR and segmentation models read
+**CC BY-NC 4.0 on Zenodo since 2026-10-15** (obtained under CC BY 4.0 on
+2026-07-29), the PHILIUMM dataset CC BY 4.0 unchanged, the Bern TrOCR
+models MIT, the two fgho models still without a licence, the Dresden 1673
+record CC BY 4.0 in its field (the package's README CC BY-NC-SA 4.0: the
+conflict stands) with two sibling Dresden records (the 1673 TEI, the 1665
+diary; CC BY 4.0, not used), HME-Leibniz CC BY-NC 4.0, Gallicorpora+'s
+record CC BY 4.0. The decisions recorded (Task 0, verbatim in the L1
+entry): PHILIUMM's models CC BY-NC 4.0 from 15 October, their dataset CC
+BY 4.0, their code's licence asked; the owner's scheme — code Apache-2.0,
+the transcriptions and the open ground truth CC BY 4.0, the NC-derived
+ground truth a second deposit under CC BY-NC 4.0, models fine-tuned from
+PHILIUMM's checkpoint CC BY-NC 4.0, K3's candidates without NC input CC BY
+4.0; the Potsdam head's statement of 12 October (Series IV, V and VIII
+under CC BY-NC 4.0; the Arbeitskatalog CC BY 4.0; the Göttingen series
+asked). **The ground truth now exports as two deposits by channel**:
+`leibniz-gt` (CC BY 4.0: `channel ia` and rows without a channel) and
+`leibniz-gt-nc` (CC BY-NC 4.0: the Potsdam Reihe IV PDFs and the GWLB
+repository's PDFs; a joined channel counts as the more restricted one; the
+letter pool in neither); each card has a Licence section quoting the
+registry and counting its lines by channel. About (EN, DE) gains Ground
+truth, Models and Letters under Licensing, and its Transcriptions paragraph,
+`llms.txt`, the attribution line of the API and the manifests say the
+transcriptions are machine output of a model obtained under CC BY 4.0;
+`leibniz legal licences | outputs | volumes` print the tables. SPECS §2 (D3
+two deposits, D4 CC BY-NC 4.0) and §7 (the dated amendment) say the same;
+`reports/release-checklist.md` §6 is the lawyer-memo list (irrevocability
+for copies already obtained, model output under a weights licence,
+ShareAlike, NC terms on a PDF and §70-free text — if not, the NC deposit
+opens up —, the Potsdam lines, §71, GPL/AGPL tools beside Apache-2.0 code).
+Tests 859 → 880, ruff clean. **Not done here:** staging (the hand-over under
+Next); the GitHub-hosted licences the prompt asked to read (dfine_kraken)
+and the Nantes code's address, which this session could not reach (its
+GitHub access is scoped to this repository: an operator line under Next);
+the recorded-not-decided question of an NC channel now (Next). The L1 entry
+in the Phase log has the detail.
 
 **2026-10-21: W6 — two reader's items from the Leibniz-Edition (13 October),
 built in a cloud session on the fixture store; the branch
@@ -782,6 +828,196 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### L1 — licence registry (2026-10-21) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ⏳ the operator's pull request and staging look
+
+- **Setting and pre-flight (Task 0).** A cloud session on the branch it was
+  given, `claude/relaxed-dijkstra-uus9rz`, from main at `aafcb05` (#49, W6
+  merged); `git status --porcelain` clean; `git merge origin/main` already up
+  to date. The session was handed the older preamble (8 and 14 October, the
+  one naming `claude/dazzling-hopper-uxji2x` as the plan's one branch); the
+  preamble of 19 October in `PROMPTS.md` says that branch is merged (#45) and
+  closed and that a cloud session works on the branch it was given, and the
+  repo wins (Divergences). No store: the fixture store of `tests/conftest.py`;
+  `.venv-cloud` made with `uv sync --extra web --extra gt --extra release`
+  (Python 3.13.16). Baseline on a clean worktree of main: `ruff check` clean,
+  `ruff format --check` 231 files already formatted, **859 passed, 1 skipped**
+  (`test_align_letterpool_eval` needs numpy). The operator's answers to Task
+  0 came with the prompt as the note of 21 October; a cloud session does not
+  wait (the preamble's item 6). Recorded verbatim, roles for names:
+  - *(1) PHILIUMM's decision.* "The operator asked on 13 October: 'Can I
+    confirm from our call and my previous email that you do want a CC BY NC
+    for your current and future models, but as for data/code/transcriptions I
+    produce, the more permissive (CC BY, Apache-2.0) terms are acceptable?'
+    The project lead answered on 15 October: 'I confirm that this is what we
+    intend to do in terms of CC BY.' The HTR engineer wrote the same day: 'I
+    updated the license for the models only to "Creative Commons Attribution
+    Non Commercial 4.0 International" (CC BY-NC 4.0).' So: their models CC
+    BY-NC 4.0 from 15 October; their dataset unchanged, CC BY 4.0; their
+    GitLab code's licence not stated, asked on 13 October; this project's
+    outputs may stay CC BY and Apache-2.0 with their agreement."
+  - *(2) The owner's scheme, as on the plan page.* "Code Apache-2.0; the
+    transcriptions (the site, dataset D2, the IIIF annotations) and the open
+    ground truth CC BY 4.0; the NC-derived ground truth a second deposit under
+    CC BY-NC 4.0; a model fine-tuned from PHILIUMM's checkpoint (v2, and K3's
+    kraken candidate) CC BY-NC 4.0. New since the prompt was written: K3
+    (running now) also trains a TrOCR candidate from the Bern model (MIT) on
+    K2's lines, which are open-bucket edition text, and may train one from
+    kraken's PP-OCRv6 model (Apache-2.0); neither has an NC input, and the
+    owner chooses CC BY 4.0 for those two if released. The GWLB letter pool
+    (CC BY-NC 4.0) is used for evaluation only (K2b) and taints no model."
+  - *(3)* "The apparatus-reinsertion script has not been received; its
+    licence is unknown; the ask stands."
+  - *(4) The Potsdam head's statement of 12 October, verbatim with roles:*
+    "you are free to use them [the electronic texts of the edition, the PDFs
+    of the volumes] under the CC BY-NC 4.0 licence (in particular, the 'NC'
+    restriction is part of the agreement between De Gruyter and the BBAW).
+    However, I can only speak for Series IV, V, and VIII, for which the
+    [BBAW] is responsible. The licensing policy for the Series for which the
+    Akademie der Wissenschaften zu Göttingen is responsible may be different"
+    (Series I, III and VII: the research director in Hanover; II and VI: in
+    Münster; the operator is writing to both). "Regarding the Arbeitskatalog
+    you can use the data under the CC BY 4.0 licence."
+  - *(5) Registry entries added by K1, K2b and K2 since the prompt:* the GWLB
+    letter pool (CC BY-NC 4.0, version 1 of each year 1708–1716, evaluation
+    only; `reports/kurrent/letterpool-sources.json`); the Bern TrOCR model
+    dh-unibe/trocr-kurrent-XVI-XVII (MIT); the two fgho Hanse models (no
+    licence stated, evaluated only); kraken's PP-OCRv6 (Apache-2.0, a K3
+    candidate base).
+  - *(6)* "Nothing merges or deploys here. If About or llms.txt change, print
+    the staging line and the checks for the operator, as W6 did."
+- **What the public records say (2026-10-21, 13:36 UTC; seventeen polite
+  GETs of the Zenodo and Hugging Face APIs with the project's User-Agent, one
+  per 1.5 s; nothing on GitHub, which this session may not read outside this
+  repository).** Zenodo 21457538 (the HTR model): `cc-by-nc-4.0`, the record
+  updated 2026-10-15T07:46Z, files unchanged (`FoNDUE-GD_v2_ft_Leibniz.safetensors`
+  and its configs); 21537859 (the segmentation model): `cc-by-nc-4.0`,
+  updated 2026-10-15T07:47Z; 21622297 (the dataset's Zenodo twin, published
+  2026-07-27): `cc-by-4.0`, updated 2026-09-10; the Hub dataset
+  `DenisaBumba/htr_leibniz_dataset_v1`: `cc-by-4.0`, revision `b53f531c`
+  (the one P1 read); 14399779 (FoNDUE-GD v2): `cc-by-4.0`; 13788177
+  (McCATMuS): `cc-by-4.0`; 15303243 (Dresden 1673, Mscr.Dresd.K.117):
+  `cc-by-4.0` in the field — the package's README applies CC BY-NC-SA 4.0,
+  the conflict stands — and its related identifiers name two sibling sets,
+  15295553 (the TEI of the 1673 diary, `cc-by-4.0`) and 14356190 (the 1665
+  diary, Mscr.Dresd.K.80, `cc-by-4.0`): the prompt's "three Dresden sets";
+  18804566 (HME-Leibniz): `cc-by-nc-4.0`; 7410360 (Gallicorpora+): the
+  record says `cc-by-4.0` (the prompt had the repository as CC0-1.0, which
+  stays unread here); `dh-unibe/trocr-kurrent-XVI-XVII` and
+  `dh-unibe/trocr-kurrent`: `mit`; `fgho/trocr-hanseXVII-kurrent` and
+  `fgho/trocr-hanseXVI-kurrent`: no licence in the card or the tags.
+- **The registry (Task 1; `src/leibniz/legal.py`, 31 entries, 9 outputs;
+  +13 tests in `tests/test_legal_licences.py`).** `Artifact(key, name, kind,
+  source, version, obtained: Terms, current: Terms | None, bucket, built,
+  notes, channel, deposit, used, asked)`; `Terms(licence, seen, where,
+  since)`. The entries: the PHILIUMM HTR model, segmentation model, dataset
+  and alignment code (the script not received), FoNDUE-GD, McCATMuS, the two
+  dh-unibe models, the two fgho models, PP-OCRv6, the three Dresden sets,
+  Bullinger, the letter pool, the GWLB images, the Arbeitskatalog (CC BY 4.0
+  in writing 2026-10-12), Bodemann via correspSearch, Kalliope (no licence
+  stated; not used), the edition's channels — `ia` (public-domain scans,
+  deposit open), `gwlb` (CC BY-NC 4.0 as published; the Göttingen series
+  asked; deposit nc), `potsdam` (no terms on 2026-09-11; the NC notice seen
+  2026-10-10; CC BY-NC 4.0 in writing 2026-10-12; deposit nc), `muenster`
+  (written permission; not fetched), the Reihe VIII TEI (CC BY-NC 4.0 in
+  writing for Series VIII; not used) — HME-Leibniz, and the tools run
+  beside the repository: Gallicorpora+, YALTAi (GPL-3.0, archived 2026-04),
+  dfine_kraken (its licence to be read: an operator line under Next),
+  ultralytics YOLO (AGPL-3.0), the Nantes HMER code (no LICENSE file; its
+  address is not in the repo). The channel entries carry the C2c re-mint's
+  lines by channel from Key numbers (ia 213,520 · gwlb 52,057 · potsdam
+  50,220; K2's 50,720 reader rows are not counted by channel in any
+  committed report). `OUTPUTS`: code Apache-2.0; inventory CC0 1.0 with the
+  records CC BY 4.0; the transcriptions CC BY 4.0 ("machine output of a model
+  obtained under CC BY 4.0 …"); `gt-open` CC BY 4.0; `gt-nc` CC BY-NC 4.0;
+  `model-v2` (v2 and K3's kraken candidate) CC BY-NC 4.0; `model-k3-trocr`
+  and `model-k3-ppocr` CC BY 4.0 if released; the reports CC BY 4.0.
+  `deposit_for(channels, bucket)`: a channel the registry does not release
+  (the letter pool, Münster) or does not know → no deposit; one NC channel
+  among several → nc; otherwise open for the open bucket; a row with no
+  channel recorded goes by its bucket (the factory's legal gate), an
+  nc-bucket row without a channel is not released.
+  `pairs.channels_from_source` reads `channel ia`, `channel ia+gwlb` from the
+  factory's source string. `leibniz legal licences` (table; `--full`,
+  `--format tsv|json`, `--key`), `legal outputs`, `legal volumes --today`
+  (`src/leibniz/legal_cli.py`). Tests: every entry has a licence string and a
+  date no later than the registry's; the relicensing is a dated change; the
+  nc rule of `align/pairs.py` agrees (its buckets are the registry's open
+  and nc, the factory's default open bucket is what the registry says for
+  every §70-free channel, the letter pool is nc and released in neither
+  deposit, every channel `volumes_sources` can write is known); the deposit
+  rule on ten source strings; the CLI; the checklist and SPECS carry what
+  the registry says.
+- **The surfaces (Task 2).** *SPECS:* §2 D3 "CC BY 4.0 (open deposit); the
+  NC-derived subset released separately under CC BY-NC 4.0 as
+  `leibniz-gt-nc`", D4 "CC BY-NC 4.0 for a model fine-tuned from the PHILIUMM
+  checkpoint; CC BY 4.0 for a candidate with no NC input"; §7.2 names the
+  registry, §7.3 the separate deposit, §7.5 the memo list's home; the
+  amendment paragraph of 2026-10-21 after §7.7 records (a) PHILIUMM's
+  decision, (b) the owner's scheme, (c) the edition's channels, (d) D3 as
+  two deposits, (e) the NC-channel question recorded, not decided. *The
+  exports* (`release/export.py`): `DATASETS` = inventory, transcriptions,
+  gt, gt-nc; `iter_gt` / `iter_gt_nc` select by `gt_deposit(source,
+  bucket)`; `gt_deposit_census` counts every `gt_lines` row by deposit and
+  channel label; the fixture store's two rows (no channel) stay in the open
+  deposit. *The cards* (`release/cards.py`): every licence line from
+  `legal.OUTPUTS` (`CARD_META[..]["output"]`), a "## Licence" section with
+  the registry's reason and, for the two ground-truth cards, "Channels in
+  this deposit … lines: `ia` n · …", "Left to the other deposit … released
+  in neither … of … rows"; the NC card's attribution names the
+  Leibniz-Edition Potsdam (CC BY-NC 4.0 as stated in writing on 2026-10-12)
+  and the GWLB Leibniz-Archiv; the citation line carries the bare licence.
+  *The attribution line* (`web/attribution.py`, on `/api/works/{id}`,
+  `/api/pages/{id}`, the manifests and the cards): "… obtained under CC BY
+  4.0; published by its makers under CC BY-NC 4.0 since 2026-10-15 …
+  CC BY 4.0." — the dates from the registry. *About* (`i18n.js`, EN and DE;
+  `views/about.js`): the Transcriptions paragraph now opens "Leibniz Legible,
+  CC BY 4.0. Machine output of a model obtained under CC BY 4.0: the PHILIUMM
+  HTR model (doi:10.5281/zenodo.21457538), which its makers have published
+  under CC BY-NC 4.0 since 15 October 2026, agreeing that these
+  transcriptions stay CC BY 4.0."; new blocks **Ground truth** (two deposits
+  by channel; the open one CC BY 4.0 on §70-free reading text from
+  public-domain scans and line images under the Public Domain Mark; the
+  second CC BY-NC 4.0 from the Potsdam Reihe IV files, released in writing on
+  12 October 2026, and the GWLB repository's PDFs; each card says which
+  channels it holds; the site shows the machine transcription only),
+  **Models** (the PHILIUMM model obtained under CC BY 4.0, CC BY-NC 4.0
+  since 15 October 2026; a model fine-tuned from it CC BY-NC 4.0; one
+  without NC input, from the Bern model (MIT) on open edition text, CC BY
+  4.0; fixed at release from the registry) and **Letters** (Bodemann via
+  correspSearch, CC BY 4.0), between Transcriptions and Code. *`llms.txt`*:
+  the same three lines under Licences and the registry's command. *The
+  README's* licensing summary follows. *The checklist*
+  (`reports/release-checklist.md`): the four exports and their checks (the
+  deposits disjoint and adding up), the NC deposit's Zenodo record and Hub
+  licence, the model's licence per the registry, and **§6, the lawyer-memo
+  list**: SPECS §7.5's five, then irrevocability for copies already
+  obtained, model output under a weights licence, ShareAlike (Bullinger,
+  from K1; the Dresden text), NC terms on a PDF and §70-free text (if not,
+  the NC deposit opens up), redistribution of lines derived from the Potsdam
+  PDFs, §71, GPL/AGPL tools beside an Apache-2.0 codebase, the Göttingen
+  series, Kalliope. A test ties the About strings in both languages,
+  `llms.txt` and the attribution line to the registry
+  (`tests/test_web_api.py`); the export tests cover the two deposits and the
+  cards' counts.
+- **Verified.** `ruff check` and `ruff format --check` clean; **880 passed,
+  1 skipped** (+13 registry, +2 export, +1 About, +5 the deposit rule's
+  parameters). `node --check` on `i18n.js` and `about.js`. Nothing was run
+  against a browser (the About blocks are strings in the tables the W6
+  session's browser checks exercised; the staging look is the operator's).
+- **Not done here.** The store was not opened (none in the cloud); staging
+  is the operator's (Next); GitHub-hosted licences were not read (dfine_kraken;
+  the Gallicorpora+ and YALTAi repositories; the Nantes code), since this
+  session's GitHub access is scoped to this repository: entries say so, and
+  the operator's line is under Next; the Göttingen series' answers and the
+  apparatus script are open asks, dated in the registry.
+- **Noticed.** `htr/artifacts.py` and `htr/kurrent.py` still carry
+  `LICENSE = "CC BY 4.0"` for the PHILIUMM model: that is the licence as
+  obtained, which the registry records as such; the report they render
+  (`reports/philiumm-repro.md`, B1) is a dated record and was not rewritten.
+  `reports/kurrent/bootstrap-candidates.md`'s licences table says CC BY 4.0
+  for `philiumm` as of 2026-10-09, which was true then. The W5 prompt is
+  still missing from `PROMPTS.md` (W6's housekeeping note).
 
 ### W6 — two reader's items from the Leibniz-Edition (2026-10-21) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and staging look
 
@@ -3606,7 +3842,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **866** (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **880** (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
 | **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
 | **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
@@ -3667,12 +3903,32 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 Per-set crosswalk coverage (sample): Handschriften 401/756 (53.0%) ·
 Briefwechsel 545/1,059 (51.5%) · Marginalien 146/396 (36.9%).
 
-Legal registry (A0, unchanged): 42 entries; 32 free today.
+Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
+(L1, 2026-10-21): 31 third-party artifacts, 9 outputs; `leibniz legal licences`.
 
 ---
 
 ## Open questions
 
+29. **Licence asks open after L1 (2026-10-21).** The registry
+    (`src/leibniz/legal.py`, `leibniz legal licences`) records them with
+    dates; none is this project's to decide. (a) The Göttingen series: the
+    licensing of Reihe I, III, VII (Hanover) and II, VI (Münster) may differ
+    from Potsdam's; the GWLB repository's Reihe I PDFs stay CC BY-NC 4.0 as
+    published and their lines in the NC deposit until an answer comes (the
+    operator's letters, October 2026). (b) PHILIUMM's GitLab code states no
+    licence (asked 2026-10-13); the apparatus-reinsertion script has not been
+    received. (c) `mittagessen/dfine_kraken`'s licence file is unread (the
+    cloud session's GitHub access is scoped to this repository); the Nantes
+    HMER code's address is not in the repo; both are tools run beside the
+    repository, nothing imported. (d) The Kurrent Trace package's licence
+    conflict (Zenodo field CC BY 4.0, README CC BY-NC-SA 4.0) is the author's
+    to resolve; nc bucket until then. (e) The lawyer-memo questions in
+    `reports/release-checklist.md` §6, first among them whether NC terms on
+    a PDF reach reading text free of §70 — if not, the NC deposit opens up.
+    (f) At every release, re-read the records (`leibniz legal licences`
+    lists the sources) and move the "seen" dates; the registry's compile
+    date is `legal.REGISTRY_DATE`.
 28. **Leibniz holdings outside the GWLB (2026-10-14, after a reader's
     request).** The site covers the GWLB's digitised Nachlass (the
     library's three Leibniz collections, as the census found them); an
@@ -3772,7 +4028,9 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
     von …"). Its site states no licence; its participation contract grants
     publication of the metadata under CC BY-SA, and the GWLB's digitisation
     policy puts its own metadata under CC0. Ask before harvesting; the
-    letters come from correspSearch (CC BY 4.0) meanwhile.
+    letters come from correspSearch (CC BY 4.0) meanwhile. **2026-10-21
+    (L1):** the licence registry carries the entry (`kalliope`: no licence
+    stated, seen 2026-10-10, not used).
 24. **The PHILIUMM model does not read Kurrent as noise (2026-10-09, K1).**
     The C2 factory minted 40,915 lines on the 2,173 German pieces (10.2 % of
     their 401,394 recognised lines, half the Latin and French rate); 27,643
@@ -3942,6 +4200,60 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 ---
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
+
+- **2026-10-21 — L1, departures from the prompt and from the preamble it
+  came with.** (1) *The branch.* The session was handed the older session
+  preamble (8 and 14 October), which puts all work on
+  `claude/dazzling-hopper-uxji2x`; the preamble of 19 October recorded in
+  `PROMPTS.md` says that branch is merged (#45) and closed and that a cloud
+  session works on the branch it was given at start. The repo wins: the work
+  is on `claude/relaxed-dijkstra-uus9rz`, from main at `aafcb05`, and the
+  staging line names `/opt/leibniz-legible/deploy/staging.sh` (the live
+  checkout carries the kit since W4), not the staging checkout's. (2) *No
+  go waited for*, and Task 0's "ask the operator, and wait" answered by the
+  operator's note of 21 October, recorded verbatim (the preamble's item 6
+  for a cloud session). (3) *The prompt's run rules* (the WSL checkout,
+  `.venv-w3`, the branch `licence-registry`, "wait for merged", the §9
+  deploy and the live check of /about) replaced by the cloud rules: a fresh
+  `.venv-cloud`, the fixture store, the staging line and `curl` checks under
+  Next. (4) *The registry's home.* The registry is in `src/leibniz/legal.py`
+  as the prompt says; the `leibniz legal` commands live in a sibling module,
+  `src/leibniz/legal_cli.py`, so that the registry module (imported by
+  `volumes_sources`, `attribution`, the cards) does not import typer and
+  rich. (5) *Live reads.* The Zenodo and Hugging Face records were re-read
+  (seventeen GETs, one per 1.5 s) so that the "as currently published"
+  column carries today's date and the record's own field rather than
+  hearsay; the prompt's Gallicorpora+ note ("repository CC0-1.0; the licence
+  on the record to be confirmed") is confirmed as CC BY 4.0 on the record,
+  the repository itself unread. GitHub-hosted repositories (dfine_kraken,
+  whose licence the prompt says to read; YALTAi; the Nantes code) were not
+  read, because this session's GitHub access is scoped to this repository;
+  the entries say so and the operator's line is under Next. (6) *The three
+  Dresden sets.* The repo's tooling holds one Dresden set (the Kurrent Trace
+  package, from Zenodo 15303243); that record's related identifiers name two
+  siblings (15295553, 14356190), which were read and entered as not used, so
+  that "the three Dresden sets" are three entries with their field licences.
+  (7) *Rows without a channel.* The prompt's deposit rule is by channel;
+  rows minted before the factory wrote the channel into `source` (none in
+  the master store since C2c; the fixture store's two) have none, and the
+  export puts an open-bucket row without a channel into the open deposit by
+  its bucket, the factory's legal gate, and says how many such rows a
+  deposit holds (`(not recorded)`), rather than dropping them silently.
+  (8) *The letter pool* has a channel key (`letterpool`) and `deposit=None`
+  in the registry so that a row of it can never reach a deposit, although
+  no such row exists: K2b's standing rule ("never in a release") is kept
+  over the amendment's "NC-derived ground truth released as a second
+  deposit", which the entry notes as "training allowed by its licence for
+  an NC model, after K2b's split — recorded, not done". (9) *The README*
+  is amended though the prompt does not name it, because its licensing
+  summary said NC sources are "excluded from public releases", which the
+  second deposit makes false. (10) *The pairs rule.* The prompt's test
+  "the nc rule in align/pairs.py agrees with the registry for the sources
+  it names" names two sources (§70 text, the Transkriptionspool); the test
+  also checks every channel `volumes_sources` can write against the
+  registry, since the channels are what the deposits turn on. (11) *The
+  environment.* `.venv-cloud` resolved to Python 3.13.16; 859 → 880 tests
+  there, the letter-pool evaluation skipped for want of numpy, as before.
 
 - **2026-10-21 — W6, departures from the prompt and from the preamble of
   19 October.** (1) *The LBr spelling.* The prompt's context said the
@@ -4247,6 +4559,46 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   gitignored like the rest of `data/`.
 
 ## Next
+
+**L1 (2026-10-21): built in a cloud session; the branch
+`claude/relaxed-dijkstra-uus9rz` carries it (compare:
+https://github.com/marchofhares/leibnizlegible/compare/main...claude/relaxed-dijkstra-uus9rz?expand=1);
+the operator opens and merges the pull request; nothing deployed.** About
+and `llms.txt` changed, so the staging look before the merge: `ssh <target>
+sudo /opt/leibniz-legible/deploy/staging.sh claude/relaxed-dijkstra-uus9rz`
+(the target and the user name on the plan page; paste the output back), then
+over HTTP, each line asking for the password once, the expected answer after
+the arrow:
+   - `B=$(curl -su USER https://staging.leibnizlegible.com/about | grep -o '/static/m/[0-9a-f]*/' | head -1); curl -su USER "https://staging.leibnizlegible.com${B}i18n.js" | grep -c "'about.license.models.p':"` → `2` (EN and DE); the same file `| grep -c "'about.license.gt.p':"` → `2`, `| grep -c "'about.license.letters.p':"` → `2`, `| grep -c 'CC BY-NC 4.0'` → `6` (three paragraphs in each language);
+   - `curl -su USER https://staging.leibnizlegible.com/llms.txt | grep -c 'CC BY-NC 4.0'` → `3`, and `| grep -c 'obtained under CC BY 4.0'` → `2`;
+   - `curl -su USER https://staging.leibnizlegible.com/api/works/00068642 | grep -c 'obtained under CC BY 4.0; published by its makers under CC BY-NC 4.0 since 2026-10-15'` → `1` (the attribution line the API and the manifests carry);
+   - `curl -su USER https://staging.leibnizlegible.com/robots.txt | grep -c '^Allow\|^Disallow'` → `10`, and `diff <(curl -su USER https://staging.leibnizlegible.com/robots.txt) <(curl -s https://leibnizlegible.com/robots.txt)` → nothing, or the `Sitemap:` line alone (L1 touches no robots rule).
+   In the browser, with the password: `/about`, EN and DE, under "Licensing
+   and attribution" seven blocks in this order — Page images, Catalogue data,
+   Transcriptions (opening "Machine output of a model obtained under CC BY
+   4.0"), Ground truth, Models, Letters, Code. Then merge and the §9 update;
+   no index rebuild is needed (nothing in the index changed). **Operator
+   lines after the merge, none urgent:** (a) read the licence file of
+   `mittagessen/dfine_kraken` and the Nantes HMER repository's address and
+   licence, and write them into the two entries (`dfine-kraken`,
+   `nantes-hmer` in `src/leibniz/legal.py`); (b) when the research directors
+   in Hanover and Münster answer, write their terms into `edition-gwlb` and
+   `edition-muenster` (and the D3 deposit of the `gwlb` channel, if it
+   changes); (c) PHILIUMM's code licence and the apparatus script, when they
+   come (`philiumm-code`); (d) at every release, `leibniz legal licences
+   --format tsv` is the list of records to re-read, and the cards and About
+   follow the registry. **The owner's open decision, recorded in L1, not
+   acted on:** the later Reihe IV volumes (IV,4 onwards, inside their
+   25-year term) and Reihe VIII could feed the factory as an NC channel now
+   instead of on §70 expiry, under the Potsdam statement of 12 October
+   (Series IV, V and VIII under CC BY-NC 4.0); Reihe IV is the German series,
+   so this is Kurrent ground truth for K2 and K3, whose models are CC BY-NC
+   4.0 in any case. The costs: those volumes' catalogue records (the
+   Arbeitskatalog export, Open question 27), a SPECS §7 amendment, registry
+   entries (`viii` exists with `deposit="nc"`; a Reihe IV NC channel would be
+   a new key), the edition cache rebuilt from those PDFs, and a bigger
+   re-mint under the K2 factory guard. The L1 note of 2026-10-14 below has
+   the first version.
 
 **W6 (2026-10-21): built in a cloud session on the fixture store; the branch
 `claude/busy-dirac-n30a43` carries it (compare:

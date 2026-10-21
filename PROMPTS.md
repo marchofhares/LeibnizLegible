@@ -2383,3 +2383,293 @@ pieces; push the branch; print:
   sentence, and that the records themselves follow the export. Do not send.
 Do not merge. Do not deploy.
 ~~~~
+
+### Phase L1 — the licence registry (run 2026-10-21)
+
+_Run in a cloud session on the branch it was given
+(`claude/relaxed-dijkstra-uus9rz`). The session was handed the older session
+preamble of 8 and 14 October together with the prompt (both printed below, as
+given); where that preamble differs from the preamble of 19 October recorded
+above under K2b — the one branch, the staging script's path — the repo's
+preamble governed, as the departures in `STATUS.md`, Divergences, record.
+Nothing merged or deployed, the fixture store only, the pre-flight recorded
+and the session proceeding as the preamble's item 6 says for a cloud session;
+Task 0's answers came with the prompt as the operator's note of 21 October
+and are recorded verbatim in the L1 entry of `STATUS.md`._
+
+~~~~text
+Phase L1 — Record the licence state of every third-party artifact, and say on
+every public surface what each output's licence is and why. One local session
+on the operator's desktop (WSL2 Ubuntu); a deploy only if the About page or
+llms.txt change.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md (§7 above all) and STATUS.md. If this prompt conflicts with the repo,
+the repo + STATUS.md win; record the divergence in STATUS.md. Write the "L1 —
+licence registry" entry in STATUS.md at the end.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. Nothing here touches data/; the store is not
+opened. Use `.venv-w3` (export UV_PROJECT_ENVIRONMENT=.venv-w3). The operator
+merges; you push and hand over. The VPS: nothing without the operator's yes
+for the exact §9 command, and only if a public surface changed. You record
+decisions; you do not make them and you do not give legal advice: where a
+question is legal, write it into the lawyer-memo list. Branch:
+`licence-registry`, created from main.
+
+## Task 0 — Pre-flight
+Clean tree on main (the operator's own untracked files aside), `git pull
+--ff-only origin main`, baseline ruff + pytest counts. Then ask the operator,
+and wait: (1) what PHILIUMM decided about their licences on the call of
+2026-10-13 (which artifacts, which licence, from when); (2) what the owner
+chose to honour for this project's v2 model and for any other artifact built
+from theirs; (3) whether the PHILIUMM code the owner may receive (the
+apparatus-reinsertion script) comes with a licence. Record the answers
+verbatim in STATUS.md's entry.
+
+## Context
+On 2026-10-06 PHILIUMM asked whether changing their Hugging Face and Zenodo
+repositories (the HTR model, the segmentation model, the dataset) from CC BY
+4.0 to CC BY-NC would be a problem for this project, their GitLab code to
+follow. The owner answered that the main consequence is for models (a model
+fine-tuned from an NC-licensed model would be NC) while this project's
+transcriptions stay CC BY, and argued for permissive terms with NC on models
+only if anything. The call discussed it; the operator's Task 0 answers say what
+was decided. Facts to record, not to argue: this project obtained its copies
+under CC BY 4.0 (dates, DOIs and file names in reports/philiumm-repro.md and
+src/leibniz/htr/artifacts.py); the CC BY 4.0 text states its grant as
+irrevocable (section 2(a)(1)) and a relicensing applies to copies obtained
+after it; SPECS §7.7 puts the relationship above rights, so what this project
+does is what the owner chose. Both the irrevocability point and the status of
+model output under a weights licence go to the lawyer memo (SPECS §7.5), not
+into prose that asserts them.
+
+## Task 1 — The registry (src/leibniz/legal.py, tested)
+A registry of third-party artifacts beside the §70 volume registry, one entry
+each: name; source (DOI or URL); version or commit; licence as obtained with
+the date; licence as currently published, if changed, with the date seen;
+the bucket consequence for this project (open or nc, per SPECS §7.3); what
+this project built from it; notes. Entries: the PHILIUMM HTR model, the
+PHILIUMM segmentation model, the PHILIUMM dataset, the FoNDUE-GD base model,
+McCATMuS, the two dh-unibe TrOCR models, the two fgho models (no licence
+stated), the three Dresden sets (field CC BY 4.0, 1673 README CC BY-NC-SA 4.0),
+the Kurrent Trace package, the Bullinger dataset (CC BY-SA 4.0), the GWLB
+images (Public Domain Mark 1.0) and the Arbeitskatalog (CC BY 4.0). Tests:
+every entry has a licence string and a date; the nc rule in align/pairs.py
+agrees with the registry for the sources it names; a `leibniz legal licences`
+command prints the table.
+
+## Task 2 — The surfaces
+SPECS.md §7 gets a dated amendment paragraph with the decision as recorded in
+Task 0. The About page's licence section, static/llms.txt and the dataset
+cards (src/leibniz/release/cards.py) state, from the registry: transcriptions
+CC BY 4.0 (machine output of a model obtained under CC BY 4.0); the C2 ground
+truth CC BY 4.0 (edition reading text free of §70, line images Public Domain
+Mark); the v2 model's licence to be fixed at release per the registry and the
+owner's choice (CC BY if trained from the copy obtained under CC BY and the
+owner so chooses; CC BY-NC if the owner honours the change). A test ties the
+cards' licence lines and the About page strings to the registry.
+reports/release-checklist.md's lawyer-memo list gains the two questions
+(irrevocability for copies already obtained; the status of model output under
+a weights licence) and the Bullinger ShareAlike question from K1 if absent.
+
+## Finish and hand-over
+STATUS.md entry with the recorded decisions and what changed on which surface;
+append this prompt to PROMPTS.md under "Follow-up phases (2026-10)"; ruff +
+pytest; `git push -u origin licence-registry`; the compare URL; wait for
+"merged". If About or llms.txt changed, the §9 deploy with the operator's yes
+(the exact command as in W4) and a live check of /about in EN and DE.
+
+## Amendment of 2026-10-10 (after the review and W5; where it differs from the tasks above, it wins)
+Read STATUS.md's W5 entry and Open question 25 first. Add to the registry
+and, where a question is legal, to the lawyer-memo list:
+- The channel per line. W5 records in every minted line's source which copy
+  of the edition its text came from. One registry entry per channel; the GT
+  card counts lines by channel. SPECS §2 already says the ground-truth
+  dataset (D3) leaves the NC-derived subset out; the channel is what makes
+  that possible, so the card and the export say which channels they include.
+- Two channels with non-commercial terms on their files: the Potsdam
+  Arbeitsstelle I's Reihe IV PDFs (its page, seen 2026-10-10: "Alle hier zur
+  Verfügung gestellten Dateien dürfen ausschließlich für nichtkommerzielle
+  Zwecke verwendet werden"; 49,640 open lines from IV,1-3 in the C2 mint) and
+  the GWLB repository's PDFs, CC BY-NC 4.0 (43,660 open lines from I,3, I,14
+  and I,15). The question for the memo: whether those terms reach reading
+  text that is free of §70, or whether these volumes are re-sourced from
+  other scans (IV,1 has one on archive.org).
+- §71 UrhG (the first-publication right, 25 years): whether it reaches the
+  machine text of pieces first published in recent AA volumes.
+- Kalliope (Open question 25): a record per LBr convolute, no licence stated,
+  not used; an entry that says so.
+- The letters: Bodemann's catalogue (1889) from correspSearch (BBAW), CC BY
+  4.0, data from the portal "Der deutsche Brief im 18. Jahrhundert"; W5 shows
+  the attribution on /letters. An entry, and the line on the About page.
+
+## Amendment of 2026-10-13 (after the call; where it differs from the tasks above, it wins)
+Task 0's answers, as the operator recorded them on the day of the call; take
+them from the operator again, verbatim, and record what is in writing apart
+from what was said: (1) PHILIUMM: models CC BY-NC; the dataset and the code
+more permissive; nothing relicensed yet; a written recap requested. (2) The
+owner's scheme: code Apache-2.0; the transcriptions (the site, dataset D2,
+the IIIF annotations) and the open ground truth CC BY 4.0; the NC-derived
+ground truth released as a second deposit under CC BY-NC 4.0 instead of left
+out; the models (v2, K3) CC BY-NC 4.0. Consequences for the tasks above:
+- Task 2: the ground-truth dataset D3 becomes two deposits by channel (open:
+  CC BY 4.0; nc-derived: CC BY-NC 4.0), so SPECS §2's "NC-derived subset
+  excluded" is amended to "released separately under CC BY-NC"; the cards,
+  the dataset selection in release/export.py and the About page say so. The
+  Potsdam channel joins the nc deposit only once its Arbeitsstelle has said
+  yes to redistribution (its notice is not a CC licence and says nothing
+  about derived data; the question goes to the memo list and to the
+  operator's note to Potsdam). The v2 model's licence line on every surface:
+  CC BY-NC 4.0.
+- Task 1, new registry entries, as tools run beside the repository and never
+  imported into it: Gallicorpora+ (kraken print model; repository CC0-1.0;
+  DOI 10.5281/zenodo.7410360, the licence on the record to be confirmed);
+  YALTAi (GPL-3.0, archived 2026-04, its README pointing to dfine_kraken);
+  mittagessen/dfine_kraken (licence to be read); ultralytics YOLO (AGPL-3.0);
+  the Nantes HMER code (public, no LICENSE file) and HME-Leibniz (CC BY-NC
+  4.0). The letter pool's entry says: evaluation now; training allowed by
+  its licence for an NC model, after K2b's split.
+- The memo list gains: whether NC terms on a PDF reach reading text free of
+  §70 (restated: if not, the nc-derived deposit opens); redistribution of
+  lines derived from the Potsdam PDFs; the status of data produced by GPL and
+  AGPL tools run beside an Apache-2.0 codebase.
+
+## Amendment of 2026-10-14 (after the Potsdam Arbeitsstelle's reply of 12 October; where it differs from the tasks above, it wins)
+Task 0 gains a written input, to be recorded with its date and taken from
+the operator: the head of the Leibniz-Edition Potsdam I and II wrote on
+2026-10-12 that the edition's electronic texts of Series IV, V and VIII
+(the PDFs of the volumes) may be used under CC BY-NC 4.0, the NC term being
+part of the BBAW's agreement with De Gruyter; that the Arbeitskatalog data
+may be used under CC BY 4.0; and that the series the Göttingen academy is
+responsible for (I, III, VII; II, VI) may differ and are asked separately.
+- Task 1: the registry entries for the Potsdam Arbeitsstelle's Reihe IV
+  PDFs and for the Reihe VIII texts carry "CC BY-NC 4.0, stated in writing
+  2026-10-12" beside the notice seen on the page; the Arbeitskatalog entry
+  carries CC BY 4.0 the same way; the GWLB repository's PDFs stay as they
+  are; the Göttingen series stay "as obtained" until an answer comes, with
+  a dated "asked" note.
+- Task 2: the NC deposit's card and the About page may say that the
+  Potsdam channel is included under its licence; the Potsdam channel no
+  longer waits for a further yes. The memo question on NC terms reaching
+  §70-free text stays, restated as "if not, the NC deposit opens up".
+- Record, do not decide: the later Reihe IV volumes (IV,4 onwards) and
+  Reihe VIII could feed the factory as an NC channel now instead of on §70
+  expiry (Reihe IV is the German series: Kurrent ground truth for K2 and
+  K3); it needs those volumes' catalogue records (the Arbeitskatalog
+  export, STATUS.md Open question 27), a SPECS §7 amendment, registry
+  entries, the edition cache rebuilt from those PDFs and a bigger re-mint.
+  Write it into STATUS.md "Next" as the owner's open decision with these
+  costs; STATUS.md already carries a first version at the top of Next.
+Names of individuals stay out of STATUS.md and PROMPTS.md: write the role
+and the date.
+
+## Operator's note of 21 October (Task 0's answers, to record verbatim; names of individuals replaced by roles)
+(1) PHILIUMM's decision. The operator asked on 13 October: "Can I confirm
+from our call and my previous email that you do want a CC BY NC for your
+current and future models, but as for data/code/transcriptions I produce,
+the more permissive (CC BY, Apache-2.0) terms are acceptable?" The project
+lead answered on 15 October: "I confirm that this is what we intend to do in
+terms of CC BY." The HTR engineer wrote the same day: "I updated the license
+for the models only to 'Creative Commons Attribution Non Commercial 4.0
+International' (CC BY-NC 4.0)." So: their models CC BY-NC 4.0 from 15
+October; their dataset unchanged, CC BY 4.0; their GitLab code's licence
+not stated, asked on 13 October; this project's outputs may stay CC BY and
+Apache-2.0 with their agreement.
+(2) The owner's scheme, as on the plan page: code Apache-2.0; the
+transcriptions (the site, dataset D2, the IIIF annotations) and the open
+ground truth CC BY 4.0; the NC-derived ground truth a second deposit under
+CC BY-NC 4.0; a model fine-tuned from PHILIUMM's checkpoint (v2, and K3's
+kraken candidate) CC BY-NC 4.0. New since the prompt was written: K3 (running
+now) also trains a TrOCR candidate from the Bern model (MIT) on K2's lines,
+which are open-bucket edition text, and may train one from kraken's PP-OCRv6
+model (Apache-2.0); neither has an NC input, and the owner chooses CC BY 4.0
+for those two if released. The GWLB letter pool (CC BY-NC 4.0) is used for
+evaluation only (K2b) and taints no model.
+(3) The apparatus-reinsertion script has not been received; its licence is
+unknown; the ask stands.
+(4) The Potsdam head's statement of 12 October, verbatim with roles: "you
+are free to use them [the electronic texts of the edition, the PDFs of the
+volumes] under the CC BY-NC 4.0 licence (in particular, the 'NC' restriction
+is part of the agreement between De Gruyter and the BBAW). However, I can only
+speak for Series IV, V, and VIII, for which the [BBAW] is responsible. The
+licensing policy for the Series for which the Akademie der Wissenschaften zu
+Göttingen is responsible may be different" (Series I, III and VII: the
+research director in Hanover; II and VI: in Münster; the operator is writing
+to both). "Regarding the Arbeitskatalog you can use the data under the CC BY
+4.0 licence."
+(5) Registry entries added by K1, K2b and K2 since the prompt: the GWLB letter
+pool (CC BY-NC 4.0, version 1 of each year 1708-1716, evaluation only;
+reports/kurrent/letterpool-sources.json); the Bern TrOCR model
+dh-unibe/trocr-kurrent-XVI-XVII (MIT); the two fgho Hanse models (no licence
+stated, evaluated only); kraken's PP-OCRv6 (Apache-2.0, a K3 candidate base).
+(6) Nothing merges or deploys here. If About or llms.txt change, print the
+staging line and the checks for the operator, as W6 did.
+~~~~
+
+The session preamble as given to this session, before the prompt (the older
+one, of 8 and 14 October; the preamble of 19 October printed above under K2b
+replaces it on the plan page and governed where the two differ):
+
+~~~~text
+SESSION PREAMBLE — read together with the phase prompt that follows; where
+they differ, this preamble wins.
+
+1. One branch. All work in this plan lives on the branch
+   `claude/dazzling-hopper-uxji2x`, with one open pull request against main.
+   Do not create the branch the prompt names. Start with
+   `git fetch origin main claude/dazzling-hopper-uxji2x && git checkout claude/dazzling-hopper-uxji2x && git pull && git merge origin/main`
+   (main moves on with every merged step, W5's pull request #42 among them;
+   a branch behind main misses their fixes), commit there,
+   `git push -u origin claude/dazzling-hopper-uxji2x`. The operator gives you
+   permission to push to that branch. If this is a cloud session with a
+   designated branch of its own, say so once, ask the operator to confirm,
+   then proceed on `claude/dazzling-hopper-uxji2x`.
+
+2. No merge, no production deploy, nothing sent. Replace every "wait for
+   merged", "§9 update", "verify live" and "deploy" step of the prompt with:
+   push the branch; print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible-staging/deploy/staging.sh claude/dazzling-hopper-uxji2x`
+   (the staging site of step S1 exists; until the final merge the script
+   runs from the staging checkout, afterwards from
+   /opt/leibniz-legible/deploy/staging.sh). The operator runs that line and
+   pastes the output. Then the checks against
+   https://staging.leibnizlegible.com: without credentials it answers 401 to
+   everything, which is the one check you can run yourself; the rest you
+   hand the operator as `curl -su USER …` lines to run and paste back. The
+   password never reaches you; the SSH target and the user name are on the
+   operator's plan page, not in the repo, so never write them into STATUS.md
+   or PROMPTS.md. Checks that need no box can run against a local server on
+   a spare port. The live site changes only at the operator's final merge.
+   Emails: you draft, the operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state", the entries "W5",
+   "K1", "W4", "S1", "C2b" and "P1", "Open questions" 18 and "Next". Prepend your phase entry to the
+   Phase log and Current state as the prompt says, and append the prompt to
+   PROMPTS.md under "Follow-up phases (2026-10)". Record in "Divergences"
+   where you departed from the prompt, this preamble included.
+
+4. Where you run. If this checkout has no data/inventory.sqlite (a cloud
+   session), build and test on fixtures and hand every store, GPU and VPS
+   step to the operator as exact commands with the expected output, as the
+   C2b and P1 sessions did; the operator pastes the console back. If it has
+   the store (the WSL desktop), run them yourself under the prompt's rules:
+   the store read-only, a go before long jobs, downloads over a gigabyte and
+   any install. The side environments on the desktop are .venv-w3 (web, gt,
+   release) and .venv-k1 (bench, gt, kurrent: kraken, torch with CUDA,
+   transformers; every GPU step); in the cloud make your own (.venv-cloud,
+   with the web, gt and release extras).
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   (reports/gt-audit.md, reports/gt-audit/reach.md, reports/philiumm/*.md)
+   carry the ones produced so far; until the re-mint, reach.md's hand shares
+   follow the loose rule W5 replaced.
+
+6. A go. Where the prompt says to print a plan and wait for "go", a cloud
+   session that was started with the whole step as its task does not wait
+   (nobody answers mid-task): it records the pre-flight in STATUS.md,
+   proceeds, and notes the departure under Divergences. The operator's yes
+   is still needed for anything on the box or the store, which a cloud
+   session hands over anyway. A desktop session waits as the prompt says.
+~~~~
