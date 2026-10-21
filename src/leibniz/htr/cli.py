@@ -12,6 +12,10 @@ Subcommands:
   ``reports/philiumm-repro.md`` and the STATUS.md gate verdict.
 * ``leibniz bench kurrent-smoke`` — the Kurrent bootstrap readers ranked on the
   Dresden lines of the Kurrent Trace package (K1 Task 3).
+* ``leibniz bench train-set`` — the training set of a fine-tune (K3; C3 reuses
+  it): the minted lines selected, tagged, screened, split into a frozen
+  page-disjoint validation set and training, and cut into Kraken's
+  image + ``.gt.txt`` format (``htr/trainset.py``).
 
 The kraken + torch stack is an optional dependency, imported lazily; ``fetch``,
 ``protocol`` and the metrics/harness all work without it.
@@ -548,6 +552,171 @@ def _record_run(db_path: Path, model_version: str, result: bench.EvalResult) -> 
     )
     db.finish_run(conn, run_id, n_input=result.n_lines, n_ok=result.n_lines, n_failed=0)
     conn.close()
+
+
+# --------------------------------------------------------------------------- #
+# train-set (K3 Task 1; C3 reuses it)
+# --------------------------------------------------------------------------- #
+
+
+@app.command("train-set")
+def train_set(
+    db_path: str = typer.Option(
+        "data/inventory.sqlite", "--db", help="SQLite store (opened read-only)."
+    ),
+    records: Path | None = typer.Option(
+        None,
+        "--records",
+        help="JSONL or CSV naming the records whose rows are taken (``record_id`` per row); "
+        "default: the K1 census's German pieces. ``--all`` takes every open-bucket row.",
+    ),
+    take_all: bool = typer.Option(False, "--all", help="Every open-bucket row (C3)."),
+    name: str = typer.Option("k3", "--name", help="The set's name (reports and the output dir)."),
+    out: Path | None = typer.Option(None, "--out", help="Output root; default data/train/<name>."),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    readings: list[str] = typer.Option(
+        None,
+        "--readings",
+        help="``reader=path`` of a reader's JSONL, for the screen's ratio on its rows "
+        "(repeatable); default: K2's trocr-kurrent-xvi-xvii readings.",
+    ),
+    flags: Path = typer.Option(
+        Path("data/gt/flags.jsonl"), "--flags", help="The reach census's flags (v1 rows)."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="PHILIUMM's held-out pages."
+    ),
+    pool: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--pool", help="The letter pool's set."
+    ),
+    audit: list[Path] = typer.Option(
+        None,
+        "--audit",
+        help="CSV of judged lines (a ``ref`` column) kept out of training (repeatable); "
+        "default: K2's audit sheet and the PHILIUMM verdicts.",
+    ),
+    val_pieces: Path | None = typer.Option(
+        None,
+        "--val-pieces",
+        help="The frozen validation pieces (reused when present); default "
+        "reports/kurrent/<name>-val-pieces.csv.",
+    ),
+    redraw: bool = typer.Option(False, "--redraw", help="Ignore a frozen validation file."),
+    val_share: float = typer.Option(0.05, "--val-share", help="Validation share of the lines."),
+    seed: int = typer.Option(20261021, "--seed", help="The draw's seed."),
+    sample: int | None = typer.Option(
+        None,
+        "--sample",
+        help="Cut only a seeded sample of N lines into <out>/sample/ and project the disk; "
+        "the validation pieces are drawn and frozen, no manifest is written.",
+    ),
+    no_crops: bool = typer.Option(False, "--no-crops", help="Manifest and report only."),
+    workers: int = typer.Option(0, "--workers", help="Process workers for the crops (0: inline)."),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="Where the report and the JSON go."
+    ),
+) -> None:
+    """Build the training set of a fine-tune from the minted lines (K3 Task 1)."""
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import trainset as T
+
+    out_root = out or Path("data/train") / name
+    rec_ids = None if take_all else T.read_record_ids(records or T.DEFAULT_RECORDS)
+    specs = readings or [f"trocr-kurrent-xvi-xvii={T.DEFAULT_READINGS}"]
+    reader_texts: dict[str, dict[str, str]] = {}
+    for spec in specs:
+        key, _, path = spec.partition("=")
+        if not path:
+            raise typer.BadParameter(f"--readings wants reader=path, got {spec!r}")
+        reader_texts[key.strip()] = T.load_readings_text(path.strip())
+    vp = val_pieces or reports_dir / f"{name}-val-pieces.csv"
+    conn = open_readonly(db_path)
+    try:
+        ts = T.build(
+            conn,
+            record_ids=rec_ids,
+            readings=reader_texts,
+            flags=T.load_flags(flags),
+            heldout=T.pages_from_csv(heldout),
+            pool=T.pages_from_csv(pool),
+            audit=T.refs_from_csvs(audit or T.DEFAULT_AUDITS),
+            val_pieces=None if redraw else vp,
+            share=val_share,
+            seed=seed,
+            name=name,
+            log=lambda m: console.print(f"  {m}"),
+        )
+        s = T.summarize(ts)
+        console.print(
+            f"[bold]train-set[/bold] {s['selection']['rows']:,} rows on "
+            f"{s['selection']['records']:,} records; excluded {s['exclusions']['total']:,} "
+            f"({', '.join(f'{k} {v:,}' for k, v in s['exclusions']['by_reason'].items())}); "
+            f"kept {s['kept']['lines']:,} — train {s['splits']['train']['lines']:,}, "
+            f"val {s['splits']['val']['lines']:,} "
+            f"({'frozen' if ts.val_frozen else f'drawn, seed {seed}'}); pages on both sides "
+            f"{s['pages_shared_between_splits']}"
+        )
+        b = ts.band
+        console.print(
+            f"  screen: band ratio {b.ratio_lo:.2f}–{b.ratio_hi:.2f} "
+            f"(median {b.ratio_median:.2f}), conf ≥ {b.conf_lo:.3f}, "
+            f"from {b.n:,} Latin and French v1 rows"
+        )
+        for g, v in ts.screen["by_group"].items():
+            share = v["outside_share"]
+            console.print(
+                f"    {g}: {v['n']:,} lines, {v['outside']:,} outside "
+                f"({'—' if share is None else f'{100 * share:.1f} %'}): "
+                + ", ".join(f"{k} {n:,}" for k, n in v["outside_by"].items())
+            )
+        if ts.screen["stop"]:
+            console.print(
+                "  [red]STOP:[/red] more than one Leibniz-hand line in ten falls outside the band"
+            )
+        if sample:
+            ts.estimate = T.estimate_disk(
+                conn,
+                ts.lines,
+                n=sample,
+                images_root=images,
+                out_root=out_root / "sample",
+                seed=seed,
+                workers=workers,
+            )
+            e = ts.estimate
+            per = e["bytes_per_line"]
+            proj = e["projected_bytes"]
+            kb = "—" if per is None else f"{per / 1024:.1f} KB"
+            gb = "—" if proj is None else f"{proj / 1e9:.2f} GB"
+            console.print(
+                f"  sample: {e['cut']:,} of {e['sampled']:,} cut, {kb} a line; projected {gb} "
+                f"for {e['kept_lines']:,} lines"
+            )
+        elif not no_crops:
+            jobs = T.crop_jobs(conn, ts.lines, images, out_root)
+            console.print(f"  cutting {len(jobs):,} pages into {out_root} ({workers} workers)")
+            ts.crops = T.cut_crops(jobs, ts.lines, workers=workers, log=lambda m: console.print(m))
+            console.print(f"  crops: {ts.crops['by_status']} · {ts.crops['bytes'] / 1e9:.2f} GB")
+    finally:
+        conn.close()
+    if sample:
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        s = T.summarize(ts)
+        (reports_dir / f"{name}-trainset.md").write_text(T.render_report(s), encoding="utf-8")
+        (reports_dir / f"{name}-trainset.json").write_text(
+            json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8"
+        )
+        if not ts.val_frozen:
+            T.write_val_pieces(vp, ts.lines)
+        console.print(
+            f"  wrote {reports_dir / f'{name}-trainset.md'} and the validation pieces {vp}"
+        )
+        return
+    paths = T.write_outputs(ts, out_root=out_root, reports_dir=reports_dir, val_pieces=vp)
+    for k, p in paths.items():
+        console.print(f"  wrote {k}: {p}")
 
 
 __all__ = ["app"]

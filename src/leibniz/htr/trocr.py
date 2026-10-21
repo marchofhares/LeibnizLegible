@@ -57,7 +57,11 @@ Decoder = Callable[[bytes], object]
 
 
 def snapshot(model_id: str, cache_dir: Path | str = HF_CACHE_DIR) -> Path:
-    """Fetch a checkpoint's inference files into ``cache_dir`` (cache-first)."""
+    """Fetch a checkpoint's inference files into ``cache_dir`` (cache-first); a local
+    directory (a K3 fine-tune under ``data/models/k3/``) is returned as it is."""
+    local_dir = Path(model_id)
+    if local_dir.is_dir() and (local_dir / "config.json").exists():
+        return local_dir
     from huggingface_hub import snapshot_download
 
     return Path(

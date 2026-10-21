@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 
@@ -205,3 +206,12 @@ def test_half_precision_and_kv_cache_reach_the_model() -> None:
     assert "use_cache" not in seen2
     with pytest.raises(ValueError):
         TrOCREngine("x", dtype="bfloat16")
+
+
+def test_snapshot_returns_a_local_checkpoint_directory(tmp_path: Path) -> None:
+    from leibniz.htr.trocr import snapshot
+
+    local = tmp_path / "best"
+    local.mkdir()
+    (local / "config.json").write_text("{}", encoding="utf-8")
+    assert snapshot(str(local), cache_dir=tmp_path / "cache") == local
