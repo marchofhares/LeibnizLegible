@@ -226,6 +226,33 @@ def _gpu_reset_peak() -> None:
         pass
 
 
+def memory_fraction(limit_mib: int | None, total_mib: int | None) -> float | None:
+    """The share of the card a process may reserve for ``limit_mib`` of ``total_mib``."""
+    if not limit_mib or not total_mib or total_mib <= 0:
+        return None
+    return min(1.0, limit_mib / total_mib)
+
+
+def cap_memory(limit_mib: int | None, device: str) -> float | None:
+    """Make the caching allocator refuse allocations past ``limit_mib`` on the device,
+    so a run that would spill into host memory under WSL2 raises
+    :class:`torch.OutOfMemoryError` in-process instead (the pilot's rows depend on it:
+    the AdamW-on-everything setting of 21 October reached 5.7 GB in one burst before
+    any check could run). Returns the fraction set, or ``None``."""
+    if not limit_mib or not device.startswith("cuda"):
+        return None
+    import torch
+
+    if not torch.cuda.is_available():
+        return None
+    idx = torch.device(device).index or 0
+    total = torch.cuda.get_device_properties(idx).total_memory // (1024 * 1024)
+    frac = memory_fraction(limit_mib, total)
+    if frac is not None:
+        torch.cuda.set_per_process_memory_fraction(frac, idx)
+    return frac
+
+
 def build_optimizer(model, settings: Settings):
     import torch
 
@@ -560,6 +587,7 @@ def pilot_setting(
     import torch
 
     row = PilotRow(settings=settings.as_dict(), status="ok")
+    cap_memory(memory_limit_mib, device)
     processor, model = load_model(base)
     model = prepare_model(model, settings, device)
     try:
@@ -690,6 +718,7 @@ def train(
 
     out_dir = Path(out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    cap_memory(memory_limit_mib, device)
     state_path = out_dir / "state.json"
     state = read_state(state_path)
     resume_from: str | Path = base
@@ -849,6 +878,7 @@ __all__ = [
     "StepLog",
     "TrainState",
     "build_optimizer",
+    "cap_memory",
     "choose_best",
     "encode_batch",
     "epoch_order",
@@ -856,6 +886,7 @@ __all__ = [
     "filter_samples",
     "load_model",
     "lr_at",
+    "memory_fraction",
     "pilot_setting",
     "prepare_model",
     "read_list",

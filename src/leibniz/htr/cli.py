@@ -800,10 +800,11 @@ def train_trocr(
     ),
     log_path: Path | None = typer.Option(None, "--log", help="Append the loop's lines here."),
     max_mib: int | None = typer.Option(
-        4500,
+        4000,
         "--max-mib",
-        help="The loop fails a run whose reserved GPU memory passes this (WSL2 spills past the "
-        "card into host memory instead of failing; 0 disables).",
+        help="The allocator refuses memory past this (an in-process out-of-memory error, so a "
+        "pilot setting fails on its own; WSL2 would spill past the card into host memory "
+        "instead); 0 disables.",
     ),
 ) -> None:
     """Fine-tune a TrOCR checkpoint on the training set (K3 Task 2a pilot / Task 3)."""

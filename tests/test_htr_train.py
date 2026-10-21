@@ -43,6 +43,13 @@ def test_extrapolate_and_schedule() -> None:
     assert T.lr_at(5, base=1e-4, warmup=0, total=0) == 1e-4
 
 
+def test_memory_fraction() -> None:
+    assert abs(T.memory_fraction(4000, 6144) - 4000 / 6144) < 1e-12
+    assert T.memory_fraction(8000, 6144) == 1.0
+    assert T.memory_fraction(None, 6144) is None and T.memory_fraction(100, 0) is None
+    assert T.cap_memory(4000, "cpu") is None
+
+
 def test_epoch_order_is_seeded_per_epoch() -> None:
     a = T.epoch_order(10, 0, 1)
     assert a == T.epoch_order(10, 0, 1) and sorted(a) == list(range(10))
@@ -325,7 +332,7 @@ def test_cli_train_trocr_pilot_with_a_stub(tmp_path: Path, monkeypatch) -> None:
     assert res.exit_code == 0, res.output
     assert [c[0] for c in calls] == ["adafactor-b2", "adamw-b2"]
     assert calls[0][1] == 5  # the screened line left out
-    assert calls[0][4] == 4500  # the loop's memory guard, on by default
+    assert calls[0][4] == 4000  # the loop's memory cap, on by default
     data = json.loads((out / "pilot.json").read_text(encoding="utf-8"))
     assert len(data["rows"]) == 2 and data["rows"][0]["val"]["cer"] == 0.25
     res = runner.invoke(
