@@ -1052,6 +1052,9 @@ def train_kraken(
             console.print(f"  scoring {acc.best['weights']} on {len(val):,} lines ({dev})")
             acc.score = K.score_weights(acc.best["weights"], val, device=dev)
             K.install_best(out, out / "best.safetensors")
+            (out / "best-val-hyps.json").write_text(
+                json.dumps(acc.score["hyps"], ensure_ascii=False, indent=0), encoding="utf-8"
+            )
         p = K.write_account(out / "account.json", acc)
         console.print(
             f"  checkpoints {len(acc.checkpoints)}; epoch seconds "
