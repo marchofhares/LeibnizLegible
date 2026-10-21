@@ -1,0 +1,604 @@
+{
+ "name": "k3",
+ "generated": "2026-10-21",
+ "selection": {
+  "rows": 60163,
+  "records": 1447,
+  "pages": 3854,
+  "by_reader": {
+   "trocr-kurrent-xvi-xvii": {
+    "lines": 50720,
+    "chars": 2283061,
+    "records": 1046
+   },
+   "v1": {
+    "lines": 9443,
+    "chars": 392855,
+    "records": 401
+   }
+  },
+  "by_group": {
+   "leibniz": {
+    "lines": 2612,
+    "chars": 99383,
+    "records": 51
+   },
+   "other": {
+    "lines": 57551,
+    "chars": 2576533,
+    "records": 1396
+   }
+  }
+ },
+ "exclusions": {
+  "total": 1434,
+  "by_reason": {
+   "audit": 215,
+   "bracket": 1154,
+   "math": 32,
+   "noise": 33
+  },
+  "by_reason_and_reader": {
+   "audit/trocr-kurrent-xvi-xvii": 205,
+   "audit/v1": 10,
+   "bracket/trocr-kurrent-xvi-xvii": 889,
+   "bracket/v1": 265,
+   "math/trocr-kurrent-xvi-xvii": 4,
+   "math/v1": 28,
+   "noise/trocr-kurrent-xvi-xvii": 26,
+   "noise/v1": 7
+  },
+  "flag_counts": {
+   "audit": 220,
+   "bracket": 1155,
+   "math": 32,
+   "noise": 37
+  }
+ },
+ "kept": {
+  "lines": 58729,
+  "records": 1446,
+  "pages": 3850,
+  "units": 1321,
+  "chars": 2601780
+ },
+ "splits": {
+  "train": {
+   "lines": 55596,
+   "records": 1348,
+   "pages": 3634,
+   "units": 1229,
+   "chars": 2454505,
+   "by_stratum": {
+    "fair_copy": {
+     "lines": 27,
+     "chars": 1454,
+     "records": 2
+    },
+    "heavy_revision": {
+     "lines": 37573,
+     "chars": 1675106,
+     "records": 896
+    },
+    "light_revision": {
+     "lines": 17694,
+     "chars": 765714,
+     "records": 429
+    },
+    "scrap": {
+     "lines": 302,
+     "chars": 12231,
+     "records": 21
+    }
+   },
+   "by_group": {
+    "leibniz": {
+     "lines": 2286,
+     "chars": 84941,
+     "records": 48
+    },
+    "other": {
+     "lines": 53310,
+     "chars": 2369564,
+     "records": 1300
+    }
+   },
+   "by_reader": {
+    "trocr-kurrent-xvi-xvii": {
+     "lines": 46921,
+     "chars": 2100217,
+     "records": 974
+    },
+    "v1": {
+     "lines": 8675,
+     "chars": 354288,
+     "records": 374
+    }
+   },
+   "by_hand": {
+    "other": {
+     "lines": 37282,
+     "chars": 1653117,
+     "records": 857
+    },
+    "own": {
+     "lines": 4162,
+     "chars": 178766,
+     "records": 107
+    },
+    "partial": {
+     "lines": 14152,
+     "chars": 622622,
+     "records": 384
+    }
+   },
+   "by_cell": {
+    "fair_copy/other": {
+     "lines": 27,
+     "chars": 1454,
+     "records": 2
+    },
+    "heavy_revision/leibniz": {
+     "lines": 2242,
+     "chars": 84135,
+     "records": 46
+    },
+    "heavy_revision/other": {
+     "lines": 35331,
+     "chars": 1590971,
+     "records": 850
+    },
+    "light_revision/leibniz": {
+     "lines": 44,
+     "chars": 806,
+     "records": 2
+    },
+    "light_revision/other": {
+     "lines": 17650,
+     "chars": 764908,
+     "records": 427
+    },
+    "scrap/other": {
+     "lines": 302,
+     "chars": 12231,
+     "records": 21
+    }
+   }
+  },
+  "val": {
+   "lines": 3133,
+   "records": 98,
+   "pages": 216,
+   "units": 92,
+   "chars": 147275,
+   "by_stratum": {
+    "fair_copy": {
+     "lines": 7,
+     "chars": 321,
+     "records": 2
+    },
+    "heavy_revision": {
+     "lines": 2117,
+     "chars": 104675,
+     "records": 53
+    },
+    "light_revision": {
+     "lines": 949,
+     "chars": 39476,
+     "records": 40
+    },
+    "scrap": {
+     "lines": 60,
+     "chars": 2803,
+     "records": 3
+    }
+   },
+   "by_group": {
+    "leibniz": {
+     "lines": 164,
+     "chars": 7962,
+     "records": 2
+    },
+    "other": {
+     "lines": 2969,
+     "chars": 139313,
+     "records": 96
+    }
+   },
+   "by_reader": {
+    "trocr-kurrent-xvi-xvii": {
+     "lines": 2675,
+     "chars": 125360,
+     "records": 71
+    },
+    "v1": {
+     "lines": 458,
+     "chars": 21915,
+     "records": 27
+    }
+   },
+   "by_hand": {
+    "other": {
+     "lines": 1481,
+     "chars": 66485,
+     "records": 56
+    },
+    "own": {
+     "lines": 236,
+     "chars": 12151,
+     "records": 4
+    },
+    "partial": {
+     "lines": 1416,
+     "chars": 68639,
+     "records": 38
+    }
+   },
+   "by_cell": {
+    "fair_copy/other": {
+     "lines": 7,
+     "chars": 321,
+     "records": 2
+    },
+    "heavy_revision/leibniz": {
+     "lines": 164,
+     "chars": 7962,
+     "records": 2
+    },
+    "heavy_revision/other": {
+     "lines": 1953,
+     "chars": 96713,
+     "records": 51
+    },
+    "light_revision/other": {
+     "lines": 949,
+     "chars": 39476,
+     "records": 40
+    },
+    "scrap/other": {
+     "lines": 60,
+     "chars": 2803,
+     "records": 3
+    }
+   }
+  }
+ },
+ "pages_shared_between_splits": 0,
+ "val_frozen": true,
+ "draw": {
+  "share": 0.05,
+  "seed": 20261021,
+  "cells": {},
+  "frozen_from": "reports/kurrent/k3-val-pieces.csv"
+ },
+ "screen": {
+  "band": {
+   "n": 273517,
+   "ratio_lo": 0.8043478260869565,
+   "ratio_hi": 1.4444444444444444,
+   "ratio_median": 1.0,
+   "conf_lo": 0.7333,
+   "conf_median": 0.95
+  },
+  "reader": "every reader but v1",
+  "by_group": {
+   "leibniz": {
+    "n": 1949,
+    "ratio_p2_5": 0.8271364317841079,
+    "ratio_median": 1.0,
+    "ratio_p97_5": 1.52995951417004,
+    "conf_p2_5": 0.73143,
+    "conf_median": 0.9062,
+    "outside": 145,
+    "outside_share": 0.07439712673165726,
+    "outside_by": {
+     "conf_low": 52,
+     "ratio_high": 66,
+     "ratio_low": 35
+    }
+   },
+   "other": {
+    "n": 47647,
+    "ratio_p2_5": 0.8260869565217391,
+    "ratio_median": 1.0,
+    "ratio_p97_5": 1.411764705882353,
+    "conf_p2_5": 0.7273,
+    "conf_median": 0.9184,
+    "outside": 3306,
+    "outside_share": 0.06938527084601338,
+    "outside_by": {
+     "conf_low": 1556,
+     "ratio_high": 1116,
+     "ratio_low": 988
+    }
+   }
+  },
+  "v1_rows": {
+   "n": 9133,
+   "outside": 1583,
+   "outside_share": 0.1733274937041498
+  },
+  "worst": [
+   {
+    "ref": "DE-611-HS-970451:0002:056",
+    "group": "other",
+    "record_id": "58770",
+    "stratum": "heavy_revision",
+    "ratio": 21.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 21,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-867509:0122:009",
+    "group": "other",
+    "record_id": "44102",
+    "stratum": "heavy_revision",
+    "ratio": 15.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 15,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068422:0004:032",
+    "group": "other",
+    "record_id": "56509",
+    "stratum": "heavy_revision",
+    "ratio": 14.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 14,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068430:0029:036",
+    "group": "other",
+    "record_id": "58297",
+    "stratum": "heavy_revision",
+    "ratio": 14.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 14,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-856291:0012:037",
+    "group": "other",
+    "record_id": "72",
+    "stratum": "heavy_revision",
+    "ratio": 14.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 14,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-960158:0136:031",
+    "group": "other",
+    "record_id": "43717",
+    "stratum": "heavy_revision",
+    "ratio": 13.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 13,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068593:0053:000",
+    "group": "other",
+    "record_id": "58810",
+    "stratum": "light_revision",
+    "ratio": 13.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 13,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-971300:0068:026",
+    "group": "other",
+    "record_id": "17368",
+    "stratum": "heavy_revision",
+    "ratio": 11.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 11,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-974056:0019:013",
+    "group": "other",
+    "record_id": "3779",
+    "stratum": "light_revision",
+    "ratio": 11.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 11,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-959461:0081:045",
+    "group": "other",
+    "record_id": "42703",
+    "stratum": "light_revision",
+    "ratio": 11.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 11,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068541:0005:151",
+    "group": "other",
+    "record_id": "44026",
+    "stratum": "heavy_revision",
+    "ratio": 11.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 11,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-867509:0122:006",
+    "group": "other",
+    "record_id": "44102",
+    "stratum": "heavy_revision",
+    "ratio": 11.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 11,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-959461:0084:027",
+    "group": "other",
+    "record_id": "42703",
+    "stratum": "light_revision",
+    "ratio": 10.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 10,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068782:0137:111",
+    "group": "other",
+    "record_id": "59738",
+    "stratum": "heavy_revision",
+    "ratio": 9.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 9,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-862243:0001:012",
+    "group": "other",
+    "record_id": "9606",
+    "stratum": "light_revision",
+    "ratio": 9.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 9,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-959461:0098:021",
+    "group": "other",
+    "record_id": "27161",
+    "stratum": "light_revision",
+    "ratio": 8.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 8,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-867509:0161:034",
+    "group": "other",
+    "record_id": "28714",
+    "stratum": "heavy_revision",
+    "ratio": 8.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 8,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068823:0107:098",
+    "group": "other",
+    "record_id": "43519",
+    "stratum": "heavy_revision",
+    "ratio": 8.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 8,
+    "machine_chars": 1
+   },
+   {
+    "ref": "DE-611-HS-867509:0120:008",
+    "group": "other",
+    "record_id": "44102",
+    "stratum": "heavy_revision",
+    "ratio": 8.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 8,
+    "machine_chars": 1
+   },
+   {
+    "ref": "00068430:0024:100",
+    "group": "other",
+    "record_id": "57247",
+    "stratum": "heavy_revision",
+    "ratio": 8.0,
+    "conf": 1.0,
+    "why": [
+     "ratio_high"
+    ],
+    "n_chars": 8,
+    "machine_chars": 1
+   }
+  ],
+  "stop_share": 0.1,
+  "stop": false
+ },
+ "crops": {
+  "pages": 3850,
+  "by_status": {
+   "ok": 58729
+  },
+  "bytes": 9418970471
+ },
+ "estimate": {
+  "sampled": 1000,
+  "cut": 1000,
+  "bytes": 161484800,
+  "bytes_per_line": 161484.8,
+  "kept_lines": 58729,
+  "projected_bytes": 9480000000.0,
+  "by_status": {
+   "ok": 1000
+  }
+ }
+}

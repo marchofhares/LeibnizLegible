@@ -1218,6 +1218,10 @@ def write_outputs(
     paths = write_manifest(ts, out_root)
     reports = Path(reports_dir)
     reports.mkdir(parents=True, exist_ok=True)
+    if ts.estimate is None:  # the sample run's disk estimate is kept by the full run
+        prior = reports / f"{ts.name}-trainset.json"
+        if prior.exists():
+            ts.estimate = json.loads(prior.read_text(encoding="utf-8")).get("estimate")
     summary = summarize(ts)
     paths["report"] = reports / f"{ts.name}-trainset.md"
     paths["report"].write_text(render_report(summary), encoding="utf-8")

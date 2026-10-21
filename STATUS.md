@@ -759,7 +759,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21) ✅ Task 0 · ⏳ Task 1
+### K3 — a Leibniz Kurrent model (2026-10-21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -837,6 +837,96 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   12-layer decoder (d_model 1,024, vocab 50,265, untied head), 333.9 M
   parameters, 1.3 GB in fp32 as K2 loaded it; its readings are NFC (49,912
   of the first 50,001).
+- **Task 1, the training set (Checkpoint A;** `htr/trainset.py`, `leibniz
+  bench train-set`, +9 tests; `reports/kurrent/k3-trainset.md` + `.json`, the
+  frozen validation pieces `k3-val-pieces.csv`; the crops and `manifest.jsonl`
+  under `data/train/k3/`, gitignored**).** One tool for K3 and C3 under the
+  `bench` group (C3 has not landed its own): the open-bucket rows of the
+  records given (K3: the census's German pieces), each tagged with its record,
+  volume, stratum, hand (`catalog/hands.py`: own / partial / other, and the
+  strict rule's *Leibniz's own* against the rest), the reader whose text it
+  was aligned on (`reader_from_source`: K2's reader rows against the v1-minted
+  rows), its alignment confidence, the text it was aligned on and the screen's
+  figures, then the exclusions, the screen, the split, the crops. *The
+  selection:* **60,163 rows on 1,447 records and 3,854 pages** —
+  trocr-kurrent-xvi-xvii 50,720, v1 9,443 by reader; Leibniz's own hand 2,612
+  lines on 51 records, the rest 57,551. *Exclusions*, the first reason that
+  applies (held-out page, letter-pool page, Marginalien, math, bracket, noise,
+  audit): **1,434 rows** — audit 215, bracket 1,154, math 32, noise 33 (by
+  reader: audit/trocr-kurrent-xvi-xvii 205, audit/v1 10,
+  bracket/trocr-kurrent-xvi-xvii 889, bracket/v1 265,
+  math/trocr-kurrent-xvi-xvii 4, math/v1 28, noise/trocr-kurrent-xvi-xvii 26,
+  noise/v1 7); the `bracket` flag now also fires on the edition's angle
+  brackets, `noise` on symbols the OCR layer leaked (`©`, `®`, `™`, `■`, `□`,
+  `•`), `audit` keeps K2's 200 sheet lines and the 20 PHILIUMM-judged lines on
+  German pieces out of training and of checkpoint selection (a sanity set once
+  judged). No row sits on a held-out page, a pool page or a Marginalien work.
+- **The screen (Task 1, the operator's note (b)).** The band the **273,517
+  v1-minted Latin and French rows** occupy: the ratio of the minted text's
+  length to the v1 reading's (whitespace collapsed) between **0.80 and 1.44**
+  (the central 95 %; median 1.00), the alignment confidence at or above
+  **0.733** (median 0.950). The reader's lines that no flag excluded, by hand
+  group, against it — **Leibniz's own hand: 1,949 lines, 145 outside (7.4 %:
+  conf_low 52, ratio_high 66, ratio_low 35); the other hands: 47,647 lines,
+  3,306 outside (6.9 %: conf_low 1,556, ratio_high 1,116, ratio_low 988)**;
+  ratio quantiles p2.5 / median / p97.5 0.83 / 1.00 / 1.53 for his hand, 0.83
+  / 1.00 / 1.41 for the rest. For comparison the v1-minted rows of the same
+  German records: 1,583 of 9,133 outside (17.3 %). **The stop rule (10 % of
+  the Leibniz-hand lines) is not triggered.** The twenty worst reader lines,
+  every one a minted slice of 8 to 21 characters on a reading of a single
+  character at confidence 1.000 (the aligner's matched fraction is over the
+  reading's characters, so a one-letter reading that matches scores 1.0 and
+  places an edition slice on no evidence; all twenty are in other hands):
+  `DE-611-HS-970451:0002:056` (other, heavy_revision, ratio 21.0, conf 1.000,
+  21 / 1 chars); `DE-611-HS-867509:0122:009` (other, heavy_revision, ratio
+  15.0, conf 1.000, 15 / 1 chars); `00068422:0004:032` (other, heavy_revision,
+  ratio 14.0, conf 1.000, 14 / 1 chars); `00068430:0029:036` (other,
+  heavy_revision, ratio 14.0, conf 1.000, 14 / 1 chars);
+  `DE-611-HS-856291:0012:037` (other, heavy_revision, ratio 14.0, conf 1.000,
+  14 / 1 chars); `DE-611-HS-960158:0136:031` (other, heavy_revision, ratio
+  13.0, conf 1.000, 13 / 1 chars); `00068593:0053:000` (other, light_revision,
+  ratio 13.0, conf 1.000, 13 / 1 chars); `DE-611-HS-971300:0068:026` (other,
+  heavy_revision, ratio 11.0, conf 1.000, 11 / 1 chars);
+  `DE-611-HS-974056:0019:013` (other, light_revision, ratio 11.0, conf 1.000,
+  11 / 1 chars); `DE-611-HS-959461:0081:045` (other, light_revision, ratio
+  11.0, conf 1.000, 11 / 1 chars); `00068541:0005:151` (other, heavy_revision,
+  ratio 11.0, conf 1.000, 11 / 1 chars); `DE-611-HS-867509:0122:006` (other,
+  heavy_revision, ratio 11.0, conf 1.000, 11 / 1 chars);
+  `DE-611-HS-959461:0084:027` (other, light_revision, ratio 10.0, conf 1.000,
+  10 / 1 chars); `00068782:0137:111` (other, heavy_revision, ratio 9.0, conf
+  1.000, 9 / 1 chars); `DE-611-HS-862243:0001:012` (other, light_revision,
+  ratio 9.0, conf 1.000, 9 / 1 chars); `DE-611-HS-959461:0098:021` (other,
+  light_revision, ratio 8.0, conf 1.000, 8 / 1 chars);
+  `DE-611-HS-867509:0161:034` (other, heavy_revision, ratio 8.0, conf 1.000, 8
+  / 1 chars); `00068823:0107:098` (other, heavy_revision, ratio 8.0, conf
+  1.000, 8 / 1 chars); `DE-611-HS-867509:0120:008` (other, heavy_revision,
+  ratio 8.0, conf 1.000, 8 / 1 chars); `00068430:0024:100` (other,
+  heavy_revision, ratio 8.0, conf 1.000, 8 / 1 chars). The manifest carries
+  each line's verdict (`screen`: `ratio_low`, `ratio_high`, `conf_low`,
+  `no_reading`), so **the ablation of note (c) is triggered by the screen** —
+  the class is "outside the band", 3,451 reader lines (`train-trocr
+  --drop-screen`, `train-kraken --drop-screen`) — and runs for the stronger
+  candidate in Task 3 if the timing allows.
+- **The split (Task 1).** Kept: **58,729 lines** on 1,446 records, 3,850
+  pages, 1,321 units (records joined over the pages they share, union-find, so
+  no page is on both sides), 2,601,780 characters. The validation set drawn
+  before any crop was cut, seed 20261021, 5 % of the lines per (stratum, hand
+  group) cell, whole units: **train 55,596 lines on 3,634 pages, val 3,133
+  lines on 216 pages (98 records, 92 units); pages on both sides 0**; by
+  reader train / val: trocr-kurrent-xvi-xvii 46,921 / 2,675, v1 8,675 / 458;
+  by cell train / val: fair_copy/other 27 / 7, heavy_revision/leibniz 2,242 /
+  164, heavy_revision/other 35,331 / 1,953, light_revision/leibniz 44 / 0 (one
+  unit: it stays in training), light_revision/other 17,650 / 949, scrap/other
+  302 / 60. The pieces are frozen in `reports/kurrent/k3-val-pieces.csv` and
+  reused by every later run (`--redraw` is the only way past it).
+- **The crops (Task 1).** The disk from a seeded 1,000-line sample first:
+  1,000 of 1,000 cut, **157.7 KB a line**, 9.48 GB projected. Then every kept
+  line through the pilot's crop (`audit.crop_image`: the polygon masked, 12 px
+  of context, no downscaling) into `data/train/k3/<split>/<page>/<seq>.png`
+  with the minted text (NFC, as stored) in `<seq>.gt.txt`, eight worker
+  processes, the page image decoded once: **3,850 pages, ok 58,729; 9.42 GB of
+  PNGs**; `train.txt` and `val.txt` list the crops for ketos, `manifest.jsonl`
+  every row with its tags and its split. **Checkpoint A.**
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into

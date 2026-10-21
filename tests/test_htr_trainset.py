@@ -388,6 +388,20 @@ def test_crops_written_in_kraken_format(tmp_path: Path) -> None:
     report = paths["report"].read_text(encoding="utf-8")
     assert "## The screen" in report and "Pages on both sides: **0**" in report
     assert paths["val_pieces"].exists()
+    # a later full run keeps the sample run's disk estimate
+    prior = json.loads(paths["json"].read_text(encoding="utf-8"))
+    prior["estimate"] = {
+        "sampled": 3,
+        "cut": 3,
+        "bytes": 300,
+        "bytes_per_line": 100.0,
+        "kept_lines": 10,
+        "projected_bytes": 1000.0,
+    }
+    paths["json"].write_text(json.dumps(prior), encoding="utf-8")
+    ts.estimate = None
+    paths = T.write_outputs(ts, out_root=out, reports_dir=tmp_path / "reports")
+    assert "## Disk, from the sample" in paths["report"].read_text(encoding="utf-8")
 
 
 def test_estimate_disk_projects_from_a_sample(tmp_path: Path) -> None:
