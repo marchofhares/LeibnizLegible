@@ -335,6 +335,11 @@ def train_steps(
     total = total_steps or int(math.ceil(steps_per_epoch * epochs))
     if max_steps is not None:
         total = min(total, start_step + max_steps)
+    if max_lines is not None:
+        total = min(
+            total, start_step + math.ceil(max_lines / (settings.batch_size * settings.accumulate))
+        )
+    warmup = min(settings.warmup_steps, max(1, total // 10))  # a short run warms up in a tenth
     logs: list[StepLog] = []
     step = start_step
     lines_done = 0
@@ -374,7 +379,7 @@ def train_steps(
             micro += 1
             if micro % settings.accumulate != 0:
                 continue
-            lr = lr_at(step, base=settings.lr, warmup=settings.warmup_steps, total=total)
+            lr = lr_at(step, base=settings.lr, warmup=warmup, total=total)
             for g in opt.param_groups:
                 g["lr"] = lr
             if scaler is not None:
@@ -443,8 +448,9 @@ def validate(
     under ``policy``; the lines sorted by width so a batch's steps match."""
     import torch
 
-    from leibniz.htr.trocr import TrOCREngine
+    from leibniz.htr.trocr import TrOCREngine, _drop_checkpoint_max_length
 
+    _drop_checkpoint_max_length(model)  # the engine's loader does this; the pair is handed over
     engine = TrOCREngine(
         "local",
         device=device,
