@@ -1,6 +1,6 @@
 # K2: reading the German pieces with the Bern Kurrent reader
 
-Reader `trocr-kurrent-xvi-xvii` over every recognised line on the pages of the census's German pieces (`data/kurrent/german_pieces.jsonl`), the pages being the union of the K1 census's placement and the factory's today; readings in `data/kurrent/k2-readings/` (gitignored), one resumable JSONL in the pilot's row format. Generated 2026-10-20.
+Reader `trocr-kurrent-xvi-xvii` over every recognised line on the pages of the census's German pieces (`data/kurrent/german_pieces.jsonl`), the pages being the union of the K1 census's placement and the factory's today; readings in `data/kurrent/k2-readings/` (gitignored), one resumable JSONL in the pilot's row format. Generated 2026-10-21.
 
 ## The pages
 
@@ -55,3 +55,7 @@ The last column counts the lines a run read identically to the run *fp32, the ch
 ## The setting
 
 **b16-float32-kv**: batch 16, float32, kv cache on; 10.67 lines/s in the sweep → the job's 310,831 lines in about 8h 05m. Batch 32 reserved 6,348 MiB, past the card's 6,144 MiB (a GTX 1660 Ti; under WSL2 the allocation spills into shared system memory instead of failing), so batch 16 is the fastest setting that fits in 6 GB. The kv cache, which the checkpoint's generation config turns off so that every one of up to 160 steps re-encodes the whole prefix, leaves the Dresden readings identical to the checkpoint's defaults and changes 1 sweep reading in 2,000, as a change of batch size does without it; half precision is slower on this card, which has no tensor cores, and changes 2 % of the readings, so it is not taken.
+
+## The job
+
+Model `dh-unibe/trocr-kurrent-XVI-XVII` on `cuda`, settings {"model": "dh-unibe/trocr-kurrent-XVI-XVII", "batch_size": 16, "dtype": "float32", "use_cache": true, "max_new_tokens": 160, "clean_up_spaces": true}. Lines on the pages 310,831; read **310,831** (307,515 in the last run, 3,316 before it); skipped 0; left 0. Last run: 7h 26m wall, 7h 15m in the engine, 41,367 lines/h; pages 4,807/4,807; finished (started 2026-10-20T23:40:50+00:00, updated 2026-10-21T07:06:53+00:00).

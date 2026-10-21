@@ -9,7 +9,7 @@ _Last updated: 2026-10-20 (**C2c — the re-mint under W5's rules, done on the d
 
 ## Current state
 
-**2026-10-20: K2 — German ground truth, in progress on the desktop; the
+**2026-10-20/21: K2 — German ground truth, in progress on the desktop; the
 branch `k2-german-gt`; nothing deployed.** The Bern Kurrent reader
 (`trocr-kurrent-xvi-xvii`, K1's gate) over every recognised line of the
 census's German pieces, then the factory over those readings, as the plan
@@ -17,11 +17,11 @@ page's K2 prompt (with its amendment of 10 October) and the preamble of 19
 October say. Task 0 done (the pre-flight; the go came after it); Task 1 in
 progress (the code built and tested; the sweep and the Dresden check done:
 fp32 with the decoder's cache on at batch 16 reads every Dresden line as
-the checkpoint's defaults do at a third of the time; **the reading job is
-running since 19:36 EDT** (restarted at 19:40 on an engine fix that
-silences a per-batch warning, resumed from its file), about 7 h at the
-measured 79 ms a line; Checkpoint A). The K2 entry in the Phase log has the
-detail and says how to resume.
+the checkpoint's defaults do at a third of the time; **the reading job ran
+from 19:36 EDT to 03:07 the next morning** (7 h 26 min after a restart on an
+engine fix at 19:40): 310,831 lines read, none skipped; Checkpoint A).
+Task 2 in progress (the dry run over the complete readings). The K2 entry in
+the Phase log has the detail.
 
 **2026-10-20: C2c — the re-mint, done on the desktop; the branch
 `c2c-remint` waits for the operator's pull request, nothing deployed.** The
@@ -733,7 +733,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K2 — German ground truth (2026-10-20) ✅ Task 0 · ⏳ Task 1 (the reading job running; Checkpoint A) · ⏳ Task 2 · ⏳ Task 3
+### K2 — German ground truth (2026-10-20/21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 (the dry run running) · ⏳ Task 3
 
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `436f682`
@@ -879,6 +879,17 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   fixed code**, resuming from the JSONL (the stats say so: `lines_before`).
   To resume after any interruption, run the same command again; to follow,
   `grep -v '^\[transformers\]' logs/k2-read.log | tail` or the stats file.
+- **The job finished (Task 1 ✅;** `reports/kurrent/k2-read.md` re-rendered
+  with its figures**).** 2026-10-21 03:07 EDT: **310,831 of 310,831 lines
+  read, 0 skipped**, 4,807 of 4,807 pages; the resumed run 307,515 lines in
+  **7 h 26 min** wall (7 h 15 min in the engine), **41,367 lines/h, 87 ms a
+  line**; the GPU idle afterwards. The readings
+  (`data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl`, 310,831 rows,
+  every line id once; a summary beside it in `readings-summary.json`): 110
+  empty readings (0.04 %); confidence (mean token probability) mean 0.755,
+  median 0.815, deciles 0.43 / 0.97; 27.4 characters a line on average
+  (median 27, longest 238; 4 readings of 150 characters or more, the
+  160-token cap never the binding one).
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 
