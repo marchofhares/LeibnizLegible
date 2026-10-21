@@ -4172,6 +4172,39 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-21 — K3, departures from the prompt and the preamble.** (1) *The
+  machine crashed during Task 2.* At about 09:27 EDT, with the kraken timing
+  pilot running at batch 8 (its second attempt; the first, at batch 16, had
+  died at the first steps with `CUDA error: unknown error` once the card's
+  memory reached 4.8 GB) and the kraken 7.1 side environment installing,
+  every process on the WSL machine failed with bus errors; the operator's
+  diagnosis is that Ubuntu's virtual disk on the host's C: drive could not
+  grow (C: had about 40 GB free afterwards). The card had reached 5.9 GB of
+  its 6,144 MiB in the pilot's last minute (K2 saw the same spill into shared
+  host memory under WSL2). After the restart: the store passed
+  `PRAGMA quick_check` (the operator); the training set on disk was verified
+  against its manifest (58,729 crops, none missing, none zero-length, every
+  PNG trailer and sidecar intact, 9.42 GB) and kept where it is; the uv cache
+  held 34 wheels damaged by the crash (invalid `WHEEL` metadata), cleaned one
+  by one with `uv cache clean` until the side environment installed; the
+  branch was merged with `origin/main` (W6, #49), STATUS.md keeping both
+  sides' entries with K3 above W6 (the phase in progress), as the preamble's
+  rule 7 says. (2) *Model artefacts live on D:.* By the operator's
+  instruction, every checkpoint and optimizer state goes under
+  `/mnt/d/leibniz-train/k3/`; `data/models/k3` is a symlink to it, so the
+  paths the prompt and the reports name still hold; `df -h /mnt/c` is the
+  budget for every write to `/` from here on, and each training job states
+  its expected disk use against it before it starts. (3) *Guards.* Every
+  training job runs under `tools/gpu-guard.sh`, which samples the card every
+  two seconds and kills the job before its memory passes 5,300 MiB; the
+  TrOCR loop fails itself when its reserved memory passes `--max-mib` (4,500
+  by default); the kraken pilot runs at batch 4 with 4-step gradient
+  accumulation instead of batch 16. (4) *The kraken 7.1 side environment*
+  (`.venv-k3-ppocr`: kraken 7.1.1, torch 2.12.0 pinned to the cached wheel,
+  the project installed editable without dependencies) is the amendment's
+  "separate environment" for PP-OCRv6; `.venv-k1` stays at kraken 7.0.3 as
+  the prompt says.
+
 - **2026-10-21 — W6, departures from the prompt and from the preamble of
   19 October.** (1) *The LBr spelling.* The prompt's context said the
   catalogue writes the correspondence with a period (`LBr. 164`); live,
