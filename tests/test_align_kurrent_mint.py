@@ -412,7 +412,8 @@ def test_cli_kurrent_mint_dry_run_write_and_audit(tmp_path: Path) -> None:
     ]
     result = runner.invoke(app, common)
     assert result.exit_code == 0, result.output
-    assert "dry run" in result.output and "Bern 1" in result.output and "4 → 8" in result.output
+    out = " ".join(result.output.split())  # the console wraps at 80 columns in a cloud run
+    assert "dry run" in out and "Bern 1" in out and "4 → 8" in out
     assert (tmp_path / "side.html").exists() and (tmp_path / "decisions.jsonl").exists()
     text = (tmp_path / "reports" / "k2-mint.md").read_text(encoding="utf-8")
     assert "The reading job's pages: 4" in text
@@ -420,32 +421,37 @@ def test_cli_kurrent_mint_dry_run_write_and_audit(tmp_path: Path) -> None:
     assert (tmp_path / "pairs.jsonl").exists()
     result = runner.invoke(app, [*common, "--write"])
     assert result.exit_code == 0, result.output
-    assert "writing the saved dry run" in result.output
-    assert "written" in result.output and "gt_lines now 8 rows" in result.output
-    assert "difference +0" in result.output
+    out = " ".join(result.output.split())
+    assert "writing the saved dry run" in out
+    assert "written" in out and "gt_lines now 8 rows" in out
+    assert "difference +0" in out
     assert (readings_dir / "write-stats.json").exists()
     # the store moved since the saved dry run: the write refuses; --recompute goes again
     result = runner.invoke(app, [*common, "--write"])
-    assert result.exit_code != 0 and "the store moved" in result.output
+    assert result.exit_code != 0 and "the store moved" in " ".join(result.output.split())
     result = runner.invoke(app, [*common, "--write", "--recompute"])
     assert result.exit_code == 0, result.output
-    assert "gt_lines now 8 rows" in result.output
+    out = " ".join(result.output.split())
+    assert "gt_lines now 8 rows" in out
     result = runner.invoke(
         app,
         [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au"), "--no-by-hand"],
     )
     assert result.exit_code == 0, result.output
-    assert (tmp_path / "au" / "k2-audit.html").exists() and "2 lines" in result.output
-    assert "not split by hand" in result.output
+    out = " ".join(result.output.split())
+    assert (tmp_path / "au" / "k2-audit.html").exists() and "2 lines" in out
+    assert "not split by hand" in out
     # by hand (the default): g1 is Leibniz's and holds every reader row, so one half is empty
     result = runner.invoke(
         app, [*common, "--audit", "--audit-n", "2", "--audit-dir", str(tmp_path / "au2")]
     )
     assert result.exit_code == 0, result.output
-    assert "leibniz_hand 1" in result.output.replace("\n", "")
+    out = " ".join(result.output.split())
+    assert "leibniz_hand 1" in out
     result = runner.invoke(app, [*common, "--account"])
     assert result.exit_code == 0, result.output
-    assert "k2 write accounted" in result.output.replace("\n", "")
+    out = " ".join(result.output.split())
+    assert "k2 write accounted" in out
     assert (tmp_path / "reports" / "k2-write.md").exists()
     result = runner.invoke(app, [*common, "--readings-dir", str(tmp_path / "nothing")])
     assert result.exit_code != 0
