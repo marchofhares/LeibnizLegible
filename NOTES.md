@@ -63,6 +63,13 @@ links here from its Open questions. Numbers cite `reports/` unless stated._
   fraction of v1/v2 disagreements on the val split where either reading is
   exactly right, per stratum. Below ~70% on heavy revision, aim A/B at fair
   copies/light revision and at GT audit; the rest needs free transcription.
+  **A first indication for German (2026-10-21, G1's first pack):** on the
+  271 selected lines with an open reader-minted row (K2), either reading —
+  the v1 text or the Bern reading — equals the minted text under the fold on
+  43 (15.9 %: Bern 42, v1 0, both 1). Biased up (lines the aligner accepted
+  on the Bern reading) and down (the fold does not forgive the edition's
+  expansions, and the reader rows' precision is not yet judged); STATUS.md,
+  G1, and Open question 30.
 - **The LL seam** (Calculemus SPECS Appendix A): `leibniz pack fragments`
   (fragment-pack JSONL from `lines` + `pages` + crosswalk + gold rows from
   open-bucket `gt_lines`, `license_bucket='open'` enforced) and `leibniz pack
