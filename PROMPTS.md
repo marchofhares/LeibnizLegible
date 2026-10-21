@@ -2673,3 +2673,247 @@ they differ, this preamble wins.
    is still needed for anything on the box or the store, which a cloud
    session hands over anyway. A desktop session waits as the prompt says.
 ~~~~
+
+### Phase G1 — the Calculemus seam (run 2026-10-21)
+
+_Run in a cloud session on the branch it was given (`claude/keen-keller-rvxmzf`),
+under the session preamble of 19 October as updated on 21 October in three
+places (the branch names in clause 1, the entry list in clause 3, the disk line
+in clause 4), which came with the prompt and is printed below it: nothing merged
+or deployed, the fixture store only, the pre-flight recorded and the session
+proceeding as the prompt's Task 0 and the preamble's item 6 say. The departures
+are in `STATUS.md`, Divergences._
+
+~~~~text
+Phase G1 — The Calculemus seam: a fragment pack of German A/B pairs from the
+store and K2's readings, and the import of the game's judgments. One cloud
+session on fixtures; the real pack is built by the operator on the desktop
+with one command this session hands over; nothing is deployed and the store
+is never written here.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies in full), SPECS.md
+§3, §7 and §11, NOTES.md section B (the Calculemus rescope, September), and
+STATUS.md: "Current state" (the K2, K2b, C2c, L1 and W6 entries), the K2
+entry in the Phase log (the readings file, the decisions file, the audit
+sheet), the L1 entry (legal.py, the deposits), Open question 27, and "Next".
+If this prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence. This phase is G1 (G for the game); K3 is in flight on the desktop
+on its own branch, so the preamble's clause 7 applies to STATUS.md and
+PROMPTS.md. Names of individuals stay out of STATUS.md and PROMPTS.md.
+
+## Where you run, and the rules that follow from it
+A cloud checkout without data/inventory.sqlite: build and test on the fixture
+store (tests/conftest.py) and on small fixture files you write; make
+.venv-cloud with the web, gt and release extras. The real inputs exist only
+on the operator's desktop: the master store (read-only), K2's readings
+data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl (310,831 rows: line_id,
+text, conf, model, device, ms), K2's per-piece decisions
+data/kurrent/k2-decisions.jsonl, and K1's German pieces
+data/kurrent/german_pieces.jsonl (record_id, work_id, page_ids, stratum,
+hand, language). Every store step is handed to the operator as an exact
+command with its expected output. The branch is the one this session was
+given; push to it; never merge.
+
+## Context
+Calculemus (its own repository, deployed unlisted on the same host) plays on
+a synthetic pack because this seam was never built. Its SPECS §6.6 freezes
+the contract for both repositories (schema_version 1, JSONL, one object per
+line); reproduce it exactly:
+
+  Fragment pack (Leibniz Legible ⇒ game). Header line
+  {kind:'fragment_pack_header', schema_version, pack_id, built_at,
+   source:{repo, git_sha, run_ids}}, then rows:
+    fragment_id, line_id, page_id, work_id
+    image: { delivery: 'iiif'|'static', service_url?, page_image_url?,
+             bbox: {x,y,w,h}, canvas_id, folio_label }
+    candidates: [ { cand_id, text,
+                    source: 'htr_best'|'htr_nbest'|'model_alt'|'llm_corrected'
+                            |'confusion_variant'|'crowd',
+                    prior_conf? } ]        # exactly 2 in v1
+    stratum: 'fair_copy'|'light_revision'|'heavy_revision'|'scrap'|'unknown'
+    lang: 'la'|'fr'|'de'|'mixed'|'unknown'
+    machine_conf: 0..1    n_chars: int    demand_weight: float (default 1)
+    license_bucket: 'open'                 # the importer rejects anything else
+    gold: { is_gold: bool, truth_cand_id?, both_wrong?: bool,
+            source?: 'aa_aligned', align_conf? }
+          # a gold row carries exactly one of truth_cand_id | both_wrong: true
+    provenance: { image_uri, model, run_at, status: 'machine'|'aligned',
+                  shelfmark, katalog_record_id?, aa_ref? }
+    attribution: [ string ]
+  Judgment pack (game ⇒ Leibniz Legible). Header line
+  {kind:'judgment_pack_header', schema_version, pack_id, built_at,
+   game:{git_sha}}, then one row per retired fragment:
+    line_id, retirement: 'converged'|'both_rejected'
+    winning_cand_id?, winning_text?, winning_source?
+    posterior, n_votes, n_effective, decided_at
+    method: 'crowd_ab_v1'
+    contributors: [ { id_opaque, display_name? } ]
+
+The game crops 'static' pages client-side on a canvas, so the page image
+must be served with Access-Control-Allow-Origin: *; the mirror
+(https://images.leibnizlegible.com/<work>/<seq>.jpg, the layout of
+web/images.py cache_relpath) and the GWLB both send it (checked 21 October).
+The first real content is German: for every line of the German pieces two
+machine readings now exist, the v1 text in `lines` and K2's Bern reading in
+the readings file, and they disagree exactly where the site is worst. Gold
+comes from K2's reader-minted gt_lines rows (source names "reader
+trocr-kurrent-xvi-xvii"), the Academy text placed on the line by the aligner.
+
+## Task 0 — Pre-flight (record it, then proceed)
+`git status --porcelain` clean; `git fetch origin main && git merge
+origin/main`; baseline ruff + pytest in .venv-cloud, counts recorded. Read
+the fixture store's lines and gt_lines rows; note that lines.lang is 'la'
+there and that no readings file exists: Task 1 builds both fixtures.
+
+## Task 1 — `leibniz pack fragments` (a new `pack` typer group;
+src/leibniz/pack/fragments.py, pure functions over rows, tested)
+Options: --db (read-only, mode=ro), --readings PATH (K2's JSONL), --pieces
+PATH (german_pieces.jsonl; the stratum, hand and language per piece),
+--image-base-url (default https://images.leibnizlegible.com; delivery
+'static', page_image_url from the page's local_path as web/images.py forms
+it; pages without a local_path are skipped and counted), --limit N (default
+2000), --seed, --gold-rate R (default 0.25), --bad-gold-share (default 0.25
+of the gold rows), --min-chars 10 --max-chars 50 (on the longer candidate),
+--out packs/fragments-<date>.jsonl (packs/ gitignored), --today for the §70
+check. Rows: one per line of the German pieces that has both a v1 text (the
+row latest_lines selects, search/documents.py) and a Bern reading, the two
+non-empty and different after whitespace normalisation; candidates
+[v1: source 'htr_best', prior_conf = its conf; Bern: 'model_alt', prior_conf
+= its conf], order shuffled under the seed so the first candidate is not
+always v1; bbox from the line polygon through audit.line_geometry and
+crop_box in page pixels with the audit's padding; canvas_id and folio_label
+from pages; stratum and lang ('de' or 'mixed') from the piece; machine_conf
+= the v1 conf; n_chars = the longer candidate's length; demand_weight 1;
+license_bucket 'open' always — the builder refuses to emit a line whose
+piece's volume is not §70-expired on --today (legal.expired_volumes /
+align.volumes.expired_volume_index) and tests that refusal. Gold: among the
+selected lines, those with a reader-minted gt_lines row whose channels
+legal.deposit_for() places in the open deposit (the ia channel; never gwlb
+or potsdam, so the game's calibration never rests on NC text): if one
+candidate equals the minted text under align/normalize's fold, that is the
+truth_cand_id; if neither does, the row is gold with both_wrong: true; cap
+the gold share at --gold-rate and the both-wrong rows at --bad-gold-share of
+the gold; align_conf from the row; source 'aa_aligned'. Selection:
+stratified by stratum under the seed, Leibniz's own hand (the piece's hand
+under the strict rule, catalog/hands.py) kept at least at its natural share.
+provenance: image_uri = the GWLB source image (web/images.py source_url),
+model = the v1 row's model for the line (the Bern reader named beside it as
+model_alt in the candidate), run_at from the runs row, status 'machine'
+('aligned' on gold rows), shelfmark = the work's first shelfmark,
+katalog_record_id = the gt row's record_id or the piece's, aa_ref = the aa
+label from the gt source where present. attribution: the strings from
+legal.py's registry for gwlb-images, the transcriptions output's attribution
+line, trocr-kurrent-xvi-xvii (MIT) and the project's own line. Header:
+repo, git sha, the run ids used. The command prints what it selected and
+skipped and why, the length distribution of the candidates, the gold counts,
+and the hand and stratum shares. `leibniz pack check FILE` validates a pack
+against the contract (a JSON schema committed under src/leibniz/pack/, the
+header, exactly two candidates, 'open' only, gold consistency) and is run on
+every pack before it leaves the desktop. Fixtures: German rows added to the
+fixture store (lines with lang 'de', a reader-minted gt row, one piece in
+Leibniz's own hand), a ten-row readings JSONL, a two-piece german_pieces
+file, under tests/fixtures/. Tests: the selection rules, the §70 refusal,
+the gold rules (truth, both-wrong, the NC-channel exclusion), the bbox
+arithmetic, the check command on a good pack and on a doctored 'nc' row.
+
+## Task 2 — `leibniz pack judgments --in FILE [--write]` (dry run by
+default, tested; never run on the master store in this session)
+Imports 'converged' rows as new `lines` rows with status 'corrected', the
+winning text, a new runs row (stage crowd, model crowd_ab_v1@<game git sha>)
+and the judgment row verbatim as the row's source JSON; never updates or
+deletes a machine row (the UNIQUE(page_id, line_seq, run_id) key keeps them
+apart); idempotent on (line_id, decided_at). 'both_rejected' rows are
+rendered by code into reports/scriptorium-queue.md (line, page, the two
+readings, the posterior, the date), the queue a human corrects later. Tests
+on the fixture store with a fixture judgment pack. Record in SPECS.md §11
+(or wherever the seams are promised) that both commands exist and where the
+contract lives.
+
+## Task 3 — Verify, record, hand over
+ruff + pytest in .venv-cloud. STATUS.md: a "G1" entry in Current state and
+the Phase log (what was built, the rules, the test counts; no corpus
+numbers: you produced none); Open question 27 unchanged; "Next": the real
+pack is the operator's command below, the judgments import is P8's. Append
+this prompt verbatim to PROMPTS.md under "Follow-up phases (2026-10)".
+Commit in sensible pieces; push the branch; print:
+- the compare URL against main;
+- for the operator, after the merge and `git pull` on the desktop, in
+  .venv-w3 (`export UV_PROJECT_ENVIRONMENT=.venv-w3`), the exact lines:
+  `uv run --no-sync leibniz pack fragments --readings
+  data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl --pieces
+  data/kurrent/german_pieces.jsonl --limit 2000 --seed 20261022 --out
+  packs/fragments-2026-10-22.jsonl` and `uv run --no-sync leibniz pack check
+  packs/fragments-2026-10-22.jsonl`, with the expected shape of the output
+  (row count, gold counts, the length distribution) and the note that both
+  open the store read-only and take minutes;
+- the one line to copy the pack to the box: `scp
+  packs/fragments-2026-10-22.jsonl root@<target>:/root/` (the target is on
+  the operator's plan page, not in the repo); the import itself is the
+  game's runbook.
+Do not merge. Do not deploy.
+~~~~
+
+The session preamble as given to this session, before the prompt (the
+preamble of 19 October printed above under K2b, as updated on 21 October):
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+~~~~
