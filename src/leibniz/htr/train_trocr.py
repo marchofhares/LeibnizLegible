@@ -102,6 +102,10 @@ PILOT_SETTINGS: tuple[Settings, ...] = (
     Settings(optimizer="adafactor", grad_checkpointing=True),
     Settings(optimizer="adafactor", fp16=True),
     Settings(optimizer="adafactor", grad_checkpointing=True, fp16=True),
+    # the whole model at half the batch (the same effective batch through accumulation):
+    # the probe of 21 October put Adafactor on everything at batch 8 just past the cap
+    Settings(optimizer="adafactor", batch_size=4, accumulate=2),
+    Settings(optimizer="adafactor", freeze_encoder=True, batch_size=16),
 )
 
 
