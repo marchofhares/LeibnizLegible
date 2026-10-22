@@ -1078,6 +1078,22 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   checkpointing, six epochs with early stopping on the validation set; one
   runs row per training; the PP-OCRv6 pilot's outcome decides whether a third
   training follows.
+- **The stop of 22 October (Task 3).** The kraken training was launched at
+  07:36:46 with eight loader workers (runs row 610); WSL stopped entirely at
+  about 07:4x (a Windows update had installed itself; the updater is off now,
+  the operator says) and the session ended with it. The launch's log was empty
+  and its guard had ended after one sample at 07:36:48: the guard's pattern
+  carried a trailing space (`k3/kraken `) that never matches ketos' command
+  line (`k3/kraken/checkpoints`), so it saw no process and quit, and ketos
+  writes its log block-buffered, so an empty log minutes in is what a live
+  process looks like until the machine goes down. Whether ketos died at once
+  or with the machine cannot be told from the disk; the exact command line ran
+  for ninety seconds in the foreground afterwards without an error. Fixed: a
+  started ketos runs with `PYTHONUNBUFFERED=1` (the log shows progress as it
+  happens) and the guard's pattern is `[k]etos.*k3/kraken/`; runs row 610
+  closed with zero counts (nothing was trained under it); the training
+  relaunched with **four loader workers**, as the operator asked ("I would
+  rather be slow than crash again"), under a new runs row.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
