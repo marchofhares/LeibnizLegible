@@ -31,7 +31,10 @@ compared with the export's columns. The rules, as the website renders them:
   parentheses as ``(99-11-28)`` (zero-filled to six digits: Access dropped the
   leading zero of ``51116``; a ``00`` month or day dropped as in the first
   date, ``(93-06)``: the operator's dry run of 2026-10-22 found 397 records
-  so).
+  so). Where the website's copy holds a short value it prints the number
+  with its leading zeros gone, ``(123)`` for the export's ``(00-01-23)``
+  (346 records in the second dry run): the comparison reads those as the
+  same ("website short date"), the stored value is the export's.
 * ``Akademie Ausgabe`` = ``REIHE | bd.nnn / UNr Aufl. Aufl(Jahr)`` with the
   piece number zero-filled to three digits (``8 | 3.044``, ``2 | 1.130 / a
   Teildr. Aufl. 2 (1988)``); a series without a piece shows the series alone
@@ -614,11 +617,13 @@ CLASSES: tuple[str, ...] = (
     "whitespace",
     "markers",
     "markup",
+    "shortdate",
     "export_adds",
     "export_lacks",
     "other",
 )
-AGREEING: frozenset[str] = frozenset({"exact", "whitespace", "markers", "markup"})
+AGREEING: frozenset[str] = frozenset({"exact", "whitespace", "markers", "markup", "shortdate"})
+_SECOND_DATE = re.compile(r"^(?P<first>.*?) \((?P<second>[\d-]+)\)$")
 EXAMPLES_PER_CLASS = 3
 
 
@@ -665,7 +670,21 @@ def classify(key: str, old: object, new: object) -> str:
             return "markers"
         if clean(old) == clean(website_lost_markup(key, new)):
             return "markup"
+        if key == "datum" and clean(old) == website_short_second_date(clean(new)):
+            return "shortdate"
     return "other"
+
+
+def website_short_second_date(value: str) -> str:
+    """A date as the website prints it where its copy holds the second date as
+    a short number: the export's ``1700-02-02 (00-01-23)`` read as
+    ``1700-02-02 (123)`` (the dashes gone, the leading zeros dropped). A
+    value without a second date comes back unchanged."""
+    m = _SECOND_DATE.match(value)
+    if m is None:
+        return value
+    digits = m.group("second").replace("-", "").lstrip("0") or "0"
+    return f"{m.group('first')} ({digits})"
 
 
 def website_lost_markup(key: str, value: str) -> str:
@@ -851,17 +870,18 @@ def render_comparison(cmp: Comparison) -> str:
         f"not in the export: {len(cmp.unmapped):,} · in the export only (new): "
         f"{cmp.new_in_export:,}",
         "",
-        "| Key | Exact | Whitespace | Markers only | Website lost markup | Export adds | "
-        "Export lacks | Other | Agree |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Key | Exact | Whitespace | Markers only | Website lost markup | Website short date "
+        "| Export adds | Export lacks | Other | Agree |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for key in COMPARED_KEYS:
         k = cmp.keys[key]
         mark = " ✱" if key in THRESHOLD_KEYS else ""
         lines.append(
             f"| {key}{mark} | {k.counts['exact']:,} | {k.counts['whitespace']:,} | "
-            f"{k.counts['markers']:,} | {k.counts['markup']:,} | {k.counts['export_adds']:,} | "
-            f"{k.counts['export_lacks']:,} | {k.counts['other']:,} | {k.pct:.1f} % |"
+            f"{k.counts['markers']:,} | {k.counts['markup']:,} | {k.counts['shortdate']:,} | "
+            f"{k.counts['export_adds']:,} | {k.counts['export_lacks']:,} | {k.counts['other']:,} "
+            f"| {k.pct:.1f} % |"
         )
     lines += [
         "",
@@ -869,8 +889,10 @@ def render_comparison(cmp: Comparison) -> str:
         f"{THRESHOLD_PCT:.0f} % each. *Agree* = exact, whitespace-only, the website's link "
         "texts only, or *website lost markup* (the store's value is the export's with every "
         "`<…>` segment gone, or a bare `°` for a format code: text the website's parser read "
-        "as HTML tags; the export's value is kept), over the records where the website had a "
-        "value. *Export adds*: the "
+        "as HTML tags; the export's value is kept) or *website short date* (the website's "
+        "copy holds the second date as a bare number, `(123)` for the export's `(00-01-23)`; "
+        "the export's value is kept), over the records where the website had a value. "
+        "*Export adds*: the "
         "store had nothing and the export has a value (the website's copy lacks it, or the "
         "website parser had no rule for it: a PPN link) — it proves nothing about the "
         "mapping and is left out of the share; *export lacks*: the store has a value the "
@@ -1167,6 +1189,7 @@ __all__ = [
     "render_import_stats",
     "umfang_cell",
     "website_lost_markup",
+    "website_short_second_date",
     "wortlaut_text",
     "write_import",
 ]

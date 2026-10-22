@@ -261,8 +261,8 @@ def test_the_mapping_reproduces_the_website() -> None:
     assert cmp.keys["drucke"].counts == {"exact": 18, "other": 3}
     assert cmp.keys["gwlb_ids"].counts == {"exact": 20, "export_adds": 1}  # the PPN link
     table = ak.render_comparison(cmp)
-    assert "| datum ✱ | 19 | 0 | 0 | 0 | 2 | 0 | 0 | 100.0 % |" in table
-    assert "| umfang | 20 | 0 | 0 | 1 | 0 | 0 | 0 | 100.0 % |" in table
+    assert "| datum ✱ | 19 | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 100.0 % |" in table
+    assert "| umfang | 20 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 100.0 % |" in table
     assert "lost as markup on umfang 1 records." in table
     assert "same answer before and after on 21 of 21 records." in table
     assert "Mapping: **settled**." in table
@@ -280,6 +280,25 @@ def test_classify() -> None:
     assert ak.classify("aa", (("1", "2", "3", "aa_column"),), ()) == "export_lacks"
     # a genuine edit stays "other"
     assert ak.classify("datum", "1698", "1700-01-14 (00-01-04)") == "other"
+
+
+def test_the_website_prints_a_short_second_date_as_a_number() -> None:
+    """The website's copy holds some second dates as a bare number with the
+    leading zeros gone (346 records in the operator's second dry run): the
+    comparison reads "(123)" as the export's "(00-01-23)"; the stored value
+    stays the export's."""
+    assert ak.website_short_second_date("1700-02-02 (00-01-23)") == "1700-02-02 (123)"
+    assert ak.website_short_second_date("1699-12-08 (99-11-28)") == "1699-12-08 (991128)"
+    assert ak.website_short_second_date("1698") == "1698"
+    assert ak.classify("datum", "1700-02-02 (123)", "1700-02-02 (00-01-23)") == "shortdate"
+    assert ak.classify("datum", "1700-02-02 (124)", "1700-02-02 (00-01-23)") == "other"
+    assert ak.classify("datum", "1700-02-02", "1700-02-02 (00-01-23)") == "other"
+    assert ak.classify("titel", "x (123)", "x (00-01-23)") == "other"  # the date's rule only
+    old = db.KatalogRecord("1", metadata={"datum": "1700-02-02 (123)", "titel": "t"})
+    new = db.KatalogRecord("1", metadata={"datum": "1700-02-02 (00-01-23)", "titel": "t"})
+    cmp = ak.compare_records([old], {"1": new})
+    assert cmp.keys["datum"].counts == {"shortdate": 1} and cmp.pct("datum") == 100.0
+    assert "| datum ✱ | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 100.0 % |" in ak.render_comparison(cmp)
 
 
 def test_the_website_lost_what_it_read_as_markup() -> None:
@@ -531,7 +550,7 @@ def test_cli_dry_run_then_write(tmp_path) -> None:
     # the second dry run compares the store with itself: every key exact on 30
     result = runner.invoke(app, base)
     assert "compared with the export: 30" in result.stdout
-    assert "| signatur ✱ | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 100.0 % |" in result.stdout
+    assert "| signatur ✱ | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 100.0 % |" in result.stdout
     # without the export directory
     result = runner.invoke(
         app,
