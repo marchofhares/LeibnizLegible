@@ -252,15 +252,20 @@ def run(
     env: Mapping[str, str] | None = None,
 ) -> subprocess.Popen:
     """Start the command detached, its output to ``log_path``; the caller polls."""
+    import os
+
     p = Path(log_path)
     p.parent.mkdir(parents=True, exist_ok=True)
     fh = p.open("ab")
+    # unbuffered, so the log shows the run's progress as it happens (a block-buffered
+    # ketos had written nothing when the machine stopped on 22 October)
+    environ = {**os.environ, **(dict(env) if env else {}), "PYTHONUNBUFFERED": "1"}
     return subprocess.Popen(
         list(cmd),
         stdout=fh,
         stderr=subprocess.STDOUT,
         cwd=cwd,
-        env=dict(env) if env else None,
+        env=environ,
         start_new_session=True,
     )
 
