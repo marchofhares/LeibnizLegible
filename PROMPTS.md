@@ -3115,3 +3115,77 @@ plan page of 8 and 14 October.
    If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
    both sides' entries, the newer above, and say so.
 ~~~~
+
+## Follow-up of 2026-10-22 (after the operator's dry run on the master store; where it differs from the tasks above, it wins)
+
+~~~~text
+Follow-up for A3b, before the merge. The dry run on the real store gave NOT
+settled on one key and a STOP; both are rendering rules, and the holdings
+page needs changes. Do all of this on the same branch, push, and print the
+compare URL again.
+
+1. datum (98.4 %): 397 "other" rows are the website dropping a zero day or
+   month inside the second date: store "1693-06-29 (93-06)" against export
+   "1693-06-29 (93-06-00)". Render "-00" parts away as the website does;
+   datum should then clear 99 % on the operator's next dry run. Keep the
+   genuine edits (store "1698", export "1700-01-14 (00-01-04)") as "other".
+2. Angle brackets: where the store's value equals the export's with every
+   "<…>" segment removed (titel "<Trig>onometria…", incipit "… <bey dem>
+   Bergambt", textart "Abf., eigh.; <prs. …>", umfang "43°" against "°"),
+   the website's parser lost text it read as HTML tags. Count these as
+   "website lost markup" in the agree column, keep the export's value, and
+   say in the report how many rows it fixes per key.
+3. The nine records in the store but not in the export (1738, 48726, 58654,
+   62088, 69210, 69212, 69213, 69214, 69215): all nine are still on the
+   public website today; 48726 is Kat.-Nr. 18752 there, and the export has
+   Kat.-Nr. 18752 as record 69490. The Access master renumbers or merges a
+   few records between TELOTA's half-yearly imports. Map a missing id to the
+   export's record with the same Kat.-Nr. and shelfmark (and read
+   Identisch_mit and mergenr for the rest), carry the mapping into the
+   crosswalk rebuild, and list the nine with their new ids in the report.
+   The STOP stays only for a record id that gt_lines references; a
+   crosswalk-only reference is remapped or dropped with a line in the
+   report. Record under Open question 27 that ids are stable except for
+   merges and that the website lags the master.
+4. absender and adressat: the website shows the names the persons table
+   normalises, with "(GND)" and "(KorrespDB)" link markers; the export
+   carries the catalogue's own strings with " | " between names. If joining
+   ritter's names through pers_norm.csv (korr → pers_name, gnd) reproduces
+   the website's names on at least 99 % of the compared records, do that
+   and keep the GND identifiers as a new metadata key; if not, record it as
+   a later step and leave the export's strings.
+5. The hand rule changes on 16 of 24,907 records (five lose "Leibniz's own
+   hand"): list them in the STATUS entry with before and after, note that
+   K3's training set was built on the old textart, and leave it there; the
+   write proceeds.
+6. The holdings page (the operator's review on staging):
+   - The phrase "Where Leibniz's papers lie" becomes "Where Leibniz's papers
+     are held" everywhere it occurs (title, heading, the About link,
+     llms.txt, the README; German "Wo Leibniz' Papiere aufbewahrt werden").
+   - The opening paragraph becomes one sentence: the Arbeitskatalog der
+     Leibniz-Edition records Leibniz's writings wherever they are held, and
+     this page counts its records by institution. The "How this was read"
+     section goes; its rules become one footnote line under the table
+     (records, not pages; a convolute counts once per piece; printed and
+     lost witnesses count; the institution is read from the shelfmark).
+   - The digitised-copies block is hidden while the store carries no import
+     run (today it reads "0 of 24,916", true and misleading); the works
+     table's heading states the store's state: "before the catalogue
+     import" now, "the whole Arbeitskatalog, refreshed <export date>" after.
+   - The page stays its own page; Browse gets one line at the top, EN and
+     DE: "Looking for something that is not here? Where Leibniz's papers are
+     held", linking it.
+   - Credit, in one place: a source line on the holdings page and above the
+     work page's catalogue records: "Source: Arbeitskatalog der
+     Leibniz-Edition, Leibniz-Edition Potsdam I (BBAW), CC BY 4.0, export of
+     19 October 2026", linking https://leibniz-katalog.bbaw.de/ and
+     https://www.bbaw.de/forschung/leibniz-edition-potsdam-i; the string
+     comes from legal.py's arbeitskatalog entry so it is written once. The
+     About page's catalogue-data block and llms.txt say the records come
+     from the Arbeitsstelle's export, not the website.
+   - Update the curl lines under Next for the new phrase (it occurs three
+     times in the page, not once).
+7. Tests and the browser checks as before; STATUS entry and Open questions
+   27 and 28 updated; push; print the compare URL and the dry-run command
+   again. Nothing merged, nothing deployed.
+~~~~
