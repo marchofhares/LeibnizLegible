@@ -1094,6 +1094,48 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   closed with zero counts (nothing was trained under it); the training
   relaunched with **four loader workers**, as the operator asked ("I would
   rather be slow than crash again"), under a new runs row.
+- **The second stop of 22 October, and the launch that holds (Task 3).** The
+  relaunch of 07:57 (four workers, runs row 611) went down with WSL at about
+  07:59: the guard's record shows the host's available memory falling from
+  8,585 MiB at 07:57:57 to 78 MiB at 07:58:51, its last sample, with no swap
+  on the 9.9 GB VM — because the session had started, beside the training's
+  start-up, the PP-OCRv6 pilot's accounting on the CPU (a second torch process
+  over 3,133 crops on all cores), the same pairing as at the 07:36 launch; a
+  distro shutdown with a termination signal to every process is how WSL2 ends
+  a distro whose memory is gone. The operator asked, verbatim: "WSL stopped
+  again at about <time>, during your relaunch; every process got a termination
+  signal first, so a distro shutdown, not a crash. Two questions before
+  anything runs: (1) did you run any wsl.exe, shutdown, pkill or kill command
+  in this session, and what exactly was running at the moment it stopped? (2)
+  how much system memory does the full kraken training need: does ketos
+  preload all 55,596 crops into RAM (the pilot's 20,000 fit; the VM has 9.9
+  GB), and if so, which option keeps them on disk? Answer both and wait; do
+  not relaunch anything until I say go." The answers (no wsl.exe, no shutdown;
+  the two `pkill` pairs on the hung PP-OCRv6 pilot at 07:35, the first of
+  which matched the session's own shell; the guards' own `pkill` on their
+  pattern, which never fired on a kraken run; and the memory record above;
+  ketos' path-format dataset, `GroundTruthDataset`, keeps per line only the
+  image's path, box and encoded text and opens the PNG from disk on every
+  access, so nothing is preloaded and the full set costs the RAM the pilot did
+  — the main process and about half a gigabyte per loader worker) are in the
+  session's reply of 22 October. The operator's decision, verbatim: "Your
+  account is accepted and so is your proposal: kraken alone with four workers,
+  nothing else of yours on the machine while it trains, the PP-OCRv6
+  accounting after the training ends, the guard's host floor at 2,500 MiB, and
+  ketos under systemd-run with MemoryMax=7G if systemd is enabled. WSL now has
+  8 GB of swap. One ordering change: do not relaunch yet. I am running a
+  catalogue import that writes the store and then makes a serving copy, about
+  an hour; I will write "go kraken" when it is done. Until then do nothing on
+  the machine." Done at "go kraken" (12:27): runs row 611 closed with zero
+  counts (nothing trained under it; the operator's catalogue import had taken
+  row 612 meanwhile); **the training launched at 12:28 as runs row 613, alone,
+  four loader workers, batch 4 with 4-step accumulation, early stopping
+  (`--lag 5`), expandable segments, ketos inside `systemd-run --user --scope
+  -p MemoryMax=7G` (`tools/ketos-memcapped.sh`, so the kernel's OOM killer
+  takes ketos before the VM), the guard at 5,700 MiB on the card and a host
+  floor of 2,500 MiB, the log unbuffered; WSL has 8 GB of swap since the
+  morning.** Nothing else of the session's runs while it trains; the PP-OCRv6
+  pilot's accounting waits for its end.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
