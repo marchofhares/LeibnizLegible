@@ -3189,3 +3189,20 @@ compare URL again.
    27 and 28 updated; push; print the compare URL and the dry-run command
    again. Nothing merged, nothing deployed.
 ~~~~
+
+## Follow-up 2 of 2026-10-22 (after the operator's second dry run)
+
+~~~~text
+Dry run two: settled on signatur 99.6, titel 99.9, textart 100, aa 100; datum
+98.6 % with 346 "other". The examples are of two kinds: genuine corrections
+in the master (16706 and 16707: store "1698", export "1700-01-14
+(00-01-04)"), which stay "other", and the website printing a short second
+date as a number with its leading zeros dropped (17346: store "1700-02-02
+(123)", export "1700-02-02 (00-01-23)"). Add the second as a rendering rule
+for the comparison only: the website's "(123)" agrees with the export's
+"(00-01-23)" when the digits match after the zeros and dashes are removed;
+the stored value stays the export's. Count it in the "Website lost markup"
+column or its own. Push and give me the dry-run line again. The rest of the
+run is right: 48726 is carried as 69490, the other eight have no match,
+every ground-truth id exists.
+~~~~
