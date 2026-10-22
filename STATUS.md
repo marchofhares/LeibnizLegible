@@ -797,7 +797,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 (the kraken pilot and the TrOCR memory probe done; the TrOCR epochs running)
+### K3 — a Leibniz Kurrent model (2026-10-21/22) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -1063,6 +1063,21 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   whole model under AdamW at a real batch size — a training this card cannot
   run at all — more than it buys days. The decision is the operator's (asked
   at Checkpoint B); nothing was rented.
+- **The operator's decisions at Checkpoint B (2026-10-22), verbatim:** "go for
+  the runs rows. Stay on this GPU; keep tools/k3-rented-gpu.md for a second
+  round after the first results and the audit verdicts, where a 24 GB card
+  would train the whole model under AdamW and the ablation together. TrOCR:
+  the whole model with gradient checkpointing, six epochs, early stopping on
+  the validation set. Kraken first as planned; since the GPU sits at 16 % and
+  the loader sets the pace, start its first epoch with eight loader workers
+  and keep them if the pace rises and memory stays under the guard, else fall
+  back to four. Checkpoints on D: as agreed; state each job's expected disk
+  use before it starts; report at checkpoint C after each training." So: no
+  rental in this round; Task 3 trains kraken first (early stopping, eight
+  loader workers to begin with) and then the whole TrOCR model with gradient
+  checkpointing, six epochs with early stopping on the validation set; one
+  runs row per training; the PP-OCRv6 pilot's outcome decides whether a third
+  training follows.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
