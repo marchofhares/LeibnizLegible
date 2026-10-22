@@ -1027,6 +1027,42 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   encoder at batch 16 — and the 20,000-line epochs with the validation CER run
   for the frozen encoder, the batch-4 whole model and the checkpointed whole
   model (in progress; Checkpoint B follows).
+- **Task 2 (a), the TrOCR epochs** (`leibniz bench train-trocr --pilot
+  --pilot-lines 20000 --pilot-save --max-mib 4000`;
+  `data/models/k3/trocr/pilot.json`, the weights under
+  `data/models/k3/trocr/<setting>/` on D:; `logs/k3-trocr-pilot-loop.log`).
+  Two more probe settings first: Adafactor on the whole model at batch 4 with
+  2-step accumulation — out of memory at the cap (3,930 MiB), so the whole
+  model trains on this card only with gradient checkpointing — and the frozen
+  encoder at batch 16: 10.23 lines/s at 3,956 MiB. Then the two feasible
+  settings for one pass over 20,000 training lines each, the validation set
+  (3,133 lines) scored after, the pilot's weights kept (the first run of these
+  epochs lost its validation to an out-of-memory error: generating at batch 16
+  with the per-step scores kept, beside the training state — fixed, see
+  Divergences). **The frozen encoder (Adafactor, batch 8): 20,000 lines in
+  40.5 min (8.24 lines/s), peak 3,488 MiB, validation CER 18.78 % (267 lines
+  exact; 8.6 lines/s at inference). The whole model with gradient
+  checkpointing (Adafactor, batch 8): 20,000 lines in 93.9 min (3.55 lines/s),
+  peak 3,496 MiB, validation CER 13.67 % (397 exact).** The base model as it
+  came read this validation set at about 30 % in the smoke run; after 20,000
+  lines the frozen-encoder fine-tune is at 18.8 % and the whole-model one at
+  13.7 % — five points for 2.3 times the time. Extrapolated to six epochs over
+  the 55,596 training lines with a validation pass each: **frozen encoder 11.9
+  h, whole model 26.7 h**; neither near the week the prompt holds the plan to.
+- **Against the week, and renting (Task 2).** The plan on this GPU: the
+  whole-model TrOCR fine-tune 1.1 days for six epochs (the frozen encoder
+  0.5), the kraken fine-tune 2.8 days for thirty epochs at the pilot's
+  loader-bound pace (early stopping will take fewer; more loader workers may
+  halve it), the two sequential on one card: about four days, under the week.
+  The operator's rule for a rented 24 GB card is a saving of more than two
+  days; what a rental would save is not a number this session produced
+  (nothing ran on such a card), and the arithmetic with its assumptions is in
+  `tools/k3-rented-gpu.md` with the prices found on 21 October: the saving is
+  of the order of two days, mostly on the kraken side where the pace is the
+  loader's, not the card's, so the honest statement is that a rental buys the
+  whole model under AdamW at a real batch size — a training this card cannot
+  run at all — more than it buys days. The decision is the operator's (asked
+  at Checkpoint B); nothing was rented.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
