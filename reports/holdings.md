@@ -1,6 +1,6 @@
 # Where Leibniz's papers are held — the Arbeitskatalog by holding institution
 
-_Leibniz Legible, Phase A3b. Generated 2026-10-22T13:02:08Z from the Arbeitskatalog export of 2026-10-19. Records, not pages; a record is one piece (a letter, a draft, a note) in one witness, so a convolute of many pieces counts many times and a lost or printed witness counts too._
+_Leibniz Legible, Phase A3b. Generated 2026-10-22T16:22:44Z from the Arbeitskatalog export of 2026-10-19, imported into the store. Records, not pages; a record is one piece (a letter, a draft, a note) in one witness, so a convolute of many pieces counts many times and a lost or printed witness counts too._
 
 > Data from the Arbeitskatalog der Leibniz-Edition (Ritter-Katalog), Berlin-Brandenburgische Akademie der Wissenschaften (TELOTA), https://leibniz-katalog.bbaw.de/ — licensed CC BY 4.0.
 
@@ -164,7 +164,15 @@ _Leibniz Legible, Phase A3b. Generated 2026-10-22T13:02:08Z from the Arbeitskata
 
 ## The GWLB's digitised works with and without catalogue records
 
-_Not available from the export alone: the works table is the store's. `leibniz catalog holdings --db …` after the import renders this section._
+2,183 of 2,225 works carry at least one record through the crosswalk (98.1 %); 42 carry none.
+
+| Set | Works | With records | Without |
+| --- | ---: | ---: | ---: |
+| Leibnitiana | 12 | 7 | 5 |
+| LeibnizBriefwechsel | 1,059 | 1,059 | 0 |
+| LeibnizHandschriften | 756 | 749 | 7 |
+| LeibnizMarginalien | 396 | 368 | 28 |
+| leibniz-rekonstruktionen | 2 | 0 | 2 |
 
 ## Method
 

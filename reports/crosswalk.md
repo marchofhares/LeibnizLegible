@@ -1,6 +1,6 @@
 # Katalog crosswalk — Ritter-Katalog ↔ GWLB works (Phase A3)
 
-_Leibniz Legible, Phase A3. Generated 2026-07-29T01:37:49Z. Joins the BBAW Arbeitskatalog der Leibniz-Edition (Ritter-Katalog) to our harvested works so every scan links to its scholarly record and (where catalogued) its AA volume/piece._
+_Leibniz Legible, Phase A3. Generated 2026-10-22T16:22:46Z. Joins the BBAW Arbeitskatalog der Leibniz-Edition (Ritter-Katalog) to our harvested works so every scan links to its scholarly record and (where catalogued) its AA volume/piece._
 
 > Data from the Arbeitskatalog der Leibniz-Edition (Ritter-Katalog), Berlin-Brandenburgische Akademie der Wissenschaften (TELOTA), https://leibniz-katalog.bbaw.de/ — licensed CC BY 4.0.
 
@@ -11,29 +11,27 @@ The katalog has **no public API** and caps every query at 5,000 rows, so a full 
 - **`gwlb_link` (conf 1.0)** — the record's *Signatur* cell links to the scan as `…/resolve?id={object_id}`; that id is our works key. Authoritative.
 - **`shelfmark` (conf 0.7)** — no link, but the record's signature normalises to the same key as a work's shelfmark (Roman/Arabic, spacing, and leaf-suffix tolerant).
 
-Sample queries this run: `reihe=1&bd=1`, `reihe=1&bd=2`, `reihe=2&bd=1`, `reihe=3&bd=1`, `sign_ol=LH 35`, `sign_ol=Leibn. Marg. 1`.
-
 ## Headline
 
-- **Katalog records scraped:** 15,382
-- **Records matched to a work:** 12,535 (81.5% of scraped)
-- **Crosswalk links written:** 12,582
-- **Distinct works matched:** 1,094 / 2,225 (**49.2%** of the corpus)
-- **Links by method:** gwlb_link: 12,384, shelfmark: 198
-- **GWLB links to non-harvested objects:** 5 (out-of-scope holdings or non-Leibniz sets — expected, not an error).
+- **Katalog records scraped:** 70,405
+- **Records matched to a work:** 39,588 (56.2% of scraped)
+- **Crosswalk links written:** 39,784
+- **Distinct works matched:** 2,183 / 2,225 (**98.1%** of the corpus)
+- **Links by method:** gwlb_link: 39,575, shelfmark: 209
+- **GWLB links to non-harvested objects:** 98 (out-of-scope holdings or non-Leibniz sets — expected, not an error).
 
-> The ≥80%-of-works target is a **full-scrape** goal. This sample covers 49.2% of works; the per-set table shows where the sampled queries landed. Record→work resolution via GWLB links is the quality signal to read here, not absolute corpus coverage.
+> The ≥80%-of-works target is a **full-scrape** goal. This sample covers 98.1% of works; the per-set table shows where the sampled queries landed. Record→work resolution via GWLB links is the quality signal to read here, not absolute corpus coverage.
 
 ## Work coverage by set
 
 | Primary set | Works | Matched | % matched |
 | --- | ---: | ---: | ---: |
-| Leibnitiana | 12 | 2 | 16.7% |
-| LeibnizBriefwechsel | 1,059 | 545 | 51.5% |
-| LeibnizHandschriften | 756 | 401 | 53.0% |
-| LeibnizMarginalien | 396 | 146 | 36.9% |
+| Leibnitiana | 12 | 7 | 58.3% |
+| LeibnizBriefwechsel | 1,059 | 1,059 | 100.0% |
+| LeibnizHandschriften | 756 | 749 | 99.1% |
+| LeibnizMarginalien | 396 | 368 | 92.9% |
 | leibniz-rekonstruktionen | 2 | 0 | 0.0% |
-| **All** | **2,225** | **1,094** | **49.2%** |
+| **All** | **2,225** | **2,183** | **98.1%** |
 
 ## Unmatched records (samples, with reasons)
 
@@ -42,24 +40,24 @@ Two reasons a scraped record has no work: it belongs to a **non-Hannover holding
 **Foreign / out-of-scope holdings:**
 
 - `10005` — (no signature)
-- `10040` — Oxford Bodl. Smith Mss. 46 S. 479-480
-- `10053` — Hannover NLA Dep. 84 A 180 Bl. 139-140 (vgl.34497) (Wasserschaden 1946)
-- `10054` — Hannover NLA Dep. 84 A 180 Bl. 158-159
-- `10055` — Kortholt, Epistolae 4 S. 253-254
-- `10072` — Ann Arbor Univ. of Michigan Library Dept. of Rare Books and Special Coll.
-- `10097` — (no signature)
-- `10098` — (no signature)
+- `10007` — Gotha FB B 199 Bl. 476
+- `10008` — (no signature)
+- `10009` — (no signature)
+- `10010` — Ms 23, 817 [b] Bl. 73-74
+- `10011` — (no signature)
+- `10014` — Dresden HStA 10024 Geheimer Rat (Geheimes Archiv), Nr. Loc. 08062/02 Bl. 11r°-20r°
+- `10015` — Hannover NLA Cal.Br. 11, 1116 Bl. 279-282
 
 **Leibniz signature, unmatched (work not in sample, or a normaliser gap):**
 
-- `11512` — Hannover NLB Leibn. Marg. 10, 1, S. 154-166 → key `Marg 10,1`
+- `10195` — LH 12, 5, 1 Bl. 5 (Kriegsverlust) → key `LH 12,5,1`
+- `10196` — LH 12, 5, 1 Bl. 5 (Kriegsverlust) → key `LH 12,5,1`
+- `10394` — LH 1, 6, 3b Bl. 3-4 → key `LH 1,6,3b`
 - `11970` — Hannover NLB Bibliotheksakten A2 Bl. 261-262 (jetzt LK-MOW Ammon10 Bl. B 261-262) → key `LK mow,ammon10,bl,b,261-262`
-- `12433` — Hannover NLB Leibn. Marg. 10, 1, S. 167-169 → key `Marg 10,1`
-- `13619` — Hannover NLB Leibn. Marg. 10, 1, S. 172-178 (L' Handexpl. d. Erstdr. mit eigh. Notaten, Marginalien & Unterstreichgn) → key `Marg 10,1`
 - `1469` — Hannover NLB Leibn. Marg. 199, S. 1 (Bl. 1r° ; Titelblatt), S. 2 (Bl. 1v° ), S. 4 (Bl. 2v° ), Bl. 17v° –19r°, Bl. 20r° , Bl. 51r° → key `Marg 199`
-- `1526` — Hannover NLB Leibn. Marg. 16, Stück 2 → key `Marg 16,stück,2`
-- `1563` — Hannover NLB Leibn. Marg. 16, Stück 1 → key `Marg 16,stück,1`
-- `15736` — Hannover NLB Bibliotheksakten A5a Bl. 122 (jetzt LK-MOW Ernst August10 Bl. D122) → key `LK mow,ernst,august10,bl,d122`
+- `1509` — Hannover NLB Leibn. Marg. 200 → key `Marg 200`
+- `1564` — Hannover NLB Leibn. Marg. 214 → key `Marg 214`
+- `1569` — Hannover NLB Leibn. Marg. 209 → key `Marg 209`
 
 ## Operator command (full scrape)
 
