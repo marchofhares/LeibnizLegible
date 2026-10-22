@@ -4302,6 +4302,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   the project installed editable without dependencies) is the amendment's
   "separate environment" for PP-OCRv6; `.venv-k1` stays at kraken 7.0.3 as
   the prompt says.
+  (5) *The TrOCR pilot epochs ran twice.* The first pass over 20,000 lines
+  per setting (16:20–18:43) lost its validation: the loop generated at batch
+  16 with the per-step scores kept (half a gigabyte for the confidence no
+  validation needs) beside the training state, and ran out of memory under
+  the cap; the pilot had saved no weights, so the epochs were run again
+  (18:47–21:15) with the validation generating at batch 8 without scores
+  after the optimizer and the gradients are dropped, and each pilot's weights
+  kept on D:. The timings of both passes agree (8.35 / 8.24 and 3.53 / 3.55
+  lines/s); the first pass's rows are in `data/models/k3/trocr/pilot-noval.json`.
+  (6) *The PP-OCRv6 pilot at batch 4 was killed by the guard* at its first
+  steps (5,835 MiB on the card) and rerun at batch 1 with 16-step
+  accumulation.
 
 - **2026-10-21 — W6, departures from the prompt and from the preamble of
   19 October.** (1) *The LBr spelling.* The prompt's context said the
