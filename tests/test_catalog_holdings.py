@@ -77,7 +77,7 @@ def _fixture_records() -> list[db.KatalogRecord]:
 
 def test_report_from_the_export_fixture() -> None:
     data = holdings.holdings_from_records(
-        _fixture_records(), generated_at="2026-10-21T00:00:00Z", source="the fixture"
+        _fixture_records(), generated_at="2026-10-19T00:00:00Z", source="the fixture"
     )
     assert data.records == 30 and data.works is None
     assert data.by_holding[0] == (holdings.GWLB, 23)
@@ -110,11 +110,11 @@ def test_report_from_a_store_adds_the_works(tmp_path) -> None:
     db.upsert_work(conn, db.Work("00000001", "LeibnizBriefwechsel", shelfmarks=["LBr. 1"]))
     records = _fixture_records()
     assert holdings.catalog_refreshed(conn) is None
-    ak.write_import(conn, records, export_date="2026-10-21", csv_dir=FIXTURES)
-    assert holdings.catalog_refreshed(conn) == "2026-10-21"
-    data = holdings.holdings_from_store(conn, generated_at="2026-10-21T00:00:00Z")
+    ak.write_import(conn, records, export_date="2026-10-19", csv_dir=FIXTURES)
+    assert holdings.catalog_refreshed(conn) == "2026-10-19"
+    data = holdings.holdings_from_store(conn, generated_at="2026-10-19T00:00:00Z")
     conn.close()
-    assert data.refreshed == "2026-10-21" and "2026-10-21" in data.source
+    assert data.refreshed == "2026-10-19" and "2026-10-19" in data.source
     assert (data.works, data.works_with_records, data.works_without_records) == (3, 2, 1)
     assert [(s.set_name, s.works, s.with_records) for s in data.by_set] == [
         ("LeibnizBriefwechsel", 1, 0),

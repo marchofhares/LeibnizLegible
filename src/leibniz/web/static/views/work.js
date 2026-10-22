@@ -4,7 +4,7 @@
 import { t, tn } from '../i18n.js';
 import * as api from '../api.js';
 import { esc, pathSeg, num, conf, setLabel, aaRef, folioLabel } from '../dom.js';
-import { errorPanel, loading, renderNotFound } from './common.js';
+import { errorPanel, loading, renderNotFound, sourceLine } from './common.js';
 
 /** The way back into the browse index: "Browse › LH 35 · Mathematik". */
 function crumbs(data) {
@@ -202,12 +202,13 @@ function katalogSection(data) {
   const order = records.some((r) => r.folio_label)
     ? `<p class="hint">${esc(t('work.katalog.order'))}</p>`
     : '';
+  // the credit, once, above the records: the registry's source line
   return (
     `<section class="panel" aria-labelledby="katalog-heading">` +
     `<h2 id="katalog-heading">${esc(t('work.katalog'))}</h2>` +
+    sourceLine(data.katalog_credit) +
     order +
     body +
-    `<p class="attribution__line">${esc(t('work.katalog.attr'))}</p>` +
     `</section>`
   );
 }

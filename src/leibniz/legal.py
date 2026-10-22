@@ -637,7 +637,8 @@ LICENCES: tuple[Artifact, ...] = (
         source="https://leibniz-katalog.bbaw.de/",
         version=(
             "scraped 2026-07-29 (A3 sample) and 2026-09 (the §70 volumes' sweep, C2); the "
-            "Arbeitsstelle's Access export of 2026-10-21 (70,405 records, CSV via mdbtools; A3b)"
+            "Arbeitsstelle's Access export of 2026-10-19, provided 2026-10-21 (70,405 records, "
+            "CSV via mdbtools; A3b)"
         ),
         obtained=Terms("CC BY 4.0", _d(2026, 7, 29), "the catalogue's site, SPECS §1.2"),
         current=Terms(
@@ -1112,7 +1113,38 @@ def output_rows(outputs: tuple[Output, ...] = OUTPUTS) -> list[dict[str, str]]:
     ]
 
 
+# The Arbeitskatalog export this site's catalogue records come from (A3b), and
+# the credit line the holdings page and the work page's catalogue records carry
+# — written once here; move the date with each new export.
+ARBEITSKATALOG_EXPORT_DATE = _d(2026, 10, 19)
+ARBEITSKATALOG_CATALOGUE_URL = "https://leibniz-katalog.bbaw.de/"
+ARBEITSKATALOG_EDITION_URL = "https://www.bbaw.de/forschung/leibniz-edition-potsdam-i"
+
+
+def arbeitskatalog_credit() -> dict:
+    """The source line for the catalogue's data, with its two links: ``text`` is
+    the whole line in English (``Source: Arbeitskatalog der Leibniz-Edition,
+    Leibniz-Edition Potsdam I (BBAW), CC BY 4.0, export of 19 October 2026``);
+    the parts let the viewer link and translate it."""
+    entry = artifact("arbeitskatalog")
+    licence = entry.licence_now.licence.split(",")[0].strip()
+    when = ARBEITSKATALOG_EXPORT_DATE
+    catalogue = "Arbeitskatalog der Leibniz-Edition"
+    edition = "Leibniz-Edition Potsdam I (BBAW)"
+    return {
+        "catalogue": {"name": catalogue, "url": ARBEITSKATALOG_CATALOGUE_URL},
+        "edition": {"name": edition, "url": ARBEITSKATALOG_EDITION_URL},
+        "licence": licence,
+        "export_date": when.isoformat(),
+        "text": (f"Source: {catalogue}, {edition}, {licence}, export of {when.day} {when:%B %Y}"),
+    }
+
+
 __all__ = [
+    "ARBEITSKATALOG_CATALOGUE_URL",
+    "ARBEITSKATALOG_EDITION_URL",
+    "ARBEITSKATALOG_EXPORT_DATE",
+    "arbeitskatalog_credit",
     "ARTIFACTS",
     "BUCKETS",
     "CHANNELS",

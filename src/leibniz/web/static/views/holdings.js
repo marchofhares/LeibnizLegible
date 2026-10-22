@@ -1,14 +1,22 @@
-// views/holdings.js — where Leibniz's papers lie: the Arbeitskatalog's records
-// by the institution their shelfmark names, the digitised copies it links by
-// domain, and the GWLB's digitised works with and without records. The figures
-// come from /api/holdings (leibniz.catalog.holdings over the store); the page
-// says whether they cover the whole catalogue (the Arbeitsstelle's export,
-// with its date) or the part the site held before it.
+// views/holdings.js — where Leibniz's papers are held: the Arbeitskatalog's
+// records by the institution their shelfmark names, the digitised copies it
+// links by domain, and the GWLB's digitised works with and without records.
+// The figures come from /api/holdings (leibniz.catalog.holdings over the
+// store); `refreshed` says whether they cover the whole catalogue (the
+// Arbeitsstelle's export, with its date) or the records the store held
+// before the import.
 
 import { t } from '../i18n.js';
 import * as api from '../api.js';
 import { esc, num, pct } from '../dom.js';
-import { errorPanel, loading } from './common.js';
+import { errorPanel, loading, sourceLine } from './common.js';
+
+const LABELS = {
+  '(printed witness, no manuscript named)': 'holdings.label.printed',
+  '(private collection)': 'holdings.label.private',
+  '(whereabouts not stated)': 'holdings.label.unlocated',
+  '(no shelfmark)': 'holdings.label.none',
+};
 
 /**
  * Holdings with fewer records than this are summed as "other" — on a store of
@@ -17,13 +25,6 @@ import { errorPanel, loading } from './common.js';
 function minRecords(data) {
   return (data.records || 0) >= 1000 ? 20 : 1;
 }
-
-const LABELS = {
-  '(printed witness, no manuscript named)': 'holdings.label.printed',
-  '(private collection)': 'holdings.label.private',
-  '(whereabouts not stated)': 'holdings.label.unlocated',
-  '(no shelfmark)': 'holdings.label.none',
-};
 
 /** The API's English labels for the records that name no institution, in the reader's language. */
 function holdingName(name) {
@@ -93,6 +94,8 @@ function byHolding(data) {
       ],
       rows,
     ) +
+    // the rules, in one line under the table
+    `<p class="hint holdings__footnote">${esc(t('holdings.footnote', { records: num(total) }))}</p>` +
     `</section>`
   );
 }
@@ -134,6 +137,10 @@ function byDomain(data) {
 
 function works(data) {
   const known = typeof data.works === 'number' && typeof data.works_with_records === 'number';
+  // the heading says which store the figures describe
+  const state = data.refreshed
+    ? t('holdings.works.state.whole', { date: data.refreshed })
+    : t('holdings.works.state.before');
   const body = known
     ? `<p>${esc(
         t('holdings.works.p', {
@@ -160,24 +167,18 @@ function works(data) {
     : `<p class="muted">${esc(t('holdings.works.none'))}</p>`;
   return (
     `<section class="panel" aria-labelledby="holdings-works">` +
-    `<h2 id="holdings-works">${esc(t('holdings.works.h'))}</h2>${body}</section>`
+    `<h2 id="holdings-works">${esc(t('holdings.works.h'))} — ${esc(state)}</h2>${body}</section>`
   );
 }
 
 function page(data) {
-  const intro = data.refreshed
-    ? t('holdings.intro', { records: num(data.records || 0), date: data.refreshed })
-    : t('holdings.intro.partial', { records: num(data.records || 0) });
   return (
-    `<p>${esc(intro)}</p>` +
+    `<p>${esc(t('holdings.intro'))}</p>` +
     byHolding(data) +
-    byDomain(data) +
+    // the digitised copies are the export's links: nothing to count before the import
+    (data.refreshed ? byDomain(data) : '') +
     works(data) +
-    `<section class="panel" aria-labelledby="holdings-method">` +
-    `<h2 id="holdings-method">${esc(t('holdings.method.h'))}</h2>` +
-    `<p>${esc(t('holdings.method.p'))}</p>` +
-    `<p class="attribution__line">${esc(t('work.katalog.attr'))}</p>` +
-    `</section>`
+    `<section class="panel holdings__source">${sourceLine(data.credit)}</section>`
   );
 }
 

@@ -19,12 +19,13 @@ making all of it *legible and findable* is the point.
 collections, not all of Leibniz's papers: much is not yet digitised, at the
 GWLB and elsewhere, and other institutions hold manuscripts too, the
 Niedersächsisches Landesarchiv Hannover among them; the Arbeitskatalog der
-Leibniz-Edition records them all, this site holds the whole Arbeitskatalog as
-the Arbeitsstelle exported it on 21 October 2026 (70,405 records, refreshed with
-each export: `leibniz catalog import-access`), and every work page links to the
-catalogue's own search by shelfmark. Where Leibniz's papers lie, institution by
-institution, is on the [holdings page](https://leibnizlegible.com/holdings) and
-in `reports/holdings.md`.
+Leibniz-Edition records them all, this site holds the whole Arbeitskatalog from
+the Arbeitsstelle's own export of 19 October 2026 (70,405 records, not the
+catalogue's website; refreshed with each export: `leibniz catalog
+import-access`), and every work page links to the catalogue's own search by
+shelfmark. Where Leibniz's papers are held, institution by institution, is on
+the [holdings page](https://leibnizlegible.com/holdings) and in
+`reports/holdings.md`.
 
 - **`SPECS.md`** — the project's law (mission, deliverables, architecture, legal rails).
 - **`PROMPTS.md`** — the phase-by-phase build plan.
@@ -184,7 +185,7 @@ must hold every word (`match=any` for one of them); titles, shelfmarks, AA
 references, folio labels and the titles of the catalogue pieces on a page are
 folded the same way, so `AA VI,4 N. 109` or `Praefatio` find their pages. The
 pieces are those of the catalogue records the store holds: the whole
-Arbeitskatalog since its import from the Arbeitsstelle's export of 21 October
+Arbeitskatalog since its import from the Arbeitsstelle's export of 19 October
 2026 (`reports/crosswalk.md`, `reports/holdings.md`).
 `/api/lookup` reads a query as a citation — a shelfmark with its folio, an
 Akademie-Ausgabe number, an id — and the search page offers where it points.

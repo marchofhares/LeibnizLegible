@@ -26,7 +26,7 @@ def _import(store_path: Path) -> None:
     """The fixture export into the fixture store, as `--write` would."""
     conn = db.connect(store_path)
     records = ak.records_from_export(ak.read_export(FIXTURES))
-    ak.write_import(conn, records, export_date="2026-10-21", csv_dir=FIXTURES)
+    ak.write_import(conn, records, export_date="2026-10-19", csv_dir=FIXTURES)
     conn.close()
 
 
@@ -45,9 +45,9 @@ def test_coverage_before_and_after_the_import(store_path) -> None:
     assert c.get("/api/contents", params={"q": "praefatio"}).json()["katalog"]["refreshed"] is None
     _import(store_path)
     c = _client(store_path)
-    assert c.get("/api/stats").json()["katalog"] == {"records": 30, "refreshed": "2026-10-21"}
+    assert c.get("/api/stats").json()["katalog"] == {"records": 30, "refreshed": "2026-10-19"}
     body = c.get(f"/api/works/{W1}").json()
-    assert body["katalog_coverage"] == {"records": 30, "refreshed": "2026-10-21"}
+    assert body["katalog_coverage"] == {"records": 30, "refreshed": "2026-10-19"}
     # the two records on LH 4, 6, 18 replaced the fixture's k-109, by their GWLB links
     assert sorted(r["record_id"] for r in body["katalog"]) == ["41800", "59095"]
     assert body["katalog"][0]["match_method"] == "gwlb_link"
@@ -67,7 +67,7 @@ def test_holdings_api_and_page(store_path) -> None:
     _import(store_path)
     c = _client(store_path)
     body = c.get("/api/holdings").json()
-    assert body["refreshed"] == "2026-10-21" and body["records"] == 30
+    assert body["refreshed"] == "2026-10-19" and body["records"] == 30
     assert body["by_holding"][0] == {"holding": "Hannover NLB", "records": 23}
     assert body["by_place"][0] == {"place": "Hannover", "records": 24}
     assert body["gwlb_links"] == {"id": 19, "PPN": 1} and body["with_url"] == 26
@@ -78,9 +78,21 @@ def test_holdings_api_and_page(store_path) -> None:
         {"set": "LeibnizHandschriften", "works": 1, "with_records": 1},
     ]
     assert "CC BY 4.0" in body["attribution"]
+    # the credit, written once in the registry
+    credit = body["credit"]
+    assert credit["text"] == (
+        "Source: Arbeitskatalog der Leibniz-Edition, Leibniz-Edition Potsdam I (BBAW), "
+        "CC BY 4.0, export of 19 October 2026"
+    )
+    assert credit["catalogue"]["url"] == "https://leibniz-katalog.bbaw.de/"
+    assert credit["edition"]["url"] == "https://www.bbaw.de/forschung/leibniz-edition-potsdam-i"
+    assert credit["export_date"] == "2026-10-19" and credit["licence"] == "CC BY 4.0"
+    assert c.get(f"/api/works/{W1}").json()["katalog_credit"] == credit
     page = c.get("/holdings")
     assert page.status_code == 200
-    assert "<title>Where Leibniz&#x27;s papers lie — Leibniz Legible</title>" in page.text
+    assert page.text.count("Where Leibniz&#x27;s papers are held") == 3  # title, og, twitter
+    assert "papers lie" not in page.text
+    assert "https://leibnizlegible.com/holdings" in c.get("/sitemap.xml").text
     assert 'property="og:url" content="https://leibnizlegible.com/holdings"' in page.text
     assert "by holding institution" in page.text  # the description meta
     get = c.get("/openapi.json").json()["paths"]["/api/holdings"]["get"]
@@ -93,6 +105,13 @@ def test_holdings_api_and_page(store_path) -> None:
         "holdings.heading",
         "holdings.byHolding.h",
         "holdings.label.printed",
+        "holdings.footnote",
+        "holdings.works.state.before",
+        "holdings.works.state.whole",
+        "katalog.source.label",
+        "katalog.source.export",
+        "browse.holdings",
+        "browse.holdings.link",
         "about.what.holdings",
         "about.what.scope.whole",
         "browse.filter.noneAnywhere.whole",
@@ -102,8 +121,36 @@ def test_holdings_api_and_page(store_path) -> None:
         "work.katalog.ov",
     ):
         assert strings.count(f"'{key}':") == 2, key
+    for gone in (
+        "holdings.method.h",
+        "holdings.method.p",
+        "holdings.intro.partial",
+        "work.katalog.attr",
+    ):
+        assert f"'{gone}':" not in strings, gone
+    assert strings.count("Where Leibniz’s papers are held") >= 2 and "papers lie" not in strings
+    assert strings.count("Wo Leibniz’ Papiere aufbewahrt werden") >= 2
+    assert "Papiere liegen" not in strings
+    assert "(19 October 2026)" in strings and "(19. Oktober 2026)" in strings  # the About block
     about = (STATIC_DIR / "views" / "about.js").read_text(encoding="utf-8")
     assert 'href="/holdings"' in about and "about.what.scope.whole" in about
+    holdings_js = (STATIC_DIR / "views" / "holdings.js").read_text(encoding="utf-8")
+    assert "holdings.method" not in holdings_js and "sourceLine(data.credit)" in holdings_js
+    assert "data.refreshed ? byDomain(data) : ''" in holdings_js
+    browse_js = (STATIC_DIR / "views" / "browse.js").read_text(encoding="utf-8")
+    assert "browse.holdings.link" in browse_js and 'href="/holdings"' in browse_js
+    work_js = (STATIC_DIR / "views" / "work.js").read_text(encoding="utf-8")
+    assert "sourceLine(data.katalog_credit)" in work_js and "work.katalog.attr" not in work_js
+    # the server-rendered pages carry the same line and the same link
+    browse = c.get("/browse").text
+    assert 'Looking for something that is not here? <a href="/holdings">' in browse
+    work = c.get(f"/work/{W1}").text
+    assert (
+        '<p class="attribution__line">Source: <a href="https://leibniz-katalog.bbaw.de/" '
+        'rel="noopener">Arbeitskatalog der Leibniz-Edition</a>, '
+        '<a href="https://www.bbaw.de/forschung/leibniz-edition-potsdam-i" rel="noopener">'
+        "Leibniz-Edition Potsdam I (BBAW)</a>, CC BY 4.0, export of 19 October 2026</p>" in work
+    )
 
 
 def test_the_work_page_says_the_whole_catalogue_once_imported(store_path) -> None:
@@ -115,15 +162,17 @@ def test_the_work_page_says_the_whole_catalogue_once_imported(store_path) -> Non
     after = c.get(f"/work/{W2}").text
     assert (
         "<p>No catalogue record is linked to this work, and this site holds the whole "
-        "Arbeitskatalog, refreshed 2026-10-21; search it for <a href=" in after
+        "Arbeitskatalog, refreshed 2026-10-19; search it for <a href=" in after
     )
     assert "holds part of" not in after
     # llms.txt and the README say the same
     llms = c.get("/llms.txt").text
-    assert "the whole Arbeitskatalog as the Arbeitsstelle exported it on 2026-10-21" in llms
-    assert "`GET /api/holdings`" in llms and "/holdings" in llms
+    assert "the whole Arbeitskatalog from the Arbeitsstelle's own export of 2026-10-19" in llms
+    assert "`GET /api/holdings`" in llms and "Where Leibniz's papers are held" in llms
+    assert "not from the catalogue's website" in llms and "papers lie" not in llms
     readme = (STATIC_DIR.parents[3] / "README.md").read_text(encoding="utf-8")
-    assert "the whole Arbeitskatalog as" in readme and "holdings page" in readme
+    assert "own export of 19 October 2026" in readme and "holdings page" in readme
+    assert "papers are held" in readme and "papers lie" not in readme
 
 
 def test_a_record_carries_the_links_out_and_the_ordnungsvermerk(store_path) -> None:

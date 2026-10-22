@@ -358,7 +358,7 @@ def import_access(
 
     conn = db.init_db(db_path)
     try:
-        comparison = access_mod.compare_records(db.iter_katalog_records(conn), by_id)
+        comparison = access_mod.compare_records(db.iter_katalog_records(conn), by_id, export.ritter)
         table = access_mod.render_comparison(comparison)
         console.print(table, markup=False, highlight=False)
         if report is not None:
@@ -366,18 +366,30 @@ def import_access(
             report.write_text(table + "\n", encoding="utf-8")
             console.print(f"  agreement table → {report}")
         missing = access_mod.missing_references(conn, set(by_id))
-        if missing:
-            for table_name, ids in missing.items():
-                shown = ", ".join(ids[:50]) + (" …" if len(ids) > 50 else "")
-                console.print(
-                    f"[red]STOP: {len(ids):,} record id(s) {table_name} references are not in "
-                    f"the export:[/red] {shown}"
+        target = {r.old_id: r.new_id for r in comparison.remapped}
+        for rid in missing.get("crosswalk", []):
+            # the rebuild links the export's record under its new id, or drops the link
+            where = target.get(rid)
+            console.print(
+                f"  crosswalk: record {rid} is "
+                + (
+                    f"carried by the export as {where}; its links are rebuilt under that id"
+                    if where
+                    else "not in the export; its links are dropped by the rebuild"
                 )
+            )
+        if missing.get("gt_lines"):
+            ids = missing["gt_lines"]
+            shown = ", ".join(
+                f"{rid} (→ {target[rid]})" if target.get(rid) else rid for rid in ids[:50]
+            ) + (" …" if len(ids) > 50 else "")
+            console.print(
+                f"[red]STOP: {len(ids):,} record id(s) the ground truth (gt_lines.record_id) "
+                f"references are not in the export:[/red] {shown}"
+            )
             console.print("[red]Nothing written.[/red]")
             raise typer.Exit(code=1)
-        console.print(
-            "  every record id the ground truth and the crosswalk reference exists in the export"
-        )
+        console.print("  every record id the ground truth references exists in the export")
         if not write:
             console.print(
                 "[yellow]Dry run: nothing written.[/yellow] After the backup and the operator's "
@@ -401,6 +413,7 @@ def import_access(
                 csv_dir=csv_dir,
                 git_sha=db.git_sha(),
                 progress=lambda _rid: progress.advance(task),
+                remapped=comparison.remapped,
             )
         console.print(access_mod.render_import_stats(stats), markup=False, highlight=False)
         console.print(

@@ -29,7 +29,9 @@ compared with the export's columns. The rules, as the website renders them:
   ``1707``, ``16930006`` → ``1693``), anything but eight digits verbatim
   (``169760113``); ``JJMMTT``, the date in the other calendar, follows in
   parentheses as ``(99-11-28)`` (zero-filled to six digits: Access dropped the
-  leading zero of ``51116``).
+  leading zero of ``51116``; a ``00`` month or day dropped as in the first
+  date, ``(93-06)``: the operator's dry run of 2026-10-22 found 397 records
+  so).
 * ``Akademie Ausgabe`` = ``REIHE | bd.nnn / UNr Aufl. Aufl(Jahr)`` with the
   piece number zero-filled to three digits (``8 | 3.044``, ``2 | 1.130 / a
   Teildr. Aufl. 2 (1988)``); a series without a piece shows the series alone
@@ -40,9 +42,16 @@ compared with the export's columns. The rules, as the website renders them:
 * ``Sigle`` = ``TZ``; ``Absendeort`` = ``ORT``; ``Textart`` = ``UEBERLFG``;
   ``Titel``, ``Incipit``, ``Drucke``, ``Bemerkungen``, ``Bezüge`` the columns
   of those names with line breaks folded to spaces.
-* ``Absender``/``Adressat`` are the bare names; the website appends its link
-  texts ``(KorrespDB)`` ``(GND)``, which every reader strips
-  (``catalog/hands.py``, ``web/browse.py``).
+* ``Absender``/``Adressat``: the export carries the catalogue's own strings,
+  several names apart by ``|``; the website shows each name with its link
+  texts, ``(KorrespDB)`` where the persons table (``pers_norm.csv``: ``korr``
+  → ``pers_name``, ``gnd``, ``idhannover``) has a Leibniz-Connection id and
+  ``(GND)`` where it has a GND, the names run together. Joined through that
+  table the export reproduces the website's cells (46 of 46 on the live
+  records), so the record carries the website's form, which every reader
+  strips (``catalog/hands.py``, ``web/browse.py``), and the identifiers beside
+  it as ``absender_gnd``, ``absender_korrespdb``, ``adressat_gnd``,
+  ``adressat_korrespdb``. Without the persons table the bare strings stay.
 * ``Format und Umfang`` = the format's name (``2`` Folio, ``4`` Quart, ``8``
   Oktav, ``12`` Duodez, ``16`` Sedez, ``24`` Vigesimoquart; the website prints
   a bare ``°`` for ``32``, this module ``32°``) and ``UMFANG`` rounded to two
@@ -68,10 +77,18 @@ itself); ``last_change`` (``Letzte_Aenderg``); ``aa_pdf`` (the edition's PDF
 for the piece, with the printed page, from ``pdf_url``: the web layer decides
 by the registry whether the host is public).
 
-The two copies have been edited apart since the website's last feed (a
-printing's wording, a date or a piece number the website's copy lacks); the
-dry run of ``leibniz catalog import-access`` counts those per key, with
-examples.
+The website's parser lost what it read as HTML tags — ``<Trig>onometria``,
+``<bey dem> Bergambt``, ``<prs. …>`` in a Textart, the format code before a
+``°`` — so a store value that equals the export's with every ``<…>`` segment
+removed counts as agreement ("website lost markup"); the export's value is
+kept. The two copies have also been edited apart since the website's last
+feed (a printing's wording, a date or a piece number the website's copy
+lacks), and the Access master renumbers or merges a few records between
+TELOTA's half-yearly imports: a store record whose id the export no longer
+carries is mapped to the export's record with the same Kat.-Nr. and
+shelfmark (else the same Kat.-Nr. where unique, else the record whose
+``Identisch_mit`` or ``mergenr`` names it). The dry run of ``leibniz catalog
+import-access`` reports all of that, with examples.
 """
 
 from __future__ import annotations
@@ -96,6 +113,7 @@ from leibniz.catalog.scrape import GWLB_RESOLVE_RE, parse_aa_refs
 
 RITTER = "ritter.csv"
 PDF_URL = "pdf_url.csv"
+PERS_NORM = "pers_norm.csv"
 OV_INFOS = "OV_mit_Infos.csv"
 OV_INHALT = "OV_mit_Inhalt.csv"
 FASZIKEL = "Faszikel_Ms_mit_Infos.csv"
@@ -111,7 +129,7 @@ TABLES: tuple[str, ...] = (
     "HAB.csv",
     "Orte.csv",
     "Orte_Hannover.csv",
-    "pers_norm.csv",
+    PERS_NORM,
     "personen_xlsx.csv",
     "Jahre.csv",
     "Ordnr.csv",
@@ -139,6 +157,10 @@ GWLB_PPN_RE = re.compile(r"digitale-sammlungen\.gwlb\.de/resolve\?PPN=([A-Za-z0-
 
 # The website's link texts after a name.
 MARKERS_RE = re.compile(r"\s*\((?:KorrespDB|GND)\)")
+# What the website's parser read as an HTML tag and lost.
+MARKUP_RE = re.compile(r"<[^<>]*>")
+# Several names in one cell of the export.
+NAME_SEP_RE = re.compile(r"\s*\|\s*|\r?\n")
 
 _XS_ANCHOR = re.compile(r"&xs[+-]?\d+&x\{")
 _APPARATUS = re.compile(r"<(app\w*)\b[^<>]*>.*?</\1\s*>", re.DOTALL | re.IGNORECASE)
@@ -171,6 +193,7 @@ class Export:
     csv_dir: Path
     ritter: list[dict[str, str]]
     pdf_url: list[dict[str, str]] = field(default_factory=list)
+    pers_norm: list[dict[str, str]] = field(default_factory=list)
     ov_infos: list[dict[str, str]] = field(default_factory=list)
     ov_inhalt: list[dict[str, str]] = field(default_factory=list)
     faszikel: list[dict[str, str]] = field(default_factory=list)
@@ -191,6 +214,7 @@ def read_export(csv_dir: Path | str) -> Export:
     export.counts[RITTER] = len(export.ritter)
     for name, attr in (
         (PDF_URL, "pdf_url"),
+        (PERS_NORM, "pers_norm"),
         (OV_INFOS, "ov_infos"),
         (OV_INHALT, "ov_inhalt"),
         (FASZIKEL, "faszikel"),
@@ -239,7 +263,12 @@ def date_cell(jjjjmmtt: str, jjmmtt: str = "") -> str:
     if other and out:
         if other.isdigit() and len(other) <= 6:
             other = other.zfill(6)
-            other = f"{other[:2]}-{other[2:4]}-{other[4:]}"
+            year, month, day = other[:2], other[2:4], other[4:]
+            other = year
+            if month != "00":
+                other += f"-{month}"
+                if day != "00":
+                    other += f"-{day}"
         out += f" ({other})"
     return out
 
@@ -302,6 +331,55 @@ def aa_refs_for(reihe: str, bd: str, nr: str, unr: str, aufl: str, bezug: str) -
     ):
         refs.append({"series": int(series), "volume": None, "piece": None, "source": "aa_column"})
     return refs
+
+
+PersonIndex = dict[str, dict[str, str]]
+
+
+def build_person_index(rows: Iterable[Mapping[str, str]]) -> PersonIndex:
+    """``korr`` (the catalogue's short name) → ``{"name", "gnd", "korrespdb"}``
+    from ``pers_norm.csv``; the first row of a repeated name wins."""
+    index: PersonIndex = {}
+    for row in rows:
+        korr = clean(row.get("korr"))
+        if korr and korr not in index:
+            index[korr] = {
+                "name": clean(row.get("pers_name")),
+                "gnd": clean(row.get("gnd")),
+                "korrespdb": clean(row.get("idhannover")),
+            }
+    return index
+
+
+def names_as_website(cell: str, index: PersonIndex | None) -> tuple[str, list[str], list[str]]:
+    """A sender or addressee cell as the website shows it, and the identifiers
+    behind it: each name with ``(KorrespDB)`` where the persons table has a
+    Leibniz-Connection id and ``(GND)`` where it has a GND, the names run
+    together as the website's cell reads; the GNDs and the KorrespDB ids in
+    the names' order (one entry per name that has one). Without the table
+    the names are the export's, ``|`` and all."""
+    text = cell or ""
+    if not text.strip():
+        return "", [], []
+    if index is None:
+        return clean(text), [], []
+    parts: list[str] = []
+    gnds: list[str] = []
+    ids: list[str] = []
+    for raw in NAME_SEP_RE.split(text):
+        name = clean(raw)
+        if not name:
+            continue
+        person = index.get(name, {})
+        shown = name
+        if person.get("korrespdb"):
+            shown += " (KorrespDB)"
+            ids.append(person["korrespdb"])
+        if person.get("gnd"):
+            shown += " (GND)"
+            gnds.append(person["gnd"])
+        parts.append(shown)
+    return "".join(parts), gnds, ids
 
 
 def wortlaut_text(raw: str) -> str | None:
@@ -416,7 +494,11 @@ def build_ov_index(
 
 
 def record_from_row(
-    row: Mapping[str, str], *, pdf_index: PdfIndex | None = None, ov_index: OvIndex | None = None
+    row: Mapping[str, str],
+    *,
+    pdf_index: PdfIndex | None = None,
+    ov_index: OvIndex | None = None,
+    person_index: PersonIndex | None = None,
 ) -> db.KatalogRecord:
     """Map one ``ritter`` row to the record the website parser would produce,
     plus the export's own keys (the module docstring has the rules)."""
@@ -437,6 +519,8 @@ def record_from_row(
         row.get("BEZUG", ""),
     )
     identisch = cell("Identisch_mit")
+    absender, absender_gnd, absender_ids = names_as_website(row.get("ABSENDER", ""), person_index)
+    adressat, adressat_gnd, adressat_ids = names_as_website(row.get("ADRESSAT", ""), person_index)
     ov_norm = cell("Ordnungsvermerk_normiert")
     ov_info = (ov_index or {}).get(ov_norm, {}) if ov_norm else {}
 
@@ -454,8 +538,8 @@ def record_from_row(
             row.get("Aufl(Jahr)", ""),
         ),
         "sigle": cell("TZ"),
-        "absender": cell("ABSENDER"),
-        "adressat": cell("ADRESSAT"),
+        "absender": absender,
+        "adressat": adressat,
         "ort": cell("ORT"),
         "textart": cell("UEBERLFG"),
         "umfang": umfang_cell(row.get("FORMAT", ""), row.get("UMFANG", "")),
@@ -475,6 +559,10 @@ def record_from_row(
         "identisch_mit": identisch if identisch and identisch != record_id else "",
         "last_change": cell("Letzte_Aenderg"),
         "aa_pdf": edition_pdf(row, pdf_index),
+        "absender_gnd": absender_gnd,
+        "absender_korrespdb": absender_ids,
+        "adressat_gnd": adressat_gnd,
+        "adressat_korrespdb": adressat_ids,
     }
     return db.KatalogRecord(
         record_id=record_id,
@@ -489,8 +577,9 @@ def records_from_export(export: Export) -> list[db.KatalogRecord]:
     """Every row of ``ritter.csv`` as a record, side tables joined."""
     pdf_index = build_pdf_index(export.pdf_url)
     ov_index = build_ov_index(export.ov_infos, export.ov_inhalt)
+    person_index = build_person_index(export.pers_norm) if export.pers_norm else None
     return [
-        record_from_row(row, pdf_index=pdf_index, ov_index=ov_index)
+        record_from_row(row, pdf_index=pdf_index, ov_index=ov_index, person_index=person_index)
         for row in export.ritter
         if clean(row.get("ID"))
     ]
@@ -524,11 +613,12 @@ CLASSES: tuple[str, ...] = (
     "exact",
     "whitespace",
     "markers",
+    "markup",
     "export_adds",
     "export_lacks",
     "other",
 )
-AGREEING: frozenset[str] = frozenset({"exact", "whitespace", "markers"})
+AGREEING: frozenset[str] = frozenset({"exact", "whitespace", "markers", "markup"})
 EXAMPLES_PER_CLASS = 3
 
 
@@ -569,9 +659,22 @@ def classify(key: str, old: object, new: object) -> str:
     if isinstance(old, str) and isinstance(new, str):
         if clean(old) == clean(new):
             return "whitespace"
-        if key in ("absender", "adressat") and clean(MARKERS_RE.sub("", old)) == clean(new):
+        if key in ("absender", "adressat") and clean(MARKERS_RE.sub("", old)) == clean(
+            MARKERS_RE.sub("", new)
+        ):
             return "markers"
+        if clean(old) == clean(website_lost_markup(key, new)):
+            return "markup"
     return "other"
+
+
+def website_lost_markup(key: str, value: str) -> str:
+    """The export's value as the website's parser would have kept it: every
+    ``<…>`` segment gone, and for the format the code before a bare ``°``."""
+    text = MARKUP_RE.sub("", value)
+    if key == "umfang":
+        text = re.sub(r"\b\d+°", "°", text)
+    return text
 
 
 def _short(value: object, limit: int = 70) -> str:
@@ -612,6 +715,17 @@ class KeyAgreement:
 
 
 @dataclass(slots=True)
+class Remap:
+    """A store record the export no longer carries under its id, and where it went."""
+
+    old_id: str
+    new_id: str | None
+    how: str  # "Kat.-Nr. and shelfmark" | "Kat.-Nr." | "Identisch_mit" | "mergenr" | "no match"
+    katnr: str = ""
+    signatur: str = ""
+
+
+@dataclass(slots=True)
 class Comparison:
     """The dry run's findings over the records the store holds."""
 
@@ -621,33 +735,91 @@ class Comparison:
     new_in_export: int
     keys: dict[str, KeyAgreement]
     hand_changes: list[tuple[str, str, str, bool, bool]]
+    remapped: list[Remap] = field(default_factory=list)
 
     def pct(self, key: str) -> float:
         return self.keys[key].pct
 
     @property
     def settled(self) -> bool:
-        """Every threshold key agrees on ≥ 99 % of the records and the hand rule
-        gives the same answer everywhere. A store record the export no longer
-        carries is listed, not a fault of the mapping: the write deletes it
-        unless the ground truth or the crosswalk references it, which
-        :func:`missing_references` stops."""
-        return not self.hand_changes and all(self.pct(k) >= THRESHOLD_PCT for k in THRESHOLD_KEYS)
+        """Every threshold key agrees on ≥ 99 % of the records. The hand rule's
+        changes are listed, not a fault of the mapping (the export's fuller
+        Textart decides); a store record the export no longer carries is
+        remapped or listed: the write drops it unless the ground truth
+        references it, which :func:`missing_references` stops."""
+        return all(self.pct(k) >= THRESHOLD_PCT for k in THRESHOLD_KEYS)
+
+    @property
+    def unmapped(self) -> list[str]:
+        """The store's record ids the export carries under no id."""
+        return [r.old_id for r in self.remapped if r.new_id is None]
+
+
+def remap_missing(
+    missing: Iterable[db.KatalogRecord],
+    new_by_id: Mapping[str, db.KatalogRecord],
+    rows: Iterable[Mapping[str, str]] = (),
+) -> list[Remap]:
+    """Where a store record went whose id the export no longer carries: the
+    export's record with the same Kat.-Nr. and shelfmark, else the same
+    Kat.-Nr. where it is unique, else the export row whose ``Identisch_mit``
+    or ``mergenr`` names the old id; ``new_id`` None where nothing matches."""
+    by_katnr: dict[str, list[str]] = {}
+    by_both: dict[tuple[str, str], list[str]] = {}
+    for rid, rec in new_by_id.items():
+        katnr = clean(rec.metadata.get("katnr"))
+        if katnr:
+            by_katnr.setdefault(katnr, []).append(rid)
+            by_both.setdefault((katnr, clean(rec.metadata.get("signatur"))), []).append(rid)
+    by_identisch: dict[str, list[str]] = {}
+    by_mergenr: dict[str, list[str]] = {}
+    for row in rows:
+        rid = clean(row.get("ID"))
+        if clean(row.get("Identisch_mit")):
+            by_identisch.setdefault(clean(row.get("Identisch_mit")), []).append(rid)
+        if clean(row.get("mergenr")):
+            by_mergenr.setdefault(clean(row.get("mergenr")), []).append(rid)
+    out: list[Remap] = []
+    for old in missing:
+        katnr = clean(old.metadata.get("katnr"))
+        signatur = clean(old.metadata.get("signatur")) or clean(
+            old.shelfmark_refs[0] if old.shelfmark_refs else ""
+        )
+        found: tuple[str, str] | None = None
+        if katnr and len(by_both.get((katnr, signatur), [])) == 1:
+            found = (by_both[(katnr, signatur)][0], "Kat.-Nr. and shelfmark")
+        elif katnr and len(by_katnr.get(katnr, [])) == 1:
+            found = (by_katnr[katnr][0], "Kat.-Nr.")
+        elif len(by_identisch.get(old.record_id, [])) == 1:
+            found = (by_identisch[old.record_id][0], "Identisch_mit")
+        elif len(by_mergenr.get(old.record_id, [])) == 1:
+            found = (by_mergenr[old.record_id][0], "mergenr")
+        if found is None:
+            out.append(Remap(old.record_id, None, "no match", katnr, signatur))
+        else:
+            out.append(Remap(old.record_id, found[0], found[1], katnr, signatur))
+    return out
 
 
 def compare_records(
-    store_records: Iterable[db.KatalogRecord], new_by_id: Mapping[str, db.KatalogRecord]
+    store_records: Iterable[db.KatalogRecord],
+    new_by_id: Mapping[str, db.KatalogRecord],
+    rows: Iterable[Mapping[str, str]] = (),
 ) -> Comparison:
-    """Compare every record the store holds with the export's row of the same id."""
+    """Compare every record the store holds with the export's row of the same
+    id — or, where the export carries the record under another id
+    (:func:`remap_missing`), with that row."""
     keys = {k: KeyAgreement(k) for k in COMPARED_KEYS}
-    missing: list[str] = []
     hand_changes: list[tuple[str, str, str, bool, bool]] = []
     n_store = compared = 0
+    store_records = list(store_records)
+    missing = [old for old in store_records if old.record_id not in new_by_id]
+    remapped = remap_missing(missing, new_by_id, rows)
+    target = {r.old_id: r.new_id for r in remapped if r.new_id is not None}
     for old in store_records:
         n_store += 1
-        new = new_by_id.get(old.record_id)
+        new = new_by_id.get(old.record_id) or new_by_id.get(target.get(old.record_id, ""))
         if new is None:
-            missing.append(old.record_id)
             continue
         compared += 1
         for key in COMPARED_KEYS:
@@ -659,40 +831,46 @@ def compare_records(
         new_lz = is_leibniz_hand(new_hand, str(new.metadata.get("absender") or "") or None)
         if old_hand != new_hand or old_lz != new_lz:
             hand_changes.append((old.record_id, old_hand, new_hand, old_lz, new_lz))
-    seen = {rid for rid in new_by_id}
     return Comparison(
         store_records=n_store,
         compared=compared,
-        missing_in_export=sorted(missing),
-        new_in_export=len(seen) - compared,
+        missing_in_export=sorted(r.old_id for r in remapped if r.new_id is None),
+        new_in_export=len(new_by_id) - compared,
         keys=keys,
         hand_changes=hand_changes,
+        remapped=remapped,
     )
 
 
 def render_comparison(cmp: Comparison) -> str:
     """The agreement table and its examples, as Markdown."""
+    mapped = [r for r in cmp.remapped if r.new_id is not None]
     lines = [
         f"Records in the store: {cmp.store_records:,} · compared with the export: "
-        f"{cmp.compared:,} · in the store but not in the export: {len(cmp.missing_in_export):,} "
-        f"· in the export only (new): {cmp.new_in_export:,}",
+        f"{cmp.compared:,} (of them {len(mapped):,} under another id) · in the store but "
+        f"not in the export: {len(cmp.unmapped):,} · in the export only (new): "
+        f"{cmp.new_in_export:,}",
         "",
-        "| Key | Exact | Whitespace | Markers only | Export adds | Export lacks | Other | Agree |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Key | Exact | Whitespace | Markers only | Website lost markup | Export adds | "
+        "Export lacks | Other | Agree |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for key in COMPARED_KEYS:
         k = cmp.keys[key]
         mark = " ✱" if key in THRESHOLD_KEYS else ""
         lines.append(
             f"| {key}{mark} | {k.counts['exact']:,} | {k.counts['whitespace']:,} | "
-            f"{k.counts['markers']:,} | {k.counts['export_adds']:,} | "
+            f"{k.counts['markers']:,} | {k.counts['markup']:,} | {k.counts['export_adds']:,} | "
             f"{k.counts['export_lacks']:,} | {k.counts['other']:,} | {k.pct:.1f} % |"
         )
     lines += [
         "",
         "✱ the keys the mapping is judged on; settled at ≥ "
-        f"{THRESHOLD_PCT:.0f} % each. *Agree* = exact, whitespace-only or the website's link "
-        "texts only, over the records where the website had a value. *Export adds*: the "
+        f"{THRESHOLD_PCT:.0f} % each. *Agree* = exact, whitespace-only, the website's link "
+        "texts only, or *website lost markup* (the store's value is the export's with every "
+        "`<…>` segment gone, or a bare `°` for a format code: text the website's parser read "
+        "as HTML tags; the export's value is kept), over the records where the website had a "
+        "value. *Export adds*: the "
         "store had nothing and the export has a value (the website's copy lacks it, or the "
         "website parser had no rule for it: a PPN link) — it proves nothing about the "
         "mapping and is left out of the share; *export lacks*: the store has a value the "
@@ -705,19 +883,37 @@ def render_comparison(cmp: Comparison) -> str:
         for cls in ("other", "export_lacks", "export_adds"):
             for rid, old, new in k.examples.get(cls, []):
                 lines.append(f"- `{key}` {cls} · {rid}: store `{old}` · export `{new}`")
-    if cmp.missing_in_export:
-        shown = ", ".join(cmp.missing_in_export[:20])
-        more = (
-            "" if len(cmp.missing_in_export) <= 20 else f" … (+{len(cmp.missing_in_export) - 20:,})"
-        )
-        lines += ["", f"In the store but not in the export: {shown}{more}"]
+    restored = [(key, cmp.keys[key].counts["markup"]) for key in COMPARED_KEYS]
+    restored = [(key, n) for key, n in restored if n]
+    if restored:
+        lines += [
+            "",
+            "The export restores text the website's parser lost as markup on "
+            + ", ".join(f"{key} {n:,}" for key, n in restored)
+            + " records.",
+        ]
+    if cmp.remapped:
+        lines += [
+            "",
+            f"Records in the store whose id the export no longer carries: {len(cmp.remapped):,} "
+            "(the Access master renumbers or merges a few records between the website's "
+            "half-yearly imports):",
+        ]
+        for r in cmp.remapped:
+            where = f"→ {r.new_id} by {r.how}" if r.new_id else "no match in the export"
+            what = ", ".join(x for x in (f"Kat.-Nr. {r.katnr}" if r.katnr else "", r.signatur) if x)
+            lines.append(f"- {r.old_id} ({what or 'no Kat.-Nr., no shelfmark'}): {where}")
     lines += [
         "",
         f"The hand rule (`catalog/hands.py`) gives the same answer before and after on "
         f"{cmp.compared - len(cmp.hand_changes):,} of {cmp.compared:,} records"
-        + (":" if cmp.hand_changes else "."),
+        + (
+            " (the export's fuller Textart decides; listed, not blocking):"
+            if cmp.hand_changes
+            else "."
+        ),
     ]
-    for rid, oh, nh, ol, nl in cmp.hand_changes[:20]:
+    for rid, oh, nh, ol, nl in cmp.hand_changes:
         lines.append(f"- {rid}: hand {oh} → {nh}, Leibniz's own {ol} → {nl}")
     verdict = "settled" if cmp.settled else "NOT settled"
     lines += ["", f"Mapping: **{verdict}**."]
@@ -750,8 +946,10 @@ def referenced_record_ids(conn: sqlite3.Connection) -> dict[str, set[str]]:
 
 
 def missing_references(conn: sqlite3.Connection, export_ids: set[str]) -> dict[str, list[str]]:
-    """Referenced record ids the export does not carry, by table; empty when
-    the import may proceed."""
+    """Referenced record ids the export does not carry, by table. A ``gt_lines``
+    entry stops the import (the ground truth's ownership would dangle); a
+    ``crosswalk`` entry is remapped or dropped by the rebuild and only
+    reported."""
     return {
         table: sorted(ids - export_ids)
         for table, ids in referenced_record_ids(conn).items()
@@ -831,10 +1029,13 @@ def write_import(
     csv_dir: Path | str,
     git_sha: str | None = None,
     progress=None,
+    remapped: Sequence[Remap] | None = None,
 ) -> ImportStats:
     """Replace ``katalog_records`` by the export (upsert every row, delete what
-    the export no longer has), rebuild the crosswalk from scratch, and record
-    the run. Idempotent: a second run writes the same rows and links.
+    the export no longer has), rebuild the crosswalk from scratch — a record
+    the export carries under another id (``remapped``) is linked under that
+    id by its own links — and record the run. Idempotent: a second run writes
+    the same rows and links.
 
     The caller has checked :func:`missing_references` and holds the operator's
     go; this function does not ask."""
@@ -849,6 +1050,7 @@ def write_import(
             "csv_dir": str(csv_dir),
             "records": len(records),
             "deleted": len(deleted),
+            "remapped": {r.old_id: r.new_id for r in remapped or () if r.new_id},
         },
         git_sha=git_sha,
     )
@@ -925,6 +1127,8 @@ __all__ = [
     "FORMATS",
     "GWLB_PPN_RE",
     "MARKERS_RE",
+    "MARKUP_RE",
+    "PERS_NORM",
     "TABLES",
     "THRESHOLD_KEYS",
     "THRESHOLD_PCT",
@@ -932,10 +1136,12 @@ __all__ = [
     "Export",
     "ImportStats",
     "KeyAgreement",
+    "Remap",
     "aa_cell",
     "aa_refs_for",
     "build_ov_index",
     "build_pdf_index",
+    "build_person_index",
     "classify",
     "clean",
     "compare_records",
@@ -949,15 +1155,18 @@ __all__ = [
     "katnr_cell",
     "load_site_records",
     "missing_references",
+    "names_as_website",
     "outside_gwlb",
     "read_export",
     "read_table",
     "record_from_row",
     "records_from_export",
     "referenced_record_ids",
+    "remap_missing",
     "render_comparison",
     "render_import_stats",
     "umfang_cell",
+    "website_lost_markup",
     "wortlaut_text",
     "write_import",
 ]

@@ -143,6 +143,8 @@ const STRINGS = {
     'browse.filter.noneAnywhere.whole':
       'No shelfmark or name matches, and no catalogue piece carries these words. This site holds the whole Arbeitskatalog, refreshed {date}.',
     'browse.contents.ov': 'Ordnungsvermerk {name}',
+    'browse.holdings': 'Looking for something that is not here?',
+    'browse.holdings.link': 'Where Leibniz’s papers are held',
     'browse.filter.onlyContents': 'No shelfmark or name matches; the catalogue pieces below do.',
     'browse.filter.noneAnywhere':
       'No shelfmark or name matches, and no catalogue piece this site holds carries these words. It holds part of the Arbeitskatalog so far, not yet every record.',
@@ -216,8 +218,6 @@ const STRINGS = {
     // shelfmark names a folio range the scan's labels can place; {range} is the
     // catalogue's own "Bl. 1–2", the same in both languages.
     'work.katalog.text': 'Text of this piece ({range})',
-    'work.katalog.attr':
-      'Catalogue data from the Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, used under CC BY 4.0.',
     'work.pages': 'Page images',
     'work.canvases': '{n} page images',
     'work.folio': 'Folio {label}',
@@ -351,12 +351,16 @@ const STRINGS = {
     'set.leibniz-rekonstruktionen': 'Leibniz-Rekonstruktionen',
 
     // ---- about -----------------------------------------------------------
-    // ---- holdings: where Leibniz's papers lie (A3b) --------------------
-    'holdings.heading': 'Where Leibniz’s papers lie',
+    // ---- holdings: where Leibniz's papers are held (A3b) --------------------
+    'holdings.heading': 'Where Leibniz’s papers are held',
     'holdings.intro':
-      'The Arbeitskatalog der Leibniz-Edition records Leibniz’s writings and letters wherever their witnesses lie. Here it is read by the institution each shelfmark names: {records} records, from the Arbeitsstelle’s export of {date}. Records, not pages: a convolute of many pieces counts many times, and a printed or lost witness counts too.',
-    'holdings.intro.partial':
-      'The Arbeitskatalog der Leibniz-Edition records Leibniz’s writings and letters wherever their witnesses lie. Here it is read by the institution each shelfmark names, over the {records} records this site holds so far — part of the catalogue; the whole follows with the Arbeitsstelle’s export. Records, not pages: a convolute of many pieces counts many times, and a printed or lost witness counts too.',
+      'The Arbeitskatalog der Leibniz-Edition records Leibniz’s writings wherever they are held; this page counts its records by institution.',
+    'holdings.footnote':
+      '{records} records, not pages; a convolute counts once per piece; printed and lost witnesses count; the institution is read from the shelfmark.',
+    'holdings.works.state.before': 'before the catalogue import',
+    'holdings.works.state.whole': 'the whole Arbeitskatalog, refreshed {date}',
+    'katalog.source.label': 'Source',
+    'katalog.source.export': 'export of {date}',
     'holdings.byHolding.h': 'Records by holding institution',
     'holdings.byHolding.p':
       'The GWLB’s own collections (LH, LBr, LBrF, LK and the Ms manuscripts) are written without a place in the catalogue and appear here under its name for the library, Hannover NLB; everything else begins with a place and an institution. Holdings with fewer than {n} records are summed as “other”.',
@@ -375,9 +379,6 @@ const STRINGS = {
     'holdings.col.works': 'Works',
     'holdings.col.with': 'With records',
     'holdings.col.without': 'Without',
-    'holdings.method.h': 'How this was read',
-    'holdings.method.p':
-      'A record’s holding is its shelfmark’s prefix, read against a table built from the export: the place names the catalogue uses, the abbreviations and words that name an institution, the connectors inside a name. A prefix the table does not know is filed by its place alone; a shelfmark with no place in front is a printed witness with no manuscript named. Whether a link opens page images, a finding aid or a catalogue record differs by host and is not checked here. The same figures as Markdown: reports/holdings.md in the repository.',
     'holdings.label.printed': '(printed witness, no manuscript named)',
     'holdings.label.private': '(private collection)',
     'holdings.label.unlocated': '(whereabouts not stated)',
@@ -392,7 +393,7 @@ const STRINGS = {
       'The site covers the scans the GWLB has published of its Leibniz collections. That is not all of Leibniz’s papers: much is not yet digitised, at the GWLB and elsewhere, and other institutions hold manuscripts of his, the Niedersächsisches Landesarchiv Hannover among them. The Arbeitskatalog der Leibniz-Edition records them all, wherever they lie; this site holds part of its records so far, and every work here links to the catalogue’s own search by shelfmark.',
     'about.what.scope.whole':
       'The site covers the scans the GWLB has published of its Leibniz collections. That is not all of Leibniz’s papers: much is not yet digitised, at the GWLB and elsewhere, and other institutions hold manuscripts of his, the Niedersächsisches Landesarchiv Hannover among them. The Arbeitskatalog der Leibniz-Edition records them all, wherever they lie; this site holds the whole catalogue, refreshed {date} from the Arbeitsstelle’s export, and every work here links to the catalogue’s own search by shelfmark.',
-    'about.what.holdings': 'Where Leibniz’s papers lie, institution by institution, as the catalogue records them:',
+    'about.what.holdings': 'Where Leibniz’s papers are held, institution by institution, as the catalogue records them:',
     'about.what.holdings.link': 'the holdings page',
     'about.what.p2':
       'This is machine output with honest labels. It is Vorausedition-grade at best, and it is explicitly subordinate to the Akademie-Ausgabe, which remains the scholarly edition of Leibniz. Nothing here is an edition, and nothing here should be quoted as one. By its own count the Akademie-Ausgabe is about half way through the volumes it plans, and one of its editors estimates that three quarters of Leibniz’s papers have never been published anywhere (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); making all of it legible and findable is the whole of the ambition.',
@@ -447,7 +448,7 @@ const STRINGS = {
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. The scans carry no related rights (§ 68 UrhG). The copies shown here are the GWLB’s delivery derivatives, unaltered except for the thumbnails, served from this project’s own storage; each page links to its original at the GWLB, whose master files remain the authoritative source.',
     'about.license.katalog.h': 'Catalogue data',
     'about.license.katalog.p':
-      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
+      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. The records on this site come from the Arbeitsstelle’s own export of the catalogue (19 October 2026), refreshed with each export, not from its website. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
     'about.license.transcriptions.h': 'Transcriptions',
     'about.license.transcriptions.p':
       'Leibniz Legible, CC BY 4.0. Machine output of a model obtained under CC BY 4.0: the PHILIUMM HTR model (doi:10.5281/zenodo.21457538), which its makers have published under CC BY-NC 4.0 since 15 October 2026, agreeing that these transcriptions stay CC BY 4.0. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
@@ -649,6 +650,8 @@ const STRINGS = {
     'browse.filter.noneAnywhere.whole':
       'Keine Signatur und kein Name passt, und kein Stück des Katalogs enthält diese Wörter. Diese Seite führt den ganzen Arbeitskatalog, Stand {date}.',
     'browse.contents.ov': 'Ordnungsvermerk {name}',
+    'browse.holdings': 'Suchen Sie etwas, das hier nicht ist?',
+    'browse.holdings.link': 'Wo Leibniz’ Papiere aufbewahrt werden',
     'browse.filter.onlyContents': 'Keine Signatur und kein Name passt; die Stücke des Katalogs unten schon.',
     'browse.filter.noneAnywhere':
       'Keine Signatur und kein Name passt, und kein Stück des Katalogs, das diese Seite führt, enthält diese Wörter. Sie führt bisher einen Teil des Arbeitskatalogs, noch nicht jeden Eintrag.',
@@ -717,8 +720,6 @@ const STRINGS = {
     'work.katalog.aa.series': '{name}: die Reihe bei {where}',
     'work.katalog.transcriptions': 'Transkriptionen der Briefe von {year} (Leibniz-Archiv, Vorausedition)',
     'work.katalog.text': 'Text dieses Stücks ({range})',
-    'work.katalog.attr':
-      'Katalogdaten aus dem Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, BBAW, Arbeitsstelle Potsdam I, genutzt unter CC BY 4.0.',
     'work.pages': 'Seitenbilder',
     'work.canvases': '{n} Seitenbilder',
     'work.folio': 'Blatt {label}',
@@ -852,12 +853,16 @@ const STRINGS = {
     'set.leibniz-rekonstruktionen': 'Leibniz-Rekonstruktionen',
 
     // ---- about -----------------------------------------------------------
-    // ---- holdings: where Leibniz's papers lie (A3b) --------------------
-    'holdings.heading': 'Wo Leibniz’ Papiere liegen',
+    // ---- holdings: where Leibniz's papers are held (A3b) --------------------
+    'holdings.heading': 'Wo Leibniz’ Papiere aufbewahrt werden',
     'holdings.intro':
-      'Der Arbeitskatalog der Leibniz-Edition verzeichnet Leibniz’ Schriften und Briefe, wo immer ihre Textzeugen liegen. Hier ist er nach der Einrichtung gelesen, die jede Signatur nennt: {records} Einträge, nach dem Export der Arbeitsstelle vom {date}. Einträge, nicht Seiten: ein Konvolut aus vielen Stücken zählt vielfach, und ein gedruckter oder verlorener Textzeuge zählt mit.',
-    'holdings.intro.partial':
-      'Der Arbeitskatalog der Leibniz-Edition verzeichnet Leibniz’ Schriften und Briefe, wo immer ihre Textzeugen liegen. Hier ist er nach der Einrichtung gelesen, die jede Signatur nennt, über die {records} Einträge, die diese Seite bisher führt — einen Teil des Katalogs; der ganze folgt mit dem Export der Arbeitsstelle. Einträge, nicht Seiten: ein Konvolut aus vielen Stücken zählt vielfach, und ein gedruckter oder verlorener Textzeuge zählt mit.',
+      'Der Arbeitskatalog der Leibniz-Edition verzeichnet Leibniz’ Schriften, wo immer sie aufbewahrt werden; diese Seite zählt seine Einträge nach Einrichtung.',
+    'holdings.footnote':
+      '{records} Einträge, nicht Seiten; ein Konvolut zählt je Stück einmal; gedruckte und verlorene Textzeugen zählen mit; die Einrichtung ist aus der Signatur gelesen.',
+    'holdings.works.state.before': 'vor dem Katalogimport',
+    'holdings.works.state.whole': 'der ganze Arbeitskatalog, Stand {date}',
+    'katalog.source.label': 'Quelle',
+    'katalog.source.export': 'Export vom {date}',
     'holdings.byHolding.h': 'Einträge nach aufbewahrender Einrichtung',
     'holdings.byHolding.p':
       'Die eigenen Bestände der GWLB (LH, LBr, LBrF, LK und die Ms-Handschriften) stehen im Katalog ohne Ortsangabe und erscheinen hier unter seinem Namen für die Bibliothek, Hannover NLB; alles andere beginnt mit Ort und Einrichtung. Einrichtungen mit weniger als {n} Einträgen sind als „andere“ zusammengefasst.',
@@ -876,9 +881,6 @@ const STRINGS = {
     'holdings.col.works': 'Werke',
     'holdings.col.with': 'Mit Katalogisaten',
     'holdings.col.without': 'Ohne',
-    'holdings.method.h': 'Wie das gelesen wurde',
-    'holdings.method.p':
-      'Die Einrichtung eines Eintrags ist der Anfang seiner Signatur, gelesen mit einer aus dem Export gebauten Tabelle: die Ortsnamen, die der Katalog verwendet, die Abkürzungen und Wörter, die eine Einrichtung nennen, die Verbindungswörter in einem Namen. Ein Anfang, den die Tabelle nicht kennt, wird allein nach dem Ort abgelegt; eine Signatur ohne Ort ist ein gedruckter Textzeuge, keine Handschrift genannt. Ob ein Link Seitenbilder, ein Findmittel oder einen Katalogeintrag öffnet, ist je Domain verschieden und hier nicht geprüft. Dieselben Zahlen als Markdown: reports/holdings.md im Repositorium.',
     'holdings.label.printed': '(gedruckter Textzeuge, keine Handschrift genannt)',
     'holdings.label.private': '(Privatbesitz)',
     'holdings.label.unlocated': '(Verbleib nicht angegeben)',
@@ -893,7 +895,7 @@ const STRINGS = {
       'Die Seite umfasst die Scans, die die GWLB aus ihren Leibniz-Beständen veröffentlicht hat. Das sind nicht alle Papiere von Leibniz: Vieles ist noch nicht digitalisiert, bei der GWLB wie andernorts, und auch andere Einrichtungen bewahren Handschriften von ihm, darunter das Niedersächsische Landesarchiv Hannover. Der Arbeitskatalog der Leibniz-Edition verzeichnet sie alle, wo immer sie liegen; diese Seite führt bisher einen Teil seiner Einträge, und jedes Werk hier verweist auf die Signatursuche des Katalogs.',
     'about.what.scope.whole':
       'Die Seite umfasst die Scans, die die GWLB aus ihren Leibniz-Beständen veröffentlicht hat. Das sind nicht alle Papiere von Leibniz: Vieles ist noch nicht digitalisiert, bei der GWLB wie andernorts, und auch andere Einrichtungen bewahren Handschriften von ihm, darunter das Niedersächsische Landesarchiv Hannover. Der Arbeitskatalog der Leibniz-Edition verzeichnet sie alle, wo immer sie liegen; diese Seite führt den ganzen Katalog, Stand {date} nach dem Export der Arbeitsstelle, und jedes Werk hier verweist auf die Signatursuche des Katalogs.',
-    'about.what.holdings': 'Wo Leibniz’ Papiere liegen, Einrichtung für Einrichtung, wie der Katalog sie verzeichnet:',
+    'about.what.holdings': 'Wo Leibniz’ Papiere aufbewahrt werden, Einrichtung für Einrichtung, wie der Katalog sie verzeichnet:',
     'about.what.holdings.link': 'die Seite zu den Beständen',
     'about.what.p2':
       'Das ist maschinelle Ausgabe mit ehrlicher Kennzeichnung. Sie hat bestenfalls den Rang einer Vorausedition und ist der Akademie-Ausgabe ausdrücklich nachgeordnet; diese bleibt die wissenschaftliche Edition der Schriften von Leibniz. Nichts hier ist eine Edition, und nichts hier sollte als solche zitiert werden. Nach eigener Zählung ist die Akademie-Ausgabe etwa bei der Hälfte der geplanten Bände, und eine ihrer Editorinnen schätzt, dass drei Viertel der Leibniz-Papiere nie irgendwo veröffentlicht wurden (Herma Kliege-Biller, Leibniz-Forschungsstelle Münster, 2023); alles lesbar und auffindbar zu machen ist der ganze Anspruch dieses Projekts.',
@@ -948,7 +950,7 @@ const STRINGS = {
       'Gottfried Wilhelm Leibniz Bibliothek – Niedersächsische Landesbibliothek, Hannover. Public Domain Mark 1.0. An den Digitalisaten bestehen keine Leistungsschutzrechte (§ 68 UrhG). Die hier gezeigten Kopien sind die Auslieferungsderivate der GWLB, unverändert bis auf die Vorschaubilder, ausgeliefert aus dem eigenen Speicher dieses Projekts; jede Seite verweist auf ihr Original bei der GWLB, deren Masterdateien die maßgebliche Quelle bleiben.',
     'about.license.katalog.h': 'Katalogdaten',
     'about.license.katalog.p':
-      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
+      'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. Die Einträge auf dieser Seite stammen aus dem eigenen Export des Katalogs durch die Arbeitsstelle (19. Oktober 2026), erneuert mit jedem Export, nicht von dessen Website. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
     'about.license.transcriptions.h': 'Transkriptionen',
     'about.license.transcriptions.p':
       'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe eines unter CC BY 4.0 bezogenen Modells: des PHILIUMM-HTR-Modells (doi:10.5281/zenodo.21457538), das seine Urheber seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlichen, im Einvernehmen darüber, dass diese Transkriptionen CC BY 4.0 bleiben. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',

@@ -1,6 +1,6 @@
-# Where Leibniz's papers lie — the Arbeitskatalog by holding institution
+# Where Leibniz's papers are held — the Arbeitskatalog by holding institution
 
-_Leibniz Legible, Phase A3b. Generated 2026-10-21T22:34:15Z from the Arbeitskatalog export of 2026-10-21. Records, not pages; a record is one piece (a letter, a draft, a note) in one witness, so a convolute of many pieces counts many times and a lost or printed witness counts too._
+_Leibniz Legible, Phase A3b. Generated 2026-10-22T13:02:08Z from the Arbeitskatalog export of 2026-10-19. Records, not pages; a record is one piece (a letter, a draft, a note) in one witness, so a convolute of many pieces counts many times and a lost or printed witness counts too._
 
 > Data from the Arbeitskatalog der Leibniz-Edition (Ritter-Katalog), Berlin-Brandenburgische Akademie der Wissenschaften (TELOTA), https://leibniz-katalog.bbaw.de/ — licensed CC BY 4.0.
 

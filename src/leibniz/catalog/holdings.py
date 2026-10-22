@@ -1,4 +1,4 @@
-"""Where Leibniz's papers lie: the holding institution of a catalogue record,
+"""Where Leibniz's papers are held: the holding institution of a catalogue record,
 read from its shelfmark, and the holdings report (Phase A3b).
 
 The Arbeitskatalog writes a shelfmark as the holding institution's own, with a
@@ -555,7 +555,7 @@ def _pct(part: int, whole: int) -> str:
 def render_holdings_md(data: HoldingsData, *, min_records: int = 20) -> str:
     """``reports/holdings.md``: the tables, and how they were read."""
     lines = [
-        "# Where Leibniz's papers lie — the Arbeitskatalog by holding institution",
+        "# Where Leibniz's papers are held — the Arbeitskatalog by holding institution",
         "",
         f"_Leibniz Legible, Phase A3b. Generated {data.generated_at} from {data.source}. "
         "Records, not pages; a record is one piece (a letter, a draft, a note) in one "

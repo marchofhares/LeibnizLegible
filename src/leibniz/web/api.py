@@ -43,6 +43,7 @@ import re
 import sqlite3
 from collections.abc import Iterator
 from dataclasses import replace
+from datetime import date
 from pathlib import Path
 from typing import Annotated
 
@@ -58,7 +59,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from leibniz import __version__, db
+from leibniz import __version__, db, legal
 from leibniz.catalog import holdings as holdings_mod
 from leibniz.catalog import letters as letters_mod
 from leibniz.catalog.arbeitskatalog import is_gwlb_url
@@ -627,6 +628,20 @@ def _stamp_shell(
     return out.replace(SSR_MARK, ssr, 1)
 
 
+def _credit_html() -> str:
+    """The catalogue data's source line (the registry's, written once), linked."""
+    credit = legal.arbeitskatalog_credit()
+    when = date.fromisoformat(credit["export_date"])
+    return (
+        '<p class="attribution__line">Source: '
+        f'<a href="{_esc(credit["catalogue"]["url"])}" rel="noopener">'
+        f"{_esc(credit['catalogue']['name'])}</a>, "
+        f'<a href="{_esc(credit["edition"]["url"])}" rel="noopener">'
+        f"{_esc(credit['edition']['name'])}</a>, {_esc(credit['licence'])}, "
+        f"export of {when.day} {when:%B %Y}</p>"
+    )
+
+
 def _crumbs(place: dict | None) -> str:
     """A work's way back into the browse index: "Browse › LH 35 · Mathematik"."""
     if not place:
@@ -680,7 +695,10 @@ def _ssr_work(
         f'<a href="/manifests/{_esc(work.gwlb_object_id)}">IIIF manifest</a>'
         f"{search}{download}</p>",
     ]
-    heading = "<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>"
+    heading = (
+        "<h2>Catalogue records (Arbeitskatalog der Leibniz-Edition, CC BY 4.0)</h2>"
+        + _credit_html()
+    )
     if katalog:
         items = []
         for rec in katalog:
@@ -798,7 +816,7 @@ def _ssr_page(
 
 
 BROWSE_TITLE = "Browse by shelfmark"
-HOLDINGS_TITLE = "Where Leibniz's papers lie"
+HOLDINGS_TITLE = "Where Leibniz's papers are held"
 HOLDINGS_DESCRIPTION = (
     "The Arbeitskatalog der Leibniz-Edition by holding institution: how many of its records "
     "name each library and archive, which link a digitised copy and where, and how many of "
@@ -849,6 +867,9 @@ def _ssr_browse(families: list[browse.Family]) -> tuple[str, str, str]:
         '<article class="panel ssr" id="ssr">',
         "<h1>Browse the Nachlass by shelfmark</h1>",
         f"<p>{_counts(n_works, n_pages)}. {_esc(BROWSE_NOTE)}</p>",
+        # the catalogue's other holdings: what the GWLB has not digitised is elsewhere
+        '<p>Looking for something that is not here? <a href="/holdings">Where Leibniz\'s '
+        "papers are held</a></p>",
     ]
     for family in families:
         parts.append(f"<h2>{_esc(family.name)}</h2>")
@@ -866,7 +887,14 @@ def _ssr_browse(families: list[browse.Family]) -> tuple[str, str, str]:
 
 
 def _sitemap_xml(site: str, work_ids: list[str]) -> str:
-    urls = [f"{site}/", f"{site}/search", f"{site}/browse", f"{site}/letters", f"{site}/about"]
+    urls = [
+        f"{site}/",
+        f"{site}/search",
+        f"{site}/browse",
+        f"{site}/letters",
+        f"{site}/holdings",
+        f"{site}/about",
+    ]
     urls += [f"{site}/work/{w}" for w in work_ids]
     body = "".join(f"<url><loc>{_esc(u)}</loc></url>" for u in urls)
     return (
@@ -1322,7 +1350,7 @@ def create_app(
                 data = holdings_mod.holdings_from_store(conn, generated_at=db.utcnow_iso())
             finally:
                 conn.close()
-            state["holdings"] = data.to_dict()
+            state["holdings"] = {**data.to_dict(), "credit": legal.arbeitskatalog_credit()}
         return state["holdings"]
 
     def letters() -> letters_mod.LettersIndex:
@@ -1466,7 +1494,7 @@ def create_app(
 
     @app.get(
         "/api/holdings",
-        summary="Where Leibniz's papers lie: the Arbeitskatalog by holding institution",
+        summary="Where Leibniz's papers are held: the Arbeitskatalog by holding institution",
         description=(
             "The catalogue's records by the institution their shelfmark names (`by_holding`, "
             "`by_place`; the GWLB's own collections under `Hannover NLB`), the digitised copies "
@@ -1475,7 +1503,8 @@ def create_app(
             "`by_set`). `refreshed` is the date of the Arbeitsstelle's export the records come "
             "from, null while the store holds the website's records. Records, not pages: a "
             "convolute of many pieces counts many times, a printed or lost witness counts too. "
-            "Arbeitskatalog der Leibniz-Edition, CC BY 4.0."
+            "`credit` is the source line (the registry's: the catalogue, the Arbeitsstelle, "
+            "the licence, the export's date). Arbeitskatalog der Leibniz-Edition, CC BY 4.0."
         ),
     )
     def api_holdings() -> JSONResponse:
@@ -1766,6 +1795,7 @@ def create_app(
                 "katalog": _katalog_for_work(conn, work_id, pages),
                 "katalog_search_urls": _katalog_searches(work.shelfmarks),
                 "katalog_coverage": katalog_coverage(),
+                "katalog_credit": legal.arbeitskatalog_credit(),
                 "attribution": attr.attribution(images.mirrored),
             }
         finally:

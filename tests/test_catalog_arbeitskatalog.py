@@ -47,6 +47,11 @@ def test_date_cell() -> None:
     assert ak.date_cell("16991208", "991128") == "1699-12-08 (99-11-28)"
     assert ak.date_cell("17051127", "51116") == "1705-11-27 (05-11-16)"  # Access lost the zero
     assert ak.date_cell("", "991128") == ""
+    # the second date drops its zero parts as the first does (397 records in the
+    # operator's dry run of 2026-10-22 read "(93-06-00)" on the website as "(93-06)")
+    assert ak.date_cell("16930629", "930600") == "1693-06-29 (93-06)"
+    assert ak.date_cell("16990000", "990000") == "1699 (99)"
+    assert ak.date_cell("17000114", "000104") == "1700-01-14 (00-01-04)"
 
 
 def test_umfang_cell() -> None:
@@ -147,7 +152,12 @@ def test_the_record_carries_the_website_keys_and_the_new_ones() -> None:
     assert r.metadata["signatur"] == "London BL Add.Mss. 4294 Bl. 67-70"
     assert r.shelfmark_refs == ["London BL Add.Mss. 4294 Bl. 67-70"]
     assert r.metadata["datum"] == "1676-08-27" and r.metadata["sigle"] == "L2"
-    assert r.metadata["absender"] == "Leibniz" and r.metadata["adressat"] == "Oldenburg"
+    # the names as the website shows them, through the persons table; the ids beside
+    assert r.metadata["absender"] == "Leibniz (GND)"
+    assert r.metadata["adressat"] == "Oldenburg (KorrespDB) (GND)"
+    assert r.metadata["absender_gnd"] == ["118571249"] and "absender_korrespdb" not in r.metadata
+    assert r.metadata["adressat_gnd"] == ["119115719"]
+    assert r.metadata["adressat_korrespdb"] == ["666"]
     assert r.metadata["ort"] == "Paris" and r.metadata["textart"] == "Abf., eigh."
     assert r.metadata["umfang"] == "Quart, 6.2 Seiten/Spalten"
     assert r.metadata["aa"] == "2 | 1.130 / a Teildr. Aufl. 2 (1988)"
@@ -242,16 +252,18 @@ def test_the_mapping_reproduces_the_website() -> None:
     assert cmp.keys["datum"].counts == {"exact": 19, "export_adds": 2}
     # the website's copy of 22579 names the series alone; the export the piece
     assert cmp.keys["aa"].counts == {"exact": 20, "export_adds": 1}
-    # the names: bare in the export, with the website's link texts in the store
-    assert cmp.keys["absender"].counts["other"] == 0 and cmp.keys["absender"].counts["markers"] > 0
-    assert cmp.keys["adressat"].counts["other"] == 0
-    # "°" for a 32° format on the website; the two copies' printings edited apart
-    assert cmp.keys["umfang"].counts == {"exact": 20, "other": 1}
+    # the names: the website's link texts reproduced through the persons table
+    assert cmp.keys["absender"].counts == {"exact": 21}
+    assert cmp.keys["adressat"].counts == {"exact": 21}
+    # "°" for a 32° format on the website: the parser lost the code; the two
+    # copies' printings edited apart
+    assert cmp.keys["umfang"].counts == {"exact": 20, "markup": 1}
     assert cmp.keys["drucke"].counts == {"exact": 18, "other": 3}
     assert cmp.keys["gwlb_ids"].counts == {"exact": 20, "export_adds": 1}  # the PPN link
     table = ak.render_comparison(cmp)
-    assert "| datum ✱ | 19 | 0 | 0 | 2 | 0 | 0 | 100.0 % |" in table
-    assert "`umfang` other · 891: store `°, 1 Seite/Spalte` · export `32°, 1 Seite/Spalte`" in table
+    assert "| datum ✱ | 19 | 0 | 0 | 0 | 2 | 0 | 0 | 100.0 % |" in table
+    assert "| umfang | 20 | 0 | 0 | 1 | 0 | 0 | 0 | 100.0 % |" in table
+    assert "lost as markup on umfang 1 records." in table
     assert "same answer before and after on 21 of 21 records." in table
     assert "Mapping: **settled**." in table
 
@@ -261,13 +273,50 @@ def test_classify() -> None:
     assert ak.classify("titel", "a  b", "a b") == "whitespace"
     assert ak.classify("absender", "Leibniz (GND)", "Leibniz") == "markers"
     assert ak.classify("adressat", "Fuchs,P. (KorrespDB) (GND)", "Fuchs,P.") == "markers"
+    assert ak.classify("absender", "Leibniz", "Leibniz (GND)") == "markers"
     assert ak.classify("titel", "Leibniz (GND)", "Leibniz") == "other"
     assert ak.classify("datum", "", "1700") == "export_adds"
     assert ak.classify("incipit", "Si qvis", "") == "export_lacks"
     assert ak.classify("aa", (("1", "2", "3", "aa_column"),), ()) == "export_lacks"
+    # a genuine edit stays "other"
+    assert ak.classify("datum", "1698", "1700-01-14 (00-01-04)") == "other"
 
 
-def test_a_lost_incipit_or_a_changed_hand_is_not_settled() -> None:
+def test_the_website_lost_what_it_read_as_markup() -> None:
+    """Text in angle brackets the website's HTML parser dropped: the store's
+    value is the export's with every <…> segment gone; the export's is kept."""
+    assert ak.classify("titel", "onometria rationalis", "<Trig>onometria rationalis") == "markup"
+    assert ak.classify("incipit", "… Bergambt", "… <bey dem> Bergambt") == "markup"
+    assert ak.classify("textart", "Abf., eigh.;", "Abf., eigh.; <prs. Anschr.>") == "markup"
+    assert ak.classify("umfang", "°, 1 Seite/Spalte", "43°, 1 Seite/Spalte") == "markup"
+    assert ak.website_lost_markup("umfang", "43°, 2 Seiten/Spalten") == "°, 2 Seiten/Spalten"
+    assert ak.classify("titel", "a b", "a <x> c") == "other"
+    old = db.KatalogRecord("1", metadata={"titel": "onometria", "textart": "Abf.;"})
+    new = db.KatalogRecord("1", metadata={"titel": "<Trig>onometria", "textart": "Abf.; <prs.>"})
+    cmp = ak.compare_records([old], {"1": new})
+    assert cmp.keys["titel"].counts == {"markup": 1} and cmp.pct("titel") == 100.0
+    assert "lost as markup on titel 1, textart 1 records." in ak.render_comparison(cmp)
+
+
+def test_names_as_website() -> None:
+    index = ak.build_person_index(
+        [
+            {"korr": "Leibniz", "pers_name": "", "gnd": "118571249", "idhannover": ""},
+            {"korr": "Ilgen", "pers_name": "Ilgen, Rüdiger", "gnd": "1", "idhannover": "22"},
+        ]
+    )
+    assert ak.names_as_website("Leibniz", index) == ("Leibniz (GND)", ["118571249"], [])
+    assert ak.names_as_website("Leibniz | Ilgen", index) == (
+        "Leibniz (GND)Ilgen (KorrespDB) (GND)",
+        ["118571249", "1"],
+        ["22"],
+    )
+    assert ak.names_as_website("?", index) == ("?", [], [])  # not in the table: bare
+    assert ak.names_as_website("", index) == ("", [], [])
+    assert ak.names_as_website("Leibniz | Ilgen", None) == ("Leibniz | Ilgen", [], [])
+
+
+def test_a_lost_incipit_is_not_settled_and_a_changed_hand_is_listed() -> None:
     old = db.KatalogRecord("1", metadata={"textart": "Abf., eigh.", "titel": "t", "incipit": "x"})
     new = db.KatalogRecord("1", metadata={"textart": "Abf.", "titel": "t"})
     cmp = ak.compare_records([old], {"1": new})
@@ -276,6 +325,48 @@ def test_a_lost_incipit_or_a_changed_hand_is_not_settled() -> None:
     assert cmp.hand_changes == [("1", "own", "other", True, False)]
     assert not cmp.settled
     assert "hand own → other, Leibniz's own True → False" in ak.render_comparison(cmp)
+    # a hand change alone does not block: the export's fuller Textart decides
+    old = db.KatalogRecord("2", metadata={"textart": "Abf.; eigh.", "titel": "t"})
+    new = db.KatalogRecord("2", metadata={"textart": "Abf.; eigh. <Aufschr.>", "titel": "t"})
+    cmp = ak.compare_records([old], {"2": new})
+    assert cmp.hand_changes == [("2", "own", "partial", True, False)] and cmp.settled
+    assert "listed, not blocking" in ak.render_comparison(cmp)
+
+
+def test_a_renumbered_record_is_mapped_by_katnr_and_shelfmark() -> None:
+    """The Access master renumbers or merges a few records between the website's
+    half-yearly imports: a store id the export lacks maps to the export's record
+    with the same Kat.-Nr. and shelfmark, else the same Kat.-Nr. where unique,
+    else the row whose Identisch_mit or mergenr names it."""
+    export = ak.read_export(FIXTURES)
+    new = {r.record_id: r for r in ak.records_from_export(export)}
+    old = [
+        # 41800 under another id: Kat.-Nr. 53823 and LH 4, 6, 18 Bl. 1
+        db.KatalogRecord("99001", metadata={"katnr": "53823", "signatur": "LH 4, 6, 18 Bl. 1"}),
+        # 59095 by Kat.-Nr. alone (the shelfmark respelled)
+        db.KatalogRecord("99002", metadata={"katnr": "81115", "signatur": "LH IV, 6, 18 Bl. 2"}),
+        # 46308's Identisch_mit names 46307
+        db.KatalogRecord("46307", metadata={"katnr": "x", "signatur": "LBrF 1 Bl. 219-220"}),
+        db.KatalogRecord("99003", metadata={"katnr": "no such", "signatur": "nowhere"}),
+    ]
+    rows = [*export.ritter, {"ID": "99009", "mergenr": "99004"}]
+    new["99009"] = db.KatalogRecord("99009", metadata={"katnr": "z", "titel": "merged"})
+    old.append(db.KatalogRecord("99004", metadata={}))
+    mapped = {r.old_id: (r.new_id, r.how) for r in ak.remap_missing(old, new, rows)}
+    assert mapped == {
+        "99001": ("41800", "Kat.-Nr. and shelfmark"),
+        "99002": ("59095", "Kat.-Nr."),
+        "46307": ("46308", "Identisch_mit"),
+        "99003": (None, "no match"),
+        "99004": ("99009", "mergenr"),
+    }
+    cmp = ak.compare_records(old, new, rows)
+    assert cmp.compared == 4 and cmp.missing_in_export == ["99003"] and cmp.unmapped == ["99003"]
+    assert cmp.store_records == 5 and cmp.new_in_export == len(new) - 4
+    table = ak.render_comparison(cmp)
+    assert "compared with the export: 4 (of them 4 under another id)" in table
+    assert "- 99001 (Kat.-Nr. 53823, LH 4, 6, 18 Bl. 1): → 41800 by Kat.-Nr. and shelfmark" in table
+    assert "- 99003 (Kat.-Nr. no such, nowhere): no match in the export" in table
 
 
 # ---- the store ------------------------------------------------------------------- #
@@ -325,14 +416,35 @@ def test_missing_references_stop_the_write(tmp_path) -> None:
             "--csv-dir",
             str(FIXTURES),
             "--export-date",
-            "2026-10-21",
+            "2026-10-19",
             "--write",
         ],
     )
     assert result.exit_code == 1 and "STOP" in result.stdout and "Nothing written" in result.stdout
+    assert "gt_lines.record_id" in result.stdout and "10270" in result.stdout
     conn = db.connect(path)
     assert db.count_katalog_records(conn) == 23
+    # a crosswalk-only reference is dropped by the rebuild, with a line, no stop
+    conn.execute("DELETE FROM gt_lines WHERE record_id = '10270'")
+    conn.commit()
     conn.close()
+    result = runner.invoke(
+        app,
+        [
+            "catalog",
+            "import-access",
+            "--db",
+            str(path),
+            "--csv-dir",
+            str(FIXTURES),
+            "--export-date",
+            "2026-10-19",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "crosswalk: record 51898 is not in the export; its links are dropped" in " ".join(
+        result.stdout.split()
+    )
 
 
 def test_write_replaces_the_records_and_rebuilds_the_crosswalk(tmp_path) -> None:
@@ -342,7 +454,7 @@ def test_write_replaces_the_records_and_rebuilds_the_crosswalk(tmp_path) -> None
     assert db.count_katalog_records(conn) == 23
     links_before = db.count_crosswalk(conn)
     records = list(_records().values())
-    stats = ak.write_import(conn, records, export_date="2026-10-21", csv_dir=FIXTURES)
+    stats = ak.write_import(conn, records, export_date="2026-10-19", csv_dir=FIXTURES)
     assert stats.records_written == 30 and stats.records_deleted == ["10270", "51898"]
     assert db.count_katalog_records(conn) == 30
     assert db.get_katalog_record(conn, "10270") is None
@@ -375,17 +487,18 @@ def test_write_replaces_the_records_and_rebuilds_the_crosswalk(tmp_path) -> None
         "SELECT stage, params, finished_at FROM runs WHERE run_id = ?", (stats.run_id,)
     ).fetchone()
     assert run["stage"] == "catalog_import_access" and run["finished_at"]
-    assert json.loads(run["params"])["export_date"] == "2026-10-21"
+    assert json.loads(run["params"])["export_date"] == "2026-10-19"
     # the record as the readers see it: the website parser's keys, the new ones beside them
     rec = db.get_katalog_record(conn, "1585")
     assert rec.metadata["titel"].startswith("[Marg. in: Dal Pozzo") and rec.gwlb_ids == [
         "1665058609"
     ]
     # idempotent: the same again changes nothing
-    again = ak.write_import(conn, records, export_date="2026-10-21", csv_dir=FIXTURES)
+    again = ak.write_import(conn, records, export_date="2026-10-19", csv_dir=FIXTURES)
     assert again.records_deleted == [] and again.links == 4 and db.count_katalog_records(conn) == 30
     cmp = ak.compare_records(db.iter_katalog_records(conn), {r.record_id: r for r in records})
     assert cmp.compared == 30 and all(a.counts == {"exact": 30} for a in cmp.keys.values())
+    assert json.loads(run["params"]).get("remapped") == {}
     conn.close()
 
 
@@ -400,7 +513,7 @@ def test_cli_dry_run_then_write(tmp_path) -> None:
         "--csv-dir",
         str(FIXTURES),
         "--export-date",
-        "2026-10-21",
+        "2026-10-19",
     ]
     result = runner.invoke(app, base)
     assert result.exit_code == 0, result.stdout
@@ -418,7 +531,7 @@ def test_cli_dry_run_then_write(tmp_path) -> None:
     # the second dry run compares the store with itself: every key exact on 30
     result = runner.invoke(app, base)
     assert "compared with the export: 30" in result.stdout
-    assert "| signatur ✱ | 30 | 0 | 0 | 0 | 0 | 0 | 100.0 % |" in result.stdout
+    assert "| signatur ✱ | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 100.0 % |" in result.stdout
     # without the export directory
     result = runner.invoke(
         app,
@@ -430,7 +543,7 @@ def test_cli_dry_run_then_write(tmp_path) -> None:
             "--csv-dir",
             str(tmp_path / "nowhere"),
             "--export-date",
-            "2026-10-21",
+            "2026-10-19",
         ],
     )
     assert result.exit_code == 1 and "nowhere" in result.stdout
@@ -446,7 +559,7 @@ def test_cli_holdings_from_the_export_and_from_the_store(tmp_path) -> None:
             "--csv-dir",
             str(FIXTURES),
             "--export-date",
-            "2026-10-21",
+            "2026-10-19",
             "--out",
             str(out),
         ],
@@ -454,7 +567,7 @@ def test_cli_holdings_from_the_export_and_from_the_store(tmp_path) -> None:
     assert result.exit_code == 0, result.stdout
     text = out.read_text(encoding="utf-8")
     assert (
-        "the Arbeitskatalog export of 2026-10-21" in text
+        "the Arbeitskatalog export of 2026-10-19" in text
         and "Not available from the export alone" in text
     )
     path = tmp_path / "inv.sqlite"
@@ -469,7 +582,7 @@ def test_cli_holdings_from_the_export_and_from_the_store(tmp_path) -> None:
             "--csv-dir",
             str(FIXTURES),
             "--export-date",
-            "2026-10-21",
+            "2026-10-19",
             "--write",
         ],
     )

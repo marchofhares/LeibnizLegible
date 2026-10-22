@@ -235,6 +235,9 @@ export async function render(ctx) {
     `<header class="panel browse__header">` +
     `<h1 tabindex="-1" data-view-heading>${esc(t('browse.heading'))}</h1>` +
     `<p>${esc(t('browse.intro'))}</p>` +
+    // the catalogue's other holdings: what the GWLB has not digitised is elsewhere
+    `<p class="browse__holdings">${esc(t('browse.holdings'))} ` +
+    `<a href="/holdings">${esc(t('browse.holdings.link'))}</a></p>` +
     `<p class="muted">${esc(counts(data.n_works, data.n_pages))}</p>` +
     `<div class="browse__filter">` +
     `<label class="field__label" for="browse-filter">${esc(t('browse.filter.label'))}</label>` +
