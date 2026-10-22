@@ -1136,6 +1136,26 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   floor of 2,500 MiB, the log unbuffered; WSL has 8 GB of swap since the
   morning.** Nothing else of the session's runs while it trains; the PP-OCRv6
   pilot's accounting waits for its end.
+- **The guard's kill of 13:07, and the launch that holds (Task 3).** The
+  training of 12:28 (runs row 613) ran 37 minutes at a steady 2,401–2,564 MiB
+  on the card, GPU utilisation 20–40 %, **3.90 batches of 4 a second — 15.6
+  lines/s, 2.2 times the pilot's pace: the four loader workers pay** — 7,478
+  of 13,899 batches into its first epoch (29,912 lines seen); then one sample
+  read 5,763 MiB and the guard ended it at 13:07:40 (the host never under 6.8
+  GB available; the abort checkpoint kept, no epoch checkpoint). One batch
+  with an outlier line, not growth: the training list's widest crops reach
+  4,214 px at the model's 120 px height (the 99th percentile is 1,954). Row
+  613 closed with the 29,912 lines seen and nothing produced. **Relaunched
+  fresh from the base at 13:11 as runs row 614**: the kraken list capped at
+  2,560 px of width at height 120 (`data/models/k3/kraken/train-capped.txt`:
+  55,585 of the 55,596 training lines, the 11 dropped listed beside it; the
+  validation set's widest is 2,270 and stays whole), batch 2 with 8-step
+  accumulation (the same effective batch of 16, half the worst-case footprint,
+  little cost while the loader sets the pace), four workers, the scope, the
+  guard and everything else as at 12:28 (`train-kraken --train-list`, new).
+  Also found: a watcher whose command line names ketos and the checkpoints
+  directory is itself a match for the guard's pattern and dies with the job;
+  the watchers no longer say the word.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into

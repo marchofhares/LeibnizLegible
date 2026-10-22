@@ -980,6 +980,11 @@ def train_kraken(
     drop_screen: bool = typer.Option(
         False, "--drop-screen", help="The ablation: leave out the lines the screen flagged."
     ),
+    train_list: Path | None = typer.Option(
+        None,
+        "--train-list",
+        help="A training list to use instead of <train-root>/train.txt (a width-capped one).",
+    ),
     start: bool = typer.Option(
         False, "--start", help="Start ketos in the background (else print the command only)."
     ),
@@ -1016,7 +1021,7 @@ def train_kraken(
         seed=seed,
     )
     out.mkdir(parents=True, exist_ok=True)
-    train_list = train_root / "train.txt"
+    train_list = train_list or train_root / "train.txt"
     val_list = train_root / "val.txt"
     if drop_screen or pilot:
         lines = [ln for ln in train_list.read_text(encoding="utf-8").splitlines() if ln.strip()]
