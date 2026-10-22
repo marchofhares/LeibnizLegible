@@ -1511,6 +1511,16 @@ select {
   color: var(--muted);
 }
 
+/* A wide table scrolls inside its own box on a narrow screen (the holdings page). */
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.holdings__table th[scope='row'] {
+  overflow-wrap: anywhere;
+}
+
 .hist {
   width: 100%;
   border-collapse: collapse;

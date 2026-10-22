@@ -33,6 +33,7 @@ page) — or to their series at leibnizedition.de.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping, Sequence
 from urllib.parse import urlencode
 
 from leibniz.catalog.shelfmarks import roman_to_int, split_family
@@ -69,6 +70,20 @@ SERIES_PAGES: dict[int, tuple[str, str, str]] = {
 }
 # The Leibniz-Archiv's checked transcriptions of the letters not yet edited.
 TRANSCRIPTION_YEARS = range(1708, 1717)
+
+# The edition's PDFs per piece, as the Arbeitskatalog's ``pdf_url`` table names
+# them (A3b, the export of 2026-10-21): the host → the GT factory's channel key
+# in the licence registry (``legal.CHANNELS``), where the files are offered,
+# and whether they are open to a link. The Münster files sit behind a
+# permission page (registry: "written permission required"), so a Reihe II or
+# VI piece gets no PDF link, only its series page.
+PDF_HOSTS: dict[str, tuple[str, str, bool]] = {
+    "www.gwlb.de": ("gwlb", "Repositorium des Leibniz-Archivs", True),
+    "leibniz-potsdam.bbaw.de": ("potsdam", "Leibniz-Edition Potsdam I", True),
+    "leibniz-berlin.bbaw.de": ("viii", "Leibniz-Edition Potsdam II", True),
+    "leibnizp2.bbaw.de": ("viii", "Leibniz-Edition Potsdam II", True),
+    "www.uni-muenster.de": ("muenster", "Leibniz-Forschungsstelle Münster", False),
+}
 
 
 # How the catalogue writes each family's label in its Signatur field.
@@ -175,6 +190,48 @@ def aa_volume_link(series: object, volume: object) -> dict | None:
     return link(EDITION_SERIES.format(roman=roman), "series", "leibnizedition.de")
 
 
+def channel_terms(channel: str) -> str:
+    """The licence the registry records for a channel, in short (``CC BY-NC 4.0``)."""
+    from leibniz.legal import CHANNELS
+
+    entry = CHANNELS.get(channel)
+    if entry is None:
+        return ""
+    return entry.licence_now.licence.split(",")[0].strip()
+
+
+def edition_pdf_link(
+    pdf: Mapping[str, object] | None, aa_refs: Sequence[Mapping] = ()
+) -> dict | None:
+    """The edition's PDF for a piece, as a link out, or ``None``: ``{"url",
+    "page", "volume", "where", "terms", "channel"}``. ``pdf`` is the record's
+    ``aa_pdf`` (url, printed page, host) from the Arbeitskatalog export; the
+    volume is the first Akademie-Ausgabe reference with a volume, named
+    ``AA VIII,3``. A host whose channel is not open to a link gives ``None``."""
+    if not pdf or not pdf.get("url"):
+        return None
+    host = str(pdf.get("host") or "").casefold()
+    found = PDF_HOSTS.get(host)
+    if found is None or not found[2]:
+        return None
+    channel, where, _ = found
+    volume = None
+    for ref in aa_refs:
+        if ref.get("volume") is not None and ref.get("source") == "aa_column":
+            roman = ROMAN.get(int(str(ref["series"])), str(ref["series"])).upper()
+            volume = f"AA {roman},{ref['volume']}"
+            break
+    page = pdf.get("page")
+    return {
+        "url": str(pdf["url"]),
+        "page": int(page) if isinstance(page, int) or str(page).isdigit() else None,
+        "volume": volume,
+        "where": where,
+        "terms": channel_terms(channel),
+        "channel": channel,
+    }
+
+
 def year_of(date: object) -> int | None:
     """The first four-digit year in a catalogue date ("1709 Jan. 3", "[1712?]")."""
     m = re.search(r"\b(1[67]\d\d)\b", str(date or ""))
@@ -195,10 +252,13 @@ def transcriptions_link(date: object) -> dict | None:
 
 
 __all__ = [
+    "PDF_HOSTS",
     "REPOSITORY_VOLUMES",
     "TRANSCRIPTION_YEARS",
     "KATALOG_LABELS",
     "aa_volume_link",
+    "channel_terms",
+    "edition_pdf_link",
     "katalog_record_url",
     "katalog_search_url",
     "katalog_spelling",

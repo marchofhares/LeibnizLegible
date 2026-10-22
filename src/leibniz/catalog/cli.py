@@ -7,6 +7,13 @@ Three subcommands:
 * ``leibniz catalog report`` — write ``reports/crosswalk.md``.
 * ``leibniz catalog letters`` — Bodemann's letters from correspSearch (CC BY 4.0)
   → the letters file the web application reads (who, when, where per letter).
+* ``leibniz catalog import-access`` — the whole Arbeitskatalog from the
+  Arbeitsstelle's Access export (A3b): a dry run compares every record the
+  store holds with the export, key by key; ``--write`` replaces
+  ``katalog_records`` and rebuilds the crosswalk.
+* ``leibniz catalog holdings`` — ``reports/holdings.md``: records by holding
+  institution, digitised copies by domain, the GWLB works with and without
+  records.
 
 Every mutating run is recorded in ``runs`` with the git SHA (provenance, §4.5).
 """
@@ -21,7 +28,9 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
 
 from leibniz import db
+from leibniz.catalog import arbeitskatalog as access_mod
 from leibniz.catalog import crosswalk as crosswalk_mod
+from leibniz.catalog import holdings as holdings_mod
 from leibniz.catalog import letters as letters_mod
 from leibniz.catalog import report as report_mod
 from leibniz.catalog import scrape as scrape_mod
@@ -35,6 +44,8 @@ app = typer.Typer(
 console = Console()
 
 DEFAULT_REPORT_PATH = Path("reports/crosswalk.md")
+DEFAULT_HOLDINGS_PATH = Path("reports/holdings.md")
+DEFAULT_CSV_DIR = Path("data/external/arbeitskatalog/csv")
 
 
 @app.command()
@@ -288,4 +299,172 @@ def letters(
         f"{len(found):,} letters ({placed:,} filed under a convolute, "
         f"{len(index.convolutes):,} convolutes) → {target}. Restart the web application "
         "to show them."
+    )
+
+
+@app.command("import-access")
+def import_access(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    csv_dir: Path = typer.Option(
+        DEFAULT_CSV_DIR,
+        "--csv-dir",
+        help="The export's CSV files (ritter.csv and the side tables).",
+    ),
+    export_date: str = typer.Option(
+        ...,
+        "--export-date",
+        help="The date of the Access export (ISO), recorded with the run and shown on the "
+        "site as the catalogue's refresh date.",
+    ),
+    write: bool = typer.Option(
+        False,
+        "--write/--dry-run",
+        help="Replace katalog_records by the export and rebuild the crosswalk. Default: the "
+        "dry run, which compares and writes nothing.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Write although the mapping is not settled on this store's records (the "
+        "operator's call, after reading the table).",
+    ),
+    report: Path | None = typer.Option(
+        None, "--report", help="Also write the agreement table (Markdown) to this file."
+    ),
+) -> None:
+    """Import the whole Arbeitskatalog from the Arbeitsstelle's Access export (A3b).
+
+    The dry run (the default) maps every row of ritter.csv to a record, compares each
+    record the store already holds with the export's row of the same id, key by key,
+    and prints the agreement table; it also checks that every record the ground truth
+    and the crosswalk reference exists in the export. With --write, after the operator's
+    backup and go, it replaces katalog_records by record_id (every row of the export;
+    idempotent), rebuilds the crosswalk (gwlb_link first, shelfmark second) and reports
+    records per work, works without a record, and the records whose URL_Ms points
+    outside the GWLB.
+    """
+    try:
+        export = access_mod.read_export(csv_dir)
+    except FileNotFoundError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
+    console.print(
+        f"[bold]catalog import-access[/bold] ← {csv_dir}: "
+        + ", ".join(f"{name} {n:,}" for name, n in export.counts.items())
+    )
+    records = access_mod.records_from_export(export)
+    by_id = {r.record_id: r for r in records}
+    console.print(f"  {len(records):,} rows mapped to records")
+
+    conn = db.init_db(db_path)
+    try:
+        comparison = access_mod.compare_records(db.iter_katalog_records(conn), by_id, export.ritter)
+        table = access_mod.render_comparison(comparison)
+        console.print(table, markup=False, highlight=False)
+        if report is not None:
+            report.parent.mkdir(parents=True, exist_ok=True)
+            report.write_text(table + "\n", encoding="utf-8")
+            console.print(f"  agreement table → {report}")
+        missing = access_mod.missing_references(conn, set(by_id))
+        target = {r.old_id: r.new_id for r in comparison.remapped}
+        for rid in missing.get("crosswalk", []):
+            # the rebuild links the export's record under its new id, or drops the link
+            where = target.get(rid)
+            console.print(
+                f"  crosswalk: record {rid} is "
+                + (
+                    f"carried by the export as {where}; its links are rebuilt under that id"
+                    if where
+                    else "not in the export; its links are dropped by the rebuild"
+                )
+            )
+        if missing.get("gt_lines"):
+            ids = missing["gt_lines"]
+            shown = ", ".join(
+                f"{rid} (→ {target[rid]})" if target.get(rid) else rid for rid in ids[:50]
+            ) + (" …" if len(ids) > 50 else "")
+            console.print(
+                f"[red]STOP: {len(ids):,} record id(s) the ground truth (gt_lines.record_id) "
+                f"references are not in the export:[/red] {shown}"
+            )
+            console.print("[red]Nothing written.[/red]")
+            raise typer.Exit(code=1)
+        console.print("  every record id the ground truth references exists in the export")
+        if not write:
+            console.print(
+                "[yellow]Dry run: nothing written.[/yellow] After the backup and the operator's "
+                "go: the same command with [cyan]--write[/cyan]."
+            )
+            return
+        if not comparison.settled and not force:
+            console.print(
+                "[red]The mapping is not settled on this store's records (the table above); "
+                "nothing written. Pass --force to write anyway.[/red]"
+            )
+            raise typer.Exit(code=1)
+        with Progress(
+            TextColumn("[cyan]crosswalk"), BarColumn(), MofNCompleteColumn(), console=console
+        ) as progress:
+            task = progress.add_task("crosswalk", total=len(records))
+            stats = access_mod.write_import(
+                conn,
+                records,
+                export_date=export_date,
+                csv_dir=csv_dir,
+                git_sha=db.git_sha(),
+                progress=lambda _rid: progress.advance(task),
+                remapped=comparison.remapped,
+            )
+        console.print(access_mod.render_import_stats(stats), markup=False, highlight=False)
+        console.print(
+            "Next: [cyan]leibniz catalog holdings --db …[/cyan] and "
+            "[cyan]leibniz catalog report --db …[/cyan]; then the serving copy and the index "
+            "rebuild (the catalogue's titles are indexed)."
+        )
+    finally:
+        conn.close()
+
+
+@app.command()
+def holdings(
+    db_path: Path = typer.Option(db.DEFAULT_DB_PATH, "--db", help="SQLite store path."),
+    csv_dir: Path | None = typer.Option(
+        None,
+        "--csv-dir",
+        help="Render from the export alone (no store): the records' side only; the works "
+        "section waits for the import.",
+    ),
+    export_date: str | None = typer.Option(
+        None, "--export-date", help="With --csv-dir: the export's date, for the report's header."
+    ),
+    out: Path = typer.Option(DEFAULT_HOLDINGS_PATH, "--out", help="Holdings markdown output."),
+) -> None:
+    """Write ``reports/holdings.md``: the Arbeitskatalog's records by holding institution,
+    the digitised copies by the domain of their link, and the GWLB works with and without
+    catalogue records."""
+    generated_at = db.utcnow_iso()
+    if csv_dir is not None:
+        export = access_mod.read_export(csv_dir)
+        records = access_mod.records_from_export(export)
+        when = f" of {export_date}" if export_date else ""
+        data = holdings_mod.holdings_from_records(
+            records, generated_at=generated_at, source=f"the Arbeitskatalog export{when}"
+        )
+    else:
+        conn = db.init_db(db_path)
+        try:
+            data = holdings_mod.holdings_from_store(conn, generated_at=generated_at)
+        finally:
+            conn.close()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(holdings_mod.render_holdings_md(data), encoding="utf-8")
+    console.print(
+        f"[bold]catalog holdings[/bold] → {out}\n"
+        f"  {data.records:,} records · {len(data.by_holding):,} holdings · "
+        f"{data.with_url:,} with a digitised copy · works "
+        + (
+            f"{data.works_with_records:,}/{data.works:,} with records"
+            if data.works is not None
+            else "(not from the export alone)"
+        )
     )

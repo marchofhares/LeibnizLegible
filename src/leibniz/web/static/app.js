@@ -20,6 +20,7 @@ import * as workView from './views/work.js';
 import * as pageView from './views/page.js';
 import * as aboutView from './views/about.js';
 import * as lettersView from './views/letters.js';
+import * as holdingsView from './views/holdings.js';
 
 const VIEWS = {
   search: searchView,
@@ -28,6 +29,7 @@ const VIEWS = {
   page: pageView,
   about: aboutView,
   letters: lettersView,
+  holdings: holdingsView,
 };
 
 let viewRoot = null;
@@ -88,6 +90,7 @@ export function parseRoute(pathname) {
   if (path === '/browse') return { name: 'browse' };
   if (path === '/about') return { name: 'about' };
   if (path === '/letters') return { name: 'letters' };
+  if (path === '/holdings') return { name: 'holdings' };
   let m = /^\/work\/(.+)$/.exec(path);
   if (m) return { name: 'work', id: safeDecode(m[1]) };
   m = /^\/page\/(.+)$/.exec(path);

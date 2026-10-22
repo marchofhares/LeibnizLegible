@@ -75,7 +75,17 @@ export function contentsBlock(found) {
       const pieces = (work.matches || [])
         .map(
           (m) =>
-            `<li>${esc(m.title)}${m.where ? ` <span class="muted">${esc(m.where)}</span>` : ''}</li>`,
+            `<li>${esc(m.title)}${m.where ? ` <span class="muted">${esc(m.where)}</span>` : ''}` +
+            (m.ordnungsvermerk
+              ? ` <span class="muted">· ${esc(
+                  t('browse.contents.ov', {
+                    name: m.ordnungsvermerk.title
+                      ? `${m.ordnungsvermerk.name} (${m.ordnungsvermerk.title})`
+                      : m.ordnungsvermerk.name,
+                  }),
+                )}</span>`
+              : '') +
+            `</li>`,
         )
         .join('');
       const more =
@@ -225,6 +235,9 @@ export async function render(ctx) {
     `<header class="panel browse__header">` +
     `<h1 tabindex="-1" data-view-heading>${esc(t('browse.heading'))}</h1>` +
     `<p>${esc(t('browse.intro'))}</p>` +
+    // the catalogue's other holdings: what the GWLB has not digitised is elsewhere
+    `<p class="browse__holdings">${esc(t('browse.holdings'))} ` +
+    `<a href="/holdings">${esc(t('browse.holdings.link'))}</a></p>` +
     `<p class="muted">${esc(counts(data.n_works, data.n_pages))}</p>` +
     `<div class="browse__filter">` +
     `<label class="field__label" for="browse-filter">${esc(t('browse.filter.label'))}</label>` +
@@ -378,7 +391,12 @@ export async function render(ctx) {
         // only part of the Arbeitskatalog so far (reports/crosswalk.md).
         if (lastShown === 0) {
           const any = Boolean(found && found.total);
-          status.textContent = t(any ? 'browse.filter.onlyContents' : 'browse.filter.noneAnywhere');
+          const refreshed = found && found.katalog && found.katalog.refreshed;
+          status.textContent = any
+            ? t('browse.filter.onlyContents')
+            : refreshed
+              ? t('browse.filter.noneAnywhere.whole', { date: refreshed })
+              : t('browse.filter.noneAnywhere');
         }
       })
       .catch(() => {

@@ -4,7 +4,7 @@
 import { t, tn } from '../i18n.js';
 import * as api from '../api.js';
 import { esc, pathSeg, num, conf, setLabel, aaRef, folioLabel } from '../dom.js';
-import { errorPanel, loading, renderNotFound } from './common.js';
+import { errorPanel, loading, renderNotFound, sourceLine } from './common.js';
 
 /** The way back into the browse index: "Browse › LH 35 · Mathematik". */
 function crumbs(data) {
@@ -101,6 +101,11 @@ function katalogRecord(record) {
     rows.push([t('work.katalog.aa.planned'), record.aa_planned.map((r) => esc(r)).join(', ')]);
   }
   if (record.drucke) rows.push([t('work.katalog.drucke'), esc(record.drucke)]);
+  // the heading an excerpt was filed under (the Arbeitskatalog export, A3b)
+  if (record.ordnungsvermerk) {
+    const ov = record.ordnungsvermerk;
+    rows.push([t('work.katalog.ov'), esc(ov.title ? `${ov.name} (${ov.title})` : ov.name)]);
+  }
 
   const body = rows
     .map(([key, value]) => `<div class="deflist__row"><dt>${esc(key)}</dt><dd>${value}</dd></div>`)
@@ -141,6 +146,22 @@ function katalogRecord(record) {
         `${esc(t('work.katalog.transcriptions', { year: record.transcriptions.year }))}</a>`,
     );
   }
+  // what the Arbeitskatalog export added: the catalogue's link to a digitised
+  // copy outside the GWLB, the edition's PDF for the piece with its page
+  if (record.url_ms) {
+    out.push(
+      `<a href="${esc(record.url_ms)}" rel="noopener">` +
+        `${esc(t('work.katalog.copy', { host: record.url_ms_domain || record.url_ms }))}</a>`,
+    );
+  }
+  if (record.aa_pdf) {
+    const pdf = record.aa_pdf;
+    const vars = { volume: pdf.volume || 'AA', page: pdf.page, where: pdf.where, terms: pdf.terms };
+    out.push(
+      `<a href="${esc(pdf.url)}" rel="noopener">` +
+        `${esc(t(pdf.page ? 'work.katalog.pdf' : 'work.katalog.pdf.nopage', vars))}</a>`,
+    );
+  }
   const link = out.length
     ? `<ul class="linklist linklist--inline katalog__links">${out.map((l) => `<li>${l}</li>`).join('')}</ul>`
     : '';
@@ -167,21 +188,27 @@ function katalogSection(data) {
   // No record held here: say that the site holds part of the catalogue, and
   // offer the catalogue's own search by the work's shelfmark(s).
   const searches = searchLinks(data);
+  const refreshed = data.katalog_coverage && data.katalog_coverage.refreshed;
   const body = records.length
     ? `<ul class="katalog-list">${records.map(katalogRecord).join('')}</ul>`
-    : `<p class="muted">${esc(t('work.katalog.partial'))}</p>` +
+    : `<p class="muted">${esc(
+        refreshed
+          ? t('work.katalog.partial.whole', { date: refreshed })
+          : t('work.katalog.partial'),
+      )}</p>` +
       (searches.length
         ? `<ul class="linklist linklist--inline katalog__links">${searches.map((l) => `<li>${l}</li>`).join('')}</ul>`
         : '');
   const order = records.some((r) => r.folio_label)
     ? `<p class="hint">${esc(t('work.katalog.order'))}</p>`
     : '';
+  // the credit, once, above the records: the registry's source line
   return (
     `<section class="panel" aria-labelledby="katalog-heading">` +
     `<h2 id="katalog-heading">${esc(t('work.katalog'))}</h2>` +
+    sourceLine(data.katalog_credit) +
     order +
     body +
-    `<p class="attribution__line">${esc(t('work.katalog.attr'))}</p>` +
     `</section>`
   );
 }

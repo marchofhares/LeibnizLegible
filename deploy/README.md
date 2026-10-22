@@ -39,6 +39,12 @@ index is rebuilt from it, and the mirror is the cache re-uploaded.
 From the repository checkout on the machine that holds the store (the WSL2
 box that ran the corpus):
 
+When the Arbeitskatalog has been imported from the Arbeitsstelle's export
+(`leibniz catalog import-access … --write`, Phase A3b), make a new serving copy
+afterwards and plan the index rebuild (§5) with it: the catalogue's titles and
+the pieces on each page are indexed, and the site reads the refresh date from
+the store (`katalog` in `/api/stats`).
+
 ```bash
 deploy/prepare-store.sh data/inventory.sqlite inventory-serving.sqlite
 ```
