@@ -797,7 +797,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21/22) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
+### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (b) kraken (Checkpoint C) · ⏳ Task 3 (a) TrOCR training
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -1156,6 +1156,43 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   Also found: a watcher whose command line names ketos and the checkpoints
   directory is itself a match for the guard's pattern and dies with the job;
   the watchers no longer say the word.
+- **Task 3 (b), the kraken training — CHECKPOINT C** (`leibniz bench
+  train-kraken --start` with `--train-list
+  data/models/k3/kraken/train-capped.txt`, batch 2 × 8-step accumulation, four
+  loader workers, early stopping with `--lag 5`, under
+  `tools/ketos-memcapped.sh` and the guard; runs row 614;
+  `data/models/k3/kraken/` on D: with `best.safetensors`,
+  `best-val-hyps.json`, `val-breakdown.json`, `account.json`, the ten best
+  lightning checkpoints and the abort checkpoint; the log
+  `logs/k3-kraken.log`, the guard's record `k3-kraken-guard.csv`). Launched
+  2026-10-22 13:11, stopped 2026-10-24 09:37 after checkpoint 36: **37 epochs
+  in 44.5 h, 72 min an epoch over the 55,585 capped lines with the validation
+  pass (about 13 lines/s all-in; the card at a steady 1.8–2.2 GB, utilisation
+  27 %, the host never under 5.5 GB available, swap under 1.5 GB, no guard
+  trip)**. Kraken's own validation accuracy by epoch: 0.7961, 0.8133, 0.8256,
+  0.8316, 0.8356, 0.8392, 0.8408, 0.8417, 0.8426, 0.8431, 0.8431, 0.8432,
+  0.8437, 0.8449, 0.8457, 0.8473, 0.8497, 0.8516, 0.8534, 0.8550, 0.8578,
+  0.8581, 0.8601, 0.8612, 0.8624, 0.8633, 0.8642, 0.8641, 0.8644, 0.8644,
+  0.8644, 0.8646, 0.8645, 0.8648, 0.8650, 0.8653, **0.8659** — gains of a few
+  ten-thousandths an epoch from epoch 26 on, which reset early stopping (its
+  minimum delta is zero) every time; the session recommended stopping after
+  the next checkpoint and the operator answered, verbatim, "your
+  recommendation is approved" (2026-10-24 morning); ketos was sent a
+  termination signal after checkpoint 36 landed and `ketos convert` turned
+  that checkpoint into `best_0.8659.safetensors`. The codec grew from 178 to
+  203 code points (`--resize union`; the added ones all symbols and the
+  edition's angle brackets). **Scored by the project's engine on the 3,133
+  validation lines: CER 15.56 % (95 % bootstrap 15.05 %–16.09 %; WER 45.8 %;
+  181 lines exact), against 24.74 % after the pilot's single epoch and 52.9 %
+  for the PHILIUMM base on the letter pool (K2b)**; by hand group Leibniz's
+  own 23.8 % (164 lines), the other hands 15.1 %; by stratum heavy_revision
+  17.8 %, light_revision 10.2 %, scrap 5.0 % (60 lines), fair_copy 32.2 % (7
+  lines); on the reader's rows 15.0 %, the v1 rows 18.9 %; the errors 43 %
+  substitutions, 11 % insertions, 46 % deletions; the normalization tax on
+  this set 1.83 points (15.56 % against 13.73 % under the aligner's fold).
+  Inference 35.2 lines/s at batch 16 on this card. Runs row 614 finished with
+  the 55,585 training lines. Disk: 0.6 GB on D:. The letter-pool and Dresden
+  numbers come in Task 4.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
