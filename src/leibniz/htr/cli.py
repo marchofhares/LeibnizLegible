@@ -1176,6 +1176,11 @@ def k3_report(
             ablation_note=ablation_note,
         )
         paths = R.write_eval(s, reports_dir)
+        paths.update(
+            R.write_cards(
+                s, trainset=R.load_json(reports_dir / "k3-trainset.json"), reports_dir=reports_dir
+            )
+        )
         c = s["choice"]
         console.print(f"  choice: {c.get('winner')} ({c.get('reason') or 'by the rule'})")
         for k, p in paths.items():

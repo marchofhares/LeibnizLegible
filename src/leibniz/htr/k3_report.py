@@ -693,6 +693,93 @@ def write_eval(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dic
     return {"md": md, "json": js}
 
 
+def card_inputs(ev: Mapping, key: str, *, trainset: Mapping | None, licence: str = "open") -> dict:
+    """What :func:`render_model_card` wants, from the evaluation JSON and the training set."""
+    m = ev["models"][key]
+    pool = m.get("pool") or {}
+    tr = m.get("trained") or {}
+    hist = tr.get("history") or []
+    best = None
+    for h in hist:
+        if h.get("cer") is not None and (best is None or h["cer"] < best["cer"]):
+            best = h
+    if key == "k3-trocr":
+        trained = {
+            "train_lines": ev["trainset"].get("train_lines"),
+            "val_lines": ev["trainset"].get("val_lines"),
+            "settings_key": (tr.get("settings") or {}).get("key"),
+            "epochs": tr.get("epoch"),
+            "best_epoch": best["epoch"] if best else None,
+            "best_cer": best["cer"] if best else None,
+            "hours": sum(h.get("seconds", 0) + h.get("val_seconds", 0) for h in hist) / 3600.0
+            if hist
+            else None,
+        }
+    else:
+        cks = tr.get("checkpoints") or []
+        trained = {
+            "train_lines": tr.get("pilot_lines") or ev["trainset"].get("train_lines"),
+            "val_lines": ev["trainset"].get("val_lines"),
+            "settings_key": (tr.get("settings") or {}).get("key"),
+            "epochs": (cks[-1]["epoch"] + 1) if cks else None,
+            "best_epoch": cks[-1]["epoch"] if cks else None,
+            "best_cer": (tr.get("score") or {}).get("cer"),
+            "hours": (tr.get("run_seconds") or 0) / 3600.0 if tr.get("run_seconds") else None,
+        }
+    hand = pool.get("hand") or {}
+    sp = m.get("speed") or {}
+    return {
+        "key": "trocr" if key == "k3-trocr" else "kraken",
+        "version": key,
+        "path": "data/models/k3/trocr/best"
+        if key == "k3-trocr"
+        else "data/models/k3/kraken/best.safetensors",
+        "trained": trained,
+        "trainset": trainset or {},
+        "letterpool": {
+            "all": pool.get("all"),
+            "test": pool.get("test"),
+            "L": hand.get("L"),
+            "K/k": hand.get("K/k"),
+        },
+        "validation": (m.get("validation") or {}).get("breakdown"),
+        "dresden": (
+            {
+                "cer": m["dresden"].get("cer"),
+                "note": "a 1673 chancery hand; a ranking, not a benchmark",
+            }
+            if m.get("dresden")
+            else None
+        ),
+        "speed": {"ms_per_line": sp.get("ms_per_line_model"), "german_hours": sp.get("hours")},
+        "licence": licence,
+        "precision_note": "K2's 200-line audit sheet (half in Leibniz's own hand) awaits its judge "
+        "at the Leibniz-Edition; no verdict existed when this model was trained.",
+    }
+
+
+def write_cards(
+    ev: Mapping,
+    *,
+    trainset: Mapping | None,
+    reports_dir: Path | str = DEFAULT_REPORTS_DIR,
+    licence: str = "open",
+) -> dict[str, Path]:
+    d = Path(reports_dir)
+    d.mkdir(parents=True, exist_ok=True)
+    out: dict[str, Path] = {}
+    for key in K3_MODELS:
+        if not ev["models"].get(key):
+            continue
+        p = d / f"k3-model-card-{key.removeprefix('k3-')}.md"
+        p.write_text(
+            render_model_card(card_inputs(ev, key, trainset=trainset, licence=licence)),
+            encoding="utf-8",
+        )
+        out[key] = p
+    return out
+
+
 def write_pilots(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dict[str, Path]:
     d = Path(reports_dir)
     d.mkdir(parents=True, exist_ok=True)
@@ -715,10 +802,12 @@ __all__ = [
     "K2B_READERS",
     "K3_MODELS",
     "build_eval",
+    "card_inputs",
     "choice",
     "pool_rows",
     "projection",
     "render_eval",
+    "write_cards",
     "write_eval",
     "WEEK_HOURS",
     "render_model_card",

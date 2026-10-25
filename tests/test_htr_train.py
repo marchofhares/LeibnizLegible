@@ -620,3 +620,6 @@ def test_cli_k3_report_eval_without_files(tmp_path: Path) -> None:
     )
     assert res.exit_code == 0, res.output
     assert (tmp_path / "rep" / "k3-eval.md").exists()
+    assert (tmp_path / "rep" / "k3-model-card-trocr.md").exists()
+    card = (tmp_path / "rep" / "k3-model-card-kraken.md").read_text(encoding="utf-8")
+    assert "Machine output, not an edition" in card and "CC BY 4.0" in card
