@@ -797,7 +797,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (b) kraken (Checkpoint C) · ⏳ Task 3 (a) TrOCR training
+### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ⏳ Task 4
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -1192,6 +1192,35 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   this set 1.83 points (15.56 % against 13.73 % under the aligner's fold).
   Inference 35.2 lines/s at batch 16 on this card. Runs row 614 finished with
   the 55,585 training lines. Disk: 0.6 GB on D:. The letter-pool and Dresden
+  numbers come in Task 4.
+- **Task 3 (a), the TrOCR training — CHECKPOINT C** (`leibniz bench
+  train-trocr --settings adafactor-grad-ckpt-b8 --epochs 6 --patience 3
+  --max-mib 4000`, the whole Bern model with gradient checkpointing, Adafactor
+  at batch 8, learning rate 5e-5 with a linear warm-up and decay to a tenth
+  over the 41,700 steps, the per-epoch validation generating at batch 8
+  without scores; runs row 615; `data/models/k3/trocr/` on D: with `best/`
+  (the epoch-5 weights, 1.3 GB, loadable as a reader), `last/`, `state.json`,
+  `best/val-hyps.json`, `val-breakdown.json`; the loop's log
+  `logs/k3-trocr-loop.log`, the guard's record `k3-trocr-guard.csv`). Launched
+  2026-10-24 09:42, finished 2026-10-25 13:23: **six epochs in 27.6 h, 4.5 h
+  an epoch over the 55,596 training lines at 3.42–3.47 lines/s plus a
+  6.5-minute validation pass; the process at a steady 3.5 GB of the card (the
+  guard's limit raised to 5,900 MiB on the way, the desktop's Xwayland having
+  grown to 1.4 GB), GPU utilisation 82 %, the host never under 6.3 GB
+  available, swap under 1 GB, no guard trip.** Validation CER by epoch 14.47,
+  13.14, 13.35, 12.34, 11.99, 11.84 % — epoch 2 the one step back (the
+  learning rate still near its peak), then the anneal; **the best at epoch 5:
+  11.84 % (95 % bootstrap 11.31 %–12.33 %; 436 lines exact)**, against 13.67 %
+  after the pilot's 20,000 lines and about 30 % for the base as it came; by
+  hand group Leibniz's own 19.7 % (164 lines), the other hands 11.4 %; by
+  stratum heavy_revision 13.3 %, light_revision 8.3 %, scrap 6.7 % (60 lines),
+  fair_copy 23.0 % (7); on the reader's rows 10.9 %, the v1 rows 16.9 %; the
+  errors 42 % substitutions, 21 % insertions, 37 % deletions (kraken's were 43
+  / 11 / 46: the TrOCR model inserts where kraken drops); the tax on this set
+  1.72 points. **Against the kraken model on the same 3,133 lines: 11.84 % to
+  15.56 %; the two disagree on 2,935 lines, and on 395 of those (13.5 %) one
+  of them is exactly right (TrOCR 325, kraken 70) — the number the C3
+  amendment asks for.** Disk: 2.7 GB on D:. The letter-pool, Dresden and speed
   numbers come in Task 4.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
