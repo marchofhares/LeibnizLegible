@@ -4473,6 +4473,17 @@ Legal registry (A0, unchanged): 42 entries; 32 free today.
   (6) *The PP-OCRv6 pilot at batch 4 was killed by the guard* at its first
   steps (5,835 MiB on the card) and rerun at batch 1 with 16-step
   accumulation.
+  (7) *Two jobs at once, three times.* The host ran out of memory at the 07:36
+  and 07:58 launches of 22 October (the PP-OCRv6 pilot's CPU scoring started
+  beside the kraken training's start-up; the machine went down both times),
+  and on 25 October at 15:54 the guard killed the letter-pool read of the K3
+  models at its host floor (available memory 6,981 → 1,778 MiB in eight
+  seconds) because the same CPU scoring ran beside it; the session itself then
+  ended while waiting. Every one of these was the session's own pairing of a
+  GPU job with a second torch process on the 9.9 GB host. The rule from here,
+  the operator's: one job at a time, the GPU idle before each, nothing else of
+  the session's on the machine while a job runs, the disk use stated against
+  C: before any job that writes.
 
 - **2026-10-21 — W6, departures from the prompt and from the preamble of
   19 October.** (1) *The LBr spelling.* The prompt's context said the
