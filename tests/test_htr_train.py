@@ -1,5 +1,7 @@
 """Tests for the training modules' bookkeeping (K3 Task 2): no torch, no kraken."""
 
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
@@ -470,3 +472,151 @@ def test_model_card_draft_renders_from_partial_data() -> None:
     )
     assert "Machine output, not an edition" in card and "MIT" in card and "30.00 %" in card
     assert "7.4 % of 1,949 lines" in card and "Dresden" in card
+
+
+def test_eval_report_choice_and_render(tmp_path: Path) -> None:
+    from leibniz.htr import k3_report as R
+
+    def pool(cer, lo, hi):
+        blk = {"cer": cer, "cer_lo": lo, "cer_hi": hi, "letters": 67}
+        return {
+            "all": blk,
+            "half": {"selection": blk, "test": blk},
+            "hand": {"L": blk, "K/k": blk},
+            "year": {"1713": blk},
+        }
+
+    k3_pool = {
+        "aggregate": {
+            "k3-trocr": {"philiumm": pool(0.30, 0.27, 0.33)},
+            "k3-kraken": {"philiumm": pool(0.32, 0.29, 0.35)},
+        },
+        "selected": {},
+        "readers": [],
+    }
+    k2b_pool = {
+        "aggregate": {"v1": {"philiumm": pool(0.466, 0.433, 0.495)}},
+        "selected": {},
+        "readers": [],
+    }
+    dresden = {
+        "results": [
+            {
+                "key": "k3-trocr",
+                "scores": {"philiumm": {"cer": 0.08, "cer_lo": 0.07, "cer_hi": 0.09}},
+                "ms_per_line": 90.0,
+                "n_lines": 383,
+                "status": "ok",
+            },
+            {
+                "key": "k3-kraken",
+                "scores": {"philiumm": {"cer": 0.2, "cer_lo": 0.18, "cer_hi": 0.22}},
+                "ms_per_line": 20.0,
+                "n_lines": 383,
+                "status": "ok",
+            },
+        ]
+    }
+    comp = {
+        "lines": 1,
+        "ref_chars": 10,
+        "edits": 1,
+        "sub": 1,
+        "ins": 0,
+        "del": 0,
+        "exact": 0,
+        "cer": 0.1,
+        "sub_share": 1.0,
+        "ins_share": 0.0,
+        "del_share": 0.0,
+    }
+    vb = {
+        "breakdown": {
+            "overall": comp,
+            "by": {
+                "group": {"leibniz": comp, "other": comp},
+                "stratum": {"heavy_revision": comp, "light_revision": comp, "scrap": comp},
+                "reader": {"trocr-kurrent-xvi-xvii": comp, "v1": comp},
+                "hand": {},
+            },
+        },
+        "bootstrap": {"cer": 0.1, "cer_lo": 0.09, "cer_hi": 0.11, "n": 1},
+        "tax": {"tax": 0.02},
+    }
+    s = R.build_eval(
+        k3_pool=k3_pool,
+        k2b_pool=k2b_pool,
+        val_breakdowns={"k3-trocr": vb, "k3-kraken": vb},
+        dresden=dresden,
+        disagreements={
+            "lines": 10,
+            "disagree": 4,
+            "a_exact": 2,
+            "b_exact": 1,
+            "either_share": 0.75,
+        },
+        trained={},
+        trainset={"splits": {"train": {"lines": 55596}, "val": {"lines": 3133}}},
+    )
+    c = s["choice"]
+    # kraken's 32 % is within trocr's interval up to 33 %, and it is the faster: speed decides
+    assert c["best_cer"]["model"] == "k3-trocr" and c["faster"]["model"] == "k3-kraken"
+    assert c["faster_within_margin"] is True and c["winner"] == "k3-kraken"
+    assert (
+        abs(
+            s["models"]["k3-trocr"]["speed"]["hours"]
+            - 310831 * (90 + 1000 * (R.K2_WALL_S - R.K2_MODEL_S) / 310831) / 1000 / 3600
+        )
+        < 1e-6
+    )
+    md = R.render_eval(s)
+    assert "The rule's answer: k3-kraken" in md and "v1 (K2b)" in md and "75.0 %" in md
+    paths = R.write_eval(s, tmp_path)
+    assert (
+        paths["md"].exists()
+        and json.loads(paths["json"].read_text())["choice"]["winner"] == "k3-kraken"
+    )
+    # the better model wins when the faster one is outside the margin
+    k3_pool["aggregate"]["k3-kraken"]["philiumm"] = pool(0.36, 0.33, 0.39)
+    s2 = R.build_eval(
+        k3_pool=k3_pool,
+        k2b_pool=k2b_pool,
+        val_breakdowns={},
+        dresden=dresden,
+        disagreements=None,
+        trained={},
+        trainset=None,
+    )
+    assert s2["choice"]["winner"] == "k3-trocr" and s2["choice"]["faster_within_margin"] is False
+
+
+def test_cli_k3_report_eval_without_files(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    root = _train_root(tmp_path)
+    res = CliRunner().invoke(
+        app,
+        [
+            "bench",
+            "k3-report",
+            "eval",
+            "--train-root",
+            str(root),
+            "--reports-dir",
+            str(tmp_path / "rep"),
+            "--k3-pool",
+            str(tmp_path / "none.json"),
+            "--k2b-pool",
+            str(tmp_path / "none.json"),
+            "--dresden",
+            str(tmp_path / "none.json"),
+            "--models-root",
+            str(tmp_path / "models"),
+            "--ppocr-account",
+            str(tmp_path / "none.json"),
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert (tmp_path / "rep" / "k3-eval.md").exists()

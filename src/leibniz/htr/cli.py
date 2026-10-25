@@ -1107,7 +1107,7 @@ def train_kraken(
 
 @app.command("k3-report")
 def k3_report(
-    which: str = typer.Argument("pilots", help="pilots (Task 2)."),
+    which: str = typer.Argument("pilots", help="pilots (Task 2) or eval (Task 4)."),
     train_root: Path = typer.Option(Path("data/train/k3"), "--train-root"),
     trocr_pilot: Path = typer.Option(Path("data/models/k3/trocr/pilot.json"), "--trocr-pilot"),
     trocr_probe: list[Path] = typer.Option(
@@ -1120,12 +1120,69 @@ def k3_report(
     plan_epochs_kraken: int = typer.Option(30, "--plan-epochs-kraken"),
     rented_note: str = typer.Option("", "--rented-note", help="A sentence on renting."),
     reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+    k3_pool: Path = typer.Option(
+        Path("reports/kurrent/k3-letterpool/letterpool-eval.json"),
+        "--k3-pool",
+        help="eval: the letter-pool evaluation with the K3 models.",
+    ),
+    k2b_pool: Path = typer.Option(
+        Path("reports/kurrent/letterpool-eval.json"), "--k2b-pool", help="eval: K2b's rows."
+    ),
+    dresden: Path = typer.Option(
+        Path("reports/kurrent/k3-dresden/bootstrap-candidates.json"),
+        "--dresden",
+        help="eval: kurrent-smoke's JSON with the K3 models.",
+    ),
+    models_root: Path = typer.Option(
+        Path("data/models/k3"), "--models-root", help="eval: <root>/<model>/ with the artefacts."
+    ),
+    ppocr_account: Path = typer.Option(
+        Path("data/models/k3/ppocr-pilot/account.json"), "--ppocr-account", help="eval: the pilot."
+    ),
+    ablation_note: str = typer.Option("", "--ablation-note", help="eval: the ablation's state."),
 ) -> None:
     """Render a K3 report from the artefacts' JSON (numbers only)."""
+    from leibniz.htr import k3_eval as E
     from leibniz.htr import k3_report as R
 
+    if which == "eval":
+        val_breakdowns: dict = {}
+        trained: dict = {}
+        hyps: dict = {}
+        for key, sub, hyps_file in (
+            ("k3-trocr", "trocr", Path("best") / "val-hyps.json"),
+            ("k3-kraken", "kraken", Path("best-val-hyps.json")),
+        ):
+            d = models_root / sub
+            val_breakdowns[key] = R.load_json(d / "val-breakdown.json")
+            trained[key] = R.load_json(d / "state.json") or R.load_json(d / "account.json") or {}
+            h = R.load_json(d / hyps_file)
+            if h:
+                hyps[key] = h
+        dis = None
+        manifest = train_root / "manifest.jsonl"
+        if len(hyps) == 2 and manifest.exists():
+            tags = E.manifest_tags(_read_manifest_rows(manifest), split="val")
+            dis = E.disagreements(E.refs_from_tags(tags), hyps["k3-trocr"], hyps["k3-kraken"])
+        s = R.build_eval(
+            k3_pool=R.load_json(k3_pool),
+            k2b_pool=R.load_json(k2b_pool),
+            val_breakdowns=val_breakdowns,
+            dresden=R.load_json(dresden),
+            disagreements=dis,
+            trained=trained,
+            trainset=R.load_json(reports_dir / "k3-trainset.json"),
+            ppocr_pilot=R.load_json(ppocr_account),
+            ablation_note=ablation_note,
+        )
+        paths = R.write_eval(s, reports_dir)
+        c = s["choice"]
+        console.print(f"  choice: {c.get('winner')} ({c.get('reason') or 'by the rule'})")
+        for k, p in paths.items():
+            console.print(f"  wrote {k}: {p}")
+        return
     if which != "pilots":
-        raise typer.BadParameter("only 'pilots' is rendered here")
+        raise typer.BadParameter("render 'pilots' or 'eval'")
     s = R.build_pilots(
         trocr=R.load_json(trocr_pilot),
         kraken=R.load_json(kraken_account),

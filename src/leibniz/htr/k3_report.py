@@ -359,6 +359,340 @@ def render_model_card(c: Mapping) -> str:
     return "\n".join(L)
 
 
+# --------------------------------------------------------------------------- #
+# The evaluation report (Task 4): k3-eval.md + .json
+# --------------------------------------------------------------------------- #
+
+K2B_READERS = ("v1", "philiumm", "trocr-kurrent-xvi-xvii", "trocr-hanse-xvi", "trocr-hanse-xvii")
+K3_MODELS = ("k3-trocr", "k3-kraken")
+HEADLINE = "philiumm"
+# K2's reading job: 310,831 lines on 4,807 pages of the German records in 26,762 s of wall
+# time, 26,109 s of them the model's (reports/kurrent/k2-read.json) — the overhead of the
+# image loading from D: and the crops is the difference, 2.1 ms a line.
+K2_LINES = 310_831
+K2_WALL_S = 26_762.054
+K2_MODEL_S = 26_108.921
+
+
+def pool_rows(lp: Mapping | None, reader: str, policy: str = HEADLINE) -> dict | None:
+    """The letter pool's rows for one reader under one policy: all, the halves, the hands,
+    the years (each ``{cer, cer_lo, cer_hi, letters, …}``)."""
+    if not lp:
+        return None
+    agg = (lp.get("aggregate") or {}).get(reader) or {}
+    block = agg.get(policy)
+    if not block:
+        return None
+    return {
+        "all": block.get("all"),
+        "selection": (block.get("half") or {}).get("selection"),
+        "test": (block.get("half") or {}).get("test"),
+        "hand": block.get("hand") or {},
+        "year": block.get("year") or {},
+        "selected": (lp.get("selected") or {}).get(reader),
+        "info": next((r for r in lp.get("readers", []) if r.get("reader") == reader), None),
+    }
+
+
+def projection(ms_per_line: float | None) -> dict | None:
+    """Hours to read K2's lines at this model's pace, with K2's measured overhead."""
+    if ms_per_line is None:
+        return None
+    overhead_ms = 1000.0 * (K2_WALL_S - K2_MODEL_S) / K2_LINES
+    all_in = ms_per_line + overhead_ms
+    return {
+        "ms_per_line_model": ms_per_line,
+        "ms_per_line_all_in": all_in,
+        "lines": K2_LINES,
+        "hours": K2_LINES * all_in / 1000.0 / 3600.0,
+    }
+
+
+def choice(models: Mapping[str, Mapping]) -> dict:
+    """The rule the prompt sets, made concrete: the better selection-half CER wins unless
+    the faster model's selection-half CER lies within the slower model's 95 % bootstrap
+    interval there (the margin the report proposes), in which case speed decides."""
+    rows = []
+    for key, m in models.items():
+        sel = ((m.get("pool") or {}).get("selection")) or {}
+        sp = m.get("speed") or {}
+        if sel.get("cer") is None:
+            continue
+        rows.append(
+            (key, sel["cer"], sel.get("cer_lo"), sel.get("cer_hi"), sp.get("ms_per_line_model"))
+        )
+    if len(rows) < 2:
+        return {
+            "rule": "selection-half CER, speed within the margin",
+            "winner": rows[0][0] if rows else None,
+            "reason": "one model measured" if rows else "nothing measured",
+        }
+    rows.sort(key=lambda r: r[1])
+    best, second = rows[0], rows[1]
+    faster = min(rows, key=lambda r: r[4] if r[4] is not None else float("inf"))
+    margin = (best[3] - best[1]) if best[3] is not None else None
+    within = margin is not None and faster[0] != best[0] and faster[1] <= best[1] + margin
+    winner = faster[0] if within else best[0]
+    return {
+        "rule": "the better letter-pool CER on the selection half, unless the faster model's "
+        "selection-half CER lies within the better model's 95 % bootstrap interval there, in "
+        "which case speed decides (every re-read of the German pages pays the speed difference)",
+        "best_cer": {"model": best[0], "cer": best[1], "cer_lo": best[2], "cer_hi": best[3]},
+        "runner_up": {"model": second[0], "cer": second[1]},
+        "faster": {"model": faster[0], "ms_per_line": faster[4]},
+        "margin": margin,
+        "faster_within_margin": within,
+        "winner": winner,
+    }
+
+
+def build_eval(
+    *,
+    k3_pool: Mapping | None,
+    k2b_pool: Mapping | None,
+    val_breakdowns: Mapping[str, Mapping | None],
+    dresden: Mapping | None,
+    disagreements: Mapping | None,
+    trained: Mapping[str, Mapping],
+    trainset: Mapping | None,
+    ppocr_pilot: Mapping | None = None,
+    ablation_note: str = "",
+) -> dict:
+    """Everything k3-eval.md says, from the files: the pool rows of K2b's readers and the K3
+    models, the validation breakdowns, Dresden, the speeds and projections, the choice."""
+    dres = {}
+    for r in (dresden or {}).get("results", []) if dresden else []:
+        dres[r["key"]] = {
+            "cer": (r.get("scores") or {}).get(HEADLINE, {}).get("cer"),
+            "cer_lo": (r.get("scores") or {}).get(HEADLINE, {}).get("cer_lo"),
+            "cer_hi": (r.get("scores") or {}).get(HEADLINE, {}).get("cer_hi"),
+            "ms_per_line": r.get("ms_per_line"),
+            "n_lines": r.get("n_lines"),
+            "status": r.get("status"),
+        }
+    models = {}
+    for key in K3_MODELS:
+        d = dres.get(key) or {}
+        models[key] = {
+            "pool": pool_rows(k3_pool, key),
+            "validation": val_breakdowns.get(key),
+            "dresden": d or None,
+            "speed": projection(d.get("ms_per_line")),
+            "trained": trained.get(key) or {},
+        }
+    baselines = {
+        key: {"pool": pool_rows(k2b_pool, key), "dresden": dres.get(key)} for key in K2B_READERS
+    }
+    return {
+        "generated": date.today().isoformat(),
+        "headline_policy": HEADLINE,
+        "models": models,
+        "baselines": baselines,
+        "disagreements": disagreements,
+        "choice": choice(models),
+        "trainset": {
+            "train_lines": ((trainset or {}).get("splits") or {}).get("train", {}).get("lines"),
+            "val_lines": ((trainset or {}).get("splits") or {}).get("val", {}).get("lines"),
+            "screen": (trainset or {}).get("screen"),
+        },
+        "ppocr_pilot": ppocr_pilot,
+        "ablation": ablation_note,
+        "k2_throughput": {"lines": K2_LINES, "wall_s": K2_WALL_S, "model_s": K2_MODEL_S},
+    }
+
+
+def _cerci(block: Mapping | None) -> str:
+    if not block or block.get("cer") is None:
+        return "—"
+    s = _pct(block["cer"], 1)
+    if block.get("cer_lo") is not None:
+        s += f" ({_pct(block['cer_lo'], 1)}–{_pct(block['cer_hi'], 1)})"
+    return s
+
+
+def render_eval(s: Mapping) -> str:
+    L: list[str] = [
+        "# K3: the evaluation, and the choice for K4",
+        "",
+        "Two Leibniz Kurrent models fine-tuned on K2's German mint "
+        f"({_n(s['trainset']['train_lines'])} training lines; "
+        f"{_n(s['trainset']['val_lines'])} validation lines, page-disjoint, for the "
+        "checkpoints), measured where nothing was tuned: the GWLB letter pool (K2b's frozen set, "
+        "its metric and code: the letter's reference against every recognised line on its pages, "
+        "nothing filtered; CC BY-NC 4.0, numbers only), Dresden as a sanity check, the validation "
+        f"set for the composition of the errors. CER under the `{s['headline_policy']}` policy "
+        f"with 95 % bootstrap intervals over letters. Generated {s['generated']}.",
+        "",
+        "## The letter pool",
+        "",
+        "| reader | all 134 letters | selection half | test half | Leibniz's hand (L) "
+        "| the correspondents' (K/k) |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for key in K2B_READERS:
+        p = (s["baselines"].get(key) or {}).get("pool")
+        if not p:
+            continue
+        L.append(
+            f"| {key} (K2b) | {_cerci(p['all'])} | {_cerci(p['selection'])} | "
+            f"{_cerci(p['test'])} | "
+            f"{_cerci((p['hand'] or {}).get('L'))} | {_cerci((p['hand'] or {}).get('K/k'))} |"
+        )
+    for key in K3_MODELS:
+        p = (s["models"][key] or {}).get("pool")
+        if not p:
+            L.append(f"| **{key}** | not read yet | | | | |")
+            continue
+        L.append(
+            f"| **{key}** | **{_cerci(p['all'])}** | **{_cerci(p['selection'])}** | "
+            f"**{_cerci(p['test'])}** | "
+            f"{_cerci((p['hand'] or {}).get('L'))} | {_cerci((p['hand'] or {}).get('K/k'))} |"
+        )
+    years = sorted(
+        {
+            y
+            for key in K3_MODELS
+            for y in (((s["models"][key] or {}).get("pool") or {}).get("year") or {})
+        }
+    )
+    if years:
+        L += [
+            "",
+            "By year (the K3 models; letters per year as K2b drew them):",
+            "",
+            "| year | " + " | ".join(K3_MODELS) + " |",
+            "|---|" + "---:|" * len(K3_MODELS),
+        ]
+        for y in years:
+            L.append(
+                f"| {y} | "
+                + " | ".join(
+                    _cerci(((s["models"][k].get("pool") or {}).get("year") or {}).get(y))
+                    for k in K3_MODELS
+                )
+                + " |"
+            )
+    L += [
+        "",
+        "## The validation set (the mint's own text as reference)",
+        "",
+        "| model | CER (95 %) | Leibniz's hand | other hands | heavy | light | scrap "
+        "| reader rows | v1 rows | sub / ins / del | tax |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+    ]
+    for key in K3_MODELS:
+        v = s["models"][key].get("validation")
+        if not v:
+            L.append(f"| {key} | — | | | | | | | | | |")
+            continue
+        b = v["breakdown"]
+        o = b["overall"]
+        by = b["by"]
+        ci = v.get("bootstrap") or {}
+        g = lambda d, k: _pct((d.get(k) or {}).get("cer"), 1)  # noqa: E731
+        L.append(
+            f"| {key} | {_pct(o['cer'], 2)} ({_pct(ci.get('cer_lo'), 2)}–"
+            f"{_pct(ci.get('cer_hi'), 2)}) | {g(by['group'], 'leibniz')} | "
+            f"{g(by['group'], 'other')} | {g(by['stratum'], 'heavy_revision')} | "
+            f"{g(by['stratum'], 'light_revision')} | {g(by['stratum'], 'scrap')} | "
+            f"{g(by['reader'], 'trocr-kurrent-xvi-xvii')} | {g(by['reader'], 'v1')} | "
+            f"{_pct(o['sub_share'], 0)} / {_pct(o['ins_share'], 0)} / {_pct(o['del_share'], 0)} | "
+            f"{100 * (v.get('tax') or {}).get('tax', 0):.1f} pts |"
+        )
+    d = s.get("disagreements")
+    if d:
+        L += [
+            "",
+            f"Where the two models disagree on a validation line ({_n(d['disagree'])} of "
+            f"{_n(d['lines'])}), one of them is exactly right on {_pct(d['either_share'], 1)} "
+            f"(k3-trocr {_n(d['a_exact'])}, k3-kraken {_n(d['b_exact'])}) — the number the C3 "
+            "amendment asks for.",
+        ]
+    L += [
+        "",
+        "## Dresden (a chancery hand, a sanity check; nc, numbers only)",
+        "",
+        "| reader | CER (95 %) | ms a line |",
+        "|---|---:|---:|",
+    ]
+    for key in list(K2B_READERS) + list(K3_MODELS):
+        dr = (
+            (s["baselines"].get(key) or {}).get("dresden")
+            if key in K2B_READERS
+            else (s["models"][key] or {}).get("dresden")
+        )
+        if dr:
+            L.append(f"| {key} | {_cerci(dr)} | {_f(dr.get('ms_per_line'), 0)} |")
+    L += [
+        "",
+        "## Speed, and the time to read every German page",
+        "",
+        "| model | ms a line (model, Dresden, as K1 measured) "
+        "| all-in ms a line (K2's overhead added) | K2's 310,831 lines |",
+        "|---|---:|---:|---:|",
+    ]
+    for key in K3_MODELS:
+        sp = s["models"][key].get("speed")
+        if sp:
+            L.append(
+                f"| {key} | {_f(sp['ms_per_line_model'], 0)} | "
+                f"{_f(sp['ms_per_line_all_in'], 0)} | {_hours(sp['hours'])} |"
+            )
+    c = s["choice"]
+    L += ["", "## The choice for K4", "", c["rule"] + ".", ""]
+    if c.get("winner"):
+        L += [
+            f"- Best selection-half CER: **{c['best_cer']['model']}** at "
+            f"{_pct(c['best_cer']['cer'], 1)} ({_pct(c['best_cer']['cer_lo'], 1)}–"
+            f"{_pct(c['best_cer']['cer_hi'], 1)}); the runner-up "
+            f"{c['runner_up']['model']} at {_pct(c['runner_up']['cer'], 1)}.",
+            f"- The faster model: **{c['faster']['model']}** "
+            f"({_f(c['faster']['ms_per_line'], 0)} ms a line); "
+            f"within the margin ({_pct(c['margin'], 1) if c['margin'] is not None else '—'}): "
+            f"**{'yes' if c['faster_within_margin'] else 'no'}**.",
+            f"- **The rule's answer: {c['winner']}.** The choice is the operator's; recorded in "
+            "STATUS.md.",
+        ]
+    pp = s.get("ppocr_pilot")
+    if pp:
+        L += [
+            "",
+            "## PP-OCRv6 (the amendment's other base), the pilot only",
+            "",
+            f"One epoch over {_n(pp.get('pilot_lines'))} lines in "
+            f"{_hours((pp.get('run_seconds') or 0) / 3600)} at batch 1 with 16-step accumulation, "
+            f"peak {_n(pp.get('peak_mib'))} MiB; kraken's validation accuracy "
+            f"{_f((pp.get('checkpoints') or [{}])[-1].get('val_metric'), 4)} against the PHILIUMM "
+            "pilot's 0.7676 after its epoch; the project's validation CER "
+            f"{_pct((pp.get('score') or {}).get('cer'), 2)}. Trained on the Dresdner Hofdiarium, "
+            "so Dresden cannot rank it; not trained in full in this round.",
+        ]
+    if s.get("ablation"):
+        L += ["", "## The ablation", "", s["ablation"]]
+    L += [
+        "",
+        "## What this is not",
+        "",
+        "- The precision of the training lines is unmeasured (K2's audit sheet awaits its "
+        "judge); the "
+        "screen's figures are in `k3-trainset.md`.",
+        "- The validation set is the mint's own text, so its numbers carry the mint's "
+        "conventions; the "
+        "letter pool is the honest German error rate.",
+        "",
+    ]
+    return "\n".join(L)
+
+
+def write_eval(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dict[str, Path]:
+    d = Path(reports_dir)
+    d.mkdir(parents=True, exist_ok=True)
+    md, js = d / "k3-eval.md", d / "k3-eval.json"
+    md.write_text(render_eval(s), encoding="utf-8")
+    js.write_text(json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8")
+    return {"md": md, "json": js}
+
+
 def write_pilots(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dict[str, Path]:
     d = Path(reports_dir)
     d.mkdir(parents=True, exist_ok=True)
@@ -378,6 +712,14 @@ def count_lines(path: Path | str) -> int:
 
 __all__ = [
     "BASES",
+    "K2B_READERS",
+    "K3_MODELS",
+    "build_eval",
+    "choice",
+    "pool_rows",
+    "projection",
+    "render_eval",
+    "write_eval",
     "WEEK_HOURS",
     "render_model_card",
     "build_pilots",

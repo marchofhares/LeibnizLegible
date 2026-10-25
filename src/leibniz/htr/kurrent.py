@@ -120,6 +120,28 @@ CANDIDATES: dict[str, Candidate] = {
             "the 19th-century base of the XVI–XVII model; a reference, off by default",
             default=False,
         ),
+        # K3's fine-tunes (2026-10-24), on the operator's desktop under data/models/k3/ (a
+        # symlink to /mnt/d/leibniz-train/k3/); off by default, evaluated by Task 4.
+        Candidate(
+            "k3-trocr",
+            "trocr",
+            "data/models/k3/trocr/best",
+            "MIT (the base) · the fine-tune open",
+            "K3: dh-unibe/trocr-kurrent-XVI-XVII fine-tuned on K2's German mint (runs row 615)",
+            "the whole model, Adafactor with gradient checkpointing, six epochs, the best on "
+            "the frozen validation set",
+            default=False,
+        ),
+        Candidate(
+            "k3-kraken",
+            "kraken",
+            "data/models/k3/kraken/best.safetensors",
+            "CC BY 4.0 (the base) · the fine-tune open",
+            "K3: FoNDUE-GD_v2_ft_Leibniz fine-tuned on K2's German mint, the codec grown "
+            "(runs row 614)",
+            "ketos from the PHILIUMM checkpoint, 37 epochs, stopped after checkpoint 36",
+            default=False,
+        ),
         Candidate("echo", "echo", "", "—", "", "the offline stub the tests run", default=False),
     )
 }
