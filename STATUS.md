@@ -1222,6 +1222,25 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   of them is exactly right (TrOCR 325, kraken 70) — the number the C3
   amendment asks for.** Disk: 2.7 GB on D:. The letter-pool, Dresden and speed
   numbers come in Task 4.
+- **The stop of 26 October, and PP-OCRv6 set aside (Task 4).** With the
+  letter-pool evaluation of the two K3 models done (08:03), the session ran
+  the PP-OCRv6 pilot's accounting: its GPU scoring failed in the kraken 7.1
+  side environment for the second time (`CUDA driver error: device not ready`
+  at the first convolution; the environment's torch wheel does not run on this
+  card though it loads), and the fallback scoring on the CPU grew until the
+  kernel's OOM killer took it at 08:30:45 — the journal of that boot: `Out of
+  memory: Killed process 11584 (leibniz) total-vm:22885020kB,
+  anon-rss:9371424kB` — and the distro shut down at 08:32:25, the session with
+  it. Dresden had not run. The operator's decision, verbatim: "drop the
+  PP-OCRv6 accounting from this phase altogether: its side environment has a
+  CUDA fault and its CPU scoring is the heaviest thing left; record it as
+  pending for K3b." So: the PP-OCRv6 pilot's weights
+  (`data/models/k3/ppocr-pilot/checkpoints/best_0.8295.safetensors`, kraken's
+  accuracy 0.8295 after one epoch over 20,000 lines in 107.6 min at batch 1 ×
+  16, peak 3,009 MiB) stay on D: unscored by the project's metric; the
+  account, the side environment's CUDA fault and a full PP-OCRv6 training are
+  K3b's. Task 4 finishes with Dresden and the speeds for the two K3 models
+  only, one job at a time.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
