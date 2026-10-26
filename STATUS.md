@@ -1071,7 +1071,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26) ✅ Task 0 · ⏳ the operator's go
+### K4 — German on the site (2026-10-26) ✅ Task 0 · ⏳ Task 1
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1083,6 +1083,10 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   changes its terms; Task 5 adds the readings to the outputs table and lets
   About read the sentence from the registry. The K3 "Next" line and the K3
   entry's choice bullet now carry the answer.
+- **The operator's go (26 October), verbatim:** "go. The store histogram
+  finishes or is stopped before Task 3's pilot starts: one process of yours
+  on the machine during a GPU job." (The histogram: a read-only side look
+  at the store's `lines` table started in Task 0.)
 - **Setting (Task 0).** The operator's desktop, the WSL checkout
   `/home/evana/LeibnizLegible`, a Claude Code session; main at `c0b1a45`
   (#55, K3 merged) and `origin/main` the same; `k4-german-site` created with
