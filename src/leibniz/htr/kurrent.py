@@ -136,7 +136,8 @@ CANDIDATES: dict[str, Candidate] = {
             "k3-kraken",
             "kraken",
             "data/models/k3/kraken/best.safetensors",
-            "CC BY 4.0 (the base) · the fine-tune open",
+            "the base obtained under CC BY 4.0, published under CC BY-NC 4.0 since 2026-10-15 · "
+            "the fine-tune CC BY-NC 4.0 (the owner's scheme of 2026-10-13)",
             "K3: FoNDUE-GD_v2_ft_Leibniz fine-tuned on K2's German mint, the codec grown "
             "(runs row 614)",
             "ketos from the PHILIUMM checkpoint, 37 epochs, stopped after checkpoint 36",

@@ -245,7 +245,8 @@ BASES = {
     },
     "kraken": {
         "name": "FoNDUE-GD_v2_ft_Leibniz.safetensors (PHILIUMM)",
-        "licence": "CC BY 4.0",
+        "licence": "obtained under CC BY 4.0 on 2026-07-29, published under CC BY-NC 4.0 since "
+        "2026-10-15",
         "origin": "Zenodo 10.5281/zenodo.21457538",
         "what": "the PHILIUMM project's kraken recognition model for Leibniz's Latin and "
         "French (FoNDUE-GD v2 fine-tuned; self-reported CER 8.33 %)",
@@ -723,8 +724,24 @@ def write_eval(s: Mapping, reports_dir: Path | str = DEFAULT_REPORTS_DIR) -> dic
     return {"md": md, "json": js}
 
 
-def card_inputs(ev: Mapping, key: str, *, trainset: Mapping | None, licence: str = "open") -> dict:
-    """What :func:`render_model_card` wants, from the evaluation JSON and the training set."""
+# The fine-tune's licence per model, as L1's registry decides (legal.py: the owner's
+# scheme of 2026-10-13 — a model fine-tuned from the PHILIUMM checkpoint is CC BY-NC 4.0,
+# a candidate without NC input stays open).
+K3_LICENCES = {
+    "k3-trocr": "open (CC BY 4.0 in this project's release: the base MIT, the training lines "
+    "open-bucket)",
+    "k3-kraken": "CC BY-NC 4.0 (the owner's scheme of 2026-10-13: fine-tuned from the PHILIUMM "
+    "checkpoint, which its makers publish under CC BY-NC 4.0 since 2026-10-15; its readings "
+    "carry the same)",
+}
+
+
+def card_inputs(
+    ev: Mapping, key: str, *, trainset: Mapping | None, licence: str | None = None
+) -> dict:
+    """What :func:`render_model_card` wants, from the evaluation JSON and the training set.
+
+    ``licence`` overrides the registry's answer in :data:`K3_LICENCES`."""
     m = ev["models"][key]
     pool = m.get("pool") or {}
     tr = m.get("trained") or {}
@@ -782,7 +799,7 @@ def card_inputs(ev: Mapping, key: str, *, trainset: Mapping | None, licence: str
             else None
         ),
         "speed": {"ms_per_line": sp.get("ms_per_line_model"), "german_hours": sp.get("hours")},
-        "licence": licence,
+        "licence": licence if licence is not None else K3_LICENCES.get(key, "open"),
         "precision_note": "K2's 200-line audit sheet (half in Leibniz's own hand) awaits its judge "
         "at the Leibniz-Edition; no verdict existed when this model was trained.",
     }
@@ -793,7 +810,7 @@ def write_cards(
     *,
     trainset: Mapping | None,
     reports_dir: Path | str = DEFAULT_REPORTS_DIR,
-    licence: str = "open",
+    licence: str | None = None,
 ) -> dict[str, Path]:
     d = Path(reports_dir)
     d.mkdir(parents=True, exist_ok=True)

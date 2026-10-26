@@ -635,3 +635,14 @@ def test_cli_k3_report_eval_without_files(tmp_path: Path) -> None:
     assert (tmp_path / "rep" / "k3-model-card-trocr.md").exists()
     card = (tmp_path / "rep" / "k3-model-card-kraken.md").read_text(encoding="utf-8")
     assert "Machine output, not an edition" in card and "CC BY 4.0" in card
+
+
+def test_card_inputs_licence_follows_the_registry() -> None:
+    from leibniz.htr import k3_report as R
+
+    ev = {"models": {"k3-trocr": {}, "k3-kraken": {}}, "trainset": {}}
+    assert R.card_inputs(ev, "k3-trocr", trainset=None)["licence"].startswith("open")
+    kraken = R.card_inputs(ev, "k3-kraken", trainset=None)["licence"]
+    assert kraken.startswith("CC BY-NC 4.0") and "2026-10-13" in kraken
+    assert R.card_inputs(ev, "k3-kraken", trainset=None, licence="x")["licence"] == "x"
+    assert "CC BY-NC 4.0" in R.BASES["kraken"]["licence"]

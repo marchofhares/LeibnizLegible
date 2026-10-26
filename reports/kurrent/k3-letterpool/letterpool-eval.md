@@ -10,7 +10,7 @@
 |---|---|---|---:|---:|---|
 | v1 | v1 | store | 17,399 | — | the store (the C1 run) |
 | k3-trocr | data/models/k3/trocr/best | cuda | 18,814 | 105 | MIT (the base) · the fine-tune open |
-| k3-kraken | k3-kraken | cuda | 14,874 | 11 | CC BY 4.0 (the base) · the fine-tune open |
+| k3-kraken | k3-kraken | cuda | 14,874 | 11 | the base obtained under CC BY 4.0, published under CC BY-NC 4.0 since 2026-10-15 · the fine-tune CC BY-NC 4.0 (the owner's scheme of 2026-10-13) |
 
 `v1` is the stored machine text of the C1 corpus run (what the website shows today); the others read the same lines afresh from the page images through the pilot's crop machinery (the v1 geometry, the polygon masked, no downscaling). A line a reader returned empty counts as deleted.
 

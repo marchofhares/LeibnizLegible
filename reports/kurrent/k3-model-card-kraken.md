@@ -4,12 +4,12 @@ A Leibniz Kurrent reader for the German stratum of the Nachlass: the PHILIUMM pr
 
 ## Data statement
 
-- **Base model:** FoNDUE-GD_v2_ft_Leibniz.safetensors (PHILIUMM) (CC BY 4.0; Zenodo 10.5281/zenodo.21457538).
+- **Base model:** FoNDUE-GD_v2_ft_Leibniz.safetensors (PHILIUMM) (obtained under CC BY 4.0 on 2026-07-29, published under CC BY-NC 4.0 since 2026-10-15; Zenodo 10.5281/zenodo.21457538).
 - **Training lines:** 55,585 minted lines of the German pieces of the §70-expired Akademie-Ausgabe volumes, placed on the GWLB's scans by the factory (60,163 rows selected, 1,434 excluded: audit 215, bracket 1,154, math 32, noise 33); the text is the edition's reading text (CC BY 4.0 in this project's release as K2's lines are open-bucket), the images the GWLB's (Public Domain Mark 1.0). By reader: trocr-kurrent-xvi-xvii 50,720, v1 9,443.
 - **Validation lines:** 3,133, whole pieces held out, page-disjoint, stratified by stratum and hand; checkpoints were chosen on them alone.
 - **Never trained on:** the GWLB letter pool (CC BY-NC 4.0; evaluation only), the Dresdner Hofdiarium lines of the Kurrent Trace package (nc; evaluation only), PHILIUMM's held-out pages, K2's audit sheet lines.
 - **Precision of the training lines: unmeasured.** K2's 200-line audit sheet (half in Leibniz's own hand) awaits its judge at the Leibniz-Edition; no verdict existed when this model was trained. The screen before training (the length ratio of the minted text to the reading and the alignment confidence against the band the Latin and French mint occupies) put leibniz 7.4 % of 1,949 lines, other 6.9 % of 47,647 lines outside the band.
-- **Licence of this model:** open.
+- **Licence of this model:** CC BY-NC 4.0 (the owner's scheme of 2026-10-13: fine-tuned from the PHILIUMM checkpoint, which its makers publish under CC BY-NC 4.0 since 2026-10-15; its readings carry the same).
 
 ## Training
 
