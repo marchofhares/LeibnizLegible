@@ -223,3 +223,49 @@ def test_cli_page_lang_without_the_cache(german_store_path: Path, tmp_path: Path
     assert res.exit_code == 0, res.output
     assert pages.read_text(encoding="utf-8").split() == [f"{W3}:0002"]
     assert "LeibnizBriefwechsel left out" in res.output
+
+
+def test_write_table_is_idempotent(german_store_path: Path) -> None:
+    conn = db.connect(german_store_path)
+    rows = P.classify_pages(conn)
+    P.mark_german(rows, P.Threshold())
+    run_id, n = P.write_table(conn, rows, threshold=P.Threshold(), git_sha="abc")
+    assert n == len(rows) == 7
+    assert db.count_page_lang(conn) == {"de": 2, "fr": 1, "unknown": 4}
+    row = db.get_page_lang(conn, f"{W3}:0001")
+    assert row.lang == "de" and row.evidence == "machine" and row.run_id == run_id
+    assert db.get_page_lang(conn, f"{W1}:0001").lang == "unknown"
+    run = conn.execute("SELECT stage, model, n_ok, scope FROM runs WHERE run_id = ?", (run_id,))
+    assert tuple(run.fetchone()) == ("enrich", "langid@hits≥2 score≥0.65 tokens≥8", 7, None)
+    # again, stricter: the same pages, the rows replaced under a new run
+    P.mark_german(rows, P.Threshold(min_hits=12))
+    run2, n2 = P.write_table(conn, rows, threshold=P.Threshold(min_hits=12))
+    assert run2 > run_id and n2 == 7
+    assert db.count_page_lang(conn) == {"de": 1, "fr": 1, "unknown": 5}
+    assert db.get_page_lang(conn, f"{W3}:0001").lang == "unknown"
+    assert db.get_page_lang(conn, f"{W3}:0002").run_id == run2
+
+
+def test_cli_page_lang_write(german_store_path: Path, tmp_path: Path) -> None:
+    res = CliRunner().invoke(
+        app,
+        [
+            "enrich",
+            "page-lang",
+            "--db",
+            str(german_store_path),
+            "--out",
+            str(tmp_path / "page-lang.jsonl"),
+            "--pages-out",
+            str(tmp_path / "german-pages.txt"),
+            "--reports-dir",
+            str(tmp_path / "reports"),
+            "--no-measure",
+            "--write",
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert "written" in res.output
+    conn = db.connect(german_store_path)
+    assert db.count_page_lang(conn) == {"de": 2, "fr": 1, "unknown": 4}
+    assert conn.execute("SELECT COUNT(*) FROM runs WHERE stage = 'enrich'").fetchone()[0] == 1

@@ -71,6 +71,12 @@ def page_lang(
         help="Leave this collection's German pages out of --pages-out (the verdicts stay); "
         "repeatable.",
     ),
+    write: bool = typer.Option(
+        False,
+        "--write",
+        help="Write the rows into the store's page_lang table under a run of stage enrich "
+        "(K4 Task 4: after the backup and the operator's go); with --reuse, the rows on disk.",
+    ),
 ) -> None:
     """Which pages are German: classify, measure, set the threshold, list (K4 Task 1)."""
     from leibniz.align.audit_reach import open_readonly
@@ -126,6 +132,15 @@ def page_lang(
         conn.close()
     P.write_jsonl(out, rows)
     _, n_listed = P.write_page_list(pages_out, rows, exclude_sets=list_exclude_set or [])
+    written: tuple[int, int] | None = None
+    if write:
+        from leibniz import db
+
+        wconn = db.init_db(db_path)  # the store read-write: page_lang and runs.scope land here
+        try:
+            written = P.write_table(wconn, rows, threshold=threshold, git_sha=db.git_sha())
+        finally:
+            wconn.close()
     summ = P.summary(
         rows,
         labels=labels,
@@ -152,6 +167,11 @@ def page_lang(
         _console.print(
             f"  no threshold of the grid reaches a precision of {precision_target:.0%}; "
             f"the identifier's own verdict is used ({threshold.key})"
+        )
+    if written is not None:
+        _console.print(
+            f"  [bold]written[/bold]: {written[1]:,} page_lang rows under run {written[0]} "
+            f"(stage enrich, model langid@{threshold.key})"
         )
     _console.print(
         f"  German pages {summ['german_pages']:,} ({json.dumps(counts)}), lines "

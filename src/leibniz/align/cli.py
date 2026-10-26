@@ -608,6 +608,48 @@ def kurrent_read(
     )
 
 
+@app.command("letterpool-mixed")
+def letterpool_mixed(
+    letters_csv: Path = typer.Option(
+        Path("reports/kurrent/k3-letterpool/letterpool-eval-letters.csv"),
+        "--letters-csv",
+        help="The per-letter scores of letterpool-eval.",
+    ),
+    testset: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--testset", help="The frozen set's texts."
+    ),
+    readers: str = typer.Option("v1,k3-trocr", "--readers", help="base,reader (the gain)."),
+    policy: str = typer.Option("philiumm", "--policy", help="The CSV's policy to read."),
+    reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+) -> None:
+    """What reading a mixed page whole costs, on the letter pool's mixed letters (K4 Task 2)."""
+    from leibniz.align import letterpool_mixed as M
+
+    keys = [r.strip() for r in readers.split(",") if r.strip()]
+    summ, paths = M.run(
+        letters_csv=letters_csv,
+        testset=testset,
+        readers=keys,
+        policy=policy,
+        reports_dir=reports_dir,
+    )
+    by = {(s["group"], s["reader"]): s for s in summ["scores"]}
+    _console.print(
+        f"[bold]letterpool-mixed[/bold] {summ['letters']} letters: mixed "
+        f"{summ['by_group']['mixed']}, German {summ['by_group']['german']} ({summ['mixed_rule']})"
+    )
+    for group in M.GROUPS:
+        cells = " · ".join(
+            f"{r} {by[(group, r)]['cer'] * 100:.1f} %" for r in keys if (group, r) in by
+        )
+        _console.print(f"  {group}: {cells}")
+    _console.print(
+        f"  gain {keys[-1]} over {keys[0]}: German {summ['gain'].get('german')}, mixed "
+        f"{summ['gain'].get('mixed')}; cost {summ['cost']}; "
+        + ", ".join(str(p) for p in paths.values())
+    )
+
+
 @app.command("kurrent-mint")
 def kurrent_mint(
     db_path: str = typer.Option(

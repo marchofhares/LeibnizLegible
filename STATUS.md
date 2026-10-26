@@ -1071,7 +1071,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
+### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1196,6 +1196,66 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   LeibnizMarginalien`: 24,078 pages, 1,417,188 lines remain) and to record a
   print reader as an open point; (2) whether 95.2 % precision (a floor) is
   good enough to open the search page's language filter (Task 5).
+- **Task 2, which reading wins — CHECKPOINT B** (`db.py`: `runs.scope`,
+  `run_precedence`, `run_rank_cte`, `current_predicate`, `current_lines`,
+  `count_current_lines`, the `page_lang` table and its helpers;
+  `search/documents.py`, `release/export.py`, `pack/judgments.py` on the
+  rule; `enrich/pagelang.py` `write_table` and `--write`;
+  `align/letterpool_mixed.py` and `leibniz align letterpool-mixed`;
+  +12 tests in `tests/test_current_rule.py`, +5 elsewhere; no store write).
+  *The rule, once, in the store layer:* a line row's rank is **(the run's
+  precedence, the run id)** — precedence 2 for a corrections run (stage
+  `crowd`, G1's judgments), 1 for a run scoped to a language (`runs.scope`,
+  an additive column; K4's Kurrent run declares `de`), 0 for an unscoped run
+  (v1, C4's v2); the highest rank is current, so a scoped run beats every
+  unscoped run on the lines it wrote whatever their age, a line it did not
+  write (an empty reading writes no row) shows the newest unscoped row, and
+  a corrected line outlives both. Read from the runs row, never from JSON:
+  in Python `db.current_lines` (what `latest_lines` now returns, its name
+  kept for its callers — the page view, the citations, the exports, the
+  twins, the fragment pack, the index documents); in SQL a CTE over `runs`
+  (`run_rank_cte`) joined on `run_id` and a `NOT EXISTS` probe
+  (`current_predicate`) comparing the row values, used by
+  `line_summaries_by_page` (the work and manifest endpoints), the D2 export
+  (`iter_transcriptions`: ordered by rank, the last row wins), the stats
+  (`corpus_stats`: the lines the store shows, their confidence histogram and
+  the models by line count, through `count_current_lines` — one full scan
+  plus one probe per row) and the judgments importer's `machine_row`. On a
+  store from before K4 opened read-only (the website's and the exports'
+  connections never migrate) the CTE has no `scope` column to read and every
+  run counts as unscoped, which is what such a store holds; the `page_lang`
+  readers answer empty there. *Timed on a synthetic 3,500-page work* (57
+  lines a page, 199,500 lines; a scoped run on every tenth page with every
+  fifth line left unwritten, a newer unscoped run on another tenth; 235,550
+  rows; best of five): **the run-id-only probe of 2026-09 154 ms, the ranked
+  probe 227 ms, the per-page Python loop 1,683 ms** (the probe keeps the
+  covering unique index for the rival rows and settles their rank with one
+  primary-key lookup in `runs`; the loop decodes every row's geometry);
+  `count_current_lines` over the 235,550 rows 216 ms; the probe and the
+  loop agree on every page. *The page language for the index:* a
+  `page_lang` table (page_id, lang, score, n_tokens, evidence, run_id),
+  written by `leibniz enrich page-lang --write` under a run of stage
+  `enrich` (model `langid@<threshold>`; an upsert per page, so a second
+  write replaces the rows under a new run — tested), read by
+  `search/documents.py` for each document's `lang` (the work's rows in one
+  query; a page without a row keeps the lines' majority, `unknown` today)
+  and by `/api/stats` as `pages_by_lang`; a page is `de` where the German
+  flag says so, else the identifier's verdict. *The stats' line count*
+  changes meaning: the current rows with text (12,825,054 on this store
+  under v1 alone) instead of every row whose text is not null (the old
+  count took empty readings in) — the About page reads the figure from the
+  index build, so it changes at the rebuild. *What reading a mixed page
+  whole costs,* measured on the letter pool (`reports/kurrent/k4-mixed-letters.md`
+  + `.json`): a letter is *mixed* when the identifier calls its reference
+  text mixed or Latin and French hold a quarter of its stopword hits — **2
+  of the 134 letters** (217 lines, 4,711 reference characters; the Latin
+  and French share of the hits over the letters: quartiles 0.00 / 0.00 /
+  0.01 — the pool is German correspondence by construction); on them v1
+  39.1 % and k3-trocr 40.6 % CER, on the 132 German letters 46.8 % and 28.4
+  %, so the reader's gain is 18.3 points on the German letters and −1.6 on
+  the mixed ones, a difference of 19.9 points on two letters — a sign, not
+  a measure; the per-line choice is Open question 31. Tests **1,036 passed,
+  1 skipped** in `.venv-w3`, ruff clean.
 - **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
   (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
   recognised page's text under the current rule classified with
@@ -5442,6 +5502,22 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Open questions
 
+31. **German pages that mix scripts, and print (2026-10-26, K4).** (a) K4
+    reads every German page whole with the Kurrent reader, the Latin and
+    French passages on it included; on the letter pool's two mixed letters
+    the reader gains nothing over v1 where it gains 18 points on the German
+    ones (`reports/kurrent/k4-mixed-letters.md`; two letters, a sign only).
+    A per-line choice between the Kurrent reading and the unscoped one —
+    by the line's own language, which the identifier cannot tell on a
+    seven-word line, or by the readers' confidences, which are not
+    comparable across models — needs per-line German ground truth on mixed
+    pages, which the pool does not give. Until then a mixed page shows the
+    Kurrent run's row wherever it wrote one. (b) The Marginalien are
+    printed books: v1 reads their print well enough for the identifier to
+    find 6,719 German pages, the Kurrent reader is a handwriting model, and
+    no ground truth exists for either on print. The session proposed to
+    leave the collection out of the reading job (the operator's answer is
+    in the K4 entry); a print reader (Fraktur) is a step of its own.
 30. **The Calculemus seam's open points (2026-10-21, G1).** None blocks the
     first pack. (a) `provenance.model_alt` (the Bern reader's model beside
     the v1 row's) is an addition to the contract of Calculemus SPECS §6.6,
@@ -5832,6 +5908,25 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-26 — K4, departures from the prompt (Tasks 1 and 2).** (1) *A
+  third precedence class.* The prompt's rule is scoped over unscoped, then
+  the newest; the store already holds, since G1, a corrections run (stage
+  `crowd`) whose rows must outlive every machine reading, and under the
+  prompt's rule alone a crowd run written after K4 would lose to the
+  Kurrent run on German pages. So the rule ranks a corrections run above a
+  scoped run, read from the runs row like the scope. (2) *The threshold's
+  sweep starts at two hits*, the identifier's own floor (one stopword
+  decided a language on long pages in a first sweep, at 94.8 % precision);
+  the chosen threshold keeps the identifier's floor and loosens its share.
+  (3) *The German page set joins the census's pages* with the threshold's:
+  the edition's text is the better evidence for the 1,180 pages v1 garbles
+  past recognition, and each page's evidence is recorded; the prompt's
+  "classified with langid" alone would have left them to v1. (4) *The stats'
+  line count* is the current rows with text, not every row whose text is
+  not null (the old count took 683,571 empty readings in); the index and
+  the exports already left them out. (5) *The Marginalien* — the session
+  proposed to leave the collection's German pages out of the reading job
+  (Open question 31 (b)); the operator decides at Checkpoint A.
 - **2026-10-22 — A3b follow-up, departures from the follow-up's text.** (1)
   *The sixteen hand changes are not listed here*: they are in the operator's
   dry-run report, which this session cannot see; the report now prints every

@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections import Counter, defaultdict
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import asdict, dataclass, field
 
 from leibniz import db
@@ -64,50 +64,55 @@ class PageDoc:
 
 
 def latest_lines(
-    conn: sqlite3.Connection, page_id: str, *, as_of_run: int | None = None
+    conn: sqlite3.Connection,
+    page_id: str,
+    *,
+    as_of_run: int | None = None,
+    precedences: Mapping[int, int] | None = None,
 ) -> list[db.Line]:
-    """A page's lines in reading order, one per ``line_seq`` (latest run wins).
+    """A page's current lines in reading order, one per ``line_seq``.
 
-    ``lines`` is unique on ``(page_id, line_seq, run_id)``, so a page re-run by a
-    later model (C4) may carry two rows per line; the viewer and the index show
-    the most recent recognition and keep the older rows as provenance.
+    ``lines`` is unique on ``(page_id, line_seq, run_id)``, so a page read by
+    more than one run carries a row per run; the viewer and the index show one
+    and keep the others as provenance. Which one is the store layer's rule
+    (:func:`leibniz.db.current_lines`): a corrections run first, then a run
+    scoped to a language (K4's Kurrent run on the German pages), then the
+    newest unscoped run — so the name says *latest* and the rule says *current*,
+    and C4's newer Latin-and-French run leaves the German pages alone.
     ``as_of_run`` reads the page as that run left it — rows of later runs
     ignored — which is what a citation pinned to a run (``?run=``) shows.
     """
-    best: dict[int, db.Line] = {}
-    for line in db.iter_lines_for_page(conn, page_id):
-        run = line.run_id or 0
-        if as_of_run is not None and run > as_of_run:
-            continue
-        cur = best.get(line.line_seq)
-        if cur is None or run >= (cur.run_id or 0):
-            best[line.line_seq] = line
-    return [best[k] for k in sorted(best)]
+    return db.current_lines(conn, page_id, as_of_run=as_of_run, precedences=precedences)
 
 
 def line_summaries_by_page(
     conn: sqlite3.Connection, work_id: str
 ) -> dict[str, tuple[int, float | None]]:
-    """Per page of a work, ``(n_lines, mean_conf)`` over the latest run per line — one query.
+    """Per page of a work, ``(n_lines, mean_conf)`` over the current row per line — one query.
 
-    The same rule as :func:`latest_lines` (latest run wins — ``NULL`` run ids
-    count as 0 — then only lines with text) for a whole work at once, so the
-    work and manifest endpoints run one query instead of one per page. A line
-    row is current when no row of the same ``(page_id, line_seq)`` has a
-    higher run id; the ``NOT EXISTS`` probe uses the table's covering unique
-    index and measured fastest of five plans on a synthetic 3,500-page work
-    (180 ms against 228 ms for the per-page loop; ``GROUP BY``/window forms
-    were slower). Pages without recognised text are absent from the result.
+    The same rule as :func:`latest_lines` (the store layer's precedence —
+    corrections, then a scoped run, then the newest run; ``NULL`` run ids count
+    as 0 — then only lines with text) for a whole work at once, so the work
+    and manifest endpoints run one query instead of one per page. A line row
+    is current when no row of the same ``(page_id, line_seq)`` outranks it
+    (:func:`leibniz.db.current_predicate`); the ``NOT EXISTS`` probe walks the
+    table's covering unique index and settles a rival's rank with one lookup
+    in the small ``runs`` table. Measured on a synthetic 3,500-page work of
+    57 lines a page (2026-10-26: a scoped run on every tenth page with every
+    fifth line unwritten, a newer unscoped run on another tenth, 235,550
+    rows; best of five): the run-id-only probe of 2026-09 154 ms, this
+    ranked probe 227 ms, the per-page loop over ``latest_lines`` 1,683 ms
+    (it decodes every row's geometry). Pages without recognised text are
+    absent from the result.
     """
     rows = conn.execute(
-        """
+        f"""
+        WITH {db.run_rank_cte(conn)}
         SELECT l.page_id, COUNT(*) AS n, AVG(l.conf) AS c
-          FROM lines l
+          FROM lines l LEFT JOIN rk lr ON lr.run_id = l.run_id
          WHERE l.page_id IN (SELECT page_id FROM pages WHERE work_id = ?)
            AND l.text IS NOT NULL AND l.text != ''
-           AND NOT EXISTS (SELECT 1 FROM lines x
-                            WHERE x.page_id = l.page_id AND x.line_seq = l.line_seq
-                              AND COALESCE(x.run_id, 0) > COALESCE(l.run_id, 0))
+           AND {db.current_predicate("l", "lr")}
          GROUP BY l.page_id
         """,
         (work_id,),
@@ -173,6 +178,27 @@ def _majority_lang(lines: list[db.Line]) -> str:
     return lang if lang in db.LINE_LANGS else "unknown"
 
 
+def page_lang_of(
+    conn: sqlite3.Connection,
+    page_id: str,
+    lines: list[db.Line],
+    *,
+    page_langs: Mapping[str, str] | None = None,
+) -> str:
+    """The language the index files a page under: the ``page_lang`` row where
+    K4 wrote one (``page_langs`` is the work's rows read in one query, else
+    the page's row is looked up), otherwise the majority of the lines' own
+    ``lang`` (``unknown`` until C4 fills it)."""
+    if page_langs is not None:
+        lang = page_langs.get(page_id)
+    else:
+        row = db.get_page_lang(conn, page_id)
+        lang = row.lang if row is not None else None
+    if lang in db.LINE_LANGS:
+        return lang
+    return _majority_lang(lines)
+
+
 def page_doc(
     conn: sqlite3.Connection,
     page: db.Page,
@@ -183,13 +209,15 @@ def page_doc(
     lines: list[db.Line] | None = None,
     twin: TwinGroup | None = None,
     pieces: list[str] | None = None,
+    page_langs: Mapping[str, str] | None = None,
 ) -> PageDoc | None:
     """Build the document for one page, or ``None`` if it has no recognised text.
 
-    ``lines`` are the page's latest lines where the caller has read them
+    ``lines`` are the page's current lines where the caller has read them
     already. ``twin`` is the page's group where its scan is registered more
     than once: a spread page indexes its own half, a fold indexes the text once,
-    on its primary page, which names the other labels (``also``).
+    on its primary page, which names the other labels (``also``). ``page_langs``
+    is the work's ``page_lang`` rows where the caller has read them.
     """
     if lines is None:
         lines = latest_lines(conn, page.id)
@@ -220,7 +248,7 @@ def page_doc(
         text="\n".join(ln.text or "" for ln in lines),
         n_lines=len(lines),
         mean_conf=mean_conf,
-        lang=_majority_lang(lines),
+        lang=page_lang_of(conn, page.id, lines, page_langs=page_langs),
         stratum=stratum if stratum in db.GT_STRATA else "unknown",
         thumb_url=page.thumb_url,
         katalog=[r["record_id"] for r in recs],
@@ -258,14 +286,18 @@ def iter_page_docs(
         params.append(set_name)
     sql += " ORDER BY gwlb_object_id"
     works = [db._work_from_row(r) for r in conn.execute(sql, params)]
+    prec = db.run_precedences(conn)
     for work in works:
         pages = db.get_pages(conn, work.gwlb_object_id)
-        groups, read = resolve_work(pages, lambda pid: latest_lines(conn, pid), twin_stats)
+        groups, read = resolve_work(
+            pages, lambda pid: latest_lines(conn, pid, precedences=prec), twin_stats
+        )
         if twins_out is not None:
             twins_out.extend(groups)
         twin_of = {pid: group for group in groups for pid in group.pages}
         records = kat.get(work.gwlb_object_id) or []
         on_page = records_by_page(work.gwlb_object_id, pages, records)
+        page_langs = db.page_langs_for_work(conn, work.gwlb_object_id)
         for page in pages:
             if page.status != "recognized":
                 continue
@@ -278,6 +310,7 @@ def iter_page_docs(
                 lines=read.pop(page.id, None),
                 twin=twin_of.get(page.id),
                 pieces=[t for r in here if (t := piece_title(r))],
+                page_langs=page_langs,
             )
             if doc is None:
                 continue
@@ -330,28 +363,39 @@ CONF_BANDS: tuple[tuple[str, float, float], ...] = (
 
 
 def corpus_stats(conn: sqlite3.Connection) -> dict:
-    """Corpus-wide counts for the About page / ``/api/stats`` (one full scan)."""
+    """Corpus-wide counts for the About page / ``/api/stats``: the lines the
+    store shows under the rule (one row per line), their confidence histogram
+    and the models by line count, each a scan of the ``lines`` table with the
+    current-row predicate (:func:`leibniz.db.current_predicate`); the pages by
+    language from ``page_lang`` (K4; empty before its write)."""
     hist = conn.execute("SELECT status, COUNT(*) FROM pages GROUP BY status").fetchall()
     by_status = {row[0]: row[1] for row in hist}
+    current = (
+        f"WITH {db.run_rank_cte(conn)} SELECT {{what}} FROM lines l"
+        " LEFT JOIN rk lr ON lr.run_id = l.run_id"
+        f" WHERE l.text IS NOT NULL AND l.text != '' AND {db.current_predicate('l', 'lr')}"
+    )
     conf_hist: dict[str, int] = {}
     for key, lo, hi in CONF_BANDS:
         conf_hist[key] = conn.execute(
-            "SELECT COUNT(*) FROM lines WHERE text IS NOT NULL AND text != '' "
-            "AND conf IS NOT NULL AND conf >= ? AND conf < ?",
+            current.format(what="COUNT(*)")
+            + " AND l.conf IS NOT NULL AND l.conf >= ? AND l.conf < ?",
             (lo, hi),
         ).fetchone()[0]
-    model = conn.execute(
-        "SELECT model FROM lines WHERE model IS NOT NULL "
-        "GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1"
-    ).fetchone()
+    by_model = conn.execute(
+        current.format(what="l.model, COUNT(*) AS n")
+        + " AND l.model IS NOT NULL GROUP BY l.model ORDER BY n DESC"
+    ).fetchall()
     return {
         "works": db.count_works(conn),
         "pages": db.count_pages(conn),
         "pages_recognized": by_status.get("recognized", 0),
         "pages_skipped": by_status.get("skipped", 0),
-        "lines": db.count_lines(conn, recognized=True),
+        "lines": db.count_current_lines(conn),
         "conf_histogram": conf_hist,
-        "model": model[0] if model else None,
+        "model": by_model[0][0] if by_model else None,
+        "models": {r[0]: int(r[1]) for r in by_model},
+        "pages_by_lang": db.count_page_lang(conn),
     }
 
 
@@ -365,6 +409,7 @@ __all__ = [
     "latest_lines",
     "line_summaries_by_page",
     "page_doc",
+    "page_lang_of",
     "piece_title",
     "records_by_page",
 ]

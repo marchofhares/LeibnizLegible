@@ -53,9 +53,11 @@ def test_corpus_stats(store_path) -> None:
     s = corpus_stats(conn)
     assert s["works"] == 2 and s["pages"] == 4
     assert s["pages_recognized"] == 3 and s["pages_skipped"] == 1
-    assert s["lines"] == 8  # 7 lines + the re-read line (a second row)
-    assert sum(s["conf_histogram"].values()) == 8
+    assert s["lines"] == 7  # the re-read line's two rows count once (K4: the current row)
+    assert sum(s["conf_histogram"].values()) == 7
     assert s["model"] == "htr@v1"
+    assert s["models"] == {"htr@v1": 6, "leibniz-htr-v2@v2": 1}
+    assert s["pages_by_lang"] == {}  # no page_lang rows before K4's write
 
 
 def test_line_summaries_by_page_match_latest_lines(store_path) -> None:

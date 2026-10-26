@@ -1,0 +1,66 @@
+{
+ "letters_csv": "reports/kurrent/k3-letterpool/letterpool-eval-letters.csv",
+ "policy": "philiumm",
+ "readers": [
+  "v1",
+  "k3-trocr"
+ ],
+ "letters": 134,
+ "by_group": {
+  "mixed": 2,
+  "german": 132
+ },
+ "mixed_rule": "the identifier says mixed, or Latin and French hold ≥ 0.25 of the stopword hits",
+ "lafr_share_quartiles": [
+  0.0,
+  0.0,
+  0.0133
+ ],
+ "scores": [
+  {
+   "group": "mixed",
+   "reader": "v1",
+   "letters": 2,
+   "lines": 217,
+   "ref_chars": 4711,
+   "edits": 1842,
+   "median_cer": 0.4203,
+   "cer": 0.391
+  },
+  {
+   "group": "mixed",
+   "reader": "k3-trocr",
+   "letters": 2,
+   "lines": 217,
+   "ref_chars": 4711,
+   "edits": 1915,
+   "median_cer": 0.3847,
+   "cer": 0.4065
+  },
+  {
+   "group": "german",
+   "reader": "v1",
+   "letters": 132,
+   "lines": 18598,
+   "ref_chars": 323605,
+   "edits": 151274,
+   "median_cer": 0.4289,
+   "cer": 0.4675
+  },
+  {
+   "group": "german",
+   "reader": "k3-trocr",
+   "letters": 132,
+   "lines": 18598,
+   "ref_chars": 323605,
+   "edits": 92023,
+   "median_cer": 0.2063,
+   "cer": 0.2844
+  }
+ ],
+ "gain": {
+  "mixed": -0.0155,
+  "german": 0.1831
+ },
+ "cost": 0.1986
+}

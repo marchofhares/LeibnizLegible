@@ -450,6 +450,60 @@ def write_page_list(
 
 
 # --------------------------------------------------------------------------- #
+# The store's table (Task 4 runs it; built and tested here)
+# --------------------------------------------------------------------------- #
+
+
+def table_lang(r: PageLang) -> str:
+    """What the ``page_lang`` row says: ``de`` for a German page (the threshold's
+    verdict joined with the edition's), else the identifier's verdict — except
+    a verdict of ``de`` that a stricter threshold did not confirm, which is
+    ``unknown`` (the table never contradicts the German flag)."""
+    if r.german:
+        return "de"
+    return "unknown" if r.lang == "de" else r.lang
+
+
+def write_table(
+    conn: sqlite3.Connection,
+    rows: Sequence[PageLang],
+    *,
+    threshold: Threshold,
+    git_sha: str | None = None,
+    note: str | None = None,
+) -> tuple[int, int]:
+    """Write every row into ``page_lang`` under one run of stage ``enrich``
+    (model ``langid@<threshold>``), replacing a page's earlier row: idempotent,
+    a second write leaves the same table under a new run. Returns the run id
+    and the rows written."""
+    counts = Counter(table_lang(r) for r in rows)
+    run_id = db.start_run(
+        conn,
+        "enrich",
+        model=f"langid@{threshold.key}",
+        params={
+            "threshold": threshold.as_dict(),
+            "pages": len(rows),
+            "by_lang": dict(counts),
+            "german_by_evidence": dict(Counter(r.evidence for r in rows if r.german)),
+            "note": note,
+        },
+        git_sha=git_sha,
+        scope=None,
+    )
+    n = 0
+    with conn:
+        for r in rows:
+            db.upsert_page_lang(
+                conn,
+                db.PageLangRow(r.page_id, table_lang(r), r.score, r.n_tokens, r.evidence, run_id),
+            )
+            n += 1
+    db.finish_run(conn, run_id, n_input=len(rows), n_ok=n, n_failed=0)
+    return run_id, n
+
+
+# --------------------------------------------------------------------------- #
 # The summary and the report
 # --------------------------------------------------------------------------- #
 
@@ -767,8 +821,10 @@ __all__ = [
     "render",
     "summary",
     "sweep",
+    "table_lang",
     "tally_works",
     "write_jsonl",
+    "write_table",
     "write_page_list",
     "write_reports",
     "write_works_csv",

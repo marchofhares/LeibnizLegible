@@ -27,7 +27,7 @@ import json
 import os
 import sqlite3
 import subprocess
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -125,7 +125,8 @@ CREATE TABLE IF NOT EXISTS runs (
     n_input     INTEGER,
     n_ok        INTEGER,
     n_failed    INTEGER,
-    git_sha     TEXT
+    git_sha     TEXT,
+    scope       TEXT                             -- a reading run's language scope ('de', K4)
 );
 
 CREATE TABLE IF NOT EXISTS lines (
@@ -201,6 +202,21 @@ CREATE TABLE IF NOT EXISTS page_stats (
     metrics             TEXT        -- JSON: full metric bag (forward-compat)
 );
 
+-- The language of each page (K4, 2026-10): the stopword identifier's verdict on
+-- the page's machine text, joined with the edition's where the census knows the
+-- piece (``evidence``: machine | edition | both), written by
+-- `leibniz enrich page-lang --write` under a run of stage ``enrich``. The index
+-- reads its ``lang`` field from here and the viewer says what the page is;
+-- never an UPDATE of the line rows.
+CREATE TABLE IF NOT EXISTS page_lang (
+    page_id     TEXT PRIMARY KEY REFERENCES pages(page_id),
+    lang        TEXT NOT NULL CHECK (lang IN ('la','fr','de','mixed','unknown')),
+    score       REAL,
+    n_tokens    INTEGER,
+    evidence    TEXT,
+    run_id      INTEGER REFERENCES runs(run_id)
+);
+
 CREATE INDEX IF NOT EXISTS ix_pages_work    ON pages (work_id);
 CREATE INDEX IF NOT EXISTS ix_pages_status  ON pages (status);
 CREATE INDEX IF NOT EXISTS ix_lines_page    ON lines (page_id);
@@ -210,6 +226,7 @@ CREATE INDEX IF NOT EXISTS ix_cross_work    ON crosswalk (work_id);
 CREATE INDEX IF NOT EXISTS ix_cross_record  ON crosswalk (katalog_record_id);
 CREATE INDEX IF NOT EXISTS ix_gt_bucket     ON gt_lines (license_bucket);
 CREATE INDEX IF NOT EXISTS ix_pstats_run    ON page_stats (run_id);
+CREATE INDEX IF NOT EXISTS ix_page_lang     ON page_lang (lang);
 """
 
 
@@ -268,17 +285,23 @@ _PAGES_ADDED_COLUMNS: tuple[tuple[str, str], ...] = (
 )
 
 
+# Columns added to ``runs`` after A0: the language scope of a reading run (K4).
+_RUNS_ADDED_COLUMNS: tuple[tuple[str, str], ...] = (("scope", "TEXT"),)
+
+
 def _migrate(conn: sqlite3.Connection) -> None:
     """Additively bring an existing store up to the current schema (idempotent).
 
     Only ``ADD COLUMN`` migrations, so it never rewrites or drops data: a DB
     harvested under the A1 schema keeps its ``works``/``pages`` rows and simply
-    gains the A2 image-cache columns (all nullable, defaulting to NULL).
+    gains the A2 image-cache columns (all nullable, defaulting to NULL); a store
+    from before K4 gains ``runs.scope`` the same way.
     """
-    existing = {row[1] for row in conn.execute("PRAGMA table_info(pages)")}
-    for name, decl in _PAGES_ADDED_COLUMNS:
-        if name not in existing:
-            conn.execute(f"ALTER TABLE pages ADD COLUMN {name} {decl}")
+    for table, added in (("pages", _PAGES_ADDED_COLUMNS), ("runs", _RUNS_ADDED_COLUMNS)):
+        existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        for name, decl in added:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
 
 
 def init_db(path: str | Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
@@ -639,19 +662,23 @@ def start_run(
     model: str | None = None,
     params: dict | None = None,
     git_sha: str | None = None,
+    scope: str | None = None,
 ) -> int:
     """Open a ``runs`` row for a pipeline invocation and return its id.
 
     Every stage that mutates the store records a run so counts, parameters, and
     the git SHA that produced them are auditable (the anti-contamination guarantee
-    depends on this). Call :func:`finish_run` when the work completes.
+    depends on this). Call :func:`finish_run` when the work completes. ``scope``
+    is the language a reading run is scoped to (``"de"`` for K4's Kurrent run):
+    its rows outrank every unscoped run's on the lines it read, whatever their
+    age (:func:`run_precedence`).
     """
     cur = conn.execute(
         """
-        INSERT INTO runs (stage, model, params, started_at, git_sha)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO runs (stage, model, params, started_at, git_sha, scope)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (stage, model, json.dumps(params) if params else None, utcnow_iso(), git_sha),
+        (stage, model, json.dumps(params) if params else None, utcnow_iso(), git_sha, scope),
     )
     conn.commit()
     return int(cur.lastrowid)
@@ -675,6 +702,150 @@ def finish_run(
         (utcnow_iso(), n_input, n_ok, n_failed, run_id),
     )
     conn.commit()
+
+
+# --------------------------------------------------------------------------- #
+# Which row of a line is current: the one precedence every reader uses (K4)
+# --------------------------------------------------------------------------- #
+
+# ``lines`` is append-per-run, so a line can have a row per run that read it.
+# One rule says which row the site, the index, the API, the exports and the
+# stats show, and every reader takes it from here (Python: current_lines /
+# line_rank; SQL: RUN_RANK_CTE + rank_sql / current_predicate). A row's rank is
+# ``(the run's precedence, the run id)``, compared in order:
+#
+#   2  a corrections run (stage ``crowd``: the Calculemus judgments, G1) — a
+#      corrected line outlives every machine reading;
+#   1  a run scoped to a language (``runs.scope``, K4's Kurrent run, ``de``) —
+#      on the lines it read it beats every unscoped run, whatever their age, so
+#      C4's newer Latin-and-French run leaves the German pages alone;
+#   0  an unscoped run (v1, C4's v2): among these the newest wins, as before.
+#
+# A line the scoped run did not write (an empty reading writes no row) shows
+# the best unscoped row, so no page is half blank. The precedence is read from
+# the runs row, never parsed from JSON, and the SQL probe keeps its covering
+# index: a rival row costs one primary-key lookup in the small ``runs`` table.
+
+CORRECTION_STAGES: tuple[str, ...] = ("crowd",)
+
+
+def run_precedence(stage: str | None, scope: str | None) -> int:
+    """The precedence class of a run: 2 corrections, 1 scoped, 0 unscoped."""
+    if stage in CORRECTION_STAGES:
+        return 2
+    if scope:
+        return 1
+    return 0
+
+
+_PRECEDENCE_CASE = (
+    "CASE WHEN {r}.stage IN ('crowd') THEN 2 WHEN {r}.scope IS NOT NULL THEN 1 ELSE 0 END"
+)
+_PRECEDENCE_CASE_NO_SCOPE = "CASE WHEN {r}.stage IN ('crowd') THEN 2 ELSE 0 END"
+
+# A CTE giving every run its precedence; join it to ``lines`` on ``run_id``.
+RUN_RANK_CTE = f"rk AS (SELECT run_id, {_PRECEDENCE_CASE.format(r='runs')} AS prec FROM runs)"
+_RUN_RANK_CTE_NO_SCOPE = (
+    f"rk AS (SELECT run_id, {_PRECEDENCE_CASE_NO_SCOPE.format(r='runs')} AS prec FROM runs)"
+)
+
+
+def has_column(conn: sqlite3.Connection, table: str, column: str) -> bool:
+    return any(r[1] == column for r in conn.execute(f"PRAGMA table_info({table})"))
+
+
+def has_table(conn: sqlite3.Connection, table: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (table,)
+    ).fetchone()
+    return row is not None
+
+
+def run_rank_cte(conn: sqlite3.Connection) -> str:
+    """:data:`RUN_RANK_CTE` for this store — without the ``scope`` column on a
+    store from before K4 opened read-only (the website's and the exports'
+    connections never migrate): every run then counts as unscoped, which is
+    what such a store holds."""
+    return RUN_RANK_CTE if has_column(conn, "runs", "scope") else _RUN_RANK_CTE_NO_SCOPE
+
+
+def rank_sql(lines_alias: str, rank_alias: str) -> str:
+    """The rank of a line row as a SQL row value ``(precedence, run id)``;
+    ``rank_alias`` is the ``rk`` row left-joined to the line (NULL for a row
+    without a run)."""
+    return f"(COALESCE({rank_alias}.prec, 0), COALESCE({lines_alias}.run_id, 0))"
+
+
+def current_predicate(lines_alias: str = "l", rank_alias: str = "lr") -> str:
+    """``NOT EXISTS (...)``: no row of the same line outranks this one. The
+    caller's query joins ``rk`` as ``rank_alias`` (``LEFT JOIN rk lr ON lr.run_id
+    = l.run_id``) and starts with ``WITH`` :data:`RUN_RANK_CTE`."""
+    return (
+        "NOT EXISTS (SELECT 1 FROM lines x LEFT JOIN rk xr ON xr.run_id = x.run_id"
+        f" WHERE x.page_id = {lines_alias}.page_id AND x.line_seq = {lines_alias}.line_seq"
+        f" AND {rank_sql('x', 'xr')} > {rank_sql(lines_alias, rank_alias)})"
+    )
+
+
+def run_precedences(conn: sqlite3.Connection) -> dict[int, int]:
+    """Run id → precedence, for every run that is not an unscoped one (the
+    rest default to 0); one small query. A store without the ``scope`` column
+    (before K4, opened read-only) has no scoped runs."""
+    if has_column(conn, "runs", "scope"):
+        rows = conn.execute(
+            "SELECT run_id, stage, scope FROM runs WHERE scope IS NOT NULL OR stage IN ('crowd')"
+        )
+    else:
+        rows = conn.execute("SELECT run_id, stage, NULL FROM runs WHERE stage IN ('crowd')")
+    return {int(r[0]): run_precedence(r[1], r[2]) for r in rows}
+
+
+def line_rank(line: Line, precedences: Mapping[int, int]) -> tuple[int, int]:
+    """The rank of a line row in Python: ``(precedence, run id)``."""
+    run = line.run_id or 0
+    return (precedences.get(run, 0), run)
+
+
+def current_lines(
+    conn: sqlite3.Connection,
+    page_id_: str,
+    *,
+    as_of_run: int | None = None,
+    precedences: Mapping[int, int] | None = None,
+) -> list[Line]:
+    """A page's current lines in reading order, one per ``line_seq``: the row of
+    the highest rank. ``as_of_run`` reads the page as that run left it — rows of
+    later runs ignored — which is what a citation pinned to a run shows. A
+    caller that reads many pages passes :func:`run_precedences` once as
+    ``precedences``."""
+    prec = run_precedences(conn) if precedences is None else precedences
+    best: dict[int, Line] = {}
+    for line in iter_lines_for_page(conn, page_id_):
+        if as_of_run is not None and (line.run_id or 0) > as_of_run:
+            continue
+        cur = best.get(line.line_seq)
+        if cur is None or line_rank(line, prec) >= line_rank(cur, prec):
+            best[line.line_seq] = line
+    return [best[k] for k in sorted(best)]
+
+
+def count_current_lines(conn: sqlite3.Connection) -> int:
+    """The lines with text the store shows: one row per line under the rule.
+    Rows of unscoped runs are counted whole and the rows that outrank them, or
+    that an unscoped twin outranks, are settled through the index: a full scan
+    of the table plus one probe per row of a run that re-read something."""
+    total = conn.execute(
+        "SELECT COUNT(*) FROM lines WHERE text IS NOT NULL AND text != ''"
+    ).fetchone()[0]
+    superseded = conn.execute(
+        f"""
+        WITH {run_rank_cte(conn)}
+        SELECT COUNT(*) FROM lines l LEFT JOIN rk lr ON lr.run_id = l.run_id
+         WHERE l.text IS NOT NULL AND l.text != ''
+           AND NOT {current_predicate("l", "lr")}
+        """
+    ).fetchone()[0]
+    return int(total) - int(superseded)
 
 
 # --------------------------------------------------------------------------- #
@@ -992,6 +1163,68 @@ def iter_page_stats(conn: sqlite3.Connection) -> Iterator[PageStats]:
     """Iterate all per-page segmentation stats, ordered by page id."""
     for row in conn.execute("SELECT * FROM page_stats ORDER BY page_id"):
         yield _page_stats_from_row(row)
+
+
+@dataclass(slots=True)
+class PageLangRow:
+    """One row of ``page_lang`` (K4): the page's language and its evidence."""
+
+    page_id: str
+    lang: str
+    score: float | None = None
+    n_tokens: int | None = None
+    evidence: str | None = None
+    run_id: int | None = None
+
+
+def upsert_page_lang(conn: sqlite3.Connection, row: PageLangRow) -> None:
+    conn.execute(
+        """
+        INSERT INTO page_lang (page_id, lang, score, n_tokens, evidence, run_id)
+        VALUES (:page_id, :lang, :score, :n_tokens, :evidence, :run_id)
+        ON CONFLICT(page_id) DO UPDATE SET
+            lang = excluded.lang, score = excluded.score, n_tokens = excluded.n_tokens,
+            evidence = excluded.evidence, run_id = excluded.run_id
+        """,
+        {
+            "page_id": row.page_id,
+            "lang": row.lang,
+            "score": row.score,
+            "n_tokens": row.n_tokens,
+            "evidence": row.evidence,
+            "run_id": row.run_id,
+        },
+    )
+
+
+def get_page_lang(conn: sqlite3.Connection, page_id_: str) -> PageLangRow | None:
+    if not has_table(conn, "page_lang"):  # a store from before K4, opened read-only
+        return None
+    r = conn.execute("SELECT * FROM page_lang WHERE page_id = ?", (page_id_,)).fetchone()
+    return None if r is None else PageLangRow(**{k: r[k] for k in r.keys()})
+
+
+def page_langs_for_work(conn: sqlite3.Connection, work_id: str) -> dict[str, str]:
+    """Page id → language for a work's pages that have a ``page_lang`` row
+    (empty on a store from before K4)."""
+    if not has_table(conn, "page_lang"):
+        return {}
+    rows = conn.execute(
+        "SELECT pl.page_id, pl.lang FROM page_lang pl"
+        " JOIN pages p ON p.page_id = pl.page_id WHERE p.work_id = ?",
+        (work_id,),
+    )
+    return {r[0]: r[1] for r in rows}
+
+
+def count_page_lang(conn: sqlite3.Connection) -> dict[str, int]:
+    """Pages per language in ``page_lang`` (empty before K4's write)."""
+    if not has_table(conn, "page_lang"):
+        return {}
+    return {
+        r[0]: int(r[1])
+        for r in conn.execute("SELECT lang, COUNT(*) FROM page_lang GROUP BY lang ORDER BY lang")
+    }
 
 
 def set_page_stratum(conn: sqlite3.Connection, page_id_: str, stratum: str) -> None:
