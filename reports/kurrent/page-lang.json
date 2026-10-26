@@ -1,0 +1,4222 @@
+{
+ "generated": "2026-10-26",
+ "today": "2026-10-26",
+ "pages": 236210,
+ "pages_with_text": 235723,
+ "lines": 12825054,
+ "by_lang": {
+  "la": 110326,
+  "fr": 62463,
+  "de": 22501,
+  "mixed": 19992,
+  "unknown": 20928
+ },
+ "threshold": {
+  "min_hits": 2,
+  "min_score": 0.3,
+  "min_tokens": 8
+ },
+ "threshold_key": "hits≥2 score≥0.3 tokens≥8",
+ "precision_target": 0.95,
+ "german_pages": 30797,
+ "german_lines": 1708517,
+ "german_by_evidence": {
+  "machine": 26164,
+  "edition": 1180,
+  "both": 3453
+ },
+ "german_score_quartiles": [
+  0.6579,
+  0.7917,
+  1.0
+ ],
+ "by_set": {
+  "Leibnitiana": {
+   "pages": 1764,
+   "lines": 108226,
+   "german_pages": 18,
+   "german_lines": 1041
+  },
+  "LeibnizBriefwechsel": {
+   "pages": 72136,
+   "lines": 3536266,
+   "german_pages": 14455,
+   "german_lines": 699198
+  },
+  "LeibnizHandschriften": {
+   "pages": 58656,
+   "lines": 4404069,
+   "german_pages": 9604,
+   "german_lines": 716924
+  },
+  "LeibnizMarginalien": {
+   "pages": 103626,
+   "lines": 4776128,
+   "german_pages": 6719,
+   "german_lines": 291329
+  },
+  "leibniz-rekonstruktionen": {
+   "pages": 28,
+   "lines": 365,
+   "german_pages": 1,
+   "german_lines": 25
+  }
+ },
+ "works_with_german": 934,
+ "works": [
+  {
+   "work_id": "DE-611-HS-3618673",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. F 20",
+   "pages": 3572,
+   "lines": 204234,
+   "german_pages": 918,
+   "german_lines": 60007,
+   "by_lang": {
+    "fr": 2366,
+    "unknown": 167,
+    "mixed": 270,
+    "de": 677,
+    "la": 92
+   }
+  },
+  {
+   "work_id": "850978815",
+   "set_name": "LeibnizMarginalien",
+   "title": "Herrn Veit Ludwigs von Seckendorff/ [et]c. Teutscher Fürsten Staat",
+   "shelfmark": "Leibn. Marg. 104, Stück 1",
+   "pages": 853,
+   "lines": 32197,
+   "german_pages": 833,
+   "german_lines": 31798,
+   "by_lang": {
+    "unknown": 17,
+    "de": 828,
+    "mixed": 5,
+    "fr": 3
+   }
+  },
+  {
+   "work_id": "DE-611-HS-974102",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 411",
+   "pages": 1160,
+   "lines": 38924,
+   "german_pages": 799,
+   "german_lines": 30697,
+   "by_lang": {
+    "la": 292,
+    "unknown": 62,
+    "de": 791,
+    "mixed": 10,
+    "fr": 5
+   }
+  },
+  {
+   "work_id": "00068812",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Braunschweig-Lüneburg LH 23, 2, 21",
+   "shelfmark": "LH 23, 2, 21",
+   "pages": 1103,
+   "lines": 97899,
+   "german_pages": 670,
+   "german_lines": 69762,
+   "by_lang": {
+    "fr": 191,
+    "de": 315,
+    "mixed": 305,
+    "unknown": 232,
+    "la": 60
+   }
+  },
+  {
+   "work_id": "DE-611-HS-958572",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 501",
+   "pages": 822,
+   "lines": 52495,
+   "german_pages": 639,
+   "german_lines": 43653,
+   "by_lang": {
+    "de": 329,
+    "unknown": 174,
+    "mixed": 236,
+    "fr": 75,
+    "la": 8
+   }
+  },
+  {
+   "work_id": "00068811",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Braunschweig-Lüneburg LH 23, 2, 20",
+   "shelfmark": "LH 23, 2, 20",
+   "pages": 611,
+   "lines": 45805,
+   "german_pages": 546,
+   "german_lines": 42036,
+   "by_lang": {
+    "de": 422,
+    "mixed": 129,
+    "unknown": 43,
+    "fr": 14,
+    "la": 3
+   }
+  },
+  {
+   "work_id": "DE-611-HS-960122",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 228",
+   "pages": 1258,
+   "lines": 49356,
+   "german_pages": 544,
+   "german_lines": 24314,
+   "by_lang": {
+    "de": 377,
+    "la": 479,
+    "unknown": 162,
+    "mixed": 197,
+    "fr": 43
+   }
+  },
+  {
+   "work_id": "00068367",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 9",
+   "shelfmark": "LH 1, 9",
+   "pages": 790,
+   "lines": 50881,
+   "german_pages": 535,
+   "german_lines": 33371,
+   "by_lang": {
+    "de": 451,
+    "unknown": 21,
+    "mixed": 127,
+    "la": 164,
+    "fr": 27
+   }
+  },
+  {
+   "work_id": "DE-611-HS-974745",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 440",
+   "pages": 516,
+   "lines": 15260,
+   "german_pages": 484,
+   "german_lines": 14735,
+   "by_lang": {
+    "de": 458,
+    "mixed": 18,
+    "unknown": 28,
+    "fr": 11,
+    "la": 1
+   }
+  },
+  {
+   "work_id": "DE-611-HS-957463",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 46",
+   "pages": 770,
+   "lines": 28428,
+   "german_pages": 445,
+   "german_lines": 16895,
+   "by_lang": {
+    "de": 221,
+    "mixed": 269,
+    "unknown": 90,
+    "la": 160,
+    "fr": 30
+   }
+  },
+  {
+   "work_id": "00068823",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Politik und Volkswirtschaft LH 34",
+   "shelfmark": "LH 34",
+   "pages": 447,
+   "lines": 43815,
+   "german_pages": 327,
+   "german_lines": 33584,
+   "by_lang": {
+    "de": 300,
+    "mixed": 24,
+    "unknown": 26,
+    "la": 13,
+    "fr": 84
+   }
+  },
+  {
+   "work_id": "816933545",
+   "set_name": "LeibnizMarginalien",
+   "title": "Joh. Rudolphi Glauberi Testimonium Veritatis. Oder Gründlicher beweis/ daß Farners Wiederlegung oder Warnung/ über Glauberi Miraculum Mundi genantes Tractätlein/ Wie auch Ersten Theil Teütschlands Wohl-farts/ im geringsten keiner Wahrhafften Wiederlegung gleich/ sonder nichts anders als ... ein Zusammen geraffete schmehcharten sey ...",
+   "shelfmark": "Leibn. Marg. 131, Stück 6",
+   "pages": 334,
+   "lines": 14944,
+   "german_pages": 318,
+   "german_lines": 14778,
+   "by_lang": {
+    "unknown": 15,
+    "de": 318,
+    "mixed": 1
+   }
+  },
+  {
+   "work_id": "840959710",
+   "set_name": "LeibnizMarginalien",
+   "title": "Zwey Rechtliche Bedencken Von der Succession und Erbfolge deß Königlichen Geschlechts und Stamms in beyden Königreichen Hungern und Böheim",
+   "shelfmark": "Leibn. Marg. 99, Stück 4",
+   "pages": 338,
+   "lines": 12984,
+   "german_pages": 318,
+   "german_lines": 12871,
+   "by_lang": {
+    "unknown": 19,
+    "de": 317,
+    "mixed": 2
+   }
+  },
+  {
+   "work_id": "DE-611-HS-959461",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 108",
+   "pages": 386,
+   "lines": 16715,
+   "german_pages": 316,
+   "german_lines": 13707,
+   "by_lang": {
+    "de": 275,
+    "unknown": 31,
+    "la": 5,
+    "mixed": 64,
+    "fr": 11
+   }
+  },
+  {
+   "work_id": "00068469",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 17",
+   "shelfmark": "LH 1, 17",
+   "pages": 416,
+   "lines": 17675,
+   "german_pages": 296,
+   "german_lines": 12605,
+   "by_lang": {
+    "la": 57,
+    "de": 212,
+    "mixed": 87,
+    "unknown": 51,
+    "fr": 9
+   }
+  },
+  {
+   "work_id": "00068774",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Deutschland LH 12, 2",
+   "shelfmark": "LH 12, 2",
+   "pages": 292,
+   "lines": 25123,
+   "german_pages": 292,
+   "german_lines": 25123,
+   "by_lang": {
+    "de": 286,
+    "mixed": 3,
+    "unknown": 3
+   }
+  },
+  {
+   "work_id": "DE-611-HS-867894",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 973",
+   "pages": 845,
+   "lines": 36653,
+   "german_pages": 287,
+   "german_lines": 13849,
+   "by_lang": {
+    "fr": 18,
+    "la": 325,
+    "mixed": 341,
+    "de": 58,
+    "unknown": 103
+   }
+  },
+  {
+   "work_id": "DE-611-HS-974744",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 439",
+   "pages": 308,
+   "lines": 14232,
+   "german_pages": 286,
+   "german_lines": 13718,
+   "by_lang": {
+    "de": 264,
+    "unknown": 19,
+    "la": 5,
+    "fr": 12,
+    "mixed": 8
+   }
+  },
+  {
+   "work_id": "DE-611-HS-3616805",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 79",
+   "pages": 1738,
+   "lines": 102990,
+   "german_pages": 284,
+   "german_lines": 24210,
+   "by_lang": {
+    "de": 160,
+    "la": 880,
+    "mixed": 294,
+    "unknown": 239,
+    "fr": 165
+   }
+  },
+  {
+   "work_id": "DE-611-HS-859703",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 636",
+   "pages": 374,
+   "lines": 12866,
+   "german_pages": 281,
+   "german_lines": 10464,
+   "by_lang": {
+    "de": 196,
+    "unknown": 109,
+    "fr": 17,
+    "la": 24,
+    "mixed": 28
+   }
+  },
+  {
+   "work_id": "813552974",
+   "set_name": "LeibnizMarginalien",
+   "title": "Güldener HandwercksBoden/ Das ist: Eine allgemeine wolgegründte/ nützliche und anmuhtige Betrachtung/ Aller und jeden zu Nutz/ Notdurfft und Wolfahrt/ auch Zierd/ Wolstand/ und Ergetzligkeit des menschlichen Lebens/ Wandels und Auffenthalt. Erfundenen/ verbesserten/ und bißhero getriebenen HandwercksKünsten",
+   "shelfmark": "Leibn. Marg. 75",
+   "pages": 293,
+   "lines": 18672,
+   "german_pages": 278,
+   "german_lines": 18436,
+   "by_lang": {
+    "unknown": 21,
+    "la": 1,
+    "mixed": 13,
+    "de": 258
+   }
+  },
+  {
+   "work_id": "DE-611-HS-3617045",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. F 1",
+   "pages": 468,
+   "lines": 19951,
+   "german_pages": 274,
+   "german_lines": 13657,
+   "by_lang": {
+    "mixed": 119,
+    "unknown": 83,
+    "fr": 61,
+    "de": 192,
+    "la": 13
+   }
+  },
+  {
+   "work_id": "00068537",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Technica LH 38",
+   "shelfmark": "LH 38",
+   "pages": 753,
+   "lines": 48857,
+   "german_pages": 273,
+   "german_lines": 20173,
+   "by_lang": {
+    "de": 209,
+    "unknown": 178,
+    "mixed": 60,
+    "la": 200,
+    "fr": 106
+   }
+  },
+  {
+   "work_id": "00068366",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 8",
+   "shelfmark": "LH 1, 8",
+   "pages": 616,
+   "lines": 27856,
+   "german_pages": 273,
+   "german_lines": 15996,
+   "by_lang": {
+    "de": 190,
+    "unknown": 44,
+    "mixed": 84,
+    "la": 286,
+    "fr": 12
+   }
+  },
+  {
+   "work_id": "00068782",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Preussen LH 19",
+   "shelfmark": "LH 19",
+   "pages": 458,
+   "lines": 30633,
+   "german_pages": 271,
+   "german_lines": 19807,
+   "by_lang": {
+    "de": 253,
+    "mixed": 17,
+    "unknown": 50,
+    "fr": 97,
+    "la": 41
+   }
+  },
+  {
+   "work_id": "00068779",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Deutschland LH 12, 4",
+   "shelfmark": "LH 12, 4",
+   "pages": 548,
+   "lines": 25149,
+   "german_pages": 269,
+   "german_lines": 8648,
+   "by_lang": {
+    "la": 225,
+    "mixed": 43,
+    "de": 228,
+    "fr": 21,
+    "unknown": 31
+   }
+  },
+  {
+   "work_id": "00068376",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 15",
+   "shelfmark": "LH 1, 15",
+   "pages": 602,
+   "lines": 33915,
+   "german_pages": 251,
+   "german_lines": 19894,
+   "by_lang": {
+    "unknown": 94,
+    "de": 195,
+    "mixed": 73,
+    "la": 196,
+    "fr": 44
+   }
+  },
+  {
+   "work_id": "835712966",
+   "set_name": "LeibnizMarginalien",
+   "title": "Gründe Der Meßkunst",
+   "shelfmark": "Leibn. Marg. 95",
+   "pages": 337,
+   "lines": 9405,
+   "german_pages": 243,
+   "german_lines": 8532,
+   "by_lang": {
+    "unknown": 90,
+    "de": 239,
+    "mixed": 6,
+    "la": 2
+   }
+  },
+  {
+   "work_id": "DE-611-HS-960234",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 248",
+   "pages": 238,
+   "lines": 14952,
+   "german_pages": 211,
+   "german_lines": 14058,
+   "by_lang": {
+    "de": 88,
+    "mixed": 94,
+    "la": 12,
+    "unknown": 38,
+    "fr": 6
+   }
+  },
+  {
+   "work_id": "850980011",
+   "set_name": "LeibnizMarginalien",
+   "title": "Additiones Oder Zugaben und Erleuterungen Zu dem Tractat des Teutschen Fürsten-Staats",
+   "shelfmark": "Leibn. Marg. 104, Stück 2",
+   "pages": 221,
+   "lines": 7528,
+   "german_pages": 207,
+   "german_lines": 7346,
+   "by_lang": {
+    "unknown": 12,
+    "de": 205,
+    "mixed": 3,
+    "la": 1
+   }
+  },
+  {
+   "work_id": "00068815",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zu Braunschweig-Lüneburg LH 23, 4, 2",
+   "shelfmark": "LH 23, 4, 2",
+   "pages": 281,
+   "lines": 17249,
+   "german_pages": 196,
+   "german_lines": 13575,
+   "by_lang": {
+    "unknown": 43,
+    "de": 102,
+    "mixed": 106,
+    "fr": 28,
+    "la": 2
+   }
+  },
+  {
+   "work_id": "00068375",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 14",
+   "shelfmark": "LH 1, 14",
+   "pages": 806,
+   "lines": 38936,
+   "german_pages": 195,
+   "german_lines": 9496,
+   "by_lang": {
+    "de": 123,
+    "fr": 40,
+    "la": 494,
+    "unknown": 51,
+    "mixed": 98
+   }
+  },
+  {
+   "work_id": "DE-611-HS-866403",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 766",
+   "pages": 226,
+   "lines": 10908,
+   "german_pages": 193,
+   "german_lines": 8568,
+   "by_lang": {
+    "mixed": 35,
+    "unknown": 21,
+    "de": 164,
+    "fr": 4,
+    "la": 2
+   }
+  },
+  {
+   "work_id": "816171491",
+   "set_name": "LeibnizMarginalien",
+   "title": "Darinnen von des Weins/ Korns und Holtzes Concentrirung, sambt deroselben Nutzlichern (als bißhero geschehenen) gebrauch/ gehandelt wirdt",
+   "shelfmark": "Leibn. Marg. 131, Stück 1",
+   "pages": 207,
+   "lines": 9700,
+   "german_pages": 190,
+   "german_lines": 9574,
+   "by_lang": {
+    "unknown": 16,
+    "de": 188,
+    "fr": 2,
+    "mixed": 1
+   }
+  },
+  {
+   "work_id": "1066509719",
+   "set_name": "LeibnizMarginalien",
+   "title": "The True Intellectual System Of The Universe",
+   "shelfmark": "Leibn. Marg. 137, Stück 1",
+   "pages": 929,
+   "lines": 56968,
+   "german_pages": 189,
+   "german_lines": 11207,
+   "by_lang": {
+    "unknown": 89,
+    "mixed": 657,
+    "la": 162,
+    "fr": 11,
+    "de": 10
+   }
+  },
+  {
+   "work_id": "862388155",
+   "set_name": "LeibnizMarginalien",
+   "title": "[Darinnen beschrieben wird des Zweyten Ofens eigenschafft/ dadurch/ oder damit man alle flüchtige subtile und verbrennliche Dinge distilliren kan: Es seyen gleich vegetabilia, animalia oder mineralia, auff eine unbekante weise/ sehr compendiose; dardurch nichts verlohren wird/ sondern die aller subtiliste Spiritus damit können gefangen und erhalten werden/ welches sonsten/ ohne diesen Ofen/ durch Retorten oder ander bekanten distillir-Zeug unmöglich zu thun ist] Darinnen beschrieben wird des Zweyten Ofens eigenschafft/ dadurch/ oder damit man alle flüchtige subtile vnd verbrennliche Dinge distilliren kan: Es seyen gleich vegetabilia, animalia oder mineralia, auff eine vnbekante weise/ sehr compendiose; dardurch nichts verlohren wird/ sondern die aller subtiliste Spiritus damit können gefangen vnd erhalten werden/ welches sonsten/ ohne diesen Ofen/ durch Retorten oder ander bekanten distillir-Zeug vnmöglich zu thun ist",
+   "shelfmark": "Leibn. Marg. 113, Stück 2",
+   "pages": 205,
+   "lines": 6161,
+   "german_pages": 188,
+   "german_lines": 5909,
+   "by_lang": {
+    "unknown": 11,
+    "fr": 1,
+    "de": 187,
+    "mixed": 3,
+    "la": 3
+   }
+  },
+  {
+   "work_id": "00068461",
+   "set_name": "LeibnizHandschriften",
+   "title": "Leibniz-Handschriften zur Theologie LH 1, 16",
+   "shelfmark": "LH 1, 16",
+   "pages": 248,
+   "lines": 16889,
+   "german_pages": 186,
+   "german_lines": 15058,
+   "by_lang": {
+    "unknown": 23,
+    "de": 145,
+    "mixed": 58,
+    "la": 9,
+    "fr": 13
+   }
+  },
+  {
+   "work_id": "DE-611-HS-855800",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 546",
+   "pages": 340,
+   "lines": 10381,
+   "german_pages": 184,
+   "german_lines": 6542,
+   "by_lang": {
+    "unknown": 84,
+    "mixed": 147,
+    "de": 75,
+    "fr": 19,
+    "la": 15
+   }
+  },
+  {
+   "work_id": "DE-611-HS-971384",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 289",
+   "pages": 200,
+   "lines": 8264,
+   "german_pages": 183,
+   "german_lines": 7829,
+   "by_lang": {
+    "de": 180,
+    "fr": 3,
+    "unknown": 13,
+    "mixed": 3,
+    "la": 1
+   }
+  },
+  {
+   "work_id": "DE-611-HS-960158",
+   "set_name": "LeibnizBriefwechsel",
+   "title": "Nachlass Gottfried Wilhelm Leibniz",
+   "shelfmark": "LBr. 237",
+   "pages": 182,
+   "lines": 7601,
+   "german_pages": 182,
+   "german_lines": 7601,
+   "by_lang": {
+    "mixed": 72,
+    "de": 76,
+    "unknown": 29,
+    "fr": 4,
+    "la": 1
+   }
+  }
+ ],
+ "labels": {
+  "pieces_by_group": {
+   "la_fr": 5486,
+   "de": 1688,
+   "other": 201
+  },
+  "pages_by_group": {
+   "la_fr": 16616,
+   "de": 4648,
+   "other": 468,
+   "both": 97
+  },
+  "pages_measured": 21232,
+  "positives": 4648,
+  "negatives": 16616
+ },
+ "default": {
+  "threshold": {
+   "min_hits": 2,
+   "min_score": 0.65,
+   "min_tokens": 8
+  },
+  "key": "hits≥2 score≥0.65 tokens≥8",
+  "tp": 2458,
+  "fp": 114,
+  "fn": 2175,
+  "tn": 16485,
+  "precision": 0.9557,
+  "recall": 0.5305
+ },
+ "chosen": {
+  "threshold": {
+   "min_hits": 2,
+   "min_score": 0.3,
+   "min_tokens": 8
+  },
+  "key": "hits≥2 score≥0.3 tokens≥8",
+  "tp": 3453,
+  "fp": 173,
+  "fn": 1180,
+  "tn": 16426,
+  "precision": 0.9523,
+  "recall": 0.7453
+ },
+ "sweep": [
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.3 tokens≥8",
+   "tp": 3453,
+   "fp": 173,
+   "fn": 1180,
+   "tn": 16426,
+   "precision": 0.9523,
+   "recall": 0.7453
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.3 tokens≥8",
+   "tp": 3422,
+   "fp": 168,
+   "fn": 1211,
+   "tn": 16431,
+   "precision": 0.9532,
+   "recall": 0.7386
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.3 tokens≥8",
+   "tp": 3367,
+   "fp": 160,
+   "fn": 1266,
+   "tn": 16439,
+   "precision": 0.9546,
+   "recall": 0.7267
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.3 tokens≥8",
+   "tp": 3313,
+   "fp": 152,
+   "fn": 1320,
+   "tn": 16447,
+   "precision": 0.9561,
+   "recall": 0.7151
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.3 tokens≥8",
+   "tp": 3250,
+   "fp": 148,
+   "fn": 1383,
+   "tn": 16451,
+   "precision": 0.9564,
+   "recall": 0.7015
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.3 tokens≥8",
+   "tp": 3067,
+   "fp": 136,
+   "fn": 1566,
+   "tn": 16463,
+   "precision": 0.9575,
+   "recall": 0.662
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.3 tokens≥8",
+   "tp": 2911,
+   "fp": 121,
+   "fn": 1722,
+   "tn": 16478,
+   "precision": 0.9601,
+   "recall": 0.6283
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.3 tokens≥8",
+   "tp": 2506,
+   "fp": 89,
+   "fn": 2127,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5409
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.3,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.3 tokens≥8",
+   "tp": 2183,
+   "fp": 72,
+   "fn": 2450,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.4712
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.4 tokens≥8",
+   "tp": 3446,
+   "fp": 172,
+   "fn": 1187,
+   "tn": 16427,
+   "precision": 0.9525,
+   "recall": 0.7438
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.4 tokens≥8",
+   "tp": 3415,
+   "fp": 167,
+   "fn": 1218,
+   "tn": 16432,
+   "precision": 0.9534,
+   "recall": 0.7371
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.4 tokens≥8",
+   "tp": 3360,
+   "fp": 159,
+   "fn": 1273,
+   "tn": 16440,
+   "precision": 0.9548,
+   "recall": 0.7252
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.4 tokens≥8",
+   "tp": 3306,
+   "fp": 151,
+   "fn": 1327,
+   "tn": 16448,
+   "precision": 0.9563,
+   "recall": 0.7136
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.4 tokens≥8",
+   "tp": 3244,
+   "fp": 147,
+   "fn": 1389,
+   "tn": 16452,
+   "precision": 0.9566,
+   "recall": 0.7002
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.4 tokens≥8",
+   "tp": 3062,
+   "fp": 135,
+   "fn": 1571,
+   "tn": 16464,
+   "precision": 0.9578,
+   "recall": 0.6609
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.4 tokens≥8",
+   "tp": 2906,
+   "fp": 121,
+   "fn": 1727,
+   "tn": 16478,
+   "precision": 0.96,
+   "recall": 0.6272
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.4 tokens≥8",
+   "tp": 2504,
+   "fp": 89,
+   "fn": 2129,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5405
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.4,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.4 tokens≥8",
+   "tp": 2182,
+   "fp": 72,
+   "fn": 2451,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.471
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.5 tokens≥8",
+   "tp": 3263,
+   "fp": 163,
+   "fn": 1370,
+   "tn": 16436,
+   "precision": 0.9524,
+   "recall": 0.7043
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.5 tokens≥8",
+   "tp": 3232,
+   "fp": 158,
+   "fn": 1401,
+   "tn": 16441,
+   "precision": 0.9534,
+   "recall": 0.6976
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.5 tokens≥8",
+   "tp": 3183,
+   "fp": 152,
+   "fn": 1450,
+   "tn": 16447,
+   "precision": 0.9544,
+   "recall": 0.687
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.5 tokens≥8",
+   "tp": 3139,
+   "fp": 145,
+   "fn": 1494,
+   "tn": 16454,
+   "precision": 0.9558,
+   "recall": 0.6775
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.5 tokens≥8",
+   "tp": 3090,
+   "fp": 142,
+   "fn": 1543,
+   "tn": 16457,
+   "precision": 0.9561,
+   "recall": 0.667
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.5 tokens≥8",
+   "tp": 2927,
+   "fp": 131,
+   "fn": 1706,
+   "tn": 16468,
+   "precision": 0.9572,
+   "recall": 0.6318
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.5 tokens≥8",
+   "tp": 2787,
+   "fp": 119,
+   "fn": 1846,
+   "tn": 16480,
+   "precision": 0.9591,
+   "recall": 0.6016
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.5 tokens≥8",
+   "tp": 2430,
+   "fp": 88,
+   "fn": 2203,
+   "tn": 16511,
+   "precision": 0.9651,
+   "recall": 0.5245
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.5,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.5 tokens≥8",
+   "tp": 2133,
+   "fp": 71,
+   "fn": 2500,
+   "tn": 16528,
+   "precision": 0.9678,
+   "recall": 0.4604
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.6 tokens≥8",
+   "tp": 2776,
+   "fp": 131,
+   "fn": 1857,
+   "tn": 16468,
+   "precision": 0.9549,
+   "recall": 0.5992
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.6 tokens≥8",
+   "tp": 2749,
+   "fp": 127,
+   "fn": 1884,
+   "tn": 16472,
+   "precision": 0.9558,
+   "recall": 0.5934
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.6 tokens≥8",
+   "tp": 2717,
+   "fp": 122,
+   "fn": 1916,
+   "tn": 16477,
+   "precision": 0.957,
+   "recall": 0.5864
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.6 tokens≥8",
+   "tp": 2699,
+   "fp": 119,
+   "fn": 1934,
+   "tn": 16480,
+   "precision": 0.9578,
+   "recall": 0.5826
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.6 tokens≥8",
+   "tp": 2673,
+   "fp": 117,
+   "fn": 1960,
+   "tn": 16482,
+   "precision": 0.9581,
+   "recall": 0.5769
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.6 tokens≥8",
+   "tp": 2573,
+   "fp": 107,
+   "fn": 2060,
+   "tn": 16492,
+   "precision": 0.9601,
+   "recall": 0.5554
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.6 tokens≥8",
+   "tp": 2481,
+   "fp": 99,
+   "fn": 2152,
+   "tn": 16500,
+   "precision": 0.9616,
+   "recall": 0.5355
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.6 tokens≥8",
+   "tp": 2203,
+   "fp": 77,
+   "fn": 2430,
+   "tn": 16522,
+   "precision": 0.9662,
+   "recall": 0.4755
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.6,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.6 tokens≥8",
+   "tp": 1961,
+   "fp": 62,
+   "fn": 2672,
+   "tn": 16537,
+   "precision": 0.9694,
+   "recall": 0.4233
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.65 tokens≥8",
+   "tp": 2458,
+   "fp": 114,
+   "fn": 2175,
+   "tn": 16485,
+   "precision": 0.9557,
+   "recall": 0.5305
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.65 tokens≥8",
+   "tp": 2431,
+   "fp": 110,
+   "fn": 2202,
+   "tn": 16489,
+   "precision": 0.9567,
+   "recall": 0.5247
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.65 tokens≥8",
+   "tp": 2415,
+   "fp": 107,
+   "fn": 2218,
+   "tn": 16492,
+   "precision": 0.9576,
+   "recall": 0.5213
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.65 tokens≥8",
+   "tp": 2397,
+   "fp": 104,
+   "fn": 2236,
+   "tn": 16495,
+   "precision": 0.9584,
+   "recall": 0.5174
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.65 tokens≥8",
+   "tp": 2384,
+   "fp": 102,
+   "fn": 2249,
+   "tn": 16497,
+   "precision": 0.959,
+   "recall": 0.5146
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.65 tokens≥8",
+   "tp": 2312,
+   "fp": 96,
+   "fn": 2321,
+   "tn": 16503,
+   "precision": 0.9601,
+   "recall": 0.499
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.65 tokens≥8",
+   "tp": 2244,
+   "fp": 88,
+   "fn": 2389,
+   "tn": 16511,
+   "precision": 0.9623,
+   "recall": 0.4844
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.65 tokens≥8",
+   "tp": 2013,
+   "fp": 76,
+   "fn": 2620,
+   "tn": 16523,
+   "precision": 0.9636,
+   "recall": 0.4345
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.65,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.65 tokens≥8",
+   "tp": 1801,
+   "fp": 61,
+   "fn": 2832,
+   "tn": 16538,
+   "precision": 0.9672,
+   "recall": 0.3887
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.7 tokens≥8",
+   "tp": 2114,
+   "fp": 98,
+   "fn": 2519,
+   "tn": 16501,
+   "precision": 0.9557,
+   "recall": 0.4563
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.7 tokens≥8",
+   "tp": 2102,
+   "fp": 97,
+   "fn": 2531,
+   "tn": 16502,
+   "precision": 0.9559,
+   "recall": 0.4537
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.7 tokens≥8",
+   "tp": 2086,
+   "fp": 94,
+   "fn": 2547,
+   "tn": 16505,
+   "precision": 0.9569,
+   "recall": 0.4502
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.7 tokens≥8",
+   "tp": 2078,
+   "fp": 92,
+   "fn": 2555,
+   "tn": 16507,
+   "precision": 0.9576,
+   "recall": 0.4485
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.7 tokens≥8",
+   "tp": 2065,
+   "fp": 90,
+   "fn": 2568,
+   "tn": 16509,
+   "precision": 0.9582,
+   "recall": 0.4457
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.7 tokens≥8",
+   "tp": 2012,
+   "fp": 85,
+   "fn": 2621,
+   "tn": 16514,
+   "precision": 0.9595,
+   "recall": 0.4343
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.7 tokens≥8",
+   "tp": 1967,
+   "fp": 80,
+   "fn": 2666,
+   "tn": 16519,
+   "precision": 0.9609,
+   "recall": 0.4246
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.7 tokens≥8",
+   "tp": 1782,
+   "fp": 70,
+   "fn": 2851,
+   "tn": 16529,
+   "precision": 0.9622,
+   "recall": 0.3846
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.7,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.7 tokens≥8",
+   "tp": 1605,
+   "fp": 56,
+   "fn": 3028,
+   "tn": 16543,
+   "precision": 0.9663,
+   "recall": 0.3464
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.8 tokens≥8",
+   "tp": 1368,
+   "fp": 64,
+   "fn": 3265,
+   "tn": 16535,
+   "precision": 0.9553,
+   "recall": 0.2953
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.8 tokens≥8",
+   "tp": 1356,
+   "fp": 63,
+   "fn": 3277,
+   "tn": 16536,
+   "precision": 0.9556,
+   "recall": 0.2927
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.8 tokens≥8",
+   "tp": 1351,
+   "fp": 62,
+   "fn": 3282,
+   "tn": 16537,
+   "precision": 0.9561,
+   "recall": 0.2916
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.8 tokens≥8",
+   "tp": 1343,
+   "fp": 60,
+   "fn": 3290,
+   "tn": 16539,
+   "precision": 0.9572,
+   "recall": 0.2899
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.8 tokens≥8",
+   "tp": 1336,
+   "fp": 59,
+   "fn": 3297,
+   "tn": 16540,
+   "precision": 0.9577,
+   "recall": 0.2884
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.8 tokens≥8",
+   "tp": 1322,
+   "fp": 57,
+   "fn": 3311,
+   "tn": 16542,
+   "precision": 0.9587,
+   "recall": 0.2853
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.8 tokens≥8",
+   "tp": 1290,
+   "fp": 54,
+   "fn": 3343,
+   "tn": 16545,
+   "precision": 0.9598,
+   "recall": 0.2784
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.8 tokens≥8",
+   "tp": 1193,
+   "fp": 47,
+   "fn": 3440,
+   "tn": 16552,
+   "precision": 0.9621,
+   "recall": 0.2575
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.8,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.8 tokens≥8",
+   "tp": 1087,
+   "fp": 42,
+   "fn": 3546,
+   "tn": 16557,
+   "precision": 0.9628,
+   "recall": 0.2346
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.9 tokens≥8",
+   "tp": 505,
+   "fp": 29,
+   "fn": 4128,
+   "tn": 16570,
+   "precision": 0.9457,
+   "recall": 0.109
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.9 tokens≥8",
+   "tp": 493,
+   "fp": 28,
+   "fn": 4140,
+   "tn": 16571,
+   "precision": 0.9463,
+   "recall": 0.1064
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.9 tokens≥8",
+   "tp": 488,
+   "fp": 27,
+   "fn": 4145,
+   "tn": 16572,
+   "precision": 0.9476,
+   "recall": 0.1053
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.9 tokens≥8",
+   "tp": 485,
+   "fp": 26,
+   "fn": 4148,
+   "tn": 16573,
+   "precision": 0.9491,
+   "recall": 0.1047
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.9 tokens≥8",
+   "tp": 484,
+   "fp": 26,
+   "fn": 4149,
+   "tn": 16573,
+   "precision": 0.949,
+   "recall": 0.1045
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.9 tokens≥8",
+   "tp": 478,
+   "fp": 26,
+   "fn": 4155,
+   "tn": 16573,
+   "precision": 0.9484,
+   "recall": 0.1032
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.9 tokens≥8",
+   "tp": 468,
+   "fp": 24,
+   "fn": 4165,
+   "tn": 16575,
+   "precision": 0.9512,
+   "recall": 0.101
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.9 tokens≥8",
+   "tp": 431,
+   "fp": 20,
+   "fn": 4202,
+   "tn": 16579,
+   "precision": 0.9557,
+   "recall": 0.093
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.9,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.9 tokens≥8",
+   "tp": 394,
+   "fp": 18,
+   "fn": 4239,
+   "tn": 16581,
+   "precision": 0.9563,
+   "recall": 0.085
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥2 score≥0.95 tokens≥8",
+   "tp": 166,
+   "fp": 18,
+   "fn": 4467,
+   "tn": 16581,
+   "precision": 0.9022,
+   "recall": 0.0358
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥3 score≥0.95 tokens≥8",
+   "tp": 154,
+   "fp": 17,
+   "fn": 4479,
+   "tn": 16582,
+   "precision": 0.9006,
+   "recall": 0.0332
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥4 score≥0.95 tokens≥8",
+   "tp": 149,
+   "fp": 16,
+   "fn": 4484,
+   "tn": 16583,
+   "precision": 0.903,
+   "recall": 0.0322
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥5 score≥0.95 tokens≥8",
+   "tp": 146,
+   "fp": 15,
+   "fn": 4487,
+   "tn": 16584,
+   "precision": 0.9068,
+   "recall": 0.0315
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥6 score≥0.95 tokens≥8",
+   "tp": 145,
+   "fp": 15,
+   "fn": 4488,
+   "tn": 16584,
+   "precision": 0.9062,
+   "recall": 0.0313
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥8 score≥0.95 tokens≥8",
+   "tp": 139,
+   "fp": 15,
+   "fn": 4494,
+   "tn": 16584,
+   "precision": 0.9026,
+   "recall": 0.03
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥10 score≥0.95 tokens≥8",
+   "tp": 130,
+   "fp": 13,
+   "fn": 4503,
+   "tn": 16586,
+   "precision": 0.9091,
+   "recall": 0.0281
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥15 score≥0.95 tokens≥8",
+   "tp": 118,
+   "fp": 9,
+   "fn": 4515,
+   "tn": 16590,
+   "precision": 0.9291,
+   "recall": 0.0255
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.95,
+    "min_tokens": 8
+   },
+   "key": "hits≥20 score≥0.95 tokens≥8",
+   "tp": 108,
+   "fp": 9,
+   "fn": 4525,
+   "tn": 16590,
+   "precision": 0.9231,
+   "recall": 0.0233
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.3 tokens≥20",
+   "tp": 3451,
+   "fp": 172,
+   "fn": 1182,
+   "tn": 16427,
+   "precision": 0.9525,
+   "recall": 0.7449
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.3 tokens≥20",
+   "tp": 3422,
+   "fp": 168,
+   "fn": 1211,
+   "tn": 16431,
+   "precision": 0.9532,
+   "recall": 0.7386
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.3 tokens≥20",
+   "tp": 3367,
+   "fp": 160,
+   "fn": 1266,
+   "tn": 16439,
+   "precision": 0.9546,
+   "recall": 0.7267
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.3 tokens≥20",
+   "tp": 3313,
+   "fp": 152,
+   "fn": 1320,
+   "tn": 16447,
+   "precision": 0.9561,
+   "recall": 0.7151
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.3 tokens≥20",
+   "tp": 3250,
+   "fp": 148,
+   "fn": 1383,
+   "tn": 16451,
+   "precision": 0.9564,
+   "recall": 0.7015
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.3 tokens≥20",
+   "tp": 3067,
+   "fp": 136,
+   "fn": 1566,
+   "tn": 16463,
+   "precision": 0.9575,
+   "recall": 0.662
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.3 tokens≥20",
+   "tp": 2911,
+   "fp": 121,
+   "fn": 1722,
+   "tn": 16478,
+   "precision": 0.9601,
+   "recall": 0.6283
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.3 tokens≥20",
+   "tp": 2506,
+   "fp": 89,
+   "fn": 2127,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5409
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.3,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.3 tokens≥20",
+   "tp": 2183,
+   "fp": 72,
+   "fn": 2450,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.4712
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.4 tokens≥20",
+   "tp": 3444,
+   "fp": 171,
+   "fn": 1189,
+   "tn": 16428,
+   "precision": 0.9527,
+   "recall": 0.7434
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.4 tokens≥20",
+   "tp": 3415,
+   "fp": 167,
+   "fn": 1218,
+   "tn": 16432,
+   "precision": 0.9534,
+   "recall": 0.7371
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.4 tokens≥20",
+   "tp": 3360,
+   "fp": 159,
+   "fn": 1273,
+   "tn": 16440,
+   "precision": 0.9548,
+   "recall": 0.7252
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.4 tokens≥20",
+   "tp": 3306,
+   "fp": 151,
+   "fn": 1327,
+   "tn": 16448,
+   "precision": 0.9563,
+   "recall": 0.7136
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.4 tokens≥20",
+   "tp": 3244,
+   "fp": 147,
+   "fn": 1389,
+   "tn": 16452,
+   "precision": 0.9566,
+   "recall": 0.7002
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.4 tokens≥20",
+   "tp": 3062,
+   "fp": 135,
+   "fn": 1571,
+   "tn": 16464,
+   "precision": 0.9578,
+   "recall": 0.6609
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.4 tokens≥20",
+   "tp": 2906,
+   "fp": 121,
+   "fn": 1727,
+   "tn": 16478,
+   "precision": 0.96,
+   "recall": 0.6272
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.4 tokens≥20",
+   "tp": 2504,
+   "fp": 89,
+   "fn": 2129,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5405
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.4,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.4 tokens≥20",
+   "tp": 2182,
+   "fp": 72,
+   "fn": 2451,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.471
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.5 tokens≥20",
+   "tp": 3261,
+   "fp": 162,
+   "fn": 1372,
+   "tn": 16437,
+   "precision": 0.9527,
+   "recall": 0.7039
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.5 tokens≥20",
+   "tp": 3232,
+   "fp": 158,
+   "fn": 1401,
+   "tn": 16441,
+   "precision": 0.9534,
+   "recall": 0.6976
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.5 tokens≥20",
+   "tp": 3183,
+   "fp": 152,
+   "fn": 1450,
+   "tn": 16447,
+   "precision": 0.9544,
+   "recall": 0.687
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.5 tokens≥20",
+   "tp": 3139,
+   "fp": 145,
+   "fn": 1494,
+   "tn": 16454,
+   "precision": 0.9558,
+   "recall": 0.6775
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.5 tokens≥20",
+   "tp": 3090,
+   "fp": 142,
+   "fn": 1543,
+   "tn": 16457,
+   "precision": 0.9561,
+   "recall": 0.667
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.5 tokens≥20",
+   "tp": 2927,
+   "fp": 131,
+   "fn": 1706,
+   "tn": 16468,
+   "precision": 0.9572,
+   "recall": 0.6318
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.5 tokens≥20",
+   "tp": 2787,
+   "fp": 119,
+   "fn": 1846,
+   "tn": 16480,
+   "precision": 0.9591,
+   "recall": 0.6016
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.5 tokens≥20",
+   "tp": 2430,
+   "fp": 88,
+   "fn": 2203,
+   "tn": 16511,
+   "precision": 0.9651,
+   "recall": 0.5245
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.5,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.5 tokens≥20",
+   "tp": 2133,
+   "fp": 71,
+   "fn": 2500,
+   "tn": 16528,
+   "precision": 0.9678,
+   "recall": 0.4604
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.6 tokens≥20",
+   "tp": 2774,
+   "fp": 130,
+   "fn": 1859,
+   "tn": 16469,
+   "precision": 0.9552,
+   "recall": 0.5987
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.6 tokens≥20",
+   "tp": 2749,
+   "fp": 127,
+   "fn": 1884,
+   "tn": 16472,
+   "precision": 0.9558,
+   "recall": 0.5934
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.6 tokens≥20",
+   "tp": 2717,
+   "fp": 122,
+   "fn": 1916,
+   "tn": 16477,
+   "precision": 0.957,
+   "recall": 0.5864
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.6 tokens≥20",
+   "tp": 2699,
+   "fp": 119,
+   "fn": 1934,
+   "tn": 16480,
+   "precision": 0.9578,
+   "recall": 0.5826
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.6 tokens≥20",
+   "tp": 2673,
+   "fp": 117,
+   "fn": 1960,
+   "tn": 16482,
+   "precision": 0.9581,
+   "recall": 0.5769
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.6 tokens≥20",
+   "tp": 2573,
+   "fp": 107,
+   "fn": 2060,
+   "tn": 16492,
+   "precision": 0.9601,
+   "recall": 0.5554
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.6 tokens≥20",
+   "tp": 2481,
+   "fp": 99,
+   "fn": 2152,
+   "tn": 16500,
+   "precision": 0.9616,
+   "recall": 0.5355
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.6 tokens≥20",
+   "tp": 2203,
+   "fp": 77,
+   "fn": 2430,
+   "tn": 16522,
+   "precision": 0.9662,
+   "recall": 0.4755
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.6,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.6 tokens≥20",
+   "tp": 1961,
+   "fp": 62,
+   "fn": 2672,
+   "tn": 16537,
+   "precision": 0.9694,
+   "recall": 0.4233
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.65 tokens≥20",
+   "tp": 2456,
+   "fp": 113,
+   "fn": 2177,
+   "tn": 16486,
+   "precision": 0.956,
+   "recall": 0.5301
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.65 tokens≥20",
+   "tp": 2431,
+   "fp": 110,
+   "fn": 2202,
+   "tn": 16489,
+   "precision": 0.9567,
+   "recall": 0.5247
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.65 tokens≥20",
+   "tp": 2415,
+   "fp": 107,
+   "fn": 2218,
+   "tn": 16492,
+   "precision": 0.9576,
+   "recall": 0.5213
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.65 tokens≥20",
+   "tp": 2397,
+   "fp": 104,
+   "fn": 2236,
+   "tn": 16495,
+   "precision": 0.9584,
+   "recall": 0.5174
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.65 tokens≥20",
+   "tp": 2384,
+   "fp": 102,
+   "fn": 2249,
+   "tn": 16497,
+   "precision": 0.959,
+   "recall": 0.5146
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.65 tokens≥20",
+   "tp": 2312,
+   "fp": 96,
+   "fn": 2321,
+   "tn": 16503,
+   "precision": 0.9601,
+   "recall": 0.499
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.65 tokens≥20",
+   "tp": 2244,
+   "fp": 88,
+   "fn": 2389,
+   "tn": 16511,
+   "precision": 0.9623,
+   "recall": 0.4844
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.65 tokens≥20",
+   "tp": 2013,
+   "fp": 76,
+   "fn": 2620,
+   "tn": 16523,
+   "precision": 0.9636,
+   "recall": 0.4345
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.65,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.65 tokens≥20",
+   "tp": 1801,
+   "fp": 61,
+   "fn": 2832,
+   "tn": 16538,
+   "precision": 0.9672,
+   "recall": 0.3887
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.7 tokens≥20",
+   "tp": 2114,
+   "fp": 98,
+   "fn": 2519,
+   "tn": 16501,
+   "precision": 0.9557,
+   "recall": 0.4563
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.7 tokens≥20",
+   "tp": 2102,
+   "fp": 97,
+   "fn": 2531,
+   "tn": 16502,
+   "precision": 0.9559,
+   "recall": 0.4537
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.7 tokens≥20",
+   "tp": 2086,
+   "fp": 94,
+   "fn": 2547,
+   "tn": 16505,
+   "precision": 0.9569,
+   "recall": 0.4502
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.7 tokens≥20",
+   "tp": 2078,
+   "fp": 92,
+   "fn": 2555,
+   "tn": 16507,
+   "precision": 0.9576,
+   "recall": 0.4485
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.7 tokens≥20",
+   "tp": 2065,
+   "fp": 90,
+   "fn": 2568,
+   "tn": 16509,
+   "precision": 0.9582,
+   "recall": 0.4457
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.7 tokens≥20",
+   "tp": 2012,
+   "fp": 85,
+   "fn": 2621,
+   "tn": 16514,
+   "precision": 0.9595,
+   "recall": 0.4343
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.7 tokens≥20",
+   "tp": 1967,
+   "fp": 80,
+   "fn": 2666,
+   "tn": 16519,
+   "precision": 0.9609,
+   "recall": 0.4246
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.7 tokens≥20",
+   "tp": 1782,
+   "fp": 70,
+   "fn": 2851,
+   "tn": 16529,
+   "precision": 0.9622,
+   "recall": 0.3846
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.7,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.7 tokens≥20",
+   "tp": 1605,
+   "fp": 56,
+   "fn": 3028,
+   "tn": 16543,
+   "precision": 0.9663,
+   "recall": 0.3464
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.8 tokens≥20",
+   "tp": 1368,
+   "fp": 64,
+   "fn": 3265,
+   "tn": 16535,
+   "precision": 0.9553,
+   "recall": 0.2953
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.8 tokens≥20",
+   "tp": 1356,
+   "fp": 63,
+   "fn": 3277,
+   "tn": 16536,
+   "precision": 0.9556,
+   "recall": 0.2927
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.8 tokens≥20",
+   "tp": 1351,
+   "fp": 62,
+   "fn": 3282,
+   "tn": 16537,
+   "precision": 0.9561,
+   "recall": 0.2916
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.8 tokens≥20",
+   "tp": 1343,
+   "fp": 60,
+   "fn": 3290,
+   "tn": 16539,
+   "precision": 0.9572,
+   "recall": 0.2899
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.8 tokens≥20",
+   "tp": 1336,
+   "fp": 59,
+   "fn": 3297,
+   "tn": 16540,
+   "precision": 0.9577,
+   "recall": 0.2884
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.8 tokens≥20",
+   "tp": 1322,
+   "fp": 57,
+   "fn": 3311,
+   "tn": 16542,
+   "precision": 0.9587,
+   "recall": 0.2853
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.8 tokens≥20",
+   "tp": 1290,
+   "fp": 54,
+   "fn": 3343,
+   "tn": 16545,
+   "precision": 0.9598,
+   "recall": 0.2784
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.8 tokens≥20",
+   "tp": 1193,
+   "fp": 47,
+   "fn": 3440,
+   "tn": 16552,
+   "precision": 0.9621,
+   "recall": 0.2575
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.8,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.8 tokens≥20",
+   "tp": 1087,
+   "fp": 42,
+   "fn": 3546,
+   "tn": 16557,
+   "precision": 0.9628,
+   "recall": 0.2346
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.9 tokens≥20",
+   "tp": 505,
+   "fp": 29,
+   "fn": 4128,
+   "tn": 16570,
+   "precision": 0.9457,
+   "recall": 0.109
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.9 tokens≥20",
+   "tp": 493,
+   "fp": 28,
+   "fn": 4140,
+   "tn": 16571,
+   "precision": 0.9463,
+   "recall": 0.1064
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.9 tokens≥20",
+   "tp": 488,
+   "fp": 27,
+   "fn": 4145,
+   "tn": 16572,
+   "precision": 0.9476,
+   "recall": 0.1053
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.9 tokens≥20",
+   "tp": 485,
+   "fp": 26,
+   "fn": 4148,
+   "tn": 16573,
+   "precision": 0.9491,
+   "recall": 0.1047
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.9 tokens≥20",
+   "tp": 484,
+   "fp": 26,
+   "fn": 4149,
+   "tn": 16573,
+   "precision": 0.949,
+   "recall": 0.1045
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.9 tokens≥20",
+   "tp": 478,
+   "fp": 26,
+   "fn": 4155,
+   "tn": 16573,
+   "precision": 0.9484,
+   "recall": 0.1032
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.9 tokens≥20",
+   "tp": 468,
+   "fp": 24,
+   "fn": 4165,
+   "tn": 16575,
+   "precision": 0.9512,
+   "recall": 0.101
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.9 tokens≥20",
+   "tp": 431,
+   "fp": 20,
+   "fn": 4202,
+   "tn": 16579,
+   "precision": 0.9557,
+   "recall": 0.093
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.9,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.9 tokens≥20",
+   "tp": 394,
+   "fp": 18,
+   "fn": 4239,
+   "tn": 16581,
+   "precision": 0.9563,
+   "recall": 0.085
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥2 score≥0.95 tokens≥20",
+   "tp": 166,
+   "fp": 18,
+   "fn": 4467,
+   "tn": 16581,
+   "precision": 0.9022,
+   "recall": 0.0358
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥3 score≥0.95 tokens≥20",
+   "tp": 154,
+   "fp": 17,
+   "fn": 4479,
+   "tn": 16582,
+   "precision": 0.9006,
+   "recall": 0.0332
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥4 score≥0.95 tokens≥20",
+   "tp": 149,
+   "fp": 16,
+   "fn": 4484,
+   "tn": 16583,
+   "precision": 0.903,
+   "recall": 0.0322
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥5 score≥0.95 tokens≥20",
+   "tp": 146,
+   "fp": 15,
+   "fn": 4487,
+   "tn": 16584,
+   "precision": 0.9068,
+   "recall": 0.0315
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥6 score≥0.95 tokens≥20",
+   "tp": 145,
+   "fp": 15,
+   "fn": 4488,
+   "tn": 16584,
+   "precision": 0.9062,
+   "recall": 0.0313
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥8 score≥0.95 tokens≥20",
+   "tp": 139,
+   "fp": 15,
+   "fn": 4494,
+   "tn": 16584,
+   "precision": 0.9026,
+   "recall": 0.03
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥10 score≥0.95 tokens≥20",
+   "tp": 130,
+   "fp": 13,
+   "fn": 4503,
+   "tn": 16586,
+   "precision": 0.9091,
+   "recall": 0.0281
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥15 score≥0.95 tokens≥20",
+   "tp": 118,
+   "fp": 9,
+   "fn": 4515,
+   "tn": 16590,
+   "precision": 0.9291,
+   "recall": 0.0255
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.95,
+    "min_tokens": 20
+   },
+   "key": "hits≥20 score≥0.95 tokens≥20",
+   "tp": 108,
+   "fp": 9,
+   "fn": 4525,
+   "tn": 16590,
+   "precision": 0.9231,
+   "recall": 0.0233
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.3 tokens≥40",
+   "tp": 3433,
+   "fp": 169,
+   "fn": 1200,
+   "tn": 16430,
+   "precision": 0.9531,
+   "recall": 0.741
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.3 tokens≥40",
+   "tp": 3414,
+   "fp": 166,
+   "fn": 1219,
+   "tn": 16433,
+   "precision": 0.9536,
+   "recall": 0.7369
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.3 tokens≥40",
+   "tp": 3364,
+   "fp": 159,
+   "fn": 1269,
+   "tn": 16440,
+   "precision": 0.9549,
+   "recall": 0.7261
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.3 tokens≥40",
+   "tp": 3312,
+   "fp": 152,
+   "fn": 1321,
+   "tn": 16447,
+   "precision": 0.9561,
+   "recall": 0.7149
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.3 tokens≥40",
+   "tp": 3250,
+   "fp": 148,
+   "fn": 1383,
+   "tn": 16451,
+   "precision": 0.9564,
+   "recall": 0.7015
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.3 tokens≥40",
+   "tp": 3067,
+   "fp": 136,
+   "fn": 1566,
+   "tn": 16463,
+   "precision": 0.9575,
+   "recall": 0.662
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.3 tokens≥40",
+   "tp": 2911,
+   "fp": 121,
+   "fn": 1722,
+   "tn": 16478,
+   "precision": 0.9601,
+   "recall": 0.6283
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.3 tokens≥40",
+   "tp": 2506,
+   "fp": 89,
+   "fn": 2127,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5409
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.3,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.3 tokens≥40",
+   "tp": 2183,
+   "fp": 72,
+   "fn": 2450,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.4712
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.4 tokens≥40",
+   "tp": 3426,
+   "fp": 168,
+   "fn": 1207,
+   "tn": 16431,
+   "precision": 0.9533,
+   "recall": 0.7395
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.4 tokens≥40",
+   "tp": 3407,
+   "fp": 165,
+   "fn": 1226,
+   "tn": 16434,
+   "precision": 0.9538,
+   "recall": 0.7354
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.4 tokens≥40",
+   "tp": 3357,
+   "fp": 158,
+   "fn": 1276,
+   "tn": 16441,
+   "precision": 0.955,
+   "recall": 0.7246
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.4 tokens≥40",
+   "tp": 3305,
+   "fp": 151,
+   "fn": 1328,
+   "tn": 16448,
+   "precision": 0.9563,
+   "recall": 0.7134
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.4 tokens≥40",
+   "tp": 3244,
+   "fp": 147,
+   "fn": 1389,
+   "tn": 16452,
+   "precision": 0.9566,
+   "recall": 0.7002
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.4 tokens≥40",
+   "tp": 3062,
+   "fp": 135,
+   "fn": 1571,
+   "tn": 16464,
+   "precision": 0.9578,
+   "recall": 0.6609
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.4 tokens≥40",
+   "tp": 2906,
+   "fp": 121,
+   "fn": 1727,
+   "tn": 16478,
+   "precision": 0.96,
+   "recall": 0.6272
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.4 tokens≥40",
+   "tp": 2504,
+   "fp": 89,
+   "fn": 2129,
+   "tn": 16510,
+   "precision": 0.9657,
+   "recall": 0.5405
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.4,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.4 tokens≥40",
+   "tp": 2182,
+   "fp": 72,
+   "fn": 2451,
+   "tn": 16527,
+   "precision": 0.9681,
+   "recall": 0.471
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.5 tokens≥40",
+   "tp": 3243,
+   "fp": 159,
+   "fn": 1390,
+   "tn": 16440,
+   "precision": 0.9533,
+   "recall": 0.7
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.5 tokens≥40",
+   "tp": 3224,
+   "fp": 156,
+   "fn": 1409,
+   "tn": 16443,
+   "precision": 0.9538,
+   "recall": 0.6959
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.5 tokens≥40",
+   "tp": 3180,
+   "fp": 151,
+   "fn": 1453,
+   "tn": 16448,
+   "precision": 0.9547,
+   "recall": 0.6864
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.5 tokens≥40",
+   "tp": 3138,
+   "fp": 145,
+   "fn": 1495,
+   "tn": 16454,
+   "precision": 0.9558,
+   "recall": 0.6773
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.5 tokens≥40",
+   "tp": 3090,
+   "fp": 142,
+   "fn": 1543,
+   "tn": 16457,
+   "precision": 0.9561,
+   "recall": 0.667
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.5 tokens≥40",
+   "tp": 2927,
+   "fp": 131,
+   "fn": 1706,
+   "tn": 16468,
+   "precision": 0.9572,
+   "recall": 0.6318
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.5 tokens≥40",
+   "tp": 2787,
+   "fp": 119,
+   "fn": 1846,
+   "tn": 16480,
+   "precision": 0.9591,
+   "recall": 0.6016
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.5 tokens≥40",
+   "tp": 2430,
+   "fp": 88,
+   "fn": 2203,
+   "tn": 16511,
+   "precision": 0.9651,
+   "recall": 0.5245
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.5,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.5 tokens≥40",
+   "tp": 2133,
+   "fp": 71,
+   "fn": 2500,
+   "tn": 16528,
+   "precision": 0.9678,
+   "recall": 0.4604
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.6 tokens≥40",
+   "tp": 2757,
+   "fp": 127,
+   "fn": 1876,
+   "tn": 16472,
+   "precision": 0.956,
+   "recall": 0.5951
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.6 tokens≥40",
+   "tp": 2741,
+   "fp": 125,
+   "fn": 1892,
+   "tn": 16474,
+   "precision": 0.9564,
+   "recall": 0.5916
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.6 tokens≥40",
+   "tp": 2714,
+   "fp": 121,
+   "fn": 1919,
+   "tn": 16478,
+   "precision": 0.9573,
+   "recall": 0.5858
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.6 tokens≥40",
+   "tp": 2698,
+   "fp": 119,
+   "fn": 1935,
+   "tn": 16480,
+   "precision": 0.9578,
+   "recall": 0.5823
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.6 tokens≥40",
+   "tp": 2673,
+   "fp": 117,
+   "fn": 1960,
+   "tn": 16482,
+   "precision": 0.9581,
+   "recall": 0.5769
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.6 tokens≥40",
+   "tp": 2573,
+   "fp": 107,
+   "fn": 2060,
+   "tn": 16492,
+   "precision": 0.9601,
+   "recall": 0.5554
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.6 tokens≥40",
+   "tp": 2481,
+   "fp": 99,
+   "fn": 2152,
+   "tn": 16500,
+   "precision": 0.9616,
+   "recall": 0.5355
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.6 tokens≥40",
+   "tp": 2203,
+   "fp": 77,
+   "fn": 2430,
+   "tn": 16522,
+   "precision": 0.9662,
+   "recall": 0.4755
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.6,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.6 tokens≥40",
+   "tp": 1961,
+   "fp": 62,
+   "fn": 2672,
+   "tn": 16537,
+   "precision": 0.9694,
+   "recall": 0.4233
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.65 tokens≥40",
+   "tp": 2439,
+   "fp": 110,
+   "fn": 2194,
+   "tn": 16489,
+   "precision": 0.9568,
+   "recall": 0.5264
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.65 tokens≥40",
+   "tp": 2423,
+   "fp": 108,
+   "fn": 2210,
+   "tn": 16491,
+   "precision": 0.9573,
+   "recall": 0.523
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.65 tokens≥40",
+   "tp": 2412,
+   "fp": 106,
+   "fn": 2221,
+   "tn": 16493,
+   "precision": 0.9579,
+   "recall": 0.5206
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.65 tokens≥40",
+   "tp": 2396,
+   "fp": 104,
+   "fn": 2237,
+   "tn": 16495,
+   "precision": 0.9584,
+   "recall": 0.5172
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.65 tokens≥40",
+   "tp": 2384,
+   "fp": 102,
+   "fn": 2249,
+   "tn": 16497,
+   "precision": 0.959,
+   "recall": 0.5146
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.65 tokens≥40",
+   "tp": 2312,
+   "fp": 96,
+   "fn": 2321,
+   "tn": 16503,
+   "precision": 0.9601,
+   "recall": 0.499
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.65 tokens≥40",
+   "tp": 2244,
+   "fp": 88,
+   "fn": 2389,
+   "tn": 16511,
+   "precision": 0.9623,
+   "recall": 0.4844
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.65 tokens≥40",
+   "tp": 2013,
+   "fp": 76,
+   "fn": 2620,
+   "tn": 16523,
+   "precision": 0.9636,
+   "recall": 0.4345
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.65,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.65 tokens≥40",
+   "tp": 1801,
+   "fp": 61,
+   "fn": 2832,
+   "tn": 16538,
+   "precision": 0.9672,
+   "recall": 0.3887
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.7 tokens≥40",
+   "tp": 2102,
+   "fp": 96,
+   "fn": 2531,
+   "tn": 16503,
+   "precision": 0.9563,
+   "recall": 0.4537
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.7 tokens≥40",
+   "tp": 2094,
+   "fp": 95,
+   "fn": 2539,
+   "tn": 16504,
+   "precision": 0.9566,
+   "recall": 0.452
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.7 tokens≥40",
+   "tp": 2083,
+   "fp": 93,
+   "fn": 2550,
+   "tn": 16506,
+   "precision": 0.9573,
+   "recall": 0.4496
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.7 tokens≥40",
+   "tp": 2077,
+   "fp": 92,
+   "fn": 2556,
+   "tn": 16507,
+   "precision": 0.9576,
+   "recall": 0.4483
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.7 tokens≥40",
+   "tp": 2065,
+   "fp": 90,
+   "fn": 2568,
+   "tn": 16509,
+   "precision": 0.9582,
+   "recall": 0.4457
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.7 tokens≥40",
+   "tp": 2012,
+   "fp": 85,
+   "fn": 2621,
+   "tn": 16514,
+   "precision": 0.9595,
+   "recall": 0.4343
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.7 tokens≥40",
+   "tp": 1967,
+   "fp": 80,
+   "fn": 2666,
+   "tn": 16519,
+   "precision": 0.9609,
+   "recall": 0.4246
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.7 tokens≥40",
+   "tp": 1782,
+   "fp": 70,
+   "fn": 2851,
+   "tn": 16529,
+   "precision": 0.9622,
+   "recall": 0.3846
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.7,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.7 tokens≥40",
+   "tp": 1605,
+   "fp": 56,
+   "fn": 3028,
+   "tn": 16543,
+   "precision": 0.9663,
+   "recall": 0.3464
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.8 tokens≥40",
+   "tp": 1360,
+   "fp": 62,
+   "fn": 3273,
+   "tn": 16537,
+   "precision": 0.9564,
+   "recall": 0.2935
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.8 tokens≥40",
+   "tp": 1352,
+   "fp": 61,
+   "fn": 3281,
+   "tn": 16538,
+   "precision": 0.9568,
+   "recall": 0.2918
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.8 tokens≥40",
+   "tp": 1348,
+   "fp": 61,
+   "fn": 3285,
+   "tn": 16538,
+   "precision": 0.9567,
+   "recall": 0.291
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.8 tokens≥40",
+   "tp": 1342,
+   "fp": 60,
+   "fn": 3291,
+   "tn": 16539,
+   "precision": 0.9572,
+   "recall": 0.2897
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.8 tokens≥40",
+   "tp": 1336,
+   "fp": 59,
+   "fn": 3297,
+   "tn": 16540,
+   "precision": 0.9577,
+   "recall": 0.2884
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.8 tokens≥40",
+   "tp": 1322,
+   "fp": 57,
+   "fn": 3311,
+   "tn": 16542,
+   "precision": 0.9587,
+   "recall": 0.2853
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.8 tokens≥40",
+   "tp": 1290,
+   "fp": 54,
+   "fn": 3343,
+   "tn": 16545,
+   "precision": 0.9598,
+   "recall": 0.2784
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.8 tokens≥40",
+   "tp": 1193,
+   "fp": 47,
+   "fn": 3440,
+   "tn": 16552,
+   "precision": 0.9621,
+   "recall": 0.2575
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.8,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.8 tokens≥40",
+   "tp": 1087,
+   "fp": 42,
+   "fn": 3546,
+   "tn": 16557,
+   "precision": 0.9628,
+   "recall": 0.2346
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.9 tokens≥40",
+   "tp": 499,
+   "fp": 27,
+   "fn": 4134,
+   "tn": 16572,
+   "precision": 0.9487,
+   "recall": 0.1077
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.9 tokens≥40",
+   "tp": 491,
+   "fp": 26,
+   "fn": 4142,
+   "tn": 16573,
+   "precision": 0.9497,
+   "recall": 0.106
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.9 tokens≥40",
+   "tp": 487,
+   "fp": 26,
+   "fn": 4146,
+   "tn": 16573,
+   "precision": 0.9493,
+   "recall": 0.1051
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.9 tokens≥40",
+   "tp": 485,
+   "fp": 26,
+   "fn": 4148,
+   "tn": 16573,
+   "precision": 0.9491,
+   "recall": 0.1047
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.9 tokens≥40",
+   "tp": 484,
+   "fp": 26,
+   "fn": 4149,
+   "tn": 16573,
+   "precision": 0.949,
+   "recall": 0.1045
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.9 tokens≥40",
+   "tp": 478,
+   "fp": 26,
+   "fn": 4155,
+   "tn": 16573,
+   "precision": 0.9484,
+   "recall": 0.1032
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.9 tokens≥40",
+   "tp": 468,
+   "fp": 24,
+   "fn": 4165,
+   "tn": 16575,
+   "precision": 0.9512,
+   "recall": 0.101
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.9 tokens≥40",
+   "tp": 431,
+   "fp": 20,
+   "fn": 4202,
+   "tn": 16579,
+   "precision": 0.9557,
+   "recall": 0.093
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.9,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.9 tokens≥40",
+   "tp": 394,
+   "fp": 18,
+   "fn": 4239,
+   "tn": 16581,
+   "precision": 0.9563,
+   "recall": 0.085
+  },
+  {
+   "threshold": {
+    "min_hits": 2,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥2 score≥0.95 tokens≥40",
+   "tp": 160,
+   "fp": 16,
+   "fn": 4473,
+   "tn": 16583,
+   "precision": 0.9091,
+   "recall": 0.0345
+  },
+  {
+   "threshold": {
+    "min_hits": 3,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥3 score≥0.95 tokens≥40",
+   "tp": 152,
+   "fp": 15,
+   "fn": 4481,
+   "tn": 16584,
+   "precision": 0.9102,
+   "recall": 0.0328
+  },
+  {
+   "threshold": {
+    "min_hits": 4,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥4 score≥0.95 tokens≥40",
+   "tp": 148,
+   "fp": 15,
+   "fn": 4485,
+   "tn": 16584,
+   "precision": 0.908,
+   "recall": 0.0319
+  },
+  {
+   "threshold": {
+    "min_hits": 5,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥5 score≥0.95 tokens≥40",
+   "tp": 146,
+   "fp": 15,
+   "fn": 4487,
+   "tn": 16584,
+   "precision": 0.9068,
+   "recall": 0.0315
+  },
+  {
+   "threshold": {
+    "min_hits": 6,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥6 score≥0.95 tokens≥40",
+   "tp": 145,
+   "fp": 15,
+   "fn": 4488,
+   "tn": 16584,
+   "precision": 0.9062,
+   "recall": 0.0313
+  },
+  {
+   "threshold": {
+    "min_hits": 8,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥8 score≥0.95 tokens≥40",
+   "tp": 139,
+   "fp": 15,
+   "fn": 4494,
+   "tn": 16584,
+   "precision": 0.9026,
+   "recall": 0.03
+  },
+  {
+   "threshold": {
+    "min_hits": 10,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥10 score≥0.95 tokens≥40",
+   "tp": 130,
+   "fp": 13,
+   "fn": 4503,
+   "tn": 16586,
+   "precision": 0.9091,
+   "recall": 0.0281
+  },
+  {
+   "threshold": {
+    "min_hits": 15,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥15 score≥0.95 tokens≥40",
+   "tp": 118,
+   "fp": 9,
+   "fn": 4515,
+   "tn": 16590,
+   "precision": 0.9291,
+   "recall": 0.0255
+  },
+  {
+   "threshold": {
+    "min_hits": 20,
+    "min_score": 0.95,
+    "min_tokens": 40
+   },
+   "key": "hits≥20 score≥0.95 tokens≥40",
+   "tp": 108,
+   "fp": 9,
+   "fn": 4525,
+   "tn": 16590,
+   "precision": 0.9231,
+   "recall": 0.0233
+  }
+ ],
+ "confusion": {
+  "fr": {
+   "fr": 7736,
+   "la": 119,
+   "unknown": 599,
+   "de": 95,
+   "mixed": 265
+  },
+  "de": {
+   "fr": 110,
+   "unknown": 581,
+   "de": 2405,
+   "mixed": 1228,
+   "la": 114
+  },
+  "la": {
+   "la": 6829,
+   "unknown": 506,
+   "mixed": 224,
+   "fr": 128,
+   "de": 19
+  },
+  "mixed": {
+   "mixed": 180,
+   "la": 112,
+   "unknown": 75,
+   "de": 73,
+   "fr": 160
+  },
+  "unknown": {
+   "mixed": 12,
+   "la": 4,
+   "unknown": 9,
+   "fr": 10,
+   "de": 6
+  }
+ }
+}

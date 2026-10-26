@@ -62,8 +62,8 @@ DEFAULT_REPORTS_DIR = Path("reports/kurrent")
 VERDICTS: tuple[str, ...] = ("la", "fr", "de", "mixed", "unknown")
 GROUPS: tuple[str, ...] = ("de", "la_fr", "other", "both")
 PRECISION_TARGET = 0.95
-SWEEP_HITS: tuple[int, ...] = (2, 3, 4, 5, 6, 8, 10, 15, 20)
-SWEEP_SCORES: tuple[float, ...] = (0.5, 0.6, 0.65, 0.7, 0.8, 0.9, 0.95)
+SWEEP_HITS: tuple[int, ...] = (2, 3, 4, 5, 6, 8, 10, 15, 20)  # two: langid's floor
+SWEEP_SCORES: tuple[float, ...] = (0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.8, 0.9, 0.95)
 SWEEP_TOKENS: tuple[int, ...] = (8, 20, 40)
 TOP_WORKS = 40
 
@@ -435,12 +435,18 @@ def german_page_ids(rows: Iterable[PageLang]) -> list[str]:
     return [r.page_id for r in rows if r.german]
 
 
-def write_page_list(path: Path | str, rows: Iterable[PageLang]) -> Path:
-    """The German pages, one id a line (the reading job's input)."""
+def write_page_list(
+    path: Path | str, rows: Iterable[PageLang], *, exclude_sets: Iterable[str] = ()
+) -> tuple[Path, int]:
+    """The German pages, one id a line (the reading job's input), the collections
+    named in ``exclude_sets`` left out (the Marginalien are print: a Kurrent
+    reader is not made for them). Returns the path and the count written."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("".join(f"{pid}\n" for pid in german_page_ids(rows)), encoding="utf-8")
-    return path
+    skip = set(exclude_sets)
+    ids = [r.page_id for r in rows if r.german and r.set_name not in skip]
+    path.write_text("".join(f"{pid}\n" for pid in ids), encoding="utf-8")
+    return path, len(ids)
 
 
 # --------------------------------------------------------------------------- #

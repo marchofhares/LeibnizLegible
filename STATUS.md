@@ -1071,7 +1071,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26) ✅ Task 0 · ⏳ Task 1
+### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1140,6 +1140,62 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   from Task 1's line count before the go. (6) The backup copy goes beside the
   operator's chore's copies under `/mnt/d/leibniz-backups/`, dated, with its
   SHA-256 in a file beside it.
+- **Task 1, which pages are German — CHECKPOINT A** (`leibniz enrich
+  page-lang`, the new `enrich` group; `enrich/pagelang.py`, `enrich/cli.py`,
+  +8 tests; `reports/kurrent/page-lang.md` + `.json` + `page-lang-works.csv`;
+  `data/kurrent/page-lang.jsonl` and `german-pages.txt`, gitignored; the log
+  `logs/k4-page-lang.log`). Every recognised page's current machine text
+  (the newest run per line, text columns only) classified with K1's
+  stopword identifier, unchanged: **236,210 pages, 12,825,054 lines with
+  text, in 3 min 13 s at 486 MB** (the store read-only). The verdicts: la
+  110,326, fr 62,463, **de 22,501**, mixed 19,992, unknown 20,928. *The
+  measure:* the census's pieces placed by the factory's resolver today —
+  the German pieces (German, or mixed with German leading) 1,688 pieces on
+  **4,648 distinct pages** (the positives; the census's 5,874 summed its
+  pieces' pages), the Latin and French pieces 5,486 on **16,616 pages** (the
+  negatives), 97 pages both claim and 468 of the other pieces set aside;
+  21,232 labelled pages measured. The identifier's own verdict (`lang ==
+  "de"`: two German hits, a share of 0.65, eight tokens) reads **95.6 %
+  precision, 53.0 % recall**. A page counts as German at a threshold on the
+  leading language, its hit count, its share of all hits and the tokens; the
+  grid (hits 2–20, share 0.3–0.95, tokens 8–40) is in the report, and
+  precision barely moves across it (95.2–97 %) while recall falls from 74 %
+  to 39 %: the false calls are a floor set by the labels (a German piece's
+  Latin page, a Latin piece's German page), not by the rule. **The threshold,
+  chosen for a precision of 95 %: German leads the stopword hits with at
+  least two of them on a page of eight or more tokens (`hits≥2 score≥0.3
+  tokens≥8`): precision 95.2 %, recall 74.5 % — 3,626 labelled pages called
+  German, 173 of them Latin or French pieces' pages, 1,180 German pieces'
+  pages missed.** The missed pages are what a Latin-trained model makes of
+  Kurrent: their machine text reads `mixed` (682) or `unknown` (396), the
+  German share of their hits a median 0.18 — v1 writes Latin and French
+  words where it cannot read. The confusion matrix (the piece's language
+  against the verdict) is in the report: of the pages of Latin pieces
+  7,706, 19 read `de`; of French pieces' 8,814, 95; of German pieces' 4,438,
+  2,405 read `de`, 1,228 `mixed`, 581 `unknown`. *The German pages:* the
+  threshold's pages joined with the census's German pages (the edition's
+  text is the better evidence; each page's evidence recorded — machine,
+  edition, both): **30,797 pages, 1,708,517 lines** — by the machine text
+  alone 26,164, by the edition alone 1,180, by both 3,453; by collection
+  LeibnizBriefwechsel 14,455 pages (699,198 lines; 20.0 % of its pages),
+  LeibnizHandschriften 9,604 (716,924; 16.4 %), **LeibnizMarginalien 6,719
+  (291,329; 6.5 %) — printed books**, Leibnitiana 18, leibniz-rekonstruktionen
+  1; 934 convolutes carry a German page (the forty with the most in the
+  report, all in the CSV: LBr. F 20 892 pages, Leibn. Marg. 104 Stück 1 833,
+  LBr. 411 798, LBr. 501 604, LH 23, 2, 21 590 …). `langid` itself is
+  unchanged (K1's tests stand); the identifier's `mixed` and `unknown` on
+  v1's reading of Kurrent is the finding, and the threshold's "German
+  leads" is the adjustment, made outside the module. `--reuse` re-renders a
+  threshold or the report from the same pass (20 s); `--list-exclude-set`
+  keeps a collection out of the reading job's page list without touching
+  the verdicts. **Two questions for the operator at this checkpoint:** (1)
+  the Marginalien are print — the reader is a handwriting model, v1 reads
+  the print well enough to find its German, and no ground truth exists for
+  either on print — so the session proposes to leave the collection's 6,719
+  pages out of the reading job's list (`--list-exclude-set
+  LeibnizMarginalien`: 24,078 pages, 1,417,188 lines remain) and to record a
+  print reader as an open point; (2) whether 95.2 % precision (a floor) is
+  good enough to open the search page's language filter (Task 5).
 - **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
   (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
   recognised page's text under the current rule classified with

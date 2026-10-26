@@ -75,7 +75,7 @@ def test_threshold_rule() -> None:
     assert strict.key == "hits≥6 score≥0.9 tokens≥20"
 
 
-def test_measure_sweep_and_pick() -> None:
+def test_measure_sweep_and_pick(tmp_path: Path) -> None:
     rows = [
         _row("p1", "de", {"de": 8}),  # German, clear
         _row("p2", "de", {"de": 2, "la": 1}),  # German, weak
@@ -106,6 +106,10 @@ def test_measure_sweep_and_pick() -> None:
     assert flags["p3"] == (False, None) and flags["p4"] == (False, None)
     assert counts == {"both": 1, "edition": 1, "machine": 1}
     assert P.german_page_ids(rows) == ["p1", "p2", "p6"]
+    listed, n = P.write_page_list(tmp_path / "pages.txt", rows, exclude_sets=["s"])
+    assert n == 0 and listed.read_text(encoding="utf-8") == ""
+    listed, n = P.write_page_list(tmp_path / "pages.txt", rows)
+    assert n == 3 and listed.read_text(encoding="utf-8").split() == ["p1", "p2", "p6"]
     assert P.confusion(rows, P.Labels(lang={"p1": "de", "p3": "la", "p4": "la"})) == {
         "de": {"de": 1},
         "la": {"la": 1, "de": 1},
@@ -212,7 +216,10 @@ def test_cli_page_lang_without_the_cache(german_store_path: Path, tmp_path: Path
             "--reuse",
             "--min-hits",
             "12",
+            "--list-exclude-set",
+            "LeibnizBriefwechsel",
         ],
     )
     assert res.exit_code == 0, res.output
     assert pages.read_text(encoding="utf-8").split() == [f"{W3}:0002"]
+    assert "LeibnizBriefwechsel left out" in res.output

@@ -65,6 +65,12 @@ def page_lang(
         help="Read the rows from --out instead of classifying the store again (a new "
         "threshold or report on the same pass).",
     ),
+    list_exclude_set: list[str] = typer.Option(
+        None,
+        "--list-exclude-set",
+        help="Leave this collection's German pages out of --pages-out (the verdicts stay); "
+        "repeatable.",
+    ),
 ) -> None:
     """Which pages are German: classify, measure, set the threshold, list (K4 Task 1)."""
     from leibniz.align.audit_reach import open_readonly
@@ -119,7 +125,7 @@ def page_lang(
     finally:
         conn.close()
     P.write_jsonl(out, rows)
-    P.write_page_list(pages_out, rows)
+    _, n_listed = P.write_page_list(pages_out, rows, exclude_sets=list_exclude_set or [])
     summ = P.summary(
         rows,
         labels=labels,
@@ -149,7 +155,9 @@ def page_lang(
         )
     _console.print(
         f"  German pages {summ['german_pages']:,} ({json.dumps(counts)}), lines "
-        f"{summ['german_lines']:,}; {out}, {pages_out}, "
+        f"{summ['german_lines']:,}; {n_listed:,} listed in {pages_out}"
+        + (f" ({', '.join(list_exclude_set)} left out)" if list_exclude_set else "")
+        + f"; {out}, "
         + ", ".join(str(p) for p in paths.values())
     )
 
