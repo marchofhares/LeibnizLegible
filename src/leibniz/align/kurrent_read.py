@@ -193,12 +193,71 @@ def plan_pages(
     return plan
 
 
+def plan_from_list(conn: sqlite3.Connection, page_ids: Sequence[str]) -> ReadPlan:
+    """A plan over a page list given as it is (K4: the German pages of
+    ``leibniz enrich page-lang``, one id a line), in the list's order, each page
+    once; the census's placement counts stay zero."""
+    seen: set[str] = set()
+    pages = [pid for pid in page_ids if pid and not (pid in seen or seen.add(pid))]
+    plan = ReadPlan(
+        pages=pages,
+        records_by_page={},
+        n_records=0,
+        n_records_with_lines=0,
+        n_records_localizable_now=0,
+        n_pages_census=0,
+        n_pages_resolver=0,
+        n_pages_only_census=0,
+        n_pages_only_resolver=0,
+    )
+    plan.n_lines = count_lines_on(conn, pages)
+    return plan
+
+
+def read_page_list(path: Path | str) -> list[str]:
+    """Page ids from a text file, one a line, blank lines and ``#`` comments skipped."""
+    out: list[str] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            out.append(line)
+    return out
+
+
+def crop_width(polygon: Sequence | None, baseline: Sequence | None) -> int | None:
+    """The width in pixels of a line's crop before padding: the polygon's box,
+    else the baseline's extent; ``None`` without geometry."""
+    for pts in (polygon, baseline):
+        xs = [float(pt[0]) for pt in (pts or []) if isinstance(pt, (list, tuple)) and len(pt) >= 2]
+        if xs:
+            return int(max(xs) - min(xs))
+    return None
+
+
+def narrow_crops(
+    conn: sqlite3.Connection, pages: Iterable[str], *, max_width: int = 80
+) -> tuple[int, int]:
+    """How many of the lines the job would read are crops narrower than
+    ``max_width`` pixels (the pool's K3 kraken model returned nothing on most
+    such crops), and the lines counted. One geometry read per page."""
+    narrow = total = 0
+    for pid in pages:
+        for ln in page_lines(conn, pid):
+            total += 1
+            w = crop_width(ln.polygon, ln.baseline)
+            if w is not None and w < max_width:
+                narrow += 1
+    return narrow, total
+
+
 def count_lines_on(conn: sqlite3.Connection, pages: Iterable[str]) -> int:
-    """The lines the job would read on these pages: a text was recognised."""
+    """The lines the job would read on these pages: a text was recognised. A
+    line is counted once however many runs hold a row for it (K4)."""
     n = 0
     for pid in pages:
         n += conn.execute(
-            "SELECT COUNT(*) FROM lines WHERE page_id = ? AND text IS NOT NULL", (pid,)
+            "SELECT COUNT(DISTINCT line_seq) FROM lines WHERE page_id = ? AND text IS NOT NULL",
+            (pid,),
         ).fetchone()[0]
     return n
 

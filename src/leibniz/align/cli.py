@@ -403,6 +403,18 @@ def kurrent_read(
     german: Path = typer.Option(
         Path("data/kurrent/german_pieces.jsonl"), "--german", help="The census's German pieces."
     ),
+    pages_file: Path = typer.Option(
+        None,
+        "--pages",
+        help="A page list, one id a line (K4: the German pages of `leibniz enrich page-lang`), "
+        "read in that order instead of the census's pieces.",
+    ),
+    narrow_px: int = typer.Option(
+        None,
+        "--narrow-px",
+        help="With --pages: count the crops narrower than this many pixels before anything "
+        "runs (the amendment of 26 October), then go on.",
+    ),
     edition_cache: Path = typer.Option(
         Path("data/gt/edition_cache.jsonl"),
         "--edition-cache",
@@ -506,20 +518,41 @@ def kurrent_read(
         _console.print(f"wrote {md} and {js}")
         return
 
-    rows = P.load_german_pieces(german)
-    refs = load_edition_refs(edition_cache) if edition_cache.exists() else {}
     conn = P.open_readonly(db_path)
     try:
-        plan = R.plan_pages(conn, rows, refs=refs, today=t, resolve=not no_resolve)
+        if pages_file is not None:
+            plan = R.plan_from_list(conn, R.read_page_list(pages_file))
+            _console.print(
+                f"[bold]kurrent-read[/bold] {plan.n_pages:,} pages from {pages_file}, "
+                f"{plan.n_lines:,} recognised lines; reader {reader}; "
+                f"device {K.pick_device(device)}"
+            )
+            if narrow_px is not None:
+                narrow, total = R.narrow_crops(conn, plan.pages, max_width=narrow_px)
+                _console.print(
+                    f"  crops under {narrow_px} px: {narrow:,} of {total:,} lines "
+                    f"({narrow / total:.1%})"
+                    if total
+                    else f"  crops under {narrow_px} px: no lines"
+                )
+        else:
+            rows = P.load_german_pieces(german)
+            refs = load_edition_refs(edition_cache) if edition_cache.exists() else {}
+            plan = R.plan_pages(conn, rows, refs=refs, today=t, resolve=not no_resolve)
+            _console.print(
+                f"[bold]kurrent-read[/bold] {plan.n_records:,} German records → "
+                f"{plan.n_pages:,} pages (census {plan.n_pages_census:,}, resolver "
+                f"{plan.n_pages_resolver:,}), {plan.n_lines:,} recognised lines; reader "
+                f"{reader}; device {K.pick_device(device)}"
+            )
         plan_path.write_text(
-            json.dumps({**plan.as_dict(), "pages": plan.pages}, ensure_ascii=False, indent=1)
+            json.dumps(
+                {**plan.as_dict(), "pages": plan.pages, "pages_file": str(pages_file or "")},
+                ensure_ascii=False,
+                indent=1,
+            )
             + "\n",
             encoding="utf-8",
-        )
-        _console.print(
-            f"[bold]kurrent-read[/bold] {plan.n_records:,} German records → {plan.n_pages:,} pages "
-            f"(census {plan.n_pages_census:,}, resolver {plan.n_pages_resolver:,}), "
-            f"{plan.n_lines:,} recognised lines; reader {reader}; device {K.pick_device(device)}"
         )
         cand = K.CANDIDATES[reader]
         dev = K.pick_device(device)

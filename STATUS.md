@@ -1071,7 +1071,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ⏳ Task 3
+### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ⏳ the operator's go for the reading job
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1256,6 +1256,72 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the mixed ones, a difference of 19.9 points on two letters — a sign, not
   a measure; the per-line choice is Open question 31. Tests **1,036 passed,
   1 skipped** in `.venv-w3`, ruff clean.
+- **Task 3, the reading — the pilot, CHECKPOINT C** (`leibniz align
+  kurrent-read --pages <list> [--narrow-px N]`: a plan over any page list,
+  the crops narrower than N px counted first; `kurrent_pilot.page_lines`
+  now takes the current *unscoped* row of each line, so a resumed or
+  repeated job after Task 4 reads the v1 geometry and never the Kurrent
+  run's own rows; `count_lines_on` counts a line once however many rows it
+  has; +2 tests. `pipeline/import_readings.py` and `leibniz pipeline
+  import-readings` (Task 4's writer: one scoped run beside v1, the v1 row's
+  geometry copied, an empty reading writes no row, a dry run by default,
+  idempotent, resumable by page; +4 tests) are built and tested on
+  fixtures; nothing written. The readings live on D: behind
+  `data/kurrent/k4-readings` → `/mnt/d/leibniz-train/k4/readings/`, the logs
+  under `/mnt/d/leibniz-train/k4/logs/` (`logs/k4-read.log` a symlink).
+  Tests **1,042 passed, 1 skipped** in `.venv-w3`, **1,052 passed, 1
+  skipped** in `.venv-k1`, ruff clean.) *The list:* the German pages
+  without the Marginalien (the proposal of Checkpoint A, the operator's
+  answer pending): **24,078 pages, 1,539,721 lines** the job reads (every v1
+  row with a text, the 122,533 read as empty included — a Kurrent reader may
+  read what v1 could not; 1,417,188 carry text), every page's image in the
+  cache; the full list with the Marginalien 30,797 pages, 1,846,897 lines.
+  *The crops under 80 px* (the amendment): **252,286 of the 1,539,721 lines
+  (16.4 %)**, the polygon's box measured before padding — on the letter pool
+  the same measure gives 3,172 of 18,445 (K3 counted 2,517 on the padded
+  crop). *What READER does on them:* on the pool's 3,172 narrow crops
+  k3-trocr returned a reading on 3,171 (one empty), a single character on
+  2,422 (`e` 741, `n` 234, `d` 190, `h` 175 …), two on 576; v1 on the same
+  crops: empty 1,284, one character 1,325, two 423, three or more 140; the
+  two agree on 275. In the pilot's sample (below) 224 of the 2,000 lines are
+  narrow: READER read all of them, 175 as one character; v1 85 empty, 92 one
+  character. On the wide crops READER read every line (v1 left 19 empty) at
+  36.2 characters a line against v1's 36.8. **The pilot** (the amendment's
+  2,000 lines: `--sweep --sweep-batches 16 --sweep-kv on`, a sample of 28
+  pages spread over the list, under `systemd-run --user --scope -p
+  MemoryMax=6G`, `/usr/bin/time -v` and the guard; the log
+  `k4-pilot.log`, the guard's record `k4-pilot-guard.csv`): **2,000 lines in
+  250.5 s — 7.98 lines/s, 125.3 ms a line all-in** (243.6 s in the engine;
+  the pace rose from 350 ms a line over the first three pages, the model's
+  load and warm-up, to 125 over the whole; K3 measured 152 ms on the pool's
+  crops); **host memory 2,291,072 KB at peak (2.19 GB) under the 6 GB
+  scope**, the host never under 7,493 MiB available; the card: torch's
+  reserved peak 4,564 MiB, nvidia-smi's 5,697 MiB with Xwayland's 1,041 —
+  203 MiB under the guard's 5,900 limit, so the job runs with
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` against fragmentation
+  and, if the guard ends it, resumes by page; GPU utilisation a mean 4 %
+  (the decoder's cache makes each step a small kernel; the card is
+  latency-bound, not full); wall 7 min 38 s with the narrow-crop count
+  (about three minutes) and the load. The guard's first pattern
+  (`kurrent-read --pages`) matched nothing because `--db` precedes `--pages`
+  on the command line; it was restarted two minutes in as
+  `[k]urrent-read --db`, which the job uses. The sweep's 2,000 readings sit
+  in `readings/sweep/` and do not count towards the job. **The figure for
+  the go: at the pilot's 125.3 ms a line the 1,539,721 lines take 53.6 h —
+  two days and six hours; with the Marginalien (1,846,897 lines) 64.3 h,
+  two days and sixteen hours.** Disk: the readings about 174 bytes a line
+  (the sweep's file), 268 MB on D: for the job; the logs on D:; nothing on
+  C: (30 GB free, down from 33 at Task 0). The launch script
+  `/mnt/d/leibniz-train/k4/logs/run-read.sh`: the job under the scope with
+  `--log-every 600`, the guard at 5,900 MiB on the card and a host floor of
+  2,500 MiB sampling every 5 s, one torch process, nothing else of the
+  session's beside it. **Asked of the operator at this checkpoint:** the
+  go for the job (about 54 hours; or 64 with the Marginalien), and for
+  Task 4 whether READER's one-character readings on the 252,286 crops under
+  80 px go into the store (the amendment writes every non-empty reading;
+  the session would rather write no row for a crop under 80 px, so those
+  lines keep v1's row — a rule the importer can apply, recorded with its
+  count).
 - **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
   (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
   recognised page's text under the current rule classified with

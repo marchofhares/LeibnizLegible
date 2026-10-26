@@ -6,6 +6,9 @@ Subcommands:
   storing line geometry + per-page segmentation stats.
 * ``leibniz pipeline recognize`` — recognise segmented pages (segmented →
   recognized), filling line text + confidence.
+* ``leibniz pipeline import-readings`` — a Kurrent reader's readings (K2's JSONL)
+  into ``lines`` as one scoped recognition run beside v1 (K4 Task 4); a dry run
+  unless ``--write``.
 * ``leibniz pipeline status``    — print the corpus status histogram + per-set.
 * ``leibniz pipeline report``    — (re)write ``reports/htr-v1-sample.md`` from the
   store.
@@ -320,3 +323,65 @@ def report(
 
 
 __all__ = ["app"]
+
+
+@app.command("import-readings")
+def import_readings_cmd(
+    db_path: Path = typer.Option(
+        db.DEFAULT_DB_PATH, "--db", help="The store (written with --write)."
+    ),
+    readings: Path = typer.Option(..., "--readings", help="The reader's JSONL (kurrent-read)."),
+    pages: Path = typer.Option(..., "--pages", help="The page list, one id a line."),
+    model: str = typer.Option(..., "--model", help="The run's model, name@version."),
+    reader: str = typer.Option(..., "--reader", help="The reader key (CANDIDATES)."),
+    scope: str = typer.Option("de", "--scope", help="The run's language scope."),
+    write: bool = typer.Option(False, "--write", help="Write the rows; a dry run otherwise."),
+    note: str = typer.Option(None, "--note", help="A sentence for the run's params."),
+    summary_out: Path = typer.Option(
+        None, "--summary", help="Write the counts as JSON here (the STATUS entry's numbers)."
+    ),
+) -> None:
+    """A reader's readings into the store as one scoped run beside v1 (K4 Task 4)."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.kurrent_read import read_page_list
+    from leibniz.pipeline import import_readings as I
+
+    ids = read_page_list(pages)
+    # the dry run opens the store read-only; --write opens it read-write, which also
+    # brings the schema forward (runs.scope, page_lang) on a store from before K4
+    conn = db.init_db(db_path) if write else open_readonly(db_path)
+    try:
+        stats = I.import_readings(
+            conn,
+            readings_path=readings,
+            page_ids=ids,
+            model=model,
+            scope=scope,
+            reader=reader,
+            write=write,
+            git_sha=db.git_sha(),
+            note=note,
+            progress=lambda st: console.print(
+                f"  {st.pages_written + st.pages_done_before + st.pages_without_readings:,} "
+                f"pages, {st.rows_written:,} rows"
+            ),
+        )
+        after = I.rows_under_run(conn, stats.run_id) if stats.run_id is not None else None
+    finally:
+        conn.close()
+    console.print(f"[bold]import-readings[/bold] {'WRITE' if write else 'dry run'}: {readings}")
+    for line in I.summary_lines(stats):
+        console.print("  " + line)
+    size = I.store_size(db_path)
+    if after is not None:
+        console.print(f"  under run {stats.run_id} now: {after[0]:,} pages, {after[1]:,} rows")
+    console.print(f"  store {size['db']:,} bytes, WAL {size['wal']:,} bytes")
+    if summary_out is not None:
+        summary_out.parent.mkdir(parents=True, exist_ok=True)
+        summary_out.write_text(
+            json.dumps({**stats.as_dict(), "under_run": after, "store": size}, indent=1) + "\n",
+            encoding="utf-8",
+        )
+        console.print(f"  wrote {summary_out}")

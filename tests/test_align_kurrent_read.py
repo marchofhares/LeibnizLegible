@@ -433,3 +433,75 @@ def test_cli_kurrent_read_with_echo_then_report(tmp_path: Path) -> None:
     assert "None" not in text
     js = json.loads((tmp_path / "reports" / "k2-read.json").read_text(encoding="utf-8"))
     assert js["plan"]["n_pages"] == 3 and "pages" not in js["plan"]  # ids stay out of the report
+
+
+def test_plan_from_list_narrow_crops_and_unscoped_rows(tmp_path: Path, german_store_path) -> None:
+    from tests.conftest import W3, W4
+
+    listing = tmp_path / "pages.txt"
+    listing.write_text(f"# the German pages\n{W3}:0001\n\n{W4}:0001\n{W3}:0001\n", encoding="utf-8")
+    ids = R.read_page_list(listing)
+    assert ids == [f"{W3}:0001", f"{W4}:0001", f"{W3}:0001"]
+    conn = open_readonly(german_store_path)
+    plan = R.plan_from_list(conn, ids)
+    assert plan.pages == [f"{W3}:0001", f"{W4}:0001"]  # once each, the list's order
+    assert plan.n_records == 0 and plan.n_lines == 6
+    assert plan.as_dict()["n_pages"] == 2
+    assert R.crop_width([[10, 0], [50, 0], [50, 9], [10, 9]], None) == 40
+    assert R.crop_width(None, [[3, 1], [103, 1]]) == 100
+    assert R.crop_width(None, None) is None
+    narrow, total = R.narrow_crops(conn, plan.pages, max_width=2000)
+    assert total == 6 and 0 < narrow <= 6
+    assert R.narrow_crops(conn, plan.pages, max_width=1)[0] == 0
+    conn.close()
+    # a scoped run's rows on a page are not what the job reads (K4): the unscoped row is
+    conn = db.connect(german_store_path)
+    de = db.start_run(conn, "recognize", model="k3-trocr@x", scope="de")
+    conn.execute(
+        "INSERT INTO lines (line_id, page_id, line_seq, text, conf, model, run_id, status, lang) "
+        "VALUES (?, ?, 0, 'Jch habe', 0.9, 'k3', ?, 'machine', 'de')",
+        (db.line_id(f"{W3}:0001", 0), f"{W3}:0001", de),
+    )
+    conn.commit()
+    from leibniz.align.kurrent_pilot import page_lines
+
+    lines = page_lines(conn, f"{W3}:0001")
+    assert [ln.line_seq for ln in lines] == [0, 1, 2, 3, 4]
+    assert lines[0].v1_text == "Ich habe Ew. Excellenz schreiben" and lines[0].polygon
+    conn.close()
+
+
+def test_cli_kurrent_read_with_a_page_list(tmp_path: Path, german_store_path) -> None:
+    from tests.conftest import W3
+
+    listing = tmp_path / "pages.txt"
+    listing.write_text(f"{W3}:0001\n{W3}:0002\n", encoding="utf-8")
+    readings = tmp_path / "readings"
+    res = CliRunner().invoke(
+        app,
+        [
+            "align",
+            "kurrent-read",
+            "--db",
+            str(german_store_path),
+            "--pages",
+            str(listing),
+            "--narrow-px",
+            "80",
+            "--reader",
+            "echo",
+            "--device",
+            "cpu",
+            "--images",
+            str(tmp_path / "no-images"),
+            "--readings-dir",
+            str(readings),
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert "2 pages from" in res.output and "crops under 80 px" in res.output
+    plan = json.loads((readings / "plan.json").read_text(encoding="utf-8"))
+    assert plan["pages"] == [f"{W3}:0001", f"{W3}:0002"] and plan["pages_file"].endswith(
+        "pages.txt"
+    )
+    assert plan["n_lines"] == 10 and plan["n_records"] == 0
