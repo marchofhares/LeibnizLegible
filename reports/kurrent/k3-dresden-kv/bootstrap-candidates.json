@@ -1,0 +1,310 @@
+{
+ "generated": "2026-10-26",
+ "package_dir": "data/external/kurrent-trace/Kurrent-Trace-v0.1",
+ "n_lines": 383,
+ "n_pages": 20,
+ "device": "cuda",
+ "cuda": true,
+ "package_info": {
+  "name": "Kurrent Trace",
+  "version": "0.1.0",
+  "date": "2026-09-30",
+  "newness": "New derivative audit package and Leibniz review selections; no newly adjudicated human transcriptions",
+  "published_gt_lines": 383,
+  "published_gt_pages": 20,
+  "published_gt_unicode_codepoints": 12396,
+  "published_gt_whitespace_tokens": 1917,
+  "leibniz_candidate_segments": 180,
+  "leibniz_pages": 2,
+  "catalogue_reference_snippets": 2,
+  "new_human_adjudicated_lines": 0,
+  "train_validation_test_split": null,
+  "split_reason": "Only one published-GT manuscript; writer separation and prior training exposure unknown.",
+  "source_license_conflict": "Dresden README/description: CC BY-NC-SA 4.0; API metadata: CC BY 4.0. More restrictive terms applied.",
+  "per_gt_page": [
+   {
+    "page_id": "dresden1673-0001_00000007",
+    "lines": 13,
+    "characters": 522
+   },
+   {
+    "page_id": "dresden1673-0002_00000008",
+    "lines": 21,
+    "characters": 867
+   },
+   {
+    "page_id": "dresden1673-0003_00000009",
+    "lines": 20,
+    "characters": 675
+   },
+   {
+    "page_id": "dresden1673-0004_00000010",
+    "lines": 11,
+    "characters": 365
+   },
+   {
+    "page_id": "dresden1673-0005_00000011",
+    "lines": 15,
+    "characters": 580
+   },
+   {
+    "page_id": "dresden1673-0006_00000012",
+    "lines": 20,
+    "characters": 684
+   },
+   {
+    "page_id": "dresden1673-0007_00000013",
+    "lines": 22,
+    "characters": 679
+   },
+   {
+    "page_id": "dresden1673-0008_00000014",
+    "lines": 24,
+    "characters": 763
+   },
+   {
+    "page_id": "dresden1673-0009_00000015",
+    "lines": 24,
+    "characters": 677
+   },
+   {
+    "page_id": "dresden1673-0010_00000016",
+    "lines": 16,
+    "characters": 602
+   },
+   {
+    "page_id": "dresden1673-0033_00000039",
+    "lines": 26,
+    "characters": 593
+   },
+   {
+    "page_id": "dresden1673-0041_00000047",
+    "lines": 17,
+    "characters": 629
+   },
+   {
+    "page_id": "dresden1673-0042_00000048",
+    "lines": 21,
+    "characters": 627
+   },
+   {
+    "page_id": "dresden1673-0043_00000049",
+    "lines": 21,
+    "characters": 722
+   },
+   {
+    "page_id": "dresden1673-0045_00000051",
+    "lines": 15,
+    "characters": 418
+   },
+   {
+    "page_id": "dresden1673-0076_00000082",
+    "lines": 25,
+    "characters": 839
+   },
+   {
+    "page_id": "dresden1673-0102_00000108",
+    "lines": 15,
+    "characters": 449
+   },
+   {
+    "page_id": "dresden1673-0103_00000109",
+    "lines": 24,
+    "characters": 740
+   },
+   {
+    "page_id": "dresden1673-0104_00000110",
+    "lines": 11,
+    "characters": 281
+   },
+   {
+    "page_id": "dresden1673-0105_00000111",
+    "lines": 22,
+    "characters": 684
+   }
+  ],
+  "gt_quality_flag_counts": {
+   "source_edge_whitespace": 16,
+   "source_nonbreaking_space": 17
+  }
+ },
+ "results": [
+  {
+   "key": "k3-trocr",
+   "kind": "trocr",
+   "source": "data/models/k3/trocr/best",
+   "licence": "MIT (the base) · the fine-tune open",
+   "origin": "K3: dh-unibe/trocr-kurrent-XVI-XVII fine-tuned on K2's German mint (runs row 615)",
+   "note": "the whole model, Adafactor with gradient checkpointing, six epochs, the best on the frozen validation set",
+   "engine_name": "trocr",
+   "engine_version": "data/models/k3/trocr/best",
+   "device": "cuda:0",
+   "n_lines": 383,
+   "seconds": 58.387828894999984,
+   "cached": false,
+   "status": "ok",
+   "n_empty": 0,
+   "mean_conf": 0.9082705432442255,
+   "scores": {
+    "philiumm": {
+     "cer": 0.11929543634907927,
+     "cer_lo": 0.10701077343624377,
+     "cer_hi": 0.13112947658402205,
+     "wer": 0.4668753260302556,
+     "wer_lo": 0.43829113924050633,
+     "wer_hi": 0.49389920424403183,
+     "macro_cer": 0.13041713664198398
+    },
+    "lenient": {
+     "cer": 0.0918958031837916,
+     "cer_lo": 0.08031237155774763,
+     "cer_hi": 0.10394555618569229,
+     "wer": 0.3557642149191445,
+     "wer_lo": 0.3267223382045929,
+     "wer_hi": 0.38372093023255816,
+     "macro_cer": 0.10365563811425393
+    },
+    "strict": {
+     "cer": 0.12011308562197093,
+     "cer_lo": 0.10788213329003978,
+     "cer_hi": 0.1321037282257429,
+     "wer": 0.4668753260302556,
+     "wer_lo": 0.43829113924050633,
+     "wer_hi": 0.49389920424403183,
+     "macro_cer": 0.13127881335262245
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.1212487899322362,
+     "wer": 0.4668753260302556,
+     "exact_lines": 30,
+     "character_edits": 1503,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.10436187399030694,
+     "wer": 0.40375586854460094,
+     "exact_lines": 51,
+     "character_edits": 1292,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 1503,
+      "reference_characters": 12396,
+      "cer": 0.1212487899322362,
+      "word_edits": 895,
+      "reference_words": 1917,
+      "wer": 0.4668753260302556,
+      "exact_lines": 30
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 1292,
+      "reference_characters": 12380,
+      "cer": 0.10436187399030694,
+      "word_edits": 774,
+      "reference_words": 1917,
+      "wer": 0.40375586854460094,
+      "exact_lines": 51
+     }
+    }
+   },
+   "ms_per_line": 152.4486394125326
+  },
+  {
+   "key": "k3-kraken",
+   "kind": "kraken",
+   "source": "data/models/k3/kraken/best.safetensors",
+   "licence": "CC BY 4.0 (the base) · the fine-tune open",
+   "origin": "K3: FoNDUE-GD_v2_ft_Leibniz fine-tuned on K2's German mint, the codec grown (runs row 614)",
+   "note": "ketos from the PHILIUMM checkpoint, 37 epochs, stopped after checkpoint 36",
+   "engine_name": "kraken",
+   "engine_version": "k3-kraken",
+   "device": "cuda",
+   "n_lines": 383,
+   "seconds": 29.18277152600001,
+   "cached": false,
+   "status": "ok",
+   "n_empty": 1,
+   "mean_conf": 0.9057696978478222,
+   "scores": {
+    "philiumm": {
+     "cer": 0.13202562049639713,
+     "cer_lo": 0.12116277176125723,
+     "cer_hi": 0.14275408784866944,
+     "wer": 0.5534689619196661,
+     "wer_lo": 0.5272822665267576,
+     "wer_hi": 0.580042689434365,
+     "macro_cer": 0.1435486613882794
+    },
+    "lenient": {
+     "cer": 0.10395561987457791,
+     "cer_lo": 0.09343099820774566,
+     "cer_hi": 0.11463987685327716,
+     "wer": 0.4590505998956703,
+     "wer_lo": 0.43213572854291415,
+     "wer_hi": 0.48740359897172236,
+     "macro_cer": 0.11632069382219244
+    },
+    "strict": {
+     "cer": 0.1323101777059774,
+     "cer_lo": 0.1216006216006216,
+     "cer_hi": 0.14279875756089586,
+     "wer": 0.5534689619196661,
+     "wer_lo": 0.5272822665267576,
+     "wer_hi": 0.580042689434365,
+     "macro_cer": 0.14386268409471256
+    }
+   },
+   "package": {
+    "strict_nfc": {
+     "cer": 0.13310745401742496,
+     "wer": 0.5534689619196661,
+     "exact_lines": 18,
+     "character_edits": 1650,
+     "reference_characters": 12396
+    },
+    "reading_long_s_and_whitespace": {
+     "cer": 0.1161550888529887,
+     "wer": 0.5049556598852374,
+     "exact_lines": 27,
+     "character_edits": 1438,
+     "reference_characters": 12380
+    }
+   },
+   "package_script": {
+    "reference_scope": "source-published GT, not an unseen test set",
+    "lines": 383,
+    "missing_scored_as_empty": 0,
+    "scores": {
+     "strict_nfc": {
+      "character_edits": 1650,
+      "reference_characters": 12396,
+      "cer": 0.13310745401742496,
+      "word_edits": 1061,
+      "reference_words": 1917,
+      "wer": 0.5534689619196661,
+      "exact_lines": 18
+     },
+     "reading_long_s_and_whitespace": {
+      "character_edits": 1438,
+      "reference_characters": 12380,
+      "cer": 0.1161550888529887,
+      "word_edits": 968,
+      "reference_words": 1917,
+      "wer": 0.5049556598852374,
+      "exact_lines": 27
+     }
+    }
+   },
+   "ms_per_line": 76.19522591644912
+  }
+ ],
+ "vision": null
+}

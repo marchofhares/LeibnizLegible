@@ -12,6 +12,18 @@ Subcommands:
   ``reports/philiumm-repro.md`` and the STATUS.md gate verdict.
 * ``leibniz bench kurrent-smoke`` — the Kurrent bootstrap readers ranked on the
   Dresden lines of the Kurrent Trace package (K1 Task 3).
+* ``leibniz bench train-set`` — the training set of a fine-tune (K3; C3 reuses
+  it): the minted lines selected, tagged, screened, split into a frozen
+  page-disjoint validation set and training, and cut into Kraken's
+  image + ``.gt.txt`` format (``htr/trainset.py``).
+* ``leibniz bench train-trocr`` — fine-tune a TrOCR checkpoint on it: the
+  timing pilot over the memory settings (``--pilot``), or the staged,
+  resumable training with checkpoints chosen on the validation set
+  (``htr/train_trocr.py``).
+* ``leibniz bench train-kraken`` — the same for a kraken model through
+  ``ketos train`` (``htr/train_kraken.py``): the command printed and started
+  in the background, its checkpoints read back, the best weights scored
+  with the project's metric.
 
 The kraken + torch stack is an optional dependency, imported lazily; ``fetch``,
 ``protocol`` and the metrics/harness all work without it.
@@ -548,6 +560,657 @@ def _record_run(db_path: Path, model_version: str, result: bench.EvalResult) -> 
     )
     db.finish_run(conn, run_id, n_input=result.n_lines, n_ok=result.n_lines, n_failed=0)
     conn.close()
+
+
+# --------------------------------------------------------------------------- #
+# train-set (K3 Task 1; C3 reuses it)
+# --------------------------------------------------------------------------- #
+
+
+@app.command("train-set")
+def train_set(
+    db_path: str = typer.Option(
+        "data/inventory.sqlite", "--db", help="SQLite store (opened read-only)."
+    ),
+    records: Path | None = typer.Option(
+        None,
+        "--records",
+        help="JSONL or CSV naming the records whose rows are taken (``record_id`` per row); "
+        "default: the K1 census's German pieces. ``--all`` takes every open-bucket row.",
+    ),
+    take_all: bool = typer.Option(False, "--all", help="Every open-bucket row (C3)."),
+    name: str = typer.Option("k3", "--name", help="The set's name (reports and the output dir)."),
+    out: Path | None = typer.Option(None, "--out", help="Output root; default data/train/<name>."),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    readings: list[str] = typer.Option(
+        None,
+        "--readings",
+        help="``reader=path`` of a reader's JSONL, for the screen's ratio on its rows "
+        "(repeatable); default: K2's trocr-kurrent-xvi-xvii readings.",
+    ),
+    flags: Path = typer.Option(
+        Path("data/gt/flags.jsonl"), "--flags", help="The reach census's flags (v1 rows)."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="PHILIUMM's held-out pages."
+    ),
+    pool: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--pool", help="The letter pool's set."
+    ),
+    audit: list[Path] = typer.Option(
+        None,
+        "--audit",
+        help="CSV of judged lines (a ``ref`` column) kept out of training (repeatable); "
+        "default: K2's audit sheet and the PHILIUMM verdicts.",
+    ),
+    val_pieces: Path | None = typer.Option(
+        None,
+        "--val-pieces",
+        help="The frozen validation pieces (reused when present); default "
+        "reports/kurrent/<name>-val-pieces.csv.",
+    ),
+    redraw: bool = typer.Option(False, "--redraw", help="Ignore a frozen validation file."),
+    val_share: float = typer.Option(0.05, "--val-share", help="Validation share of the lines."),
+    seed: int = typer.Option(20261021, "--seed", help="The draw's seed."),
+    sample: int | None = typer.Option(
+        None,
+        "--sample",
+        help="Cut only a seeded sample of N lines into <out>/sample/ and project the disk; "
+        "the validation pieces are drawn and frozen, no manifest is written.",
+    ),
+    no_crops: bool = typer.Option(False, "--no-crops", help="Manifest and report only."),
+    workers: int = typer.Option(0, "--workers", help="Process workers for the crops (0: inline)."),
+    reports_dir: Path = typer.Option(
+        Path("reports/kurrent"), "--reports-dir", help="Where the report and the JSON go."
+    ),
+) -> None:
+    """Build the training set of a fine-tune from the minted lines (K3 Task 1)."""
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import trainset as T
+
+    out_root = out or Path("data/train") / name
+    rec_ids = None if take_all else T.read_record_ids(records or T.DEFAULT_RECORDS)
+    specs = readings or [f"trocr-kurrent-xvi-xvii={T.DEFAULT_READINGS}"]
+    reader_texts: dict[str, dict[str, str]] = {}
+    for spec in specs:
+        key, _, path = spec.partition("=")
+        if not path:
+            raise typer.BadParameter(f"--readings wants reader=path, got {spec!r}")
+        reader_texts[key.strip()] = T.load_readings_text(path.strip())
+    vp = val_pieces or reports_dir / f"{name}-val-pieces.csv"
+    conn = open_readonly(db_path)
+    try:
+        ts = T.build(
+            conn,
+            record_ids=rec_ids,
+            readings=reader_texts,
+            flags=T.load_flags(flags),
+            heldout=T.pages_from_csv(heldout),
+            pool=T.pages_from_csv(pool),
+            audit=T.refs_from_csvs(audit or T.DEFAULT_AUDITS),
+            val_pieces=None if redraw else vp,
+            share=val_share,
+            seed=seed,
+            name=name,
+            log=lambda m: console.print(f"  {m}"),
+        )
+        s = T.summarize(ts)
+        console.print(
+            f"[bold]train-set[/bold] {s['selection']['rows']:,} rows on "
+            f"{s['selection']['records']:,} records; excluded {s['exclusions']['total']:,} "
+            f"({', '.join(f'{k} {v:,}' for k, v in s['exclusions']['by_reason'].items())}); "
+            f"kept {s['kept']['lines']:,} — train {s['splits']['train']['lines']:,}, "
+            f"val {s['splits']['val']['lines']:,} "
+            f"({'frozen' if ts.val_frozen else f'drawn, seed {seed}'}); pages on both sides "
+            f"{s['pages_shared_between_splits']}"
+        )
+        b = ts.band
+        console.print(
+            f"  screen: band ratio {b.ratio_lo:.2f}–{b.ratio_hi:.2f} "
+            f"(median {b.ratio_median:.2f}), conf ≥ {b.conf_lo:.3f}, "
+            f"from {b.n:,} Latin and French v1 rows"
+        )
+        for g, v in ts.screen["by_group"].items():
+            share = v["outside_share"]
+            console.print(
+                f"    {g}: {v['n']:,} lines, {v['outside']:,} outside "
+                f"({'—' if share is None else f'{100 * share:.1f} %'}): "
+                + ", ".join(f"{k} {n:,}" for k, n in v["outside_by"].items())
+            )
+        if ts.screen["stop"]:
+            console.print(
+                "  [red]STOP:[/red] more than one Leibniz-hand line in ten falls outside the band"
+            )
+        if sample:
+            ts.estimate = T.estimate_disk(
+                conn,
+                ts.lines,
+                n=sample,
+                images_root=images,
+                out_root=out_root / "sample",
+                seed=seed,
+                workers=workers,
+            )
+            e = ts.estimate
+            per = e["bytes_per_line"]
+            proj = e["projected_bytes"]
+            kb = "—" if per is None else f"{per / 1024:.1f} KB"
+            gb = "—" if proj is None else f"{proj / 1e9:.2f} GB"
+            console.print(
+                f"  sample: {e['cut']:,} of {e['sampled']:,} cut, {kb} a line; projected {gb} "
+                f"for {e['kept_lines']:,} lines"
+            )
+        elif not no_crops:
+            jobs = T.crop_jobs(conn, ts.lines, images, out_root)
+            console.print(f"  cutting {len(jobs):,} pages into {out_root} ({workers} workers)")
+            ts.crops = T.cut_crops(jobs, ts.lines, workers=workers, log=lambda m: console.print(m))
+            console.print(f"  crops: {ts.crops['by_status']} · {ts.crops['bytes'] / 1e9:.2f} GB")
+    finally:
+        conn.close()
+    if sample:
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        s = T.summarize(ts)
+        (reports_dir / f"{name}-trainset.md").write_text(T.render_report(s), encoding="utf-8")
+        (reports_dir / f"{name}-trainset.json").write_text(
+            json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8"
+        )
+        if not ts.val_frozen:
+            T.write_val_pieces(vp, ts.lines)
+        console.print(
+            f"  wrote {reports_dir / f'{name}-trainset.md'} and the validation pieces {vp}"
+        )
+        return
+    paths = T.write_outputs(ts, out_root=out_root, reports_dir=reports_dir, val_pieces=vp)
+    for k, p in paths.items():
+        console.print(f"  wrote {k}: {p}")
+
+
+# --------------------------------------------------------------------------- #
+# train-trocr / train-kraken (K3 Tasks 2 and 3)
+# --------------------------------------------------------------------------- #
+
+
+def _record_training_run(
+    db_path: str, stage: str, model: str, params: dict, *, n_input: int
+) -> int | None:
+    """One runs row for a training (the only write K3 makes to the store); ``None``
+    when no store is given."""
+    if not db_path:
+        return None
+    conn = db.init_db(db_path)
+    try:
+        run_id = db.start_run(conn, stage, model=model, params=params, git_sha=db.git_sha())
+        conn.commit()
+    finally:
+        conn.close()
+    console.print(f"  runs row {run_id} opened ({stage}, {model})")
+    return run_id
+
+
+def _finish_training_run(db_path: str, run_id: int | None, *, n_input: int, n_ok: int) -> None:
+    if not db_path or run_id is None:
+        return
+    conn = db.init_db(db_path)
+    try:
+        db.finish_run(conn, run_id, n_input=n_input, n_ok=n_ok, n_failed=0)
+        conn.commit()
+    finally:
+        conn.close()
+    console.print(f"  runs row {run_id} finished")
+
+
+@app.command("train-trocr")
+def train_trocr(
+    base: str = typer.Option(
+        "dh-unibe/trocr-kurrent-XVI-XVII", "--base", help="Hub id or local checkpoint directory."
+    ),
+    train_root: Path = typer.Option(
+        Path("data/train/k3"), "--train-root", help="The training set (train.txt, val.txt)."
+    ),
+    out: Path = typer.Option(Path("data/models/k3/trocr"), "--out", help="Artefacts root."),
+    pilot: bool = typer.Option(False, "--pilot", help="Time the settings on a bounded run."),
+    pilot_lines: int = typer.Option(20_000, "--pilot-lines", help="Lines per pilot setting."),
+    settings_keys: str = typer.Option(
+        None,
+        "--settings",
+        help="Comma-separated setting keys to run (pilot: default every PILOT_SETTINGS row; "
+        "training: one key, default adafactor-b8).",
+    ),
+    pilot_val: bool = typer.Option(
+        True, "--pilot-val/--no-pilot-val", help="Score the validation set after each pilot run."
+    ),
+    pilot_save: bool = typer.Option(
+        False, "--pilot-save", help="Keep each pilot's weights under <out>/<setting>/."
+    ),
+    val_limit: int | None = typer.Option(
+        None, "--val-limit", help="Score only the first N validation lines (pilot)."
+    ),
+    epochs: int = typer.Option(6, "--epochs", help="Epochs of the full training."),
+    plan_epochs: float = typer.Option(6.0, "--plan-epochs", help="Epochs the pilot projects."),
+    batch_size: int | None = typer.Option(None, "--batch-size", help="Override the batch size."),
+    lr: float | None = typer.Option(None, "--lr", help="Override the learning rate."),
+    accumulate: int | None = typer.Option(None, "--accumulate", help="Gradient accumulation."),
+    drop_screen: bool = typer.Option(
+        False, "--drop-screen", help="The ablation: leave out the lines the screen flagged."
+    ),
+    device: str = typer.Option("auto", "--device", help="auto | cpu | cuda | cuda:N."),
+    seed: int = typer.Option(20261021, "--seed", help="The epoch order's seed."),
+    patience: int = typer.Option(3, "--patience", help="Epochs without gain before stopping."),
+    db_path: str = typer.Option(
+        "", "--db", help="Store for the runs row of a full training (none by default)."
+    ),
+    log_path: Path | None = typer.Option(None, "--log", help="Append the loop's lines here."),
+    max_mib: int | None = typer.Option(
+        4000,
+        "--max-mib",
+        help="The allocator refuses memory past this (an in-process out-of-memory error, so a "
+        "pilot setting fails on its own; WSL2 would spill past the card into host memory "
+        "instead); 0 disables.",
+    ),
+) -> None:
+    """Fine-tune a TrOCR checkpoint on the training set (K3 Task 2a pilot / Task 3)."""
+    from leibniz.htr import kurrent as K
+    from leibniz.htr import train_trocr as T
+
+    dev = K.pick_device(device)
+    limit = max_mib or None
+    train = T.read_list(train_root / "train.txt")
+    val = T.read_list(train_root / "val.txt")
+    if drop_screen:
+        manifest = _read_manifest_rows(train_root / "manifest.jsonl")
+        before = len(train)
+        train = T.stage_samples(train, manifest, drop_screen=True)
+        console.print(f"  ablation: {before - len(train):,} screened lines left out")
+    if val_limit:
+        val = val[:val_limit]
+    console.print(
+        f"[bold]train-trocr[/bold] base {base}; {len(train):,} training lines, {len(val):,} "
+        f"validation lines; device {dev}"
+    )
+
+    def _log(msg: str) -> None:
+        console.print(f"  {msg}")
+        if log_path:
+            with Path(log_path).open("a", encoding="utf-8") as fh:
+                fh.write(msg + "\n")
+
+    def _override(s: T.Settings) -> T.Settings:
+        kw = {}
+        if batch_size:
+            kw["batch_size"] = batch_size
+        if lr:
+            kw["lr"] = lr
+        if accumulate:
+            kw["accumulate"] = accumulate
+        return T.Settings(**{**s.as_dict_plain(), **kw}) if kw else s
+
+    all_settings = {s.key: s for s in T.PILOT_SETTINGS}
+    if pilot:
+        keys = (
+            [k.strip() for k in settings_keys.split(",") if k.strip()]
+            if settings_keys
+            else list(all_settings)
+        )
+        unknown = [k for k in keys if k not in all_settings]
+        if unknown:
+            raise typer.BadParameter(f"unknown settings {unknown}; known: {sorted(all_settings)}")
+        rows = []
+        out.mkdir(parents=True, exist_ok=True)
+        pilot_path = out / "pilot.json"
+        for key in keys:
+            s = _override(all_settings[key])
+            _log(f"pilot {s.key}: up to {pilot_lines:,} lines")
+            row = T.pilot_setting(
+                base,
+                s,
+                train,
+                device=dev,
+                max_lines=pilot_lines,
+                val=val if pilot_val else None,
+                log=_log,
+                plan_lines=len(train),
+                plan_epochs=plan_epochs,
+                memory_limit_mib=limit,
+                save_to=(out / s.key) if pilot_save else None,
+            )
+            rows.append(row)
+            v = row.val or {}
+            _log(
+                f"pilot {s.key}: {row.status}; {row.lines:,} lines in {row.seconds:.0f} s "
+                f"({row.lines_per_s or 0:.2f} lines/s), peak {row.peak_mib} MiB"
+                + (f"; val CER {100 * v['cer']:.2f} %" if v.get("cer") is not None else "")
+                + (
+                    f"; projected {row.projection['days']:.1f} days for {plan_epochs:g} epochs"
+                    if row.projection and row.projection.get("days") is not None
+                    else ""
+                )
+            )
+            T.write_pilot(
+                pilot_path,
+                rows,
+                {
+                    "base": base,
+                    "device": dev,
+                    "pilot_lines": pilot_lines,
+                    "train_lines": len(train),
+                    "val_lines": len(val),
+                    "plan_epochs": plan_epochs,
+                },
+            )
+        console.print(f"  wrote {pilot_path}")
+        return
+    key = settings_keys or "adafactor-b8"
+    if key not in all_settings:
+        raise typer.BadParameter(f"unknown settings {key!r}; known: {sorted(all_settings)}")
+    s = _override(all_settings[key])
+    params = {
+        "base": base,
+        "settings": s.as_dict(),
+        "epochs": epochs,
+        "train_lines": len(train),
+        "val_lines": len(val),
+        "drop_screen": drop_screen,
+        "seed": seed,
+    }
+    run_id = _record_training_run(
+        db_path, "htr_train", f"trocr-k3@{base}", params, n_input=len(train)
+    )
+    state = T.train(
+        base,
+        out,
+        train_samples=train,
+        val_samples=val,
+        settings=s,
+        device=dev,
+        epochs=epochs,
+        seed=seed,
+        log=_log,
+        patience=patience,
+        memory_limit_mib=limit,
+    )
+    _finish_training_run(db_path, run_id, n_input=len(train), n_ok=len(train))
+    best = T.choose_best(state.history)
+    console.print(
+        f"  done: best epoch {best['epoch'] if best else '—'}, val CER {100 * best['cer']:.2f} %"
+        if best
+        else "  done: no epoch finished"
+    )
+
+
+def _read_manifest_rows(path: Path) -> list[dict]:
+    rows: list[dict] = []
+    with Path(path).open(encoding="utf-8") as fh:
+        for raw in fh:
+            if raw.strip():
+                rows.append(json.loads(raw))
+    return rows
+
+
+@app.command("train-kraken")
+def train_kraken(
+    base: Path = typer.Option(
+        Path("data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors"),
+        "--base",
+        help="The kraken weights to start from.",
+    ),
+    train_root: Path = typer.Option(
+        Path("data/train/k3"), "--train-root", help="The training set (train.txt, val.txt)."
+    ),
+    out: Path = typer.Option(Path("data/models/k3/kraken"), "--out", help="Artefacts root."),
+    pilot: bool = typer.Option(False, "--pilot", help="One fixed epoch on a subset of lines."),
+    pilot_lines: int = typer.Option(20_000, "--pilot-lines", help="Lines of the pilot subset."),
+    epochs: int = typer.Option(-1, "--epochs", help="Fixed epochs; -1 for early stopping."),
+    lag: int = typer.Option(5, "--lag", help="Early stopping: evaluations without gain."),
+    batch_size: int = typer.Option(16, "--batch-size", help="ketos -B."),
+    accumulate: int = typer.Option(
+        1, "--accumulate", help="ketos --accumulate-grad-batches (effective batch = -B × this)."
+    ),
+    lr: float = typer.Option(1e-4, "--lr", help="ketos -r."),
+    augment: bool = typer.Option(False, "--augment", help="ketos --augment."),
+    freeze_backbone: int = typer.Option(0, "--freeze-backbone", help="ketos --freeze-backbone."),
+    precision: str = typer.Option("32-true", "--precision", help="ketos --precision."),
+    workers: int = typer.Option(4, "--workers", help="ketos --workers."),
+    ketos: str = typer.Option(
+        "ketos", "--ketos", help="The ketos executable (a side environment's for PP-OCRv6)."
+    ),
+    device: str = typer.Option("cuda:0", "--device", help="ketos -d."),
+    seed: int = typer.Option(20261021, "--seed", help="ketos -s and the subset's seed."),
+    drop_screen: bool = typer.Option(
+        False, "--drop-screen", help="The ablation: leave out the lines the screen flagged."
+    ),
+    train_list: Path | None = typer.Option(
+        None,
+        "--train-list",
+        help="A training list to use instead of <train-root>/train.txt (a width-capped one).",
+    ),
+    start: bool = typer.Option(
+        False, "--start", help="Start ketos in the background (else print the command only)."
+    ),
+    account: bool = typer.Option(
+        False, "--account", help="Read a finished run back: checkpoints, best weights, score."
+    ),
+    score_device: str = typer.Option("auto", "--score-device", help="For --account's scoring."),
+    peak_mib: int | None = typer.Option(
+        None, "--peak-mib", help="The GPU's peak memory sampled while it ran (for --account)."
+    ),
+    db_path: str = typer.Option(
+        "", "--db", help="Store for the runs row of a started training (none by default)."
+    ),
+    log_path: Path | None = typer.Option(None, "--log", help="ketos' output file."),
+) -> None:
+    """Fine-tune the PHILIUMM kraken model on the training set through ketos (K3 2b / 3)."""
+    from leibniz.htr import kurrent as KU
+    from leibniz.htr import train_kraken as K
+
+    s = K.KetosSettings(
+        base=str(base),
+        ketos=ketos,
+        batch_size=batch_size,
+        accumulate=accumulate,
+        lr=lr,
+        epochs=1 if pilot else epochs,
+        quit="fixed" if pilot or epochs > 0 else "early",
+        lag=lag,
+        augment=augment,
+        freeze_backbone=freeze_backbone,
+        precision=precision,
+        workers=workers,
+        device=device,
+        seed=seed,
+    )
+    out.mkdir(parents=True, exist_ok=True)
+    train_list = train_list or train_root / "train.txt"
+    val_list = train_root / "val.txt"
+    if drop_screen or pilot:
+        lines = [ln for ln in train_list.read_text(encoding="utf-8").splitlines() if ln.strip()]
+        if drop_screen:
+            manifest = _read_manifest_rows(train_root / "manifest.jsonl")
+            screened = {
+                str(train_root / r["image"]) for r in manifest if r.get("image") and r.get("screen")
+            }
+            before = len(lines)
+            lines = [ln for ln in lines if ln not in screened]
+            console.print(f"  ablation: {before - len(lines):,} screened lines left out")
+        sub = out / ("pilot-train.txt" if pilot else "train.txt")
+        sub.write_text("".join(ln + "\n" for ln in lines), encoding="utf-8")
+        train_list = sub
+        if pilot:
+            train_list = K.subset_list(sub, out / "pilot-train.txt", n=pilot_lines, seed=seed)
+    cmd = K.ketos_command(s, train_list=train_list, val_list=val_list, out_dir=out)
+    log_file = log_path or out / "ketos.log"
+    if account:
+        text = Path(log_file).read_text(encoding="utf-8") if Path(log_file).exists() else ""
+        run_info = (
+            json.loads((out / "run.json").read_text(encoding="utf-8"))
+            if (out / "run.json").exists()
+            else {}
+        )
+        acc = K.account(
+            out,
+            s,
+            cmd,
+            text,
+            train_list=train_list,
+            started=run_info.get("started"),
+            peak_mib=peak_mib,
+        )
+        if acc.best:
+            val = K.read_list(val_list)
+            dev = KU.pick_device(score_device)
+            console.print(f"  scoring {acc.best['weights']} on {len(val):,} lines ({dev})")
+            acc.score = K.score_weights(acc.best["weights"], val, device=dev)
+            acc.codec = K.codec_growth(base, acc.best["weights"])
+            K.install_best(out, out / "best.safetensors")
+            (out / "best-val-hyps.json").write_text(
+                json.dumps(acc.score["hyps"], ensure_ascii=False, indent=0), encoding="utf-8"
+            )
+        p = K.write_account(out / "account.json", acc)
+        console.print(
+            f"  checkpoints {len(acc.checkpoints)}; epoch seconds "
+            f"{[round(t) for t in acc.epoch_seconds]}; run seconds "
+            f"{'—' if acc.run_seconds is None else round(acc.run_seconds)}; "
+            f"{acc.pilot_lines} lines; best {acc.best}; "
+            + (f"val CER {100 * acc.score['cer']:.2f} %" if acc.score else "no score")
+        )
+        console.print(f"  wrote {p}")
+        return
+    console.print("[bold]train-kraken[/bold] " + " ".join(cmd))
+    if not start:
+        console.print("  (not started: pass --start to run it in the background)")
+        return
+    params = {"settings": s.as_dict(), "command": cmd, "pilot": pilot, "drop_screen": drop_screen}
+    run_id = _record_training_run(db_path, "htr_train", f"kraken-k3@{base.name}", params, n_input=0)
+    import os as _os
+    import time as _time
+
+    proc = K.run(cmd, log_path=log_file)
+    (out / "run.json").write_text(
+        json.dumps(
+            {
+                "pid": proc.pid,
+                "command": cmd,
+                "log": str(log_file),
+                "run_id": run_id,
+                "started": _time.time(),
+                # the allocator settings the job inherits (K3 runs with
+                # expandable segments against fragmentation on the 6 GB card)
+                "env": {k: v for k, v in _os.environ.items() if k.startswith("PYTORCH_CUDA_ALLOC")},
+            },
+            indent=1,
+        ),
+        encoding="utf-8",
+    )
+    console.print(f"  started pid {proc.pid}; log {log_file}; account with --account when done")
+
+
+@app.command("k3-report")
+def k3_report(
+    which: str = typer.Argument("pilots", help="pilots (Task 2) or eval (Task 4)."),
+    train_root: Path = typer.Option(Path("data/train/k3"), "--train-root"),
+    trocr_pilot: Path = typer.Option(Path("data/models/k3/trocr/pilot.json"), "--trocr-pilot"),
+    trocr_probe: list[Path] = typer.Option(
+        None, "--trocr-probe", help="The memory probes' pilot.json files (repeatable)."
+    ),
+    kraken_account: Path = typer.Option(
+        Path("data/models/k3/kraken-pilot/account.json"), "--kraken-account"
+    ),
+    plan_epochs_trocr: float = typer.Option(6.0, "--plan-epochs-trocr"),
+    plan_epochs_kraken: int = typer.Option(30, "--plan-epochs-kraken"),
+    rented_note: str = typer.Option("", "--rented-note", help="A sentence on renting."),
+    reports_dir: Path = typer.Option(Path("reports/kurrent"), "--reports-dir"),
+    k3_pool: Path = typer.Option(
+        Path("reports/kurrent/k3-letterpool/letterpool-eval.json"),
+        "--k3-pool",
+        help="eval: the letter-pool evaluation with the K3 models.",
+    ),
+    k2b_pool: Path = typer.Option(
+        Path("reports/kurrent/letterpool-eval.json"), "--k2b-pool", help="eval: K2b's rows."
+    ),
+    dresden: Path = typer.Option(
+        Path("reports/kurrent/k3-dresden/bootstrap-candidates.json"),
+        "--dresden",
+        help="eval: kurrent-smoke's JSON with the K3 models.",
+    ),
+    models_root: Path = typer.Option(
+        Path("data/models/k3"), "--models-root", help="eval: <root>/<model>/ with the artefacts."
+    ),
+    ppocr_account: Path = typer.Option(
+        Path("data/models/k3/ppocr-pilot/account.json"), "--ppocr-account", help="eval: the pilot."
+    ),
+    ablation_note: str = typer.Option("", "--ablation-note", help="eval: the ablation's state."),
+    dresden_kv: Path = typer.Option(
+        Path("reports/kurrent/k3-dresden-kv/bootstrap-candidates.json"),
+        "--dresden-kv",
+        help="eval: kurrent-smoke's JSON with the decoder's cache on (the TrOCR pace for K4).",
+    ),
+) -> None:
+    """Render a K3 report from the artefacts' JSON (numbers only)."""
+    from leibniz.htr import k3_eval as E
+    from leibniz.htr import k3_report as R
+
+    if which == "eval":
+        val_breakdowns: dict = {}
+        trained: dict = {}
+        hyps: dict = {}
+        for key, sub, hyps_file in (
+            ("k3-trocr", "trocr", Path("best") / "val-hyps.json"),
+            ("k3-kraken", "kraken", Path("best-val-hyps.json")),
+        ):
+            d = models_root / sub
+            val_breakdowns[key] = R.load_json(d / "val-breakdown.json")
+            trained[key] = R.load_json(d / "state.json") or R.load_json(d / "account.json") or {}
+            h = R.load_json(d / hyps_file)
+            if h:
+                hyps[key] = h
+        dis = None
+        manifest = train_root / "manifest.jsonl"
+        if len(hyps) == 2 and manifest.exists():
+            tags = E.manifest_tags(_read_manifest_rows(manifest), split="val")
+            dis = E.disagreements(E.refs_from_tags(tags), hyps["k3-trocr"], hyps["k3-kraken"])
+        s = R.build_eval(
+            k3_pool=R.load_json(k3_pool),
+            k2b_pool=R.load_json(k2b_pool),
+            val_breakdowns=val_breakdowns,
+            dresden=R.load_json(dresden),
+            disagreements=dis,
+            trained=trained,
+            trainset=R.load_json(reports_dir / "k3-trainset.json"),
+            ppocr_pilot=R.load_json(ppocr_account),
+            ablation_note=ablation_note,
+            dresden_kv=R.load_json(dresden_kv),
+        )
+        paths = R.write_eval(s, reports_dir)
+        paths.update(
+            R.write_cards(
+                s, trainset=R.load_json(reports_dir / "k3-trainset.json"), reports_dir=reports_dir
+            )
+        )
+        c = s["choice"]
+        console.print(f"  choice: {c.get('winner')} ({c.get('reason') or 'by the rule'})")
+        for k, p in paths.items():
+            console.print(f"  wrote {k}: {p}")
+        return
+    if which != "pilots":
+        raise typer.BadParameter("render 'pilots' or 'eval'")
+    s = R.build_pilots(
+        trocr=R.load_json(trocr_pilot),
+        kraken=R.load_json(kraken_account),
+        trocr_probes=[R.load_json(p) for p in (trocr_probe or [])],
+        train_lines=R.count_lines(train_root / "train.txt"),
+        val_lines=R.count_lines(train_root / "val.txt"),
+        plan_epochs_trocr=plan_epochs_trocr,
+        plan_epochs_kraken=plan_epochs_kraken,
+        rented_note=rented_note,
+    )
+    paths = R.write_pilots(s, reports_dir)
+    console.print(
+        f"  fastest TrOCR setting {s['trocr_fastest']}, best CER {s['trocr_best_cer']}; "
+        f"kraken {s['kraken'].get('status')}; over a week: {s['over_a_week']}"
+    )
+    for k, p in paths.items():
+        console.print(f"  wrote {k}: {p}")
 
 
 __all__ = ["app"]

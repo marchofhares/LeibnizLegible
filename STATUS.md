@@ -3,11 +3,33 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-22 (**A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-26 (**K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-21/26: K3 — a Leibniz Kurrent model, done on the desktop; the
+branch `k3-kurrent-model`, the pull request the operator's; nothing
+deployed; the choice for K4 open until the operator answers.** Two models
+fine-tuned on K2's German mint (55,596 training lines, 3,133 page-disjoint
+validation lines frozen before any training, every line tagged by hand and
+reader, the screen for misplaced lines not triggered) and measured where
+nothing was tuned: **on the GWLB letter pool (K2b's frozen set, nothing
+filtered) k3-trocr reads at 28.6 % CER (24.6–32.5) and k3-kraken at 30.6 %
+(26.5–34.5), against 37.0 % for the Bern model as it came and 46.6 % for
+the stored v1 text; Leibniz's own hand 36.7 % and 39.7 % (49.2 % before),
+the correspondents' 19.4 % and 20.3 %**; on the validation set 11.84 % and
+15.56 %; on Dresden 11.9 % and 13.2 %; 152 and 52 ms a line on this card.
+The trainings: kraken 37 epochs in 44.5 h (stopped on the operator's
+approval), TrOCR six epochs in 27 h — after a crash, two stops and three
+guard kills along the way, every one the session's own doing (two jobs at
+once on the 9.9 GB host) and each recorded under Divergences; the artefacts
+live on D: behind the `data/models/k3` symlink. The rule the report proposes
+answers **kraken** (within the margin on the selection half, ten times
+faster); the operator decides. PP-OCRv6, the ablation and a rental are
+K3b's. The K3 entry in the Phase log has the detail; `reports/kurrent/k3-eval.md`
+the numbers.
 
 **2026-10-22, later: A3b follow-up 2, after the operator's second dry run;
 the dry run is to run once more; nothing written to the store, nothing
@@ -1024,6 +1046,543 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ✅ Task 4 (Checkpoint D) · ⏳ the operator's choice
+
+- **The operator's decision on the prerequisite (21 October), verbatim:**
+  "The prerequisite "K2's audit sheet judged": the operator decides to go
+  without, conditionally. The sheet (data/kurrent/k2-audit.html, 200 lines,
+  half in Leibniz's own hand) is being sent to a judge at the Leibniz-Edition;
+  no verdict exists yet." Its consequences, from the same note: (a) every
+  training line tagged in the manifest by hand (Leibniz's own under W5's
+  strict rule, against the rest) and by reader (K2's reader rows against the
+  v1-minted rows); (b) a cheap screen for misplaced lines before any
+  training — per K2 line the alignment confidence and the ratio of the
+  minted text's length to the Bern reading's length, by hand group against
+  the band the v1-minted Latin and French lines occupy; the share outside the
+  band per group and the twenty worst line ids into this entry; more than
+  about one Leibniz-hand line in ten outside the band stops the phase at
+  Checkpoint A; (c) one more ablation for the stronger candidate, the same
+  training without a flagged class, run only if a verdict arrives or the
+  screen flags a class, else recorded as planned; (d) the model cards state
+  that the precision of the German training lines is unmeasured, the audit
+  pending, with the screen's figures beside the statement.
+- **Setting (Task 0).** The operator's desktop, the WSL checkout
+  `/home/evana/LeibnizLegible`, a Claude Code session; main at `af8a1b9`
+  (#48, K2 merged) and `origin/main` the same; `k3-kurrent-model` created
+  with `git checkout -B k3-kurrent-model origin/main`, the name the
+  operator gave. The tree clean apart from the operator's own untracked
+  files (`logs/`, `*.log`, `resume-run.sh`, `.python-version`, the two
+  gt-audit HTML sheets), left alone. GPU: GTX 1660 Ti, driver 610.57.01,
+  1,142 MiB of 6,144 MiB held by Xwayland, nothing else on it. Disk: `/`
+  1007 G with 895 G free, `/mnt/d` 932 G with 412 G free; RAM 9 GiB, 16
+  cores. `.venv-k1`: Python 3.12, torch 2.12.0+cu130 with CUDA available,
+  transformers 5.12.1, kraken 7.0.3, lightning 2.6.1, safetensors 0.7.0,
+  pyarrow 25.0.0, no accelerate. Baseline in `.venv-k1`: `ruff check`
+  clean, `ruff format --check` 231 files formatted, **pytest 866 passed, 1
+  skipped** in 38.5 s. The backup chore of the store may be running in
+  another window (the operator's note); it holds no lock.
+- **Prerequisites, each verified (Task 0).** K2 merged: `gt_lines` holds
+  **50,720 rows whose source names `reader trocr-kurrent-xvi-xvii`**
+  (333,680 rows in all, the store 17,094,205,440 bytes, modified 2026-10-21
+  07:36, WAL empty, opened `mode=ro`), `reports/kurrent/k2-mint.md`
+  present, run 609 the last runs row. K2b merged:
+  `reports/kurrent/letterpool-testset.csv` (134 letters), the texts under
+  `data/kurrent/letterpool/` (`testset.jsonl`), the metric in
+  `align/letterpool_eval.py` with its checksum check. The audit sheet: the
+  operator's decision above. C3 has not landed (no `train-set` tool in the
+  code), so Task 1 builds `leibniz htr train-set` under the `bench` group
+  for both.
+- **The training rows, counted read-only (Task 0).** On the 2,148 German
+  records: **60,163 rows on 1,447 records, 3,854 pages** — 50,720 the
+  reader's, 9,443 from the v1 text; by hand under the strict rule
+  **Leibniz's own 2,612** (2,093 reader, 519 v1, on 51 records), the
+  author's own hand but not Leibniz 1,973 (61 records), partial 15,746
+  (422), other 39,832 (913); by stratum heavy_revision 40,641 ·
+  light_revision 19,057 · scrap 406 · fair_copy 59; 44.5 characters a line
+  on average (median 46). **None of the 3,854 pages is among the 1,472
+  held-out pages of `reports/philiumm/heldout_pages.csv` or the 380 pages
+  of the letter pool's set.** The works are 158 Briefwechsel and 95
+  Handschriften convolutes: no Marginalien. The C2b exclusions that apply:
+  `math` 32 rows (4 reader, 28 v1) and `bracket` 1,149 rows (883 reader,
+  266 v1), the v1 rows from `data/gt/flags.jsonl`, the reader rows from the
+  same patterns run over their text (`audit_patterns.is_math_dense`,
+  `has_bracket`). The 200 lines of K2's audit sheet are all among these
+  rows, as are 20 of the 199 PHILIUMM-judged lines (German pieces minted
+  from the v1 text): both sets stay out of training and of checkpoint
+  selection, tagged `audit`, so the judges' verdicts remain a sanity set.
+  The text is NFC (60,160 of 60,163 rows); 813 rows end in `¬`, the
+  scribe's line-end mark the aligner keeps since C2b; a few dozen carry
+  symbols the OCR layer leaked (`©`, `™`, `■`, `•`, `®`), to be excluded
+  and counted. The PHILIUMM codec (178 code points, NFD: combining marks,
+  no precomposed letters) lacks, in NFD, 32 of the training text's 131
+  distinct characters — none of them a letter but `¬`, the em dash, `*`,
+  the apostrophe and typographic quotes, `æ`/`Æ`/`œ`; the umlauts decompose
+  onto `u`/`a`/`o` + U+0308, which it has; `ß` it has; the edition text has
+  no long s (0 of 60,163 rows) — so the codec grows by `--resize union`.
+  The Bern checkpoint (`dh-unibe/trocr-kurrent-XVI-XVII`, snapshot
+  `a6bb6086`): a ViT encoder at 384 px (768 hidden, 12 layers) and a
+  12-layer decoder (d_model 1,024, vocab 50,265, untied head), 333.9 M
+  parameters, 1.3 GB in fp32 as K2 loaded it; its readings are NFC (49,912
+  of the first 50,001).
+- **Task 1, the training set (Checkpoint A;** `htr/trainset.py`, `leibniz
+  bench train-set`, +9 tests; `reports/kurrent/k3-trainset.md` + `.json`, the
+  frozen validation pieces `k3-val-pieces.csv`; the crops and `manifest.jsonl`
+  under `data/train/k3/`, gitignored**).** One tool for K3 and C3 under the
+  `bench` group (C3 has not landed its own): the open-bucket rows of the
+  records given (K3: the census's German pieces), each tagged with its record,
+  volume, stratum, hand (`catalog/hands.py`: own / partial / other, and the
+  strict rule's *Leibniz's own* against the rest), the reader whose text it
+  was aligned on (`reader_from_source`: K2's reader rows against the v1-minted
+  rows), its alignment confidence, the text it was aligned on and the screen's
+  figures, then the exclusions, the screen, the split, the crops. *The
+  selection:* **60,163 rows on 1,447 records and 3,854 pages** —
+  trocr-kurrent-xvi-xvii 50,720, v1 9,443 by reader; Leibniz's own hand 2,612
+  lines on 51 records, the rest 57,551. *Exclusions*, the first reason that
+  applies (held-out page, letter-pool page, Marginalien, math, bracket, noise,
+  audit): **1,434 rows** — audit 215, bracket 1,154, math 32, noise 33 (by
+  reader: audit/trocr-kurrent-xvi-xvii 205, audit/v1 10,
+  bracket/trocr-kurrent-xvi-xvii 889, bracket/v1 265,
+  math/trocr-kurrent-xvi-xvii 4, math/v1 28, noise/trocr-kurrent-xvi-xvii 26,
+  noise/v1 7); the `bracket` flag now also fires on the edition's angle
+  brackets, `noise` on symbols the OCR layer leaked (`©`, `®`, `™`, `■`, `□`,
+  `•`), `audit` keeps K2's 200 sheet lines and the 20 PHILIUMM-judged lines on
+  German pieces out of training and of checkpoint selection (a sanity set once
+  judged). No row sits on a held-out page, a pool page or a Marginalien work.
+- **The screen (Task 1, the operator's note (b)).** The band the **273,517
+  v1-minted Latin and French rows** occupy: the ratio of the minted text's
+  length to the v1 reading's (whitespace collapsed) between **0.80 and 1.44**
+  (the central 95 %; median 1.00), the alignment confidence at or above
+  **0.733** (median 0.950). The reader's lines that no flag excluded, by hand
+  group, against it — **Leibniz's own hand: 1,949 lines, 145 outside (7.4 %:
+  conf_low 52, ratio_high 66, ratio_low 35); the other hands: 47,647 lines,
+  3,306 outside (6.9 %: conf_low 1,556, ratio_high 1,116, ratio_low 988)**;
+  ratio quantiles p2.5 / median / p97.5 0.83 / 1.00 / 1.53 for his hand, 0.83
+  / 1.00 / 1.41 for the rest. For comparison the v1-minted rows of the same
+  German records: 1,583 of 9,133 outside (17.3 %). **The stop rule (10 % of
+  the Leibniz-hand lines) is not triggered.** The twenty worst reader lines,
+  every one a minted slice of 8 to 21 characters on a reading of a single
+  character at confidence 1.000 (the aligner's matched fraction is over the
+  reading's characters, so a one-letter reading that matches scores 1.0 and
+  places an edition slice on no evidence; all twenty are in other hands):
+  `DE-611-HS-970451:0002:056` (other, heavy_revision, ratio 21.0, conf 1.000,
+  21 / 1 chars); `DE-611-HS-867509:0122:009` (other, heavy_revision, ratio
+  15.0, conf 1.000, 15 / 1 chars); `00068422:0004:032` (other, heavy_revision,
+  ratio 14.0, conf 1.000, 14 / 1 chars); `00068430:0029:036` (other,
+  heavy_revision, ratio 14.0, conf 1.000, 14 / 1 chars);
+  `DE-611-HS-856291:0012:037` (other, heavy_revision, ratio 14.0, conf 1.000,
+  14 / 1 chars); `DE-611-HS-960158:0136:031` (other, heavy_revision, ratio
+  13.0, conf 1.000, 13 / 1 chars); `00068593:0053:000` (other, light_revision,
+  ratio 13.0, conf 1.000, 13 / 1 chars); `DE-611-HS-971300:0068:026` (other,
+  heavy_revision, ratio 11.0, conf 1.000, 11 / 1 chars);
+  `DE-611-HS-974056:0019:013` (other, light_revision, ratio 11.0, conf 1.000,
+  11 / 1 chars); `DE-611-HS-959461:0081:045` (other, light_revision, ratio
+  11.0, conf 1.000, 11 / 1 chars); `00068541:0005:151` (other, heavy_revision,
+  ratio 11.0, conf 1.000, 11 / 1 chars); `DE-611-HS-867509:0122:006` (other,
+  heavy_revision, ratio 11.0, conf 1.000, 11 / 1 chars);
+  `DE-611-HS-959461:0084:027` (other, light_revision, ratio 10.0, conf 1.000,
+  10 / 1 chars); `00068782:0137:111` (other, heavy_revision, ratio 9.0, conf
+  1.000, 9 / 1 chars); `DE-611-HS-862243:0001:012` (other, light_revision,
+  ratio 9.0, conf 1.000, 9 / 1 chars); `DE-611-HS-959461:0098:021` (other,
+  light_revision, ratio 8.0, conf 1.000, 8 / 1 chars);
+  `DE-611-HS-867509:0161:034` (other, heavy_revision, ratio 8.0, conf 1.000, 8
+  / 1 chars); `00068823:0107:098` (other, heavy_revision, ratio 8.0, conf
+  1.000, 8 / 1 chars); `DE-611-HS-867509:0120:008` (other, heavy_revision,
+  ratio 8.0, conf 1.000, 8 / 1 chars); `00068430:0024:100` (other,
+  heavy_revision, ratio 8.0, conf 1.000, 8 / 1 chars). The manifest carries
+  each line's verdict (`screen`: `ratio_low`, `ratio_high`, `conf_low`,
+  `no_reading`), so **the ablation of note (c) is triggered by the screen** —
+  the class is "outside the band", 3,451 reader lines (`train-trocr
+  --drop-screen`, `train-kraken --drop-screen`) — and runs for the stronger
+  candidate in Task 3 if the timing allows.
+- **The split (Task 1).** Kept: **58,729 lines** on 1,446 records, 3,850
+  pages, 1,321 units (records joined over the pages they share, union-find, so
+  no page is on both sides), 2,601,780 characters. The validation set drawn
+  before any crop was cut, seed 20261021, 5 % of the lines per (stratum, hand
+  group) cell, whole units: **train 55,596 lines on 3,634 pages, val 3,133
+  lines on 216 pages (98 records, 92 units); pages on both sides 0**; by
+  reader train / val: trocr-kurrent-xvi-xvii 46,921 / 2,675, v1 8,675 / 458;
+  by cell train / val: fair_copy/other 27 / 7, heavy_revision/leibniz 2,242 /
+  164, heavy_revision/other 35,331 / 1,953, light_revision/leibniz 44 / 0 (one
+  unit: it stays in training), light_revision/other 17,650 / 949, scrap/other
+  302 / 60. The pieces are frozen in `reports/kurrent/k3-val-pieces.csv` and
+  reused by every later run (`--redraw` is the only way past it).
+- **The crops (Task 1).** The disk from a seeded 1,000-line sample first:
+  1,000 of 1,000 cut, **157.7 KB a line**, 9.48 GB projected. Then every kept
+  line through the pilot's crop (`audit.crop_image`: the polygon masked, 12 px
+  of context, no downscaling) into `data/train/k3/<split>/<page>/<seq>.png`
+  with the minted text (NFC, as stored) in `<seq>.gt.txt`, eight worker
+  processes, the page image decoded once: **3,850 pages, ok 58,729; 9.42 GB of
+  PNGs**; `train.txt` and `val.txt` list the crops for ketos, `manifest.jsonl`
+  every row with its tags and its split. **Checkpoint A.**
+- **Task 2 (b), the kraken pilot** (`leibniz bench train-kraken --pilot
+  --start`, `--account`; `data/models/k3/kraken-pilot/` on D: with
+  `account.json`, the best weights and their validation hypotheses; the log
+  `logs/k3-kraken-pilot.log`, the guard's record `k3-kraken-pilot-guard.csv`).
+  `ketos train` (kraken 7.0.3, `.venv-k1`) from the PHILIUMM checkpoint with
+  `--resize union` (the codec grew from 178 to 198 code points, the twenty
+  added all symbols: `¬`, the em dash, the apostrophe and typographic quotes,
+  `æ`, `ı`, `£`, `$`, `%`, `*`, `{}`, `\\`, `º`, a combining macron and
+  cedilla — the umlauts decompose in NFD onto marks it had), `-u NFD
+  --normalize-whitespace`, batch 4 with 4-step gradient accumulation, learning
+  rate 1e-4 (AdamW, cosine), two loader workers, one fixed epoch over a seeded
+  **20,000 lines** of the training list, under
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. Two earlier attempts
+  failed on memory: at batch 16 the card reached 4.8 GB and the run died at
+  its first steps with `CUDA error: unknown error`; at batch 8 (and again at
+  batch 4 without expandable segments) the reserved memory climbed past 5.4 GB
+  over half an hour — the caching allocator fragmenting on the lines' variable
+  widths — and the machine, or the guard, stopped it (the batch-8 run was the
+  one running when the machine crashed; the batch-4 run was killed by the
+  guard at 5,411 MiB after 4,014 batches, 16,056 lines, in 34 min). With
+  expandable segments the same batch-4 run peaked at **2,776 MiB** and
+  finished: **47.9 min for the epoch, validation and conversion (6.95 lines/s
+  all-in; GPU utilisation 16 % on average — the run is bound by the loader,
+  not the card)**; kraken's own validation accuracy 0.7676; the best weights
+  scored by the project's engine on the **3,133 validation lines: CER 24.74
+  %** (philiumm policy; WER 65.2 %; 49 lines exact; 46.0 lines/s at inference,
+  batch 16). By hand group 32.1 % on Leibniz's own (164 lines) and 24.3 % on
+  the other hands; by stratum heavy_revision 27.6 %, light_revision 18.0 %,
+  scrap 9.5 % (60 lines), fair_copy 44.8 % (7); on the reader's rows 24.6 %,
+  the v1 rows 25.7 %; deletions 39 % of its edits, substitutions 53 %,
+  insertions 8 %; the normalization tax on this set 2.1 points (24.74 %
+  against 22.68 % under the aligner's fold). Extrapolated: **one epoch over
+  the 55,596 training lines ≈ 2.2 h; thirty epochs ≈ 2.8 days** (early
+  stopping will take fewer). Disk: 66 MB on D: (one lightning checkpoint, the
+  weights), the logs on C:.
+- **Task 2 (a), the TrOCR memory probe** (`leibniz bench train-trocr --pilot
+  --pilot-lines 2000 --no-pilot-val --max-mib 4000`;
+  `data/models/k3/trocr-probe/pilot.json`; the loop's log
+  `logs/k3-trocr-probe-loop.log`). Each setting of `PILOT_SETTINGS` on the
+  same 2,000 training lines under a hard allocator cap of 4,000 MiB for the
+  process (`torch.cuda.set_per_process_memory_fraction`; with Xwayland's 1.2
+  GB and the CUDA context the card then holds about 5.6 GB at most, under its
+  6,144 MiB, so an allocation past the cap raises an out-of-memory error in
+  the process instead of spilling into host memory as WSL2 otherwise does —
+  the first attempt without the cap reached 5.7 GB in one burst at the first
+  AdamW step and the guard killed the whole probe). The rows: adamw-b8 out of
+  memory at the cap; adafactor-b8 out of memory at the cap;
+  adamw-frozen-encoder-b8 out of memory at the cap;
+  adafactor-frozen-encoder-b8 8.19 lines/s at a peak of 3,988 MiB (11.3 h for
+  six epochs); adafactor-grad-ckpt-b8 3.55 lines/s at a peak of 3,436 MiB
+  (26.1 h for six epochs); adafactor-fp16-b8 out of memory at the cap;
+  adafactor-grad-ckpt-fp16-b8 0.97 lines/s at a peak of 4,000 MiB (95.1 h for
+  six epochs). So on this card the Bern model fine-tunes only with Adafactor,
+  and either the encoder frozen (the fastest, 8.2 lines/s, the decoder's 248 M
+  parameters trained) or gradient checkpointing (the whole model, at less than
+  half the pace); half precision is slower by a factor of eight on the GTX
+  1660 Ti (no tensor cores; K2 saw the same at inference) and out of the
+  question. Two more settings were added for the 20,000-line epochs —
+  Adafactor on everything at batch 4 with 2-step accumulation, and the frozen
+  encoder at batch 16 — and the 20,000-line epochs with the validation CER run
+  for the frozen encoder, the batch-4 whole model and the checkpointed whole
+  model (in progress; Checkpoint B follows).
+- **Task 2 (a), the TrOCR epochs** (`leibniz bench train-trocr --pilot
+  --pilot-lines 20000 --pilot-save --max-mib 4000`;
+  `data/models/k3/trocr/pilot.json`, the weights under
+  `data/models/k3/trocr/<setting>/` on D:; `logs/k3-trocr-pilot-loop.log`).
+  Two more probe settings first: Adafactor on the whole model at batch 4 with
+  2-step accumulation — out of memory at the cap (3,930 MiB), so the whole
+  model trains on this card only with gradient checkpointing — and the frozen
+  encoder at batch 16: 10.23 lines/s at 3,956 MiB. Then the two feasible
+  settings for one pass over 20,000 training lines each, the validation set
+  (3,133 lines) scored after, the pilot's weights kept (the first run of these
+  epochs lost its validation to an out-of-memory error: generating at batch 16
+  with the per-step scores kept, beside the training state — fixed, see
+  Divergences). **The frozen encoder (Adafactor, batch 8): 20,000 lines in
+  40.5 min (8.24 lines/s), peak 3,488 MiB, validation CER 18.78 % (267 lines
+  exact; 8.6 lines/s at inference). The whole model with gradient
+  checkpointing (Adafactor, batch 8): 20,000 lines in 93.9 min (3.55 lines/s),
+  peak 3,496 MiB, validation CER 13.67 % (397 exact).** The base model as it
+  came read this validation set at about 30 % in the smoke run; after 20,000
+  lines the frozen-encoder fine-tune is at 18.8 % and the whole-model one at
+  13.7 % — five points for 2.3 times the time. Extrapolated to six epochs over
+  the 55,596 training lines with a validation pass each: **frozen encoder 11.9
+  h, whole model 26.7 h**; neither near the week the prompt holds the plan to.
+- **Against the week, and renting (Task 2).** The plan on this GPU: the
+  whole-model TrOCR fine-tune 1.1 days for six epochs (the frozen encoder
+  0.5), the kraken fine-tune 2.8 days for thirty epochs at the pilot's
+  loader-bound pace (early stopping will take fewer; more loader workers may
+  halve it), the two sequential on one card: about four days, under the week.
+  The operator's rule for a rented 24 GB card is a saving of more than two
+  days; what a rental would save is not a number this session produced
+  (nothing ran on such a card), and the arithmetic with its assumptions is in
+  `tools/k3-rented-gpu.md` with the prices found on 21 October: the saving is
+  of the order of two days, mostly on the kraken side where the pace is the
+  loader's, not the card's, so the honest statement is that a rental buys the
+  whole model under AdamW at a real batch size — a training this card cannot
+  run at all — more than it buys days. The decision is the operator's (asked
+  at Checkpoint B); nothing was rented.
+- **The operator's decisions at Checkpoint B (2026-10-22), verbatim:** "go for
+  the runs rows. Stay on this GPU; keep tools/k3-rented-gpu.md for a second
+  round after the first results and the audit verdicts, where a 24 GB card
+  would train the whole model under AdamW and the ablation together. TrOCR:
+  the whole model with gradient checkpointing, six epochs, early stopping on
+  the validation set. Kraken first as planned; since the GPU sits at 16 % and
+  the loader sets the pace, start its first epoch with eight loader workers
+  and keep them if the pace rises and memory stays under the guard, else fall
+  back to four. Checkpoints on D: as agreed; state each job's expected disk
+  use before it starts; report at checkpoint C after each training." So: no
+  rental in this round; Task 3 trains kraken first (early stopping, eight
+  loader workers to begin with) and then the whole TrOCR model with gradient
+  checkpointing, six epochs with early stopping on the validation set; one
+  runs row per training; the PP-OCRv6 pilot's outcome decides whether a third
+  training follows.
+- **The stop of 22 October (Task 3).** The kraken training was launched at
+  07:36:46 with eight loader workers (runs row 610); WSL stopped entirely at
+  about 07:4x (a Windows update had installed itself; the updater is off now,
+  the operator says) and the session ended with it. The launch's log was empty
+  and its guard had ended after one sample at 07:36:48: the guard's pattern
+  carried a trailing space (`k3/kraken `) that never matches ketos' command
+  line (`k3/kraken/checkpoints`), so it saw no process and quit, and ketos
+  writes its log block-buffered, so an empty log minutes in is what a live
+  process looks like until the machine goes down. Whether ketos died at once
+  or with the machine cannot be told from the disk; the exact command line ran
+  for ninety seconds in the foreground afterwards without an error. Fixed: a
+  started ketos runs with `PYTHONUNBUFFERED=1` (the log shows progress as it
+  happens) and the guard's pattern is `[k]etos.*k3/kraken/`; runs row 610
+  closed with zero counts (nothing was trained under it); the training
+  relaunched with **four loader workers**, as the operator asked ("I would
+  rather be slow than crash again"), under a new runs row.
+- **The second stop of 22 October, and the launch that holds (Task 3).** The
+  relaunch of 07:57 (four workers, runs row 611) went down with WSL at about
+  07:59: the guard's record shows the host's available memory falling from
+  8,585 MiB at 07:57:57 to 78 MiB at 07:58:51, its last sample, with no swap
+  on the 9.9 GB VM — because the session had started, beside the training's
+  start-up, the PP-OCRv6 pilot's accounting on the CPU (a second torch process
+  over 3,133 crops on all cores), the same pairing as at the 07:36 launch; a
+  distro shutdown with a termination signal to every process is how WSL2 ends
+  a distro whose memory is gone. The operator asked, verbatim: "WSL stopped
+  again at about <time>, during your relaunch; every process got a termination
+  signal first, so a distro shutdown, not a crash. Two questions before
+  anything runs: (1) did you run any wsl.exe, shutdown, pkill or kill command
+  in this session, and what exactly was running at the moment it stopped? (2)
+  how much system memory does the full kraken training need: does ketos
+  preload all 55,596 crops into RAM (the pilot's 20,000 fit; the VM has 9.9
+  GB), and if so, which option keeps them on disk? Answer both and wait; do
+  not relaunch anything until I say go." The answers (no wsl.exe, no shutdown;
+  the two `pkill` pairs on the hung PP-OCRv6 pilot at 07:35, the first of
+  which matched the session's own shell; the guards' own `pkill` on their
+  pattern, which never fired on a kraken run; and the memory record above;
+  ketos' path-format dataset, `GroundTruthDataset`, keeps per line only the
+  image's path, box and encoded text and opens the PNG from disk on every
+  access, so nothing is preloaded and the full set costs the RAM the pilot did
+  — the main process and about half a gigabyte per loader worker) are in the
+  session's reply of 22 October. The operator's decision, verbatim: "Your
+  account is accepted and so is your proposal: kraken alone with four workers,
+  nothing else of yours on the machine while it trains, the PP-OCRv6
+  accounting after the training ends, the guard's host floor at 2,500 MiB, and
+  ketos under systemd-run with MemoryMax=7G if systemd is enabled. WSL now has
+  8 GB of swap. One ordering change: do not relaunch yet. I am running a
+  catalogue import that writes the store and then makes a serving copy, about
+  an hour; I will write "go kraken" when it is done. Until then do nothing on
+  the machine." Done at "go kraken" (12:27): runs row 611 closed with zero
+  counts (nothing trained under it; the operator's catalogue import had taken
+  row 612 meanwhile); **the training launched at 12:28 as runs row 613, alone,
+  four loader workers, batch 4 with 4-step accumulation, early stopping
+  (`--lag 5`), expandable segments, ketos inside `systemd-run --user --scope
+  -p MemoryMax=7G` (`tools/ketos-memcapped.sh`, so the kernel's OOM killer
+  takes ketos before the VM), the guard at 5,700 MiB on the card and a host
+  floor of 2,500 MiB, the log unbuffered; WSL has 8 GB of swap since the
+  morning.** Nothing else of the session's runs while it trains; the PP-OCRv6
+  pilot's accounting waits for its end.
+- **The guard's kill of 13:07, and the launch that holds (Task 3).** The
+  training of 12:28 (runs row 613) ran 37 minutes at a steady 2,401–2,564 MiB
+  on the card, GPU utilisation 20–40 %, **3.90 batches of 4 a second — 15.6
+  lines/s, 2.2 times the pilot's pace: the four loader workers pay** — 7,478
+  of 13,899 batches into its first epoch (29,912 lines seen); then one sample
+  read 5,763 MiB and the guard ended it at 13:07:40 (the host never under 6.8
+  GB available; the abort checkpoint kept, no epoch checkpoint). One batch
+  with an outlier line, not growth: the training list's widest crops reach
+  4,214 px at the model's 120 px height (the 99th percentile is 1,954). Row
+  613 closed with the 29,912 lines seen and nothing produced. **Relaunched
+  fresh from the base at 13:11 as runs row 614**: the kraken list capped at
+  2,560 px of width at height 120 (`data/models/k3/kraken/train-capped.txt`:
+  55,585 of the 55,596 training lines, the 11 dropped listed beside it; the
+  validation set's widest is 2,270 and stays whole), batch 2 with 8-step
+  accumulation (the same effective batch of 16, half the worst-case footprint,
+  little cost while the loader sets the pace), four workers, the scope, the
+  guard and everything else as at 12:28 (`train-kraken --train-list`, new).
+  Also found: a watcher whose command line names ketos and the checkpoints
+  directory is itself a match for the guard's pattern and dies with the job;
+  the watchers no longer say the word.
+- **Task 3 (b), the kraken training — CHECKPOINT C** (`leibniz bench
+  train-kraken --start` with `--train-list
+  data/models/k3/kraken/train-capped.txt`, batch 2 × 8-step accumulation, four
+  loader workers, early stopping with `--lag 5`, under
+  `tools/ketos-memcapped.sh` and the guard; runs row 614;
+  `data/models/k3/kraken/` on D: with `best.safetensors`,
+  `best-val-hyps.json`, `val-breakdown.json`, `account.json`, the ten best
+  lightning checkpoints and the abort checkpoint; the log
+  `logs/k3-kraken.log`, the guard's record `k3-kraken-guard.csv`). Launched
+  2026-10-22 13:11, stopped 2026-10-24 09:37 after checkpoint 36: **37 epochs
+  in 44.5 h, 72 min an epoch over the 55,585 capped lines with the validation
+  pass (about 13 lines/s all-in; the card at a steady 1.8–2.2 GB, utilisation
+  27 %, the host never under 5.5 GB available, swap under 1.5 GB, no guard
+  trip)**. Kraken's own validation accuracy by epoch: 0.7961, 0.8133, 0.8256,
+  0.8316, 0.8356, 0.8392, 0.8408, 0.8417, 0.8426, 0.8431, 0.8431, 0.8432,
+  0.8437, 0.8449, 0.8457, 0.8473, 0.8497, 0.8516, 0.8534, 0.8550, 0.8578,
+  0.8581, 0.8601, 0.8612, 0.8624, 0.8633, 0.8642, 0.8641, 0.8644, 0.8644,
+  0.8644, 0.8646, 0.8645, 0.8648, 0.8650, 0.8653, **0.8659** — gains of a few
+  ten-thousandths an epoch from epoch 26 on, which reset early stopping (its
+  minimum delta is zero) every time; the session recommended stopping after
+  the next checkpoint and the operator answered, verbatim, "your
+  recommendation is approved" (2026-10-24 morning); ketos was sent a
+  termination signal after checkpoint 36 landed and `ketos convert` turned
+  that checkpoint into `best_0.8659.safetensors`. The codec grew from 178 to
+  203 code points (`--resize union`; the added ones all symbols and the
+  edition's angle brackets). **Scored by the project's engine on the 3,133
+  validation lines: CER 15.56 % (95 % bootstrap 15.05 %–16.09 %; WER 45.8 %;
+  181 lines exact), against 24.74 % after the pilot's single epoch and 52.9 %
+  for the PHILIUMM base on the letter pool (K2b)**; by hand group Leibniz's
+  own 23.8 % (164 lines), the other hands 15.1 %; by stratum heavy_revision
+  17.8 %, light_revision 10.2 %, scrap 5.0 % (60 lines), fair_copy 32.2 % (7
+  lines); on the reader's rows 15.0 %, the v1 rows 18.9 %; the errors 43 %
+  substitutions, 11 % insertions, 46 % deletions; the normalization tax on
+  this set 1.83 points (15.56 % against 13.73 % under the aligner's fold).
+  Inference 35.2 lines/s at batch 16 on this card. Runs row 614 finished with
+  the 55,585 training lines. Disk: 0.6 GB on D:. The letter-pool and Dresden
+  numbers come in Task 4.
+- **Task 3 (a), the TrOCR training — CHECKPOINT C** (`leibniz bench
+  train-trocr --settings adafactor-grad-ckpt-b8 --epochs 6 --patience 3
+  --max-mib 4000`, the whole Bern model with gradient checkpointing, Adafactor
+  at batch 8, learning rate 5e-5 with a linear warm-up and decay to a tenth
+  over the 41,700 steps, the per-epoch validation generating at batch 8
+  without scores; runs row 615; `data/models/k3/trocr/` on D: with `best/`
+  (the epoch-5 weights, 1.3 GB, loadable as a reader), `last/`, `state.json`,
+  `best/val-hyps.json`, `val-breakdown.json`; the loop's log
+  `logs/k3-trocr-loop.log`, the guard's record `k3-trocr-guard.csv`). Launched
+  2026-10-24 09:42, finished 2026-10-25 13:23: **six epochs in 27.6 h, 4.5 h
+  an epoch over the 55,596 training lines at 3.42–3.47 lines/s plus a
+  6.5-minute validation pass; the process at a steady 3.5 GB of the card (the
+  guard's limit raised to 5,900 MiB on the way, the desktop's Xwayland having
+  grown to 1.4 GB), GPU utilisation 82 %, the host never under 6.3 GB
+  available, swap under 1 GB, no guard trip.** Validation CER by epoch 14.47,
+  13.14, 13.35, 12.34, 11.99, 11.84 % — epoch 2 the one step back (the
+  learning rate still near its peak), then the anneal; **the best at epoch 5:
+  11.84 % (95 % bootstrap 11.31 %–12.33 %; 436 lines exact)**, against 13.67 %
+  after the pilot's 20,000 lines and about 30 % for the base as it came; by
+  hand group Leibniz's own 19.7 % (164 lines), the other hands 11.4 %; by
+  stratum heavy_revision 13.3 %, light_revision 8.3 %, scrap 6.7 % (60 lines),
+  fair_copy 23.0 % (7); on the reader's rows 10.9 %, the v1 rows 16.9 %; the
+  errors 42 % substitutions, 21 % insertions, 37 % deletions (kraken's were 43
+  / 11 / 46: the TrOCR model inserts where kraken drops); the tax on this set
+  1.72 points. **Against the kraken model on the same 3,133 lines: 11.84 % to
+  15.56 %; the two disagree on 2,935 lines, and on 395 of those (13.5 %) one
+  of them is exactly right (TrOCR 325, kraken 70) — the number the C3
+  amendment asks for.** Disk: 2.7 GB on D:. The letter-pool, Dresden and speed
+  numbers come in Task 4.
+- **The stop of 26 October, and PP-OCRv6 set aside (Task 4).** With the
+  letter-pool evaluation of the two K3 models done (08:03), the session ran
+  the PP-OCRv6 pilot's accounting: its GPU scoring failed in the kraken 7.1
+  side environment for the second time (`CUDA driver error: device not ready`
+  at the first convolution; the environment's torch wheel does not run on this
+  card though it loads), and the fallback scoring on the CPU grew until the
+  kernel's OOM killer took it at 08:30:45 — the journal of that boot: `Out of
+  memory: Killed process 11584 (leibniz) total-vm:22885020kB,
+  anon-rss:9371424kB` — and the distro shut down at 08:32:25, the session with
+  it. Dresden had not run. The operator's decision, verbatim: "drop the
+  PP-OCRv6 accounting from this phase altogether: its side environment has a
+  CUDA fault and its CPU scoring is the heaviest thing left; record it as
+  pending for K3b." So: the PP-OCRv6 pilot's weights
+  (`data/models/k3/ppocr-pilot/checkpoints/best_0.8295.safetensors`, kraken's
+  accuracy 0.8295 after one epoch over 20,000 lines in 107.6 min at batch 1 ×
+  16, peak 3,009 MiB) stay on D: unscored by the project's metric; the
+  account, the side environment's CUDA fault and a full PP-OCRv6 training are
+  K3b's. Task 4 finishes with Dresden and the speeds for the two K3 models
+  only, one job at a time.
+- **Task 4, the evaluation — CHECKPOINT D** (`leibniz align letterpool-eval
+  --read --readers k3-trocr,k3-kraken --reports-dir
+  reports/kurrent/k3-letterpool` — K2b's metric and code, the frozen set
+  verified against its checksums, nothing filtered; `leibniz bench
+  kurrent-smoke --candidates k3-trocr,k3-kraken` into
+  `reports/kurrent/k3-dresden/` as K1 measured and `k3-dresden-kv/` with the
+  decoder's cache; `leibniz bench k3-report eval` →
+  `reports/kurrent/k3-eval.md` + `.json` and the two model cards
+  `k3-model-card-trocr.md`, `k3-model-card-kraken.md`; the readings under
+  `data/kurrent/letterpool-readings/` and `data/kurrent/smoke-k3*/`,
+  gitignored, nc). **The letter pool (134 letters, 18,815 lines, 325,624
+  reference characters; CER under the philiumm policy, 95 % bootstrap over
+  letters): k3-trocr 28.6 % (24.6–32.5 %), selection half 24.7 % (21.0–28.3
+  %), test half 31.6 % (25.3–36.8 %), Leibniz's own hand (L) 36.7 % (31.9–41.0
+  %), the correspondents' (K/k) 19.4 % (15.7–23.8 %); k3-kraken 30.6 %
+  (26.5–34.5 %), selection 26.6 % (23.0–30.4 %), test 33.6 % (27.0–38.9 %), L
+  39.7 % (34.7–43.9 %), K/k 20.3 % (16.8–24.6 %)** — against K2b's rows on the
+  same set: v1 46.6 %, philiumm 52.9 %, the Bern model as it came 37.0 %
+  (selection 34.1, test 39.2; L 49.2, K/k 23.2), trocr-hanse-xvi 35.6 %
+  (evaluate only). By year k3-trocr: 1708 19.5, 1709 27.4, 1710 21.2, 1711
+  32.1, 1712 11.3, 1713 25.1, 1714 29.5, 1715 35.4, 1716 28.3; k3-kraken: 1708
+  22.5, 1709 31.2, 1710 22.2, 1711 33.2, 1712 15.5, 1713 26.6, 1714 30.8, 1715
+  38.1, 1716 30.3. Lines read (counted per letter; an empty reading counts as
+  deleted): k3-trocr 18,814, k3-kraken 14,874 — the kraken model returns
+  nothing on 3,905 of the 18,445 distinct lines (the PHILIUMM base on 957),
+  2,517 of them crops narrower than 80 px, a letter or two where the TrOCR
+  model reads 'h', 'e', '2', 'H.'; the mint holds few such lines. The
+  aligner-selected rates (labelled flattered): k3-trocr 6,295 lines accepted
+  at 10.3 %, k3-kraken 5,738 at 14.6 %.
+- **The validation set, Dresden and speed (Task 4).** Validation (the mint's
+  own text; 3,133 lines): k3-trocr 11.84 %, k3-kraken 15.56 % (the Checkpoint
+  C bullets have the breakdowns, the compositions and the tax); where the two
+  disagree (2,935 lines) one is exactly right on 13.5 % (TrOCR 325, kraken
+  70). Dresden (383 Kurrent Trace lines, a 1673 chancery hand, nc, numbers
+  only; a sanity check, not a ranking): k3-trocr 11.9 % (10.7–13.1 %),
+  k3-kraken 13.2 % (12.1–14.3 %) — against the Bern base's 7.4 % and
+  PHILIUMM's 29.5 % in K1: the TrOCR fine-tune gave up some of the chancery
+  hand, the kraken fine-tune learned it. **Speed on this card as K1 measured
+  (fp32, no cache, batch 8, the PNG path): k3-trocr 181 ms a line, k3-kraken
+  52 ms; with the decoder's cache at batch 16 (K2's setting) k3-trocr 152 ms;
+  reading K2's 310,831 lines at K2's measured overhead of 2.1 ms a line:
+  k3-trocr 13.3 h with the cache (15.8 h without), k3-kraken 4.6 h.**
+  PP-OCRv6: set aside (the bullet above); the ablation of note (c), triggered
+  by the screen (3,451 lines outside the band), planned, not run — the phase's
+  GPU time went to the two trainings.
+- **The choice for K4 (Task 4).** The rule as the report proposes it: the
+  better letter-pool CER on the selection half, unless the faster model's
+  selection-half CER lies within the better model's 95 % bootstrap interval
+  there, in which case speed decides (every re-read of the German pages pays
+  the speed difference). The better selection-half CER is **k3-trocr** at 24.7
+  % (21.0 %–28.3 %), the runner-up k3-kraken at 26.6 %; the faster model is
+  **k3-kraken** (52 ms a line against 181), within the margin (3.6 %): yes;
+  **the rule's answer: k3-kraken**. Put to the operator in two sentences; the
+  answer goes into Next verbatim; until it comes the choice is open.
+- **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
+  new `htr/trainset.py`): the rows above through the pilot's crop (the
+  polygon masked, the audit's padding, no downscale) into
+  `data/train/k3/<split>/<page>/<seq>.png` + `.gt.txt` with a
+  `manifest.jsonl` (line id, record, volume, stratum, hand group, reader,
+  alignment confidence, the screen's figures, split and the reason for an
+  exclusion); the disk from a 1,000-line sample first; the validation set
+  drawn before any crop is cut, seeded, as whole pieces joined over shared
+  pages (so page-disjoint), stratified by stratum and hand group, about 5 %
+  of the lines, its piece list committed as `reports/kurrent/k3-val-pieces.csv`;
+  the screen of (b) with its band from the v1-minted Latin and French
+  rows; `reports/kurrent/k3-trainset.md` + `.json`. Checkpoint A, or a
+  stop if the screen says so. *Task 2:* two timing pilots on 20,000
+  training lines, one epoch each — (a) a plain PyTorch loop over the Bern
+  checkpoint (`leibniz htr train-trocr`), first the memory of AdamW on
+  every parameter, then Adafactor, a frozen encoder, gradient checkpointing
+  and fp16 autocast, each with its seconds, peak VRAM and lines per second,
+  the feasible ones carried to the end of the epoch and scored on the
+  validation set; (b) `ketos train` from the PHILIUMM checkpoint with the
+  codec grown (`--resize union`), timed the same way; the PP-OCRv6 base of
+  the amendment needs kraken 7.1 in a separate environment — a load test
+  there first, after a go for the install. Then the extrapolation to the
+  full plan against a week, and `tools/k3-rented-gpu.md` if a 24 GB card
+  saves more than two days. Checkpoint B. *Task 3:* both candidates under
+  nohup with a log under `logs/` and a runs row each (a go before the
+  first), checkpoints chosen on the validation set only, artefacts under
+  `data/models/k3/<candidate>/`; the ablation of (c) planned. Checkpoint C
+  after each. *Task 4:* the letter pool through `letterpool-eval` with the
+  new models as CANDIDATES entries (the choice on the selection half,
+  reported on the test half), the validation set by stratum and hand with
+  the error composition, Dresden as a sanity check, the speed as K1
+  measured it and the projection from K2's throughput;
+  `reports/kurrent/k3-eval.md` + `.json`, a model card draft per model; the
+  choice put to the operator in two sentences. Checkpoint D. Expected
+  days: the pilots produce them; the only measured rates so far are
+  inference rates — 87 ms a line for the Bern reader on this card (K2) and
+  34 ms for the PHILIUMM model on Dresden (K1). Nothing to download before
+  the pilots; the kraken 7.1 environment and any rental need a go.
 
 ### A3b — the Arbeitskatalog import (2026-10-21/22) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ✅ Task 4 · ✅ the operator's first dry run read, the follow-up built · ⏳ the operator's dry run again, write, serving copy and pull request
 
@@ -2198,6 +2757,14 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   https://github.com/marchofhares/leibnizlegible/compare/main...k2-german-gt?expand=1
   — the operator opens and merges the pull request. Nothing deployed,
   nothing sent; the website serves its own copy of the store.
+- **The operator's decision on the audit sheet (2026-10-21, with the K3
+  go), verbatim:** "The prerequisite "K2's audit sheet judged": the operator
+  decides to go without, conditionally. The sheet (data/kurrent/k2-audit.html,
+  200 lines, half in Leibniz's own hand) is being sent to a judge at the
+  Leibniz-Edition; no verdict exists yet." K3 starts on it; the K3 entry
+  records the conditions. When the verdict comes, score it with
+  `leibniz align audit-score` (the lines CSV carries the `group` column)
+  and put the figures by hand into this entry.
 
 ### C2c — the re-mint (2026-10-20) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 (Checkpoint: the mint) · ✅ Task 3 · ⏳ the operator's pull request
 
@@ -4602,7 +5169,11 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **980** (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **1026** (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K3 training (2026-10-22/25)** | **kraken** (runs row 614): ketos from the PHILIUMM checkpoint, the codec 178 → 203 code points, batch 2 × 8, four loader workers, **37 epochs in 44.5 h** (71 min an epoch, 13 lines/s all-in, the card at 2.2 GB), stopped after checkpoint 36 at kraken's accuracy 0.8659; **TrOCR** (runs row 615): the whole Bern model, Adafactor with gradient checkpointing at batch 8, **six epochs in 27.0 h** (4.5 h an epoch, 3.45 lines/s, the process at 3.5 GB), the best at epoch 5 |
+| **K3 validation CER (3,133 held-out mint lines)** | **k3-trocr 11.84 %** (Leibniz's hand 19.7 %, other hands 11.4 %; heavy 13.3 % · light 8.3 %) · **k3-kraken 15.56 %** (23.8 % / 15.1 %; 17.8 % · 10.2 %); the pilots' single epochs 13.67 / 24.74 %; the two disagree on 2,935 lines, one exactly right on 13.5 % |
+| **K3 letter-pool CER, unfiltered (2026-10-26)** | K2b's set, philiumm policy, 95 % bootstrap over letters: **k3-trocr 28.6 % (24.6–32.5)** · selection 24.7 % (21.0–28.3) · test 31.6 % (25.3–36.8) · Leibniz's hand (L) 36.7 % (31.9–41.0) · the correspondents' (K/k) 19.4 % (15.7–23.8); **k3-kraken 30.6 % (26.5–34.5)** · selection 26.6 % (23.0–30.4) · test 33.6 % (27.0–38.9) · L 39.7 % (34.7–43.9) · K/k 20.3 % (16.8–24.6); against the Bern base 37.0 %, v1 46.6 %, philiumm 52.9 % (K2b); the kraken model reads nothing on 3,905 of the 18,445 lines (2,517 narrower than 80 px) |
+| **K3 Dresden and speed (2026-10-26)** | Dresden (383 lines, philiumm policy): k3-trocr 11.9 % (10.7–13.1), k3-kraken 13.2 % (12.1–14.3) (the Bern base 7.4 %, PHILIUMM 29.5 % in K1); ms a line on the GTX 1660 Ti as K1 measured: k3-trocr 181, with the decoder's cache 152, k3-kraken 52; K2's 310,831 lines at K2's overhead: 13.3 h / 4.6 h |
 | **A3b Arbeitskatalog export (2026-10-21)** | `ritter.csv` **70,405 records**, 45 columns · `URL_Ms` on 49,341 (GWLB 39,673: 39,257 by id, 416 by PPN; Arcinsys 4,189) · holdings 215: **Hannover NLB 48,167 (68.4 %)** · no shelfmark 7,509 · Hannover NLA 4,218 · printed witness 1,700 · `pdf_url` 18,995 rows, 25,012 of the 35,133 records with a piece number matched · Ordnungsvermerk on 3,051 records (259 names) · the mapping on the fixture: textart, signatur, titel, datum, aa **100 %** over 21 website records, the names 46/46 cells through the persons table, hand rule 21/21 · the operator's dry runs on the store (2026-10-22): first datum 98.4 % before the second-date fix, nine renumbered ids, 16 hand changes of 24,907; second signatur 99.6 %, titel 99.9 %, textart 100 %, aa 100 %, datum 98.6 % before the short-date rule (346 "other"), 48726 → 69490, eight unmatched, every ground-truth id present · browser checks 84 + 32 |
 | **G1 fragment pack (2026-10-21, the operator's run)** | the 2,148 German records on 4,734 pages: **305,602 lines** (the latest run of each) → another registration's (W5's twins) **112,513 (36.8 %)** · no v1 text 21,419 · empty reading 49 · the same text 1,441 · under 10 characters 50,176 · over 50 40,551 · refused under §70 0 → **79,453 eligible** (fair 55 · light 18,904 · heavy 59,345 · scrap 1,149; Leibniz's own hand 5,188, 6.5 %) → **2,000 rows** (fair 55 · light 649 · heavy 648 · scrap 648; his hand 131, 6.5 %; de 1,939 · mixed 61; the longer reading 10–19 380 · 20–29 330 · 30–39 497 · 40–50 793) · **gold 56 (2.8 %): truth 42 (the Bern reading every time, v1 never) · both-wrong 14**; of the 2,000, 553 lines with a reader-minted row: 282 withheld (NC deposit), 271 open — **one reading equal to the minted text under the fold on 43 (15.9 %)**, neither on 228 (84.1 %); `pack check` OK; 390 s, the store read-only |
 | **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
@@ -5214,6 +5785,62 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   environment.* `.venv-cloud` resolved to Python 3.13.16; 859 → 880 tests
   there, the letter-pool evaluation skipped for want of numpy, as before.
 
+- **2026-10-21 — K3, departures from the prompt and the preamble.** (1) *The
+  machine crashed during Task 2.* At about 09:27 EDT, with the kraken timing
+  pilot running at batch 8 (its second attempt; the first, at batch 16, had
+  died at the first steps with `CUDA error: unknown error` once the card's
+  memory reached 4.8 GB) and the kraken 7.1 side environment installing,
+  every process on the WSL machine failed with bus errors; the operator's
+  diagnosis is that Ubuntu's virtual disk on the host's C: drive could not
+  grow (C: had about 40 GB free afterwards). The card had reached 5.9 GB of
+  its 6,144 MiB in the pilot's last minute (K2 saw the same spill into shared
+  host memory under WSL2). After the restart: the store passed
+  `PRAGMA quick_check` (the operator); the training set on disk was verified
+  against its manifest (58,729 crops, none missing, none zero-length, every
+  PNG trailer and sidecar intact, 9.42 GB) and kept where it is; the uv cache
+  held 34 wheels damaged by the crash (invalid `WHEEL` metadata), cleaned one
+  by one with `uv cache clean` until the side environment installed; the
+  branch was merged with `origin/main` (W6, #49), STATUS.md keeping both
+  sides' entries with K3 above W6 (the phase in progress), as the preamble's
+  rule 7 says. (2) *Model artefacts live on D:.* By the operator's
+  instruction, every checkpoint and optimizer state goes under
+  `/mnt/d/leibniz-train/k3/`; `data/models/k3` is a symlink to it, so the
+  paths the prompt and the reports name still hold; `df -h /mnt/c` is the
+  budget for every write to `/` from here on, and each training job states
+  its expected disk use against it before it starts. (3) *Guards.* Every
+  training job runs under `tools/gpu-guard.sh`, which samples the card every
+  two seconds and kills the job before its memory passes 5,300 MiB; the
+  TrOCR loop fails itself when its reserved memory passes `--max-mib` (4,500
+  by default); the kraken pilot runs at batch 4 with 4-step gradient
+  accumulation instead of batch 16. (4) *The kraken 7.1 side environment*
+  (`.venv-k3-ppocr`: kraken 7.1.1, torch 2.12.0 pinned to the cached wheel,
+  the project installed editable without dependencies) is the amendment's
+  "separate environment" for PP-OCRv6; `.venv-k1` stays at kraken 7.0.3 as
+  the prompt says.
+  (5) *The TrOCR pilot epochs ran twice.* The first pass over 20,000 lines
+  per setting (16:20–18:43) lost its validation: the loop generated at batch
+  16 with the per-step scores kept (half a gigabyte for the confidence no
+  validation needs) beside the training state, and ran out of memory under
+  the cap; the pilot had saved no weights, so the epochs were run again
+  (18:47–21:15) with the validation generating at batch 8 without scores
+  after the optimizer and the gradients are dropped, and each pilot's weights
+  kept on D:. The timings of both passes agree (8.35 / 8.24 and 3.53 / 3.55
+  lines/s); the first pass's rows are in `data/models/k3/trocr/pilot-noval.json`.
+  (6) *The PP-OCRv6 pilot at batch 4 was killed by the guard* at its first
+  steps (5,835 MiB on the card) and rerun at batch 1 with 16-step
+  accumulation.
+  (7) *Two jobs at once, three times.* The host ran out of memory at the 07:36
+  and 07:58 launches of 22 October (the PP-OCRv6 pilot's CPU scoring started
+  beside the kraken training's start-up; the machine went down both times),
+  and on 25 October at 15:54 the guard killed the letter-pool read of the K3
+  models at its host floor (available memory 6,981 → 1,778 MiB in eight
+  seconds) because the same CPU scoring ran beside it; the session itself then
+  ended while waiting. Every one of these was the session's own pairing of a
+  GPU job with a second torch process on the 9.9 GB host. The rule from here,
+  the operator's: one job at a time, the GPU idle before each, nothing else of
+  the session's on the machine while a job runs, the disk use stated against
+  C: before any job that writes.
+
 - **2026-10-21 — W6, departures from the prompt and from the preamble of
   19 October.** (1) *The LBr spelling.* The prompt's context said the
   catalogue writes the correspondence with a period (`LBr. 164`); live,
@@ -5722,6 +6349,8 @@ password once, the expected answer after the arrow:
    page without records. **The holdings page and the records wait for the
    export** (Open question 27). Housekeeping: the W5 prompt is missing from
    `PROMPTS.md`.
+
+**K3 (2026-10-26): a Leibniz Kurrent model — two models trained and measured on the desktop; the branch `k3-kurrent-model` carries the code, the reports and the docs (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...k3-kurrent-model?expand=1); the operator opens and merges the pull request; nothing deployed.** Read first: `reports/kurrent/k3-eval.md` (the letter pool, the validation set, Dresden, the speeds, the choice rule and its answer), then the two model cards `k3-model-card-trocr.md` and `k3-model-card-kraken.md`, `k3-pilots.md` and `k3-trainset.md`. **Keep `data/models/k3/` (a symlink to `/mnt/d/leibniz-train/k3/`: the two models, their validation hypotheses and accounts, the PP-OCRv6 pilot's weights) and `data/train/k3/` (the crops, the manifest, the split lists).** The models as readers: the CANDIDATES keys `k3-trocr` (`data/models/k3/trocr/best`, a Hub-style checkpoint directory the TrOCR engine loads by path; its `generation_config.json` carries `use_cache: true`; MIT base, the fine-tune open) and `k3-kraken` (`data/models/k3/kraken/best.safetensors`, kraken 7.0.3; CC BY 4.0 base, the fine-tune open), both off by default; version strings `k3-trocr@runs-615-epoch-5` and `k3-kraken@runs-614-checkpoint-36`. **The choice for K4 is the operator's, on the numbers (`k3-eval.md`): the rule's answer is k3-kraken — k3-trocr has the better selection-half CER (24.7 %), k3-kraken is the faster (52 ms a line) and lies within the margin (3.6 %).** The operator's answer goes here verbatim; until it comes, the choice is open. Pending for K3b: the PP-OCRv6 pilot's accounting (its side environment's CUDA fault; its weights on D:) and a full PP-OCRv6 training, the ablation without the screened lines (planned, not run), a 24 GB rental for the whole model under AdamW (`tools/k3-rented-gpu.md`), and K2's audit verdicts when they come (the manifest's tags let a class of lines go without recutting).
 
 **K2 (2026-10-21): German ground truth, done on the desktop; the branch
 `k2-german-gt` carries the code, the reports and the docs (compare:

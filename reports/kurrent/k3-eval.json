@@ -1,0 +1,3037 @@
+{
+ "trocr_kv_ms": 152.4486394125326,
+ "trocr_kv_hours": 13.344137788121365,
+ "generated": "2026-10-26",
+ "headline_policy": "philiumm",
+ "models": {
+  "k3-trocr": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 18814,
+     "ref_chars": 328316,
+     "edits": 93938,
+     "cer": 0.28612068860488066,
+     "cer_lo": 0.24606895044528218,
+     "cer_hi": 0.325464423762365,
+     "letter_cer_mean": 0.2551851291627831,
+     "letter_cer_q1": 0.1275326286116984,
+     "letter_cer_median": 0.2116408661985858,
+     "letter_cer_q3": 0.3484293484293485,
+     "letter_cer_min": 0.05447070914696814,
+     "letter_cer_max": 0.70567837017772,
+     "span_share_mean": 0.6910451229020498
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7695,
+     "ref_chars": 140107,
+     "edits": 34557,
+     "cer": 0.24664720535019663,
+     "cer_lo": 0.20960896383905833,
+     "cer_hi": 0.28256930483546716,
+     "letter_cer_mean": 0.24676355785000237,
+     "letter_cer_q1": 0.12745098039215685,
+     "letter_cer_median": 0.225,
+     "letter_cer_q3": 0.32364729458917835,
+     "letter_cer_min": 0.05447070914696814,
+     "letter_cer_max": 0.6414565826330533,
+     "span_share_mean": 0.7411174875250772
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 11119,
+     "ref_chars": 188209,
+     "edits": 59381,
+     "cer": 0.31550563469334625,
+     "cer_lo": 0.2528770126839665,
+     "cer_hi": 0.3676400402664645,
+     "letter_cer_mean": 0.2636067004755637,
+     "letter_cer_q1": 0.12978524743230627,
+     "letter_cer_median": 0.20974006573050494,
+     "letter_cer_q3": 0.42193675889328064,
+     "letter_cer_min": 0.06841741534208708,
+     "letter_cer_max": 0.70567837017772,
+     "span_share_mean": 0.6409727582790222
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 8058,
+      "ref_chars": 153297,
+      "edits": 29742,
+      "cer": 0.19401553846454922,
+      "cer_lo": 0.15687479486302086,
+      "cer_hi": 0.23827166906167582,
+      "letter_cer_mean": 0.17935503665929362,
+      "letter_cer_q1": 0.10161042944785276,
+      "letter_cer_median": 0.14147465437788018,
+      "letter_cer_q3": 0.20974006573050494,
+      "letter_cer_min": 0.05447070914696814,
+      "letter_cer_max": 0.5530921820303384,
+      "span_share_mean": 0.6927056032617275
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10756,
+      "ref_chars": 175019,
+      "edits": 64196,
+      "cer": 0.36679446231552004,
+      "cer_lo": 0.3188806690254101,
+      "cer_hi": 0.4100811123986095,
+      "letter_cer_mean": 0.33101522166627256,
+      "letter_cer_q1": 0.21354166666666666,
+      "letter_cer_median": 0.32253521126760565,
+      "letter_cer_q3": 0.4666666666666667,
+      "letter_cer_min": 0.05795768169273229,
+      "letter_cer_max": 0.70567837017772,
+      "span_share_mean": 0.689384642542372
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 271,
+      "ref_chars": 5294,
+      "edits": 1033,
+      "cer": 0.19512655836796372,
+      "cer_lo": 0.07894736842105263,
+      "cer_hi": 0.24875759249033683,
+      "letter_cer_mean": 0.16385248045569473,
+      "letter_cer_q1": 0.036494812403731584,
+      "letter_cer_median": 0.16385248045569473,
+      "letter_cer_q3": 0.29121014850765786,
+      "letter_cer_min": 0.07894736842105263,
+      "letter_cer_max": 0.24875759249033683,
+      "span_share_mean": 0.724974832092162
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 998,
+      "ref_chars": 18700,
+      "edits": 5124,
+      "cer": 0.27401069518716575,
+      "cer_lo": 0.1675487060191916,
+      "cer_hi": 0.4043649750197213,
+      "letter_cer_mean": 0.2566820732556036,
+      "letter_cer_q1": 0.12855242519903906,
+      "letter_cer_median": 0.23400144325746552,
+      "letter_cer_q3": 0.3143089029240679,
+      "letter_cer_min": 0.05447070914696814,
+      "letter_cer_max": 0.70567837017772,
+      "span_share_mean": 0.8274488744367732
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 319,
+      "ref_chars": 6019,
+      "edits": 1279,
+      "cer": 0.2124937697291909,
+      "cer_lo": 0.19777620061509343,
+      "cer_hi": 0.2531869688385269,
+      "letter_cer_mean": 0.2287806973626539,
+      "letter_cer_q1": 0.19777620061509343,
+      "letter_cer_median": 0.225,
+      "letter_cer_q3": 0.26356589147286824,
+      "letter_cer_min": 0.19777620061509343,
+      "letter_cer_max": 0.26356589147286824,
+      "span_share_mean": 0.8087474232841597
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 404,
+      "ref_chars": 13868,
+      "edits": 4452,
+      "cer": 0.3210268243438131,
+      "cer_lo": 0.08095698405026583,
+      "cer_hi": 0.4786266024992923,
+      "letter_cer_mean": 0.16905197269525576,
+      "letter_cer_q1": 0.07217626905126741,
+      "letter_cer_median": 0.09590920129236967,
+      "letter_cer_q3": 0.2339390074526163,
+      "letter_cer_min": 0.06841741534208708,
+      "letter_cer_max": 0.5530921820303384,
+      "span_share_mean": 0.8539331915966509
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 170,
+      "ref_chars": 5484,
+      "edits": 621,
+      "cer": 0.11323851203501094,
+      "cer_lo": 0.08019784490372725,
+      "cer_hi": 0.1484831354814396,
+      "letter_cer_mean": 0.11502357955797134,
+      "letter_cer_q1": 0.07547410176549918,
+      "letter_cer_median": 0.10318331503841932,
+      "letter_cer_q3": 0.1604931896102195,
+      "letter_cer_min": 0.0736949846468782,
+      "letter_cer_max": 0.1826625386996904,
+      "span_share_mean": 0.9468330827861798
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5943,
+      "ref_chars": 96510,
+      "edits": 24212,
+      "cer": 0.25087555693710495,
+      "cer_lo": 0.19150231182393831,
+      "cer_hi": 0.3190309309766875,
+      "letter_cer_mean": 0.2510849107687773,
+      "letter_cer_q1": 0.1302726813850057,
+      "letter_cer_median": 0.18641350407269103,
+      "letter_cer_q3": 0.3831950729009552,
+      "letter_cer_min": 0.06781750924784218,
+      "letter_cer_max": 0.6414565826330533,
+      "span_share_mean": 0.6658230646389042
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2208,
+      "ref_chars": 42514,
+      "edits": 12539,
+      "cer": 0.29493813802512114,
+      "cer_lo": 0.20255592856941348,
+      "cer_hi": 0.3794228206607132,
+      "letter_cer_mean": 0.28148606095861306,
+      "letter_cer_q1": 0.10226700251889169,
+      "letter_cer_median": 0.21455938697318008,
+      "letter_cer_q3": 0.45710627400768244,
+      "letter_cer_min": 0.05795768169273229,
+      "letter_cer_max": 0.6229050279329609,
+      "span_share_mean": 0.6305719227380782
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 4102,
+      "ref_chars": 71420,
+      "edits": 25299,
+      "cer": 0.3542285074208905,
+      "cer_lo": 0.2332472043375127,
+      "cer_hi": 0.4298402571430885,
+      "letter_cer_mean": 0.2694155306227664,
+      "letter_cer_q1": 0.11184755592377796,
+      "letter_cer_median": 0.23867262284620294,
+      "letter_cer_q3": 0.4080287597363691,
+      "letter_cer_min": 0.08970649028524183,
+      "letter_cer_max": 0.5175263607865489,
+      "span_share_mean": 0.6202894683658029
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 4399,
+      "ref_chars": 68507,
+      "edits": 19379,
+      "cer": 0.2828762024318683,
+      "cer_lo": 0.2353056356580868,
+      "cer_hi": 0.3326930360911206,
+      "letter_cer_mean": 0.2935095413531955,
+      "letter_cer_q1": 0.20142706131078225,
+      "letter_cer_median": 0.263833894549802,
+      "letter_cer_q3": 0.3775861706477516,
+      "letter_cer_min": 0.09683022145028224,
+      "letter_cer_max": 0.5331632653061225,
+      "span_share_mean": 0.6687698224719423
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 6295,
+     "yield": 0.33457347860749403,
+     "policies": {
+      "philiumm": {
+       "cer": 0.10310242177445539,
+       "ref_chars": 255639,
+       "edits": 26357
+      },
+      "lenient": {
+       "cer": 0.09195989175644415,
+       "ref_chars": 254611,
+       "edits": 23414
+      },
+      "strict": {
+       "cer": 0.10343358138874202,
+       "ref_chars": 253438,
+       "edits": 26214
+      },
+      "reading": {
+       "cer": 0.10343358138874202,
+       "ref_chars": 253438,
+       "edits": 26214
+      }
+     }
+    },
+    "info": {
+     "reader": "k3-trocr",
+     "model": "data/models/k3/trocr/best",
+     "device": "cuda",
+     "lines_read": 18814,
+     "ms_per_line": 104.75156953103821,
+     "licence": "MIT (the base) · the fine-tune open",
+     "evaluate_only": false
+    }
+   },
+   "validation": {
+    "breakdown": {
+     "overall": {
+      "lines": 3133,
+      "ref_chars": 148499,
+      "edits": 17578,
+      "sub": 7376,
+      "ins": 3713,
+      "exact": 436,
+      "del": 6489,
+      "cer": 0.11837116748260931,
+      "sub_share": 0.41961542837637955,
+      "ins_share": 0.21122994652406418,
+      "del_share": 0.36915462509955627
+     },
+     "by": {
+      "stratum": {
+       "fair_copy": {
+        "lines": 7,
+        "ref_chars": 326,
+        "edits": 75,
+        "sub": 34,
+        "ins": 24,
+        "exact": 0,
+        "del": 17,
+        "cer": 0.23006134969325154,
+        "sub_share": 0.4533333333333333,
+        "ins_share": 0.32,
+        "del_share": 0.22666666666666666
+       },
+       "heavy_revision": {
+        "lines": 2117,
+        "ref_chars": 105565,
+        "edits": 13996,
+        "sub": 5838,
+        "ins": 2825,
+        "exact": 252,
+        "del": 5333,
+        "cer": 0.13258182162648605,
+        "sub_share": 0.4171191769076879,
+        "ins_share": 0.2018433838239497,
+        "del_share": 0.38103743926836237
+       },
+       "light_revision": {
+        "lines": 949,
+        "ref_chars": 39802,
+        "edits": 3319,
+        "sub": 1408,
+        "ins": 816,
+        "exact": 172,
+        "del": 1095,
+        "cer": 0.08338776945882116,
+        "sub_share": 0.4242241639047906,
+        "ins_share": 0.24585718589936728,
+        "del_share": 0.3299186501958421
+       },
+       "scrap": {
+        "lines": 60,
+        "ref_chars": 2806,
+        "edits": 188,
+        "sub": 96,
+        "ins": 48,
+        "exact": 12,
+        "del": 44,
+        "cer": 0.06699928724162509,
+        "sub_share": 0.5106382978723404,
+        "ins_share": 0.2553191489361702,
+        "del_share": 0.23404255319148937
+       }
+      },
+      "group": {
+       "leibniz": {
+        "lines": 164,
+        "ref_chars": 8018,
+        "edits": 1583,
+        "sub": 803,
+        "ins": 274,
+        "exact": 17,
+        "del": 506,
+        "cer": 0.1974307807433275,
+        "sub_share": 0.50726468730259,
+        "ins_share": 0.17308907138344914,
+        "del_share": 0.31964624131396085
+       },
+       "other": {
+        "lines": 2969,
+        "ref_chars": 140481,
+        "edits": 15995,
+        "sub": 6573,
+        "ins": 3439,
+        "exact": 419,
+        "del": 5983,
+        "cer": 0.11385881364739715,
+        "sub_share": 0.41094091903719915,
+        "ins_share": 0.21500468896530164,
+        "del_share": 0.37405439199749924
+       }
+      },
+      "reader": {
+       "trocr-kurrent-xvi-xvii": {
+        "lines": 2675,
+        "ref_chars": 126471,
+        "edits": 13845,
+        "sub": 5416,
+        "ins": 3149,
+        "exact": 379,
+        "del": 5280,
+        "cer": 0.10947173660364827,
+        "sub_share": 0.39118815456843625,
+        "ins_share": 0.2274467316720838,
+        "del_share": 0.38136511375947996
+       },
+       "v1": {
+        "lines": 458,
+        "ref_chars": 22028,
+        "edits": 3733,
+        "sub": 1960,
+        "ins": 564,
+        "exact": 57,
+        "del": 1209,
+        "cer": 0.1694661340112584,
+        "sub_share": 0.5250468791856415,
+        "ins_share": 0.15108491829627646,
+        "del_share": 0.32386820251808196
+       }
+      },
+      "hand": {
+       "other": {
+        "lines": 1481,
+        "ref_chars": 67054,
+        "edits": 7539,
+        "sub": 3179,
+        "ins": 1628,
+        "exact": 239,
+        "del": 2732,
+        "cer": 0.11243177140811883,
+        "sub_share": 0.4216739620639342,
+        "ins_share": 0.2159437591192466,
+        "del_share": 0.3623822788168192
+       },
+       "own": {
+        "lines": 236,
+        "ref_chars": 12237,
+        "edits": 2064,
+        "sub": 980,
+        "ins": 426,
+        "exact": 20,
+        "del": 658,
+        "cer": 0.16866879137043392,
+        "sub_share": 0.4748062015503876,
+        "ins_share": 0.2063953488372093,
+        "del_share": 0.3187984496124031
+       },
+       "partial": {
+        "lines": 1416,
+        "ref_chars": 69208,
+        "edits": 7975,
+        "sub": 3217,
+        "ins": 1659,
+        "exact": 177,
+        "del": 3099,
+        "cer": 0.11523234308172466,
+        "sub_share": 0.40338557993730406,
+        "ins_share": 0.20802507836990597,
+        "del_share": 0.38858934169278997
+       }
+      }
+     }
+    },
+    "bootstrap": {
+     "cer": 0.11837116748260931,
+     "cer_lo": 0.11308445807500628,
+     "cer_hi": 0.1232683427398666,
+     "n": 3133
+    },
+    "tax": {
+     "policy": "philiumm",
+     "cer_policy": 0.11837116748260931,
+     "cer_folded": 0.10115366482708894,
+     "tax": 0.01721750265552037,
+     "lines": 3133
+    }
+   },
+   "dresden": {
+    "cer": 0.11929543634907927,
+    "cer_lo": 0.10701077343624377,
+    "cer_hi": 0.13112947658402205,
+    "ms_per_line": 181.22866392428202,
+    "n_lines": 383,
+    "status": "ok"
+   },
+   "speed": {
+    "ms_per_line_model": 181.22866392428202,
+    "ms_per_line_all_in": 183.3299118693068,
+    "lines": 310831,
+    "hours": 15.829061065624584
+   },
+   "trained": {
+    "epoch": 6,
+    "step": 41700,
+    "best_cer": 0.11837116748260931,
+    "best_epoch": 5,
+    "history": [
+     {
+      "epoch": 0,
+      "step": 6950,
+      "lines": 55596,
+      "seconds": 16190.042592680984,
+      "lines_per_s": 3.4339625533247964,
+      "peak_mib": 3516,
+      "cer": 0.1446676408595344,
+      "wer": 0.38018954960999746,
+      "exact": 356,
+      "val_seconds": 397.8445157610113,
+      "at": "2026-10-24T18:19:34+00:00"
+     },
+     {
+      "epoch": 1,
+      "step": 13900,
+      "lines": 55596,
+      "seconds": 16121.11381729602,
+      "lines_per_s": 3.4486450892960114,
+      "peak_mib": 3496,
+      "cer": 0.13139482420757043,
+      "wer": 0.35037322821437555,
+      "exact": 393,
+      "val_seconds": 401.70760393401724,
+      "at": "2026-10-24T22:55:34+00:00"
+     },
+     {
+      "epoch": 2,
+      "step": 20850,
+      "lines": 55596,
+      "seconds": 16156.04114464001,
+      "lines_per_s": 3.441189552704546,
+      "peak_mib": 3496,
+      "cer": 0.1335227846652166,
+      "wer": 0.3511700075484358,
+      "exact": 397,
+      "val_seconds": 397.6046773529961,
+      "at": "2026-10-25T03:32:22+00:00"
+     },
+     {
+      "epoch": 3,
+      "step": 27800,
+      "lines": 55596,
+      "seconds": 16029.707174275012,
+      "lines_per_s": 3.468310393668466,
+      "peak_mib": 3516,
+      "cer": 0.12335436602266682,
+      "wer": 0.3365763650088065,
+      "exact": 417,
+      "val_seconds": 394.0366510929889,
+      "at": "2026-10-25T08:06:35+00:00"
+     },
+     {
+      "epoch": 4,
+      "step": 34750,
+      "lines": 55596,
+      "seconds": 16116.391225497995,
+      "lines_per_s": 3.44965564698136,
+      "peak_mib": 3516,
+      "cer": 0.11994693566960046,
+      "wer": 0.3268892057368112,
+      "exact": 422,
+      "val_seconds": 417.0187252610049,
+      "at": "2026-10-25T12:43:17+00:00"
+     },
+     {
+      "epoch": 5,
+      "step": 41700,
+      "lines": 55596,
+      "seconds": 16239.408414147008,
+      "lines_per_s": 3.4235237258746065,
+      "peak_mib": 3496,
+      "cer": 0.11837116748260931,
+      "wer": 0.32466661075232744,
+      "exact": 436,
+      "val_seconds": 386.55896590597695,
+      "at": "2026-10-25T17:22:43+00:00"
+     }
+    ],
+    "settings": {
+     "optimizer": "adafactor",
+     "freeze_encoder": false,
+     "grad_checkpointing": true,
+     "fp16": false,
+     "batch_size": 8,
+     "lr": 5e-05,
+     "accumulate": 1,
+     "weight_decay": 0.0,
+     "warmup_steps": 200,
+     "max_target_tokens": 128,
+     "key": "adafactor-grad-ckpt-b8"
+    },
+    "started": "2026-10-24T13:42:36+00:00",
+    "finished": "2026-10-25T17:23:25+00:00"
+   }
+  },
+  "k3-kraken": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 14874,
+     "ref_chars": 328316,
+     "edits": 100553,
+     "cer": 0.3062689603918176,
+     "cer_lo": 0.26542371736413684,
+     "cer_hi": 0.34502561730689285,
+     "letter_cer_mean": 0.27646951076829146,
+     "letter_cer_q1": 0.14655260590529184,
+     "letter_cer_median": 0.22952973303584506,
+     "letter_cer_q3": 0.39177891433778445,
+     "letter_cer_min": 0.050597976080956765,
+     "letter_cer_max": 0.7195491980927612,
+     "span_share_mean": 0.7093160052002435
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 5862,
+     "ref_chars": 140107,
+     "edits": 37306,
+     "cer": 0.2662679238010949,
+     "cer_lo": 0.22958235221217002,
+     "cer_hi": 0.3040571049136786,
+     "letter_cer_mean": 0.26946831428234785,
+     "letter_cer_q1": 0.14543372459204124,
+     "letter_cer_median": 0.23099850968703428,
+     "letter_cer_q3": 0.3798449612403101,
+     "letter_cer_min": 0.050597976080956765,
+     "letter_cer_max": 0.6638655462184874,
+     "span_share_mean": 0.7610591497139645
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 9012,
+     "ref_chars": 188209,
+     "edits": 63247,
+     "cer": 0.3360466290134903,
+     "cer_lo": 0.27010540370045993,
+     "cer_hi": 0.38863462160449797,
+     "letter_cer_mean": 0.28347070725423507,
+     "letter_cer_q1": 0.14692556634304207,
+     "letter_cer_median": 0.22806095638465582,
+     "letter_cer_q3": 0.42954776792205906,
+     "letter_cer_min": 0.08583690987124463,
+     "letter_cer_max": 0.7195491980927612,
+     "span_share_mean": 0.6575728606865224
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 6036,
+      "ref_chars": 153297,
+      "edits": 31148,
+      "cer": 0.20318727698519867,
+      "cer_lo": 0.16835404314828034,
+      "cer_hi": 0.24577011153396267,
+      "letter_cer_mean": 0.194632291223543,
+      "letter_cer_q1": 0.12114633087277464,
+      "letter_cer_median": 0.1697936210131332,
+      "letter_cer_q3": 0.23099850968703428,
+      "letter_cer_min": 0.07091469681397738,
+      "letter_cer_max": 0.5772058823529411,
+      "span_share_mean": 0.708036556244974
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 8838,
+      "ref_chars": 175019,
+      "edits": 69405,
+      "cer": 0.3965569452459447,
+      "cer_lo": 0.34732923729661574,
+      "cer_hi": 0.43876190076752086,
+      "letter_cer_mean": 0.35830673031303995,
+      "letter_cer_q1": 0.22806095638465582,
+      "letter_cer_median": 0.3590686274509804,
+      "letter_cer_q3": 0.45902688860435337,
+      "letter_cer_min": 0.050597976080956765,
+      "letter_cer_max": 0.7195491980927612,
+      "span_share_mean": 0.710595454155513
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 248,
+      "ref_chars": 5294,
+      "edits": 1192,
+      "cer": 0.22516055912353608,
+      "cer_lo": 0.09210526315789473,
+      "cer_hi": 0.2865819988956378,
+      "letter_cer_mean": 0.18934363102676627,
+      "letter_cer_q1": 0.04348607922345897,
+      "letter_cer_median": 0.18934363102676627,
+      "letter_cer_q3": 0.33520118283007355,
+      "letter_cer_min": 0.09210526315789473,
+      "letter_cer_max": 0.2865819988956378,
+      "span_share_mean": 0.7275168434314794
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 665,
+      "ref_chars": 18700,
+      "edits": 5842,
+      "cer": 0.31240641711229944,
+      "cer_lo": 0.20250155639821155,
+      "cer_hi": 0.4451131996851706,
+      "letter_cer_mean": 0.29665098490545216,
+      "letter_cer_q1": 0.15022832410109793,
+      "letter_cer_median": 0.2496937626718469,
+      "letter_cer_q3": 0.400244493934966,
+      "letter_cer_min": 0.07091469681397738,
+      "letter_cer_max": 0.7195491980927612,
+      "span_share_mean": 0.8394478538649851
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 240,
+      "ref_chars": 6019,
+      "edits": 1334,
+      "cer": 0.22163150024921083,
+      "cer_lo": 0.20227111426543648,
+      "cer_hi": 0.28328611898017,
+      "letter_cer_mean": 0.24040412091181626,
+      "letter_cer_q1": 0.20227111426543648,
+      "letter_cer_median": 0.20789473684210527,
+      "letter_cer_q3": 0.311046511627907,
+      "letter_cer_min": 0.20227111426543648,
+      "letter_cer_max": 0.311046511627907,
+      "span_share_mean": 0.8098509034254212
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 331,
+      "ref_chars": 13868,
+      "edits": 4611,
+      "cer": 0.33249206807037784,
+      "cer_lo": 0.09905431619786614,
+      "cer_hi": 0.4871732621186372,
+      "letter_cer_mean": 0.1825519674288197,
+      "letter_cer_q1": 0.09164579722488303,
+      "letter_cer_median": 0.11506250230660137,
+      "letter_cer_q3": 0.23017305796640847,
+      "letter_cer_min": 0.09084027252081757,
+      "letter_cer_max": 0.5633022170361727,
+      "span_share_mean": 0.8580994299633428
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 141,
+      "ref_chars": 5484,
+      "edits": 852,
+      "cer": 0.15536105032822758,
+      "cer_lo": 0.10950345281157514,
+      "cer_hi": 0.2026947861745753,
+      "letter_cer_mean": 0.16057463880106576,
+      "letter_cer_q1": 0.10438936602234021,
+      "letter_cer_median": 0.1643612693246542,
+      "letter_cer_q3": 0.2148665963179971,
+      "letter_cer_min": 0.08583690987124463,
+      "letter_cer_max": 0.23116615067079463,
+      "span_share_mean": 0.9593838845575199
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 4648,
+      "ref_chars": 96510,
+      "edits": 25691,
+      "cer": 0.26620039374158116,
+      "cer_lo": 0.20607531326840686,
+      "cer_hi": 0.3351670690928401,
+      "letter_cer_mean": 0.26827490938472315,
+      "letter_cer_q1": 0.15291632782145115,
+      "letter_cer_median": 0.19735576548752953,
+      "letter_cer_q3": 0.4180434621283332,
+      "letter_cer_min": 0.07548701298701299,
+      "letter_cer_max": 0.6638655462184874,
+      "span_share_mean": 0.6830963715947505
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 1815,
+      "ref_chars": 42514,
+      "edits": 13114,
+      "cer": 0.3084630945100437,
+      "cer_lo": 0.22066747538578724,
+      "cer_hi": 0.3883900841380089,
+      "letter_cer_mean": 0.2956010542518116,
+      "letter_cer_q1": 0.1304785894206549,
+      "letter_cer_median": 0.235329703569268,
+      "letter_cer_q3": 0.45902688860435337,
+      "letter_cer_min": 0.050597976080956765,
+      "letter_cer_max": 0.6192052980132451,
+      "span_share_mean": 0.6452619154144263
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 3559,
+      "ref_chars": 71420,
+      "edits": 27193,
+      "cer": 0.38074768972276674,
+      "cer_lo": 0.2558993399339934,
+      "cer_hi": 0.45943166947092917,
+      "letter_cer_mean": 0.2954595211695391,
+      "letter_cer_q1": 0.13362864525655224,
+      "letter_cer_median": 0.2686662412252712,
+      "letter_cer_q3": 0.4334931096464949,
+      "letter_cer_min": 0.09635416666666667,
+      "letter_cer_max": 0.54265153288088,
+      "span_share_mean": 0.6357123806409689
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 3227,
+      "ref_chars": 68507,
+      "edits": 20724,
+      "cer": 0.3025092326331616,
+      "cer_lo": 0.2475864690231851,
+      "cer_hi": 0.3571227621483376,
+      "letter_cer_mean": 0.31374529246400684,
+      "letter_cer_q1": 0.21816939787378078,
+      "letter_cer_median": 0.3144544545636894,
+      "letter_cer_q3": 0.4150003533370838,
+      "letter_cer_min": 0.10544478527607362,
+      "letter_cer_max": 0.5772058823529411,
+      "span_share_mean": 0.7029874599435799
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 5738,
+     "yield": 0.30496943927717246,
+     "policies": {
+      "philiumm": {
+       "cer": 0.14596682351129323,
+       "ref_chars": 246741,
+       "edits": 36016
+      },
+      "lenient": {
+       "cer": 0.1344031320711716,
+       "ref_chars": 245716,
+       "edits": 33025
+      },
+      "strict": {
+       "cer": 0.14652842792956694,
+       "ref_chars": 244601,
+       "edits": 35841
+      },
+      "reading": {
+       "cer": 0.14654886938319958,
+       "ref_chars": 244601,
+       "edits": 35846
+      }
+     }
+    },
+    "info": {
+     "reader": "k3-kraken",
+     "model": "k3-kraken",
+     "device": "cuda",
+     "lines_read": 14874,
+     "ms_per_line": 10.672263486039578,
+     "licence": "CC BY 4.0 (the base) · the fine-tune open",
+     "evaluate_only": false
+    }
+   },
+   "validation": {
+    "breakdown": {
+     "overall": {
+      "lines": 3133,
+      "ref_chars": 148499,
+      "edits": 23105,
+      "sub": 10032,
+      "ins": 2478,
+      "exact": 181,
+      "del": 10595,
+      "cer": 0.15559027333517397,
+      "sub_share": 0.4341917333910409,
+      "ins_share": 0.10724951309240424,
+      "del_share": 0.45855875351655484
+     },
+     "by": {
+      "stratum": {
+       "fair_copy": {
+        "lines": 7,
+        "ref_chars": 326,
+        "edits": 105,
+        "sub": 53,
+        "ins": 5,
+        "exact": 0,
+        "del": 47,
+        "cer": 0.3220858895705521,
+        "sub_share": 0.5047619047619047,
+        "ins_share": 0.047619047619047616,
+        "del_share": 0.44761904761904764
+       },
+       "heavy_revision": {
+        "lines": 2117,
+        "ref_chars": 105565,
+        "edits": 18793,
+        "sub": 8078,
+        "ins": 1816,
+        "exact": 95,
+        "del": 8899,
+        "cer": 0.17802301899303746,
+        "sub_share": 0.4298408982067791,
+        "ins_share": 0.09663172457830044,
+        "del_share": 0.47352737721492044
+       },
+       "light_revision": {
+        "lines": 949,
+        "ref_chars": 39802,
+        "edits": 4067,
+        "sub": 1849,
+        "ins": 638,
+        "exact": 72,
+        "del": 1580,
+        "cer": 0.10218079493492789,
+        "sub_share": 0.45463486599459063,
+        "ins_share": 0.15687238750922056,
+        "del_share": 0.3884927464961888
+       },
+       "scrap": {
+        "lines": 60,
+        "ref_chars": 2806,
+        "edits": 140,
+        "sub": 52,
+        "ins": 19,
+        "exact": 14,
+        "del": 69,
+        "cer": 0.04989308624376337,
+        "sub_share": 0.37142857142857144,
+        "ins_share": 0.1357142857142857,
+        "del_share": 0.4928571428571429
+       }
+      },
+      "group": {
+       "leibniz": {
+        "lines": 164,
+        "ref_chars": 8018,
+        "edits": 1912,
+        "sub": 916,
+        "ins": 137,
+        "exact": 7,
+        "del": 859,
+        "cer": 0.23846345722125217,
+        "sub_share": 0.4790794979079498,
+        "ins_share": 0.07165271966527197,
+        "del_share": 0.44926778242677823
+       },
+       "other": {
+        "lines": 2969,
+        "ref_chars": 140481,
+        "edits": 21193,
+        "sub": 9116,
+        "ins": 2341,
+        "exact": 174,
+        "del": 9736,
+        "cer": 0.15086025868266884,
+        "sub_share": 0.4301420280281225,
+        "ins_share": 0.11046100127400557,
+        "del_share": 0.45939697069787194
+       }
+      },
+      "reader": {
+       "trocr-kurrent-xvi-xvii": {
+        "lines": 2675,
+        "ref_chars": 126471,
+        "edits": 18945,
+        "sub": 8100,
+        "ins": 2185,
+        "exact": 157,
+        "del": 8660,
+        "cer": 0.14979718670683398,
+        "sub_share": 0.42755344418052255,
+        "ins_share": 0.11533386117709159,
+        "del_share": 0.45711269464238585
+       },
+       "v1": {
+        "lines": 458,
+        "ref_chars": 22028,
+        "edits": 4160,
+        "sub": 1932,
+        "ins": 293,
+        "exact": 24,
+        "del": 1935,
+        "cer": 0.18885055384056657,
+        "sub_share": 0.46442307692307694,
+        "ins_share": 0.07043269230769231,
+        "del_share": 0.4651442307692308
+       }
+      },
+      "hand": {
+       "other": {
+        "lines": 1481,
+        "ref_chars": 67054,
+        "edits": 10563,
+        "sub": 4552,
+        "ins": 1118,
+        "exact": 104,
+        "del": 4893,
+        "cer": 0.1575297521400662,
+        "sub_share": 0.43093818044116255,
+        "ins_share": 0.10584114361450346,
+        "del_share": 0.46322067594433397
+       },
+       "own": {
+        "lines": 236,
+        "ref_chars": 12237,
+        "edits": 2856,
+        "sub": 1319,
+        "ins": 187,
+        "exact": 9,
+        "del": 1350,
+        "cer": 0.2333905368962981,
+        "sub_share": 0.46183473389355745,
+        "ins_share": 0.06547619047619048,
+        "del_share": 0.4726890756302521
+       },
+       "partial": {
+        "lines": 1416,
+        "ref_chars": 69208,
+        "edits": 9686,
+        "sub": 4161,
+        "ins": 1173,
+        "exact": 68,
+        "del": 4352,
+        "cer": 0.13995491850653102,
+        "sub_share": 0.4295890976667355,
+        "ins_share": 0.12110262234152384,
+        "del_share": 0.44930827999174067
+       }
+      }
+     }
+    },
+    "bootstrap": {
+     "cer": 0.15559027333517397,
+     "cer_lo": 0.15046283691805065,
+     "cer_hi": 0.16086071137659516,
+     "n": 3133
+    },
+    "tax": {
+     "policy": "philiumm",
+     "cer_policy": 0.15559027333517397,
+     "cer_folded": 0.13729582073823457,
+     "tax": 0.018294452596939403,
+     "lines": 3133
+    }
+   },
+   "dresden": {
+    "cer": 0.13202562049639713,
+    "cer_lo": 0.12116277176125723,
+    "cer_hi": 0.14275408784866944,
+    "ms_per_line": 51.69323501044383,
+    "n_lines": 383,
+    "status": "ok"
+   },
+   "speed": {
+    "ms_per_line_model": 51.69323501044383,
+    "ms_per_line_all_in": 53.794482955468624,
+    "lines": 310831,
+    "hours": 4.644720258758685
+   },
+   "trained": {
+    "out_dir": "data/models/k3/kraken",
+    "settings": {
+     "base": "data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors",
+     "ketos": "tools/ketos-memcapped.sh",
+     "batch_size": 2,
+     "accumulate": 8,
+     "lr": 0.0001,
+     "epochs": -1,
+     "min_epochs": 0,
+     "lag": 5,
+     "quit": "early",
+     "resize": "union",
+     "normalization": "NFD",
+     "normalize_whitespace": true,
+     "augment": false,
+     "optimizer": "AdamW",
+     "schedule": "cosine",
+     "warmup": 0,
+     "weight_decay": 0.0,
+     "freeze_backbone": 0,
+     "precision": "32-true",
+     "workers": 4,
+     "threads": 4,
+     "device": "cuda:0",
+     "freq": 1.0,
+     "seed": 20261021,
+     "key": "FoNDUE-GD_v2_ft_Leibniz-b2-lr0.0001-union-x8"
+    },
+    "command": [
+     "tools/ketos-memcapped.sh",
+     "-d",
+     "cuda:0",
+     "--precision",
+     "32-true",
+     "--workers",
+     "4",
+     "--threads",
+     "4",
+     "-s",
+     "20261021",
+     "train",
+     "-f",
+     "path",
+     "-t",
+     "data/models/k3/kraken/train-capped.txt",
+     "-e",
+     "data/train/k3/val.txt",
+     "-i",
+     "data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors",
+     "--resize",
+     "union",
+     "-u",
+     "NFD",
+     "-B",
+     "2",
+     "-r",
+     "0.0001",
+     "--optimizer",
+     "AdamW",
+     "--schedule",
+     "cosine",
+     "-w",
+     "0",
+     "-q",
+     "early",
+     "-N",
+     "-1",
+     "--min-epochs",
+     "0",
+     "--lag",
+     "5",
+     "-F",
+     "1",
+     "-o",
+     "data/models/k3/kraken/checkpoints",
+     "--accumulate-grad-batches",
+     "8",
+     "--normalize-whitespace",
+     "--no-augment"
+    ],
+    "checkpoints": [
+     {
+      "epoch": 26,
+      "val_metric": 0.8642,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_26-0.8642.ckpt",
+      "mtime": 1792806012.0
+     },
+     {
+      "epoch": 28,
+      "val_metric": 0.8644,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_28-0.8644.ckpt",
+      "mtime": 1792814566.0
+     },
+     {
+      "epoch": 29,
+      "val_metric": 0.8644,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_29-0.8644.ckpt",
+      "mtime": 1792818827.0
+     },
+     {
+      "epoch": 30,
+      "val_metric": 0.8644,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_30-0.8644.ckpt",
+      "mtime": 1792823095.0
+     },
+     {
+      "epoch": 31,
+      "val_metric": 0.8646,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_31-0.8646.ckpt",
+      "mtime": 1792827426.0
+     },
+     {
+      "epoch": 32,
+      "val_metric": 0.8645,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_32-0.8645.ckpt",
+      "mtime": 1792831724.0
+     },
+     {
+      "epoch": 33,
+      "val_metric": 0.8648,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_33-0.8648.ckpt",
+      "mtime": 1792836006.0
+     },
+     {
+      "epoch": 34,
+      "val_metric": 0.865,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_34-0.8650.ckpt",
+      "mtime": 1792840313.0
+     },
+     {
+      "epoch": 35,
+      "val_metric": 0.8653,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_35-0.8653.ckpt",
+      "mtime": 1792844610.0
+     },
+     {
+      "epoch": 36,
+      "val_metric": 0.8659,
+      "path": "data/models/k3/kraken/checkpoints/checkpoint_36-0.8659.ckpt",
+      "mtime": 1792849010.0
+     }
+    ],
+    "epoch_seconds": [
+     4261.0,
+     4268.0,
+     4331.0,
+     4298.0,
+     4282.0,
+     4307.0,
+     4297.0,
+     4400.0
+    ],
+    "best": {
+     "weights": "data/models/k3/kraken/checkpoints/best_0.8659.safetensors",
+     "score": 0.8659
+    },
+    "log": {
+     "resized": null,
+     "best": null,
+     "errors": [
+      "│ ❱ 73 │   │   _error_if_any_worker_fails()                                    │",
+      "│   76 │   │   │   │   raise AssertionError(\"previous_handler is not callable\" │",
+      "RuntimeError: DataLoader worker (pid 684612) is killed by signal: Terminated.",
+      "│ ❱ 73 │   │   _error_if_any_worker_fails()                                    │",
+      "│   76 │   │   │   │   raise AssertionError(\"previous_handler is not callable\" │",
+      "RuntimeError: DataLoader worker (pid 683773) is killed by signal: Terminated.",
+      "RuntimeError: release unlocked lock",
+      "│   249 │   except ValueError as e:                                            │",
+      "│   1125 │   │   raise RuntimeError(f\"Unexpected state {self.state}\")          │",
+      "│   1498 │   │   │   │   raise AssertionError(                                 │",
+      "│ ❱ 1300 │   │   │   │   raise RuntimeError(                                   │",
+      "RuntimeError: DataLoader worker (pid(s) 684610, 684611, 684612, 684613) exited"
+     ]
+    },
+    "score": {
+     "n": 3133,
+     "cer": 0.15559027333517397,
+     "wer": 0.4577287595403841,
+     "exact": 181,
+     "seconds": 88.91281575901667,
+     "lines_per_s": 35.23676506310939,
+     "policy": "philiumm"
+    },
+    "codec": {
+     "before": 178,
+     "after": 203,
+     "added": 25,
+     "removed": 0,
+     "added_chars": "\"$%'*\\{}£¨¬¸ºÆæıˆ̄—‘“”„〈〉"
+    },
+    "pilot_lines": 55585,
+    "run_seconds": 160060.2858595848,
+    "peak_mib": 2238
+   }
+  }
+ },
+ "baselines": {
+  "v1": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 17399,
+     "ref_chars": 328316,
+     "edits": 153116,
+     "cer": 0.46636776763849463,
+     "cer_lo": 0.4332017255962353,
+     "cer_hi": 0.4949620227427858,
+     "letter_cer_mean": 0.45522817638991425,
+     "letter_cer_q1": 0.3474982998067679,
+     "letter_cer_median": 0.428864646882432,
+     "letter_cer_q3": 0.5793987241238612,
+     "letter_cer_min": 0.20836751435602954,
+     "letter_cer_max": 0.7360208062418726,
+     "span_share_mean": 0.6815944407294253
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7034,
+     "ref_chars": 140107,
+     "edits": 62308,
+     "cer": 0.44471725181468447,
+     "cer_lo": 0.41356177422425283,
+     "cer_hi": 0.47627002131023577,
+     "letter_cer_mean": 0.45115495020178653,
+     "letter_cer_q1": 0.33712308452792883,
+     "letter_cer_median": 0.4343617664851785,
+     "letter_cer_q3": 0.5421500386697602,
+     "letter_cer_min": 0.20836751435602954,
+     "letter_cer_max": 0.7133520074696545,
+     "span_share_mean": 0.7316627344866665
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 10365,
+     "ref_chars": 188209,
+     "edits": 90808,
+     "cer": 0.48248489710906495,
+     "cer_lo": 0.43114230936498893,
+     "cer_hi": 0.5238568168371228,
+     "letter_cer_mean": 0.4593014025780421,
+     "letter_cer_q1": 0.352461586704296,
+     "letter_cer_median": 0.41736227045075125,
+     "letter_cer_q3": 0.5992217898832685,
+     "letter_cer_min": 0.2374821173104435,
+     "letter_cer_max": 0.7360208062418726,
+     "span_share_mean": 0.6315261469721839
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 7276,
+      "ref_chars": 153297,
+      "edits": 59070,
+      "cer": 0.38533043699485314,
+      "cer_lo": 0.35943936007197785,
+      "cer_hi": 0.4188112538589089,
+      "letter_cer_mean": 0.3891447618964907,
+      "letter_cer_q1": 0.32353699407063674,
+      "letter_cer_median": 0.3622291021671827,
+      "letter_cer_q3": 0.40677083333333336,
+      "letter_cer_min": 0.20836751435602954,
+      "letter_cer_max": 0.7174490699734278,
+      "span_share_mean": 0.6920340480629841
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10123,
+      "ref_chars": 175019,
+      "edits": 94046,
+      "cer": 0.5373473737137111,
+      "cer_lo": 0.4993608936982368,
+      "cer_hi": 0.5688842897851364,
+      "letter_cer_mean": 0.5213115908833378,
+      "letter_cer_q1": 0.4319136172765447,
+      "letter_cer_median": 0.5421500386697602,
+      "letter_cer_q3": 0.6288782816229117,
+      "letter_cer_min": 0.21568627450980393,
+      "letter_cer_max": 0.7360208062418726,
+      "span_share_mean": 0.6711548333958665
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 266,
+      "ref_chars": 5294,
+      "edits": 2052,
+      "cer": 0.387608613524745,
+      "cer_lo": 0.2822966507177033,
+      "cer_hi": 0.43622308117062397,
+      "letter_cer_mean": 0.35925986594416365,
+      "letter_cer_q1": 0.24381504310447316,
+      "letter_cer_median": 0.35925986594416365,
+      "letter_cer_q3": 0.4747046887838541,
+      "letter_cer_min": 0.2822966507177033,
+      "letter_cer_max": 0.43622308117062397,
+      "span_share_mean": 0.7230840730327941
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 900,
+      "ref_chars": 18700,
+      "edits": 8394,
+      "cer": 0.44887700534759356,
+      "cer_lo": 0.37779740871613665,
+      "cer_hi": 0.5341748617838447,
+      "letter_cer_mean": 0.43582155260225364,
+      "letter_cer_q1": 0.35778389094056684,
+      "letter_cer_median": 0.39639393495945774,
+      "letter_cer_q3": 0.4938029745164878,
+      "letter_cer_min": 0.31654676258992803,
+      "letter_cer_max": 0.7360208062418726,
+      "span_share_mean": 0.8263633169365224
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 296,
+      "ref_chars": 6019,
+      "edits": 2312,
+      "cer": 0.3841169629506563,
+      "cer_lo": 0.34776437189496096,
+      "cer_hi": 0.48087818696883855,
+      "letter_cer_mean": 0.4255705801053378,
+      "letter_cer_q1": 0.34776437189496096,
+      "letter_cer_median": 0.42894736842105263,
+      "letter_cer_q3": 0.5,
+      "letter_cer_min": 0.34776437189496096,
+      "letter_cer_max": 0.5,
+      "span_share_mean": 0.8180133908835893
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 382,
+      "ref_chars": 13868,
+      "edits": 6412,
+      "cer": 0.4623593885203346,
+      "cer_lo": 0.2696877590494612,
+      "cer_hi": 0.5806197696578009,
+      "letter_cer_mean": 0.3454031951001821,
+      "letter_cer_q1": 0.2509134249932121,
+      "letter_cer_median": 0.2995686435778067,
+      "letter_cer_q3": 0.41200946625475643,
+      "letter_cer_min": 0.24740843123704215,
+      "letter_cer_max": 0.6366686114352392,
+      "span_share_mean": 0.8523061742740655
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 157,
+      "ref_chars": 5484,
+      "edits": 1674,
+      "cer": 0.3052516411378556,
+      "cer_lo": 0.26642678347934917,
+      "cer_hi": 0.35144701228398917,
+      "letter_cer_mean": 0.3120771999743067,
+      "letter_cer_q1": 0.26357425637694676,
+      "letter_cer_median": 0.31174533479692645,
+      "letter_cer_q3": 0.3607460761603569,
+      "letter_cer_min": 0.2374821173104435,
+      "letter_cer_max": 0.3622291021671827,
+      "span_share_mean": 0.9406891919593194
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5485,
+      "ref_chars": 96510,
+      "edits": 43098,
+      "cer": 0.4465651227852036,
+      "cer_lo": 0.39478550508240967,
+      "cer_hi": 0.5000312080641638,
+      "letter_cer_mean": 0.4619212599349083,
+      "letter_cer_q1": 0.33970978186424283,
+      "letter_cer_median": 0.4437908467905844,
+      "letter_cer_q3": 0.5969653620202945,
+      "letter_cer_min": 0.20836751435602954,
+      "letter_cer_max": 0.7174490699734278,
+      "span_share_mean": 0.6412687681367942
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2054,
+      "ref_chars": 42514,
+      "edits": 19764,
+      "cer": 0.46488215646610526,
+      "cer_lo": 0.4013765055529485,
+      "cer_hi": 0.5260344155482541,
+      "letter_cer_mean": 0.45449859063770537,
+      "letter_cer_q1": 0.34005037783375314,
+      "letter_cer_median": 0.3895037486611924,
+      "letter_cer_q3": 0.5941101152368758,
+      "letter_cer_min": 0.23275068997240111,
+      "letter_cer_max": 0.6824953445065177,
+      "span_share_mean": 0.6285287075215046
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 3956,
+      "ref_chars": 71420,
+      "edits": 37547,
+      "cer": 0.5257210865303836,
+      "cer_lo": 0.43537555960868846,
+      "cer_hi": 0.5818042400613437,
+      "letter_cer_mean": 0.4777376902744052,
+      "letter_cer_q1": 0.36970837253057387,
+      "letter_cer_median": 0.4645820038289726,
+      "letter_cer_q3": 0.5705985915492958,
+      "letter_cer_min": 0.3120284065690191,
+      "letter_cer_max": 0.6516576422532535,
+      "span_share_mean": 0.613786252082144
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 3903,
+      "ref_chars": 68507,
+      "edits": 31863,
+      "cer": 0.4651057556162144,
+      "cer_lo": 0.42136565876691184,
+      "cer_hi": 0.5135952132383876,
+      "letter_cer_mean": 0.49798492368823594,
+      "letter_cer_q1": 0.3798500210974329,
+      "letter_cer_median": 0.5091423725472202,
+      "letter_cer_q3": 0.6110170387601583,
+      "letter_cer_min": 0.30004342162396874,
+      "letter_cer_max": 0.6764705882352942,
+      "span_share_mean": 0.6723753958181149
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 4056,
+     "yield": 0.21557268137124636,
+     "policies": {
+      "philiumm": {
+       "cer": 0.28741737422131675,
+       "ref_chars": 178667,
+       "edits": 51352
+      },
+      "lenient": {
+       "cer": 0.2697507856464226,
+       "ref_chars": 177879,
+       "edits": 47983
+      },
+      "strict": {
+       "cer": 0.289071806423567,
+       "ref_chars": 177129,
+       "edits": 51203
+      },
+      "reading": {
+       "cer": 0.2889758311738902,
+       "ref_chars": 177129,
+       "edits": 51186
+      }
+     }
+    },
+    "info": {
+     "reader": "v1",
+     "model": "v1",
+     "device": "store",
+     "lines_read": 17399,
+     "ms_per_line": null,
+     "licence": "the store (the C1 run)",
+     "evaluate_only": false
+    }
+   },
+   "dresden": null
+  },
+  "philiumm": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 17848,
+     "ref_chars": 328316,
+     "edits": 173602,
+     "cer": 0.5287649703334593,
+     "cer_lo": 0.49826568322267034,
+     "cer_hi": 0.5557238301985072,
+     "letter_cer_mean": 0.5123089411315915,
+     "letter_cer_q1": 0.4272862026755405,
+     "letter_cer_median": 0.49427282207033857,
+     "letter_cer_q3": 0.621749226006192,
+     "letter_cer_min": 0.23459061637534498,
+     "letter_cer_max": 0.7351538794971825,
+     "span_share_mean": 0.6794171973521804
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7252,
+     "ref_chars": 140107,
+     "edits": 70749,
+     "cer": 0.5049640631802836,
+     "cer_lo": 0.4754369013291539,
+     "cer_hi": 0.5348231089368726,
+     "letter_cer_mean": 0.5060236718747521,
+     "letter_cer_q1": 0.39783889980353637,
+     "letter_cer_median": 0.49506781750924783,
+     "letter_cer_q3": 0.6192384769539078,
+     "letter_cer_min": 0.23459061637534498,
+     "letter_cer_max": 0.7264239028944911,
+     "span_share_mean": 0.7264197970516925
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 10596,
+     "ref_chars": 188209,
+     "edits": 102853,
+     "cer": 0.5464828993300002,
+     "cer_lo": 0.49950378592957434,
+     "cer_hi": 0.5856685488679236,
+     "letter_cer_mean": 0.5185942103884309,
+     "letter_cer_q1": 0.4326262324469674,
+     "letter_cer_median": 0.48366013071895425,
+     "letter_cer_q3": 0.6409313725490197,
+     "letter_cer_min": 0.3040057224606581,
+     "letter_cer_max": 0.7351538794971825,
+     "span_share_mean": 0.6324145976526684
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 7547,
+      "ref_chars": 153297,
+      "edits": 69803,
+      "cer": 0.4553448534544055,
+      "cer_lo": 0.4297175912107904,
+      "cer_hi": 0.486133631894577,
+      "letter_cer_mean": 0.4544482401313591,
+      "letter_cer_q1": 0.3898700433188937,
+      "letter_cer_median": 0.448,
+      "letter_cer_q3": 0.49506781750924783,
+      "letter_cer_min": 0.2895816242821985,
+      "letter_cer_max": 0.7183348095659876,
+      "span_share_mean": 0.6895002064124833
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10301,
+      "ref_chars": 175019,
+      "edits": 103799,
+      "cer": 0.5930727521012005,
+      "cer_lo": 0.5581820198093771,
+      "cer_hi": 0.6228652409172893,
+      "letter_cer_mean": 0.5701696421318239,
+      "letter_cer_q1": 0.474025974025974,
+      "letter_cer_median": 0.6130653266331658,
+      "letter_cer_q3": 0.6625766871165644,
+      "letter_cer_min": 0.23459061637534498,
+      "letter_cer_max": 0.7351538794971825,
+      "span_share_mean": 0.6693341882918776
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 263,
+      "ref_chars": 5294,
+      "edits": 2309,
+      "cer": 0.43615413675859466,
+      "cer_lo": 0.3666267942583732,
+      "cer_hi": 0.46824958586416343,
+      "letter_cer_mean": 0.4174381900612683,
+      "letter_cer_q1": 0.34122109635692566,
+      "letter_cer_median": 0.4174381900612683,
+      "letter_cer_q3": 0.493655283765611,
+      "letter_cer_min": 0.3666267942583732,
+      "letter_cer_max": 0.46824958586416343,
+      "span_share_mean": 0.7236251560549314
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 911,
+      "ref_chars": 18700,
+      "edits": 9614,
+      "cer": 0.5141176470588236,
+      "cer_lo": 0.4422814207650273,
+      "cer_hi": 0.5903792574060386,
+      "letter_cer_mean": 0.5063818209063533,
+      "letter_cer_q1": 0.4137191020730702,
+      "letter_cer_median": 0.47935240604887597,
+      "letter_cer_q3": 0.5965690072774199,
+      "letter_cer_min": 0.3406988694758479,
+      "letter_cer_max": 0.7351538794971825,
+      "span_share_mean": 0.824466076678965
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 298,
+      "ref_chars": 6019,
+      "edits": 2634,
+      "cer": 0.43761422163150027,
+      "cer_lo": 0.41424177903950793,
+      "cer_hi": 0.5046033994334278,
+      "letter_cer_mean": 0.46270659600514535,
+      "letter_cer_q1": 0.41424177903950793,
+      "letter_cer_median": 0.4486842105263158,
+      "letter_cer_q3": 0.5251937984496124,
+      "letter_cer_min": 0.41424177903950793,
+      "letter_cer_max": 0.5251937984496124,
+      "span_share_mean": 0.8146436852678458
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 383,
+      "ref_chars": 13868,
+      "edits": 7217,
+      "cer": 0.520406691664263,
+      "cer_lo": 0.34053004340872745,
+      "cer_hi": 0.6364004208141134,
+      "letter_cer_mean": 0.40937770760141484,
+      "letter_cer_q1": 0.3365131163046766,
+      "letter_cer_median": 0.3585858344313375,
+      "letter_cer_q3": 0.45824806784089955,
+      "letter_cer_min": 0.3270249810749432,
+      "letter_cer_max": 0.6920945157526255,
+      "span_share_mean": 0.8511212670944639
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 161,
+      "ref_chars": 5484,
+      "edits": 2226,
+      "cer": 0.4059080962800875,
+      "cer_lo": 0.34746558197747185,
+      "cer_hi": 0.47303768478034564,
+      "letter_cer_mean": 0.41568132642888916,
+      "letter_cer_q1": 0.3468767424345601,
+      "letter_cer_median": 0.4083424807903403,
+      "letter_cer_q3": 0.4881553332424927,
+      "letter_cer_min": 0.3040057224606581,
+      "letter_cer_max": 0.49437052200614123,
+      "span_share_mean": 0.9354556660488708
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5642,
+      "ref_chars": 96510,
+      "edits": 48912,
+      "cer": 0.5068075847062481,
+      "cer_lo": 0.4591160536070716,
+      "cer_hi": 0.5543143844369763,
+      "letter_cer_mean": 0.5136659576573414,
+      "letter_cer_q1": 0.4414838052690362,
+      "letter_cer_median": 0.48723908038451885,
+      "letter_cer_q3": 0.6208457312886244,
+      "letter_cer_min": 0.24019607843137256,
+      "letter_cer_max": 0.7264239028944911,
+      "span_share_mean": 0.639653475110959
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2117,
+      "ref_chars": 42514,
+      "edits": 22696,
+      "cer": 0.5338476737074845,
+      "cer_lo": 0.480358389050224,
+      "cer_hi": 0.5801802232473647,
+      "letter_cer_mean": 0.5191077406352249,
+      "letter_cer_q1": 0.4653826132222801,
+      "letter_cer_median": 0.5119600142806141,
+      "letter_cer_q3": 0.6641438032166509,
+      "letter_cer_min": 0.23459061637534498,
+      "letter_cer_max": 0.6880819366852886,
+      "span_share_mean": 0.6341536644800247
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 3988,
+      "ref_chars": 71420,
+      "edits": 41864,
+      "cer": 0.5861663399607953,
+      "cer_lo": 0.49825310946515206,
+      "cer_hi": 0.6404777966456535,
+      "letter_cer_mean": 0.5380228132749254,
+      "letter_cer_q1": 0.439134524929445,
+      "letter_cer_median": 0.5420393559928444,
+      "letter_cer_q3": 0.6601330066503325,
+      "letter_cer_min": 0.34465617232808615,
+      "letter_cer_max": 0.7000094993825401,
+      "span_share_mean": 0.6041969712788472
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 4085,
+      "ref_chars": 68507,
+      "edits": 36130,
+      "cer": 0.5273913614667114,
+      "cer_lo": 0.4836921900879093,
+      "cer_hi": 0.5761745489835883,
+      "letter_cer_mean": 0.5447267433605567,
+      "letter_cer_q1": 0.4487247460394075,
+      "letter_cer_median": 0.5453992309894875,
+      "letter_cer_q3": 0.6356103774024232,
+      "letter_cer_min": 0.35161042944785276,
+      "letter_cer_max": 0.7020872865275142,
+      "span_share_mean": 0.6702554673405187
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 2821,
+     "yield": 0.1499335636460271,
+     "policies": {
+      "philiumm": {
+       "cer": 0.319494945822122,
+       "ref_chars": 110008,
+       "edits": 35147
+      },
+      "lenient": {
+       "cer": 0.3021168176504968,
+       "ref_chars": 109504,
+       "edits": 33083
+      },
+      "strict": {
+       "cer": 0.32069781086135457,
+       "ref_chars": 109084,
+       "edits": 34983
+      },
+      "reading": {
+       "cer": 0.3207986505812035,
+       "ref_chars": 109084,
+       "edits": 34994
+      }
+     }
+    },
+    "info": {
+     "reader": "philiumm",
+     "model": "philiumm",
+     "device": "cuda",
+     "lines_read": 17848,
+     "ms_per_line": 15.453179723502306,
+     "licence": "CC BY 4.0",
+     "evaluate_only": false
+    }
+   },
+   "dresden": null
+  },
+  "trocr-kurrent-xvi-xvii": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 18807,
+     "ref_chars": 328316,
+     "edits": 121566,
+     "cer": 0.3702713239683719,
+     "cer_lo": 0.3251561908661691,
+     "cer_hi": 0.409935620716486,
+     "letter_cer_mean": 0.3468870073491027,
+     "letter_cer_q1": 0.17013355928809626,
+     "letter_cer_median": 0.3152465878567241,
+     "letter_cer_q3": 0.5047491719089239,
+     "letter_cer_min": 0.078196872125115,
+     "letter_cer_max": 0.7217165149544863,
+     "span_share_mean": 0.6833290695448851
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7695,
+     "ref_chars": 140107,
+     "edits": 47839,
+     "cer": 0.341446180419251,
+     "cer_lo": 0.2952667232627038,
+     "cer_hi": 0.3863817351033315,
+     "letter_cer_mean": 0.3462494908493986,
+     "letter_cer_q1": 0.17092337917485265,
+     "letter_cer_median": 0.32447817836812143,
+     "letter_cer_q3": 0.49933333333333335,
+     "letter_cer_min": 0.078196872125115,
+     "letter_cer_max": 0.707749766573296,
+     "span_share_mean": 0.7336156430206612
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 11112,
+     "ref_chars": 188209,
+     "edits": 73727,
+     "cer": 0.39172940720156846,
+     "cer_lo": 0.3215333451741519,
+     "cer_hi": 0.4481911301805298,
+     "letter_cer_mean": 0.34752452384880683,
+     "letter_cer_q1": 0.1663594470046083,
+     "letter_cer_median": 0.29794385132463425,
+     "letter_cer_q3": 0.5474178403755868,
+     "letter_cer_min": 0.09084027252081757,
+     "letter_cer_max": 0.7217165149544863,
+     "span_share_mean": 0.6330424960691091
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 8057,
+      "ref_chars": 153297,
+      "edits": 35515,
+      "cer": 0.23167446199208072,
+      "cer_lo": 0.1960166427938067,
+      "cer_hi": 0.2733279141602991,
+      "letter_cer_mean": 0.22395817883636146,
+      "letter_cer_q1": 0.13243595310464612,
+      "letter_cer_median": 0.19546925566343043,
+      "letter_cer_q3": 0.27631578947368424,
+      "letter_cer_min": 0.08067831449126413,
+      "letter_cer_max": 0.6397058823529411,
+      "span_share_mean": 0.6896278274991725
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10750,
+      "ref_chars": 175019,
+      "edits": 86051,
+      "cer": 0.4916666190527886,
+      "cer_lo": 0.4479834177529304,
+      "cer_hi": 0.5292909492370973,
+      "letter_cer_mean": 0.46981583586184394,
+      "letter_cer_q1": 0.41608168474792595,
+      "letter_cer_median": 0.49933333333333335,
+      "letter_cer_q3": 0.5972261802982806,
+      "letter_cer_min": 0.078196872125115,
+      "letter_cer_max": 0.7217165149544863,
+      "span_share_mean": 0.6770303115905977
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 271,
+      "ref_chars": 5294,
+      "edits": 1277,
+      "cer": 0.24121647147714392,
+      "cer_lo": 0.13098086124401914,
+      "cer_hi": 0.2921038100496963,
+      "letter_cer_mean": 0.21154233564685773,
+      "letter_cer_q1": 0.09070012404259983,
+      "letter_cer_median": 0.21154233564685773,
+      "letter_cer_q3": 0.3323845472511156,
+      "letter_cer_min": 0.13098086124401914,
+      "letter_cer_max": 0.2921038100496963,
+      "span_share_mean": 0.7216693308770544
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 996,
+      "ref_chars": 18700,
+      "edits": 6999,
+      "cer": 0.37427807486631015,
+      "cer_lo": 0.251896813353566,
+      "cer_hi": 0.49905710555582417,
+      "letter_cer_mean": 0.3556261462444221,
+      "letter_cer_q1": 0.2187685136335711,
+      "letter_cer_median": 0.31099691679290375,
+      "letter_cer_q3": 0.49612733812548604,
+      "letter_cer_min": 0.08067831449126413,
+      "letter_cer_max": 0.7217165149544863,
+      "span_share_mean": 0.8317349085013518
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 319,
+      "ref_chars": 6019,
+      "edits": 1588,
+      "cer": 0.263831201196212,
+      "cer_lo": 0.22190678968535604,
+      "cer_hi": 0.3859773371104816,
+      "letter_cer_mean": 0.30819305610210906,
+      "letter_cer_q1": 0.22190678968535604,
+      "letter_cer_median": 0.27631578947368424,
+      "letter_cer_q3": 0.4263565891472868,
+      "letter_cer_min": 0.22190678968535604,
+      "letter_cer_max": 0.4263565891472868,
+      "span_share_mean": 0.8065740034709937
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 404,
+      "ref_chars": 13868,
+      "edits": 4916,
+      "cer": 0.35448514565907124,
+      "cer_lo": 0.1182096403978577,
+      "cer_hi": 0.49842817991294536,
+      "letter_cer_mean": 0.2149880469919866,
+      "letter_cer_q1": 0.09164579722488303,
+      "letter_cer_median": 0.14546277657314943,
+      "letter_cer_q3": 0.3312642928155397,
+      "letter_cer_min": 0.09084027252081757,
+      "letter_cer_max": 0.5618436406067678,
+      "span_share_mean": 0.8500415211688637
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 170,
+      "ref_chars": 5484,
+      "edits": 758,
+      "cer": 0.13822027716994895,
+      "cer_lo": 0.10795352993744414,
+      "cer_hi": 0.17889617255233664,
+      "letter_cer_mean": 0.1410576108842047,
+      "letter_cer_q1": 0.10720112941649432,
+      "letter_cer_median": 0.12282497441146366,
+      "letter_cer_q3": 0.18403041058828568,
+      "letter_cer_min": 0.09585121602288985,
+      "letter_cer_max": 0.21671826625386997,
+      "span_share_mean": 0.9503773806889839
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5940,
+      "ref_chars": 96510,
+      "edits": 33358,
+      "cer": 0.3456429385555901,
+      "cer_lo": 0.2659197770940965,
+      "cer_hi": 0.43135731844392255,
+      "letter_cer_mean": 0.35924055099208396,
+      "letter_cer_q1": 0.16694102490695678,
+      "letter_cer_median": 0.33585485937176707,
+      "letter_cer_q3": 0.5426071145121358,
+      "letter_cer_min": 0.10674547983310154,
+      "letter_cer_max": 0.707749766573296,
+      "span_share_mean": 0.6515765841299039
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2208,
+      "ref_chars": 42514,
+      "edits": 14694,
+      "cer": 0.3456273227642659,
+      "cer_lo": 0.24450916150952554,
+      "cer_hi": 0.4466874838401718,
+      "letter_cer_mean": 0.32986065137438036,
+      "letter_cer_q1": 0.13148614609571788,
+      "letter_cer_median": 0.25021626297577854,
+      "letter_cer_q3": 0.6037131882202305,
+      "letter_cer_min": 0.078196872125115,
+      "letter_cer_max": 0.6843575418994413,
+      "span_share_mean": 0.6254943735358083
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 4100,
+      "ref_chars": 71420,
+      "edits": 32352,
+      "cer": 0.45298235788294594,
+      "cer_lo": 0.341666097877278,
+      "cer_hi": 0.5214980713289137,
+      "letter_cer_mean": 0.3813799362447704,
+      "letter_cer_q1": 0.22185308231819859,
+      "letter_cer_median": 0.41608168474792595,
+      "letter_cer_q3": 0.5539245056920311,
+      "letter_cer_min": 0.11781727986771393,
+      "letter_cer_max": 0.6151950718685831,
+      "span_share_mean": 0.6169530340653226
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 4399,
+      "ref_chars": 68507,
+      "edits": 25624,
+      "cer": 0.37403477016947173,
+      "cer_lo": 0.3115267545987913,
+      "cer_hi": 0.4315187520206919,
+      "letter_cer_mean": 0.3902323976721609,
+      "letter_cer_q1": 0.2779646814033773,
+      "letter_cer_median": 0.40613130524516605,
+      "letter_cer_q3": 0.5108811648334439,
+      "letter_cer_min": 0.12998466257668712,
+      "letter_cer_max": 0.6397058823529411,
+      "span_share_mean": 0.6597442401100868
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 4993,
+     "yield": 0.26537337230932767,
+     "policies": {
+      "philiumm": {
+       "cer": 0.15603618390719806,
+       "ref_chars": 216892,
+       "edits": 33843
+      },
+      "lenient": {
+       "cer": 0.1416612619290281,
+       "ref_chars": 215860,
+       "edits": 30579
+      },
+      "strict": {
+       "cer": 0.15631614941218613,
+       "ref_chars": 214949,
+       "edits": 33600
+      },
+      "reading": {
+       "cer": 0.15587883637514016,
+       "ref_chars": 214949,
+       "edits": 33506
+      }
+     }
+    },
+    "info": {
+     "reader": "trocr-kurrent-xvi-xvii",
+     "model": "dh-unibe/trocr-kurrent-XVI-XVII",
+     "device": "cuda",
+     "lines_read": 18807,
+     "ms_per_line": 340.2368988885877,
+     "licence": "MIT",
+     "evaluate_only": false
+    }
+   },
+   "dresden": null
+  },
+  "trocr-hanse-xvi": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 18815,
+     "ref_chars": 328316,
+     "edits": 116766,
+     "cer": 0.35565126280778275,
+     "cer_lo": 0.31166770124500764,
+     "cer_hi": 0.39630691268767604,
+     "letter_cer_mean": 0.3283684419701858,
+     "letter_cer_q1": 0.17020391627532738,
+     "letter_cer_median": 0.2830040799298893,
+     "letter_cer_q3": 0.47896292779767813,
+     "letter_cer_min": 0.0750256937307297,
+     "letter_cer_max": 0.7156480277416558,
+     "span_share_mean": 0.677688194971147
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7696,
+     "ref_chars": 140107,
+     "edits": 45222,
+     "cer": 0.322767599049298,
+     "cer_lo": 0.2780846067752719,
+     "cer_hi": 0.3666578214143558,
+     "letter_cer_mean": 0.32396924218826645,
+     "letter_cer_q1": 0.17034068136272545,
+     "letter_cer_median": 0.28137817883511074,
+     "letter_cer_q3": 0.4625,
+     "letter_cer_min": 0.0750256937307297,
+     "letter_cer_max": 0.6788048552754435,
+     "span_share_mean": 0.7254846033172988
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 11119,
+     "ref_chars": 188209,
+     "edits": 71544,
+     "cer": 0.38013059949311667,
+     "cer_lo": 0.3105596249941012,
+     "cer_hi": 0.4370705618311376,
+     "letter_cer_mean": 0.33276764175210516,
+     "letter_cer_q1": 0.1697936210131332,
+     "letter_cer_median": 0.2849254555494202,
+     "letter_cer_q3": 0.504225352112676,
+     "letter_cer_min": 0.09012875536480687,
+     "letter_cer_max": 0.7156480277416558,
+     "span_share_mean": 0.6298917866249951
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 8059,
+      "ref_chars": 153297,
+      "edits": 34972,
+      "cer": 0.22813231831020828,
+      "cer_lo": 0.19276617698970863,
+      "cer_hi": 0.27073414244244765,
+      "letter_cer_mean": 0.21749034109428805,
+      "letter_cer_q1": 0.12967581047381546,
+      "letter_cer_median": 0.1818770226537217,
+      "letter_cer_q3": 0.2538818310143174,
+      "letter_cer_min": 0.0750256937307297,
+      "letter_cer_max": 0.6470588235294118,
+      "span_share_mean": 0.6869219455345806
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10756,
+      "ref_chars": 175019,
+      "edits": 81794,
+      "cer": 0.46734354555791086,
+      "cer_lo": 0.42137231657648566,
+      "cer_hi": 0.5068964206204033,
+      "letter_cer_mean": 0.43924654284608344,
+      "letter_cer_q1": 0.3393909626719057,
+      "letter_cer_median": 0.46279554937413075,
+      "letter_cer_q3": 0.56145966709347,
+      "letter_cer_min": 0.0827966881324747,
+      "letter_cer_max": 0.7156480277416558,
+      "span_share_mean": 0.6684544444077133
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 271,
+      "ref_chars": 5294,
+      "edits": 1218,
+      "cer": 0.23007177937287496,
+      "cer_lo": 0.11124401913875598,
+      "cer_hi": 0.2849254555494202,
+      "letter_cer_mean": 0.1980847373440881,
+      "letter_cer_q1": 0.06782366003608993,
+      "letter_cer_median": 0.1980847373440881,
+      "letter_cer_q3": 0.3283458146520863,
+      "letter_cer_min": 0.11124401913875598,
+      "letter_cer_max": 0.2849254555494202,
+      "span_share_mean": 0.7227407206492937
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 998,
+      "ref_chars": 18700,
+      "edits": 6293,
+      "cer": 0.336524064171123,
+      "cer_lo": 0.2203234105108416,
+      "cer_hi": 0.4611658323914097,
+      "letter_cer_mean": 0.3175853920412181,
+      "letter_cer_q1": 0.17986379971012767,
+      "letter_cer_median": 0.2866638111504551,
+      "letter_cer_q3": 0.43809367692269097,
+      "letter_cer_min": 0.0750256937307297,
+      "letter_cer_max": 0.7156480277416558,
+      "span_share_mean": 0.8192781548165493
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 319,
+      "ref_chars": 6019,
+      "edits": 1546,
+      "cer": 0.25685329789001493,
+      "cer_lo": 0.22214336408800567,
+      "cer_hi": 0.3555240793201133,
+      "letter_cer_mean": 0.2943830253474367,
+      "letter_cer_q1": 0.22214336408800567,
+      "letter_cer_median": 0.27631578947368424,
+      "letter_cer_q3": 0.3846899224806202,
+      "letter_cer_min": 0.22214336408800567,
+      "letter_cer_max": 0.3846899224806202,
+      "span_share_mean": 0.8089849947867084
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 404,
+      "ref_chars": 13868,
+      "edits": 4802,
+      "cer": 0.34626478223247764,
+      "cer_lo": 0.11331700399639036,
+      "cer_hi": 0.4952442366596808,
+      "letter_cer_mean": 0.2019105476581189,
+      "letter_cer_q1": 0.09881181509474038,
+      "letter_cer_median": 0.14269257651718453,
+      "letter_cer_q3": 0.26561617299148166,
+      "letter_cer_min": 0.09462528387585163,
+      "letter_cer_max": 0.5656359393232205,
+      "span_share_mean": 0.846239436675214
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 170,
+      "ref_chars": 5484,
+      "edits": 757,
+      "cer": 0.13803792851932895,
+      "cer_lo": 0.10509383378016086,
+      "cer_hi": 0.17953055614294777,
+      "letter_cer_mean": 0.1410959206815478,
+      "letter_cer_q1": 0.10433989908745284,
+      "letter_cer_median": 0.12282497441146366,
+      "letter_cer_q3": 0.18698741541068487,
+      "letter_cer_min": 0.09012875536480687,
+      "letter_cer_max": 0.21775025799793601,
+      "span_share_mean": 0.9390028307894053
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5943,
+      "ref_chars": 96510,
+      "edits": 32024,
+      "cer": 0.3318205367319449,
+      "cer_lo": 0.25687015264390545,
+      "cer_hi": 0.4171737977093281,
+      "letter_cer_mean": 0.34046135040742603,
+      "letter_cer_q1": 0.16993038610053124,
+      "letter_cer_median": 0.278922604239092,
+      "letter_cer_q3": 0.4971045850619161,
+      "letter_cer_min": 0.11126564673157163,
+      "letter_cer_max": 0.6788048552754435,
+      "span_share_mean": 0.6429008176867191
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2208,
+      "ref_chars": 42514,
+      "edits": 14416,
+      "cer": 0.33908830032459897,
+      "cer_lo": 0.2429314539810387,
+      "cer_hi": 0.43708003839648946,
+      "letter_cer_mean": 0.32352801526146896,
+      "letter_cer_q1": 0.12594458438287154,
+      "letter_cer_median": 0.2471885813148789,
+      "letter_cer_q3": 0.56145966709347,
+      "letter_cer_min": 0.0827966881324747,
+      "letter_cer_max": 0.6722532588454376,
+      "span_share_mean": 0.6282814636079369
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 4102,
+      "ref_chars": 71420,
+      "edits": 31288,
+      "cer": 0.4380845701484178,
+      "cer_lo": 0.3242544900033887,
+      "cer_hi": 0.5097891502526641,
+      "letter_cer_mean": 0.36091360865134525,
+      "letter_cer_q1": 0.1965854883253829,
+      "letter_cer_median": 0.3619791666666667,
+      "letter_cer_q3": 0.5603791247367189,
+      "letter_cer_min": 0.11740388590326581,
+      "letter_cer_max": 0.5944713593616415,
+      "span_share_mean": 0.6100017873652899
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 4400,
+      "ref_chars": 68507,
+      "edits": 24422,
+      "cer": 0.35648911790036053,
+      "cer_lo": 0.3003476400588314,
+      "cer_hi": 0.41010524092780964,
+      "letter_cer_mean": 0.36833970194814347,
+      "letter_cer_q1": 0.23950065217660077,
+      "letter_cer_median": 0.3555923997949896,
+      "letter_cer_q3": 0.4832691980230698,
+      "letter_cer_min": 0.12462006079027356,
+      "letter_cer_max": 0.6470588235294118,
+      "span_share_mean": 0.6576559313572728
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 5408,
+     "yield": 0.28743024182832844,
+     "policies": {
+      "philiumm": {
+       "cer": 0.15494152134890468,
+       "ref_chars": 232307,
+       "edits": 35994
+      },
+      "lenient": {
+       "cer": 0.1412619155696777,
+       "ref_chars": 231315,
+       "edits": 32676
+      },
+      "strict": {
+       "cer": 0.15568573637082136,
+       "ref_chars": 230278,
+       "edits": 35851
+      },
+      "reading": {
+       "cer": 0.1556770512163559,
+       "ref_chars": 230278,
+       "edits": 35849
+      }
+     }
+    },
+    "info": {
+     "reader": "trocr-hanse-xvi",
+     "model": "fgho/trocr-hanseXVI-kurrent",
+     "device": "cuda",
+     "lines_read": 18815,
+     "ms_per_line": 123.752740580103,
+     "licence": "none stated",
+     "evaluate_only": true
+    }
+   },
+   "dresden": null
+  },
+  "trocr-hanse-xvii": {
+   "pool": {
+    "all": {
+     "letters": 134,
+     "lines": 18815,
+     "lines_read": 18815,
+     "ref_chars": 328316,
+     "edits": 127698,
+     "cer": 0.38894845210102463,
+     "cer_lo": 0.34623240726917387,
+     "cer_hi": 0.428002372572103,
+     "letter_cer_mean": 0.36218920418309003,
+     "letter_cer_q1": 0.2033597039308942,
+     "letter_cer_median": 0.3283887568843089,
+     "letter_cer_q3": 0.5213454109973839,
+     "letter_cer_min": 0.1002805049088359,
+     "letter_cer_max": 0.7160814911140009,
+     "span_share_mean": 0.6785329000764092
+    },
+    "selection": {
+     "letters": 67,
+     "lines": 7696,
+     "lines_read": 7696,
+     "ref_chars": 140107,
+     "edits": 50210,
+     "cer": 0.35836896086562414,
+     "cer_lo": 0.3131116744189862,
+     "cer_hi": 0.4011611548412333,
+     "letter_cer_mean": 0.35856858628538185,
+     "letter_cer_q1": 0.2036673215455141,
+     "letter_cer_median": 0.3469750889679715,
+     "letter_cer_q3": 0.47695390781563124,
+     "letter_cer_min": 0.1002805049088359,
+     "letter_cer_max": 0.6899441340782123,
+     "span_share_mean": 0.7293227929319466
+    },
+    "test": {
+     "letters": 67,
+     "lines": 11119,
+     "lines_read": 11119,
+     "ref_chars": 188209,
+     "edits": 77488,
+     "cer": 0.41171251109139306,
+     "cer_lo": 0.3464660014578242,
+     "cer_hi": 0.46565556809631303,
+     "letter_cer_mean": 0.3658098220807982,
+     "letter_cer_q1": 0.2020033388981636,
+     "letter_cer_median": 0.3179190751445087,
+     "letter_cer_q3": 0.5512321660181583,
+     "letter_cer_min": 0.12303290414878398,
+     "letter_cer_max": 0.7160814911140009,
+     "span_share_mean": 0.627743007220872
+    },
+    "hand": {
+     "K/k": {
+      "letters": 67,
+      "lines": 8059,
+      "lines_read": 8059,
+      "ref_chars": 153297,
+      "edits": 40531,
+      "cer": 0.2643952588765599,
+      "cer_lo": 0.2271730420479946,
+      "cer_hi": 0.30780700390897103,
+      "letter_cer_mean": 0.25514472487961865,
+      "letter_cer_q1": 0.16977854971775944,
+      "letter_cer_median": 0.21717298518704495,
+      "letter_cer_q3": 0.3000604960677556,
+      "letter_cer_min": 0.1002805049088359,
+      "letter_cer_max": 0.6397058823529411,
+      "span_share_mean": 0.6888882558791691
+     },
+     "L": {
+      "letters": 67,
+      "lines": 10756,
+      "lines_read": 10756,
+      "ref_chars": 175019,
+      "edits": 87167,
+      "cer": 0.4980430696095852,
+      "cer_lo": 0.45331285787044895,
+      "cer_hi": 0.5352305218426918,
+      "letter_cer_mean": 0.46923368348656136,
+      "letter_cer_q1": 0.3706597222222222,
+      "letter_cer_median": 0.48606811145510836,
+      "letter_cer_q3": 0.5982624325943678,
+      "letter_cer_min": 0.10395584176632934,
+      "letter_cer_max": 0.7160814911140009,
+      "span_share_mean": 0.6681775442736495
+     }
+    },
+    "year": {
+     "1708": {
+      "letters": 2,
+      "lines": 271,
+      "lines_read": 271,
+      "ref_chars": 5294,
+      "edits": 1468,
+      "cer": 0.2772950510011334,
+      "cer_lo": 0.16028708133971292,
+      "cer_hi": 0.3313086692435119,
+      "letter_cer_mean": 0.2457978752916124,
+      "letter_cer_q1": 0.11753168436376318,
+      "letter_cer_median": 0.2457978752916124,
+      "letter_cer_q3": 0.37406406621946164,
+      "letter_cer_min": 0.16028708133971292,
+      "letter_cer_max": 0.3313086692435119,
+      "span_share_mean": 0.7224303059680812
+     },
+     "1709": {
+      "letters": 10,
+      "lines": 998,
+      "lines_read": 998,
+      "ref_chars": 18700,
+      "edits": 7093,
+      "cer": 0.3793048128342246,
+      "cer_lo": 0.2731668502876729,
+      "cer_hi": 0.4964916411584648,
+      "letter_cer_mean": 0.3641767738513529,
+      "letter_cer_q1": 0.24442997992476928,
+      "letter_cer_median": 0.33314217567822957,
+      "letter_cer_q3": 0.4844539565919042,
+      "letter_cer_min": 0.10328879753340185,
+      "letter_cer_max": 0.7160814911140009,
+      "span_share_mean": 0.825778420305069
+     },
+     "1710": {
+      "letters": 3,
+      "lines": 319,
+      "lines_read": 319,
+      "ref_chars": 6019,
+      "edits": 1704,
+      "cer": 0.28310350556570857,
+      "cer_lo": 0.2552637804589543,
+      "cer_hi": 0.3661473087818697,
+      "letter_cer_mean": 0.3119307120773694,
+      "letter_cer_q1": 0.2552637804589543,
+      "letter_cer_median": 0.28421052631578947,
+      "letter_cer_q3": 0.3963178294573643,
+      "letter_cer_min": 0.2552637804589543,
+      "letter_cer_max": 0.3963178294573643,
+      "span_share_mean": 0.8101428568693883
+     },
+     "1711": {
+      "letters": 6,
+      "lines": 404,
+      "lines_read": 404,
+      "ref_chars": 13868,
+      "edits": 5119,
+      "cer": 0.3691231612344967,
+      "cer_lo": 0.14281949934123847,
+      "cer_hi": 0.5103981944220538,
+      "letter_cer_mean": 0.23317638193288326,
+      "letter_cer_q1": 0.1279617648459027,
+      "letter_cer_median": 0.16194159928897478,
+      "letter_cer_q3": 0.32842238153152375,
+      "letter_cer_min": 0.12414837244511734,
+      "letter_cer_max": 0.5758459743290548,
+      "span_share_mean": 0.8505747966736602
+     },
+     "1712": {
+      "letters": 5,
+      "lines": 170,
+      "lines_read": 170,
+      "ref_chars": 5484,
+      "edits": 932,
+      "cer": 0.1699489423778264,
+      "cer_lo": 0.13512064343163538,
+      "cer_hi": 0.2139987312328188,
+      "letter_cer_mean": 0.17344436610272768,
+      "letter_cer_q1": 0.12847583736528112,
+      "letter_cer_median": 0.17195496417604914,
+      "letter_cer_q3": 0.21915759580351346,
+      "letter_cer_min": 0.12303290414878398,
+      "letter_cer_max": 0.26418988648090813,
+      "span_share_mean": 0.9483242950357059
+     },
+     "1713": {
+      "letters": 48,
+      "lines": 5943,
+      "lines_read": 5943,
+      "ref_chars": 96510,
+      "edits": 35140,
+      "cer": 0.36410734638897524,
+      "cer_lo": 0.2916790185392105,
+      "cer_hi": 0.44512318255250405,
+      "letter_cer_mean": 0.3726230107817086,
+      "letter_cer_q1": 0.202272812296872,
+      "letter_cer_median": 0.339099149317142,
+      "letter_cer_q3": 0.5467759513016899,
+      "letter_cer_min": 0.10974106041923551,
+      "letter_cer_max": 0.6853408029878618,
+      "span_share_mean": 0.6413764626326155
+     },
+     "1714": {
+      "letters": 15,
+      "lines": 2208,
+      "lines_read": 2208,
+      "ref_chars": 42514,
+      "edits": 15409,
+      "cer": 0.362445312132474,
+      "cer_lo": 0.2680196578085184,
+      "cer_hi": 0.45326141609909953,
+      "letter_cer_mean": 0.34667893497571456,
+      "letter_cer_q1": 0.14962216624685137,
+      "letter_cer_median": 0.28179065743944637,
+      "letter_cer_q3": 0.618437900128041,
+      "letter_cer_min": 0.1002805049088359,
+      "letter_cer_max": 0.6899441340782123,
+      "span_share_mean": 0.6228616968402251
+     },
+     "1715": {
+      "letters": 19,
+      "lines": 4102,
+      "lines_read": 4102,
+      "ref_chars": 71420,
+      "edits": 33539,
+      "cer": 0.46960235228227387,
+      "cer_lo": 0.36135758651286604,
+      "cer_hi": 0.5373531367767679,
+      "letter_cer_mean": 0.3949387588299175,
+      "letter_cer_q1": 0.22769640479360853,
+      "letter_cer_median": 0.40913555992141454,
+      "letter_cer_q3": 0.5789843201497776,
+      "letter_cer_min": 0.13600661430343117,
+      "letter_cer_max": 0.6197125256673511,
+      "span_share_mean": 0.6089617930781541
+     },
+     "1716": {
+      "letters": 26,
+      "lines": 4400,
+      "lines_read": 4400,
+      "ref_chars": 68507,
+      "edits": 27294,
+      "cer": 0.39841184112572436,
+      "cer_lo": 0.33897781825478907,
+      "cer_hi": 0.45343322194675,
+      "letter_cer_mean": 0.40799971742954216,
+      "letter_cer_q1": 0.2942351091367959,
+      "letter_cer_median": 0.3920112011151858,
+      "letter_cer_q3": 0.5267607691612342,
+      "letter_cer_min": 0.14302147239263804,
+      "letter_cer_max": 0.6397058823529411,
+      "span_share_mean": 0.6633075093065186
+     }
+    },
+    "selected": {
+     "threshold": 0.65,
+     "lines": 18815,
+     "aligned": 5006,
+     "yield": 0.26606431039064576,
+     "policies": {
+      "philiumm": {
+       "cer": 0.17983605092485902,
+       "ref_chars": 212627,
+       "edits": 38238
+      },
+      "lenient": {
+       "cer": 0.1643474439724623,
+       "ref_chars": 211637,
+       "edits": 34782
+      },
+      "strict": {
+       "cer": 0.1801198900770315,
+       "ref_chars": 210693,
+       "edits": 37950
+      },
+      "reading": {
+       "cer": 0.1801198900770315,
+       "ref_chars": 210693,
+       "edits": 37950
+      }
+     }
+    },
+    "info": {
+     "reader": "trocr-hanse-xvii",
+     "model": "fgho/trocr-hanseXVII-kurrent",
+     "device": "cuda",
+     "lines_read": 18815,
+     "ms_per_line": 352.2218812686365,
+     "licence": "none stated",
+     "evaluate_only": true
+    }
+   },
+   "dresden": null
+  }
+ },
+ "disagreements": {
+  "lines": 3133,
+  "disagree": 2935,
+  "a_exact": 325,
+  "b_exact": 70,
+  "either_exact": 395,
+  "either_share": 0.13458262350936967
+ },
+ "choice": {
+  "rule": "the better letter-pool CER on the selection half, unless the faster model's selection-half CER lies within the better model's 95 % bootstrap interval there, in which case speed decides (every re-read of the German pages pays the speed difference)",
+  "best_cer": {
+   "model": "k3-trocr",
+   "cer": 0.24664720535019663,
+   "cer_lo": 0.20960896383905833,
+   "cer_hi": 0.28256930483546716
+  },
+  "runner_up": {
+   "model": "k3-kraken",
+   "cer": 0.2662679238010949
+  },
+  "faster": {
+   "model": "k3-kraken",
+   "ms_per_line": 51.69323501044383
+  },
+  "margin": 0.03592209948527053,
+  "faster_within_margin": true,
+  "winner": "k3-kraken"
+ },
+ "trainset": {
+  "train_lines": 55596,
+  "val_lines": 3133,
+  "screen": {
+   "band": {
+    "n": 273517,
+    "ratio_lo": 0.8043478260869565,
+    "ratio_hi": 1.4444444444444444,
+    "ratio_median": 1.0,
+    "conf_lo": 0.7333,
+    "conf_median": 0.95
+   },
+   "reader": "every reader but v1",
+   "by_group": {
+    "leibniz": {
+     "n": 1949,
+     "ratio_p2_5": 0.8271364317841079,
+     "ratio_median": 1.0,
+     "ratio_p97_5": 1.52995951417004,
+     "conf_p2_5": 0.73143,
+     "conf_median": 0.9062,
+     "outside": 145,
+     "outside_share": 0.07439712673165726,
+     "outside_by": {
+      "conf_low": 52,
+      "ratio_high": 66,
+      "ratio_low": 35
+     }
+    },
+    "other": {
+     "n": 47647,
+     "ratio_p2_5": 0.8260869565217391,
+     "ratio_median": 1.0,
+     "ratio_p97_5": 1.411764705882353,
+     "conf_p2_5": 0.7273,
+     "conf_median": 0.9184,
+     "outside": 3306,
+     "outside_share": 0.06938527084601338,
+     "outside_by": {
+      "conf_low": 1556,
+      "ratio_high": 1116,
+      "ratio_low": 988
+     }
+    }
+   },
+   "v1_rows": {
+    "n": 9133,
+    "outside": 1583,
+    "outside_share": 0.1733274937041498
+   },
+   "worst": [
+    {
+     "ref": "DE-611-HS-970451:0002:056",
+     "group": "other",
+     "record_id": "58770",
+     "stratum": "heavy_revision",
+     "ratio": 21.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 21,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-867509:0122:009",
+     "group": "other",
+     "record_id": "44102",
+     "stratum": "heavy_revision",
+     "ratio": 15.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 15,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068422:0004:032",
+     "group": "other",
+     "record_id": "56509",
+     "stratum": "heavy_revision",
+     "ratio": 14.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 14,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068430:0029:036",
+     "group": "other",
+     "record_id": "58297",
+     "stratum": "heavy_revision",
+     "ratio": 14.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 14,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-856291:0012:037",
+     "group": "other",
+     "record_id": "72",
+     "stratum": "heavy_revision",
+     "ratio": 14.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 14,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-960158:0136:031",
+     "group": "other",
+     "record_id": "43717",
+     "stratum": "heavy_revision",
+     "ratio": 13.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 13,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068593:0053:000",
+     "group": "other",
+     "record_id": "58810",
+     "stratum": "light_revision",
+     "ratio": 13.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 13,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-971300:0068:026",
+     "group": "other",
+     "record_id": "17368",
+     "stratum": "heavy_revision",
+     "ratio": 11.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 11,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-974056:0019:013",
+     "group": "other",
+     "record_id": "3779",
+     "stratum": "light_revision",
+     "ratio": 11.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 11,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-959461:0081:045",
+     "group": "other",
+     "record_id": "42703",
+     "stratum": "light_revision",
+     "ratio": 11.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 11,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068541:0005:151",
+     "group": "other",
+     "record_id": "44026",
+     "stratum": "heavy_revision",
+     "ratio": 11.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 11,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-867509:0122:006",
+     "group": "other",
+     "record_id": "44102",
+     "stratum": "heavy_revision",
+     "ratio": 11.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 11,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-959461:0084:027",
+     "group": "other",
+     "record_id": "42703",
+     "stratum": "light_revision",
+     "ratio": 10.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 10,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068782:0137:111",
+     "group": "other",
+     "record_id": "59738",
+     "stratum": "heavy_revision",
+     "ratio": 9.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 9,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-862243:0001:012",
+     "group": "other",
+     "record_id": "9606",
+     "stratum": "light_revision",
+     "ratio": 9.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 9,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-959461:0098:021",
+     "group": "other",
+     "record_id": "27161",
+     "stratum": "light_revision",
+     "ratio": 8.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 8,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-867509:0161:034",
+     "group": "other",
+     "record_id": "28714",
+     "stratum": "heavy_revision",
+     "ratio": 8.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 8,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068823:0107:098",
+     "group": "other",
+     "record_id": "43519",
+     "stratum": "heavy_revision",
+     "ratio": 8.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 8,
+     "machine_chars": 1
+    },
+    {
+     "ref": "DE-611-HS-867509:0120:008",
+     "group": "other",
+     "record_id": "44102",
+     "stratum": "heavy_revision",
+     "ratio": 8.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 8,
+     "machine_chars": 1
+    },
+    {
+     "ref": "00068430:0024:100",
+     "group": "other",
+     "record_id": "57247",
+     "stratum": "heavy_revision",
+     "ratio": 8.0,
+     "conf": 1.0,
+     "why": [
+      "ratio_high"
+     ],
+     "n_chars": 8,
+     "machine_chars": 1
+    }
+   ],
+   "stop_share": 0.1,
+   "stop": false
+  }
+ },
+ "ppocr_pilot": null,
+ "ablation": "Planned, triggered by the screen (3,451 reader lines outside the band, the manifest's screen field; train-trocr --drop-screen / train-kraken --drop-screen), not run: the GPU time of the phase went to the two trainings. Pending for K3b with the audit verdicts.",
+ "k2_throughput": {
+  "lines": 310831,
+  "wall_s": 26762.054,
+  "model_s": 26108.921
+ }
+}
