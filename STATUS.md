@@ -797,7 +797,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ⏳ Task 4
+### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ✅ Task 4 (Checkpoint D) · ⏳ the operator's choice
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -1241,6 +1241,60 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   account, the side environment's CUDA fault and a full PP-OCRv6 training are
   K3b's. Task 4 finishes with Dresden and the speeds for the two K3 models
   only, one job at a time.
+- **Task 4, the evaluation — CHECKPOINT D** (`leibniz align letterpool-eval
+  --read --readers k3-trocr,k3-kraken --reports-dir
+  reports/kurrent/k3-letterpool` — K2b's metric and code, the frozen set
+  verified against its checksums, nothing filtered; `leibniz bench
+  kurrent-smoke --candidates k3-trocr,k3-kraken` into
+  `reports/kurrent/k3-dresden/` as K1 measured and `k3-dresden-kv/` with the
+  decoder's cache; `leibniz bench k3-report eval` →
+  `reports/kurrent/k3-eval.md` + `.json` and the two model cards
+  `k3-model-card-trocr.md`, `k3-model-card-kraken.md`; the readings under
+  `data/kurrent/letterpool-readings/` and `data/kurrent/smoke-k3*/`,
+  gitignored, nc). **The letter pool (134 letters, 18,815 lines, 325,624
+  reference characters; CER under the philiumm policy, 95 % bootstrap over
+  letters): k3-trocr 28.6 % (24.6–32.5 %), selection half 24.7 % (21.0–28.3
+  %), test half 31.6 % (25.3–36.8 %), Leibniz's own hand (L) 36.7 % (31.9–41.0
+  %), the correspondents' (K/k) 19.4 % (15.7–23.8 %); k3-kraken 30.6 %
+  (26.5–34.5 %), selection 26.6 % (23.0–30.4 %), test 33.6 % (27.0–38.9 %), L
+  39.7 % (34.7–43.9 %), K/k 20.3 % (16.8–24.6 %)** — against K2b's rows on the
+  same set: v1 46.6 %, philiumm 52.9 %, the Bern model as it came 37.0 %
+  (selection 34.1, test 39.2; L 49.2, K/k 23.2), trocr-hanse-xvi 35.6 %
+  (evaluate only). By year k3-trocr: 1708 19.5, 1709 27.4, 1710 21.2, 1711
+  32.1, 1712 11.3, 1713 25.1, 1714 29.5, 1715 35.4, 1716 28.3; k3-kraken: 1708
+  22.5, 1709 31.2, 1710 22.2, 1711 33.2, 1712 15.5, 1713 26.6, 1714 30.8, 1715
+  38.1, 1716 30.3. Lines read (counted per letter; an empty reading counts as
+  deleted): k3-trocr 18,814, k3-kraken 14,874 — the kraken model returns
+  nothing on 3,905 of the 18,445 distinct lines (the PHILIUMM base on 957),
+  2,517 of them crops narrower than 80 px, a letter or two where the TrOCR
+  model reads 'h', 'e', '2', 'H.'; the mint holds few such lines. The
+  aligner-selected rates (labelled flattered): k3-trocr 6,295 lines accepted
+  at 10.3 %, k3-kraken 5,738 at 14.6 %.
+- **The validation set, Dresden and speed (Task 4).** Validation (the mint's
+  own text; 3,133 lines): k3-trocr 11.84 %, k3-kraken 15.56 % (the Checkpoint
+  C bullets have the breakdowns, the compositions and the tax); where the two
+  disagree (2,935 lines) one is exactly right on 13.5 % (TrOCR 325, kraken
+  70). Dresden (383 Kurrent Trace lines, a 1673 chancery hand, nc, numbers
+  only; a sanity check, not a ranking): k3-trocr 11.9 % (10.7–13.1 %),
+  k3-kraken 13.2 % (12.1–14.3 %) — against the Bern base's 7.4 % and
+  PHILIUMM's 29.5 % in K1: the TrOCR fine-tune gave up some of the chancery
+  hand, the kraken fine-tune learned it. **Speed on this card as K1 measured
+  (fp32, no cache, batch 8, the PNG path): k3-trocr 181 ms a line, k3-kraken
+  52 ms; with the decoder's cache at batch 16 (K2's setting) k3-trocr 152 ms;
+  reading K2's 310,831 lines at K2's measured overhead of 2.1 ms a line:
+  k3-trocr 13.3 h with the cache (15.8 h without), k3-kraken 4.6 h.**
+  PP-OCRv6: set aside (the bullet above); the ablation of note (c), triggered
+  by the screen (3,451 lines outside the band), planned, not run — the phase's
+  GPU time went to the two trainings.
+- **The choice for K4 (Task 4).** The rule as the report proposes it: the
+  better letter-pool CER on the selection half, unless the faster model's
+  selection-half CER lies within the better model's 95 % bootstrap interval
+  there, in which case speed decides (every re-read of the German pages pays
+  the speed difference). The better selection-half CER is **k3-trocr** at 24.7
+  % (21.0 %–28.3 %), the runner-up k3-kraken at 26.6 %; the faster model is
+  **k3-kraken** (52 ms a line against 181), within the margin (3.6 %): yes;
+  **the rule's answer: k3-kraken**. Put to the operator in two sentences; the
+  answer goes into Next verbatim; until it comes the choice is open.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
@@ -4112,6 +4166,10 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | Metric | Value |
 | --- | --- |
 | Tests passing | **866** (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K3 training (2026-10-22/25)** | **kraken** (runs row 614): ketos from the PHILIUMM checkpoint, the codec 178 → 203 code points, batch 2 × 8, four loader workers, **37 epochs in 44.5 h** (71 min an epoch, 13 lines/s all-in, the card at 2.2 GB), stopped after checkpoint 36 at kraken's accuracy 0.8659; **TrOCR** (runs row 615): the whole Bern model, Adafactor with gradient checkpointing at batch 8, **six epochs in 27.0 h** (4.5 h an epoch, 3.45 lines/s, the process at 3.5 GB), the best at epoch 5 |
+| **K3 validation CER (3,133 held-out mint lines)** | **k3-trocr 11.84 %** (Leibniz's hand 19.7 %, other hands 11.4 %; heavy 13.3 % · light 8.3 %) · **k3-kraken 15.56 %** (23.8 % / 15.1 %; 17.8 % · 10.2 %); the pilots' single epochs 13.67 / 24.74 %; the two disagree on 2,935 lines, one exactly right on 13.5 % |
+| **K3 letter-pool CER, unfiltered (2026-10-26)** | K2b's set, philiumm policy, 95 % bootstrap over letters: **k3-trocr 28.6 % (24.6–32.5)** · selection 24.7 % (21.0–28.3) · test 31.6 % (25.3–36.8) · Leibniz's hand (L) 36.7 % (31.9–41.0) · the correspondents' (K/k) 19.4 % (15.7–23.8); **k3-kraken 30.6 % (26.5–34.5)** · selection 26.6 % (23.0–30.4) · test 33.6 % (27.0–38.9) · L 39.7 % (34.7–43.9) · K/k 20.3 % (16.8–24.6); against the Bern base 37.0 %, v1 46.6 %, philiumm 52.9 % (K2b); the kraken model reads nothing on 3,905 of the 18,445 lines (2,517 narrower than 80 px) |
+| **K3 Dresden and speed (2026-10-26)** | Dresden (383 lines, philiumm policy): k3-trocr 11.9 % (10.7–13.1), k3-kraken 13.2 % (12.1–14.3) (the Bern base 7.4 %, PHILIUMM 29.5 % in K1); ms a line on the GTX 1660 Ti as K1 measured: k3-trocr 181, with the decoder's cache 152, k3-kraken 52; K2's 310,831 lines at K2's overhead: 13.3 h / 4.6 h |
 | **K2 German ground truth (2026-10-21)** | the Bern reader `trocr-kurrent-xvi-xvii` over **310,831 lines** on 4,807 pages of the 2,148 German records (7 h 26 min, 87 ms a line, fp32 + kv cache, batch 16; every Dresden reading as the checkpoint's defaults'); at the factory's gate **v1 10.8 % → Bern 16.9 %** of the lines (Leibniz's own hand 9.5 → 12.5 %); the rule: 1,178 pieces to the reader, 402 kept by v1, 568 none; the write (run 609): **`gt_lines` 315,797 → 333,680** (50,720 reader rows) · **German records 42,278 → 60,163** · Leibniz's own hand 1,888 → 2,612; the 200-line sheet half his hand, half the others, awaiting a judge |
 | **C2c re-mint (2026-10-20), beside the C2 mint** | **315,797 open-bucket lines** (was 297,424; +6.2 %) · fair 10,234 (9,913) · light 100,085 (96,175) · heavy 203,749 (190,162) · scrap 1,729 (1,174) · 6,130 records (5,526) on 17,669 pages (16,843) · by channel ia 213,520 · gwlb 52,057 · potsdam 50,220 · 7,308 of 16,807 pieces minted, 337,432 pairs, every skip structural (0 locked; C2: 746) · **hyphen flag 848 (0.3 %; was 7,822, 2.6 %)**, 8,523 minted lines end in a hyphen mark (271) · bracket 4,811 (1.5 %) · math 255 (0.1 %) · **Leibniz's own hand 14.9 %** under the strict rule (25.7 % under the loose rule on the old mint; the strict rule there 15.1 %) · A VI,4: 62,164 paired, agree 9,506 · disagree 774 · **1,472 held-out pages** |
 | **K2b letter-pool test set (2026-10-19)** | the GWLB pool, nine checked volumes (1708–1716, version 1 each): **2,533 letters** parsed (835 German, 1,179 French, 489 Latin) · **695 German and placeable** (L 111, l 1, K 560, k 17) · **565 placed** on the store (no work 72 · no canvas 10 · no lines 0 · shared leaves 48) · disjoint from K2's German pieces' pages (0 of 1,782) and the PHILIUMM held-out pages (0) · **the set: 134 letters (67 L, 65 K, 2 k) · 386 pages · 18,815 recognised lines · 325,624 reference characters**; selection half 67 letters, 7,696 lines · test half 67, 11,119 lines; CC BY-NC 4.0, nc bucket, the texts gitignored |
@@ -4842,6 +4900,8 @@ password once, the expected answer after the arrow:
    page without records. **The holdings page and the records wait for the
    export** (Open question 27). Housekeeping: the W5 prompt is missing from
    `PROMPTS.md`.
+
+**K3 (2026-10-26): a Leibniz Kurrent model — two models trained and measured on the desktop; the branch `k3-kurrent-model` carries the code, the reports and the docs (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...k3-kurrent-model?expand=1); the operator opens and merges the pull request; nothing deployed.** Read first: `reports/kurrent/k3-eval.md` (the letter pool, the validation set, Dresden, the speeds, the choice rule and its answer), then the two model cards `k3-model-card-trocr.md` and `k3-model-card-kraken.md`, `k3-pilots.md` and `k3-trainset.md`. **Keep `data/models/k3/` (a symlink to `/mnt/d/leibniz-train/k3/`: the two models, their validation hypotheses and accounts, the PP-OCRv6 pilot's weights) and `data/train/k3/` (the crops, the manifest, the split lists).** The models as readers: the CANDIDATES keys `k3-trocr` (`data/models/k3/trocr/best`, a Hub-style checkpoint directory the TrOCR engine loads by path; its `generation_config.json` carries `use_cache: true`; MIT base, the fine-tune open) and `k3-kraken` (`data/models/k3/kraken/best.safetensors`, kraken 7.0.3; CC BY 4.0 base, the fine-tune open), both off by default; version strings `k3-trocr@runs-615-epoch-5` and `k3-kraken@runs-614-checkpoint-36`. **The choice for K4 is the operator's, on the numbers (`k3-eval.md`): the rule's answer is k3-kraken — k3-trocr has the better selection-half CER (24.7 %), k3-kraken is the faster (52 ms a line) and lies within the margin (3.6 %).** The operator's answer goes here verbatim; until it comes, the choice is open. Pending for K3b: the PP-OCRv6 pilot's accounting (its side environment's CUDA fault; its weights on D:) and a full PP-OCRv6 training, the ablation without the screened lines (planned, not run), a 24 GB rental for the whole model under AdamW (`tools/k3-rented-gpu.md`), and K2's audit verdicts when they come (the manifest's tags let a class of lines go without recutting).
 
 **K2 (2026-10-21): German ground truth, done on the desktop; the branch
 `k2-german-gt` carries the code, the reports and the docs (compare:
