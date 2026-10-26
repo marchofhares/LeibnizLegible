@@ -3,11 +3,35 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-26 (**K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-26 (**K4 — German on the site, begun on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`), the pre-flight done, the go waited for**; earlier the same day, **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-26: K4 — German on the site, begun on the desktop; the branch
+`k4-german-site` from main at #55; Task 0 done, the operator's go waited
+for; nothing written to the store, nothing deployed.** The operator's
+choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
+`k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
+letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
+against 53.7 %, so Task 4's gate is met on K3's numbers); its readings carry
+CC BY 4.0 like v1's (the registry's `model-k3-trocr`: the Bern base MIT,
+K2's lines open-bucket). Prerequisites verified: K3 merged (main at
+`c0b1a45`, #55; `k3-trocr` and `k3-kraken` in the CANDIDATES table; the
+checkpoint on D: behind the `data/models/k3` symlink, `model.safetensors`
+1,335,747,032 bytes with its `generation_config.json`;
+`reports/kurrent/k3-eval.md`; runs rows 614 and 615 in the store); K2b's
+test set present (`reports/kurrent/letterpool-testset.csv`,
+`data/kurrent/letterpool/testset.jsonl`, `letterpool-eval.md`). Baseline:
+ruff clean in both environments; pytest **1,026 passed, 1 skipped** in
+`.venv-k1` (44.2 s) and **1,016 passed, 1 skipped** in `.venv-w3` (41.3 s;
+the letter-pool metric's tests need numpy, which that environment lacks).
+The desktop: GTX 1660 Ti, 1,188 MiB of 6,144 MiB held by Xwayland; RAM
+9,943 MiB with 9,050 available, swap 8,192 MiB; **C: 33 GB free** (the
+budget for every write under `/`), D: 368 GB free; the store
+17,143,570,432 bytes, WAL empty. The plan, what was found before the go and
+the open points are in the K4 entry of the Phase log.
 
 **2026-10-21/26: K3 — a Leibniz Kurrent model, done on the desktop; the
 branch `k3-kurrent-model`, the pull request the operator's; nothing
@@ -1047,7 +1071,121 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ✅ Task 4 (Checkpoint D) · ⏳ the operator's choice
+### K4 — German on the site (2026-10-26) ✅ Task 0 · ⏳ the operator's go
+
+- **The operator's choice of reader (26 October), verbatim:** "I agree to go
+  with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
+  epoch-5 weights of runs row 615, version string
+  `k3-trocr@runs-615-epoch-5`), read with `--kv-cache` as K2 read; its
+  readings carry CC BY 4.0 like v1's (`legal.py`, `model-k3-trocr`: the Bern
+  base MIT, K2's lines open-bucket edition text), so nothing on About, in
+  `llms.txt`, the attribution line, the D2 export or the fragment packs
+  changes its terms; Task 5 adds the readings to the outputs table and lets
+  About read the sentence from the registry. The K3 "Next" line and the K3
+  entry's choice bullet now carry the answer.
+- **Setting (Task 0).** The operator's desktop, the WSL checkout
+  `/home/evana/LeibnizLegible`, a Claude Code session; main at `c0b1a45`
+  (#55, K3 merged) and `origin/main` the same; `k4-german-site` created with
+  `git checkout -B k4-german-site origin/main`, the name the operator gave.
+  The tree clean apart from the operator's own untracked files (`logs/`,
+  `*.log`, `resume-run.sh`, `.python-version`, the two gt-audit HTML sheets),
+  left alone. GPU: GTX 1660 Ti, driver 610.57.01, 1,188 MiB of 6,144 MiB
+  held by Xwayland, nothing else on it. Disk: `/` 1007 G with 885 G free
+  (the growing file on C:), **C: 476 G with 33 G free — the budget for every
+  write under `/`**, `/mnt/d` 932 G with 368 G free; RAM 9,943 MiB (9,050
+  available), swap 8,192 MiB; user systemd running (`systemd-run` present).
+  `.venv-k1`: Python 3.12.13, torch 2.12.0+cu130 with CUDA available,
+  transformers 5.12.1; `.venv-w3`: Python 3.12.13, no torch. Baseline:
+  `ruff check` clean and 225 files formatted in both; pytest **1,026 passed,
+  1 skipped** in 44.2 s (`.venv-k1`; the skip is the absent-stack path) and
+  **1,016 passed, 1 skipped** in 41.3 s (`.venv-w3`; the skip is the
+  letter-pool metric's module, which needs numpy). The store
+  `data/inventory.sqlite`: 17,143,570,432 bytes, modified 2026-10-25 13:23,
+  WAL empty, journal mode `wal`, page size 4,096 over 4,185,442 pages, no
+  freelist; opened `mode=ro` only; the last runs row 615 (K3's TrOCR
+  training).
+- **Prerequisites, each verified (Task 0).** K3 merged: `htr/kurrent.py`
+  carries `k3-trocr` and `k3-kraken` in CANDIDATES (off by default);
+  `data/models/k3/trocr/best/` on D: behind the symlink holds
+  `model.safetensors` (1,335,747,032 bytes), `config.json`,
+  `generation_config.json`, the processor and tokenizer files and
+  `val-hyps.json`; `reports/kurrent/k3-eval.md` and the two model cards are
+  on main; runs rows 614 (kraken) and 615 (TrOCR) are in the store. The
+  operator's choice of reader: above. K2b's test set:
+  `reports/kurrent/letterpool-testset.csv` (134 letters),
+  `data/kurrent/letterpool/testset.jsonl`, `reports/kurrent/letterpool-eval.md`
+  with v1's rows (46.6 % overall, 53.7 % in Leibniz's own hand, 38.5 % the
+  correspondents'). K2's readings (`data/kurrent/k2-readings/
+  trocr-kurrent-xvi-xvii.jsonl`, 310,831 lines) are the Bern model's, not
+  READER's, so nothing is reused. Page images under `/mnt/d/leibniz-images`.
+- **Found while reading, before the go (Task 0).** (1) `kurrent-read` plans
+  its pages from the census's pieces file (`--german`) and the factory's
+  placement, and has no page-list option; Task 3 adds `--pages <file>` (one
+  page id a line, Task 1's German pages) and leaves the K2 path as it is.
+  (2) `read_pages` is one process — the page image decoded in the main
+  process, the crops cut in memory, no loader workers — so the memory rule's
+  "four loader workers at most" is met with none; the host memory is the
+  pilot's to measure. (3) `set_line_recognition` updates rows in place, as
+  the prompt says; Task 4 writes the new run's rows with `insert_line` under
+  the run's id, the v1 row's geometry copied, and never touches v1's rows.
+  (4) The index's `lang` field is the majority of `lines.lang` today
+  (`_majority_lang` in `search/documents.py`); Task 2 lets a `page_lang` row
+  override it. (5) C: has 33 GB free: the serving copy of Task 6 (`VACUUM
+  INTO`, about the store's size) is written to `/mnt/d/`, not under the
+  checkout, and the write of Task 4 states its expected size against C:
+  from Task 1's line count before the go. (6) The backup copy goes beside the
+  operator's chore's copies under `/mnt/d/leibniz-backups/`, dated, with its
+  SHA-256 in a file beside it.
+- **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
+  (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
+  recognised page's text under the current rule classified with
+  `langid.classify`, into `data/kurrent/page-lang.jsonl` (page_id, lang,
+  score, n_tokens, plus the hits); the measure against the census's pieces —
+  the German pieces' pages as positives, the Latin and French pieces' pages
+  as negatives (`reports/kurrent/german_pieces_index.csv` and the census's
+  summary; pages shared by both groups set aside and counted) — precision
+  and recall for German along the score and token thresholds, the threshold
+  set for precision; `langid` adjusted for noisy machine text only if the
+  numbers call for it and only with K1's tests unchanged; German pages and
+  lines by collection and convolute in `reports/kurrent/page-lang.md`.
+  One read-only pass over the store (the text of 13.5 M lines). Checkpoint
+  A. *Task 2:* an additive `runs.scope` column (`_migrate`), set by the
+  writer of Task 4 to `de`; one precedence, `run_rank`, in `db.py` — a
+  scoped run's row beats an unscoped run's row on the same (page_id,
+  line_seq), among runs of the same kind the higher run id wins — used by
+  `latest_lines`, `line_summaries_by_page` (the `NOT EXISTS` probe reads the
+  rank through a join on `runs`, no JSON), the index documents, the API, the
+  exports and the stats; the per-line fallback of the amendment follows (a
+  line the scoped run did not write shows the newest unscoped row); a
+  `page_lang` table (page_id, lang, score, n_tokens, run_id) read by
+  `search/documents.py` for the index's `lang`; the cost of reading mixed
+  pages whole measured on the letter pool's mixed letters; tests on fixtures
+  for every reader; the probe timed on the synthetic work as its docstring
+  did. Checkpoint B. *Task 3:* `/mnt/d/leibniz-train/k4/` behind
+  `data/kurrent/k4-readings`; the crops under 80 px counted among the
+  German lines; a 2,000-line pilot with `k3-trocr --kv-cache` at batch 16
+  under `/usr/bin/time -v` for the host memory and the pace, the figure in
+  days from Task 1's count; then, after the go, the whole job under
+  `systemd-run --user --scope -p MemoryMax=6G` and nohup with a log on D:,
+  the guard watching the card, nothing else of the session's beside it.
+  Checkpoint C. *Task 4:* the gate (met on K3's numbers); the backup copy to
+  D: with its SHA-256; the go; `leibniz enrich page-lang --write` (the table,
+  a runs row of stage `enrich`) and `leibniz pipeline import-readings` (one
+  runs row of stage `recognize`, model `k3-trocr@runs-615-epoch-5`, scope
+  `de`; one row per non-empty reading with the v1 row's geometry, status
+  `machine`, lang `de`; idempotent, resumable by page); the counts and the
+  store's size after. Checkpoint D. *Task 5:* About (EN, DE) and `llms.txt`
+  name READER and the letter-pool number and what it was measured on; the
+  outputs table; the provenance line checked; the language filter opened if
+  the operator says so on Task 1's numbers; tests and the browser checks.
+  Checkpoint E. *Task 6:* the serving copy to D:, the box commands and the
+  `curl -su USER …` checks for the operator, the entry completed, the push
+  and the compare URL. Expected days: Task 1 and Task 2 within the day; the
+  reading's days come from the pilot and Task 1's count (K3 measured 152 ms a
+  line for READER with the cache on this card, 13.3 h for K2's 310,831
+  lines; the German pages beyond the census's 5,874 are not yet counted).
+
+### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ✅ Task 4 (Checkpoint D) · ✅ the operator's choice (2026-10-26: TrOCR)
 
 - **The operator's decision on the prerequisite (21 October), verbatim:**
   "The prerequisite "K2's audit sheet judged": the operator decides to go
@@ -1543,8 +1681,9 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the speed difference). The better selection-half CER is **k3-trocr** at 24.7
   % (21.0 %–28.3 %), the runner-up k3-kraken at 26.6 %; the faster model is
   **k3-kraken** (52 ms a line against 181), within the margin (3.6 %): yes;
-  **the rule's answer: k3-kraken**. Put to the operator in two sentences; the
-  answer goes into Next verbatim; until it comes the choice is open.
+  **the rule's answer: k3-kraken**. Put to the operator in two sentences. **The operator's
+  answer (2026-10-26), verbatim: "I agree to go with TrOCR."** — READER for
+  K4 is `k3-trocr`; the K4 entry carries it.
 - **Plan, as printed for the go.** *Task 1:* `leibniz htr train-set` (a
   new `htr/trainset.py`): the rows above through the pilot's crop (the
   polygon masked, the audit's padding, no downscale) into
@@ -6350,7 +6489,7 @@ password once, the expected answer after the arrow:
    export** (Open question 27). Housekeeping: the W5 prompt is missing from
    `PROMPTS.md`.
 
-**K3 (2026-10-26): a Leibniz Kurrent model — two models trained and measured on the desktop; the branch `k3-kurrent-model` carries the code, the reports and the docs (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...k3-kurrent-model?expand=1); the operator opens and merges the pull request; nothing deployed.** Read first: `reports/kurrent/k3-eval.md` (the letter pool, the validation set, Dresden, the speeds, the choice rule and its answer), then the two model cards `k3-model-card-trocr.md` and `k3-model-card-kraken.md`, `k3-pilots.md` and `k3-trainset.md`. **Keep `data/models/k3/` (a symlink to `/mnt/d/leibniz-train/k3/`: the two models, their validation hypotheses and accounts, the PP-OCRv6 pilot's weights) and `data/train/k3/` (the crops, the manifest, the split lists).** The models as readers: the CANDIDATES keys `k3-trocr` (`data/models/k3/trocr/best`, a Hub-style checkpoint directory the TrOCR engine loads by path; its `generation_config.json` carries `use_cache: true`; MIT base, the fine-tune open) and `k3-kraken` (`data/models/k3/kraken/best.safetensors`, kraken 7.0.3; CC BY 4.0 base, the fine-tune open), both off by default; version strings `k3-trocr@runs-615-epoch-5` and `k3-kraken@runs-614-checkpoint-36`. **The choice for K4 is the operator's, on the numbers (`k3-eval.md`): the rule's answer is k3-kraken — k3-trocr has the better selection-half CER (24.7 %), k3-kraken is the faster (52 ms a line) and lies within the margin (3.6 %).** The operator's answer goes here verbatim; until it comes, the choice is open. Pending for K3b: the PP-OCRv6 pilot's accounting (its side environment's CUDA fault; its weights on D:) and a full PP-OCRv6 training, the ablation without the screened lines (planned, not run), a 24 GB rental for the whole model under AdamW (`tools/k3-rented-gpu.md`), and K2's audit verdicts when they come (the manifest's tags let a class of lines go without recutting).
+**K3 (2026-10-26): a Leibniz Kurrent model — two models trained and measured on the desktop; the branch `k3-kurrent-model` carries the code, the reports and the docs (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...k3-kurrent-model?expand=1); the operator opens and merges the pull request; nothing deployed.** Read first: `reports/kurrent/k3-eval.md` (the letter pool, the validation set, Dresden, the speeds, the choice rule and its answer), then the two model cards `k3-model-card-trocr.md` and `k3-model-card-kraken.md`, `k3-pilots.md` and `k3-trainset.md`. **Keep `data/models/k3/` (a symlink to `/mnt/d/leibniz-train/k3/`: the two models, their validation hypotheses and accounts, the PP-OCRv6 pilot's weights) and `data/train/k3/` (the crops, the manifest, the split lists).** The models as readers: the CANDIDATES keys `k3-trocr` (`data/models/k3/trocr/best`, a Hub-style checkpoint directory the TrOCR engine loads by path; its `generation_config.json` carries `use_cache: true`; MIT base, the fine-tune open) and `k3-kraken` (`data/models/k3/kraken/best.safetensors`, kraken 7.0.3; CC BY 4.0 base, the fine-tune open), both off by default; version strings `k3-trocr@runs-615-epoch-5` and `k3-kraken@runs-614-checkpoint-36`. **The choice for K4 is the operator's, on the numbers (`k3-eval.md`): the rule's answer is k3-kraken — k3-trocr has the better selection-half CER (24.7 %), k3-kraken is the faster (52 ms a line) and lies within the margin (3.6 %).** **The operator's answer (2026-10-26), verbatim: "I agree to go with TrOCR."** READER for K4 is `k3-trocr` (`data/models/k3/trocr/best`), read with `--kv-cache`; K4 runs on `k4-german-site`. Pending for K3b: the PP-OCRv6 pilot's accounting (its side environment's CUDA fault; its weights on D:) and a full PP-OCRv6 training, the ablation without the screened lines (planned, not run), a 24 GB rental for the whole model under AdamW (`tools/k3-rented-gpu.md`), and K2's audit verdicts when they come (the manifest's tags let a class of lines go without recutting).
 
 **K2 (2026-10-21): German ground truth, done on the desktop; the branch
 `k2-german-gt` carries the code, the reports and the docs (compare:
