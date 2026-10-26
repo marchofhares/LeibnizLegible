@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 
@@ -48,7 +49,7 @@ class _StubModel:
         self.calls: list[int] = []
 
     def generate(self, pixel, **kw):
-        assert kw["num_beams"] == 1 and kw["output_scores"] and kw["return_dict_in_generate"]
+        assert kw["num_beams"] == 1 and kw["return_dict_in_generate"]
         self.calls.append(len(pixel))
         seqs, lps = [], []
         width = max(len(self.script[p][0]) for p in pixel)
@@ -76,7 +77,7 @@ class _StubProcessor:
         return [self.texts[tuple(r)] for r in rows]
 
 
-def _engine(batch_size: int = 8) -> tuple[TrOCREngine, _StubModel]:
+def _engine(batch_size: int = 8, **kw) -> tuple[TrOCREngine, _StubModel]:
     script = {
         b"img1": ([11, 12, EOS], [math.log(0.9), math.log(0.8), math.log(0.99)]),
         b"img2": ([21, EOS], [math.log(0.5), math.log(0.9)]),
@@ -104,6 +105,7 @@ def _engine(batch_size: int = 8) -> tuple[TrOCREngine, _StubModel]:
         batch_size=batch_size,
         loader=loader,
         decode=lambda b: b,
+        **kw,
     )
     return eng, model
 
@@ -205,3 +207,19 @@ def test_half_precision_and_kv_cache_reach_the_model() -> None:
     assert "use_cache" not in seen2
     with pytest.raises(ValueError):
         TrOCREngine("x", dtype="bfloat16")
+
+
+def test_snapshot_returns_a_local_checkpoint_directory(tmp_path: Path) -> None:
+    from leibniz.htr.trocr import snapshot
+
+    local = tmp_path / "best"
+    local.mkdir()
+    (local / "config.json").write_text("{}", encoding="utf-8")
+    assert snapshot(str(local), cache_dir=tmp_path / "cache") == local
+
+
+def test_generation_without_scores_gives_no_confidence() -> None:
+    eng, _model = _engine(with_scores=False)
+    rows = eng.transcribe_conf([b"img1", b"img2"])
+    assert [c for _, c in rows] == [None, None]
+    assert [t for t, _ in rows] == ["Sonnabend", "Den"]

@@ -57,7 +57,11 @@ Decoder = Callable[[bytes], object]
 
 
 def snapshot(model_id: str, cache_dir: Path | str = HF_CACHE_DIR) -> Path:
-    """Fetch a checkpoint's inference files into ``cache_dir`` (cache-first)."""
+    """Fetch a checkpoint's inference files into ``cache_dir`` (cache-first); a local
+    directory (a K3 fine-tune under ``data/models/k3/``) is returned as it is."""
+    local_dir = Path(model_id)
+    if local_dir.is_dir() and (local_dir / "config.json").exists():
+        return local_dir
     from huggingface_hub import snapshot_download
 
     return Path(
@@ -153,6 +157,7 @@ class TrOCREngine:
         dtype: str | None = None,
         use_cache: bool | None = None,
         profile: bool = False,
+        with_scores: bool = True,
     ) -> None:
         self.model_id = model_id
         self.version = version or model_id
@@ -165,6 +170,10 @@ class TrOCREngine:
         self.dtype = dtype
         self.use_cache = use_cache
         self.profile = profile
+        # The per-step scores give the confidence; kept for every generated step they
+        # cost batch × steps × vocabulary floats (half a gigabyte at batch 16 and 160
+        # steps), which the K3 validation loop cannot spare beside a training state.
+        self.with_scores = with_scores
         # Seconds per stage and counts, accumulated while ``profile`` is set
         # (:meth:`reset_timings` clears them). ``steps`` are generation steps
         # (the longest line of a batch sets them), ``tokens`` the generated
@@ -299,7 +308,7 @@ class TrOCREngine:
             max_new_tokens=self.max_new_tokens,
             num_beams=1,
             do_sample=False,
-            output_scores=True,
+            output_scores=self.with_scores,
             return_dict_in_generate=True,
             **kwargs,
         )
@@ -310,15 +319,18 @@ class TrOCREngine:
             skip_special_tokens=True,
             clean_up_tokenization_spaces=self.clean_up_spaces,
         )
-        scores = model.compute_transition_scores(  # type: ignore[attr-defined]
-            gen.sequences, gen.scores, normalize_logits=True
-        )
         ids_rows = _rows(gen.sequences)
-        lp_rows = _rows(scores)
+        if self.with_scores:
+            scores = model.compute_transition_scores(  # type: ignore[attr-defined]
+                gen.sequences, gen.scores, normalize_logits=True
+            )
+            lp_rows = _rows(scores)
+        else:
+            lp_rows = [[] for _ in ids_rows]
         result: list[tuple[str, float | None]] = []
         for text, ids, lps in zip(texts, ids_rows, lp_rows, strict=True):
             # sequences carry the decoder-start token first; the scores do not
-            conf = mean_token_prob(ids[1:], lps, self._skip)
+            conf = mean_token_prob(ids[1:], lps, self._skip) if self.with_scores else None
             result.append((tidy(text) if self.clean_up_spaces else text.strip(), conf))
         self._tick("postprocess", t0)
         if self.profile:

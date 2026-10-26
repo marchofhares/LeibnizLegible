@@ -203,3 +203,11 @@ def test_cli_kurrent_smoke_with_echo(tmp_path: Path, monkeypatch) -> None:
     assert "echo" in result.output
     assert (tmp_path / "reports" / "bootstrap-candidates.md").exists()
     assert (tmp_path / "reports" / "bootstrap-candidates.json").exists()
+
+
+def test_k3_candidates_are_registered_off_by_default() -> None:
+    from leibniz.htr.kurrent import CANDIDATES
+
+    for key, kind in (("k3-trocr", "trocr"), ("k3-kraken", "kraken")):
+        c = CANDIDATES[key]
+        assert c.kind == kind and not c.default and c.source.startswith("data/models/k3/")
