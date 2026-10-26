@@ -1140,6 +1140,11 @@ def k3_report(
         Path("data/models/k3/ppocr-pilot/account.json"), "--ppocr-account", help="eval: the pilot."
     ),
     ablation_note: str = typer.Option("", "--ablation-note", help="eval: the ablation's state."),
+    dresden_kv: Path = typer.Option(
+        Path("reports/kurrent/k3-dresden-kv/bootstrap-candidates.json"),
+        "--dresden-kv",
+        help="eval: kurrent-smoke's JSON with the decoder's cache on (the TrOCR pace for K4).",
+    ),
 ) -> None:
     """Render a K3 report from the artefacts' JSON (numbers only)."""
     from leibniz.htr import k3_eval as E
@@ -1174,6 +1179,7 @@ def k3_report(
             trainset=R.load_json(reports_dir / "k3-trainset.json"),
             ppocr_pilot=R.load_json(ppocr_account),
             ablation_note=ablation_note,
+            dresden_kv=R.load_json(dresden_kv),
         )
         paths = R.write_eval(s, reports_dir)
         paths.update(

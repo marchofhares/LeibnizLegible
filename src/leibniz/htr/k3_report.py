@@ -457,6 +457,7 @@ def build_eval(
     trainset: Mapping | None,
     ppocr_pilot: Mapping | None = None,
     ablation_note: str = "",
+    dresden_kv: Mapping | None = None,
 ) -> dict:
     """Everything k3-eval.md says, from the files: the pool rows of K2b's readers and the K3
     models, the validation breakdowns, Dresden, the speeds and projections, the choice."""
@@ -483,7 +484,15 @@ def build_eval(
     baselines = {
         key: {"pool": pool_rows(k2b_pool, key), "dresden": dres.get(key)} for key in K2B_READERS
     }
+    # the TrOCR model with the decoder's cache on (K2's reading setting): the pace K4 would get
+    kv_ms = None
+    for r in (dresden_kv or {}).get("results", []) if dresden_kv else []:
+        if r.get("key") == "k3-trocr" and r.get("status") == "ok":
+            kv_ms = r.get("ms_per_line")
+    kv_proj = projection(kv_ms)
     return {
+        "trocr_kv_ms": kv_ms,
+        "trocr_kv_hours": kv_proj["hours"] if kv_proj else None,
         "generated": date.today().isoformat(),
         "headline_policy": HEADLINE,
         "models": models,
@@ -548,6 +557,21 @@ def render_eval(s: Mapping) -> str:
             f"**{_cerci(p['test'])}** | "
             f"{_cerci((p['hand'] or {}).get('L'))} | {_cerci((p['hand'] or {}).get('K/k'))} |"
         )
+    read = []
+    for key in K3_MODELS:
+        info = ((s["models"][key] or {}).get("pool") or {}).get("info") or {}
+        if info.get("lines_read") is not None:
+            read.append(
+                f"{key} {_n(info['lines_read'])} lines with a reading of 18,815 "
+                f"({_f(info.get('ms_per_line'), 0)} ms a line in the read)"
+            )
+    if read:
+        L += [
+            "",
+            "Lines read, counted per letter (an empty reading counts as deleted): "
+            + "; ".join(read)
+            + ".",
+        ]
     years = sorted(
         {
             y
@@ -631,6 +655,12 @@ def render_eval(s: Mapping) -> str:
         "| all-in ms a line (K2's overhead added) | K2's 310,831 lines |",
         "|---|---:|---:|---:|",
     ]
+    if s.get("trocr_kv_ms") is not None:
+        L.append(
+            f"| k3-trocr, the decoder's cache on (K2's setting) | {_f(s['trocr_kv_ms'], 0)} | "
+            f"{_f(s['trocr_kv_ms'] + 1000.0 * (K2_WALL_S - K2_MODEL_S) / K2_LINES, 0)} | "
+            f"{_hours(s['trocr_kv_hours'])} |"
+        )
     for key in K3_MODELS:
         sp = s["models"][key].get("speed")
         if sp:

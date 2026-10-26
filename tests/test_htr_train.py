@@ -571,6 +571,18 @@ def test_eval_report_choice_and_render(tmp_path: Path) -> None:
     )
     md = R.render_eval(s)
     assert "The rule's answer: k3-kraken" in md and "v1 (K2b)" in md and "75.0 %" in md
+    kv = {"results": [{"key": "k3-trocr", "status": "ok", "ms_per_line": 90.0}]}
+    s_kv = R.build_eval(
+        k3_pool=k3_pool,
+        k2b_pool=k2b_pool,
+        val_breakdowns={},
+        dresden=dresden,
+        disagreements=None,
+        trained={},
+        trainset=None,
+        dresden_kv=kv,
+    )
+    assert s_kv["trocr_kv_ms"] == 90.0 and "the decoder's cache on" in R.render_eval(s_kv)
     paths = R.write_eval(s, tmp_path)
     assert (
         paths["md"].exists()
