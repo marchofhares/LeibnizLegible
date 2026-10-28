@@ -1213,4 +1213,419 @@ def k3_report(
         console.print(f"  wrote {k}: {p}")
 
 
+# --------------------------------------------------------------------------- #
+# LT1: whole pages to the frontier vision models (page-list, page-fetch, page-read,
+# page-lines, page-score, page-report)
+# --------------------------------------------------------------------------- #
+
+_PAGE_SETS = ("philiumm", "pool", "all")
+
+
+def _polite_fetch():
+    """A polite GET returning bytes (the Hub, the mirror): one request a second, the UA."""
+    from leibniz.net import PoliteClient, default_user_agent
+
+    client = PoliteClient(user_agent=default_user_agent(), min_interval=1.0)
+    return client, client.get_bytes
+
+
+def _page_rows(paths: list[Path], which: str):
+    from leibniz.htr import pageread as R
+
+    rows = []
+    for p in paths:
+        rows.extend(R.read_page_list(p))
+    if which != "all":
+        rows = [r for r in rows if r.set == which]
+    return rows
+
+
+@app.command("page-list")
+def page_list(
+    testset: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="K2b's frozen set."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="P1's page census."
+    ),
+    hub_cache: Path = typer.Option(
+        Path("data/philiumm"), "--hub-cache", help="Where the Hub's file listing is cached."
+    ),
+    val_pages: Path | None = typer.Option(
+        None, "--val-pages", help="A directory of fetched val pages, listed instead of the Hub."
+    ),
+    n_pool: int = typer.Option(100, "--n-pool", help="Pool pages to draw (whole letters)."),
+    seed: int = typer.Option(20261028, "--seed", help="The pool draw's seed."),
+    out_dir: Path = typer.Option(Path("reports/htr"), "--out-dir", help="Where the lists go."),
+    no_split_openings: bool = typer.Option(
+        False, "--no-split-openings", help="Read an opening whole instead of left and right."
+    ),
+) -> None:
+    """Write the two page lists: PHILIUMM's val pages and a seeded draw of pool pages (LT1)."""
+    from leibniz.htr import pageread as R
+
+    if val_pages is not None and Path(val_pages).exists():
+        files = sorted(f"val/{p.name}" for p in Path(val_pages).glob("*.jpg"))
+        source = str(val_pages)
+    else:
+        from leibniz.align.philiumm import vi4 as V
+
+        client, _fetch = _polite_fetch()
+        try:
+            listing = V.fetch_listing(Path(hub_cache), client=client)
+        finally:
+            client.close()
+        files = R.val_files(listing["files"])
+        source = f"the Hub listing (revision {listing.get('sha')})"
+    held = R.read_heldout(heldout) if Path(heldout).exists() else {}
+    phil = R.philiumm_rows(files, held, split_openings=not no_split_openings)
+    pool = R.draw_pool_pages(R.read_testset_rows(testset), n_pages=n_pool, seed=seed)
+    p1 = R.write_page_list(phil, Path(out_dir) / "page-list-philiumm.csv")
+    p2 = R.write_page_list(pool, Path(out_dir) / "page-list-pool.csv")
+    n_files = len({r.ref for r in phil})
+    openings = sum(1 for r in phil if r.column == "left")
+    console.print(
+        f"[bold]page-list[/bold] PHILIUMM: {n_files} val pages from {source}, {len(phil)} "
+        f"calls ({openings} openings read as two halves), {sum(1 for r in phil if r.work_id)} "
+        f"calls on pages the store also holds → {p1}"
+    )
+    letters = {r.letter_id for r in pool}
+    n_l = sum(1 for r in pool if r.hand == "L")
+    n_sel = sum(1 for r in pool if r.half == "selection")
+    console.print(
+        f"  pool: {len(pool)} pages of {len(letters)} letters, seed {seed}; "
+        f"L {n_l}, K/k {len(pool) - n_l}; selection {n_sel}, test {len(pool) - n_sel} → {p2}"
+    )
+
+
+@app.command("page-fetch")
+def page_fetch(
+    val_pages: Path = typer.Option(
+        Path("data/gt/philiumm-val-pages"), "--val-pages", help="Where the val pages land."
+    ),
+    hub_cache: Path = typer.Option(Path("data/philiumm"), "--hub-cache", help="The listing cache."),
+    limit: int | None = typer.Option(None, "--limit", help="Only the first N pages (a smoke run)."),
+) -> None:
+    """Fetch PHILIUMM's val pages (JPEG + PAGE XML, CC BY 4.0) from the Hub, one a second."""
+    from leibniz.align.philiumm import vi4 as V
+    from leibniz.htr import pageread as R
+
+    client, fetch = _polite_fetch()
+    try:
+        listing = V.fetch_listing(Path(hub_cache), client=client)
+        files = R.val_files(listing["files"])
+        if limit is not None:
+            files = files[:limit]
+        got, present = R.fetch_val_pages(
+            files, val_pages, fetch, log=lambda m: console.print(f"  {m}")
+        )
+    finally:
+        client.close()
+    console.print(
+        f"[bold]page-fetch[/bold] {got} files fetched now, {present} present in {val_pages}"
+    )
+
+
+@app.command("page-read")
+def page_read(
+    pages: list[Path] = typer.Option(..., "--pages", help="Page list CSV (repeatable)."),
+    engine: str = typer.Option(..., "--engine", help="gemini | anthropic | openai | echo."),
+    model: str | None = typer.Option(None, "--model", help="The model id (echo: a label)."),
+    out: Path = typer.Option(
+        Path("data/bench/page-llm"), "--out", help="Readings directory: one JSONL per model."
+    ),
+    images: Path | None = typer.Option(None, "--images", help="The page-image cache root."),
+    val_pages: Path = typer.Option(
+        Path("data/gt/philiumm-val-pages"), "--val-pages", help="page-fetch's directory."
+    ),
+    mirror: bool = typer.Option(
+        True, "--mirror/--no-mirror", help="Fetch a missing image from the public mirror / Hub."
+    ),
+    cache: Path = typer.Option(
+        Path("data/bench/page-llm/images"), "--cache", help="Where fetched images are kept."
+    ),
+    which: str = typer.Option("all", "--set", help="philiumm | pool | all."),
+    long_side: int = typer.Option(2000, "--long-side", help="The image's long side in px."),
+    max_tokens: int = typer.Option(4000, "--max-tokens", help="The output cap per call."),
+    reasoning: str | None = typer.Option(
+        None, "--reasoning", help="Override the lowest setting (effort / thinking_level / …)."
+    ),
+    timeout: float = typer.Option(300.0, "--timeout", help="Seconds per call."),
+    max_cost: float | None = typer.Option(None, "--max-cost", help="Stop at this many USD."),
+    assume_output_tokens: int = typer.Option(
+        1500, "--assume-output-tokens", help="Dry run: output tokens a page, thinking included."
+    ),
+    redo: str = typer.Option("none", "--redo", help="none | failed | all."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print the plan and the cost; no call."),
+    limit: int | None = typer.Option(None, "--limit", help="Only the first N rows."),
+) -> None:
+    """Read whole pages with a frontier vision model, one page a call, resumable (LT1 Task 1)."""
+    from leibniz.htr import pageread as R
+    from leibniz.htr.engines import MissingKeyError
+
+    if which not in _PAGE_SETS:
+        raise typer.BadParameter(f"--set must be one of {_PAGE_SETS}")
+    if redo not in ("none", "failed", "all"):
+        raise typer.BadParameter("--redo must be none, failed or all")
+    if engine in R.API_ENGINES and not model:
+        raise typer.BadParameter("--model is required for an API engine")
+    rows = _page_rows(pages, which)
+    if limit is not None:
+        rows = rows[:limit]
+    if not rows:
+        console.print("[red]No pages in the list(s).[/red]")
+        raise typer.Exit(code=1)
+    label = model or "0"
+    out_path = R.readings_path(out, label)
+    client = None
+    fetch = None
+    if mirror:
+        client, fetch = _polite_fetch()
+    store = R.ImageStore(images_root=images, val_pages=val_pages, cache_dir=cache, fetch=fetch)
+    try:
+        plan = R.plan_read(
+            rows,
+            engine,
+            label,
+            out_path=out_path,
+            images=store,
+            long_side=long_side,
+            output_tokens_per_page=assume_output_tokens,
+            reasoning=reasoning,
+        )
+        console.print(
+            f"[bold]page-read[/bold] {engine} {label}: {plan.calls} calls to make "
+            f"({plan.already_read} already in {out_path}); pages {plan.pages}; long side "
+            f"{long_side} px; reasoning {plan.reasoning}; max_tokens {max_tokens}"
+        )
+        rate = f"{plan.rate[0]:.2f} / {plan.rate[1]:.2f} USD per 1M" if plan.rate else "unpriced"
+        console.print(
+            f"  estimate: {plan.input_tokens:,} input tokens (image sizes known for "
+            f"{plan.image_sizes_known} of {plan.calls}) + {plan.output_tokens_assumed:,} output "
+            f"tokens assumed ({assume_output_tokens} a page) at {rate} → "
+            f"{'—' if plan.cost is None else f'{plan.cost:.2f} USD'}"
+            + (f"; cap {max_cost:.2f} USD" if max_cost is not None else "; no cap")
+        )
+        if dry_run:
+            return
+        try:
+            eng = R.build_engine(
+                engine, model, max_tokens=max_tokens, timeout=timeout, reasoning=reasoning
+            )
+        except MissingKeyError as exc:
+            console.print(f"[yellow]{exc}[/yellow]")
+            raise typer.Exit(code=2) from None
+        stats = R.read_pages(
+            rows,
+            eng,
+            out_path,
+            images=store,
+            engine_name=engine,
+            long_side=long_side,
+            max_cost=max_cost,
+            redo=redo,
+            log=lambda m: console.print(f"  {m}"),
+        )
+        close = getattr(eng, "close", None)
+        if callable(close):
+            close()
+    finally:
+        if client is not None:
+            client.close()
+    capped = " (stopped at the cap)" if stats.stopped_at_cap else ""
+    console.print(
+        f"  done: {stats.read} read, {stats.skipped} skipped, statuses {stats.statuses}, "
+        f"{stats.cost:.2f} USD{capped} → {out_path}"
+    )
+
+
+@app.command("page-lines")
+def page_lines(
+    val_pages: Path = typer.Option(
+        Path("data/gt/philiumm-val-pages"), "--val-pages", help="page-fetch's directory."
+    ),
+    out: Path = typer.Option(
+        Path("data/bench/page-llm/val-lines"), "--out", help="Kraken image + .gt.txt pairs."
+    ),
+) -> None:
+    """Cut the val pages' lines for the kraken model (then `bench run OUT --engine kraken`)."""
+    from leibniz.htr import pagescore as S
+
+    n = S.cut_page_lines(val_pages, out, log=lambda m: console.print(f"  {m}"))
+    console.print(f"[bold]page-lines[/bold] {n} lines written to {out}")
+
+
+@app.command("page-score")
+def page_score(
+    which: str = typer.Option(..., "--set", help="philiumm | pool."),
+    pages: list[Path] = typer.Option(..., "--pages", help="Page list CSV (repeatable)."),
+    readings: Path = typer.Option(
+        Path("data/bench/page-llm"), "--readings", help="page-read's directory."
+    ),
+    models: str | None = typer.Option(
+        None, "--models", help="Comma-separated model ids (default: every JSONL in --readings)."
+    ),
+    scores: Path = typer.Option(
+        Path("reports/htr/page-llm.scores.json"), "--scores", help="The score file (updated)."
+    ),
+    split: str = typer.Option("val", "--split", help="PHILIUMM: val (its held-out split)."),
+    val_pages: Path = typer.Option(
+        Path("data/gt/philiumm-val-pages"), "--val-pages", help="The val pages' XML."
+    ),
+    kraken_lines: Path | None = typer.Option(
+        None, "--kraken-lines", help="A `bench run --out` dump of page-lines' crops."
+    ),
+    db_path: str = typer.Option(
+        "data/inventory.sqlite", "--db", help="Pool: the store (read-only)."
+    ),
+    testset: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--testset", help="Pool: the frozen set."
+    ),
+    texts: Path = typer.Option(
+        Path("data/kurrent/letterpool/testset.jsonl"), "--texts", help="Pool: the references."
+    ),
+    pool_readings: Path = typer.Option(
+        Path("data/kurrent/letterpool-readings"),
+        "--pool-readings",
+        help="Pool: K2b's and K3's line readings.",
+    ),
+    line_readers: str = typer.Option(
+        "k3-trocr,k3-kraken,trocr-kurrent-xvi-xvii",
+        "--line-readers",
+        help="Pool: the line readers scored beside the page models (those on disk).",
+    ),
+    diff_reader: str = typer.Option("k3-trocr", "--diff-reader", help="The diff's line reader."),
+    seed: int = typer.Option(20261028, "--seed", help="Recorded: the pool draw's seed."),
+) -> None:
+    """Score the page readings: PHILIUMM page CER, or the pool by K2b's metric (LT1 Task 2)."""
+    from leibniz.htr import pageread as R
+    from leibniz.htr import pagescore as S
+
+    if which not in ("philiumm", "pool"):
+        raise typer.BadParameter("--set must be philiumm or pool")
+    if split == "test":
+        split = "val"  # the dataset has no test split; val is its held-out split (recorded)
+    if split != "val":
+        raise typer.BadParameter("--split: the dataset's held-out split is val")
+    rows = _page_rows(pages, which)
+    if models:
+        names = [m.strip() for m in models.split(",") if m.strip()]
+        files = [R.readings_path(readings, m) for m in names]
+    else:
+        files = sorted(Path(readings).glob("*.jsonl"))
+    model_readings: dict = {}
+    for f in files:
+        rd = R.load_readings(f)
+        rd = {k: v for k, v in rd.items() if v.get("set") == which}
+        if not rd:
+            continue
+        name = next(iter(rd.values())).get("model") or f.stem
+        model_readings[name] = rd
+    if not model_readings:
+        console.print(f"[red]No readings for the {which} set under {readings}.[/red]")
+        raise typer.Exit(code=1)
+    sf = S.ScoreFile.load(scores)
+    first = next(iter(next(iter(model_readings.values())).values()))
+    sf.generated = {
+        "date": db.utcnow_iso(),
+        "prompt_sha256": (first.get("settings") or {}).get("prompt_sha256"),
+        "long_side": (first.get("settings") or {}).get("long_side"),
+        "max_tokens": (first.get("settings") or {}).get("max_tokens"),
+    }
+    if which == "philiumm":
+        refs, missing = S.philiumm_refs(rows, val_pages)
+        if not refs:
+            console.print(f"[red]No PAGE XML for the list's pages under {val_pages}.[/red]")
+            raise typer.Exit(code=1)
+        hyps = S.read_line_dump(kraken_lines) if kraken_lines else None
+        sf.philiumm = S.score_philiumm(
+            refs,
+            model_readings,
+            missing=missing,
+            kraken_hyps=hyps,
+            kraken_dump=str(kraken_lines) if kraken_lines else "",
+        )
+        for reader, pols in sf.philiumm["aggregate"].items():
+            h = pols[S.HEADLINE_POLICY]
+            console.print(
+                f"  [bold]{reader}[/bold]: page CER {_fmt(h['charged']['cer'])} "
+                f"({_fmt(h['charged']['cer_lo'])}–{_fmt(h['charged']['cer_hi'])}) with "
+                f"{h['charged']['failed']} failed pages charged; {_fmt(h['omitted']['cer'])} "
+                f"with them left out; {h['charged']['pages']} pages"
+            )
+        if missing:
+            console.print(f"  left out, no XML on disk: {', '.join(missing)}")
+    else:
+        from leibniz.align import letterpool_eval as E
+        from leibniz.align.audit_reach import open_readonly
+
+        letters = E.load_set(testset, texts)
+        conn = open_readonly(db_path)
+        try:
+            sf.pool = S.score_pool(
+                conn,
+                letters,
+                rows,
+                model_readings,
+                pool_readings_dir=pool_readings,
+                line_readers=[k.strip() for k in line_readers.split(",") if k.strip()],
+                diff_reader=diff_reader,
+                seed=seed,
+                log=lambda m: console.print(f"  {m}"),
+            )
+        finally:
+            conn.close()
+        d = sf.pool["draw"]
+        console.print(
+            f"  {d['letters']} letters, {d['pages']} pages (L {d['pages_L']}, K/k {d['pages_K']})"
+        )
+        for reader, pols in sf.pool["aggregate"].items():
+            h = pols[S.HEADLINE_POLICY]["all"]
+            console.print(
+                f"  [bold]{reader}[/bold]: CER {_fmt(h['cer'])} ({_fmt(h['cer_lo'])}–"
+                f"{_fmt(h['cer_hi'])}) on {h['letters']} letters"
+            )
+        if sf.pool["failed_pages"]:
+            console.print(
+                f"  failed pages: {len(sf.pool['failed_pages'])}; letters with every page read: "
+                f"{sf.pool['omitted']['letters']} of {d['letters']}"
+            )
+    path = sf.save(scores)
+    console.print(f"  wrote {path}")
+
+
+def _fmt(x: float | None) -> str:
+    return "—" if x is None else f"{x * 100:.1f} %"
+
+
+@app.command("page-report")
+def page_report(
+    scores: Path = typer.Option(
+        Path("reports/htr/page-llm.scores.json"), "--scores", help="page-score's file."
+    ),
+    out: Path = typer.Option(Path("reports/htr/page-llm.md"), "--out", help="The report."),
+    k2b: Path = typer.Option(
+        Path("reports/kurrent/letterpool-eval.json"), "--k2b", help="K2b's whole-set rows."
+    ),
+    k3: Path = typer.Option(
+        Path("reports/kurrent/k3-letterpool/letterpool-eval.json"), "--k3", help="K3's rows."
+    ),
+) -> None:
+    """Render reports/htr/page-llm.md and .json from the score file (LT1 Task 3)."""
+    from leibniz.htr import pagereport as PR
+    from leibniz.htr import pagescore as S
+
+    sf = S.ScoreFile.load(scores)
+    if not sf.philiumm and not sf.pool:
+        console.print(f"[red]Nothing scored yet in {scores}.[/red]")
+        raise typer.Exit(code=1)
+    committed = PR.committed_pool_rows({"k3": k3, "k2b": k2b})
+    md, js = PR.write_report(
+        {"philiumm": sf.philiumm, "pool": sf.pool, "generated": sf.generated},
+        report_path=out,
+        committed=committed,
+    )
+    console.print(f"[bold]page-report[/bold] wrote {md} and {js}")
+
+
 __all__ = ["app"]

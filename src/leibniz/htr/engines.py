@@ -24,14 +24,78 @@ from __future__ import annotations
 
 import base64
 import io
+import math
 import os
 import signal
 import threading
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
+from dataclasses import dataclass
 
 import httpx
+
+# --------------------------------------------------------------------------- #
+# One API answer, as the page reader records it (LT1)
+# --------------------------------------------------------------------------- #
+
+# The APIs' own stop reasons, folded to four words the page reader can act on:
+# ``end`` (the model stopped by itself), ``length`` (the output cap was hit — a
+# runaway in the page protocol), ``refusal`` (a safety stop or a content filter),
+# ``other:<raw>`` (anything else, kept verbatim).
+_STOP_END = {"end_turn", "stop", "stop_sequence", "end"}
+_STOP_LENGTH = {"max_tokens", "length"}
+_STOP_REFUSAL = {
+    "refusal",
+    "content_filter",
+    "safety",
+    "recitation",
+    "blocklist",
+    "prohibited_content",
+    "spii",
+}
+
+
+def classify_stop(raw: str | None) -> str:
+    """``end`` | ``length`` | ``refusal`` | ``other:<raw>`` from an API's stop/finish reason."""
+    r = (raw or "").strip()
+    low = r.lower()
+    if low in _STOP_END:
+        return "end"
+    if low in _STOP_LENGTH:
+        return "length"
+    if low in _STOP_REFUSAL:
+        return "refusal"
+    return f"other:{r}" if r else "other:"
+
+
+@dataclass(slots=True)
+class ApiReply:
+    """What one call returned: the text, why the model stopped, what it cost in tokens.
+
+    ``output_tokens`` is the API's completion count, which on a thinking model
+    includes the reasoning tokens; ``reasoning_tokens`` is the API's own split
+    of that count when it reports one (``None`` otherwise).
+    """
+
+    text: str
+    stop: str
+    input_tokens: int = 0
+    output_tokens: int = 0
+    reasoning_tokens: int | None = None
+    attempts: int = 1
+
+
+def _prefix_rate(
+    table: Mapping[str, tuple[float, float]], model: str
+) -> tuple[float, float] | None:
+    """The table's row for ``model`` by longest known prefix (a dated id → its family)."""
+    rate = table.get(model)
+    if rate is not None:
+        return rate
+    keys = sorted((k for k in table if model.startswith(k)), key=len, reverse=True)
+    return table[keys[0]] if keys else None
+
 
 # --------------------------------------------------------------------------- #
 # Kraken (local inference)
@@ -310,6 +374,62 @@ DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
 
+# Approximate list prices, USD per 1M tokens (input, output), for cost *estimates*
+# only, as for OPENAI_PRICES below: the run reports the exact usage from each
+# response. Read from the Claude API's model table on 2026-10-28 (the
+# claude-api skill's cached table of 2026-10-06, the same figures).
+ANTHROPIC_PRICES: dict[str, tuple[float, float]] = {
+    "claude-fable-5-1": (10.00, 50.00),
+    "claude-fable-5": (10.00, 50.00),
+    "claude-opus-5-5": (4.00, 20.00),
+    "claude-opus-5": (5.00, 25.00),
+    "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-sonnet-5": (2.00, 10.00),
+    "claude-haiku-5-5": (0.10, 0.50),
+}
+
+# Claude's visual tokens: 28 × 28 px patches, the image first fitted into the
+# model's tier — Claude 4.7 and later (Fable 5.1 among them): a long edge of
+# at most 2,576 px and at most 4,784 visual tokens; larger images are downscaled
+# server-side, aspect kept (the vision documentation, read 2026-10-28).
+ANTHROPIC_PATCH_PX = 28
+ANTHROPIC_MAX_LONG_EDGE = 2576
+ANTHROPIC_MAX_VISUAL_TOKENS = 4784
+
+
+def estimate_anthropic_cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
+    """USD cost estimate from token usage, or ``None`` if the model isn't priced."""
+    rate = _prefix_rate(ANTHROPIC_PRICES, model)
+    if rate is None:
+        return None
+    return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
+
+
+def anthropic_image_tokens(width: int, height: int) -> int:
+    """Visual tokens Claude charges for an image of this size (the high-resolution tier).
+
+    The image is scaled down, aspect kept, until its long edge is within
+    :data:`ANTHROPIC_MAX_LONG_EDGE` and its patch count within
+    :data:`ANTHROPIC_MAX_VISUAL_TOKENS`; the count is ``⌈w/28⌉ × ⌈h/28⌉``. An
+    estimate for planning: the run records the API's own ``input_tokens``.
+    """
+    w, h = max(1, width), max(1, height)
+    long_edge = max(w, h)
+    if long_edge > ANTHROPIC_MAX_LONG_EDGE:
+        s = ANTHROPIC_MAX_LONG_EDGE / long_edge
+        w, h = max(1, round(w * s)), max(1, round(h * s))
+
+    def patches(a: int, b: int) -> int:
+        return math.ceil(a / ANTHROPIC_PATCH_PX) * math.ceil(b / ANTHROPIC_PATCH_PX)
+
+    n = patches(w, h)
+    while n > ANTHROPIC_MAX_VISUAL_TOKENS:
+        s = math.sqrt(ANTHROPIC_MAX_VISUAL_TOKENS / n) * 0.995
+        w, h = max(1, int(w * s)), max(1, int(h * s))
+        n = patches(w, h)
+    return n
+
+
 # Zero-shot, image-grounded, and deliberately terse: we want the transcription
 # only, no commentary or "I can't read this" hedging that would pollute the CER.
 DEFAULT_PROMPT = (
@@ -335,6 +455,13 @@ class AnthropicEngine:
     key is present, each line image is sent as a base64 image block with a terse
     diplomatic-transcription prompt; transient ``429``/``529`` responses are
     retried with backoff and requests are spaced by ``min_interval``.
+
+    The page protocol (LT1) adds ``effort`` (``output_config.effort``: on the
+    Claude 5 models thinking is always on and cannot be disabled — ``low`` is
+    the lowest setting the API allows, the API's documentation read 2026-10-28)
+    and leaves ``temperature`` unsent by default (the current models reject the
+    parameter). Token usage accumulates in ``usage_input`` / ``usage_output``
+    (the output count includes the thinking tokens); :attr:`cost` prices it.
     """
 
     name = "anthropic"
@@ -346,6 +473,8 @@ class AnthropicEngine:
         api_key: str | None = None,
         prompt: str = DEFAULT_PROMPT,
         max_tokens: int = 256,
+        effort: str | None = None,
+        temperature: float | None = None,
         min_interval: float = 0.3,
         max_retries: int = 4,
         timeout: float = 120.0,
@@ -363,10 +492,14 @@ class AnthropicEngine:
         self.model = model
         self.prompt = prompt
         self.max_tokens = max_tokens
+        self.effort = effort
+        self.temperature = temperature
         self.min_interval = min_interval
         self.max_retries = max_retries
         self._deadline_s = timeout + 30.0
         self._sleep = sleep
+        self.usage_input = 0
+        self.usage_output = 0
         self._owns_client = client is None
         if client is None:
             import httpx
@@ -385,6 +518,20 @@ class AnthropicEngine:
     def __exit__(self, *_exc: object) -> None:
         self.close()
 
+    @property
+    def cost(self) -> float | None:
+        """Estimated USD cost of everything transcribed so far (or ``None``)."""
+        return estimate_anthropic_cost(self.model, self.usage_input, self.usage_output)
+
+    def settings(self) -> dict:
+        """The sampling and reasoning settings as sent, for the run's record."""
+        return {
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "reasoning": f"effort {self.effort}" if self.effort else "the model's default",
+            "thinking": "always on (cannot be disabled on this API's current models)",
+        }
+
     def _headers(self) -> dict[str, str]:
         return {
             "x-api-key": self._key,
@@ -392,10 +539,10 @@ class AnthropicEngine:
             "content-type": "application/json",
         }
 
-    def _one(self, data: bytes) -> str:
+    def _body(self, data: bytes, prompt: str) -> dict:
         media_type = _sniff_media_type(data)
         b64 = base64.standard_b64encode(data).decode("ascii")
-        body = {
+        body: dict = {
             "model": self.model,
             "max_tokens": self.max_tokens,
             "messages": [
@@ -410,11 +557,20 @@ class AnthropicEngine:
                                 "data": b64,
                             },
                         },
-                        {"type": "text", "text": self.prompt},
+                        {"type": "text", "text": prompt},
                     ],
                 }
             ],
         }
+        if self.effort:
+            body["output_config"] = {"effort": self.effort}
+        if self.temperature is not None:
+            body["temperature"] = self.temperature
+        return body
+
+    def reply(self, data: bytes, *, prompt: str | None = None) -> ApiReply:
+        """One image, one call: the text, the stop reason and the usage."""
+        body = self._body(data, prompt if prompt is not None else self.prompt)
         attempt = 0
         while True:
             try:
@@ -430,8 +586,32 @@ class AnthropicEngine:
                 attempt += 1
                 self._sleep(2.0**attempt)
                 continue
+            if (
+                resp.status_code == 400
+                and "temperature" in body
+                and "temperature" in _error_message(resp)
+            ):
+                # The current models reject the parameter: drop it and go again.
+                body.pop("temperature")
+                self.temperature = None
+                continue
             resp.raise_for_status()
-            return _extract_text(resp.json())
+            payload = resp.json()
+            usage = payload.get("usage") or {}
+            n_in = int(usage.get("input_tokens", 0))
+            n_out = int(usage.get("output_tokens", 0))
+            self.usage_input += n_in
+            self.usage_output += n_out
+            return ApiReply(
+                text=_extract_text(payload),
+                stop=classify_stop(payload.get("stop_reason")),
+                input_tokens=n_in,
+                output_tokens=n_out,
+                attempts=attempt + 1,
+            )
+
+    def _one(self, data: bytes) -> str:
+        return self.reply(data).text
 
     def transcribe(self, images: Sequence[bytes]) -> list[str]:
         out: list[str] = []
@@ -440,6 +620,14 @@ class AnthropicEngine:
                 self._sleep(self.min_interval)
             out.append(self._one(data))
         return out
+
+
+def _error_message(resp) -> str:
+    """The ``error.message`` of an API error response (lower-cased), or ``""``."""
+    try:
+        return str((resp.json().get("error") or {}).get("message") or "").lower()
+    except Exception:
+        return ""
 
 
 def _sniff_media_type(data: bytes) -> str:
@@ -488,6 +676,17 @@ OPENAI_PRICES: dict[str, tuple[float, float]] = {
     "gpt-5.6-terra": (2.00, 12.00),
 }
 
+# The page protocol asks for reasoning off, or the lowest setting the API
+# allows; OpenAI's ``reasoning_effort`` values are model-dependent ("none",
+# "minimal", "low", … — the reasoning guide, read 2026-10-28), so a 400 on the
+# requested value steps down this chain until one is accepted (``None`` = send
+# nothing and take the model's default).
+OPENAI_REASONING_FALLBACK: dict[str, str | None] = {
+    "none": "minimal",
+    "minimal": "low",
+    "low": None,
+}
+
 
 def estimate_openai_cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
     """USD cost estimate from token usage, or ``None`` if the model isn't priced.
@@ -496,13 +695,27 @@ def estimate_openai_cost(model: str, input_tokens: int, output_tokens: int) -> f
     ``gpt-4o-2024-08-06`` prices as ``gpt-4o``). Estimate only — see
     :data:`OPENAI_PRICES`.
     """
-    rate = OPENAI_PRICES.get(model)
+    rate = _prefix_rate(OPENAI_PRICES, model)
     if rate is None:
-        keys = sorted((k for k in OPENAI_PRICES if model.startswith(k)), key=len, reverse=True)
-        if not keys:
-            return None
-        rate = OPENAI_PRICES[keys[0]]
+        return None
     return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
+
+
+def openai_image_tokens(width: int, height: int, *, detail: str = "high") -> int:
+    """The Chat Completions image token rule for GPT-4o-class models (an estimate).
+
+    ``high`` detail: the image fitted into 2048 × 2048, then its short side to
+    768 px, 170 tokens per 512 × 512 tile plus 85; ``low``: 85.
+    """
+    if detail == "low":
+        return 85
+    w, h = max(1, width), max(1, height)
+    s = min(1.0, 2048 / max(w, h))
+    w, h = w * s, h * s
+    s2 = 768 / min(w, h)
+    if s2 < 1.0:
+        w, h = w * s2, h * s2
+    return 85 + 170 * math.ceil(w / 512) * math.ceil(h / 512)
 
 
 def _param_error(resp) -> str | None:
@@ -557,6 +770,12 @@ class OpenAIEngine:
     each line image as a high-detail ``data:`` image URL and accumulates token
     ``usage`` across the batch (``usage_input`` / ``usage_output``) so the run can
     report exact cost. ``name`` is ``openai``; ``version`` is the model id.
+
+    The page protocol (LT1) adds ``reasoning_effort``: the value asked for is
+    sent as is, and a 400 naming the parameter steps down
+    :data:`OPENAI_REASONING_FALLBACK` (``none`` → ``minimal`` → ``low`` → the
+    model's default) so a run never dies on a model that lacks a level; the
+    value that was accepted is what :meth:`settings` reports.
     """
 
     name = "openai"
@@ -571,6 +790,7 @@ class OpenAIEngine:
         max_tokens: int = 256,
         detail: str = "high",
         temperature: float | None = 0.0,
+        reasoning_effort: str | None = None,
         min_interval: float = 0.2,
         max_retries: int = 4,
         timeout: float = 120.0,
@@ -591,6 +811,7 @@ class OpenAIEngine:
         self.max_tokens = max_tokens
         self.detail = detail
         self.temperature = temperature
+        self.reasoning_effort = reasoning_effort
         self.min_interval = min_interval
         self.max_retries = max_retries
         self._deadline_s = timeout + 30.0
@@ -620,10 +841,23 @@ class OpenAIEngine:
         """Estimated USD cost of everything transcribed so far (or ``None``)."""
         return estimate_openai_cost(self.model, self.usage_input, self.usage_output)
 
+    def settings(self) -> dict:
+        """The sampling and reasoning settings as sent, for the run's record."""
+        return {
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "reasoning": (
+                f"reasoning_effort {self.reasoning_effort}"
+                if self.reasoning_effort
+                else "the model's default (no reasoning_effort sent)"
+            ),
+            "detail": self.detail,
+        }
+
     def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self._key}", "content-type": "application/json"}
 
-    def _one(self, data: bytes) -> str:
+    def _body(self, data: bytes, prompt: str) -> dict:
         media_type = _sniff_media_type(data)
         b64 = base64.standard_b64encode(data).decode("ascii")
         body: dict = {
@@ -635,7 +869,7 @@ class OpenAIEngine:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": self.prompt},
+                        {"type": "text", "text": prompt},
                         {
                             "type": "image_url",
                             "image_url": {
@@ -649,6 +883,31 @@ class OpenAIEngine:
         }
         if self.temperature is not None:
             body["temperature"] = self.temperature
+        if self.reasoning_effort:
+            body["reasoning_effort"] = self.reasoning_effort
+        self._extend_body(body)
+        return body
+
+    def _extend_body(self, body: dict) -> None:
+        """A subclass's extra fields (Gemini's thinking level)."""
+
+    def _step_down_reasoning(self, body: dict) -> bool:
+        """After a 400 on ``reasoning_effort``: the next value of the chain into ``body``
+        (or the field removed); False when nothing is left to try."""
+        current = body.get("reasoning_effort")
+        if current is None:
+            return False
+        nxt = OPENAI_REASONING_FALLBACK.get(current)
+        if nxt is None:
+            body.pop("reasoning_effort", None)
+        else:
+            body["reasoning_effort"] = nxt
+        self.reasoning_effort = nxt
+        return True
+
+    def reply(self, data: bytes, *, prompt: str | None = None) -> ApiReply:
+        """One image, one call: the text, the finish reason and the usage."""
+        body = self._body(data, prompt if prompt is not None else self.prompt)
         attempt = 0
         while True:
             try:
@@ -664,25 +923,44 @@ class OpenAIEngine:
                 attempt += 1
                 self._sleep(2.0**attempt)
                 continue
-            if (
-                resp.status_code == 400
-                and "temperature" in body
-                and _param_error(resp) == "temperature"
-            ):
-                # gpt-5.x-class models pin temperature to the default and 400 on any
-                # explicit value (verified live) — drop the field and go again.
-                body.pop("temperature")
-                self.temperature = None
-                continue
+            if resp.status_code == 400:
+                param = _param_error(resp)
+                if "temperature" in body and param == "temperature":
+                    # gpt-5.x-class models pin temperature to the default and 400 on
+                    # any explicit value (verified live) — drop the field and go again.
+                    body.pop("temperature")
+                    self.temperature = None
+                    continue
+                if (
+                    "reasoning_effort" in body
+                    and (param == "reasoning_effort" or "reasoning_effort" in _error_message(resp))
+                    and self._step_down_reasoning(body)
+                ):
+                    continue
             resp.raise_for_status()
-            return self._parse(resp.json())
+            return self._parse(resp.json(), attempts=attempt + 1)
 
-    def _parse(self, payload: dict) -> str:
+    def _one(self, data: bytes) -> str:
+        return self.reply(data).text
+
+    def _parse(self, payload: dict, *, attempts: int = 1) -> ApiReply:
         usage = payload.get("usage") or {}
-        self.usage_input += int(usage.get("prompt_tokens", 0))
-        self.usage_output += int(usage.get("completion_tokens", 0))
+        n_in = int(usage.get("prompt_tokens", 0))
+        n_out = int(usage.get("completion_tokens", 0))
+        self.usage_input += n_in
+        self.usage_output += n_out
+        details = usage.get("completion_tokens_details") or {}
+        reasoning = details.get("reasoning_tokens")
         choices = payload.get("choices") or [{}]
-        return (choices[0].get("message", {}).get("content") or "").strip()
+        first = choices[0] if choices else {}
+        return ApiReply(
+            text=((first.get("message") or {}).get("content") or "").strip(),
+            stop=classify_stop(first.get("finish_reason")),
+            input_tokens=n_in,
+            output_tokens=n_out,
+            reasoning_tokens=int(reasoning) if reasoning is not None else None,
+            attempts=attempts,
+        )
 
     def transcribe(self, images: Sequence[bytes]) -> list[str]:
         out: list[str] = []
@@ -702,20 +980,39 @@ DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 # Same caveat as OPENAI_PRICES: approximate list rates for estimates only.
 # gemini-3.8-flash is the introductory rate (through 2026-12-31; doubles
 # 2027-01-01); thinking tokens bill at the output rate and are included in
-# the API's reported completion_tokens.
+# the API's reported completion_tokens. The 3.1 Pro and Argon rows were read
+# from the Gemini API pricing page on 2026-10-28: 3.1 Pro's rate for prompts
+# of at most 200k tokens (4.00 / 18.00 above that; a page is far below);
+# gemini-4-argon's introductory rate through 2026-11-30 (4.00 / 20.00 from
+# 2026-12-01 — a run after that date re-derives its cost from the logged usage).
 GEMINI_PRICES: dict[str, tuple[float, float]] = {
     "gemini-3.8-flash": (0.75, 3.75),
+    "gemini-3.1-pro-preview": (2.00, 12.00),
+    "gemini-4-argon": (2.00, 10.00),
 }
+
+# Gemini's image tokens (the image-understanding documentation, read
+# 2026-10-28): an image within 384 × 384 px costs 258 tokens; a larger one is
+# cut into 768 × 768 tiles of 258 tokens each, the tile count from the shorter
+# side divided by 1.5 (their example: 960 × 540 → a unit of 360 → 3 × 2 = 6
+# tiles). An estimate for planning; the run records the API's prompt_tokens.
+GEMINI_TILE_TOKENS = 258
+
+
+def gemini_image_tokens(width: int, height: int) -> int:
+    """Gemini's documented tiling rule for an image of this size (an estimate)."""
+    w, h = max(1, width), max(1, height)
+    if w <= 384 and h <= 384:
+        return GEMINI_TILE_TOKENS
+    unit = max(1, min(w, h) // 1.5)
+    return GEMINI_TILE_TOKENS * math.ceil(w / unit) * math.ceil(h / unit)
 
 
 def estimate_gemini_cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
     """USD cost estimate from token usage (longest-prefix match, like OpenAI's)."""
-    rate = GEMINI_PRICES.get(model)
+    rate = _prefix_rate(GEMINI_PRICES, model)
     if rate is None:
-        keys = sorted((k for k in GEMINI_PRICES if model.startswith(k)), key=len, reverse=True)
-        if not keys:
-            return None
-        rate = GEMINI_PRICES[keys[0]]
+        return None
     return input_tokens * rate[0] / 1e6 + output_tokens * rate[1] / 1e6
 
 
@@ -730,6 +1027,12 @@ class GeminiEngine(OpenAIEngine):
     output), so give them a generous cap or the visible answer truncates
     (observed on gemini-3.8-flash at the 256 default: finish_reason=length after
     6 visible tokens).
+
+    The page protocol (LT1) adds ``thinking_level``: Gemini 3.x Pro and Gemini 4
+    Argon take ``low`` | ``medium`` | ``high`` and have no "off" (the thinking
+    documentation, read 2026-10-28); it travels in the endpoint's
+    ``extra_body.google.thinking_config`` and cannot be combined with
+    ``reasoning_effort``, so the engine sends one or the other.
     """
 
     name = "gemini"
@@ -740,6 +1043,7 @@ class GeminiEngine(OpenAIEngine):
         model: str = DEFAULT_GEMINI_MODEL,
         api_key: str | None = None,
         url: str = GEMINI_URL,
+        thinking_level: str | None = None,
         **kwargs,
     ) -> None:
         key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
@@ -749,14 +1053,29 @@ class GeminiEngine(OpenAIEngine):
                 "is skipped (the harness runs fully without it)."
             )
         super().__init__(model=model, api_key=key, url=url, **kwargs)
+        self.thinking_level = thinking_level
+        if thinking_level and self.reasoning_effort:
+            raise ValueError("thinking_level and reasoning_effort cannot both be set")
 
     @property
     def cost(self) -> float | None:
         """Estimated USD cost of everything transcribed so far (or ``None``)."""
         return estimate_gemini_cost(self.model, self.usage_input, self.usage_output)
 
+    def settings(self) -> dict:
+        s = super().settings()
+        if self.thinking_level:
+            s["reasoning"] = f"thinking_level {self.thinking_level} (no off on this model family)"
+        return s
+
+    def _extend_body(self, body: dict) -> None:
+        if self.thinking_level:
+            cfg = {"thinking_level": self.thinking_level}
+            body["extra_body"] = {"google": {"thinking_config": cfg}}
+
 
 __all__ = [
+    "ANTHROPIC_PRICES",
     "ANTHROPIC_URL",
     "DEFAULT_ANTHROPIC_MODEL",
     "DEFAULT_GEMINI_MODEL",
@@ -765,12 +1084,19 @@ __all__ = [
     "GEMINI_PRICES",
     "GEMINI_URL",
     "OPENAI_PRICES",
+    "OPENAI_REASONING_FALLBACK",
     "OPENAI_URL",
     "AnthropicEngine",
+    "ApiReply",
     "GeminiEngine",
     "KrakenEngine",
     "MissingKeyError",
     "OpenAIEngine",
+    "anthropic_image_tokens",
+    "classify_stop",
+    "estimate_anthropic_cost",
     "estimate_gemini_cost",
     "estimate_openai_cost",
+    "gemini_image_tokens",
+    "openai_image_tokens",
 ]
