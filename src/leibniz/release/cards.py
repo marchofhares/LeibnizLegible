@@ -95,9 +95,14 @@ ANTI_CONTAMINATION = (
 ERROR_RATES = (
     "Measured character error rate of the model on the PHILIUMM validation split "
     "(1,878 Latin/French lines): **7.95 %** (95 % CI 7.49–8.46), word error rate 27.0 %. "
-    "German/Kurrent lines are transcribed by the same Latin/French model and are expected "
-    "to be far worse; they are unmeasured until the per-language pass (Phase C4). "
-    "See `reports/philiumm-repro.md`."
+    "German pages are read by a second model, the project's own Kurrent model "
+    "(`k3-trocr@runs-615-epoch-5`, a TrOCR model fine-tuned from the Bern Kurrent model on "
+    "edition text; Phase K3/K4): on a frozen pool of 134 German letters of 1708–1716 "
+    "(18,815 recognised lines, the GWLB Leibniz-Archiv's checked transcriptions as the "
+    "reference) its character error rate is **28.6 %** (95 % CI 24.6–32.5) against 46.6 % "
+    "for the Latin/French model on the same lines; in Leibniz's own hand 36.7 % against "
+    "53.7 %. Each line names the model that read it (`model`). "
+    "See `reports/philiumm-repro.md` and `reports/kurrent/k3-letterpool/letterpool-eval.md`."
 )
 
 # The card's audit paragraph without numbers, for an export run where no scored

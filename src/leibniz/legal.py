@@ -1012,12 +1012,26 @@ OUTPUTS: tuple[Output, ...] = (
     ),
     Output(
         "model-k3-trocr",
-        "K3's TrOCR candidate, trained from the Bern model on K2's lines",
+        "K3's TrOCR model, trained from the Bern model on K2's lines: READER of the German "
+        "pages since K4 (k3-trocr@runs-615-epoch-5)",
         "CC BY 4.0 (if released)",
         "no NC input: the Bern model is MIT and K2's lines are open-bucket edition text "
         "(the owner, 2026-10-21)",
         ("trocr-kurrent-xvi-xvii", "edition-ia", "edition-potsdam", "edition-gwlb"),
-        "the owner, 2026-10-21 (the operator's note)",
+        "the owner, 2026-10-21 (the operator's note); chosen as READER by the operator, "
+        '2026-10-26 ("I agree to go with TrOCR.")',
+    ),
+    Output(
+        "readings-de",
+        "the German pages' readings (K4): READER's run beside v1 on the site, in "
+        "leibniz-transcriptions (D2) and the IIIF annotations (D7)",
+        "CC BY 4.0",
+        "machine output of a model with no NC input (model-k3-trocr), on the same page "
+        "images as v1's; the amendment of 2026-10-26: k3-trocr's readings carry CC BY 4.0 "
+        "like v1's, so nothing on About, in llms.txt, the attribution line, the D2 export "
+        "or the fragment packs changes its terms",
+        ("trocr-kurrent-xvi-xvii", "edition-ia", "edition-potsdam", "edition-gwlb", "gwlb-images"),
+        "the owner's scheme of 2026-10-13, applied by the K4 amendment of 2026-10-26",
     ),
     Output(
         "model-k3-ppocr",
@@ -1051,6 +1065,39 @@ def output(key: str) -> Output:
 def deposit_licence(deposit: str) -> str:
     """The licence of a D3 deposit (``"open"`` → CC BY 4.0, ``"nc"`` → CC BY-NC 4.0)."""
     return OUTPUT[f"gt-{deposit}"].licence
+
+
+READER_DE = "k3-trocr"  # the reader of the German pages (K4; the operator's choice, 2026-10-26)
+READER_DE_VERSION = "k3-trocr@runs-615-epoch-5"
+
+
+def site_readers() -> dict[str, dict[str, str]]:
+    """What the site says about its two readers, read from this registry (K4 Task 5):
+    for v1 and for the German pages' reader, the model's name, the model's licence as
+    published today, the licence its readings carry, and the output row that decides it.
+    About's licence paragraph and ``/api/stats`` fill their sentences from this, so a
+    change of terms is made once, here."""
+    v1 = artifact("philiumm-htr-model")
+    base = artifact("trocr-kurrent-xvi-xvii")
+    return {
+        "v1": {
+            "model": v1.name,
+            "model_licence": v1.licence_now.licence,
+            "model_licence_obtained": v1.obtained.licence,
+            "readings_licence": output("transcriptions").licence,
+            "output": "transcriptions",
+        },
+        "de": {
+            "reader": READER_DE,
+            "version": READER_DE_VERSION,
+            "model": output("model-k3-trocr").name,
+            "model_licence": output("model-k3-trocr").licence.split(" (")[0],
+            "base": base.name,
+            "base_licence": base.obtained.licence,
+            "readings_licence": output("readings-de").licence,
+            "output": "readings-de",
+        },
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -1163,12 +1210,15 @@ __all__ = [
     "Volume",
     "artifact",
     "deposit_for",
+    "READER_DE",
+    "READER_DE_VERSION",
     "deposit_licence",
     "expired_volumes",
     "get_volume",
     "licence_rows",
     "output",
     "output_rows",
+    "site_readers",
     "protected_volumes",
     "upcoming_expiries",
 ]

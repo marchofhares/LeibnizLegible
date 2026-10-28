@@ -71,7 +71,7 @@ const STRINGS = {
 
     // ---- the honesty banner ---------------------------------------------
     'honesty.banner':
-      'Machine transcription. Not an edition. Errors are expected (character error rate about 8% on Latin and French; German is unmeasured and worse).',
+      'Machine transcription. Not an edition. Errors are expected (character error rate about 8% on Latin and French, about 29% on German letters in Kurrent).',
 
     // ---- search ----------------------------------------------------------
     'search.heading': 'Search the Nachlass',
@@ -419,6 +419,8 @@ const STRINGS = {
       'The page and line figures follow the library’s own page records. The GWLB photographs an unfolded sheet as one image, two folio pages side by side, and registers that image under both folio numbers, so many images were read twice and the line total counts them twice. The next index build finds them and counts each scan once.',
     'about.numbers.backend': 'Search backend',
     'about.numbers.model': 'Recognition model',
+    'about.numbers.models': 'Recognition models (lines shown)',
+    'about.numbers.langs': 'Pages by language',
     'about.hist.h': 'Distribution of line confidence',
     'about.hist.band': 'Confidence band',
     'about.hist.lines': 'Lines',
@@ -428,7 +430,7 @@ const STRINGS = {
     'about.error.p1':
       'On the PHILIUMM validation split — 1,878 lines of Leibniz’s Latin and French — the model we run measures a character error rate of 7.95% (95% confidence interval 7.49–8.46) and a word error rate of 27.0%. That is roughly one wrong character in every thirteen, and roughly one word in four touched by some error.',
     'about.error.p2':
-      'German in Kurrent script is not measured at all, because no ground truth for Leibniz’s German hand exists anywhere. It is certainly much worse, and it is about 15% of the corpus. Mathematical notation, diagrams and heavily revised drafts are likewise weak. Read every line here as a hypothesis about the manuscript, not as a reading of it.',
+      'German in Kurrent script is read by a second model, this project’s own: a TrOCR model fine-tuned from the Bern Kurrent model on edition text of Leibniz’s German pieces (phase K3). It reads the pages a stopword identifier calls German (on the catalogued pieces it is right 95 times in 100 and finds three German pages in four), the printed Marginalien excepted. Its error rate is measured on a frozen pool of 134 German letters of 1708–1716 — 386 pages, 18,815 recognised lines read as they lie on the leaves, the reference being the GWLB Leibniz-Archiv’s checked transcription of each letter: a character error rate of 28.6% (95% confidence interval 24.6–32.5) against 46.6% for the Latin-and-French model on the same lines; in Leibniz’s own hand 36.7% against 53.7%, in his correspondents’ hands 19.4% against 38.5%. So roughly one character in four is still wrong on a German page. Mathematical notation, diagrams and heavily revised drafts are likewise weak. Read every line here as a hypothesis about the manuscript, not as a reading of it.',
     'about.error.p3':
       'The model is PHILIUMM’s FoNDUE-GD_v2_ft_Leibniz (Kraken), doi:10.5281/zenodo.21457538, CC BY 4.0. Our reproduction of its published figures is in the project repository.',
 
@@ -451,13 +453,13 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. The records on this site come from the Arbeitsstelle’s own export of the catalogue (19 October 2026), refreshed with each export, not from its website. The catalogue is the metadata spine of the whole field; every link out to a record is a link to their work.',
     'about.license.transcriptions.h': 'Transcriptions',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Machine output of a model obtained under CC BY 4.0: the PHILIUMM HTR model (doi:10.5281/zenodo.21457538), which its makers have published under CC BY-NC 4.0 since 15 October 2026, agreeing that these transcriptions stay CC BY 4.0. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
+      'Leibniz Legible, CC BY 4.0. The readings of the German pages, by this project’s own Kurrent model, carry {deReadings} as well. Machine output of a model obtained under CC BY 4.0: the PHILIUMM HTR model (doi:10.5281/zenodo.21457538), which its makers have published under CC BY-NC 4.0 since 15 October 2026, agreeing that these transcriptions stay CC BY 4.0. Please do not ingest it as verified text, and please carry the provenance fields with it if you redistribute it. The text can be taken away as plain text, each file with its provenance in a header: per page (every page view has a Text block with a Copy button and a download), per work (from the work page), and per catalogue piece across its folios (from each record on the work page that can be placed on the scan).',
     'about.license.gt.h': 'Ground truth',
     'about.license.gt.p':
       'Two deposits, by the copy of the edition each line’s text was read from. The open deposit, CC BY 4.0: the reading text of Akademie-Ausgabe volumes free of § 70 UrhG, read from public-domain library scans, on line images under the Public Domain Mark. The second deposit, CC BY-NC 4.0: the same kind of text read from the Potsdam Arbeitsstelle’s Reihe IV files, which the Leibniz-Edition Potsdam released to this project under CC BY-NC 4.0 in writing on 12 October 2026, and from the volume PDFs of the GWLB’s Repositorium des Leibniz-Archivs (CC BY-NC 4.0). Each deposit’s card says which channels it holds. This site shows the machine transcription only; no text read through a non-commercial channel is displayed here.',
     'about.license.models.h': 'Models',
     'about.license.models.p':
-      'The corpus is read by the PHILIUMM HTR model, obtained under CC BY 4.0 and published by its makers under CC BY-NC 4.0 since 15 October 2026. A model this project fine-tunes from it is released under CC BY-NC 4.0. A model trained without any non-commercial input — one fine-tuned from the Bern Kurrent model (MIT) on open edition text, for instance — is released under CC BY 4.0. Each release’s licence is fixed from the project’s licence registry (src/leibniz/legal.py) when it is deposited.',
+      'Two models read the corpus. The Latin and French pages, and every page not called German, are read by the PHILIUMM HTR model, obtained under {v1ModelObtained} and published by its makers under {v1Model} since 15 October 2026, who agreed that these transcriptions stay {v1Readings}. The German pages are read by this project’s own Kurrent model ({readerDe}), fine-tuned from the Bern Kurrent model ({deBase}) on open edition text with no non-commercial input, so the model is {deModel} and its readings are {deReadings}. A model this project fine-tunes from the PHILIUMM checkpoint is released under CC BY-NC 4.0. These licences are read from the project’s licence registry (src/leibniz/legal.py) each time this page is served, and a release’s licence is fixed from it when the release is deposited.',
     'about.license.letters.h': 'Letters',
     'about.license.letters.p':
       'Eduard Bodemann’s catalogue of the correspondence (1889), letter by letter from correspSearch (Berlin-Brandenburgische Akademie der Wissenschaften; data from the portal Der deutsche Brief im 18. Jahrhundert). CC BY 4.0.',
@@ -580,7 +582,7 @@ const STRINGS = {
 
     // ---- honesty banner --------------------------------------------------
     'honesty.banner':
-      'Maschinelle Transkription. Keine Edition. Fehler sind zu erwarten (Zeichenfehlerrate rund 8 % bei Latein und Französisch; Deutsch ist nicht gemessen und schlechter).',
+      'Maschinelle Transkription. Keine Edition. Fehler sind zu erwarten (Zeichenfehlerrate rund 8 % bei Latein und Französisch, rund 29 % bei deutschen Briefen in Kurrent).',
 
     // ---- search ----------------------------------------------------------
     'search.heading': 'Den Nachlass durchsuchen',
@@ -921,6 +923,8 @@ const STRINGS = {
       'Die Seiten- und Zeilenzahlen folgen den Seiteneinträgen der Bibliothek. Die GWLB fotografiert einen aufgefalteten Bogen als ein Bild, zwei Blattseiten nebeneinander, und verzeichnet dieses Bild unter beiden Blattnummern; viele Bilder wurden daher zweimal gelesen, und die Zeilensumme zählt sie doppelt. Der nächste Aufbau des Suchindex findet sie und zählt jeden Scan einmal.',
     'about.numbers.backend': 'Suchindex',
     'about.numbers.model': 'Erkennungsmodell',
+    'about.numbers.models': 'Erkennungsmodelle (gezeigte Zeilen)',
+    'about.numbers.langs': 'Seiten nach Sprache',
     'about.hist.h': 'Verteilung der Zeilenkonfidenz',
     'about.hist.band': 'Konfidenzband',
     'about.hist.lines': 'Zeilen',
@@ -930,7 +934,7 @@ const STRINGS = {
     'about.error.p1':
       'Auf dem Validierungsteil von PHILIUMM — 1.878 Zeilen aus Leibniz’ lateinischer und französischer Hand — erreicht das von uns eingesetzte Modell eine Zeichenfehlerrate von 7,95 % (95-%-Konfidenzintervall 7,49–8,46) und eine Wortfehlerrate von 27,0 %. Das ist etwa ein falsches Zeichen je dreizehn und etwa jedes vierte Wort von einem Fehler berührt.',
     'about.error.p2':
-      'Deutsch in Kurrentschrift ist überhaupt nicht gemessen, denn für Leibniz’ deutsche Hand existieren nirgends Referenzdaten. Es ist mit Sicherheit deutlich schlechter und macht rund 15 % des Korpus aus. Mathematische Notation, Zeichnungen und stark überarbeitete Entwürfe sind ebenso schwach. Lesen Sie jede Zeile hier als eine Vermutung über die Handschrift, nicht als deren Lesung.',
+      'Deutsch in Kurrentschrift liest ein zweites, projekteigenes Modell: ein TrOCR-Modell, feinabgestimmt aus dem Berner Kurrent-Modell auf Ausgabentext deutscher Stücke von Leibniz (Phase K3). Es liest die Seiten, die ein Stoppwort-Erkenner als deutsch einstuft (auf den katalogisierten Stücken trifft er 95-mal von 100 und findet drei von vier deutschen Seiten), die gedruckten Marginalien ausgenommen. Seine Fehlerrate ist auf einem eingefrorenen Bestand von 134 deutschen Briefen der Jahre 1708–1716 gemessen — 386 Seiten, 18.815 erkannte Zeilen, gelesen, wie sie auf den Blättern stehen; Referenz ist die geprüfte Transkription jedes Briefes durch das Leibniz-Archiv der GWLB: eine Zeichenfehlerrate von 28,6 % (95-%-Konfidenzintervall 24,6–32,5) gegenüber 46,6 % des Latein-und-Französisch-Modells auf denselben Zeilen; in Leibniz’ eigener Hand 36,7 % gegenüber 53,7 %, in den Händen seiner Korrespondenten 19,4 % gegenüber 38,5 %. Etwa jedes vierte Zeichen auf einer deutschen Seite ist also weiterhin falsch. Mathematische Notation, Zeichnungen und stark überarbeitete Entwürfe sind ebenso schwach. Lesen Sie jede Zeile hier als eine Vermutung über die Handschrift, nicht als deren Lesung.',
     'about.error.p3':
       'Das Modell ist FoNDUE-GD_v2_ft_Leibniz aus dem Projekt PHILIUMM (Kraken), doi:10.5281/zenodo.21457538, CC BY 4.0. Unsere Reproduktion der veröffentlichten Werte liegt im Projekt-Repositorium.',
 
@@ -953,13 +957,13 @@ const STRINGS = {
       'Leibniz-Katalog / Arbeitskatalog der Leibniz-Edition, Berlin-Brandenburgische Akademie der Wissenschaften (BBAW), edited by the Arbeitsstelle Potsdam I. CC BY 4.0. Die Einträge auf dieser Seite stammen aus dem eigenen Export des Katalogs durch die Arbeitsstelle (19. Oktober 2026), erneuert mit jedem Export, nicht von dessen Website. Der Katalog ist das metadatentragende Rückgrat des ganzen Feldes; jeder Link auf einen Datensatz ist ein Link auf deren Arbeit.',
     'about.license.transcriptions.h': 'Transkriptionen',
     'about.license.transcriptions.p':
-      'Leibniz Legible, CC BY 4.0. Maschinelle Ausgabe eines unter CC BY 4.0 bezogenen Modells: des PHILIUMM-HTR-Modells (doi:10.5281/zenodo.21457538), das seine Urheber seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlichen, im Einvernehmen darüber, dass diese Transkriptionen CC BY 4.0 bleiben. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',
+      'Leibniz Legible, CC BY 4.0. Auch die Lesungen der deutschen Seiten durch das projekteigene Kurrent-Modell stehen unter {deReadings}. Maschinelle Ausgabe eines unter CC BY 4.0 bezogenen Modells: des PHILIUMM-HTR-Modells (doi:10.5281/zenodo.21457538), das seine Urheber seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlichen, im Einvernehmen darüber, dass diese Transkriptionen CC BY 4.0 bleiben. Bitte übernehmen Sie sie nicht als geprüften Text, und führen Sie bei einer Weitergabe die Provenienzangaben mit. Der Text lässt sich als reiner Text mitnehmen, jede Datei mit ihrer Provenienz in einem Kopf: je Seite (jede Seitenansicht hat einen Textblock mit Kopierknopf und Download), je Werk (von der Werkseite) und je Katalogstück über seine Blätter hinweg (von jedem Katalogisat auf der Werkseite, das sich auf dem Digitalisat verorten lässt).',
     'about.license.gt.h': 'Ground Truth',
     'about.license.gt.p':
       'Zwei Deposita, je nach der Ausgabenkopie, aus der der Text einer Zeile gelesen wurde. Das offene Depositum, CC BY 4.0: der Lesetext von Bänden der Akademie-Ausgabe, deren Schutz nach § 70 UrhG abgelaufen ist, gelesen aus gemeinfreien Bibliotheksscans, auf Zeilenbildern unter der Public Domain Mark. Das zweite Depositum, CC BY-NC 4.0: Text derselben Art, gelesen aus den Dateien der Potsdamer Arbeitsstelle zu Reihe IV, die die Leibniz-Edition Potsdam diesem Projekt am 12. Oktober 2026 schriftlich unter CC BY-NC 4.0 freigegeben hat, und aus den Band-PDFs des Repositoriums des Leibniz-Archivs der GWLB (CC BY-NC 4.0). Die Karte jedes Depositums nennt die Kanäle, die es enthält. Diese Seite zeigt allein die maschinelle Transkription; kein über einen nichtkommerziellen Kanal gelesener Text wird hier angezeigt.',
     'about.license.models.h': 'Modelle',
     'about.license.models.p':
-      'Das Korpus wird vom PHILIUMM-HTR-Modell gelesen, bezogen unter CC BY 4.0 und von seinen Urhebern seit dem 15. Oktober 2026 unter CC BY-NC 4.0 veröffentlicht. Ein Modell, das dieses Projekt daraus feinabstimmt, erscheint unter CC BY-NC 4.0. Ein Modell ohne jede nichtkommerzielle Eingabe — etwa eines, das aus dem Berner Kurrent-Modell (MIT) auf offenem Ausgabentext feinabgestimmt wird — erscheint unter CC BY 4.0. Die Lizenz jeder Veröffentlichung wird bei der Hinterlegung aus dem Lizenzregister des Projekts (src/leibniz/legal.py) festgelegt.',
+      'Zwei Modelle lesen das Korpus. Die lateinischen und französischen Seiten und jede nicht als deutsch eingestufte Seite liest das PHILIUMM-HTR-Modell, bezogen unter {v1ModelObtained} und von seinen Urhebern seit dem 15. Oktober 2026 unter {v1Model} veröffentlicht, die zugestimmt haben, dass diese Transkriptionen {v1Readings} bleiben. Die deutschen Seiten liest das projekteigene Kurrent-Modell ({readerDe}), feinabgestimmt aus dem Berner Kurrent-Modell ({deBase}) auf offenem Ausgabentext ohne jede nichtkommerzielle Eingabe; das Modell steht daher unter {deModel}, seine Lesungen unter {deReadings}. Ein Modell, das dieses Projekt aus dem PHILIUMM-Modell feinabstimmt, erscheint unter CC BY-NC 4.0. Diese Lizenzen werden bei jedem Ausliefern dieser Seite aus dem Lizenzregister des Projekts (src/leibniz/legal.py) gelesen; die Lizenz einer Veröffentlichung wird bei der Hinterlegung daraus festgelegt.',
     'about.license.letters.h': 'Briefe',
     'about.license.letters.p':
       'Eduard Bodemanns Katalog des Briefwechsels (1889), Brief für Brief aus correspSearch (Berlin-Brandenburgische Akademie der Wissenschaften; Daten aus dem Portal Der deutsche Brief im 18. Jahrhundert). CC BY 4.0.',
