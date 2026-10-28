@@ -12,8 +12,10 @@ _Last updated: 2026-10-26 (**K4 — German on the site, begun on the desktop on 
 **2026-10-28: K4 — German on the site; the branch `k4-german-site` from
 main at #55; Tasks 0–3 done; the reading job running since 2026-10-28
 09:50 (k3-trocr over 1,539,721 lines on 24,078 German pages, under the 6 GB
-scope with the guard and a retry loop; its first progress line 105 ms a
-line, ETA 44 h 41 m, so about 2026-10-30 07:00); Task 4's write waits for
+scope with the guard and a retry loop; 91 ms a line; one guard kill at
+19:09, the card 22 MiB over the 5,900 line, no leak, relaunched by the
+loop at 19:11 from the readings file; finish about 2026-10-30 01:00
+without further kills); Task 4's write waits for
 the job and the operator's go; nothing written to the store, nothing
 deployed.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
@@ -1075,7 +1077,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ⏳ the reading job (running since 2026-10-28 09:50)
+### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ⏳ the reading job (running since 2026-10-28 09:50; one guard kill, relaunched 19:11)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1391,6 +1393,31 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   and `.json` from the job's stats file, its log (launches, relaunches,
   exits, `/usr/bin/time`'s peak RSS per launch), the guard's CSV and the
   import's summary JSON, numbers only, no store read.
+- **The first guard kill and the relaunch (2026-10-28, 19:09–19:34).** The
+  guard killed launch 1 at 19:09:56 with the card at 5,922 MiB, 22 over the
+  5,900 line, after 363,739 lines and 4,932 pages at a steady 91 ms a line
+  (launch 1 ran 9 h 20 m; exit 143). No leak: over the guard's 6,619 samples
+  the hourly means from 10:00 on sat between 5,623 and 5,769 MiB, 160
+  samples went over 5,800, and the kill was one of those spikes (5,622 →
+  5,889 → 5,922 MiB across ten seconds); the host never under 6,879 MiB
+  available. The retry loop relaunched at 19:11:06 (relaunch 1 of 5, launch
+  2) from the readings file: 366,804 lines taken as done, the job resumed
+  after the 4,932 done pages. The resume costs time the pace line hides:
+  the pace clock starts before the loop that skips the done pages, and a
+  skipped page still costs one `page_lines` query on the store, so the
+  4,932 skips took about five minutes at 15 % GPU utilisation and launch
+  2's first progress line (19:24:20, 1,519 lines this run) showed 400 ms a
+  line, its second (19:34:21, 374,895 lines done, 8,091 this run, pages
+  5,049) 149 ms; the interval between the two, 6,572 lines in 601 s, is 91
+  ms a line, launch 1's pace. The skip cost grows with progress, about a
+  minute per thousand done pages at each relaunch. **Expected finish on the
+  interval pace: about 2026-10-30 01:00 without further kills; each further
+  kill costs the 60 s wait, the model load, the skip phase and the page in
+  progress.** The card after the relaunch: 5,575 MiB, 87–88 °C, the
+  driver's software thermal slowdown active, SM clock 1,575–1,665 MHz of
+  2,100, 93 W of 120; the guard logs no temperature, so whether launch 1
+  ran throttled the same way is unknown. The guard's limit is the
+  operator's to raise; the K4 report's launches table carries the kill.
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a
