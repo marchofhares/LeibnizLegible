@@ -3,11 +3,66 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-26 (**K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-28 (**LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-10-28: LT1 — the page-level test of frontier vision models against
+the project's readers, Part A built in a cloud session on fixtures; the branch
+`claude/kind-tesla-xhk9ac`, the pull request the operator's; Part B (the API
+runs, the scoring, the report's numbers) the operator's desktop, the runbook
+under Next; no API call was made here, no store write, nothing deployed.** A
+colleague holds that the current frontier models read whole pages far better
+than the project's readers; B1's only LLM numbers used line crops. The fair
+protocol is now code: `leibniz bench page-read` sends whole pages, one page a
+call (a half at a time where the list names a column), one prompt for every
+model (Humphries' recipe: every line in reading order, one output line per
+manuscript line, character by character, nothing else), temperature 0 where
+the API takes it, reasoning off or at the floor the API allows, `max_tokens`
+4,000, the image downscaled to a long side of 2,000 px, every call's usage and
+estimated cost logged, a refusal, an empty answer or a runaway recorded and
+retried once, the run resumable by page and stopped at a cost cap. The
+engines (`htr/engines.py`) now return a structured reply (text, stop reason,
+usage): Claude gets `output_config.effort` (thinking is always on and cannot be
+disabled on the Claude 5 models; *low* is the floor), no `temperature` (the
+current models reject it) and a usage/pricing table of its own; Gemini gets
+`thinking_level` (3.x Pro and 4 Argon take low | medium | high and have no
+off) and the rows `gemini-3.1-pro-preview` (2.00 / 12.00 USD per 1M) and
+`gemini-4-argon` (2.00 / 10.00 through 2026-11-30); OpenAI gets
+`reasoning_effort` with a step-down chain (none → minimal → low) on a 400. The
+scoring (`htr/pagescore.py`): PHILIUMM's held-out pages with the dataset's own
+PAGE XML as the page reference (its lines in document order — the parquet
+carries text and image only, so the page is rebuilt from the XML the Hub
+publishes beside each scan), page CER pooled over pages with a bootstrap,
+failed pages charged as 100 % and left out, the kraken model's page CER from
+its line readings of the same lines (`bench page-lines` cuts them for `bench
+run`); the letter pool through a reader kind *page* for `letterpool_eval`
+(`PageReadings`: the page text attached to the page, `machine_text`
+concatenates the pages in order, the infix metric, pooling and aggregation
+unchanged), both ways for failed pages, beside v1, the Bern model and the K3
+models on the same letters; the colleague's line diff (both readers' lines
+aligned to the same reference lines: exactly one right, both wrong, invented,
+dropped, the length ratio). `bench page-report` renders
+`reports/htr/page-llm.md` + `.json` with the protocol, the settings per model,
+the sets, the tables, the cost, the refusals both ways, the diff and the two
+caveats (small sets; the pool's references are checked letter transcriptions,
+not a random sample of the German pages). The two page lists are committed:
+`reports/htr/page-list-philiumm.csv` — the whole `val` split, **27 pages as 34
+calls** (7 openings read as left and right; 16 calls on pages the store also
+holds), not the 50 the prompt names: the held-out split has 27 pages, and the
+dataset has no `test` split (`val` is it) — and `page-list-pool.csv`, **100
+pool pages of 34 letters drawn seeded (20261028), whole letters at a time: 50
+pages in Leibniz's hand, 50 in the correspondents', 19 and 15 letters, 18 of
+the selection half and 16 of the test half**. The dry run's estimates for the
+134 calls a model, at the pricing tables and an assumed 1,500 output tokens a
+page (thinking included) with image sizes assumed (1,333 × 2,000 px, none on
+disk here): claude-fable-5-1 **14.80 USD**, gemini-3.1-pro-preview **2.85 USD**,
+gemini-4-argon **2.45 USD** (gpt-5.5, if wanted, 2.21 USD) — under the 20 USD
+cap a model the prompt sets; the real run records the APIs' own usage. Tests
+1016 → **1060**, ruff clean; the LT1 entry in the Phase log has the detail
+and the pre-flight's facts; Part B's runbook is under Next.
 
 **2026-10-21/26: K3 — a Leibniz Kurrent model, done on the desktop; the
 branch `k3-kurrent-model`, the pull request the operator's; nothing
@@ -1046,6 +1101,145 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 ---
 
 ## Phase log
+
+### LT1 — the page-level LLM test (2026-10-28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (the report's code, the runbook, the hand-over) · ⏳ Part B (the operator's desktop: the reads, the scoring, the report's numbers)
+
+- **Setting.** A cloud session on the branch it was given,
+  `claude/kind-tesla-xhk9ac`, from main at `c0b1a45` (#55 merged; `git merge
+  origin/main` already up to date). No `data/inventory.sqlite`, so fixtures
+  throughout; `.venv-cloud` made with the web, gt and release extras (pyarrow
+  comes with release) and **numpy added** (`VIRTUAL_ENV=.venv-cloud uv pip
+  install numpy`): the pool metric's infix alignment is a numpy row and its
+  tests skip without it. Baseline before any change: `ruff check` clean,
+  `ruff format --check` 266 files formatted, **pytest 1016 passed, 1 skipped**
+  (the numpy skip) in 47 s. No API key in the session; every API path is tested
+  against scripted replies and recorded fixtures. Network used, politely: the
+  Hub's dataset info and file tree (three GETs), one val page's JPEG and XML
+  from the Hub (two GETs, 2,323,554 and 55,089 bytes), two pages from the
+  public mirror (two GETs), one Hub listing GET by `page-list` (cached under
+  `data/philiumm/hf-files.json`), and the documentation pages of the three
+  APIs; nothing sent to any API.
+- **Task 0, the facts.** (a) *The PHILIUMM parquet*: the dataset's features are
+  `text` (string) and `image` (Image) and nothing else — no page, no line
+  order — over the splits `train_clean` 18,254, `train_noisy` 43,372, `val`
+  1,878 rows; so a page reference cannot be rebuilt from the parquet. The Hub
+  repository carries the pages themselves: `val/` holds **54 files, 27 JPEG +
+  PAGE XML pairs** (eScriptorium exports, `TextRegion` with SegmOnto types,
+  `TextLine` with `Coords`, `Baseline` and `Unicode`); `LH_1_2_1_0004r.xml`
+  names its image 2,482 × 4,214 px and carries 104 lines with text in a main
+  zone and margin zones. The page reference is therefore the val XML's lines in
+  document order (`align/pagexml.py`, the P1 reader), the empty ones dropped.
+  (b) *The mapping*: `reports/philiumm/heldout_pages.csv` has 1,475 rows
+  (1,155 noisy, 290 clean, 30 val); the 30 val rows come from 23 files — 16
+  files map to one store page each, 7 are openings (`LH_35_1_27_0009v-0008r`)
+  mapped to two store pages; 4 val files are not in it (2 eScriptorium-id
+  names the P1 matcher could not parse, 2 without a page). Real images exist
+  for every val page without the store: the Hub's own `val/*.jpg`, and they
+  are the GWLB's derivatives — the Hub's `LH_1_2_1_0004r.jpg` and the mirror's
+  `00068282/0007.jpg` (its store page) are both 2,482 × 4,214 px. So the
+  PHILIUMM set is the whole val split, 27 pages, their image from the Hub
+  (`page-fetch`; on the desktop too), the openings read as a left and a right
+  half (one column at a time, as the protocol says; the XML's lines split by
+  their x-centre against the page's midline). Nothing is left out for want of
+  a mapping; the prompt's 50 is not reachable from the held-out split. (c)
+  *The pool set*: 134 letters (67 L, 65 K, 2 k), 67 selection / 67 test; 386
+  page slots, 380 distinct pages (six pages carry two letters), 35 works;
+  18,815 recognised lines, 325,624 reference characters; 2.88 pages a letter
+  on average, 8 at most; `letterpool_eval.machine_text` attaches readings by
+  line id to the store's lines in reading order and joins the texts by
+  spaces — the page kind attaches by page id instead (below). (d) *The APIs*
+  (their documentation read 2026-10-28): Gemini has no bare `gemini-3.1-pro`
+  — the id is **`gemini-3.1-pro-preview`**, `thinking_level` low | medium |
+  high, default high, no off; **`gemini-4-argon` exists** (the models page
+  lists it as stable), thinking_level low | medium | high, no off; on the
+  OpenAI-compatible endpoint the level travels in `extra_body.google.
+  thinking_config` and cannot be combined with `reasoning_effort`; temperature
+  is accepted there (B1 sent 0.0 live). Claude: **`claude-fable-5-1`**;
+  thinking is always on and `{type: "disabled"}` returns a 400, so "without a
+  thinking block" is not available — `output_config.effort` *low* is the
+  floor; `temperature` is rejected by the current models; images are 28 × 28
+  px patches, the Claude 4.7+ tier fitting the image into a 2,576 px long
+  edge and 4,784 visual tokens (a 1,178 × 2,000 page: 3,096 tokens);
+  `stop_reason` names `refusal` and `max_tokens`. OpenAI: `reasoning_effort`
+  values are model-dependent (`none`, `minimal`, `low`, …; gpt-5.5 takes
+  `none`, GPT-6 Astra does not), so the engine steps down a chain on a 400.
+  (e) *Pricing rows added*: `ANTHROPIC_PRICES` (claude-fable-5-1 10.00 /
+  50.00; opus-5-5 4.00 / 20.00; sonnet-5-5 2.00 / 10.00; haiku-5-5 0.10 /
+  0.50 — the first Anthropic cost accounting in the harness),
+  `gemini-3.1-pro-preview` 2.00 / 12.00 (prompts of at most 200k tokens),
+  `gemini-4-argon` 2.00 / 10.00 (through 2026-11-30; 4.00 / 20.00 from
+  2026-12-01: a run after that date re-derives the cost from the logged
+  usage). The plan and its cost are in Current state; the preamble's item 6
+  applies (a cloud session records the pre-flight and proceeds).
+- **Task 1, the page reader (`htr/pageread.py`, `htr/engines.py`).** The page
+  list CSV: `page_id, set, source, column, letter_id, hand, half, work_id,
+  seq, ref` (source `store` → the image cache's layout `{work}/{seq:04d}.jpg`
+  under `--images` or the public mirror; `hf:val/<file>.jpg` → the Hub;
+  column `whole | left | right`). `prepare_image` crops the half, downscales
+  so the long side is at most 2,000 px (never up), re-encodes JPEG q92: the
+  mirror's 2,482 × 4,214 page became 1,178 × 2,000 px, 790,097 bytes; the
+  wide `DE-611-HS-859659:0001` (4,896 × 4,179) 2,000 × 1,707 px, 1,034,421
+  bytes. `ImageStore`: a local root first, then the cache, then one polite
+  fetch kept under `--cache`. `read_pages`: one call a row, the reply
+  classified `ok | refused | runaway | empty` (`error` for an API error, a
+  4xx not retried), the failed statuses retried once, the JSONL row carrying
+  page, set, column, letter, hand, half, engine, model, the settings (prompt
+  SHA-256, max_tokens, temperature, the reasoning setting, the long side),
+  the image sizes sent, the text and its lines, the status and the first
+  attempt's, the stop reason, the usage (input, output, reasoning), the cost,
+  the milliseconds; resumable, `--redo failed | all`; the cost cap stops the
+  run before the next call. `plan_read` (the dry run) counts the calls and
+  estimates the input tokens by each API's documented image rule on the real
+  size where the image is on disk (else 1,333 × 2,000 assumed) plus an output
+  assumption the operator states. The engines: `ApiReply` and `classify_stop`
+  shared; `AnthropicEngine.reply` with `effort`, no temperature, usage and
+  `cost`; `OpenAIEngine.reply` with `reasoning_effort` and the chain,
+  `finish_reason`, `completion_tokens_details.reasoning_tokens`;
+  `GeminiEngine` with `thinking_level`; the three image-token rules
+  (`anthropic_image_tokens`, `gemini_image_tokens`, `openai_image_tokens`).
+  `build_engine` sets the page protocol per engine; `echo` is the offline
+  stub. Checkpoint A: 10 engine tests and 16 reader tests, all offline.
+- **Task 2, the scoring (`htr/pagescore.py`, `align/letterpool_eval.py`).**
+  (a) `philiumm_refs` reads `<stem>.xml` per list row (a column's lines by
+  x-centre); `score_page` normalises both sides under the four policies
+  (`philiumm` the headline) and takes the edit distance of the page's lines
+  joined by spaces (a numpy row for long strings, checked against the
+  harness's DP); `pooled_pages` with the B1 bootstrap over pages, `charge` and
+  `omit` for the failed pages; `aggregate_pages` per model and policy. The
+  kraken model: `cut_page_lines` cuts every val line with text through the
+  audit's crop machinery (polygon masked, no downscaling) into Kraken's image +
+  `.gt.txt` pairs named `<stem>__<index>`, `bench run DIR --engine kraken
+  --out DUMP` reads them, `kraken_page_texts` joins the dump back into pages
+  (B1's dump cannot stand in: its ids are parquet rows and name no page). (b)
+  `PageReadings` in `letterpool_eval`: `machine_text(lines, readings,
+  page_ids=…)` concatenates the pages' lines in order for the page kind (a page
+  read empty is one empty line, so it still counts), `score_set` and
+  `selected_scores` pass the letter's page ids, `reader_info` counts a page
+  reader's lines and reports no per-line pace; `pool_page_readings` builds one
+  from a readings file (`page:<model>`), `score_pool` scores the drawn letters
+  under v1, the line readers on disk (k3-trocr, k3-kraken, the Bern model) and
+  the page models with `build_result`'s pieces, then the same letters without
+  those any page model failed on (the paired "left out" view). (c) The diff:
+  `align_lines` (Needleman–Wunsch over lines, a pair costs 1 − similarity, a
+  gap 0.35, so two lines under 30 % similar are not paired), `diff_lines`
+  counts both right, only a / only b right, both wrong, near (≤ 10 % CER),
+  invented, dropped, the length ratios; on PHILIUMM against the kraken dump's
+  lines, on the pool against k3-trocr with the factory's aligner cutting the
+  letter's text into k3-trocr's accepted lines as the reference lines (the
+  declined lines counted). Checkpoint B: 11 scoring tests, the pool one on the
+  fixture store with a page reader that fails one page.
+- **Task 3, the report and the commands.** `htr/pagereport.py` renders
+  `reports/htr/page-llm.md` + `.json` from `page-llm.scores.json` (numbers
+  only; the committed K2b/K3 whole-set rows read from their JSON and shown
+  beside the subset rows; B1's line-crop table for scale). The commands:
+  `bench page-list` (the two lists), `page-fetch` (the Hub's val pages, one a
+  second), `page-read`, `page-lines`, `page-score --set philiumm | pool`
+  (`--split test` is read as `val` and recorded), `page-report`. Tests: 1016 →
+  **1060** passed (the numpy skip now runs), ruff clean, 272 files formatted.
+- **Not done here (Part B, the operator's).** The API reads, the kraken line
+  run, the two scorings and the report's numbers: the runbook under Next.
+  `reports/htr/page-llm.md` does not exist until `page-report` runs on the
+  desktop; no number of the test exists yet.
 
 ### K3 — a Leibniz Kurrent model (2026-10-21/24) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 (Checkpoint C: kraken and TrOCR) · ✅ Task 4 (Checkpoint D) · ⏳ the operator's choice
 
@@ -5633,6 +5827,38 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-10-28 — LT1, departures from the prompt and the preamble of 19
+  October (updated 21 October).** (1) *No go waited for*: a cloud session
+  started with the whole step records the pre-flight and proceeds (the
+  preamble's item 6); every API, store and GPU step is handed over. (2) *The
+  page reference comes from the dataset's PAGE XML, not the parquet*: the
+  parquet has text and image only; the Hub's `val/` carries the pages (JPEG +
+  XML). (3) *`--split test` means `val`*: the dataset has no test split; its
+  held-out split is `val`, the one B1 scored. (4) *27 PHILIUMM pages, not
+  50*: the held-out split has 27; the list carries them all (34 calls). (5)
+  *PHILIUMM's images come from the Hub*, not the desktop cache or the mirror:
+  the same GWLB derivatives (checked on one page: identical dimensions), and
+  the XML's coordinates belong to them; 16 of the 27 are also store pages,
+  recorded in the list. (6) *Openings are read as two halves* (left, right),
+  the XML lines split at the midline — the protocol's "one column at a time";
+  `page-list --no-split-openings` reads them whole. (7) *Claude cannot run
+  without a thinking block*: thinking is always on on the Claude 5 models and
+  `disabled` is a 400; effort *low* is sent and recorded; `temperature` is not
+  sent (rejected). (8) *The Gemini id is `gemini-3.1-pro-preview`* (no bare
+  `gemini-3.1-pro`); `gemini-4-argon` exists and is in the plan as a third
+  model. (9) *numpy installed into `.venv-cloud`*, which the preamble's extras
+  list lacks: the pool metric needs it (one package, no `uv sync`). (10) *The
+  pool draw is by whole letters*: 100 pages = 34 letters, since the metric
+  charges a letter for every line on its pages. (11) *The kraken model's page
+  CER is a re-run on the val lines cut from the Hub's images*, not B1's dump
+  (its ids name no page); the cut is `bench page-lines`. (12) *Three helper
+  commands beyond the prompt's three*: `page-list`, `page-fetch`,
+  `page-lines`. (13) *The pool diff's reference lines are the aligner's
+  slices of the letter text onto k3-trocr's lines*: the pool has no
+  line-segmented reference; the report says so. (14) *The report is code
+  only*: no `reports/htr/page-llm.md` is committed, since no number exists
+  yet. (15) *A first `ANTHROPIC_PRICES` table*: the Anthropic engine had no
+  cost accounting before.
 - **2026-10-22 — A3b follow-up, departures from the follow-up's text.** (1)
   *The sixteen hand changes are not listed here*: they are in the operator's
   dry-run report, which this session cannot see; the report now prints every
@@ -6145,6 +6371,90 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   gitignored like the rest of `data/`.
 
 ## Next
+
+**LT1 (2026-10-28): Part A built in a cloud session; the branch
+`claude/kind-tesla-xhk9ac` carries it (compare:
+https://github.com/marchofhares/LeibnizLegible/compare/main...claude/kind-tesla-xhk9ac?expand=1);
+the operator opens and merges the pull request; nothing deployed. Part B is
+the operator's, from the second checkout beside K4's reading job: the reads
+are API traffic on the CPU (no torch process, no GPU); the one kraken step
+waits until K4's job has ended.** The keys as environment variables
+(`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`; `OPENAI_API_KEY` only if gpt-5.5 is
+wanted), never in the repo; the master store read-only; the pool's texts
+never leave the machine (only page images go out, the GWLB's public-domain
+scans). In order, each with its expected cost (the dry run's estimates from
+this session, at the pricing tables with 1,500 output tokens a page assumed
+and the image sizes assumed; the real run logs the APIs' own usage) and time:
+   1. **The checkout and the environment.** Before the merge
+      `git -C ~/LeibnizLegible-g1 fetch origin claude/kind-tesla-xhk9ac && git -C ~/LeibnizLegible-g1 checkout --detach origin/claude/kind-tesla-xhk9ac`,
+      after it `… fetch origin main && … checkout --detach origin/main`; then
+      `cd ~/LeibnizLegible-g1 && export UV_PROJECT_ENVIRONMENT=.venv-g1 && uv sync --extra web --extra gt --extra release`
+      and, if `uv run --no-sync python -c 'import numpy'` fails,
+      `VIRTUAL_ENV=.venv-g1 uv pip install numpy` (the pool metric needs it;
+      one package). Seconds to a minute.
+   2. **The val pages from the Hub** (CC BY 4.0; one request a second):
+      `uv run --no-sync leibniz bench page-fetch --val-pages /home/evana/LeibnizLegible/data/gt/philiumm-val-pages`
+      → `page-fetch 54 files fetched now, 54 present in …` (27 JPEG + 27 XML;
+      the one page fetched here was 2.3 MB, so the lot is of the order of
+      tens of megabytes; about a minute of requests). Free.
+   3. **The dry runs** (no call; the plan with the real image sizes, the pool's
+      from `/mnt/d/leibniz-images`): for each of
+      `--engine gemini --model gemini-3.1-pro-preview`,
+      `--engine gemini --model gemini-4-argon`,
+      `--engine anthropic --model claude-fable-5-1`:
+      `uv run --no-sync leibniz bench page-read --pages reports/htr/page-list-philiumm.csv --pages reports/htr/page-list-pool.csv <engine and model> --images /mnt/d/leibniz-images --val-pages /home/evana/LeibnizLegible/data/gt/philiumm-val-pages --out /home/evana/LeibnizLegible/data/bench/page-llm --max-cost 20 --dry-run`
+      → `134 calls to make … pages {'philiumm': 34, 'pool': 100} … estimate:
+      <input tokens> (image sizes known for 134 of 134) + 201,000 output
+      tokens assumed … → <USD>; cap 20.00 USD`. This session's figures with
+      the sizes assumed: gemini-3.1-pro-preview 2.85 USD, gemini-4-argon 2.45
+      USD, claude-fable-5-1 14.80 USD (gpt-5.5 2.21 USD if run). Then the go.
+   4. **The reads**, the same three commands without `--dry-run` (the cap of
+      20 USD a model stays; a run that stops at the cap or on an error is
+      resumed by running the command again; `--redo failed` reads the failed
+      pages once more). Expected per command: a line per page
+      `<model>: <page> [<column>] ok · N lines · <in>+<out> tokens · <USD> ·
+      <s> s`, then `done: 134 read, 0 skipped, statuses {…}, <USD> USD → …`.
+      Time: unmeasured until the first pages print their seconds; bounded by
+      the 300 s deadline a call (`--timeout`), the polite half-second between
+      calls, and one retry per failed page. Cost: the estimates above, the
+      real figure in the log. The readings land in
+      `/home/evana/LeibnizLegible/data/bench/page-llm/<model>.jsonl` and the
+      images sent under `…/page-llm/images/` (gitignored; keep them: they are
+      the record of what each model saw).
+   5. **The kraken model on the same lines** — after K4's reading job has
+      ended (one torch process on the machine), from the main checkout in
+      `.venv-k1` (kraken 7.0.3; CPU is enough — B1 read the 1,878 val lines
+      in about 160 s on CPU):
+      `cd ~/LeibnizLegible && UV_PROJECT_ENVIRONMENT=.venv-k1 uv run --no-sync leibniz bench page-lines --val-pages data/gt/philiumm-val-pages --out data/bench/page-llm/val-lines`
+      → `page-lines <n> lines written to …` (the val XML's lines with text and
+      geometry; the parquet's val split has 1,878 rows), then
+      `UV_PROJECT_ENVIRONMENT=.venv-k1 uv run --no-sync leibniz bench run data/bench/page-llm/val-lines --engine kraken --out data/bench/page-llm/kraken-val-lines.jsonl`
+      → `kraken@FoNDUE-GD_v2_ft_Leibniz on <n> lines [philiumm]: CER …`
+      (B1's model, the default path; the number should sit near B1's 7.95 %
+      if the cut matches the dataset's own crops, and the report quotes what
+      it is). Minutes. (The main checkout must carry the branch or the
+      merged main for `page-lines` to exist: `git pull --ff-only` after the
+      merge, or run from the second checkout with `UV_PROJECT_ENVIRONMENT`
+      pointing at the main checkout's `.venv-k1` and `PYTHONPATH=src`.)
+   6. **The scoring** (the store read-only; the pool's texts verified against
+      the frozen checksums first):
+      `uv run --no-sync leibniz bench page-score --set philiumm --pages reports/htr/page-list-philiumm.csv --readings /home/evana/LeibnizLegible/data/bench/page-llm --val-pages /home/evana/LeibnizLegible/data/gt/philiumm-val-pages --kraken-lines /home/evana/LeibnizLegible/data/bench/page-llm/kraken-val-lines.jsonl --scores reports/htr/page-llm.scores.json`
+      → a line per reader `<model>: page CER … with <k> failed pages charged;
+      … with them left out; 34 pages` and the kraken row; then
+      `uv run --no-sync leibniz bench page-score --set pool --pages reports/htr/page-list-pool.csv --readings /home/evana/LeibnizLegible/data/bench/page-llm --db /home/evana/LeibnizLegible/data/inventory.sqlite --testset reports/kurrent/letterpool-testset.csv --texts /home/evana/LeibnizLegible/data/kurrent/letterpool/testset.jsonl --pool-readings /home/evana/LeibnizLegible/data/kurrent/letterpool-readings --scores reports/htr/page-llm.scores.json`
+      → `34 letters, 100 pages (L 50, K/k 50)`, a line per reader (`v1`,
+      `k3-trocr`, `k3-kraken`, `trocr-kurrent-xvi-xvii` where their readings
+      are on disk, `page:<model>` for each model) with CER and interval, the
+      failed pages and the letters with every page read. Seconds to minutes;
+      free.
+   7. **The report**: `uv run --no-sync leibniz bench page-report` →
+      `reports/htr/page-llm.md` and `.json`. Read it; then from the main
+      checkout commit `reports/htr/` (the lists, the score file, the report —
+      numbers only; nothing under `data/`), write the headline numbers into
+      the LT1 entry and Current state, push, and print the compare URL. The
+      report's numbers go to the colleague as they are, with the two caveats
+      (the sets are small; the pool's references are checked letter
+      transcriptions of 1708–1716, not a random sample of the German pages).
 
 **A3b (2026-10-21, the follow-up 2026-10-22): built in a cloud session on
 fixtures cut from the export; the branch `claude/adoring-volta-eogav8`

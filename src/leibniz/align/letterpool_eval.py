@@ -242,6 +242,25 @@ class MachineText:
     lines: list[HtrLine]
 
 
+class PageReadings(dict):
+    """A reader of the *page* kind (LT1): ``{page_id: Reading}``, the reading the text of
+    the whole page as the model returned it, its lines separated by newlines.
+
+    :func:`machine_text` recognises the kind and concatenates the pages of a
+    letter in order, each page's lines becoming the letter's ``HtrLine`` rows, so
+    the infix alignment, :func:`score_set`, :func:`pooled` and :func:`aggregate`
+    run unchanged on it; a page without a reading (or read empty) contributes
+    one empty line, so the page still counts in ``n_lines``.
+    """
+
+
+def page_lines_of(reading: P.Reading | None) -> list[str]:
+    """A page reading's lines: split on newlines, stripped, the empty ones dropped."""
+    if reading is None:
+        return []
+    return [ln.strip() for ln in reading.text.splitlines() if ln.strip()]
+
+
 def set_lines(
     conn: sqlite3.Connection, letters: Sequence[SetLetter]
 ) -> dict[str, list[P.PilotLine]]:
@@ -252,11 +271,35 @@ def set_lines(
     return out
 
 
-def machine_text(lines: Sequence[P.PilotLine], readings: Mapping[str, P.Reading]) -> MachineText:
-    htr = [
-        HtrLine(ref=ln.line_id, text=readings[ln.line_id].text if ln.line_id in readings else "")
-        for ln in lines
-    ]
+def machine_text(
+    lines: Sequence[P.PilotLine],
+    readings: Mapping[str, P.Reading],
+    *,
+    page_ids: Sequence[str] | None = None,
+) -> MachineText:
+    """The letter's machine text under one reader: the stored lines' readings in order,
+    or — for a :class:`PageReadings` reader — the pages' texts in order (``page_ids``,
+    else the pages the stored lines name)."""
+    if isinstance(readings, PageReadings):
+        pages = (
+            list(page_ids)
+            if page_ids is not None
+            else list(dict.fromkeys(ln.page_id for ln in lines))
+        )
+        htr: list[HtrLine] = []
+        for pid in pages:
+            page_texts = page_lines_of(readings.get(pid))
+            if not page_texts:
+                htr.append(HtrLine(ref=f"{pid}:page", text=""))
+                continue
+            htr.extend(HtrLine(ref=f"{pid}:page:{k:03d}", text=t) for k, t in enumerate(page_texts))
+    else:
+        htr = [
+            HtrLine(
+                ref=ln.line_id, text=readings[ln.line_id].text if ln.line_id in readings else ""
+            )
+            for ln in lines
+        ]
     texts = [h.text.strip() for h in htr]
     return MachineText(
         text=" ".join(t for t in texts if t),
@@ -345,7 +388,7 @@ def score_set(
     spans = set(span_policies)
     for reader, readings in readers.items():
         for k, ltr in enumerate(letters, start=1):
-            mt = machine_text(lines[ltr.letter_id], readings)
+            mt = machine_text(lines[ltr.letter_id], readings, page_ids=ltr.page_ids)
             for pol in pols:
                 out.append(score_letter(ltr, mt, reader, pol, with_span=pol in spans))
             if log and k % 25 == 0:
@@ -443,7 +486,7 @@ def selected_scores(
         edits = dict.fromkeys(pols, 0)
         refs = dict.fromkeys(pols, 0)
         for ltr in letters:
-            mt = machine_text(lines[ltr.letter_id], readings)
+            mt = machine_text(lines[ltr.letter_id], readings, page_ids=ltr.page_ids)
             res = align_piece(mt.lines, ltr.text, threshold=threshold)
             n_lines += res.n_lines
             for al in res.lines:
@@ -495,23 +538,35 @@ def reader_info(
     lines: Mapping[str, Sequence[P.PilotLine]] | None = None,
 ) -> ReaderInfo:
     """A reader's model, device, pace and coverage; the lines read are counted per letter
-    (a page two letters share counts for each) when the set's ``lines`` are given."""
+    (a page two letters share counts for each) when the set's ``lines`` are given. For a
+    page reader the lines read are the lines of its page texts and the pace is per page,
+    reported as ``None`` here (the LT1 report carries the seconds a page)."""
     ms = [r.ms for r in readings.values() if r.ms > 0]
-    if lines is not None:
+    if isinstance(readings, PageReadings):
+        pages = (
+            list(dict.fromkeys(ln.page_id for ls in lines.values() for ln in ls))
+            if lines is not None
+            else list(readings)
+        )
+        lines_read = sum(len(page_lines_of(readings.get(pid))) for pid in pages)
+        pace = None
+    elif lines is not None:
         lines_read = sum(
             1
             for ls in lines.values()
             for ln in ls
             if ln.line_id in readings and readings[ln.line_id].text.strip()
         )
+        pace = statistics.fmean(ms) if ms else None
     else:
         lines_read = sum(1 for r in readings.values() if r.text.strip())
+        pace = statistics.fmean(ms) if ms else None
     return ReaderInfo(
         reader=reader,
         model=next((r.model for r in readings.values() if r.model), reader),
         device=next((r.device for r in readings.values() if r.device), ""),
         lines_read=lines_read,
-        ms_per_line=statistics.fmean(ms) if ms else None,
+        ms_per_line=pace,
         licence=licence,
         evaluate_only=reader in EVALUATE_ONLY,
     )
@@ -920,6 +975,7 @@ __all__ = [
     "Infix",
     "LetterScore",
     "MachineText",
+    "PageReadings",
     "ReaderInfo",
     "SetLetter",
     "aggregate",
@@ -929,6 +985,7 @@ __all__ = [
     "infix_distance_reference",
     "load_set",
     "machine_text",
+    "page_lines_of",
     "pooled",
     "read_set",
     "reader_info",

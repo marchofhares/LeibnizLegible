@@ -15,6 +15,7 @@ from leibniz.htr.engines import (
     KrakenEngine,
     MissingKeyError,
     OpenAIEngine,
+    estimate_anthropic_cost,
     estimate_gemini_cost,
     estimate_openai_cost,
 )
@@ -349,3 +350,185 @@ def test_openai_transport_error_exhausts_retries() -> None:
     with pytest.raises(httpx.ConnectError):
         eng.transcribe([b"img"])
     assert client.posts == 3  # initial + 2 retries
+
+
+# -- LT1: the page protocol's additions ------------------------------------- #
+
+
+class _AResp:
+    def __init__(self, text: str, stop: str = "end_turn", status: int = 200, usage=None) -> None:
+        self.status_code = status
+        self._t, self._stop, self._usage = (
+            text,
+            stop,
+            usage or {"input_tokens": 3000, "output_tokens": 700},
+        )
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+    def json(self) -> dict:
+        if self.status_code == 400:
+            return {
+                "error": {
+                    "type": "invalid_request_error",
+                    "message": "temperature is not supported",
+                }
+            }
+        return {
+            "content": [{"type": "text", "text": self._t}],
+            "stop_reason": self._stop,
+            "usage": self._usage,
+        }
+
+
+class _AClient:
+    def __init__(self, replies) -> None:
+        self.replies = list(replies)
+        self.posts: list[dict] = []
+
+    def post(self, url, headers=None, json=None):  # noqa: A002
+        self.posts.append({"url": url, "headers": headers, "json": copy.deepcopy(json)})
+        return self.replies.pop(0)
+
+    def close(self) -> None:
+        pass
+
+
+def test_anthropic_reply_sends_effort_captures_usage_and_prices_it() -> None:
+    client = _AClient([_AResp("linea una\nlinea duo", "end_turn"), _AResp("", "max_tokens")])
+    eng = AnthropicEngine(
+        api_key="k",
+        model="claude-fable-5-1",
+        client=client,
+        effort="low",
+        max_tokens=4000,
+        min_interval=0,
+    )
+    rep = eng.reply(b"\xff\xd8\xffimg", prompt="the page prompt")
+    assert rep.text == "linea una\nlinea duo" and rep.stop == "end" and rep.attempts == 1
+    assert (rep.input_tokens, rep.output_tokens) == (3000, 700)
+    body = client.posts[0]["json"]
+    assert body["output_config"] == {"effort": "low"} and body["max_tokens"] == 4000
+    assert (
+        "temperature" not in body and body["messages"][0]["content"][1]["text"] == "the page prompt"
+    )
+    rep2 = eng.reply(b"img")
+    assert rep2.stop == "length"
+    assert (eng.usage_input, eng.usage_output) == (6000, 1400)
+    assert eng.cost == pytest.approx(6000 * 10 / 1e6 + 1400 * 50 / 1e6)
+    assert eng.settings()["reasoning"] == "effort low" and eng.settings()["temperature"] is None
+    assert estimate_anthropic_cost("claude-fable-5-1-2027", 1_000_000, 0) == pytest.approx(10.0)
+    assert estimate_anthropic_cost("unknown", 1, 1) is None
+
+
+def test_anthropic_drops_a_rejected_temperature_and_transcribe_still_works() -> None:
+    client = _AClient([_AResp("", status=400), _AResp("ok", "end_turn")])
+    eng = AnthropicEngine(
+        api_key="k", client=client, temperature=0.0, min_interval=0, sleep=lambda _s: None
+    )
+    assert eng.transcribe([b"img"]) == ["ok"]
+    assert "temperature" in client.posts[0]["json"] and "temperature" not in client.posts[1]["json"]
+    assert eng.temperature is None
+
+
+class _OAFull:
+    """OpenAI-shaped replies with a finish reason and reasoning tokens; a scripted 400 on
+    reasoning_effort for the first value(s)."""
+
+    def __init__(self, replies, reject_efforts=()) -> None:
+        self.replies = list(replies)
+        self.reject = set(reject_efforts)
+        self.posts: list[dict] = []
+
+    def post(self, url, headers=None, json=None):  # noqa: A002
+        self.posts.append({"url": url, "headers": headers, "json": copy.deepcopy(json)})
+        effort = json.get("reasoning_effort")
+        if effort in self.reject:
+
+            class _Err:
+                status_code = 400
+
+                @staticmethod
+                def json() -> dict:
+                    return {
+                        "error": {
+                            "param": "reasoning_effort",
+                            "message": f"Unsupported value: {effort}",
+                        }
+                    }
+
+                @staticmethod
+                def raise_for_status() -> None:
+                    raise RuntimeError("HTTP 400")
+
+            return _Err()
+        text, finish, p, c, r = self.replies.pop(0)
+
+        class _Ok:
+            status_code = 200
+
+            @staticmethod
+            def raise_for_status() -> None:
+                pass
+
+            @staticmethod
+            def json() -> dict:
+                return {
+                    "choices": [{"message": {"content": text}, "finish_reason": finish}],
+                    "usage": {
+                        "prompt_tokens": p,
+                        "completion_tokens": c,
+                        "completion_tokens_details": {"reasoning_tokens": r},
+                    },
+                }
+
+        return _Ok()
+
+    def close(self) -> None:
+        pass
+
+
+def test_openai_reply_steps_down_the_reasoning_chain_and_reads_the_finish_reason() -> None:
+    client = _OAFull(
+        [("a\nb", "stop", 1200, 300, 100), ("c", "length", 1200, 4000, 3900)],
+        reject_efforts={"none", "minimal"},
+    )
+    eng = OpenAIEngine(
+        api_key="k", model="gpt-5.5", client=client, reasoning_effort="none", min_interval=0
+    )
+    rep = eng.reply(b"img")
+    assert rep.text == "a\nb" and rep.stop == "end" and rep.reasoning_tokens == 100
+    assert [p["json"].get("reasoning_effort") for p in client.posts] == ["none", "minimal", "low"]
+    assert eng.reasoning_effort == "low" and eng.settings()["reasoning"] == "reasoning_effort low"
+    rep2 = eng.reply(b"img2")
+    assert rep2.stop == "length" and client.posts[-1]["json"]["reasoning_effort"] == "low"
+    assert (eng.usage_input, eng.usage_output) == (2400, 4300)
+    # a model that rejects every level ends without the field
+    client2 = _OAFull([("x", "stop", 1, 1, 0)], reject_efforts={"none", "minimal", "low"})
+    eng2 = OpenAIEngine(api_key="k", client=client2, reasoning_effort="none", min_interval=0)
+    assert eng2.reply(b"i").text == "x" and "reasoning_effort" not in client2.posts[-1]["json"]
+    assert eng2.reasoning_effort is None
+
+
+def test_gemini_sends_the_thinking_level_in_the_extra_body(monkeypatch) -> None:
+    client = _OAFull([("z", "stop", 1600, 500, 200)])
+    eng = GeminiEngine(
+        api_key="k",
+        model="gemini-3.1-pro-preview",
+        client=client,
+        thinking_level="low",
+        min_interval=0,
+    )
+    rep = eng.reply(b"img")
+    body = client.posts[0]["json"]
+    assert body["extra_body"] == {"google": {"thinking_config": {"thinking_level": "low"}}}
+    assert "reasoning_effort" not in body and body["temperature"] == 0.0
+    assert rep.reasoning_tokens == 200 and eng.cost == pytest.approx(
+        1600 * 2 / 1e6 + 500 * 12 / 1e6
+    )
+    assert "thinking_level low" in eng.settings()["reasoning"]
+    with pytest.raises(ValueError):
+        GeminiEngine(api_key="k", client=client, thinking_level="low", reasoning_effort="low")
+    assert estimate_gemini_cost("gemini-4-argon", 1_000_000, 1_000_000) == pytest.approx(12.0)

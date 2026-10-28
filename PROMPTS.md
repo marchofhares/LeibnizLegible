@@ -3436,3 +3436,204 @@ The operator's instruction after the crash of 21 October, verbatim:
 ~~~~
 The WSL machine crashed with Bus errors on every process, almost certainly because Ubuntu's virtual disk on the host's C: drive could not grow; C: now has about 40 GB free. Before anything else: run df -h /mnt/c and treat that free space, not df /, as the budget for every write from now on. The state on disk: the branch k3-kurrent-model exists but HEAD is on main at aafcb05 (W6 merged); data/train/k3 holds manifest.jsonl, train, val, train.txt, val.txt and sample; data/models/k3/kraken-pilot exists; no job survived, the machine restarted; the store passed PRAGMA quick_check after the crash. Check out k3-kurrent-model, list its commits against main, read STATUS.md's K3 entry, git status and the logs under logs/, and say which task you were in and whether the training set on disk matches the manifest (sizes and counts) or needs rebuilding. Then: keep the crops where they are and report their total size; write every model checkpoint and optimizer state under /mnt/d/leibniz-train/k3/ instead of data/models/k3/, moving kraken-pilot there and symlinking data/models/k3 to it so the paths in the reports stay as the prompt says; and before each training job state its expected disk use against the C: figure. Continue from the last completed checkpoint.
 ~~~~
+
+### Phase LT1 — the page-level LLM test (run 2026-10-28)
+
+_Run in a cloud session on the branch it was given (`claude/kind-tesla-xhk9ac`),
+under the session preamble of 19 October as updated on 21 October, given with
+the prompt and printed first below; Part A (the code, the tests, the runbook)
+here, Part B (the API runs, the scoring, the report's numbers) the operator's
+desktop. No go was waited for (the preamble's item 6); the departures are in
+`STATUS.md`, Divergences._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+Phase LT1 — the page-level test of frontier vision models against the
+project's readers. Part A in a cloud session on the branch it was given
+(the code, the tests, the runbook); Part B on the operator's desktop from
+the second checkout (the API runs, the scoring, the report), beside K4's
+reading job: API traffic on the CPU, no torch process, no GPU. No store
+write; no deploy; nothing on the site changes.
+
+Why: a colleague holds that the current frontier models (Gemini 3.1 Pro,
+"Gemini 4 Argon" if it exists, Claude Fable 5.1) read whole pages far better
+than the project's readers. The project's only LLM numbers (B1, September:
+150 line crops, zero-shot, gpt-4.1 36.6 %, gpt-4o 43.8 %, gemini-3.8-flash
+55.1 %, the GPT-5.6 models 74–79 %, the PHILIUMM kraken model 8.2 %) used
+line crops, which favour a line recogniser. This phase runs the fair
+protocol, whole pages, and lands the result in the same tables as K2b and
+K3, so the comparison is one number against another under one policy.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), STATUS.md (the B1, K2b, K3 and K4
+entries; "Divergences"; "Next"), reports/philiumm-repro.md (the B1 protocol
+and its LLM table), reports/kurrent/letterpool-eval.md and k3-eval.md (the
+pool's metric and the numbers to land beside), src/leibniz/htr/engines.py
+(the three API engines: prompt, max_tokens 256, temperature, the pricing
+tables, the Gemini thinking note) and src/leibniz/align/letterpool_eval.py
+(machine_text, infix_distance, score_set, pooled, aggregate, read_set). If
+this prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence. Write the "LT1 — page-level LLM test" entry in STATUS.md after
+every task; if one exists, continue from its first unfinished task.
+
+## Where you run, and the rules that follow from it
+Part A: the cloud checkout, .venv-cloud with the web + gt + release extras
+and pyarrow (the bench extra's kraken and torch are not needed here); the
+fixture store; no API key, so every API path is tested against the echo
+engine and recorded fixtures. Page images for the fixture tests come from
+the public mirror (https://images.leibnizlegible.com, the URL scheme in
+src/leibniz/pack/fragments.py and web/attribution.py), a handful of pages,
+polite. Part B is the operator's: /home/evana/LeibnizLegible-g1 with
+.venv-g1 (UV_PROJECT_ENVIRONMENT=.venv-g1), the keys as environment
+variables, the master store read-only, the image cache /mnt/d/leibniz-images,
+the pool's references under data/kurrent/letterpool/. Rules that bind both
+parts: the letter pool's reference texts are CC BY-NC 4.0 and never leave
+the machine — only page images go to an API, and they are the GWLB's
+public-domain scans; the PHILIUMM dataset is CC BY 4.0; no API output is
+ever a training label; every run states its expected cost from the pricing
+tables before it starts and stops at a cap the operator sets; never write a
+number you did not produce.
+
+## The protocol (the colleague's conditions, adopted)
+Whole pages, one page a call, one column at a time where a page has two
+(the page list carries a column flag; the default is the whole page).
+Temperature 0. Reasoning off, or at the lowest setting an API allows, and
+the setting named per model in the report (Gemini 3.x Pro has a thinking
+level with no "off"; Claude without a thinking block; find the current
+parameters in each API's documentation and record what you did). One
+prompt for every model, in the spirit of Humphries' recipe: transcribe every
+line of this manuscript page in reading order, one output line per
+manuscript line, character by character, no commentary, no translation, no
+expansion of abbreviations; and nothing else. max_tokens about 4,000; the
+image downscaled to a stated long side (2,000 px unless the pilot says
+otherwise) and the token count recorded. A refusal, an empty answer or a
+runaway (the output limit reached) is recorded as such, retried once, and
+scored both ways: as 100 % error and left out. Every call's usage tokens and
+estimated cost logged; the run resumable by page.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+A clean tree on the branch; ruff + pytest baseline. Then the facts the plan
+needs: (a) the PHILIUMM parquet's columns — which field names the page and
+the line's order within it, so a page reference can be rebuilt from the
+test split; (b) whether those pages map to store pages through
+reports/philiumm/heldout_pages.csv or the dataset's file names, so real
+page images exist for them (the desktop cache; the mirror for the fixture);
+if no mapping exists for a page, it is left out and said so; (c) the pool
+set reports/kurrent/letterpool-testset.csv — letters, pages, hands, halves —
+and how letterpool_eval attaches readings to lines, so a page text can enter
+machine_text unchanged; (d) the three APIs' current parameters for
+temperature and reasoning, and the model ids: gemini-3.1-pro (or the
+current id), the Argon id if the models list has one, claude-fable-5-1 (or
+the current id); (e) the pricing rows to add. Print the plan with the
+expected cost of Part B at 50 PHILIUMM pages and 100 pool pages per model;
+wait for "go".
+
+## Task 1 — The page reader (code and tests)
+`leibniz bench page-read --pages LIST.csv --engine gemini|anthropic|openai
+--model ID --out DIR [--images ROOT | --mirror] [--long-side 2000]
+[--max-cost USD]`: LIST.csv has page_id, image source, column flag; one
+call a page through the existing engines, extended for a page prompt,
+max_tokens, the reasoning setting and a per-call timeout; the answer as
+JSONL (page_id, model, settings, the text, lines split on newlines, usage,
+cost, status ok|refused|empty|runaway); resumable; a dry run prints the
+cost. Tests with the echo engine and recorded fixtures (no network in
+pytest). CHECKPOINT A.
+
+## Task 2 — The scoring (code and tests)
+(a) PHILIUMM pages: `leibniz bench page-score --pages … --readings DIR --split
+test`: the page reference is the test split's lines in order; page CER
+under the philiumm policy (the same normalisation as B1), pooled over pages
+and per page, with a bootstrap over pages; beside it the PHILIUMM kraken
+model's page CER from its own line readings of the same lines (B1's per-line
+dump if it exists on the desktop, else `bench run --out` re-run there after
+K4 frees the card) — the dedicated model and the page models on one table.
+(b) The pool: a reader kind "page" for letterpool_eval, whose reading is the
+page text attached to the page as a whole, so machine_text concatenates it
+in order and infix_distance, score_set, pooled and aggregate run
+unchanged; the result rows go into the same table as v1, the Bern model,
+k3-trocr and k3-kraken: all letters, selection and test halves, Leibniz's
+hand and the correspondents', 95 % intervals over letters. (c) The diff the
+colleague proposes: for each page, align the page model's lines to the
+reference lines and k3-trocr's lines to the same, and count the lines where
+exactly one reader is right, where both are wrong, the extra lines the page
+model invented and the lines it dropped (the hallucination count), the
+length ratio. Tests on fixtures for all three. CHECKPOINT B.
+
+## Task 3 — The report, the runbook, the hand-over
+`leibniz bench page-report` → reports/htr/page-llm.md + .json: the protocol
+and the settings per model, the two sets and how they were drawn, the
+tables, the cost, the refusals both ways, the diff counts, and two caveats
+in the text: the page sets are small, and the pool's references are the
+GWLB's checked transcriptions of letters, not a random sample of the
+German pages. Then the Part B runbook in the STATUS entry under Next, every
+command with its expected time and cost: the page lists (50 PHILIUMM test
+pages with real images; 100 pool pages drawn seeded from the test set,
+half L and half K/k, from both halves, listed by letter), the three reads
+(a cap of 20 USD a model), the scoring, the report, commit and push. Append
+this prompt verbatim to PROMPTS.md under "Follow-up phases (2026-10)". ruff
++ pytest clean. Push, print the compare URL. Do not merge.
+
+## Part B — the operator's desktop (after the hand-over; K4 may be running)
+Run the runbook from the second checkout: the reads are API traffic and run
+beside K4; any kraken re-run waits until K4's reading job has ended (one
+torch process on the machine). The report's numbers go back to the
+colleague as they are, with the caveats.
+~~~~
