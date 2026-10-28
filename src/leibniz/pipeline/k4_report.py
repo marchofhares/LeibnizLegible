@@ -38,8 +38,8 @@ class JobLog:
     launches: list[str] = field(default_factory=list)  # timestamps
     relaunches: list[dict] = field(default_factory=list)  # {n, after_exit, at}
     exits: list[dict] = field(default_factory=list)  # {code, launch, at}
-    max_rss_kb: list[int] = field(default_factory=list)  # one per finished launch
-    wall: list[str] = field(default_factory=list)  # /usr/bin/time's h:mm:ss, per launch
+    max_rss_kb: list[int] = field(default_factory=list)  # per launch that ended on its own
+    wall: list[str] = field(default_factory=list)  # /usr/bin/time's h:mm:ss, the same launches
     done: dict | None = None  # {code, launches, at}
     first_progress: str | None = None
     last_progress: str | None = None
@@ -286,8 +286,12 @@ def render(summ: Mapping) -> str:
         row("relaunched after exits", ", ".join(str(r["after_exit"]) for r in log["relaunches"]))
     exits = ", ".join(f"{e['code']}@{e['launch']}" for e in log["exits"]) or "—"
     row("exits (code, launch)", exits)
-    row("peak host RSS (`/usr/bin/time -v`)", f"{_n(log['peak_rss_kb'])} KB")
-    row("wall per launch", ", ".join(log["wall"]) or "—")
+    # the guard's pkill -f matches the time wrapper too: a killed launch leaves no summary
+    row(
+        "peak host RSS (`/usr/bin/time -v`, launches that ended on their own)",
+        f"{_n(log['peak_rss_kb'])} KB",
+    )
+    row("wall per launch that ended on its own", ", ".join(log["wall"]) or "—")
     row("guard samples · starts", f"{_n(guard['samples'])} · {guard['starts']}")
     row("card peak (nvidia-smi, Xwayland included)", f"{_n(guard['peak_used_mib'])} MiB")
     util = guard["mean_util_pct"]

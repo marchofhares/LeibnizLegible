@@ -159,7 +159,7 @@ def test_gather_and_render(tmp_path: Path) -> None:
     assert "30,797 pages called German of 236,210" in md and "keeps v1's text" in md
     assert "| pages | 24,078 of 24,078 |" in md
     assert "| launches · relaunches | 2 · 1 |" in md
-    assert "| peak host RSS (`/usr/bin/time -v`) | 2,291,072 KB |" in md
+    assert "| peak host RSS (`/usr/bin/time -v`, launches that ended on their own) | 2,291,072 KB |" in md
     assert "| card peak (nvidia-smi, Xwayland included) | 5,697 MiB |" in md
     assert "| crops under 80 px | 252,286 lines, 250,000 of them with a row |" in md
     assert "| store after | 19,143,570,432 bytes (+2,000,000,000 bytes), WAL 0 |" in md
