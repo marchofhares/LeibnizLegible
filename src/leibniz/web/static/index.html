@@ -181,14 +181,16 @@
               </p>
 
               <!--
-                Language and writing stage are not yet populated in the index
-                (every page is "unknown" until the C4 run adds language
-                identification and strata), so the two filters stay hidden;
-                the API still accepts the parameters.
+                The language comes from K4's language pass over each page's
+                machine text (the page_lang table, read into the index at its
+                rebuild); the filter is open since K4 (the operator,
+                2026-10-28). The writing stage is not yet populated (every
+                page is "unknown" until the C4 run adds strata), so that
+                filter stays hidden; the API still accepts the parameter.
               -->
-              <p class="field" hidden>
-                <label class="field__label" for="lang" data-i18n="search.lang">Language of the text</label>
-                <select id="lang" name="lang">
+              <p class="field">
+                <label class="field__label" for="lang" data-i18n="search.lang">Language (detected)</label>
+                <select id="lang" name="lang" aria-describedby="lang-help">
                   <option value="" data-i18n="search.lang.any">Any language</option>
                   <option value="la" data-i18n="lang.la">Latin</option>
                   <option value="fr" data-i18n="lang.fr">French</option>
@@ -196,6 +198,7 @@
                   <option value="mixed" data-i18n="lang.mixed">Mixed</option>
                   <option value="unknown" data-i18n="lang.unknown">Undetermined</option>
                 </select>
+                <span class="hint" id="lang-help" data-i18n="search.lang.help">The labels come from a language pass over the machine text; German is detected with 95 % precision and about 75 % recall.</span>
               </p>
 
               <p class="field" hidden>

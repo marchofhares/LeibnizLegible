@@ -98,14 +98,23 @@ IMPORT = {
 }
 
 
+PAGE_LANG = {
+    "pages": 236210,
+    "german_pages": 30797,
+    "chosen": {"key": "hits≥2 score≥0.3 tokens≥8", "precision": 0.9523, "recall": 0.7453},
+}
+
+
 def _files(tmp_path: Path) -> dict[str, Path]:
     d = tmp_path / "k4"
     d.mkdir()
+    (d / "page-lang.json").write_text(json.dumps(PAGE_LANG), encoding="utf-8")
     (d / "k4-read.log").write_text(LOG, encoding="utf-8")
     (d / "guard.csv").write_text(GUARD, encoding="utf-8")
     (d / "k3-trocr.stats.json").write_text(json.dumps(STATS), encoding="utf-8")
     (d / "import.json").write_text(json.dumps(IMPORT), encoding="utf-8")
-    return {k: d / k for k in ("k4-read.log", "guard.csv", "k3-trocr.stats.json", "import.json")}
+    names = ("k4-read.log", "guard.csv", "k3-trocr.stats.json", "import.json", "page-lang.json")
+    return {k: d / k for k in names}
 
 
 def test_read_job_log(tmp_path: Path) -> None:
@@ -138,10 +147,16 @@ def test_gather_and_render(tmp_path: Path) -> None:
         log_path=f["k4-read.log"],
         guard_path=f["guard.csv"],
         import_summary_path=f["import.json"],
+        page_lang_path=f["page-lang.json"],
         store_before=17143570432,
         today="2026-10-31",
     )
     md = K.render(summ)
+    assert (
+        "threshold hits≥2 score≥0.3 tokens≥8; on the census's pieces precision 95.2 %, recall 74.5 %"
+        in md
+    )
+    assert "30,797 pages called German of 236,210" in md and "keeps v1's text" in md
     assert "| pages | 24,078 of 24,078 |" in md
     assert "| launches · relaunches | 2 · 1 |" in md
     assert "| peak host RSS (`/usr/bin/time -v`) | 2,291,072 KB |" in md
@@ -175,6 +190,8 @@ def test_cli_k4_report(tmp_path: Path) -> None:
             str(f["guard.csv"]),
             "--import-summary",
             str(f["import.json"]),
+            "--page-lang",
+            str(f["page-lang.json"]),
             "--out",
             str(out),
             "--today",

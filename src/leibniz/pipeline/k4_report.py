@@ -161,12 +161,26 @@ def gather(
     log_path: Path | str | None,
     guard_path: Path | str | None,
     import_summary_path: Path | str | None,
+    page_lang_path: Path | str | None = None,
     store_before: int | None = None,
     today: str = "",
 ) -> dict:
     """Everything the report prints, as one JSON-ready dict."""
     stats = _load(stats_path)
     imp = _load(import_summary_path)
+    pl = _load(page_lang_path)
+    chosen = pl.get("chosen") or {}
+    coverage = (
+        {
+            "threshold": chosen.get("key"),
+            "precision": chosen.get("precision"),
+            "recall": chosen.get("recall"),
+            "german_pages": pl.get("german_pages"),
+            "pages": pl.get("pages"),
+        }
+        if pl
+        else {}
+    )
     log = read_job_log(log_path) if log_path else JobLog()
     guard = read_guard_csv(guard_path) if guard_path else GuardSummary()
     return {
@@ -175,12 +189,17 @@ def gather(
         "log": log.as_dict(),
         "guard": guard.as_dict(),
         "import": imp,
+        "coverage": coverage,
         "store_before": store_before,
     }
 
 
 def _n(x) -> str:
     return "—" if x is None else f"{x:,}"
+
+
+def _pct(x) -> str:
+    return "—" if x is None else f"{float(x) * 100:.1f} %"
 
 
 def _hours(seconds) -> str:
@@ -244,6 +263,19 @@ def render(summ: Mapping) -> str:
         )
     else:
         a("(no stats file)")
+    cov = summ.get("coverage") or {}
+    if cov:
+        a("")
+        a(
+            f"**What the re-read covers.** The job's pages are the German pages the language "
+            f"pass over the machine text found (`leibniz enrich page-lang`, threshold "
+            f"{cov.get('threshold')}; on the census's pieces precision "
+            f"{_pct(cov.get('precision'))}, recall {_pct(cov.get('recall'))}, so about three "
+            f"quarters of the German pages by that measure; {_n(cov.get('german_pages'))} pages "
+            f"called German of {_n(cov.get('pages'))}, the printed Marginalien left out of the "
+            f"job). A German page the pass missed keeps v1's text (the operator, 28 October); "
+            f"a second pass is the next round's item (STATUS.md, Next)."
+        )
     a("")
     a("### Launches, memory, the guard")
     a("")

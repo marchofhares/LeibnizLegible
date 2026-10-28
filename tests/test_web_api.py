@@ -1425,3 +1425,45 @@ def test_page_lines_name_the_model_that_read_them(german_store_path, tmp_path) -
     }
     text = c.get(f"/api/pages/{page}/text").text
     assert "k3-trocr@runs-615-epoch-5" in text or "FoNDUE-GD_v2_ft_Leibniz@v1" in text
+
+
+def test_language_filter_is_open_and_the_stage_filter_hidden() -> None:
+    """K4 (the operator, 2026-10-28): the language filter shows with its five values and
+    a hint; the writing-stage filter stays hidden until C4 fills the strata."""
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    lang = re.search(r'<p class="field"( hidden)?>\s*<label class="field__label" for="lang"', html)
+    stage = re.search(
+        r'<p class="field"( hidden)?>\s*<label class="field__label" for="stratum"', html
+    )
+    assert lang is not None and lang.group(1) is None
+    assert stage is not None and stage.group(1) == " hidden"
+    for value in ("la", "fr", "de", "mixed", "unknown"):
+        assert f'<option value="{value}"' in html
+    assert 'data-i18n="search.lang.help"' in html and 'aria-describedby="lang-help"' in html
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for key in ("search.lang", "search.lang.help"):
+        assert strings.count(f"'{key}':") == 2, key
+    assert "Language (detected)" in strings and "Sprache (erkannt)" in strings
+    for lang_code in ("en", "de"):
+        help_text = _string(strings, lang_code, "search.lang.help")
+        assert "95" in help_text and "75" in help_text
+
+
+def test_search_filters_by_the_detected_language(store_path, tmp_path) -> None:
+    """The index's `lang` comes from the page_lang table (K4); `lang=de` keeps the
+    page the pass called German and drops the others."""
+    conn = db.init_db(store_path)
+    page = f"{W1}:0001"
+    db.upsert_page_lang(conn, db.PageLangRow(page_id=page, lang="de", score=0.8, n_tokens=40))
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path)
+    everything = c.get("/api/search", params={"q": "calculemus"}).json()
+    hit_pages = {h["page_id"] for h in everything["hits"]}
+    assert page in hit_pages
+    german = c.get("/api/search", params={"q": "calculemus", "lang": "de"}).json()
+    assert {h["page_id"] for h in german["hits"]} == {page}
+    assert german["hits"][0]["lang"] == "de"
+    latin = c.get("/api/search", params={"q": "calculemus", "lang": "la"}).json()
+    assert page not in {h["page_id"] for h in latin["hits"]}
+    assert c.get("/api/stats").json()["pages_by_lang"] == {"de": 1}

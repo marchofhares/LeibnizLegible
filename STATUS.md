@@ -1391,6 +1391,22 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   and `.json` from the job's stats file, its log (launches, relaunches,
   exits, `/usr/bin/time`'s peak RSS per launch), the guard's CSV and the
   import's summary JSON, numbers only, no store read.
+- **The operator's decision on the language filter (28 October),
+  verbatim:** "The language filter: open it, with the five values and the
+  label "language (detected)"; the help text says the labels come from a
+  language pass over the machine text, German detected with 95 % precision
+  and about 75 % recall. About's sentence and the K4 report say the re-read
+  covers the German pages the language pass found, about three quarters of
+  them by the census's measure, and that the rest keep the older text;
+  record the threshold and a second pass as the next round's item in Next.
+  Build Task 5's second part now, the browser checks after the job as you
+  planned." Done in the second part of Task 5: the search form's language
+  field is shown (`index.html`; the writing-stage field stays hidden), its
+  label `Language (detected)` / `Sprache (erkannt)`, a hint under it
+  (`search.lang.help`, EN and DE); About's "How wrong is it?" paragraph and
+  the K4 report's coverage line say what the re-read covers and that the
+  rest keeps the older text; `llms.txt` says the same for the `lang`
+  parameter; the Next item is at the head of "Next".
 - **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
   (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
   recognised page's text under the current rule classified with
@@ -6586,6 +6602,20 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   gitignored like the rest of `data/`.
 
 ## Next
+
+**K4 (2026-10-28): the next round's item — a second language pass.** K4
+read the German pages the language pass found at the threshold hits≥2
+score≥0.3 tokens≥8 (`leibniz enrich page-lang`; on the census's pieces
+precision 95.2 %, recall 74.5 %, so about three quarters of the German pages
+by that measure: 30,797 pages called German, 24,078 of them in the job, the
+Marginalien left out); a German page the pass missed keeps v1's text and
+shows as such. Next round: a second pass with a stronger signal — the
+identifier over READER's own text on the pages the first pass left
+`unknown` or `mixed` with German second, the census's German pieces'
+neighbouring pages, or a lower threshold measured again on the census —
+then the reading job over the newly found pages only (resumable; a second
+scoped run beside the first, the precedence rule showing the newest), the
+page_lang table updated under its own runs row, and the index rebuilt.
 
 **A3b (2026-10-21, the follow-up 2026-10-22): built in a cloud session on
 fixtures cut from the export; the branch `claude/adoring-volta-eogav8`

@@ -397,6 +397,9 @@ def k4_report_cmd(
     import_summary: Path = typer.Option(
         None, "--import-summary", help="The import's --summary JSON."
     ),
+    page_lang: Path = typer.Option(
+        None, "--page-lang", help="The page-language pass's JSON (reports/kurrent/page-lang.json)."
+    ),
     store_before: int = typer.Option(
         None, "--store-before", help="The store's size in bytes before the write."
     ),
@@ -413,6 +416,7 @@ def k4_report_cmd(
         log_path=log,
         guard_path=guard,
         import_summary_path=import_summary,
+        page_lang_path=page_lang,
         store_before=store_before,
         today=today or date.today().isoformat(),
     )

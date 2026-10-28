@@ -83,8 +83,10 @@ const STRINGS = {
     'search.filters': 'Filters',
     'search.set': 'Collection',
     'search.set.any': 'All collections',
-    'search.lang': 'Language of the text',
+    'search.lang': 'Language (detected)',
     'search.lang.any': 'Any language',
+    'search.lang.help':
+      'The labels come from a language pass over the machine text; German is detected with 95 % precision and about 75 % recall.',
     'search.stratum': 'Writing stage',
     'search.stratum.any': 'Any stage',
     'search.minconf': 'Minimum mean confidence',
@@ -430,7 +432,7 @@ const STRINGS = {
     'about.error.p1':
       'On the PHILIUMM validation split — 1,878 lines of Leibniz’s Latin and French — the model we run measures a character error rate of 7.95% (95% confidence interval 7.49–8.46) and a word error rate of 27.0%. That is roughly one wrong character in every thirteen, and roughly one word in four touched by some error.',
     'about.error.p2':
-      'German in Kurrent script is read by a second model, this project’s own: a TrOCR model fine-tuned from the Bern Kurrent model on edition text of Leibniz’s German pieces (phase K3). It reads the pages a stopword identifier calls German (on the catalogued pieces it is right 95 times in 100 and finds three German pages in four), the printed Marginalien excepted. Its error rate is measured on a frozen pool of 134 German letters of 1708–1716 — 386 pages, 18,815 recognised lines read as they lie on the leaves, the reference being the GWLB Leibniz-Archiv’s checked transcription of each letter: a character error rate of 28.6% (95% confidence interval 24.6–32.5) against 46.6% for the Latin-and-French model on the same lines; in Leibniz’s own hand 36.7% against 53.7%, in his correspondents’ hands 19.4% against 38.5%. So roughly one character in four is still wrong on a German page. Mathematical notation, diagrams and heavily revised drafts are likewise weak. Read every line here as a hypothesis about the manuscript, not as a reading of it.',
+      'German in Kurrent script is read by a second model, this project’s own: a TrOCR model fine-tuned from the Bern Kurrent model on edition text of Leibniz’s German pieces (phase K3). The re-read covers the German pages a language pass over the machine text found — about three quarters of the German pages by the census’s measure, found with 95% precision — the printed Marginalien excepted; the rest keep the older model’s text, so a German page may still show the first model’s reading. Its error rate is measured on a frozen pool of 134 German letters of 1708–1716 — 386 pages, 18,815 recognised lines read as they lie on the leaves, the reference being the GWLB Leibniz-Archiv’s checked transcription of each letter: a character error rate of 28.6% (95% confidence interval 24.6–32.5) against 46.6% for the Latin-and-French model on the same lines; in Leibniz’s own hand 36.7% against 53.7%, in his correspondents’ hands 19.4% against 38.5%. So roughly one character in four is still wrong on a German page. Mathematical notation, diagrams and heavily revised drafts are likewise weak. Read every line here as a hypothesis about the manuscript, not as a reading of it.',
     'about.error.p3':
       'The model is PHILIUMM’s FoNDUE-GD_v2_ft_Leibniz (Kraken), doi:10.5281/zenodo.21457538, CC BY 4.0. Our reproduction of its published figures is in the project repository.',
 
@@ -594,8 +596,10 @@ const STRINGS = {
     'search.filters': 'Filter',
     'search.set': 'Bestand',
     'search.set.any': 'Alle Bestände',
-    'search.lang': 'Sprache des Textes',
+    'search.lang': 'Sprache (erkannt)',
     'search.lang.any': 'Alle Sprachen',
+    'search.lang.help':
+      'Die Angaben stammen aus einem Sprachdurchgang über den Maschinentext; Deutsch wird mit 95 % Präzision und etwa 75 % Vollständigkeit erkannt.',
     'search.stratum': 'Schreibstufe',
     'search.stratum.any': 'Alle Stufen',
     'search.minconf': 'Mindestwert der mittleren Konfidenz',
@@ -934,7 +938,7 @@ const STRINGS = {
     'about.error.p1':
       'Auf dem Validierungsteil von PHILIUMM — 1.878 Zeilen aus Leibniz’ lateinischer und französischer Hand — erreicht das von uns eingesetzte Modell eine Zeichenfehlerrate von 7,95 % (95-%-Konfidenzintervall 7,49–8,46) und eine Wortfehlerrate von 27,0 %. Das ist etwa ein falsches Zeichen je dreizehn und etwa jedes vierte Wort von einem Fehler berührt.',
     'about.error.p2':
-      'Deutsch in Kurrentschrift liest ein zweites, projekteigenes Modell: ein TrOCR-Modell, feinabgestimmt aus dem Berner Kurrent-Modell auf Ausgabentext deutscher Stücke von Leibniz (Phase K3). Es liest die Seiten, die ein Stoppwort-Erkenner als deutsch einstuft (auf den katalogisierten Stücken trifft er 95-mal von 100 und findet drei von vier deutschen Seiten), die gedruckten Marginalien ausgenommen. Seine Fehlerrate ist auf einem eingefrorenen Bestand von 134 deutschen Briefen der Jahre 1708–1716 gemessen — 386 Seiten, 18.815 erkannte Zeilen, gelesen, wie sie auf den Blättern stehen; Referenz ist die geprüfte Transkription jedes Briefes durch das Leibniz-Archiv der GWLB: eine Zeichenfehlerrate von 28,6 % (95-%-Konfidenzintervall 24,6–32,5) gegenüber 46,6 % des Latein-und-Französisch-Modells auf denselben Zeilen; in Leibniz’ eigener Hand 36,7 % gegenüber 53,7 %, in den Händen seiner Korrespondenten 19,4 % gegenüber 38,5 %. Etwa jedes vierte Zeichen auf einer deutschen Seite ist also weiterhin falsch. Mathematische Notation, Zeichnungen und stark überarbeitete Entwürfe sind ebenso schwach. Lesen Sie jede Zeile hier als eine Vermutung über die Handschrift, nicht als deren Lesung.',
+      'Deutsch in Kurrentschrift liest ein zweites, projekteigenes Modell: ein TrOCR-Modell, feinabgestimmt aus dem Berner Kurrent-Modell auf Ausgabentext deutscher Stücke von Leibniz (Phase K3). Die neue Lesung umfasst die deutschen Seiten, die ein Sprachdurchgang über den Maschinentext gefunden hat — nach dem Maß des Zensus etwa drei Viertel der deutschen Seiten, gefunden mit 95 % Präzision —, die gedruckten Marginalien ausgenommen; die übrigen behalten den Text des älteren Modells, eine deutsche Seite kann also noch die Lesung des ersten Modells zeigen. Seine Fehlerrate ist auf einem eingefrorenen Bestand von 134 deutschen Briefen der Jahre 1708–1716 gemessen — 386 Seiten, 18.815 erkannte Zeilen, gelesen, wie sie auf den Blättern stehen; Referenz ist die geprüfte Transkription jedes Briefes durch das Leibniz-Archiv der GWLB: eine Zeichenfehlerrate von 28,6 % (95-%-Konfidenzintervall 24,6–32,5) gegenüber 46,6 % des Latein-und-Französisch-Modells auf denselben Zeilen; in Leibniz’ eigener Hand 36,7 % gegenüber 53,7 %, in den Händen seiner Korrespondenten 19,4 % gegenüber 38,5 %. Etwa jedes vierte Zeichen auf einer deutschen Seite ist also weiterhin falsch. Mathematische Notation, Zeichnungen und stark überarbeitete Entwürfe sind ebenso schwach. Lesen Sie jede Zeile hier als eine Vermutung über die Handschrift, nicht als deren Lesung.',
     'about.error.p3':
       'Das Modell ist FoNDUE-GD_v2_ft_Leibniz aus dem Projekt PHILIUMM (Kraken), doi:10.5281/zenodo.21457538, CC BY 4.0. Unsere Reproduktion der veröffentlichten Werte liegt im Projekt-Repositorium.',
 
