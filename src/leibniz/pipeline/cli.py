@@ -9,6 +9,8 @@ Subcommands:
 * ``leibniz pipeline import-readings`` — a Kurrent reader's readings (K2's JSONL)
   into ``lines`` as one scoped recognition run beside v1 (K4 Task 4); a dry run
   unless ``--write``.
+* ``leibniz pipeline k4-report`` — the K4 reading report from the job's files and the
+  import's summary (no store read).
 * ``leibniz pipeline status``    — print the corpus status histogram + per-set.
 * ``leibniz pipeline report``    — (re)write ``reports/htr-v1-sample.md`` from the
   store.
@@ -385,3 +387,34 @@ def import_readings_cmd(
             encoding="utf-8",
         )
         console.print(f"  wrote {summary_out}")
+
+
+@app.command("k4-report")
+def k4_report_cmd(
+    stats: Path = typer.Option(None, "--stats", help="The job's <reader>.stats.json."),
+    log: Path = typer.Option(None, "--log", help="The job's log (run-read.sh, /usr/bin/time -v)."),
+    guard: Path = typer.Option(None, "--guard", help="The guard's CSV."),
+    import_summary: Path = typer.Option(
+        None, "--import-summary", help="The import's --summary JSON."
+    ),
+    store_before: int = typer.Option(
+        None, "--store-before", help="The store's size in bytes before the write."
+    ),
+    out: Path = typer.Option(None, "--out", help="The report's markdown path."),
+    today: str = typer.Option(None, "--today", help="The date printed (default: today)."),
+) -> None:
+    """The K4 reading report (reports/kurrent/k4-reading.md and .json), numbers only."""
+    from datetime import date
+
+    from leibniz.pipeline import k4_report as K
+
+    summ = K.gather(
+        stats_path=stats,
+        log_path=log,
+        guard_path=guard,
+        import_summary_path=import_summary,
+        store_before=store_before,
+        today=today or date.today().isoformat(),
+    )
+    paths = K.write_report(summ, out=out or K.DEFAULT_OUT)
+    console.print(f"[bold]k4-report[/bold] → {paths['md']} and {paths['json']}")

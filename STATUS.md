@@ -9,9 +9,13 @@ _Last updated: 2026-10-26 (**K4 — German on the site, begun on the desktop on 
 
 ## Current state
 
-**2026-10-26: K4 — German on the site, begun on the desktop; the branch
-`k4-german-site` from main at #55; Task 0 done, the operator's go waited
-for; nothing written to the store, nothing deployed.** The operator's
+**2026-10-28: K4 — German on the site; the branch `k4-german-site` from
+main at #55; Tasks 0–3 done; the reading job running since 2026-10-28
+09:50 (k3-trocr over 1,539,721 lines on 24,078 German pages, under the 6 GB
+scope with the guard and a retry loop; its first progress line 105 ms a
+line, ETA 44 h 41 m, so about 2026-10-30 07:00); Task 4's write waits for
+the job and the operator's go; nothing written to the store, nothing
+deployed.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
 `k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
 letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
@@ -1071,7 +1075,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ⏳ the operator's go for the reading job
+### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ⏳ the reading job (running since 2026-10-28 09:50)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1322,6 +1326,71 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the session would rather write no row for a crop under 80 px, so those
   lines keep v1's row — a rule the importer can apply, recorded with its
   count).
+- **The operator's decisions (28 October), verbatim.** Before them, the
+  operator's own note: "The apartment lost power for a second today and the
+  PC restarted; nothing of yours was running, the pilot had finished and you
+  were waiting for me since Monday. Before resuming I added
+  autoMemoryReclaim=gradual under [experimental] in .wslconfig and ran wsl
+  --shutdown, because Windows hung at the lock screen yesterday with the VM
+  holding memory. A read-only quick_check of the store is running
+  (~/quickcheck.log); launch nothing before it prints ok. Your background
+  histogram task died with the session; do not restart it." (The histogram
+  was a read-only probe of row lengths; its figures are not needed again.
+  `.wslconfig` now: `memory=10GB`, `swap=8GB`, `autoMemoryReclaim=gradual`.)
+  Then: "1. Go for the reading job without the Marginalien (M1's domain), at
+  the pilot's settings. Before launching, give run-read.sh a retry loop: if
+  the job ends with a non-zero exit, relaunch it from the readings file
+  after 60 seconds, up to five times, logging each relaunch, so a guard kill
+  does not wait for a human. Then launch under the memory scope with the
+  guard and report the first progress line and the expected finish time.
+  2. Task 4 writes every non-empty reading, crops under 80 px included, as
+  the amendment says: the letter-pool number was measured on all crops, and
+  one run per page keeps K3b's later replacement simple. Count the narrow
+  crops in the K4 report and record them as an open question for K3b's
+  segmentation measurement. 3. The language filter: decide at Task 5. Print
+  checkpoint A's table again then (pages by language, precision, recall,
+  the threshold), since I did not see it on Monday. 4. pytest beside the
+  job: yes, in .venv-w3 or with CUDA_VISIBLE_DEVICES set to empty, with -p
+  no:cacheprovider, under a gigabyte, never two at once, never anything
+  that touches the GPU." So: the page list stays the 24,078 pages without
+  the Marginalien; `run-read.sh` (on D:, the first version kept as
+  `run-read.sh.v1`) now loops: the job under the scope with the guard
+  beside it, `READ-EXIT <code> launch <n>` logged at each end, and after a
+  non-zero exit `# relaunch <n> of 5 in 60 s` then the same command (the
+  job reads what its JSONL does not hold, one page lost at most), at most
+  five relaunches, then `READ-DONE`. Task 4's importer writes every
+  non-empty reading as built; the narrow-crop count (252,286 of the job's
+  lines under 80 px) goes into the K4 report and Open question 32 for K3b.
+- **The job launched (28 October).** The operator's read-only
+  `PRAGMA quick_check` printed `ok` after 894 s; nothing else ran. 09:50:13
+  `setsid nohup bash /mnt/d/leibniz-train/k4/logs/run-read.sh` from a
+  plain shell (the harness's own background tasks die with a session, as
+  the histogram did): launch 1 under `systemd-run --user --scope -p
+  MemoryMax=6G` (unit `run-p1387-i1672.scope`), `/usr/bin/time -v`, the
+  guard beside it at 5,900 MiB on the card and a 2,500 MiB host floor,
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, batch 16, the
+  decoder's cache, `--log-every 600`. The engine was up by 09:51; **the
+  first progress line, 10:00:35: 5,771 of 1,539,721 lines done, 34,327
+  lines/h, 105 ms a line, ETA 44 h 41 m, pages 107 of 24,078** — faster
+  than the pilot's 125 ms (the pilot's figure carried the load and the
+  narrow-crop count; GPU utilisation now a mean 80 % over the guard's first
+  130 samples against the pilot's 4 %). **Expected finish: about 2026-10-30
+  07:00 at the job's own pace, 15:30 at the pilot's.** Memory at the first
+  line: the python process 1,859,336 KB resident, the host never under 7,555
+  MiB available, the card's peak 5,734 MiB (166 MiB under the guard; the
+  pilot's 5,697). Readings in `data/kurrent/k4-readings/k3-trocr.jsonl`
+  (945 KB after eight minutes), the stats beside them. Beside the job this
+  session runs ruff and one pytest at a time (`python -m pytest -p
+  no:cacheprovider`, `CUDA_VISIBLE_DEVICES=` empty; the five touched test
+  files took 157 MB and 5 s) and writes Task 4's and Task 5's code; the
+  browser checks of Task 5 (headless Chromium) wait for the job's end
+  rather than share the card. Built while the job runs: the importer counts
+  the crops under 80 px per collection as it goes (`narrow_lines`,
+  `narrow_rows`; no second pass over the geometry), `leibniz pipeline
+  k4-report` (`pipeline/k4_report.py`) writes `reports/kurrent/k4-reading.md`
+  and `.json` from the job's stats file, its log (launches, relaunches,
+  exits, `/usr/bin/time`'s peak RSS per launch), the guard's CSV and the
+  import's summary JSON, numbers only, no store read.
 - **Plan, as printed for the go.** *Task 1:* `leibniz enrich page-lang`
   (a new `enrich` group, `enrich/cli.py`, `enrich/pagelang.py`): every
   recognised page's text under the current rule classified with
@@ -5568,6 +5637,18 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Open questions
 
+32. **The narrow crops among the German lines (2026-10-28, K4; for K3b's
+    segmentation measurement).** Of the 1,539,721 lines the K4 reading job
+    reads, 252,286 (16.4 %) are crops under 80 px wide, segmentation
+    fragments either way: on the letter pool's 3,172 such crops READER
+    returned a single character on 2,422 (v1: 1,284 empty, 1,325 one
+    character). The operator's decision of 28 October: Task 4 writes every
+    non-empty reading, these included, because the letter-pool number was
+    measured on all crops and one run per page keeps K3b's replacement
+    simple. Open for K3b: whether its segmentation measurement counts these
+    fragments as segmentation errors (merged or split lines) and whether a
+    re-segmentation removes them; the count by collection is in the K4
+    report (`reports/kurrent/k4-reading.md`, Task 4).
 31. **German pages that mix scripts, and print (2026-10-26, K4).** (a) K4
     reads every German page whole with the Kurrent reader, the Latin and
     French passages on it included; on the letter pool's two mixed letters

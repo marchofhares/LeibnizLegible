@@ -17,6 +17,12 @@ Idempotent and resumable by page: the run is found by its model and scope
 while unfinished and reused; a page whose rows the run already holds is
 skipped; a second import of the same file under the same model adds nothing.
 The dry run (the default) counts everything and writes nothing.
+
+The narrow crops are counted as the pages go by (the operator's decision of
+28 October: every non-empty reading is written, a crop under
+:data:`NARROW_PX` pixels included, and their number goes into the K4 report
+and an open question for K3b's segmentation measurement), so the report
+needs no second pass over the geometry.
 """
 
 from __future__ import annotations
@@ -30,8 +36,10 @@ from pathlib import Path
 
 from leibniz import db
 from leibniz.align.kurrent_pilot import PilotLine, page_lines
+from leibniz.align.kurrent_read import crop_width
 
 COMMIT_EVERY = 200  # pages per transaction
+NARROW_PX = 80  # a crop narrower than this is a segmentation fragment either way
 
 
 @dataclass(slots=True)
@@ -74,6 +82,8 @@ class ImportStats:
     empty_readings: int = 0  # a line read as empty: no row
     lines_without_reading: int = 0  # a line the file has no row for
     orphan_readings: int = 0  # a reading whose line has no unscoped row
+    narrow_lines: int = 0  # lines whose crop is under NARROW_PX wide
+    narrow_rows: int = 0  # of the rows written, those on such crops
     model: str = ""
     scope: str = ""
     run_id: int | None = None
@@ -91,6 +101,9 @@ class ImportStats:
             "empty_readings": self.empty_readings,
             "lines_without_reading": self.lines_without_reading,
             "orphan_readings": self.orphan_readings,
+            "narrow_px": NARROW_PX,
+            "narrow_lines": self.narrow_lines,
+            "narrow_rows": self.narrow_rows,
             "model": self.model,
             "scope": self.scope,
             "run_id": self.run_id,
@@ -228,6 +241,15 @@ def import_readings(
         stats.lines_without_reading += missing
         seqs = {ln.line_seq for ln in lines}
         stats.orphan_readings += sum(1 for seq in page_readings if seq not in seqs)
+        written = {row.line_seq for row in rows}
+        for ln in lines:
+            w = crop_width(ln.polygon, ln.baseline)
+            if w is not None and w < NARROW_PX:
+                stats.narrow_lines += 1
+                tally["narrow_lines"] += 1
+                if ln.line_seq in written:
+                    stats.narrow_rows += 1
+                    tally["narrow_rows"] += 1
         if write and rows:
             for row in rows:
                 db.insert_line(conn, row)
@@ -282,19 +304,22 @@ def summary_lines(stats: ImportStats) -> list[str]:
         f"{what} {stats.rows_written:,} rows on {stats.pages_written:,} pages; empty readings "
         f"{stats.empty_readings:,}, lines without a reading {stats.lines_without_reading:,}, "
         f"orphan readings {stats.orphan_readings:,}",
+        f"crops under {NARROW_PX} px: {stats.narrow_lines:,} lines, {stats.narrow_rows:,} of "
+        f"them with a row",
     ]
     if stats.run_id is not None:
         L.append(f"run {stats.run_id} (stage recognize, model {stats.model}, scope {stats.scope})")
     for name, t in sorted(stats.by_set.items()):
         L.append(
             f"  {name or '(no set)'}: pages {t.get('pages', 0):,}, lines {t.get('lines', 0):,}, "
-            f"rows {t.get('rows', 0):,}"
+            f"rows {t.get('rows', 0):,}, narrow {t.get('narrow_lines', 0):,}"
         )
     return L
 
 
 __all__ = [
     "COMMIT_EVERY",
+    "NARROW_PX",
     "ImportStats",
     "ReadingRow",
     "find_open_run",

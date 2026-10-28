@@ -161,6 +161,44 @@ def test_resume_skips_pages_the_open_run_holds(german_store_path: Path, tmp_path
     assert I.find_open_run(conn, model="k3@v", scope="de") is None
 
 
+def test_narrow_crops_are_counted_and_written(german_store_path: Path, tmp_path: Path) -> None:
+    """A crop under 80 px gets its row like any other (the operator, 28 October)
+    and is counted for the K4 report."""
+    conn = db.init_db(german_store_path)
+    v1 = conn.execute(
+        "SELECT run_id, model FROM lines WHERE page_id = ? AND line_seq = 0", (P1,)
+    ).fetchone()
+    conn.execute(
+        "INSERT INTO lines (line_id, page_id, line_seq, baseline, polygon, text, conf, model, "
+        "run_id, status, lang) VALUES (?, ?, 5, ?, ?, 'e', 0.3, ?, ?, 'machine', 'de')",
+        (
+            db.line_id(P1, 5),
+            P1,
+            "[[100, 800], [150, 800]]",
+            "[[100, 760], [150, 760], [150, 820], [100, 820]]",  # 50 px wide
+            v1["model"],
+            v1["run_id"],
+        ),
+    )
+    conn.commit()
+    readings = _readings(
+        tmp_path / "k3.jsonl", [(f"{P1}:000", "Jch habe", 0.9), (f"{P1}:005", "n", 0.2)]
+    )
+    stats = I.import_readings(
+        conn, readings_path=readings, page_ids=[P1], model="k3@v", reader="k3-trocr", write=True
+    )
+    assert stats.lines == 6 and stats.rows_written == 2
+    assert stats.narrow_lines == 1 and stats.narrow_rows == 1
+    assert stats.by_set["LeibnizHandschriften"]["narrow_lines"] == 1
+    assert stats.as_dict()["narrow_px"] == I.NARROW_PX == 80
+    assert "crops under 80 px: 1 lines, 1 of them with a row" in " ".join(I.summary_lines(stats))
+    row = conn.execute(
+        "SELECT text FROM lines WHERE page_id = ? AND line_seq = 5 AND run_id = ?",
+        (P1, stats.run_id),
+    ).fetchone()
+    assert row["text"] == "n"
+
+
 def test_cli_import_readings(german_store_path: Path, tmp_path: Path) -> None:
     readings = _readings(tmp_path / "k3.jsonl", [(f"{P1}:000", "Jch habe", 0.9)])
     pages = tmp_path / "pages.txt"
