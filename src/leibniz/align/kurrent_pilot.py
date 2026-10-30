@@ -289,11 +289,21 @@ class PilotLine:
 def page_lines(
     conn: sqlite3.Connection, page_id: str, *, sample: int | None = None
 ) -> list[PilotLine]:
-    """The page's recognised lines in reading order (the first ``sample`` with --sample)."""
-    out: list[PilotLine] = []
+    """The page's recognised lines in reading order (the first ``sample`` with
+    --sample): the current row of each line among the *unscoped* runs (v1
+    today, C4's v2 later) — the geometry and the reading a Kurrent reader is
+    compared with, never a Kurrent run's own rows (K4) or a correction's."""
+    prec = db.run_precedences(conn)
+    best: dict[int, db.Line] = {}
     for ln in db.iter_lines_for_page(conn, page_id):
-        if ln.text is None:
+        if ln.text is None or prec.get(ln.run_id or 0, 0) != 0:
             continue
+        cur = best.get(ln.line_seq)
+        if cur is None or (ln.run_id or 0) >= (cur.run_id or 0):
+            best[ln.line_seq] = ln
+    out: list[PilotLine] = []
+    for seq in sorted(best):
+        ln = best[seq]
         out.append(
             PilotLine(
                 line_id=ln.id,

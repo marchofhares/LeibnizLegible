@@ -1471,6 +1471,11 @@ select {
   max-width: 44rem;
 }
 
+/* A link whose text is a URL (the issues link) breaks instead of widening a phone. */
+.about a {
+  overflow-wrap: anywhere;
+}
+
 .about__lang {
   font-family: var(--sans);
   font-size: 0.85rem;

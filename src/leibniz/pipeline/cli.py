@@ -6,6 +6,11 @@ Subcommands:
   storing line geometry + per-page segmentation stats.
 * ``leibniz pipeline recognize`` — recognise segmented pages (segmented →
   recognized), filling line text + confidence.
+* ``leibniz pipeline import-readings`` — a Kurrent reader's readings (K2's JSONL)
+  into ``lines`` as one scoped recognition run beside v1 (K4 Task 4); a dry run
+  unless ``--write``.
+* ``leibniz pipeline k4-report`` — the K4 reading report from the job's files and the
+  import's summary (no store read).
 * ``leibniz pipeline status``    — print the corpus status histogram + per-set.
 * ``leibniz pipeline report``    — (re)write ``reports/htr-v1-sample.md`` from the
   store.
@@ -320,3 +325,100 @@ def report(
 
 
 __all__ = ["app"]
+
+
+@app.command("import-readings")
+def import_readings_cmd(
+    db_path: Path = typer.Option(
+        db.DEFAULT_DB_PATH, "--db", help="The store (written with --write)."
+    ),
+    readings: Path = typer.Option(..., "--readings", help="The reader's JSONL (kurrent-read)."),
+    pages: Path = typer.Option(..., "--pages", help="The page list, one id a line."),
+    model: str = typer.Option(..., "--model", help="The run's model, name@version."),
+    reader: str = typer.Option(..., "--reader", help="The reader key (CANDIDATES)."),
+    scope: str = typer.Option("de", "--scope", help="The run's language scope."),
+    write: bool = typer.Option(False, "--write", help="Write the rows; a dry run otherwise."),
+    note: str = typer.Option(None, "--note", help="A sentence for the run's params."),
+    summary_out: Path = typer.Option(
+        None, "--summary", help="Write the counts as JSON here (the STATUS entry's numbers)."
+    ),
+) -> None:
+    """A reader's readings into the store as one scoped run beside v1 (K4 Task 4)."""
+    import json
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.align.kurrent_read import read_page_list
+    from leibniz.pipeline import import_readings as I
+
+    ids = read_page_list(pages)
+    # the dry run opens the store read-only; --write opens it read-write, which also
+    # brings the schema forward (runs.scope, page_lang) on a store from before K4
+    conn = db.init_db(db_path) if write else open_readonly(db_path)
+    try:
+        stats = I.import_readings(
+            conn,
+            readings_path=readings,
+            page_ids=ids,
+            model=model,
+            scope=scope,
+            reader=reader,
+            write=write,
+            git_sha=db.git_sha(),
+            note=note,
+            progress=lambda st: console.print(
+                f"  {st.pages_written + st.pages_done_before + st.pages_without_readings:,} "
+                f"pages, {st.rows_written:,} rows"
+            ),
+        )
+        after = I.rows_under_run(conn, stats.run_id) if stats.run_id is not None else None
+    finally:
+        conn.close()
+    console.print(f"[bold]import-readings[/bold] {'WRITE' if write else 'dry run'}: {readings}")
+    for line in I.summary_lines(stats):
+        console.print("  " + line)
+    size = I.store_size(db_path)
+    if after is not None:
+        console.print(f"  under run {stats.run_id} now: {after[0]:,} pages, {after[1]:,} rows")
+    console.print(f"  store {size['db']:,} bytes, WAL {size['wal']:,} bytes")
+    if summary_out is not None:
+        summary_out.parent.mkdir(parents=True, exist_ok=True)
+        summary_out.write_text(
+            json.dumps({**stats.as_dict(), "under_run": after, "store": size}, indent=1) + "\n",
+            encoding="utf-8",
+        )
+        console.print(f"  wrote {summary_out}")
+
+
+@app.command("k4-report")
+def k4_report_cmd(
+    stats: Path = typer.Option(None, "--stats", help="The job's <reader>.stats.json."),
+    log: Path = typer.Option(None, "--log", help="The job's log (run-read.sh, /usr/bin/time -v)."),
+    guard: Path = typer.Option(None, "--guard", help="The guard's CSV."),
+    import_summary: Path = typer.Option(
+        None, "--import-summary", help="The import's --summary JSON."
+    ),
+    page_lang: Path = typer.Option(
+        None, "--page-lang", help="The page-language pass's JSON (reports/kurrent/page-lang.json)."
+    ),
+    store_before: int = typer.Option(
+        None, "--store-before", help="The store's size in bytes before the write."
+    ),
+    out: Path = typer.Option(None, "--out", help="The report's markdown path."),
+    today: str = typer.Option(None, "--today", help="The date printed (default: today)."),
+) -> None:
+    """The K4 reading report (reports/kurrent/k4-reading.md and .json), numbers only."""
+    from datetime import date
+
+    from leibniz.pipeline import k4_report as K
+
+    summ = K.gather(
+        stats_path=stats,
+        log_path=log,
+        guard_path=guard,
+        import_summary_path=import_summary,
+        page_lang_path=page_lang,
+        store_before=store_before,
+        today=today or date.today().isoformat(),
+    )
+    paths = K.write_report(summ, out=out or K.DEFAULT_OUT)
+    console.print(f"[bold]k4-report[/bold] → {paths['md']} and {paths['json']}")

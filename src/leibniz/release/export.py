@@ -220,17 +220,21 @@ def _is_nc(source: dict | None) -> bool:
 
 
 def iter_transcriptions(conn: sqlite3.Connection) -> Iterator[dict]:
-    """Recognised lines, one per ``(page, line_seq)`` (latest run), NC rows excluded."""
+    """Recognised lines, one per ``(page, line_seq)`` — the current row under the
+    store's rule (:func:`leibniz.db.current_lines`: corrections, then a scoped
+    run, then the newest), NC rows excluded."""
     cur = conn.execute(
-        """
+        f"""
+        WITH {db.run_rank_cte(conn)}
         SELECT l.*, p.work_id, w.set_name, p.image_url, p.image_service_url, p.canvas_id,
                p.width AS p_width, p.height AS p_height, r.started_at, r.finished_at
           FROM lines l
           JOIN pages p ON p.page_id = l.page_id
           JOIN works w ON w.gwlb_object_id = p.work_id
           LEFT JOIN runs r ON r.run_id = l.run_id
+          LEFT JOIN rk lr ON lr.run_id = l.run_id
          WHERE l.text IS NOT NULL AND l.text != ''
-         ORDER BY l.page_id, l.line_seq, l.run_id
+         ORDER BY l.page_id, l.line_seq, COALESCE(lr.prec, 0), COALESCE(l.run_id, 0)
         """
     )
     pending: dict | None = None
@@ -265,7 +269,7 @@ def iter_transcriptions(conn: sqlite3.Connection) -> Iterator[dict]:
         k = (line.page_id, line.line_seq)
         if key is not None and k != key and pending is not None:
             yield pending
-        key, pending = k, row  # rows are ordered by run_id, so the last one wins
+        key, pending = k, row  # rows are ordered by rank, so the last one wins
     if pending is not None:
         yield pending
 

@@ -1322,6 +1322,16 @@ def test_about_licence_strings_follow_the_registry() -> None:
     for lang in ("en", "de"):
         tr = _string(source, lang, "about.license.transcriptions.p")
         assert tr.startswith(f"Leibniz Legible, {legal.output('transcriptions').licence}.")
+        assert "{deReadings}" in tr  # the German readings' licence, stamped from the registry
+        models = _string(source, lang, "about.license.models.p")
+        for var in ("v1ModelObtained", "v1Model", "v1Readings", "readerDe", "deBase"):
+            assert "{" + var + "}" in models, (lang, var)
+        assert "{deModel}" in models and "{deReadings}" in models
+        wrong = _string(source, lang, "about.error.p2")
+        for number in ("134", "18", "815", "28", "6", "46", "6", "36", "7", "53", "7"):
+            assert number in wrong, (lang, number)
+        banner = _string(source, lang, "honesty.banner")
+        assert "29" in banner and "8" in banner
         assert model.obtained.licence in tr and model.licence_now.licence in tr
         assert model.source.removeprefix("doi:") in tr
         gt = _string(source, lang, "about.license.gt.p")
@@ -1332,8 +1342,9 @@ def test_about_licence_strings_follow_the_registry() -> None:
         )
         models = _string(source, lang, "about.license.models.p")
         assert legal.output("model-v2").licence in models
-        assert legal.output("model-k3-trocr").licence.split(" (")[0] in models
-        assert "MIT" in models and "legal.py" in models
+        # READER's and v1's licences are not written here: the paragraph reads them
+        # from the registry's stamps on the shell ({deModel}, {deBase}, {v1Model} …)
+        assert "legal.py" in models and "{deModel}" in models and "{deBase}" in models
         letters = _string(source, lang, "about.license.letters.p")
         assert legal.artifact("bodemann-correspsearch").obtained.licence in letters
         assert "correspSearch" in letters and "Bodemann" in letters
@@ -1351,3 +1362,108 @@ def test_about_licence_strings_follow_the_registry() -> None:
     assert "obtained under CC BY 4.0" in attr.TRANSCRIPTIONS
     assert "CC BY-NC 4.0 since 2026-10-15" in attr.TRANSCRIPTIONS
     assert attr.TRANSCRIPTIONS.endswith(f"{legal.output('transcriptions').licence}.")
+
+
+# ---- K4: the two readers on the site ------------------------------------------- #
+
+
+def test_stats_and_shell_carry_the_readers_from_the_registry(store_path, tmp_path) -> None:
+    from leibniz import legal
+
+    c = _client(store_path, tmp_path, static=STATIC_DIR)
+    readers = c.get("/api/stats").json()["readers"]
+    assert readers == legal.site_readers()
+    assert (
+        readers["de"]["reader"] == "k3-trocr" and readers["de"]["readings_licence"] == "CC BY 4.0"
+    )
+    html = c.get("/about").text
+    assert 'data-reader-de="k3-trocr"' in html
+    assert 'data-licence-de-readings="CC BY 4.0"' in html
+    assert 'data-licence-de-model="CC BY 4.0"' in html
+    assert 'data-licence-de-base="MIT"' in html
+    assert 'data-licence-v1-model="CC BY-NC 4.0"' in html
+    assert 'data-licence-v1-model-obtained="CC BY 4.0"' in html
+    assert 'data-licence-v1-readings="CC BY 4.0"' in html
+
+
+def test_page_lines_name_the_model_that_read_them(german_store_path, tmp_path) -> None:
+    """The provenance line's model per line: the scoped run's where it has a row,
+    the unscoped v1 row's elsewhere (K4 Task 5's check)."""
+    import json as _json
+
+    from tests.conftest import W3
+
+    from leibniz.pipeline import import_readings as I
+
+    page = f"{W3}:0001"
+    readings = tmp_path / "k3.jsonl"
+    readings.write_text(
+        _json.dumps({"line_id": f"{page}:000", "text": "Jch habe", "conf": 0.9}) + "\n",
+        encoding="utf-8",
+    )
+    conn = db.init_db(german_store_path)
+    stats = I.import_readings(
+        conn,
+        readings_path=readings,
+        page_ids=[page],
+        model="k3-trocr@runs-615-epoch-5",
+        reader="k3-trocr",
+        write=True,
+    )
+    conn.close()
+    c = _client(german_store_path, tmp_path, search=False)
+    lines = c.get(f"/api/pages/{page}").json()["lines"]
+    by_seq = {ln["line_seq"]: ln for ln in lines}
+    assert by_seq[0]["model"] == "k3-trocr@runs-615-epoch-5"
+    assert by_seq[0]["run_id"] == stats.run_id and by_seq[0]["text"] == "Jch habe"
+    assert (
+        by_seq[1]["model"] == "FoNDUE-GD_v2_ft_Leibniz@v1" and by_seq[1]["run_id"] != stats.run_id
+    )
+    assert {ln["model"] for ln in lines} == {
+        "k3-trocr@runs-615-epoch-5",
+        "FoNDUE-GD_v2_ft_Leibniz@v1",
+    }
+    text = c.get(f"/api/pages/{page}/text").text
+    assert "k3-trocr@runs-615-epoch-5" in text or "FoNDUE-GD_v2_ft_Leibniz@v1" in text
+
+
+def test_language_filter_is_open_and_the_stage_filter_hidden() -> None:
+    """K4 (the operator, 2026-10-28): the language filter shows with its five values and
+    a hint; the writing-stage filter stays hidden until C4 fills the strata."""
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    lang = re.search(r'<p class="field"( hidden)?>\s*<label class="field__label" for="lang"', html)
+    stage = re.search(
+        r'<p class="field"( hidden)?>\s*<label class="field__label" for="stratum"', html
+    )
+    assert lang is not None and lang.group(1) is None
+    assert stage is not None and stage.group(1) == " hidden"
+    for value in ("la", "fr", "de", "mixed", "unknown"):
+        assert f'<option value="{value}"' in html
+    assert 'data-i18n="search.lang.help"' in html and 'aria-describedby="lang-help"' in html
+    strings = (STATIC_DIR / "i18n.js").read_text(encoding="utf-8")
+    for key in ("search.lang", "search.lang.help"):
+        assert strings.count(f"'{key}':") == 2, key
+    assert "Language (detected)" in strings and "Sprache (erkannt)" in strings
+    for lang_code in ("en", "de"):
+        help_text = _string(strings, lang_code, "search.lang.help")
+        assert "95" in help_text and "75" in help_text
+
+
+def test_search_filters_by_the_detected_language(store_path, tmp_path) -> None:
+    """The index's `lang` comes from the page_lang table (K4); `lang=de` keeps the
+    page the pass called German and drops the others."""
+    conn = db.init_db(store_path)
+    page = f"{W1}:0001"
+    db.upsert_page_lang(conn, db.PageLangRow(page_id=page, lang="de", score=0.8, n_tokens=40))
+    conn.commit()
+    conn.close()
+    c = _client(store_path, tmp_path)
+    everything = c.get("/api/search", params={"q": "calculemus"}).json()
+    hit_pages = {h["page_id"] for h in everything["hits"]}
+    assert page in hit_pages
+    german = c.get("/api/search", params={"q": "calculemus", "lang": "de"}).json()
+    assert {h["page_id"] for h in german["hits"]} == {page}
+    assert german["hits"][0]["lang"] == "de"
+    latin = c.get("/api/search", params={"q": "calculemus", "lang": "la"}).json()
+    assert page not in {h["page_id"] for h in latin["hits"]}
+    assert c.get("/api/stats").json()["pages_by_lang"] == {"de": 1}

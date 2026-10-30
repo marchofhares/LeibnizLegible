@@ -1232,6 +1232,23 @@ def _record_text(
     yield from _page_chunks(db_path, pages, fmt, twins)
 
 
+def _reader_stamps() -> str:
+    """``data-*`` attributes for the shell's ``<html>``: the German pages' reader and
+    the licences of both readers' models and readings, from the registry
+    (:func:`leibniz.legal.site_readers`)."""
+    r = legal.site_readers()
+    pairs = (
+        ("data-reader-de", r["de"]["reader"]),
+        ("data-licence-v1-model", r["v1"]["model_licence"]),
+        ("data-licence-v1-model-obtained", r["v1"]["model_licence_obtained"]),
+        ("data-licence-v1-readings", r["v1"]["readings_licence"]),
+        ("data-licence-de-model", r["de"]["model_licence"]),
+        ("data-licence-de-base", r["de"]["base_licence"]),
+        ("data-licence-de-readings", r["de"]["readings_licence"]),
+    )
+    return " ".join(f'{k}="{_esc(v)}"' for k, v in pairs)
+
+
 def create_app(
     db_path: str | Path = db.DEFAULT_DB_PATH,
     *,
@@ -1489,6 +1506,8 @@ def create_app(
             stats.setdefault("model", None)
             stats["images"] = {"origin": images.origin, "base_url": images.base_url}
             stats["katalog"] = katalog_coverage()
+            # the readers and the licences their readings carry, from the registry (K4)
+            stats["readers"] = legal.site_readers()
             state["stats"] = stats
         return JSONResponse(state["stats"], headers=CACHE_HEADERS)
 
@@ -2075,6 +2094,9 @@ def create_app(
         shell = index_html.read_text(encoding="utf-8").replace(
             'data-image-origin="gwlb"', f'data-image-origin="{images.origin}"'
         )
+        # the readers' licences, from the registry, so About's licence paragraph
+        # and the viewer's attribution read them without a request (K4 Task 5)
+        shell = shell.replace("<html ", f"<html {_reader_stamps()} ", 1)
         game_url = (calculemus_url or "").strip().rstrip("/")
         if game_url:
             shell = shell.replace("<html ", f'<html data-calculemus-url="{_esc(game_url)}" ', 1)

@@ -14,6 +14,7 @@ from rich.console import Console
 from leibniz import __version__
 from leibniz.align.cli import app as align_app
 from leibniz.catalog.cli import app as catalog_app
+from leibniz.enrich.cli import app as enrich_app
 from leibniz.harvest.cli import app as harvest_app
 from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
@@ -38,6 +39,7 @@ app.add_typer(images_app, name="images")
 app.add_typer(catalog_app, name="catalog")
 app.add_typer(bench_app, name="bench")
 app.add_typer(align_app, name="align")
+app.add_typer(enrich_app, name="enrich")
 app.add_typer(pipeline_app, name="pipeline")
 app.add_typer(index_app, name="index")
 app.add_typer(release_app, name="release")
