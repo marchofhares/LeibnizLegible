@@ -21,7 +21,9 @@ skipped, 33 empty); the dated backup copy of the store on D: verified
 scoped run (1,539,688 rows on 24,078 pages under run 617, stage recognize,
 model `k3-trocr@runs-615-epoch-5`, scope `de`), the store 19,354,243,072
 bytes after (+2,210,672,640), WAL empty, verified read-only; Checkpoint D;
-Task 5's browser checks next; nothing deployed.** The operator's
+the browser checks on the fixture store 92 of 92 (Checkpoint E; one
+phone-width fault of About's found and fixed on the way); Task 6 running:
+the serving copy on D:; nothing deployed.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
 `k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
 letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
@@ -1081,7 +1083,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ⏳ Task 5 (the browser checks)
+### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ✅ Task 5 (Checkpoint E: 92 browser checks) · ⏳ Task 6 (the serving copy, the box)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1521,6 +1523,48 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   the coverage sentence, the write's table and the collection table. The
   operator's off-site upload of the backup (rclone from D:) ran beside the
   writes, theirs. Nothing deployed; the serving copy is Task 6's.
+- **Task 5's browser checks (2026-10-30 09:05–09:20) — CHECKPOINT E.** As
+  W4 ran them: Playwright from npm on the Windows side of the box
+  (`playwright@1.64.1` with `playwright-core`, `axe-core@4.14.0`, 3
+  packages, 22 MB, in `%LOCALAPPDATA%\Temp\pw-k4`), Windows Node
+  v24.14.0, the preinstalled Chromium build `chromium-1243` under
+  `ms-playwright` (Playwright 1.64.1 expects build 1248, so the checks get
+  the executable's path as an argument), against `leibniz serve --backend
+  none --rate-limit 0` in WSL on a fixture store (the test fixtures'
+  `seed_store` + `seed_german`, one scoped `k3-trocr@runs-615-epoch-5` run
+  with one re-read line on `00069377:0001`, `page_lang` rows). The install
+  was the operator's at the keyboard: the session's permission classifier
+  refused the npm command, and a first form of the line through `cmd.exe`
+  failed on the Windows side before writing anything ("The system cannot
+  find the path specified."); the Node install's bash shim with
+  `WSLENV=PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` carried the variable to the
+  Windows process and installed in 3 s, no browser downloaded. The scripts
+  are committed for the re-run after the deploy: `tools/browser-checks/k4-seed.py`
+  and `tools/browser-checks/k4-checks.mjs` (the GWLB stubbed with a one-pixel
+  JPEG and a level-0 `info.json`; axe-core served from the app's origin
+  through a route, the CSP being `script-src 'self'`). **What is checked, in
+  EN and DE at 1,280 and 390 px:** About (the models row, pages by language
+  with German, READER named from the `data-reader-de` stamp, the base's MIT
+  from the stamps, no placeholder left), the search form (the language
+  filter visible, its six values `'' la fr de mixed unknown`, the label
+  "Language (detected)" / "Sprache (erkannt)", the hint naming 95 % and 75 %
+  and being the field's `aria-describedby`, the writing-stage filter
+  hidden), the German page (`k3-trocr@runs-615-epoch-5` on its line, v1 on
+  the others, the provenance row labelled "Model" / "Modell"), no console or
+  page errors, no horizontal scroll, axe-core 0 violations on every view;
+  12 screenshots. **First run 86 of 92:** (1) the page view threw on the
+  stub's `info.json` ("Nothing in the info.json to construct image pyramids
+  from", then "Invalid array length"): a level-0 service without `sizes` or
+  `tiles` gives OpenSeadragon nothing, the stub's fault, fixed in the stub;
+  (2) **About scrolled sideways at 390 px, 411 px wide, in both languages —
+  not K4's rows: the "Report a problem" link, whose text is the full issues
+  URL, 380 px of unbreakable text, on main before K4.** Fixed in
+  `style.css` (`.about a { overflow-wrap: anywhere; }`, one rule). **Second
+  run 92 of 92, 0 failed.** The German page at 390 px looked at: line 1 as
+  READER's reading, the citation and the text block naming both models with
+  their runs, the warning box's Kurrent rate. ruff clean; pytest **1,062
+  passed, 1 skipped** (55.3 s, 809,716 KB under the 1 GB scope beside the
+  serving copy, no GPU).
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a
