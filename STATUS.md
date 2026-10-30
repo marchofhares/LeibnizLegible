@@ -10,13 +10,18 @@ _Last updated: 2026-10-26 (**K4 — German on the site, begun on the desktop on 
 ## Current state
 
 **2026-10-30: K4 — German on the site; the branch `k4-german-site` from
-main at #55; Tasks 0–3 done; the reading job finished 2026-10-30 00:49
+main at #55; Tasks 0–4 done; the reading job finished 2026-10-30 00:49
 (k3-trocr over 1,539,721 lines on 24,078 German pages, under the 6 GB
 scope with the guard; two launches, one guard kill at 19:09 on the 28th,
 the card 22 MiB over the 5,900 line, no leak; 91 ms a line, 39 h in all; 0
 skipped, 33 empty); the dated backup copy of the store on D: verified
-(01:26, the same SHA-256 on both sides); Task 4's write waits for the
-operator's go; nothing written to the store, nothing deployed.** The operator's
+(01:26, the same SHA-256 on both sides); after the operator's go of the
+30th the master store written once, 08:40–08:51: the `page_lang` table
+(236,210 rows under run 616, stage enrich) and READER's readings as one
+scoped run (1,539,688 rows on 24,078 pages under run 617, stage recognize,
+model `k3-trocr@runs-615-epoch-5`, scope `de`), the store 19,354,243,072
+bytes after (+2,210,672,640), WAL empty, verified read-only; Checkpoint D;
+Task 5's browser checks next; nothing deployed.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
 `k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
 letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
@@ -1076,7 +1081,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ⏳ Task 4 (the backup copy verified; the write waits for the go)
+### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ⏳ Task 5 (the browser checks)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1459,6 +1464,63 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   lines, 40 rows, 28 narrow. Store before the write 17,143,570,432 bytes,
   WAL 0 bytes. The go request printed for the operator with these numbers,
   the gate and the commands.
+- **Task 4's writes (2026-10-30 08:40–08:51) — CHECKPOINT D.** The
+  operator's go (30 October), verbatim: "Go 1 and Go 2, in that order. After
+  the two writes, print the German pages and lines under the new run, the
+  run row (stage, model, scope), the store's size and the time -v peak; then
+  the K4 report and the import summary, and checkpoint D. The off-site
+  upload of the backup is mine and runs beside you from D:. Nothing else
+  touches the store until you say the writes are done." Pre-flight: no
+  process of the session's running, the store 17,143,570,432 bytes with an
+  empty WAL, C: 51 GB free, the write's five inputs at their recorded
+  SHA-256. Each write from a detached shell under
+  `systemd-run --user --scope -p MemoryMax=4G` with `/usr/bin/time -v`,
+  nothing else of the session's beside it; the launchers and logs under
+  `/mnt/d/leibniz-train/k4/logs/` (`run-write-1.sh`, `write-1.log`,
+  `run-write-2.sh`, `write-2.log`, `after-write.log`). **Write 1**
+  (08:40:46–08:41:10; 23.5 s, 570,072 KB peak): `leibniz enrich page-lang
+  --db data/inventory.sqlite --reuse --write --list-exclude-set
+  LeibnizMarginalien --today 2026-10-26` read Task 1's 236,210 rows back,
+  measured the threshold on the census labels again (hits≥2 score≥0.3
+  tokens≥8: precision 95.2 %, recall 74.5 % on 21,232 labelled pages, 173
+  Latin or French pages called German) and wrote **236,210 `page_lang` rows
+  under run 616** (stage `enrich`, model `langid@hits≥2 score≥0.3
+  tokens≥8`, no scope): de 30,797, la 110,167, fr 62,330, unknown 19,115,
+  mixed 13,801. The page list (24,078 pages) and `page-lang.jsonl` came out
+  byte-identical to Task 1's (SHA-256 compared before and after); the two
+  reports changed only in their "generated" date. The store 17,163,821,056
+  bytes after (+20,250,624), the WAL checkpointed and removed on close.
+  **Write 2** (08:41:59–08:51:07; 9 min 7 s, 517,996 KB peak, 32 % of a
+  CPU): `leibniz pipeline import-readings --db data/inventory.sqlite
+  --readings data/kurrent/k4-readings/k3-trocr.jsonl --pages
+  data/kurrent/german-pages.txt --model k3-trocr@runs-615-epoch-5 --reader
+  k3-trocr --scope de --write --summary reports/kurrent/k4-import.json
+  --note …` wrote **1,539,688 rows on 24,078 pages under run 617** (stage
+  `recognize`, model `k3-trocr@runs-615-epoch-5`, scope `de`; n_input
+  1,539,721, n_ok 1,539,688, n_failed 0; git `afb756f`; the note and the
+  import's counts in the run's params): 33 empty readings without a row, 0
+  lines without a reading, 0 orphan readings, 0 pages done before; crops
+  under 80 px 252,286 lines, 252,278 of them with a row. By collection:
+  Briefwechsel 14,455 pages, 780,940 rows; Handschriften 9,604, 757,227;
+  Leibnitiana 18, 1,481; Rekonstruktionen 1, 40 — the dry run's numbers
+  exactly. **Verified read-only afterwards** (`after-write.log`, 9 s): every
+  row of run 617 status `machine`, lang `de`, model
+  `k3-trocr@runs-615-epoch-5`, none without text, geometry or confidence;
+  run 617 the only run with a scope; 30,797 German pages in `page_lang`,
+  24,078 of them with rows under run 617, the other 6,719 the Marginalien
+  pages the job left out, no page under the run unmarked. **The store
+  after: 19,354,243,072 bytes** (4,725,157 pages of 4,096, freelist 0;
+  +2,210,672,640 over the backup's 17,143,570,432), WAL 0 bytes, journal
+  mode `wal`; C: 48 GB free. The K4 report built from the job's stats, log
+  and guard CSV and the import summary (`leibniz pipeline k4-report …
+  --store-before 17143570432 --today 2026-10-30` → `reports/kurrent/
+  k4-reading.md` and `.json`; `reports/kurrent/k4-import.json`): the job's
+  table (90.8 ms a line, 39,666 lines an hour in the last launch; peak host
+  RSS 2,769,976 KB on the launch that ended on its own; card peak 5,922
+  MiB; GPU utilisation 88.2 % mean; host MemAvailable minimum 6,727 MiB),
+  the coverage sentence, the write's table and the collection table. The
+  operator's off-site upload of the backup (rclone from D:) ran beside the
+  writes, theirs. Nothing deployed; the serving copy is Task 6's.
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a

@@ -1,6 +1,6 @@
 # Which pages are German: the identifier on the machine text
 
-Every recognised page's current machine text (the newest run per line, v1 today) classified with `leibniz.enrich.langid` — 236,210 pages, 12,825,054 lines with text (235,723 pages carry any). A page counts as German at the threshold **hits≥2 score≥0.3 tokens≥8** on the leading language's stopword hits, their share of all hits and the page's tokens; the threshold is set for precision (target 95 %) on the census's pieces, see below. Generated 2026-10-26; the store read-only.
+Every recognised page's current machine text (the newest run per line, v1 today) classified with `leibniz.enrich.langid` — 236,210 pages, 12,825,054 lines with text (235,723 pages carry any). A page counts as German at the threshold **hits≥2 score≥0.3 tokens≥8** on the leading language's stopword hits, their share of all hits and the page's tokens; the threshold is set for precision (target 95 %) on the census's pieces, see below. Generated 2026-10-30; the store read-only.
 
 ## The verdicts
 
