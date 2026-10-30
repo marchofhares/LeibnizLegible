@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-10-26 (**K4 — German on the site, begun on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`), the pre-flight done, the go waited for**; earlier the same day, **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-10-30 (**K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -22,8 +22,14 @@ scoped run (1,539,688 rows on 24,078 pages under run 617, stage recognize,
 model `k3-trocr@runs-615-epoch-5`, scope `de`), the store 19,354,243,072
 bytes after (+2,210,672,640), WAL empty, verified read-only; Checkpoint D;
 the browser checks on the fixture store 92 of 92 (Checkpoint E; one
-phone-width fault of About's found and fixed on the way); Task 6 running:
-the serving copy on D:; nothing deployed.** The operator's
+phone-width fault of About's found and fixed on the way); Task 6: the
+serving copy on D: (18,314,969,088 bytes; the `VACUUM INTO` 08:57–09:38 at
+the share's 4–7 MiB/s, its integrity check over the share stopped after
+79 minutes at under a megabyte a second and moved to the box, its SHA-256
+read at 1.6–2.0 MiB/s beside the operator's rclone check of the backups),
+the box commands, the curl checks with their expected answers and the live
+switch in order in the K4 entry; the branch pushed, the compare URL
+printed; nothing deployed, nothing merged.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
 `k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
 letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
@@ -1083,7 +1089,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ✅ Task 5 (Checkpoint E: 92 browser checks) · ⏳ Task 6 (the serving copy, the box)
+### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ✅ Task 5 (Checkpoint E: 92 browser checks) · ✅ Task 6 (the serving copy on D:; the box commands, the checks and the live switch handed to the operator)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1565,6 +1571,195 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   their runs, the warning box's Kurrent rate. ruff clean; pytest **1,062
   passed, 1 skipped** (55.3 s, 809,716 KB under the 1 GB scope beside the
   serving copy, no GPU).
+- **Task 6, the serving copy and the box (2026-10-30, from 08:56).** The copy:
+  `deploy/prepare-store.sh data/inventory.sqlite
+  /mnt/d/leibniz-serving/inventory-serving-2026-10-30.sqlite` from 08:56:53
+  under a 4 GB scope (`run-serving-copy.sh` under
+  `/mnt/d/leibniz-train/k4/logs/`; the output on D: by the disk rule, C: 48 GB
+  free; `UV_NO_SYNC=1`, no GPU; the older `inventory-serving.sqlite` of 22
+  October left beside it). The `VACUUM INTO` finished at 09:38 — about 41
+  minutes, the share's write pace 4–7 MiB/s, against the README's ten minutes
+  for a copy on the VHD — at **18,314,969,088 bytes**: 4,471,428 pages of
+  4,096 against the master's 4,725,157, so 253,729 pages (1,039,273,984 bytes)
+  freed by the vacuum; `journal_mode delete`, freelist 0, read from the copy's
+  header. The script's `integrity_check` then ran over the share, a b-tree
+  walk in 4 KiB random reads at under a megabyte a second (0.7 MiB/s in a 20 s
+  sample at 10:55; about 31 GB read in 79 minutes against an 18.3 GB file, the
+  2 MB page cache turning over), with no end to estimate: stopped at 10:57:23
+  (SIGTERM to the python child; the script's wall 2:00:30, peak 27,740 KB,
+  exit 143). The copy was complete and closed at 09:38 and is untouched by the
+  stop. The integrity check moves to the box, where the file lies on local
+  disk (the command below, with the row counts it must print); the script's
+  last step, the SHA-256, re-run on its own from 10:58:15 (`run-sha256.sh`, a
+  512 MB scope), reads sequentially at 1.6–2.0 MiB/s beside the operator's
+  `rclone check` of the backups folder, which has read the five backup copies
+  at once over the same share since 10:31 — about three hours; the digest:
+  SHA256-PENDING. The lesson for the README: `prepare-store.sh` is built for a
+  copy on the VHD; over the drive share the vacuum takes four times the budget
+  and the integrity check cannot be run at all, so on this desktop the check
+  belongs on the box.
+
+  **The numbers for the checks, read from the master** (`k4-stats.py`,
+  read-only under a 1 GB scope, 11:02:06–11:11:24, `corpus_stats` 538 s, peak
+  39,692 KB): the lines shown under the rule **12,947,584**, by model
+  `FoNDUE-GD_v2_ft_Leibniz` 11,407,896 and `k3-trocr@runs-615-epoch-5`
+  1,539,688 (run 617's rows, every one of them current); pages by language la
+  110,167 · fr 62,330 · de 30,797 · unknown 19,115 · mixed 13,801; works
+  2,225, pages 236,795 (recognized 236,210, skipped 569); the confidence
+  histogram under 0.5 907,117 · 0.5–0.7 998,464 · 0.7–0.8 897,761 · 0.8–0.9
+  2,344,657 · 0.9 and above 7,799,585. The tables' row counts, which the copy
+  must repeat on the box: works 2,225 · pages 236,795 · lines 15,061,271 ·
+  gt_lines 333,680 · runs 617. The page for the checks,
+  `DE-611-HS-971383:0035` (Briefwechsel, folio 18r, a portrait scan of 2,447 ×
+  4,018, so no spread for the twins rule to halve): 203 lines, all 203 current
+  ones READER's (run 348's 203 v1 rows beneath), `page_lang` de at 0.5405 on
+  351 tokens, evidence both, run 616. One thing the master's numbers caught:
+  the store's v1 rows carry the model string `FoNDUE-GD_v2_ft_Leibniz`; the
+  fixture's `…@v1` is the tests' own, and llms.txt had the fixture's string
+  for the real site — corrected on this branch (the fixture-based checks
+  script keeps it, as it should).
+
+  **The box, in order.** The target, the user name and the password are on the
+  operator's plan page; `HOST` and `USER` stand for them below. The transfer
+  reads D: over the share, so it waits for the rclone check to end or shares
+  its pace; the README's budget is an hour and a half.
+
+  ```bash
+  # the desktop: the transfer to a second path on the box (deploy/README.md §14)
+  rsync -avP /mnt/d/leibniz-serving/inventory-serving-2026-10-30.sqlite root@HOST:/var/lib/leibniz-legible/inventory-staging.sqlite
+
+  # the box: the digest (the one this entry prints), the owner, then the integrity
+  # check and the row counts the share could not give — read-only, local disk
+  ssh root@HOST
+  sha256sum /var/lib/leibniz-legible/inventory-staging.sqlite
+  chown leibniz:leibniz /var/lib/leibniz-legible/inventory-staging.sqlite
+  python3 -c "import sqlite3; c = sqlite3.connect('file:/var/lib/leibniz-legible/inventory-staging.sqlite?mode=ro', uri=True); print('integrity:', c.execute('PRAGMA integrity_check').fetchone()[0]); print('journal mode:', c.execute('PRAGMA journal_mode').fetchone()[0]); [print(t, c.execute('SELECT COUNT(*) FROM ' + t).fetchone()[0]) for t in ('works', 'pages', 'lines', 'gt_lines', 'runs')]"
+  #   integrity: ok · journal mode: delete · works 2225 · pages 236795 · lines 15061271 · gt_lines 333680 · runs 617
+  #   (the desktop's read-only quick_check of the 17 GB master took 894 s on its VHD on the 28th; budget that order)
+
+  # the box: staging on the copy and on the branch (the branch is on origin)
+  sed -i 's#^LEIBNIZ_DB_PATH=.*#LEIBNIZ_DB_PATH=/var/lib/leibniz-legible/inventory-staging.sqlite#' /etc/leibniz-legible/staging.env
+  grep '^LEIBNIZ_DB_PATH=' /etc/leibniz-legible/staging.env
+  /opt/leibniz-legible/deploy/staging.sh k4-german-site      # restarts the unit, waits for /healthz, prints the address
+  ```
+
+  **The checks, round one** — the new store under the old index: pages,
+  About's reader sentences and `/api/stats`' readers come from the store and
+  the registry at once; search, the models row and the pages-by-language row
+  wait for the index build. Each line's expected answer follows it.
+
+  ```bash
+  S=https://staging.leibnizlegible.com
+  curl -su USER $S/healthz                                                     # {"status":"ok",…}
+  curl -su USER $S/about | grep -o 'data-reader-de="k3-trocr"' | wc -l         # 1
+  curl -su USER $S/about | grep -o 'data-licence-de-[a-z]*="[^"]*"'
+  #   data-licence-de-model="CC BY 4.0"  data-licence-de-base="MIT"  data-licence-de-readings="CC BY 4.0"
+  curl -su USER $S/static/i18n.js | grep -c "'search.lang':\|'search.lang.help':\|'about.numbers.langs':\|'about.numbers.models':\|'lang.de.text':"
+  #   10 (five keys, each in EN and DE)
+  curl -su USER $S/llms.txt | grep -c k3-trocr                                 # 3
+  curl -su USER $S/llms.txt | grep -c '28.6%'                                  # 1
+  curl -su USER $S/llms.txt | grep -c 'three quarters'                         # 1
+  curl -su USER $S/llms.txt | grep -c 'FoNDUE-GD_v2_ft_Leibniz@v1'             # 0
+  curl -su USER $S/api/stats | python3 -c 'import json,sys; s=json.load(sys.stdin); print(s["readers"]["de"]); print(s["models"]); print(s.get("pages_by_lang"))'
+  #   {'reader': 'k3-trocr', 'version': 'k3-trocr@runs-615-epoch-5', 'model': "K3's TrOCR model, …", 'model_licence': 'CC BY 4.0',
+  #    'base': 'dh-unibe/trocr-kurrent-XVI-XVII (the Bern Kurrent TrOCR model)', 'base_licence': 'MIT', 'readings_licence': 'CC BY 4.0', 'output': 'readings-de'}
+  #   then, until the build: the old index's models (FoNDUE-GD_v2_ft_Leibniz alone) and None
+  curl -su USER $S/api/pages/DE-611-HS-971383:0035 | python3 -c 'import json,sys,collections; p=json.load(sys.stdin); print(p["label"], p["run"]["run_id"], p["run"]["stage"], p["run"]["model"]); print(collections.Counter(l["model"] for l in p["lines"]))'
+  #   18r 617 recognize k3-trocr@runs-615-epoch-5
+  #   Counter({'k3-trocr@runs-615-epoch-5': 203})
+  curl -su USER "$S/api/search?q=Herr&lang=de" | python3 -c 'import json,sys; r=json.load(sys.stdin); print(r["total"], {h["lang"] for h in r["hits"]})'
+  #   until the build: 0 set() — the old index filed every page under the lines' own lang, unknown until C4
+  ```
+
+  In the browser, with the password: `$S/page/DE-611-HS-971383:0035` — every
+  line's provenance row names `k3-trocr@runs-615-epoch-5`, the citation is
+  pinned to run 617; `$S/about` — the licence paragraph with the stamps filled
+  in (below); `$S/search` — the "Language (detected)" filter, five values
+  under "Any language", the hint beneath it, the writing-stage filter hidden.
+  Then the index:
+
+  ```bash
+  /opt/leibniz-legible/deploy/staging.sh --index     # prints df -h /var/lib/meilisearch, asks "Build it? [y/N]"; staging down for the build; 5 h 33 m last time
+  journalctl -fu leibniz-index-staging               # Ctrl-C leaves the build running; the script starts the unit again when it ends
+  ```
+
+  **The checks, round two**, after the build (the staging unit is started
+  again by the script):
+
+  ```bash
+  curl -su USER $S/api/stats | python3 -c 'import json,sys; s=json.load(sys.stdin); print(s["lines"], s["models"]); print(s["pages_by_lang"]); print(s["index_built_at"])'
+  #   12947584 {'FoNDUE-GD_v2_ft_Leibniz': 11407896, 'k3-trocr@runs-615-epoch-5': 1539688}
+  #   {'de': 30797, 'fr': 62330, 'la': 110167, 'mixed': 13801, 'unknown': 19115}
+  #   the build's own time
+  curl -su USER "$S/api/search?q=Herr&lang=de" | python3 -c 'import json,sys; r=json.load(sys.stdin); print(r["total"], {h["lang"] for h in r["hits"]})'
+  #   a count above 0, and {'de'}
+  ```
+
+  And About in the browser: the row "Recognition models (lines shown)" with
+  both models and their counts, the row "Pages by language" with the five
+  values.
+
+  **What the site now says.** About, EN: "The German pages are read by this
+  project's own Kurrent model (k3-trocr), fine-tuned from the Bern Kurrent
+  model (MIT) on open edition text with no non-commercial input, so the model
+  is CC BY 4.0 and its readings are CC BY 4.0." (the stamps `readerDe`,
+  `deBase`, `deModel`, `deReadings` filled from the registry at each serve);
+  DE: "Die deutschen Seiten liest das projekteigene Kurrent-Modell (k3-trocr),
+  feinabgestimmt aus dem Berner Kurrent-Modell (MIT) …". About's models
+  paragraph: "The re-read covers the German pages a language pass over the
+  machine text found — about three quarters of the German pages by the
+  census's measure, found with 95% precision — the printed Marginalien
+  excepted; the rest keep the older model's text, so a German page may still
+  show the first model's reading." About's numbers, once the index is built:
+  "Recognition models (lines shown)" FoNDUE-GD_v2_ft_Leibniz 11,407,896 ·
+  k3-trocr@runs-615-epoch-5 1,539,688; "Pages by language" la 110,167 · fr
+  62,330 · de 30,797 · unknown 19,115 · mixed 13,801. The search form:
+  "Language (detected)" / "Sprache (erkannt)", five values, the hint "The
+  labels come from a language pass over the machine text; German is detected
+  with 95 % precision and about 75 % recall." A German page: each line's
+  provenance row "Model: k3-trocr@runs-615-epoch-5", the citation pinned to
+  run 617. llms.txt: the second model named with its 28.6% against 46.6%, the
+  three-quarters coverage, the model string per line in the API, the licence
+  line "CC BY 4.0, its readings CC BY 4.0".
+
+  **The operator's live switch, in order, after the merge.** One departure
+  from the prompt's order: the index build must run K4's code (the
+  pages-by-language count, the scoped-run rule in the documents), so the §9
+  update of the live checkout comes before the rebuild; K4's code reads a
+  store without the `page_lang` table (`has_table` guards), so the code may go
+  live before the store. The staging copy is the serving copy, so the live
+  file is replaced by one rename and no second transfer; the staging unit is
+  stopped first, as the rebuild wants it anyway (§14, Memory).
+
+  ```bash
+  # 1. the code (README §9, Update the app)
+  sudo -u leibniz -H git -C /opt/leibniz-legible pull --ff-only
+  sudo -u leibniz -H env UV_CACHE_DIR=/opt/leibniz-legible/.uv/cache UV_PYTHON_INSTALL_DIR=/opt/leibniz-legible/.uv/python uv sync --project /opt/leibniz-legible --frozen --no-dev --extra web
+  systemctl restart leibniz-legible && curl -s http://127.0.0.1:8000/healthz    # {"status":"ok",…}
+  # 2. the live serving copy replaced (one rename; requests in flight keep the old file until they close it)
+  systemctl stop leibniz-legible-staging
+  mv -f /var/lib/leibniz-legible/inventory-staging.sqlite /var/lib/leibniz-legible/inventory.sqlite
+  sha256sum /var/lib/leibniz-legible/inventory.sqlite                           # the digest above
+  sed -i 's#^LEIBNIZ_DB_PATH=.*#LEIBNIZ_DB_PATH=/var/lib/leibniz-legible/inventory.sqlite#' /etc/leibniz-legible/staging.env
+  # 3. the staging index dropped first (its disk), then the live index rebuilt beside the live one (§5; 5 h 33 m last time)
+  /opt/leibniz-legible/deploy/staging.sh --drop-index
+  du -sh /var/lib/meilisearch && df -h /var/lib/meilisearch
+  systemd-run --unit=leibniz-index --uid=leibniz --gid=leibniz -p WorkingDirectory=/opt/leibniz-legible --setenv=LEIBNIZ_DB_PATH=/var/lib/leibniz-legible/inventory.sqlite --setenv=MEILI_MASTER_KEY="$(sed -n 's/^MEILI_MASTER_KEY=//p' /etc/meilisearch/env)" /opt/leibniz-legible/.venv/bin/leibniz index build --backend meili
+  journalctl -fu leibniz-index
+  # 4. after the swap: the app restarted so /api/stats reads the new build (§9, A new corpus run); staging back on main
+  systemctl restart leibniz-legible
+  /opt/leibniz-legible/deploy/staging.sh --main
+  /opt/leibniz-legible/deploy/staging.sh --status
+  # 5. the checks: both rounds above against https://leibnizlegible.com, without -u, the same answers
+  ```
+
+  Then the operator's STATUS line for the switch (the build's time, the live
+  `/api/stats` figures) — the numbers are theirs to produce. ruff clean;
+  pytest in `.venv-w3` **1,052 passed, 1 skipped** (40.0 s, 219,356 KB under
+  the 1 GB scope; the skip is `test_align_letterpool_eval.py`, its eleven
+  tests wanting numpy, which that environment lacks: 1,052 + 11 is Checkpoint
+  E's 1,062 passed and 1 skipped). Nothing deployed; the branch pushed, not
+  merged; the compare URL printed.
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a
@@ -5753,7 +5948,11 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **1026** (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **1,052** (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **K4 German pages and READER's run (2026-10-30)** | `page_lang` 236,210 rows under run 616 (la 110,167 · fr 62,330 · de 30,797 · unknown 19,115 · mixed 13,801); run 617 (stage recognize, model `k3-trocr@runs-615-epoch-5`, scope `de`): **1,539,688 rows on 24,078 German pages** (the 6,719 German Marginalien pages left out; 33 empty readings without a row; 252,278 rows on crops under 80 px); the lines shown under the rule 12,947,584, of them READER's 1,539,688 and v1's 11,407,896; the master store 19,354,243,072 bytes after (+2,210,672,640) |
+| **K4 reading job (2026-10-28/30)** | 1,539,721 lines in 39 h over two launches (one guard kill), 90.8 ms a line, 39,666 lines an hour, host peak 2,769,976 KB, card peak 5,922 MiB, GPU 88.2 % mean |
+| **K4 serving copy (2026-10-30)** | `inventory-serving-2026-10-30.sqlite` on D: **18,314,969,088 bytes** (4,471,428 pages; the master's 4,725,157), `VACUUM INTO` 08:57–09:38 over the share at 4–7 MiB/s; its integrity check over the share stopped after 79 min at under a megabyte a second and moved to the box; SHA-256 SHA256-PENDING |
+| **K4 browser checks (2026-10-30)** | **92 of 92** on a fixture store (Playwright 1.64.1, Chromium build 1243, EN and DE, 1,280 and 390 px, axe-core 0 violations) |
 | **K3 training (2026-10-22/25)** | **kraken** (runs row 614): ketos from the PHILIUMM checkpoint, the codec 178 → 203 code points, batch 2 × 8, four loader workers, **37 epochs in 44.5 h** (71 min an epoch, 13 lines/s all-in, the card at 2.2 GB), stopped after checkpoint 36 at kraken's accuracy 0.8659; **TrOCR** (runs row 615): the whole Bern model, Adafactor with gradient checkpointing at batch 8, **six epochs in 27.0 h** (4.5 h an epoch, 3.45 lines/s, the process at 3.5 GB), the best at epoch 5 |
 | **K3 validation CER (3,133 held-out mint lines)** | **k3-trocr 11.84 %** (Leibniz's hand 19.7 %, other hands 11.4 %; heavy 13.3 % · light 8.3 %) · **k3-kraken 15.56 %** (23.8 % / 15.1 %; 17.8 % · 10.2 %); the pilots' single epochs 13.67 / 24.74 %; the two disagree on 2,935 lines, one exactly right on 13.5 % |
 | **K3 letter-pool CER, unfiltered (2026-10-26)** | K2b's set, philiumm policy, 95 % bootstrap over letters: **k3-trocr 28.6 % (24.6–32.5)** · selection 24.7 % (21.0–28.3) · test 31.6 % (25.3–36.8) · Leibniz's hand (L) 36.7 % (31.9–41.0) · the correspondents' (K/k) 19.4 % (15.7–23.8); **k3-kraken 30.6 % (26.5–34.5)** · selection 26.6 % (23.0–30.4) · test 33.6 % (27.0–38.9) · L 39.7 % (34.7–43.9) · K/k 20.3 % (16.8–24.6); against the Bern base 37.0 %, v1 46.6 %, philiumm 52.9 % (K2b); the kraken model reads nothing on 3,905 of the 18,445 lines (2,517 narrower than 80 px) |
@@ -6789,7 +6988,8 @@ identifier over READER's own text on the pages the first pass left
 neighbouring pages, or a lower threshold measured again on the census —
 then the reading job over the newly found pages only (resumable; a second
 scoped run beside the first, the precedence rule showing the newest), the
-page_lang table updated under its own runs row, and the index rebuilt.
+page_lang table updated under its own runs row, and the index rebuilt. C4
+keeps its run unscoped and leaves German pages alone.
 
 **A3b (2026-10-21, the follow-up 2026-10-22): built in a cloud session on
 fixtures cut from the export; the branch `claude/adoring-volta-eogav8`
