@@ -14,9 +14,9 @@ main at #55; Tasks 0–3 done; the reading job finished 2026-10-30 00:49
 (k3-trocr over 1,539,721 lines on 24,078 German pages, under the 6 GB
 scope with the guard; two launches, one guard kill at 19:09 on the 28th,
 the card 22 MiB over the 5,900 line, no leak; 91 ms a line, 39 h in all; 0
-skipped, 33 empty); the dated backup copy of the store running on D: since
-00:55; Task 4's write waits for the backup's SHA-256 and the operator's go;
-nothing written to the store, nothing deployed.** The operator's
+skipped, 33 empty); the dated backup copy of the store on D: verified
+(01:26, the same SHA-256 on both sides); Task 4's write waits for the
+operator's go; nothing written to the store, nothing deployed.** The operator's
 choice of reader, verbatim: **"I agree to go with TrOCR."** READER is
 `k3-trocr` (`data/models/k3/trocr/best`, read with `--kv-cache`; on the
 letter pool 28.6 % CER against v1's 46.6 %, in Leibniz's own hand 36.7 %
@@ -1076,7 +1076,7 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
 
 ## Phase log
 
-### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ⏳ Task 4 (the backup copy running; the write waits for the go)
+### K4 — German on the site (2026-10-26/28) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ⏳ Task 4 (the backup copy verified; the write waits for the go)
 
 - **The operator's choice of reader (26 October), verbatim:** "I agree to go
   with TrOCR." So READER is `k3-trocr` (`data/models/k3/trocr/best`, the
@@ -1432,7 +1432,19 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   `/mnt/d/leibniz-backups/inventory-2026-10-30.sqlite` (the sqlite3 backup
   API from a read-only connection, 4,096 pages a step, the SHA-256 written
   beside it) started 00:55:55 under a 2 GB scope; D: had 347 GB free, C: 51
-  GB. The write waits for the copy's digest and the operator's go.
+  GB. **Stopped at 01:02 and replaced by a plain copy:** the backup API's
+  per-step commits over the drive share ran at 3.4 MB a second (262,144 of
+  4,185,442 pages in 311 s, an 83-minute job against a measured 54 MB a
+  second for a direct write to D: and 561 MB a second reading the store),
+  and the store has had no write since 2026-10-25 and no write-ahead
+  content to fold in (`journal_mode` wal, the `-wal` file empty), so a copy
+  of the file is the same database. `cp` took 1,055 s (01:02:50–01:20:25),
+  the digests of both sides 374 s more: **`inventory-2026-10-30.sqlite`,
+  17,143,570,432 bytes, SHA-256
+  `2cde43729fc9c177b32e469ec3b55a18e89347c39d6222fa44a90fa5cea0a58f` on the
+  source and on the copy, the digest beside the copy in `.sha256`
+  (`sha256sum -c` form).** D: 331 GB free after it. The write waits for the
+  operator's go.
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a
