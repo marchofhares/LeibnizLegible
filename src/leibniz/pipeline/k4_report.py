@@ -67,6 +67,7 @@ def read_job_log(path: Path | str) -> JobLog:
     p = Path(path)
     if not p.exists():
         return out
+    prev = ""
     with p.open(encoding="utf-8", errors="replace") as fh:
         for raw in fh:
             line = raw.rstrip("\n")
@@ -87,9 +88,15 @@ def read_job_log(path: Path | str) -> JobLog:
             elif m := _WALL.search(line):
                 out.wall.append(m.group(1))
             elif " lines/h · " in line:
+                # the job's log wraps a progress line over two physical lines
+                text = line.strip()
+                if "lines done" not in text and "lines done" in prev:
+                    text = prev.strip() + " " + text
+                text = text.split("; stats", 1)[0]
                 if out.first_progress is None:
-                    out.first_progress = line.strip()
-                out.last_progress = line.strip()
+                    out.first_progress = text
+                out.last_progress = text
+            prev = line
     return out
 
 

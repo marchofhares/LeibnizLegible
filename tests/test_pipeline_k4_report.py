@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 
 from leibniz.cli import app
 from leibniz.pipeline import k4_report as K
+from leibniz.pipeline.k4_report import read_job_log
 
 LOG = """# launch 1 2026-10-28T09:50:13-04:00
 kurrent-read 24,078 pages from data/kurrent/german-pages.txt, 1,539,721
@@ -159,7 +160,10 @@ def test_gather_and_render(tmp_path: Path) -> None:
     assert "30,797 pages called German of 236,210" in md and "keeps v1's text" in md
     assert "| pages | 24,078 of 24,078 |" in md
     assert "| launches · relaunches | 2 · 1 |" in md
-    assert "| peak host RSS (`/usr/bin/time -v`, launches that ended on their own) | 2,291,072 KB |" in md
+    assert (
+        "| peak host RSS (`/usr/bin/time -v`, launches that ended on their own) | 2,291,072 KB |"
+        in md
+    )
     assert "| card peak (nvidia-smi, Xwayland included) | 5,697 MiB |" in md
     assert "| crops under 80 px | 252,286 lines, 250,000 of them with a row |" in md
     assert "| store after | 19,143,570,432 bytes (+2,000,000,000 bytes), WAL 0 |" in md
@@ -201,3 +205,21 @@ def test_cli_k4_report(tmp_path: Path) -> None:
     assert res.exit_code == 0, res.output
     assert out.exists() and out.with_suffix(".json").exists()
     assert "Generated 2026-10-31" in out.read_text(encoding="utf-8")
+
+
+def test_wrapped_progress_lines_are_joined(tmp_path):
+    log = tmp_path / "k4-read.log"
+    log.write_text(
+        "# launch 1 2026-10-28T09:50:13-04:00\n"
+        "10:00:35 k3-trocr: 5,771/1,539,721 lines done (5,771 this run, 0 \n"
+        "skipped) · 34,327 lines/h · 105 ms/line · ETA 44h 41m · pages 107/24,078\n"
+        "  finished: k3-trocr: 1,539,721/1,539,721 lines done (1,172,917 this run, 0 \n"
+        "skipped) · 39,666 lines/h · 91 ms/line · ETA 0s · pages 24,078/24,078; stats \n"
+    )
+    parsed = read_job_log(log)
+    assert parsed.first_progress == (
+        "10:00:35 k3-trocr: 5,771/1,539,721 lines done (5,771 this run, 0 skipped) · "
+        "34,327 lines/h · 105 ms/line · ETA 44h 41m · pages 107/24,078"
+    )
+    assert parsed.last_progress.endswith("ETA 0s · pages 24,078/24,078")
+    assert "; stats" not in parsed.last_progress
