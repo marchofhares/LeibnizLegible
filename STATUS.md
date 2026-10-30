@@ -1445,6 +1445,20 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   source and on the copy, the digest beside the copy in `.sha256`
   (`sha256sum -c` form).** D: 331 GB free after it. The write waits for the
   operator's go.
+- **The importer's dry run (2026-10-30 01:27–01:30, the store read-only).**
+  `leibniz pipeline import-readings` over the job's file without `--write`,
+  under a 4 GB scope: 3 min 34 s, 489,604 KB peak RSS. **It would write
+  1,539,688 rows on 24,078 pages** under one run (model
+  `k3-trocr@runs-615-epoch-5`, scope `de`): 1,539,721 lines on the pages,
+  33 read as empty (no row), 0 lines without a reading, 0 orphan readings,
+  0 pages done before. Crops under 80 px: 252,286 lines, 252,278 of them
+  with a row (8 of the 33 empties are narrow). By collection: Handschriften
+  9,604 pages, 757,241 lines, 757,227 rows, 87,619 narrow; Briefwechsel
+  14,455 pages, 780,959 lines, 780,940 rows, 164,360 narrow; Leibnitiana 18
+  pages, 1,481 lines, 1,481 rows, 279 narrow; Rekonstruktionen 1 page, 40
+  lines, 40 rows, 28 narrow. Store before the write 17,143,570,432 bytes,
+  WAL 0 bytes. The go request printed for the operator with these numbers,
+  the gate and the commands.
 - **The operator's decision on the language filter (28 October),
   verbatim:** "The language filter: open it, with the five values and the
   label "language (detected)"; the help text says the labels come from a
