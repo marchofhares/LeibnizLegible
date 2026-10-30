@@ -26,7 +26,7 @@ phone-width fault of About's found and fixed on the way); Task 6: the
 serving copy on D: (18,314,969,088 bytes; the `VACUUM INTO` 08:57–09:38 at
 the share's 4–7 MiB/s, its integrity check over the share stopped after
 79 minutes at under a megabyte a second and moved to the box, its SHA-256
-read at 1.6–2.0 MiB/s beside the operator's rclone check of the backups),
+`3ff238b22a89…` in 58 min 32 s),
 the box commands, the curl checks with their expected answers and the live
 switch in order in the K4 entry; the branch pushed, the compare URL
 printed; nothing deployed, nothing merged.** The operator's
@@ -1590,11 +1590,14 @@ tests/                         +80 tests; fixtures/{images/thumb_sample.jpg,
   exit 143). The copy was complete and closed at 09:38 and is untouched by the
   stop. The integrity check moves to the box, where the file lies on local
   disk (the command below, with the row counts it must print); the script's
-  last step, the SHA-256, re-run on its own from 10:58:15 (`run-sha256.sh`, a
-  512 MB scope), reads sequentially at 1.6–2.0 MiB/s beside the operator's
-  `rclone check` of the backups folder, which has read the five backup copies
-  at once over the same share since 10:31 — about three hours; the digest:
-  SHA256-PENDING. The lesson for the README: `prepare-store.sh` is built for a
+  last step, the SHA-256, re-run on its own from 10:57:45 (`run-sha256.sh`, a
+  512 MB scope), read sequentially at 1.6–2.0 MiB/s while the operator's
+  `rclone check` of the backups folder read the five backup copies at once
+  over the same share (from 10:31), and faster once that ended: **58 min 32 s**
+  in all (10:57:45–11:56:18, 5.0 MiB/s over the whole file, peak 7,552 KB);
+  the digest **`3ff238b22a89e8dde77d7f965b47045785b0d37740bf25eae0f2c1496da8f782`**,
+  in `inventory-serving-2026-10-30.sqlite.sha256` beside the copy, in
+  `sha256sum -c` form. The lesson for the README: `prepare-store.sh` is built for a
   copy on the VHD; over the drive share the vacuum takes four times the budget
   and the integrity check cannot be run at all, so on this desktop the check
   belongs on the box.
@@ -5951,7 +5954,7 @@ Scaffold, `legal.py` (§70/§71 registry), `db.py` (7 tables). 27 tests green.
 | Tests passing | **1,052** (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
 | **K4 German pages and READER's run (2026-10-30)** | `page_lang` 236,210 rows under run 616 (la 110,167 · fr 62,330 · de 30,797 · unknown 19,115 · mixed 13,801); run 617 (stage recognize, model `k3-trocr@runs-615-epoch-5`, scope `de`): **1,539,688 rows on 24,078 German pages** (the 6,719 German Marginalien pages left out; 33 empty readings without a row; 252,278 rows on crops under 80 px); the lines shown under the rule 12,947,584, of them READER's 1,539,688 and v1's 11,407,896; the master store 19,354,243,072 bytes after (+2,210,672,640) |
 | **K4 reading job (2026-10-28/30)** | 1,539,721 lines in 39 h over two launches (one guard kill), 90.8 ms a line, 39,666 lines an hour, host peak 2,769,976 KB, card peak 5,922 MiB, GPU 88.2 % mean |
-| **K4 serving copy (2026-10-30)** | `inventory-serving-2026-10-30.sqlite` on D: **18,314,969,088 bytes** (4,471,428 pages; the master's 4,725,157), `VACUUM INTO` 08:57–09:38 over the share at 4–7 MiB/s; its integrity check over the share stopped after 79 min at under a megabyte a second and moved to the box; SHA-256 SHA256-PENDING |
+| **K4 serving copy (2026-10-30)** | `inventory-serving-2026-10-30.sqlite` on D: **18,314,969,088 bytes** (4,471,428 pages; the master's 4,725,157), `VACUUM INTO` 08:57–09:38 over the share at 4–7 MiB/s; its integrity check over the share stopped after 79 min at under a megabyte a second and moved to the box; SHA-256 `3ff238b22a89e8dde77d7f965b47045785b0d37740bf25eae0f2c1496da8f782` (58 min 32 s over the share) |
 | **K4 browser checks (2026-10-30)** | **92 of 92** on a fixture store (Playwright 1.64.1, Chromium build 1243, EN and DE, 1,280 and 390 px, axe-core 0 violations) |
 | **K3 training (2026-10-22/25)** | **kraken** (runs row 614): ketos from the PHILIUMM checkpoint, the codec 178 → 203 code points, batch 2 × 8, four loader workers, **37 epochs in 44.5 h** (71 min an epoch, 13 lines/s all-in, the card at 2.2 GB), stopped after checkpoint 36 at kraken's accuracy 0.8659; **TrOCR** (runs row 615): the whole Bern model, Adafactor with gradient checkpointing at batch 8, **six epochs in 27.0 h** (4.5 h an epoch, 3.45 lines/s, the process at 3.5 GB), the best at epoch 5 |
 | **K3 validation CER (3,133 held-out mint lines)** | **k3-trocr 11.84 %** (Leibniz's hand 19.7 %, other hands 11.4 %; heavy 13.3 % · light 8.3 %) · **k3-kraken 15.56 %** (23.8 % / 15.1 %; 17.8 % · 10.2 %); the pilots' single epochs 13.67 / 24.74 %; the two disagree on 2,935 lines, one exactly right on 13.5 % |
