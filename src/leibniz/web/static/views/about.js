@@ -5,6 +5,7 @@ import { t, getLang, setLang } from '../i18n.js';
 import * as api from '../api.js';
 import { esc, num, pct, chip, statusBadge } from '../dom.js';
 import { errorPanel } from './common.js';
+import { langLabel } from '../dom.js';
 
 /** The confidence histogram buckets, in the order the API reports them. */
 const BANDS = [
@@ -78,11 +79,33 @@ function histogram(data) {
   );
 }
 
+/** `model (lines)` per recognition model, most lines first (the K4 stats). */
+function modelsLine(models) {
+  if (!models || typeof models !== 'object') return '';
+  return Object.entries(models)
+    .filter(([, n]) => Number(n) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .map(([model, n]) => `${model} (${num(Number(n))})`)
+    .join(' · ');
+}
+
+/** `Language n` per page language, as the page_lang table counts them (K4). */
+function langsLine(byLang) {
+  if (!byLang || typeof byLang !== 'object') return '';
+  return Object.entries(byLang)
+    .filter(([, n]) => Number(n) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .map(([code, n]) => `${langLabel(code)} ${num(Number(n))}`)
+    .join(' · ');
+}
+
 function provenanceRows(data) {
+  const models = modelsLine(data.models);
   const rows = [
     ['about.numbers.version', data.version],
     ['about.numbers.backend', data.backend],
-    ['about.numbers.model', data.model],
+    models ? ['about.numbers.models', models] : ['about.numbers.model', data.model],
+    ['about.numbers.langs', langsLine(data.pages_by_lang)],
   ].filter(([, value]) => value !== null && value !== undefined && value !== '');
   if (!rows.length) return '';
   return (
@@ -111,8 +134,29 @@ function imageOrigin() {
   return document.documentElement.dataset.imageOrigin === 'mirror' ? 'mirror' : 'gwlb';
 }
 
+/**
+ * The two readers' licences, stamped into the shell from the licence registry
+ * (web/api.py, legal.site_readers): the licence paragraphs name them through
+ * these, so a change of terms is made once, in src/leibniz/legal.py. A missing
+ * stamp shows as a dash rather than as a stale licence.
+ */
+function readerVars() {
+  const d = document.documentElement.dataset;
+  const v = (key) => (d[key] ? d[key] : '—');
+  return {
+    readerDe: v('readerDe'),
+    v1Model: v('licenceV1Model'),
+    v1ModelObtained: v('licenceV1ModelObtained'),
+    v1Readings: v('licenceV1Readings'),
+    deModel: v('licenceDeModel'),
+    deBase: v('licenceDeBase'),
+    deReadings: v('licenceDeReadings'),
+  };
+}
+
 function licensing() {
   const images = imageOrigin() === 'mirror' ? 'about.license.images.p.mirror' : 'about.license.images.p';
+  const vars = readerVars();
   const blocks = [
     ['about.license.images.h', images],
     ['about.license.katalog.h', 'about.license.katalog.p'],
@@ -125,7 +169,7 @@ function licensing() {
   return blocks
     .map(
       ([h, p]) =>
-        `<div class="license"><h3>${esc(t(h))}</h3><p>${esc(t(p))}</p></div>`,
+        `<div class="license"><h3>${esc(t(h))}</h3><p>${esc(t(p, vars))}</p></div>`,
     )
     .join('');
 }

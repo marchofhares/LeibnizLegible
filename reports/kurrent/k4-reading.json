@@ -1,0 +1,150 @@
+{
+ "date": "2026-10-30",
+ "job": {
+  "reader": "k3-trocr",
+  "model": "data/models/k3/trocr/best",
+  "device": "cuda",
+  "settings": {
+   "model": "data/models/k3/trocr/best",
+   "batch_size": 16,
+   "dtype": "float32",
+   "use_cache": true,
+   "max_new_tokens": 160,
+   "clean_up_spaces": true
+  },
+  "pages_total": 24078,
+  "pages_done": 24078,
+  "lines_total": 1539721,
+  "lines_before": 366804,
+  "lines_read": 1172917,
+  "skipped": {},
+  "seconds": 106450.118025841,
+  "model_seconds": 103081.12522577886,
+  "started": "2026-10-28T23:14:11+00:00",
+  "updated": "2026-10-30T04:48:22+00:00",
+  "finished": true,
+  "n_skipped": 0,
+  "lines_done": 1539721,
+  "lines_left": 0,
+  "lines_per_hour": 39666.477391551394,
+  "ms_per_line": 90.75673557961987,
+  "eta_seconds": 0.0
+ },
+ "log": {
+  "launches": [
+   "2026-10-28T09:50:13-04:00",
+   "2026-10-28T19:11:06-04:00"
+  ],
+  "relaunches": [
+   {
+    "n": 1,
+    "after_exit": 143,
+    "at": "2026-10-28T19:10:06-04:00"
+   }
+  ],
+  "exits": [
+   {
+    "code": 143,
+    "launch": 1,
+    "at": "2026-10-28T19:09:56-04:00"
+   },
+   {
+    "code": 0,
+    "launch": 2,
+    "at": "2026-10-30T00:49:32-04:00"
+   }
+  ],
+  "max_rss_kb": [
+   2769976
+  ],
+  "peak_rss_kb": 2769976,
+  "wall": [
+   "29:38:24"
+  ],
+  "done": {
+   "code": 0,
+   "launches": 2,
+   "at": "2026-10-30T00:49:38-04:00"
+  },
+  "first_progress": "10:00:35 k3-trocr: 5,771/1,539,721 lines done (5,771 this run, 0 skipped) · 34,327 lines/h · 105 ms/line · ETA 44h 41m · pages 107/24,078",
+  "last_progress": "finished: k3-trocr: 1,539,721/1,539,721 lines done (1,172,917 this run, 0 skipped) · 39,666 lines/h · 91 ms/line · ETA 0s · pages 24,078/24,078"
+ },
+ "guard": {
+  "samples": 27574,
+  "peak_used_mib": 5922,
+  "mean_util_pct": 88.2,
+  "min_avail_mib": 6727,
+  "kills": [
+   "# guard kill 2026-10-28T19:09:56-04:00: used 5922 MiB > 5900 MiB"
+  ],
+  "starts": 2
+ },
+ "import": {
+  "pages": 24078,
+  "pages_done_before": 0,
+  "pages_written": 24078,
+  "pages_without_readings": 0,
+  "lines": 1539721,
+  "rows_written": 1539688,
+  "empty_readings": 33,
+  "lines_without_reading": 0,
+  "orphan_readings": 0,
+  "narrow_px": 80,
+  "narrow_lines": 252286,
+  "narrow_rows": 252278,
+  "model": "k3-trocr@runs-615-epoch-5",
+  "scope": "de",
+  "run_id": 617,
+  "dry_run": false,
+  "by_set": {
+   "LeibnizHandschriften": {
+    "pages": 9604,
+    "lines": 757241,
+    "narrow_lines": 87619,
+    "narrow_rows": 87616,
+    "rows": 757227,
+    "pages_written": 9604
+   },
+   "Leibnitiana": {
+    "pages": 18,
+    "lines": 1481,
+    "narrow_lines": 279,
+    "narrow_rows": 279,
+    "rows": 1481,
+    "pages_written": 18
+   },
+   "LeibnizBriefwechsel": {
+    "pages": 14455,
+    "lines": 780959,
+    "narrow_lines": 164360,
+    "narrow_rows": 164355,
+    "rows": 780940,
+    "pages_written": 14455
+   },
+   "leibniz-rekonstruktionen": {
+    "pages": 1,
+    "lines": 40,
+    "narrow_lines": 28,
+    "narrow_rows": 28,
+    "rows": 40,
+    "pages_written": 1
+   }
+  },
+  "under_run": [
+   24078,
+   1539688
+  ],
+  "store": {
+   "db": 19354243072,
+   "wal": 0
+  }
+ },
+ "coverage": {
+  "threshold": "hits≥2 score≥0.3 tokens≥8",
+  "precision": 0.9523,
+  "recall": 0.7453,
+  "german_pages": 30797,
+  "pages": 236210
+ },
+ "store_before": 17143570432
+}

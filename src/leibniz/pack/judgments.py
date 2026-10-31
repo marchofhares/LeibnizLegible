@@ -109,10 +109,14 @@ class ImportPlan:
 
 
 def machine_row(conn: sqlite3.Connection, page_id: str, line_seq: int) -> sqlite3.Row | None:
-    """The line's latest machine row (by the ``(page_id, line_seq)`` index)."""
+    """The line's current machine row — the store's rule among the machine rows
+    (a scoped run's before an unscoped one's, then the newest; K4) — by the
+    ``(page_id, line_seq)`` index."""
     return conn.execute(
-        "SELECT * FROM lines WHERE page_id = ? AND line_seq = ? AND status = 'machine' "
-        "ORDER BY COALESCE(run_id, 0) DESC LIMIT 1",
+        f"WITH {db.run_rank_cte(conn)} SELECT l.* FROM lines l"
+        " LEFT JOIN rk lr ON lr.run_id = l.run_id"
+        " WHERE l.page_id = ? AND l.line_seq = ? AND l.status = 'machine'"
+        " ORDER BY COALESCE(lr.prec, 0) DESC, COALESCE(l.run_id, 0) DESC LIMIT 1",
         (page_id, line_seq),
     ).fetchone()
 

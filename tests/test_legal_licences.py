@@ -177,6 +177,24 @@ def test_the_outputs_table_matches_the_owners_scheme() -> None:
     assert legal.output("model-k3-trocr").licence.startswith("CC BY 4.0")
     assert legal.output("model-k3-ppocr").licence.startswith("CC BY 4.0")
     assert "obtained under CC BY 4.0" in legal.output("transcriptions").why
+    # K4: READER and its readings (the amendment of 2026-10-26)
+    assert legal.output("readings-de").licence == "CC BY 4.0"
+    assert "READER" in legal.output("model-k3-trocr").name
+    assert "I agree to go with TrOCR." in legal.output("model-k3-trocr").decided
+    readers = legal.site_readers()
+    assert readers["v1"]["readings_licence"] == "CC BY 4.0"
+    assert readers["v1"]["model_licence"] == "CC BY-NC 4.0"  # the relicensing of 2026-10-15
+    assert readers["v1"]["model_licence_obtained"] == "CC BY 4.0"
+    assert readers["de"] == {
+        "reader": "k3-trocr",
+        "version": "k3-trocr@runs-615-epoch-5",
+        "model": legal.output("model-k3-trocr").name,
+        "model_licence": "CC BY 4.0",
+        "base": legal.artifact("trocr-kurrent-xvi-xvii").name,
+        "base_licence": "MIT",
+        "readings_licence": "CC BY 4.0",
+        "output": "readings-de",
+    }
     for o in legal.OUTPUTS:
         assert o.why and o.decided, o.key
         assert set(o.inputs) <= set(legal.ARTIFACTS), o.key

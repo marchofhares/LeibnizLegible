@@ -1,0 +1,60 @@
+{
+ "pages": 24078,
+ "pages_done_before": 0,
+ "pages_written": 24078,
+ "pages_without_readings": 0,
+ "lines": 1539721,
+ "rows_written": 1539688,
+ "empty_readings": 33,
+ "lines_without_reading": 0,
+ "orphan_readings": 0,
+ "narrow_px": 80,
+ "narrow_lines": 252286,
+ "narrow_rows": 252278,
+ "model": "k3-trocr@runs-615-epoch-5",
+ "scope": "de",
+ "run_id": 617,
+ "dry_run": false,
+ "by_set": {
+  "LeibnizHandschriften": {
+   "pages": 9604,
+   "lines": 757241,
+   "narrow_lines": 87619,
+   "narrow_rows": 87616,
+   "rows": 757227,
+   "pages_written": 9604
+  },
+  "Leibnitiana": {
+   "pages": 18,
+   "lines": 1481,
+   "narrow_lines": 279,
+   "narrow_rows": 279,
+   "rows": 1481,
+   "pages_written": 18
+  },
+  "LeibnizBriefwechsel": {
+   "pages": 14455,
+   "lines": 780959,
+   "narrow_lines": 164360,
+   "narrow_rows": 164355,
+   "rows": 780940,
+   "pages_written": 14455
+  },
+  "leibniz-rekonstruktionen": {
+   "pages": 1,
+   "lines": 40,
+   "narrow_lines": 28,
+   "narrow_rows": 28,
+   "rows": 40,
+   "pages_written": 1
+  }
+ },
+ "under_run": [
+  24078,
+  1539688
+ ],
+ "store": {
+  "db": 19354243072,
+  "wal": 0
+ }
+}

@@ -3637,3 +3637,271 @@ beside K4; any kraken re-run waits until K4's reading job has ended (one
 torch process on the machine). The report's numbers go back to the
 colleague as they are, with the caveats.
 ~~~~
+### Phase K4 — German on the site (run 2026-10-26)
+
+_Run on the operator's desktop — the WSL checkout, driven from a Claude Code
+session — under the session preamble of 19 October as updated on 21 October,
+given again with the prompt and printed first below; the branch
+`k4-german-site` from main at #55 as the operator named it; nothing merged or
+deployed; the operator's "go" waited for after Task 0, before the reading job,
+before the backup and the write, and before staging, as the preamble says. The
+amendment of 26 October is part of the prompt; the operator's note of the same
+day, which names the reader, is printed last. The departures are in
+`STATUS.md`, Divergences._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+~~~~
+
+~~~~text
+Phase K4 — German on the site: find the German pages, re-read them with the
+reader K3's choice names, and show German as German. One local session on
+the operator's desktop (WSL2 Ubuntu), over several days with checkpoints; the
+GPU; the store written once (a page-language table and a new reading run)
+after a backup; then staging with its own serving copy and index, and the
+operator's merge and live switch.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), SPECS.md (§3, the site; §7),
+STATUS.md (the K1, K2, K2b and K3 entries; M1 and C4 if present;
+"Divergences" on versioned line rows; "Next"), and deploy/README.md §2, §5,
+§9 and "A branch that changes the data". If this prompt conflicts with the
+repo, the repo + STATUS.md win; record the divergence. Write the "K4 — German
+on the site" entry in STATUS.md after every task; if one exists, continue from
+its first unfinished task.
+
+## Where you run, and the rules that follow from it
+The checkout at /home/evana/LeibnizLegible, the branch the preamble names;
+.venv-k1 for the GPU work, .venv-w3 for the web checks. data/inventory.sqlite
+is the MASTER store (16 GB): read-only until Task 4, then written once,
+through project code with runs rows, idempotent and resumable, after a dated
+backup copy to /mnt/d/ with its SHA-256 (D: needs 20 GB free) and the
+operator's go. Page images from /mnt/d/leibniz-images. Long jobs under nohup
+with logs, polled; a go before any job over an hour. Never write a number you
+did not produce. The live site changes only through the operator's merge and
+§9 update; staging first, as the preamble says.
+Prerequisites, each verified or the session stops and says which is missing:
+K3 merged, with the operator's choice of reader in STATUS.md (READER below);
+K2b's test set present.
+
+## Background
+The website shows, for every line, the newest run's text: latest_lines and
+line_summaries_by_page in src/leibniz/search/documents.py (the second is an
+SQL probe whose docstring records its measured plan), and the API, the
+exports and the index all read that rule. lines is unique on (page_id,
+line_seq, run_id), so a second reading can sit beside v1 as a new run; but
+the recognise stage (pipeline/recognize.py → db.set_line_recognition)
+UPDATES rows in place and must not be used for it. Two decisions come first
+(STATUS.md, "Next"): which pages are German beyond the 5,874 of K1's census,
+and which reading wins per line once C4 adds a newer Latin and French run,
+since newest-wins would cover a German page's Kurrent reading with v2's.
+Scribes switched script with language: German in Kurrent, Latin and French in
+a Latin hand, often on one page. The search fold (align/normalize.py) already
+maps ß to ss and drops umlauts. The search page's language and writing-stage
+filters are hidden (src/leibniz/web/static/index.html), because every page's
+language reads "unknown" until it is determined.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+A clean tree, `git pull`; `nvidia-smi`; `df -h data /mnt/d`; baseline ruff +
+pytest in both environments. Print the plan; wait for "go".
+
+## Task 1 — Which pages are German (store read-only)
+`leibniz enrich page-lang` (a new `enrich` group; langid.py is the package's
+first module): every page's v1 text classified with leibniz.enrich.langid,
+into data/kurrent/page-lang.jsonl (page_id, lang, score, n_tokens). Measure
+it before trusting it: against the census's pieces (the German pieces' pages
+against the Latin and French pieces' pages, reports/kurrent/census.md),
+precision and recall for German. A German verdict on a Latin page costs more
+than a missed German page (a Kurrent reading of a Latin page is worse than
+v1's), so set the threshold for precision and say where it sits. Adjust langid
+for noisy machine text only if needed, and only without changing its results
+on edition text (K1's tests). Write reports/kurrent/page-lang.md: German
+pages and lines by collection and convolute, precision, recall, the
+threshold. CHECKPOINT A; the operator reads it.
+
+## Task 2 — Which reading wins (code and tests; no store write)
+One rule, implemented once and used by every reader of the store
+(latest_lines, line_summaries_by_page, the documents for the index, the API,
+the exports, the stats): a run that declares a language scope (here "de")
+wins on the pages where it has rows over runs without one, whatever their
+age; among runs of the same kind the newest wins, as today. C4's v2 run,
+unscoped, then leaves German pages to the Kurrent run with nothing to change
+on C4's side. Keep the rule cheap in SQL: a precedence the probe can read
+without parsing JSON per row. The page language from Task 1 feeds the
+index's lang field through a page_lang table read by search/documents.py,
+not an UPDATE of 13.5 million line rows. Pages that mix scripts get the
+Kurrent run whole in this phase; measure on the letter pool's mixed letters
+what that costs and record per-line choice as an open question. Tests on
+fixtures for every reader of the rule; time the probe on a synthetic work as
+its docstring did. CHECKPOINT B.
+
+## Task 3 — The reading (store read-only, GPU)
+READER is the model K3's choice names: the Bern model as it came, its K3
+fine-tune, or K3's Kraken model. Read every line of the German pages with
+READER into data/kurrent/k4-readings/<reader>.jsonl through K2's `leibniz
+align kurrent-read` (taking any page list), resumable; reuse K2's readings
+for the pages K2 read if READER is the model K2 used. Estimate from 2,000
+lines and K2's all-in throughput: every German page takes the Bern reader
+more than a week and a Kraken-speed model one to two days. Ask for a go and
+run it under nohup. CHECKPOINT C; the session may stop while the job runs.
+
+## Task 4 — The write (backup and go first)
+The gate, before anything is written: READER's letter-pool CER (K3) is below
+v1's (K2b) overall and in Leibniz's own hand; if not, stop and say so. Then
+the backup copy, the operator's go, and through project code: the page_lang
+table (a runs row, stage enrich), and the new reading as one run (stage
+recognize, model READER's name@version, the scope "de" declared), one row per
+line with the v1 row's geometry copied, status machine, lang de; idempotent
+and resumable by page. Afterwards: German pages and lines under the new run,
+the store's size. CHECKPOINT D.
+
+## Task 5 — The website
+The About page in EN and DE (src/leibniz/web/static/i18n.js): German pages
+are read by READER, with K3's measured letter-pool CER and what it was
+measured on; llms.txt the same; the viewer's provenance line names each
+line's model (check that it does). Open the search page's language filter
+if Task 1's precision is good enough (the operator decides on the numbers);
+the writing-stage filter stays hidden. Tests; the browser checks on the
+fixture store as W4 ran them (Playwright with the preinstalled Chromium, axe,
+phone width). CHECKPOINT E.
+
+## Task 6 — Staging, then hand-over
+A branch that changes the data, per deploy/README.md: a serving copy of the
+written store (deploy/prepare-store.sh, about ten minutes), its transfer to a
+second path on the box (about an hour and a half), staging.env pointed at it,
+`staging.sh --index` for a staging index (hours; the script asks and prints
+the box's free disk). Hand the operator every box command and every
+`curl -su USER …` check with its expected answer. If M1 is ready at the same
+time, one serving copy and one index build carry both. Then complete the
+STATUS.md entry: the numbers, what the site now says, and the operator's live
+switch in order (the live serving copy replaced, the live index rebuilt, 5 h
+33 m last time, the §9 update, the checks, staging back on main and its copy
+deleted). "Key numbers"; "Next": C4 keeps its run unscoped and leaves German
+pages alone. Append this prompt verbatim to PROMPTS.md under "Follow-up
+phases (2026-10)". ruff + pytest clean. Push, print the compare URL. Do not
+merge.
+
+## Amendment of 26 October, after K3 (where it differs, this part wins)
+- K3 reached main through the operator's pull request from
+  claude/gracious-thompson-pp1ror (main with k3-kurrent-model, the STATUS and
+  PROMPTS conflicts resolved, the kraken card's licence corrected). K3's STATUS
+  entry records the choice of reader as open, and the K3 session is closed: at
+  Task 0 write the operator's choice verbatim into the K4 entry and into the
+  K3 "Next" line that waits for it, before anything else.
+- READER keys, as htr/kurrent.py's CANDIDATES name them: k3-trocr
+  (data/models/k3/trocr/best, a symlink into /mnt/d/leibniz-train/k3/; read
+  with --kv-cache: 152 ms a line on this card, 13.3 h for K2's 310,831 lines)
+  or k3-kraken (data/models/k3/kraken/best.safetensors: 52 ms, 4.6 h). The
+  kraken model read 3,905 of the pool's 18,445 lines as empty, 2,517 of them
+  crops under 80 px: count such crops among the German lines before the
+  estimate, whichever reader runs, and report what READER does on them.
+- Licence, from legal.py (L1's registry, the owner's scheme of 2026-10-13):
+  k3-trocr is open (the Bern base MIT, K2's lines open-bucket), so its
+  readings carry CC BY 4.0 like v1's and nothing on About, in llms.txt, the
+  attribution line, the D2 export or the fragment packs changes its terms.
+  k3-kraken is CC BY-NC 4.0 (fine-tuned from the PHILIUMM checkpoint, itself
+  published under CC BY-NC 4.0 since 2026-10-15) and so are its readings: if
+  READER is k3-kraken, Task 5 rewrites About's and llms.txt's licence sentence
+  and the attribution line through the registry, the D2 export puts the German
+  run's lines in the NC deposit, and `leibniz pack fragments` refuses them
+  (license_bucket open only). Either way add READER and its readings to
+  legal.py's outputs table and let About read the sentence from the registry.
+- An empty reading writes no row, and the rule of Task 2 is per line where
+  the scoped run has no row: that line shows the newest unscoped run's row
+  (v1 today), so no page is half blank.
+- Memory, the rule of 26 October in the preamble: before the reading job,
+  state its expected host memory from a 2,000-line pilot measured with
+  /usr/bin/time -v, keep it under 6 GB, run it under
+  `systemd-run --scope -p MemoryMax=6G` in the form the preamble gives, one
+  torch process at a time, nothing else of the session's beside it, four
+  loader workers at most; readings and logs under /mnt/d/leibniz-train/k4/
+  behind a symlink, as K3 did.
+- Time: Task 1's count of German pages decides the days; say the figure from
+  the pilot before asking for the go. Resumable by page, as kurrent-read is.
+- The index rebuild of Task 6 carries A3b's catalogue titles (the search box
+  finds them only after it); the serving copy is made from the written master
+  with deploy/prepare-store.sh, as on 22 October.
+~~~~
+
+The operator's note of 26 October, given with the prompt, verbatim:
+
+~~~~text
+OPERATOR'S NOTE, 26 October 2026, for K4 (where it differs, this note wins):
+- The branch is k4-german-site, from main at #55 (K3 merged, its STATUS and
+  PROMPTS entries beside A3b's, G1's and L1's, the kraken card's licence
+  corrected). The K3 session is closed.
+- My choice of reader, verbatim, for the K4 entry and for the K3 "Next" line
+  that waits for it: "I agree to go with TrOCR." READER is k3-trocr
+  (data/models/k3/trocr/best), read with --kv-cache.
+- Read the amendment of 26 October at the end of the K4 prompt before Task 0:
+  the reader keys; the licence (k3-trocr's readings stay CC BY 4.0; add the
+  model and its readings to legal.py's outputs table and let About read the
+  sentence from the registry); the per-line fallback where the scoped run has
+  no row; the memory rule (the expected host memory from a 2,000-line pilot,
+  under 6 GB, MemoryMax, one torch process, four loader workers at most); the
+  readings under /mnt/d/leibniz-train/k4/; the index rebuild carrying the
+  catalogue titles.
+- The desktop is as K3 left it: .venv-k1 for the GPU work, .venv-w3 for the
+  web checks, data/models/k3 a symlink into /mnt/d/leibniz-train/k3/. The
+  second checkout ~/LeibnizLegible-g1 is mine for store chores while you hold
+  this one; nothing else of yours runs on the machine while a job of yours
+  runs.
+- Task 0 as the prompt says: report and wait for my go.
+~~~~

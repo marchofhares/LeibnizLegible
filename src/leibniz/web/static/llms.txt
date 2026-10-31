@@ -8,9 +8,18 @@
 
 Wording rule for anything you quote from here: say "the machine reads it as …",
 never "Leibniz wrote". The text is unreviewed HTR output with a character error
-rate of about 8% on Latin and French (word error rate 27%); German in Kurrent is
-unmeasured and worse. Cite the page URL and, ideally, the line id with every
-quotation, and carry the confidence with it.
+rate of about 8% on Latin and French (word error rate 27%). German pages are read
+by a second model, the project's own Kurrent model (`k3-trocr`, fine-tuned from the
+Bern Kurrent model on edition text): on a frozen pool of 134 German letters of
+1708–1716 (18,815 lines, the GWLB Leibniz-Archiv's checked transcriptions as the
+reference) its character error rate is 28.6%, against 46.6% for the first model
+on the same lines; in Leibniz's own hand 36.7% against 53.7%. The re-read covers the
+German pages the language pass found (about three quarters of them by the census's
+measure; the printed Marginalien excepted); the rest keep the first model's text.
+Every line names the model that read it (`model` in the page API, the provenance
+line in the viewer).
+Cite the page URL and, ideally, the line id with every quotation, and carry the
+confidence with it.
 
 ## Scope
 
@@ -27,29 +36,29 @@ The site covers the scans the GWLB has published of its Leibniz collections, not
 
 ## Machine access (JSON and plain text, no key, CORS open, rate-limited per client)
 
-- `GET /api/search?q=…` with optional `set`, `lang`, `stratum`, `min_conf`, `work`, `page`, `limit` (max 100), `match` (`all`, the default: a page holds every word; `any`: one is enough). Returns page-level hits with a snippet, mean confidence and a thumbnail URL; `reachable` says how many of `total` can be paged to (10,000). Words match typo-tolerantly and multi-word queries are not phrase queries; "double quotes" match the exact words in that order, and a leading minus (-word, -"two words") leaves out pages that contain it. Quoted and excluded words match exactly, so they do not see past misread words. Titles, shelfmarks, Akademie-Ausgabe references and the titles of the catalogue pieces on a page are searched too. A scan the library registered under two folio labels is one hit (`also` names the other labels); a two-page spread is two, one per half.
+- `GET /api/search?q=…` with optional `set`, `lang` (`la`, `fr`, `de`, `mixed`, `unknown`: the language a pass over the machine text detected per page; German with 95 % precision and about 75 % recall), `stratum`, `min_conf`, `work`, `page`, `limit` (max 100), `match` (`all`, the default: a page holds every word; `any`: one is enough). Returns page-level hits with a snippet, mean confidence and a thumbnail URL; `reachable` says how many of `total` can be paged to (10,000). Words match typo-tolerantly and multi-word queries are not phrase queries; "double quotes" match the exact words in that order, and a leading minus (-word, -"two words") leaves out pages that contain it. Quoted and excluded words match exactly, so they do not see past misread words. Titles, shelfmarks, Akademie-Ausgabe references and the titles of the catalogue pieces on a page are searched too. A scan the library registered under two folio labels is one hit (`also` names the other labels); a two-page spread is two, one per half.
 - `GET /api/lookup?q=…`: where a citation points — a shelfmark with or without its folio (`LH IV, 6, 18 Bl. 1r`), an Akademie-Ausgabe piece (`A VI, 4 N. 109`), a work or page id — as `targets` with site URLs; `kind` is null when `q` is not a citation.
 - `GET /api/letters` with optional `who`, `place`, `from`, `to` (years), `direction` (`to`, `from` Leibniz), `work`, `page`, `limit`: Bodemann's letters (correspSearch, CC BY 4.0) with sender and addressee (GND), date, place (GeoNames), his number and the works that hold the convolute.
 - `GET /api/contents?q=…`: the convolutes whose catalogue pieces carry the words in a title, incipit, sender, addressee or Ordnungsvermerk (the heading an excerpt was filed under), with the matching pieces, their shelfmarks and their Ordnungsvermerk; `katalog` says how many records the site holds and the date of the export they come from.
 - `GET /api/holdings`: the Arbeitskatalog by holding institution (`by_holding`, `by_place`), the digitised copies it links by domain (`by_domain`, `gwlb_links`), the GWLB's digitised works with and without records (`works`, `works_with_records`, `by_set`), and `refreshed`, the export's date.
 - `GET /api/works`: every work in one list, a compact row each (`work_id`, `set`, `title`, `shelfmark`, `shelfmarks`, `family`, `section`, `section_label`, `label`, `n_canvases`, `has_katalog`), plus `groups`, the tree behind /browse (family → section → the work ids in order). `?set=` and `?family=` (`LH`, `LBr`, `Marg`, `Other`) narrow it. A letter convolute's `label` is its correspondent only where the linked catalogue records name one that fits the alphabetical order of the LBr numbers; otherwise it is the bare shelfmark, so a missing name means "not established here", not "unknown".
 - `GET /api/works/{work_id}`: title, shelfmarks, pages, catalogue records (with `sender` and `addressee` as the catalogue names them, Akademie-Ausgabe references and other printings where it knows them, `text_url` where the piece can be placed on the scan, `url_ms` where the catalogue links a digitised copy outside the GWLB, `aa_pdf` — the edition's PDF for the piece with its printed page, where the channel is open — and `ordnungsvermerk` for an excerpt), `katalog_coverage` (records held, the export's date), attribution, and `browse`, the work's section in that tree.
-- `GET /api/pages/{page_id}`: every line with its number on the page (`n`, from 1), text, confidence, status, geometry, model, run and source image, and `cite`: the page's citation with a permalink pinned to its recognition run. `?run=N` reads the page as run N left it, so a quotation keeps its text after a later re-read; `/page/{page_id}#L3` is line 3 of the page in the viewer.
+- `GET /api/pages/{page_id}`: every line with its number on the page (`n`, from 1), text, confidence, status, geometry, model (`FoNDUE-GD_v2_ft_Leibniz` on most lines; `k3-trocr@runs-615-epoch-5` where the Kurrent model read a German page's line), run and source image, and `cite`: the page's citation with a permalink pinned to its recognition run. `?run=N` reads the page as run N left it, so a quotation keeps its text after a later re-read; `/page/{page_id}#L3` is line 3 of the page in the viewer.
 - `GET /api/pages/{page_id}/text`: the page's transcription as plain UTF-8 text: a header of `# ` lines (page URL, work, folio, source image, model, run and run date, line count, mean confidence, licence, this wording rule), a blank line, then one recognised line per line in reading order. `?format=tsv` gives tab-separated `line_id`, `line_seq`, `conf`, `status`, `text` under a header row instead.
 - `GET /api/works/{work_id}/text`: the same for a whole work, every page in canvas order under a `## Folio <label> — <page_id>` line followed by `# ` lines naming its source image and model (`?format=tsv` too). Streamed; a work of a thousand pages is one request, not a thousand.
 - `GET /api/records/{record_id}/text`: the text of one catalogue piece — a letter, a draft, a treatise as the Arbeitskatalog lists it — across the folios its shelfmark names (`Bl. 164–169` → the canvases labelled 164r to 169v), in the work export's layout under a header naming the record (title, date, sender and addressee, Akademie-Ausgabe reference where known), the work, the folio range and the canvases (`?format=tsv` too). The record ids come from `/api/works/{work_id}`, whose `katalog` entries carry `text_url`, `folio_label`, `folio_range` and `n_pages` where the record can be placed; a record without a folio range, or whose folios the scan's labels cannot place, answers 404 and says why.
-- `GET /api/stats`: corpus counts.
+- `GET /api/stats`: corpus counts, `models` (lines shown per recognition model), `pages_by_lang` (pages per language as identified), and `readers` (the two readers and the licences of their models and readings, from the licence registry).
 - `GET /openapi.json`: the OpenAPI description of the above.
 - IIIF Presentation 3: `GET /manifests/{work_id}`; W3C annotation pages with the transcription: `GET /annotations/{page_id}`. Please do not crawl these blindly; they reference every page image.
 
 ## Licences
 
-- Transcriptions: Leibniz Legible, CC BY 4.0, machine output of a model obtained under CC BY 4.0 (the PHILIUMM HTR model, doi:10.5281/zenodo.21457538, published by its makers under CC BY-NC 4.0 since 2026-10-15, who agreed that these transcriptions stay CC BY 4.0); do not ingest as verified text; keep the provenance fields.
+- Transcriptions: Leibniz Legible, CC BY 4.0, machine output of a model obtained under CC BY 4.0 (the PHILIUMM HTR model, doi:10.5281/zenodo.21457538, published by its makers under CC BY-NC 4.0 since 2026-10-15, who agreed that these transcriptions stay CC BY 4.0); the German pages' readings by the project's own Kurrent model (no non-commercial input) are CC BY 4.0 as well; do not ingest as verified text; keep the provenance fields.
 - Page images: GWLB Hannover, Public Domain Mark 1.0.
 - Catalogue data: Arbeitskatalog der Leibniz-Edition, Leibniz-Edition Potsdam I (BBAW), CC BY 4.0; the records come from the Arbeitsstelle's export of 2026-10-19, not from the catalogue's website (`credit` in `/api/holdings`, `katalog_credit` in `/api/works/{work_id}`).
 - Letters: Eduard Bodemann's catalogue (1889) via correspSearch (BBAW; data: Portal Der deutsche Brief im 18. Jahrhundert), CC BY 4.0.
 - Ground truth (dataset D3, at release; not shown on this site): two deposits by the copy of the edition each line's text was read from. The open deposit, CC BY 4.0: Akademie-Ausgabe reading text free of § 70 UrhG, read from public-domain library scans, on line images under the Public Domain Mark. The NC deposit, CC BY-NC 4.0: the same kind of text read from the Potsdam Arbeitsstelle's Reihe IV files (CC BY-NC 4.0, stated in writing 2026-10-12) and from the GWLB repository's volume PDFs (CC BY-NC 4.0). Each deposit's card says which channels it holds.
-- Models: the corpus is read by the PHILIUMM HTR model (obtained under CC BY 4.0; CC BY-NC 4.0 since 2026-10-15). A model fine-tuned from it: CC BY-NC 4.0. A model without non-commercial input (from the Bern Kurrent model, MIT, on open edition text): CC BY 4.0. Fixed at release from the registry `src/leibniz/legal.py` (`leibniz legal licences`).
+- Models: the Latin and French pages, and every page not called German, are read by the PHILIUMM HTR model (obtained under CC BY 4.0; CC BY-NC 4.0 since 2026-10-15). The German pages are read by the project's own Kurrent model, `k3-trocr`, fine-tuned from the Bern Kurrent model (MIT) on open edition text without non-commercial input: CC BY 4.0, its readings CC BY 4.0. A model fine-tuned from the PHILIUMM checkpoint: CC BY-NC 4.0. Fixed at release from the registry `src/leibniz/legal.py` (`leibniz legal licences`; `readers` in `/api/stats`).
 - Code: Apache-2.0, https://github.com/marchofhares/leibnizlegible
 
 ## Cite
