@@ -16,6 +16,7 @@ from typer.testing import CliRunner
 from leibniz import db
 from leibniz.align import audit_edition as E
 from leibniz.align import audit_patterns as P
+from leibniz.align import audit_reach
 from leibniz.align.audit import read_verdicts, score_by_group, score_verdicts
 from leibniz.align.pairs import (
     channels_from_source,
@@ -479,6 +480,8 @@ def test_verified_source_keeps_every_parser_reading_the_row() -> None:
     assert reader_from_source(src) == READER and record_id_from_source(src) == "k-4101"
     assert channels_from_source(src) == ("ia",) and E.verified_from_source(src) == MARK[9:]
     assert f"; reader {READER};" in src  # the K2 sheet's and the trainset's LIKE pattern
+    reach = audit_reach._SOURCE_RE.search(src)  # the reach census: volume and record
+    assert reach is not None and reach.group("vol") == "IV,3" and reach.group("rec") == "k-4101"
     # idempotent, and a corrected line's channel is replaced, not added
     assert E.verified_source(src, by="leibniz-edition", on="2026-11-06") == src
     corr = E.verified_source(POTSDAM, by="leibniz-edition", on="2026-11-06", channel="edition-x")
