@@ -645,7 +645,7 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 ## Phase log
 
-### REL1 — the first releases (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 · ⏳ Task 3 · ⏳ Task 4 · ⏳ Part B (the operator's desktop) · ⏳ Part C
+### REL1 — the first releases (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 · ⏳ Task 3 · ⏳ Task 4 · ⏳ Part B (the operator's desktop) · ⏳ Part C
 
 - **Setting and pre-flight (Task 0; recorded, no go waited for).** Part A, a
   cloud session on the branch it was given, `claude/clever-gates-56b0a4`, from
@@ -773,6 +773,46 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   re-renders every card and deposit file from the manifests alone, each card
   with its own DOI and its siblings'. Tests 1,071 → **1,090** at this
   checkpoint, ruff clean.
+- **Task 2, the model package** (`release/model.py`; `leibniz release model
+  --weights DIR --card FILE --name NAME --out ROOT`). The checkpoint's
+  inference files are copied into `ROOT/NAME/` by an allowlist — `config.json`,
+  `model.safetensors`, `preprocessor_config.json` required, a tokenizer file
+  required, `generation_config.json`, the processor and tokenizer files and
+  K3's `k3-training.json` where present — and everything else in the folder
+  (an optimizer state, a trainer's log, a checkpoint directory, weights not
+  in safetensors) is left behind and listed; the weights folder is read,
+  never written. Beside them: **README.md**, K3's card
+  (`reports/kurrent/k3-model-card-trocr.md`, the default `--card`) brought to
+  the finish — the title and the DOI line, K3's data statement and error
+  table as they stand, the draft's two stale bullets rewritten (the
+  precision of the training lines "unmeasured until the audit is scored",
+  with K2's sheet as it came back and the note that the judged lines were
+  never trained on; the licence from the registry's `model-k3-trocr` row),
+  then LT1's table beside K3's, the K4 run the readings are on the site
+  under (run 617, 1,539,688 lines on 24,078 pages, greedy, the decoder's
+  cache on, 160 new tokens, batch 16, float32, 91 ms a line, all read from
+  `k4-reading.json`), the usage with transformers — `use_cache=True` and why:
+  the checkpoint's generation config, the base's, switches the decoder's
+  key/value cache off — the anti-contamination note, where the record lives,
+  the citation; a card that has changed shape still yields the finished
+  statements under a heading of their own, and the command says which lines
+  it did not find. **LICENSE**: the model's licence by name with the address
+  of its legal code and the registry's reason, and the base model's MIT
+  notice in full as its repository states it (read 2026-11-17: "Copyright (c)
+  2023 Digital Humanities Center, University of Bern"). **MANIFEST.json**:
+  the name, the reader's version, the base, the licence, every file with its
+  size and SHA-256, what was left out. **`ROOT/NAME.zip`** for Zenodo (the
+  weights stored, the text deflated, written to a `.part` and renamed) and
+  the record's deposit file `ROOT/NAME.zenodo.json` (upload type `other`:
+  the deposit API has no "model"; the related identifiers: the code
+  repository, the Bern model's address as `isDerivedFrom`, the project
+  statement). **One thing the card now says in plain words, for the
+  operator to read before publishing** (Open question 34): the registry
+  calls the model "no NC input" and CC BY 4.0, and its training lines are
+  K2's, part of them read from the Potsdam text files and the GWLB
+  repository's PDFs and therefore published in the NC-derived deposit; the
+  card states both and names the lawyer-memo question, taking no position.
+  Tested on a stand-in folder (7 tests); 1,090 → **1,097**.
 
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 
