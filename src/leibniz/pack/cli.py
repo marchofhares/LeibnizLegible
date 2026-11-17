@@ -63,7 +63,11 @@ def fragments(
     limit: int = typer.Option(F.DEFAULT_LIMIT, "--limit", min=1, help="Rows at most."),
     seed: int = typer.Option(0, "--seed", help="Seed of the draw, the order and the gold."),
     gold_rate: float = typer.Option(
-        F.DEFAULT_GOLD_RATE, "--gold-rate", min=0.0, max=1.0, help="Gold rows at most, a share."
+        F.DEFAULT_GOLD_RATE,
+        "--gold-rate",
+        min=0.0,
+        max=1.0,
+        help="Gold rows at most, a share; the gold is drawn first, among all eligible lines.",
     ),
     bad_gold_share: float = typer.Option(
         F.DEFAULT_BAD_GOLD_SHARE,
@@ -72,8 +76,26 @@ def fragments(
         max=1.0,
         help="Both-wrong rows at most, a share of the gold.",
     ),
-    min_chars: int = typer.Option(F.DEFAULT_MIN_CHARS, "--min-chars", min=1),
-    max_chars: int = typer.Option(F.DEFAULT_MAX_CHARS, "--max-chars", min=1),
+    min_chars: int = typer.Option(
+        F.DEFAULT_MIN_CHARS, "--min-chars", min=1, help="The longer reading at least."
+    ),
+    max_chars: int = typer.Option(
+        F.DEFAULT_MAX_CHARS, "--max-chars", min=1, help="The longer reading at most."
+    ),
+    min_ratio: float = typer.Option(
+        F.DEFAULT_MIN_RATIO,
+        "--min-ratio",
+        min=0.0,
+        max=1.0,
+        help="The shorter reading at least this share of the longer (0: no floor).",
+    ),
+    strata: str | None = typer.Option(
+        None,
+        "--strata",
+        help="Weights by stratum, e.g. "
+        "'fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1' (relative; a "
+        "stratum not named gives no row). Default: equal numbers per stratum.",
+    ),
     out: Path | None = typer.Option(
         None,
         "--out",
@@ -83,10 +105,14 @@ def fragments(
         None, "--today", help="The day of the §70 check, YYYY-MM-DD (default: today)."
     ),
 ) -> None:
-    """Build a fragment pack: German A/B pairs (v1 against the Bern reading), with gold."""
+    """Build a fragment pack: German A/B pairs (v1 against the Bern reading), the gold first."""
     day = _day(today)
     if min_chars > max_chars:
         raise typer.BadParameter("--min-chars is over --max-chars")
+    try:
+        weights = F.parse_strata(strata) if strata is not None else None
+    except ValueError as exc:
+        raise typer.BadParameter(f"--strata: {exc}") from exc
     for label, path in (("--readings", readings), ("--pieces", pieces)):
         if not path.exists():
             raise typer.BadParameter(f"{label}: {path} not found")
@@ -107,6 +133,8 @@ def fragments(
             bad_gold_share=bad_gold_share,
             min_chars=min_chars,
             max_chars=max_chars,
+            min_ratio=min_ratio,
+            strata=weights,
             image_base_url=image_base_url,
         )
     finally:
