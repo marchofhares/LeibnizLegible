@@ -152,7 +152,7 @@ Tiles come from the GWLB directly:
 - `delivery === "iiif"` → `tileSources: image_service_url + "/info.json"`
 - `delivery === "static"` → `tileSources: { type: "image", url: image_url }`
   (only about a third of works have an Image API service, so this is the
-  common case; see STATUS.md, "Delivery-model correction")
+  common case; see STATUS-archive.md, "Delivery-model correction")
 
 The line overlay is **one** `<svg viewBox="0 0 {width} {height}"
 preserveAspectRatio="none">` holding one `<polygon>` per line, added once with
