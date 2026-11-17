@@ -76,6 +76,9 @@ class AuditLine:
     alt_text: str | None = None  # a second reading to show (P1: PHILIUMM's aligned text)
     alt_label: str = ""  # how to name it on the sheet
     group: str = ""  # a grouping the lines CSV carries (K2: the hand); not shown on the sheet
+    # the neighbouring lines of the page, for context only (greyscale JPEG strips)
+    context_above: list[bytes] = field(default_factory=list)
+    context_below: list[bytes] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -130,6 +133,8 @@ def sample_lines(
     reader: str | None = None,
     record_ids: Iterable[str] | None = None,
     exclude_records: bool = False,
+    exclude_refs: Iterable[str] | None = None,
+    exclude_pages: Iterable[str] | None = None,
 ) -> list[AuditLine]:
     """Draw ``n`` minted lines, equal per stratum, reproducibly for ``seed``.
 
@@ -139,7 +144,12 @@ def sample_lines(
     draws from that reader's rows instead (K2's own audit sheet). ``record_ids``
     narrows the pool to those records' rows — or, with ``exclude_records``, to
     every other record's (K2: the lines in Leibniz's own hand against the rest).
+    ``exclude_refs`` and ``exclude_pages`` take lines out of the pool before the
+    draw (a second sheet: none of the first sheet's lines, no page of a test
+    set); a draw without them is the draw it always was for its seed.
     """
+    skip_refs = {str(r) for r in exclude_refs or ()}
+    skip_pages = {str(p) for p in exclude_pages or ()}
     pick = f"NOT ({READER_SQL})"
     base: list = []
     if reader:
@@ -159,15 +169,35 @@ def sample_lines(
             f"SELECT stratum, COUNT(*) FROM gt_lines WHERE {pick} GROUP BY stratum", base
         )
     }
+    pools: dict[str, list[int]] | None = None
+    if skip_refs or skip_pages:
+        pools = {}
+        for stratum in counts:
+            where = "stratum IS NULL" if stratum == "unknown" else "stratum = ?"
+            params = (*(() if stratum == "unknown" else (stratum,)), *base)
+            pools[stratum] = [
+                r[0]
+                for r in conn.execute(
+                    f"SELECT id, line_image_ref FROM gt_lines WHERE {where} AND {pick} ORDER BY id",
+                    params,
+                )
+                if r[1] not in skip_refs and page_of_ref(r[1]) not in skip_pages
+            ]
+        counts = {s: len(ids) for s, ids in pools.items()}
     rng = random.Random(seed)
     out: list[AuditLine] = []
     for stratum, k in allocate(counts, n).items():
         where = "stratum IS NULL" if stratum == "unknown" else "stratum = ?"
         params: tuple = () if stratum == "unknown" else (stratum,)
         params = (*params, *base)
-        ids = [
-            r[0] for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where} AND {pick}", params)
-        ]
+        ids = (
+            pools[stratum]
+            if pools is not None
+            else [
+                r[0]
+                for r in conn.execute(f"SELECT id FROM gt_lines WHERE {where} AND {pick}", params)
+            ]
+        )
         for gid in sorted(rng.sample(ids, k)):
             row = conn.execute(
                 "SELECT line_image_ref, text, source, stratum, align_conf "
@@ -194,6 +224,14 @@ def split_ref(ref: str) -> tuple[str, int]:
     """``"{page_id}:{line_seq:03d}"`` → ``(page_id, line_seq)`` (the canonical line id)."""
     page_id, _, seq = ref.rpartition(":")
     return page_id, int(seq)
+
+
+def page_of_ref(ref: str) -> str:
+    """The page id of a line ref: canonical (``page:seq``) or with a region
+    (``page#xywh=…``, the rows minted before the canonical id)."""
+    head = ref.split("#", 1)[0]
+    page_id, _, seq = head.rpartition(":")
+    return page_id if "#" not in ref and seq.isdigit() and len(seq) == 3 else head
 
 
 def line_geometry(
@@ -353,6 +391,59 @@ def attach_images(conn: sqlite3.Connection, lines: Sequence[AuditLine], images_r
             ln.image_note = "line geometry outside the image"
 
 
+CONTEXT_JPEG_QUALITY = 70
+
+
+def context_strip(im, polygon: Sequence | None, baseline: Sequence | None) -> bytes | None:
+    """A neighbouring line's strip for context: the audit crop (the same
+    ``CROP_PAD``), in greyscale, as JPEG bytes — a sheet with two neighbours
+    per line would otherwise be three times its size."""
+    crop = crop_image(im, polygon, baseline)
+    if crop is None:
+        return None
+    buf = io.BytesIO()
+    crop.convert("L").save(buf, format="JPEG", quality=CONTEXT_JPEG_QUALITY)
+    return buf.getvalue()
+
+
+def attach_context(
+    conn: sqlite3.Connection, lines: Sequence[AuditLine], images_root: Path, n: int
+) -> int:
+    """Give each line the strips of up to ``n`` lines before and after it on its
+    page, by ``line_seq`` (the segmenter's reading order), in place; return the
+    number of strips attached. A neighbour without geometry, or a page that is
+    not cached, contributes nothing."""
+    if n <= 0:
+        return 0
+    from PIL import Image
+
+    attached = 0
+    for ln in lines:
+        ln.context_above, ln.context_below = [], []
+        page = db.get_page(conn, ln.page_id)
+        if page is None:
+            continue
+        path = Path(images_root) / (page.local_path or local_relpath(page))
+        if not path.exists():
+            continue
+        try:
+            with Image.open(path) as im:
+                for seq in range(ln.line_seq - n, ln.line_seq + n + 1):
+                    if seq == ln.line_seq or seq < 0:
+                        continue
+                    polygon, baseline, _ = line_geometry(conn, ln.page_id, seq)
+                    if polygon is None and baseline is None:
+                        continue
+                    strip = context_strip(im, polygon, baseline)
+                    if strip is None:
+                        continue
+                    (ln.context_above if seq < ln.line_seq else ln.context_below).append(strip)
+                    attached += 1
+        except OSError:  # a truncated or unreadable cache file: the line goes without context
+            continue
+    return attached
+
+
 def lines_for_refs(conn: sqlite3.Connection, refs: Sequence[str]) -> list[AuditLine]:
     """Audit lines for explicit canonical refs, minted or not (P1 and K1 sheets).
 
@@ -397,12 +488,14 @@ def write_sheet(
     help_html: str | None = None,
     verdict_labels: Mapping[str, str] | None = None,
     attach: bool = True,
+    transcription_field: bool = False,
+    storage_key: str | None = None,
 ) -> AuditSheet:
     """Crop the given lines and write the sheet HTML + its lines CSV into ``out_dir``.
 
     ``help_html`` and ``verdict_labels`` reach :func:`render_sheet` (a sheet in
-    another language); ``attach=False`` keeps crops and HTR texts the caller
-    attached itself.
+    another language), as do ``transcription_field`` and ``storage_key``;
+    ``attach=False`` keeps crops and HTR texts the caller attached itself.
     """
     if attach:
         attach_images(conn, lines, images_root)
@@ -412,7 +505,13 @@ def write_sheet(
     csv_path = out_dir / csv_name
     html_path.write_text(
         render_sheet(
-            lines, seed=seed, title=title, help_html=help_html, verdict_labels=verdict_labels
+            lines,
+            seed=seed,
+            title=title,
+            help_html=help_html,
+            verdict_labels=verdict_labels,
+            transcription_field=transcription_field,
+            storage_key=storage_key,
         ),
         encoding="utf-8",
     )
@@ -525,6 +624,65 @@ restore();
 """
 
 
+_CONTEXT_CSS = """
+img.ctx{opacity:.6;border-style:dashed;margin:.15rem 0}
+.ctxnote{font-size:.75rem;color:#888}
+"""
+_TRANSCRIPTION_CSS = """
+.transcription{width:95%;font-family:Georgia,serif;font-size:1.05rem;margin:.3rem 0;
+  display:block}
+"""
+
+
+def _js_with_transcription(js: str) -> str:
+    """The sheet's script for a sheet with a transcription field per line: the
+    field is saved like the note, a line with a text counts as judged (the
+    Leibniz-Edition's convention: the text in place of a verdict), and the
+    download is the table ``leibniz align audit-convert`` reads — ``ref,
+    stratum, verdict, transcription, note`` — named after the sheet."""
+    swaps = (
+        (
+            "it.classList.toggle('done', !!(v && v.verdict));\n    if (v && v.verdict) done++;",
+            "const j = !!(v && (v.verdict || v.transcription));\n"
+            "    it.classList.toggle('done', j);\n    if (j) done++;",
+        ),
+        (
+            "if (ev.target.classList.contains('note')) cur.note = ev.target.value;",
+            "if (ev.target.classList.contains('note')) cur.note = ev.target.value;\n"
+            "  if (ev.target.classList.contains('transcription')) "
+            "cur.transcription = ev.target.value;",
+        ),
+        (
+            "if (v.note) it.querySelector('.note').value = v.note;",
+            "if (v.note) it.querySelector('.note').value = v.note;\n"
+            "    if (v.transcription) it.querySelector('.transcription').value = v.transcription;",
+        ),
+        (
+            "[['ref','stratum','verdict','note']]",
+            "[['ref','stratum','verdict','transcription','note']]",
+        ),
+        (
+            "v.verdict || '', v.note || '']",
+            "v.verdict || '', v.transcription || '', v.note || '']",
+        ),
+        (
+            "a.download = 'gt-audit-verdicts.csv';",
+            "a.download = (document.body.dataset.name || 'gt-audit') + '-verdicts.csv';",
+        ),
+    )
+    for old, new in swaps:
+        if js.count(old) != 1:  # pragma: no cover — the script and this list move together
+            raise RuntimeError(f"sheet script changed: {old!r}")
+        js = js.replace(old, new)
+    return js
+
+
+_SHEET_JS_TRANSCRIPTION = _js_with_transcription(_SHEET_JS)
+TRANSCRIPTION_PLACEHOLDER = (
+    "the whole line, corrected (optional) · die ganze Zeile, berichtigt (optional)"
+)
+
+
 DEFAULT_HELP_HTML = (
     "<div class='help'>For each line, compare the <b>minted text</b> with the "
     "<b>image strip</b> and pick one:<br>"
@@ -546,18 +704,30 @@ def render_sheet(
     title: str = "Ground-truth hand audit",
     help_html: str | None = None,
     verdict_labels: Mapping[str, str] | None = None,
+    transcription_field: bool = False,
+    storage_key: str | None = None,
 ) -> str:
     """The self-contained audit page (crops inlined as data URIs).
 
     ``help_html`` replaces the instructions block; ``verdict_labels`` maps a
     verdict value to the text shown beside its radio button (the value in the
-    downloaded CSV stays the C2 one, so one scorer reads every sheet).
+    downloaded CSV stays the C2 one, so one scorer reads every sheet). A line
+    with context strips shows them, paler, above and below its own strip.
+    ``transcription_field`` adds a field for the whole line's corrected text
+    (the download then has a ``transcription`` column and is named after
+    ``storage_key``); ``storage_key`` names the sheet in the browser's storage
+    so two sheets of one seed keep their verdicts apart.
     """
     parts: list[str] = []
     A = parts.append
+    has_context = any(ln.context_above or ln.context_below for ln in lines)
+    css = _SHEET_CSS + (_CONTEXT_CSS if has_context else "")
+    css += _TRANSCRIPTION_CSS if transcription_field else ""
+    key = html.escape(storage_key, quote=True) if storage_key else str(seed)
+    name = f" data-name='{key}'" if storage_key else ""
     A("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
     A(f"<title>Leibniz Legible — {html.escape(title)}</title>")
-    A(f"<style>{_SHEET_CSS}</style></head><body data-seed='{seed}'>")
+    A(f"<style>{css}</style></head><body data-seed='{key}'{name}>")
     A(f"<h1>{html.escape(title)}</h1>")
     A(help_html if help_html is not None else DEFAULT_HELP_HTML)
     A("<div id='toolbar'><button id='dl'>Download verdicts (CSV)</button> ")
@@ -574,11 +744,17 @@ def render_sheet(
             f"<div class='meta'>#{k} · {ref} · {html.escape(ln.stratum)}{conf}{folio} · "
             f"{html.escape(ln.source)}</div>"
         )
+        for strip in ln.context_above:
+            b64 = base64.b64encode(strip).decode("ascii")
+            A(f"<img class='ctx' src='data:image/jpeg;base64,{b64}' alt='the line before'>")
         if ln.crop_png is not None:
             b64 = base64.b64encode(ln.crop_png).decode("ascii")
             A(f"<img src='data:image/png;base64,{b64}' alt='line image'>")
         else:
             A(f"<div class='noimg'>no image: {html.escape(ln.image_note or 'unknown')}</div>")
+        for strip in ln.context_below:
+            b64 = base64.b64encode(strip).decode("ascii")
+            A(f"<img class='ctx' src='data:image/jpeg;base64,{b64}' alt='the line after'>")
         A(f"<div class='gt'>{html.escape(ln.gt_text)}</div>")
         if ln.alt_text is not None:
             A(
@@ -591,9 +767,12 @@ def render_sheet(
             shown = html.escape((verdict_labels or {}).get(v, v))
             A(f"<label><input type='radio' name='v-{k}' value='{v}'> {shown}</label>")
         A("</div>")
+        if transcription_field:
+            A(f"<input class='transcription' placeholder='{TRANSCRIPTION_PLACEHOLDER}'>")
         A("<input class='note' placeholder='note (optional)'>")
         A("</div>")
-    A(f"<script>{_SHEET_JS}</script></body></html>")
+    js = _SHEET_JS_TRANSCRIPTION if transcription_field else _SHEET_JS
+    A(f"<script>{js}</script></body></html>")
     return "\n".join(parts)
 
 
@@ -1106,10 +1285,12 @@ __all__ = [
     "Evidence",
     "StratumScore",
     "allocate",
+    "attach_context",
     "build_sheet",
     "crop_box",
     "crop_image",
     "lines_for_refs",
+    "page_of_ref",
     "read_verdicts",
     "render_agreement",
     "render_group_scores",

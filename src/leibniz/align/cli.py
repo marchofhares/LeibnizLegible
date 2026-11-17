@@ -22,6 +22,14 @@ Subcommands:
                 the dry run and its report; ``--write`` after a backup and a go.
 * ``letterpool-fetch`` / ``letterpool-parse`` — the GWLB letter pool (K2b): the
                 checked volumes fetched and recorded, then parsed into letters.
+* ``audit-convert`` / ``audit-score --corrections`` / ``audit-apply`` — a judge's
+                table with a transcription column (K3b): converted to the C2
+                verdict shape, scored strictly and under the fold by stratum and
+                hand, and the verified lines written into ``gt_lines`` (a dry run
+                unless ``--write``).
+* ``audit-sheet-k2`` — a further audit sheet of the reader's minted lines: by
+                hand, without the lines, records and pages already used, with
+                the neighbouring lines for context (K3b).
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -1808,6 +1816,171 @@ def audit_apply(
             highlight=False,
         )
     _console.print(f"  verified lines → {out} ({len(plan.rows)} rows)")
+
+
+@app.command(name="audit-sheet-k2")
+def audit_sheet_k2(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/k2-readings"),
+        "--readings-dir",
+        help="The reader's JSONL (kurrent-read).",
+    ),
+    reader: str = typer.Option("trocr-kurrent-xvi-xvii", "--reader", help="The reader key."),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    decisions: Path = typer.Option(
+        Path("data/kurrent/k2-decisions.jsonl"),
+        "--decisions",
+        help="Per-piece decisions (kurrent-mint): which records are in Leibniz's own hand "
+        "under the strict rule.",
+    ),
+    n: int = typer.Option(200, "--n", help="Lines on the sheet (equal numbers per stratum)."),
+    seed: int = typer.Option(20261020, "--seed", help="Seed of the draw."),
+    hand: str = typer.Option(
+        "both",
+        "--hand",
+        help="own: every line from the records in Leibniz's own hand (the strict rule); "
+        "other: every line from the other records; both: half and half, as K2's sheet.",
+    ),
+    exclude_refs: list[Path] = typer.Option(
+        [],
+        "--exclude-refs",
+        help="A lines CSV (column ref): none of its lines again. Repeatable.",
+    ),
+    exclude_records: list[Path] = typer.Option(
+        [],
+        "--exclude-records",
+        help="A CSV with a record_id column (reports/kurrent/k3-val-pieces.csv): no line of "
+        "these records. Repeatable.",
+    ),
+    exclude_pages: list[Path] = typer.Option(
+        [],
+        "--exclude-pages",
+        help="A CSV with a page_ids or page_id column (reports/kurrent/letterpool-testset.csv, "
+        "reports/philiumm/heldout_pages.csv): no line of these pages. Repeatable.",
+    ),
+    context: int = typer.Option(
+        0,
+        "--context",
+        help="Lines above and below each sampled line, from the same page by line_seq, shown "
+        "as paler grey strips. The verdict applies to the middle line.",
+    ),
+    refs: Path = typer.Option(
+        None,
+        "--refs",
+        help="A CSV with a ref column: exactly these lines instead of a draw (--n, --hand "
+        "and the exclusions are then not used).",
+    ),
+    out_dir: Path = typer.Option(
+        Path("data/kurrent"), "--out", help="Directory for NAME.html and NAME-lines.csv."
+    ),
+    name: str = typer.Option(
+        "k3b-audit", "--name", help="The sheet's file name, without extension."
+    ),
+    title: str = typer.Option(None, "--title", help="The page's heading."),
+    english_only: bool = typer.Option(
+        False, "--english-only", help="Labels in English only (default: German too)."
+    ),
+    force: bool = typer.Option(False, "--force", help="Overwrite an existing sheet of this name."),
+) -> None:
+    """A further audit sheet of the reader's minted lines: by hand, without the lines,
+    records and pages already used, with the neighbouring lines for context (K3b).
+
+    The verdicts download as ref, stratum, verdict, transcription, note — the table
+    audit-convert reads: a corrected transcription is welcome in the note or, as the
+    Leibniz-Edition did, as the whole line's text in a column of its own. The verdict
+    applies to the middle strip; the paler strips are context."""
+    import csv
+
+    from leibniz.align import kurrent_mint as M
+    from leibniz.align import kurrent_pilot as P
+
+    if hand not in M.AUDIT_HANDS:
+        raise typer.BadParameter(f"--hand is one of {', '.join(M.AUDIT_HANDS)}")
+    if context < 0 or n < 1:
+        raise typer.BadParameter("--context is 0 or more and --n at least 1")
+    if not name or any(ch in name for ch in "/\\ ") or name.endswith((".html", ".csv")):
+        raise typer.BadParameter("--name is a file name without extension, e.g. k3b-audit")
+    targets = [out_dir / f"{name}.html", out_dir / f"{name}-lines.csv"]
+    taken = [str(p) for p in targets if p.exists()]
+    if taken and not force:
+        raise typer.BadParameter(
+            f"{', '.join(taken)} exists: a second sheet takes another --name (or --force)"
+        )
+    readings = P.load_readings(readings_dir, reader)
+    if not readings:
+        raise typer.BadParameter(f"no readings for {reader} under {readings_dir}")
+    own_ids: set[str] = set()
+    if decisions.exists():
+        own_ids = {d.record_id for d in M.load_decisions(decisions) if d.leibniz_hand}
+    if hand != "both" and not own_ids and refs is None:
+        raise typer.BadParameter(
+            f"--hand {hand} needs the records in Leibniz's own hand: no decisions at {decisions}"
+        )
+    try:
+        skip_refs = M.read_csv_column(exclude_refs, ("ref",))
+        skip_records = M.read_csv_column(exclude_records, ("record_id",))
+        skip_pages = M.read_csv_column(exclude_pages, ("page_ids", "page_id"))
+        wanted: list[str] | None = None
+        if refs is not None:
+            with refs.open(newline="", encoding="utf-8-sig") as fh:
+                rows = list(csv.DictReader(fh))
+            if not rows or "ref" not in rows[0]:
+                raise ValueError(f"{refs}: no column ref, or no row")
+            wanted = [r["ref"].strip() for r in rows if (r.get("ref") or "").strip()]
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from None
+    conn = P.open_readonly(db_path)
+    try:
+        html_path, csv_path, by_stratum, by_group = M.build_audit_sheet(
+            conn,
+            readings,
+            reader=reader,
+            images_root=images,
+            out_dir=out_dir,
+            n=n,
+            seed=seed,
+            bilingual=not english_only,
+            leibniz_hand_ids=own_ids or None,
+            hand=hand,
+            exclude_refs=skip_refs,
+            exclude_record_ids=skip_records,
+            exclude_pages=skip_pages,
+            context=context,
+            name=name,
+            refs=wanted,
+            title=title or f"{name} — {M.AUDIT_TITLE}",
+            correction_note=True,
+        )
+    finally:
+        conn.close()
+    total = sum(by_stratum.values())
+    _console.print(
+        f"[bold]audit-sheet-k2[/bold] → {html_path} ({total} lines: "
+        + ", ".join(f"{k} {v}" for k, v in sorted(by_stratum.items()))
+        + (
+            "; by hand " + ", ".join(f"{k} {v}" for k, v in sorted(by_group.items()))
+            if by_group
+            else "; not grouped by hand"
+        )
+        + f"); lines CSV {csv_path}"
+    )
+    if wanted is not None:
+        _console.print(f"  the {len(wanted)} lines of {refs}, {context} line(s) of context each")
+    else:
+        _console.print(
+            f"  drawn with seed {seed}, hand {hand}, context {context}; left out of the pool: "
+            f"{len(skip_refs):,} lines, {len(skip_records):,} records, {len(skip_pages):,} pages"
+        )
+        if total < n:
+            _console.print(
+                f"[yellow]{total} lines drawn of the {n} asked: the pool holds no more after "
+                "the exclusions[/yellow]"
+            )
 
 
 @app.command(name="audit-reach")
