@@ -3,11 +3,50 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-11-17 (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-11-17: ARCH1 — the archive: the finished phases moved out of STATUS.md
+and PROMPTS.md, verbatim; a cloud session, alone, on the branch it was given,
+`claude/blissful-mccarthy-ktud6m`, from main at `f2ce06c` (#62); docs only: no
+code, no data, nothing deployed; the pull request and the merge are the
+operator's, before any other session branches.** `STATUS-archive.md` now holds
+the Current state entries dated before 2026-10-19 (the entry of 2026-10-14
+back to July, with the retained subsections from "Prior gate (retained)" to
+"A3 in numbers"), the 27 Phase log entries from W5 (2026-10-10) back to A0
+(2026-07-28), and the twelve paragraphs of Next whose every item is done or
+superseded; `PROMPTS-archive.md` holds the original prompts of A0 to C2 and D1
+to D3 and the sixteen follow-up prompts from W3 to K4. STATUS.md keeps one
+pointer line in Current state, one per moved Phase log entry and one in Next;
+Key numbers, Open questions and Divergences are whole, and every entry of
+2026-10-19 or later stays where it was. PROMPTS.md keeps "How to use this
+file" (two sentences on the archive files added), COMMON CONTEXT, C3 with its
+two amendments, C4, E1 and the "Follow-up phases (2026-10)" heading with a
+table of the sixteen archived run prompts; new prompts are appended below the
+table, this one the first. **The counts (`wc -l`, before and after the move):
+STATUS.md 8,113 → 5,390 lines (612,651 → 424,587 bytes) with 2,771 in
+STATUS-archive.md; PROMPTS.md 3,907 → 143 lines (260,339 → 13,577 bytes) with
+3,807 in PROMPTS-archive.md.** The proof, by a script of the session's (not
+committed) that reads the old files from `origin/main` and the four files as
+committed: every old line is in the working file or in its archive (none
+missing), the content lines stand in their old order in both files and none
+stands twice; **STATUS.md's 8,113 old lines = 5,361 kept + 2,752 archived**,
+with 29 new lines in STATUS.md (the pointer lines) and 19 in the archive (the
+title, the two-line head, three section headings, rules and blank lines);
+**PROMPTS.md's 3,907 = 119 kept + 3,788 archived**, with 24 new lines in
+PROMPTS.md (the two sentences, two pointer lines, the table's 18 lines, the
+two lines around it, one blank line) and 19 in the archive. No test or module
+reads either file (no line in `tests` names them; the 25 lines in `src` are
+docstrings, comments and message strings). ruff clean and **1,071 passed, 3
+skipped** before and after (the three need numpy, which the three extras do
+not bring). With this entry, the Phase log entry, the Divergences entry and
+the line in Next, STATUS.md stands at 5,594 lines, and PROMPTS.md with this
+prompt appended at 333. In Next stay every paragraph of 2026-10-19 or later
+and four older blocks with an open item each (the L1 note of 14 October, P1,
+W3, the A0–C2 block). The ARCH1 entry in the Phase log has the detail.
 
 **2026-11-16: two arrivals, recorded (no code, no data).** (a) **The K2 audit
 sheet is judged.** The Leibniz-Edition's Arbeitsstelle (Potsdam) returned the
@@ -605,6 +644,142 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 ---
 
 ## Phase log
+
+### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
+
+- **Setting and pre-flight (Task 0).** A cloud session, alone, on the branch
+  it was given, `claude/blissful-mccarthy-ktud6m`, from main at `f2ce06c`
+  (#62); `git fetch origin main && git merge origin/main` already up to date;
+  no `data/inventory.sqlite`, so a cloud checkout. `.venv-cloud` made with `uv
+  sync --extra web --extra gt --extra release` (uv 0.11.32; Python 3.13.18,
+  uv's default here). Baseline: `ruff check` clean, `ruff format --check` 296
+  files already formatted, **1,071 passed, 3 skipped**
+  (`test_align_letterpool_eval`, `test_htr_pagereport` and
+  `test_htr_pagescore` need numpy, which these extras do not bring). The files
+  as found (`wc -l`, `wc -c`): STATUS.md 8,113 lines, 612,651 bytes;
+  PROMPTS.md 3,907 lines, 260,339 bytes. Read first, as the prompt says:
+  PROMPTS.md's "How to use this file" and COMMON CONTEXT, STATUS.md's headings
+  and the first lines of its Current state entries, then the kept Current
+  state entries and the whole of Next, which the judgement on Next needs. The
+  pre-flight recorded, the session proceeded (the preamble's item 6 and the
+  cloud batch note of 17 November).
+- **Task 1 — STATUS-archive.md (commit `df97d6e`).** By the old file's line
+  numbers: *Current state*, lines 603–1,248 moved (the entry of 2026-10-14
+  back to the undated entries of July, and the eight headings of retained
+  subsections: "Prior gate (retained)" twice, "Phase B1 in numbers", "What was
+  built (B1)", "Delivery-model correction", "What was built (A2 + A3)", "A2 in
+  numbers", "A3 in numbers"), one pointer line in their place; the entries
+  from 2026-11-16 back to K2b's of 2026-10-20 stay. *Phase log*, lines
+  4,382–6,285 moved (27 entries, W5 of 2026-10-10 back to A0 of 2026-07-28), a
+  pointer line for each with its heading's title and date; K4 back to K2b
+  stay. *Next*, lines 7,843–7,993, 8,019–8,050 and 8,072–8,089 moved, one
+  pointer line at the first emptied place. Key numbers, Open questions and
+  Divergences untouched. The cut was made by a script that asserts the text at
+  every boundary and that every moved dated entry is before 2026-10-19 and
+  every kept one is not.
+- **The judgement on Next, paragraph by paragraph.** Every paragraph dated
+  2026-10-19 or later stays, as the entries of those days do: the kept entries
+  and the open prompts say "under Next" of them (LT1's Part B runbook of 28
+  October has been run and stays for that reason and for LT1b's reruns). Of
+  the sixteen older blocks, **twelve moved**: W5 of 10 October (its own
+  heading says steps 1 to 6 are done); K1 of 9 October (merged as #41; K2,
+  which it feeds, is done); the Kurrent path proposed on 9 October and the
+  operator's choice of the letter-pool route the same day (K2, K2b, K3 and K4
+  have all run; the audit by a reader of Kurrent it leaves open came back on 6
+  November); the final merge of 8 October (#40, live); W4's staging look (its
+  steps ticked, merged and live); S1 (installed and verified; its standing
+  staging line is superseded by the final-merge paragraph and by every later
+  staging line, and the rule never to send a staging link stands in
+  `deploy/README.md` §14); C2b of 7 October (items 1 to 3 ticked; item 4, the
+  second judging round, restated in C2c's paragraph of 20 October, which
+  stays); the W3 fix (merged as #39, live, every later staging check reads its
+  `/static/m/` addresses); W2 and W1 (live, checked 6 October); Phase D
+  deployable of 16 September (live since 21 September with the search
+  criterion measured; its release-export item is carried by C2c's paragraph
+  and by REL1). **Four stay, each with an open item:** the L1 note of 14
+  October (the letters to the research directors in Hanover and Münster and
+  the ask for the Edition's Transkribus pages have no recorded answer, and
+  L1's paragraph of 21 October points to it); P1 of 8 October (the sheet of
+  300 disagreements to offer the PHILIUMM team has no recorded outcome; its
+  Task 3 is carried by the paragraph of 16 November); W3 of 6 October (the
+  question to the Edition about the grouping is Open question 22 (a)); the
+  A0–C2 block at the end with its closing line (C3 has not run; the report of
+  the 16 redirect-loop URLs to the GWLB has no recorded outcome).
+- **Task 2 — PROMPTS-archive.md (commit `8dcdfa2`).** By the old file's line
+  numbers: lines 60–169 (the prompts of A0, A1, A2, A3, B1, B2, C1, C2),
+  212–241 (D1, D2, D3) and 256–3,907 (the sixteen follow-up prompts: W3, C2b,
+  P1, S1, W4, K1, K2b, C2c, K2, W6, L1, G1, A3b, K3, LT1, K4) moved under two
+  section headings, "Original phase prompts (archived)" and "Follow-up phases
+  (2026-10) (archived)". PROMPTS.md keeps "How to use this file" with one new
+  paragraph of two sentences (where the run prompts and the old entries are
+  and that a prompt naming one means the archived text; that nothing is
+  appended to the archive files), COMMON CONTEXT, a pointer line where A0 to
+  C2 stood, C3 with the amendments of 16 September and 7 October, C4, a
+  pointer line where D1 to D3 stood, E1, and the "Follow-up phases (2026-10)"
+  heading with its sentence, the table (phase, date run, the heading in the
+  archive; the dates are the headings' own) and the line "New prompts are
+  appended below this line, verbatim, as before." P1's prompt is archived with
+  the others though its Task 3 is still to run; the plan page carries that
+  session's note.
+- **Task 3 — the proof.** A script of the session's (not committed) reads the
+  old files from `origin/main` and the four files as they stand, knowing
+  nothing of the cut. (A) As a multiset of lines, every old line is in the
+  working file or in its archive: 0 missing in STATUS, 0 in PROMPTS; no old
+  line other than a blank line or a `---` rule stands more often than before.
+  (B) On the content lines (every line but a blank line and a rule) the old
+  file is exactly an interleaving of the two new files with their added lines
+  left out, so nothing is reordered, dropped or copied: STATUS 7,871 content
+  lines = 5,249 kept + 2,622 archived; PROMPTS 3,525 = 79 + 3,446. (C) Over
+  all lines, kept being the most old lines that still stand in the working
+  file in their old order (difflib's matching blocks, equal to an exact
+  longest-common-subsequence count): **STATUS.md 8,113 = 5,361 kept + 2,752
+  archived; STATUS.md 5,390 = 5,361 + 29 new; STATUS-archive.md 2,771 =
+  2,752 + 19 new. PROMPTS.md 3,907 = 119 kept + 3,788 archived; PROMPTS.md
+  143 = 119 + 24 new; PROMPTS-archive.md 3,807 = 3,788 + 19 new.** The new lines,
+  printed in full by the script: in STATUS 29 pointer lines, the archive's
+  title, two head lines and three section headings, 3 rules and 10 blank
+  lines; in PROMPTS 2 pointer lines, 18 table lines, the archive's title, two
+  head lines and two section headings, the paragraph of two sentences, the two
+  lines around the table, 3 rules and 12 blank lines. Blank lines and rules
+  are interchangeable in this count: one blank line of Next stands in the
+  archive between two moved runs rather than after the third, and the cut's
+  own ranges move 3,792 lines of PROMPTS.md where the proof counts 3,788, four
+  blank lines and rules being counted as kept where one still stands in the
+  old place. `wc -l` after the move: 5,390 STATUS.md, 2,771 STATUS-archive.md,
+  143 PROMPTS.md, 3,807 PROMPTS-archive.md. The script ran again on the files
+  with this entry and the prompt in them; the hand-over has its counts.
+- **No reader of either file in the code.** `grep -rn 'STATUS.md\|PROMPTS.md'
+  tests src`: no line in `tests`; 25 lines in `src`, each a docstring, a
+  comment or a message string, none opening the file. One of them now names a
+  section that has moved: `src/leibniz/web/static/README.md` line 155 says
+  "see STATUS.md, "Delivery-model correction"", which is in STATUS-archive.md
+  under "Current state (archived)"; left as it is (this phase changes no file
+  under `src`), the preamble's clause 8 covers it. The other files that name
+  the two (README.md, SPECS.md, NOTES.md, `deploy/README.md`, the reports, the
+  issue template) name the file as a whole or a section that stays
+  (Divergences, Open questions, the C3 amendment). ruff clean, **1,071 passed,
+  3 skipped** after the move as before it.
+- **Found on the way, not changed.** (a) In this environment `uv run --no-sync
+  pytest` stops at collection on `tests/test_enrich_pagelang.py` and
+  `tests/test_pipeline_import_readings.py` (`from tests.conftest import …`
+  with no `tests/__init__.py`: the repository root is not on the path); `uv
+  run --no-sync python -m pytest` collects and passes them, and is how the
+  counts above were made. A one-line `pythonpath = ["."]` under
+  `[tool.pytest.ini_options]` would settle it; a code session's. (b) The "Last
+  updated" line at the head of STATUS.md was 12,634 bytes before this session
+  and grows with every one; the prompt names no place for it, so it was
+  extended as every session extends it. On the operator's word a later session
+  can move all but its last few items to the archive. (c) W6's housekeeping
+  note still holds: the W5 prompt was never appended to PROMPTS.md, so it is
+  in neither prompts file.
+- **Hand-over.** Three commits on `claude/blissful-mccarthy-ktud6m`: the
+  STATUS move, the PROMPTS move, this record with the prompt. Compare:
+  https://github.com/marchofhares/LeibnizLegible/compare/main...claude/blissful-mccarthy-ktud6m?expand=1
+  — the operator opens and merges the pull request, and no other session
+  branches before that (both files are the ones every session appends to).
+  From the merge on the preamble's clause 8 holds. Nothing under `data/`,
+  nothing deployed, no file under `src`, `tests`, `deploy` or `reports`
+  changed.
 
 ### K4 — German on the site (2026-10-26/30) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B) · ✅ Task 3 pilot (Checkpoint C) · ✅ the operator's go (2026-10-28) · ✅ the reading job (2026-10-28 09:50 – 2026-10-30 00:49, two launches) · ✅ Task 4 (Checkpoint D: the store written 2026-10-30 08:40–08:51) · ✅ Task 5 (Checkpoint E: 92 browser checks) · ✅ Task 6 (the serving copy on D:; the box commands, the checks and the live switch handed to the operator) · ✅ live (the operator's switch, 2026-10-31)
 
@@ -4290,6 +4465,33 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-11-17 — ARCH1, departures from the prompt and the preamble of 19
+  October (updated 21 October and 16 November).** (1) *No go waited for*: a
+  cloud session started with the whole step records the pre-flight and
+  proceeds (the preamble's item 6, the cloud batch note of 17 November). (2)
+  *Eight retained subsections, not seven*: the prompt's list names seven and
+  "Prior gate (retained)" stands twice; all eight headings moved. (3) *Next's
+  pointer line names what moved*, not "entries before 2026-10-19": twelve of
+  the sixteen blocks older than 19 October moved, four stay with an open item
+  each (the L1 note of 14 October, P1, W3, the A0–C2 block), and nothing dated
+  2026-10-19 or later moved, LT1's Part B runbook included though it has been
+  run (the kept entries point to it under Next); the pointer stands at the
+  first emptied place. (4) *Two pointer lines in PROMPTS.md* where the
+  original prompts stood, which the prompt does not ask for and the preamble's
+  clause 8 does; the table lists the sixteen follow-up prompts only. (5) *P1's
+  prompt is archived though its Task 3 has not run*: the prompt says every
+  prompt under the heading. (6) *One old line is not verbatim in either file*:
+  STATUS.md's "Last updated" line, extended at its head as every session
+  extends it, its old text whole behind the new item. (7) *The proof counts
+  blank lines and `---` rules as interchangeable*; on the content lines it is
+  exact, order included. (8) *Three commits, not two*: the two moves as the
+  prompt says, then this record and the prompt (the batch note: commit and
+  push after every task). (9) *`python -m pytest`, not bare `pytest`*: two
+  test files import `tests.conftest`, which the bare command cannot find in
+  this environment (the ARCH1 entry, "Found on the way"). (10) *Nothing else
+  touched*: the README's file list and the one line under `src` that names an
+  archived section were left as they are (docs of this phase are the four
+  files).
 - **2026-10-28 — LT1, departures from the prompt and the preamble of 19
   October (updated 21 October).** (1) *No go waited for*: a cloud session
   started with the whole step records the pre-flight and proceeds (the
@@ -4854,6 +5056,8 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   gitignored like the rest of `data/`.
 
 ## Next
+
+**ARCH1 (2026-11-17): the archive is built on `claude/blissful-mccarthy-ktud6m` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/blissful-mccarthy-ktud6m?expand=1); the operator opens and merges the pull request before any other session branches, since STATUS.md and PROMPTS.md are the files every session appends to; from the merge on the preamble's clause 8 holds — the entries before 2026-10-19 are in `STATUS-archive.md`, the prompts already run in `PROMPTS-archive.md`, nothing is appended to either, and a prompt that names an archived entry means the archived text.**
 
 **K3b and P1 Task 3 can start (2026-11-16).** The inputs both waited for are
 in: the Edition's verdicts on K2's sheet (6 November; converted and scored in
