@@ -645,6 +645,135 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 ## Phase log
 
+### REL1 — the first releases (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 · ⏳ Task 3 · ⏳ Task 4 · ⏳ Part B (the operator's desktop) · ⏳ Part C
+
+- **Setting and pre-flight (Task 0; recorded, no go waited for).** Part A, a
+  cloud session on the branch it was given, `claude/clever-gates-56b0a4`, from
+  main at `9ae24de` (#63, ARCH1 merged: the archive files are in force);
+  `git fetch origin main && git merge origin/main` already up to date; no
+  store in the checkout (`data/README.md` only), so everything here runs on
+  fixtures; `.venv-cloud` made with the web, gt and release extras
+  (`UV_PROJECT_ENVIRONMENT=.venv-cloud uv sync --extra web --extra gt --extra
+  release`; Python 3.13); no token of any kind. Baseline: ruff clean,
+  **1,071 passed, 3 skipped** (`python -m pytest`; the three need numpy).
+  The fixture store of the pre-flight is K4's (`tools/browser-checks/k4-seed.py`:
+  the test fixtures with the German rows and one scoped k3-trocr run);
+  `leibniz release export --format parquet` and `--format jsonl` wrote the
+  four datasets (works 4, pages 8, crosswalk 1, katalog_records 1; lines 19;
+  gt 7; gt-nc 1) and `leibniz release checklist` printed the checklist.
+  **Confirmed:** (a) `iter_transcriptions` applies K4's precedence — the
+  fixture page `00069377:0001` exports the scoped row on the line the scoped
+  run wrote (`model` `k3-trocr@runs-615-epoch-5`, `run_id` 8) and the first
+  model's rows on its other four lines; the column is `run_id` (with
+  `run_at`), not `run` as the prompt writes it; (b) the ground truth splits
+  by channel as L1 decided (open: `ia` and rows without a channel; nc:
+  `potsdam`, `gwlb`, joined channels; the letter pool in neither); (c) the
+  inventory tables are `works`, `pages`, `crosswalk`, `katalog_records`, the
+  last the store's catalogue records as they are — on the fixture one
+  website-shaped record; on the master, by STATUS.md, 24,916 records read
+  from the catalogue's website unless A3b's write has run since (its entry
+  still reads ⏳), and then 70,405 from the Arbeitsstelle's export; the card
+  asks the store which (`catalog_refreshed`) and words the credit
+  accordingly. **Found, and not foreseen by the prompt:** (1) *the committed
+  audit summary was a test's.* `tests/test_align_audit.py` ran `align
+  audit-score` without `--summary`, so every test run wrote an 8-line
+  stand-in audit over `reports/gt-audit/audit-summary.json`; the file was
+  first committed in that state (2026-10-10, `b725def`) and has read "8
+  rows, 95.0 %, passes the gate" on main since. Both ground-truth cards
+  quote that file, so an export from main said "Hand audit of 8 of 8 sampled
+  lines … precision 95.0 % as written, which passes the 95 % gate", and the
+  committed `reports/gt-factory.md` (the operator's run of 21 October) says
+  the same with "Audited 2" and 50 to 100 % per stratum. (2) *The export
+  opened the master with `db.init_db`*: a writing connection that runs the
+  schema DDL and the migrations; Part B's rule is a read-only store. (3)
+  *The export held a million line rows in memory per file* (`_chunks` built
+  each chunk as a list) and sorted the whole `lines` table (`ORDER BY
+  page_id, line_seq, rank` with no index on the pair): gigabytes of Python
+  objects and of temporary file on a 9.9 GB host. (4) *The cards said
+  nothing true about the German reader's licence, the language pass or the
+  inventory*, and stated one model in the attribution line. The three
+  answers of the operator's note of 16 November: the model's public name
+  **`leibniz-kurrent-trocr`**; D1 inside the transcriptions record **yes**;
+  the Hugging Face namespace was left as `[NAMESPACE]`, so proposed:
+  **`leibniz-legible`** (`https://huggingface.co/leibniz-legible` answered
+  404 on 2026-11-17: no public profile of that name; the operator creates the
+  organisation or names another). The plan as carried out is the tasks below.
+- **Task 1, the cards true to the store — CHECKPOINT A.** *The audit
+  summary restored and fenced:* `leibniz align audit-score
+  reports/gt-audit/gt-audit-verdicts-philiumm.csv` with the C2 mint's stratum
+  counts as weights (9,913 · 96,175 · 190,162 · 1,174, Key numbers) wrote the
+  real summary back — **200 lines, 199 judged, 185 scored, corpus-weighted
+  precision 72.3 %, 92.2 % with boundary slips usable, FAIL at 95 %** — and
+  its stratum table is the committed `reports/gt-audit.md`'s line for line;
+  the four test invocations now pass `--summary` into the test's own folder,
+  and a test pins the committed summary to the audit; the two wrong passages
+  of `reports/gt-factory.md` (the Audited and Est. precision columns, the
+  sentence under them) were re-rendered by the report's own code from the
+  restored summary (50 · 45 · 48 · 42 scored; 84.0 · 86.7 · 64.6 · 57.1 %)
+  and nothing else in that file touched; the operator's next `align
+  gt-report` on the store regenerates the whole. *The export*
+  (`release/export.py`): the store opened read-only by the CLI
+  (`audit_reach.open_readonly`; a missing store is an error, never created);
+  the lines read page by page along `ix_lines_page` (`CROSS JOIN` pins the
+  order, a test reads the query plan: no temporary B-tree) with the current
+  row of each line chosen in Python under the same rank `(precedence, run
+  id)`; chunks streamed to the writers, never held; a re-export clears an
+  older run's extra chunk files. `MANIFEST.json` (version 2) now carries
+  everything a card states as a number: `counts` (the lines by model, by
+  run, by language, by status, by collection, the pages with lines — tallied
+  as the rows are written; a deposit's lines by channel, stratum and reader,
+  and the verified ones), `corpus` (works, pages by status, pages by
+  language from `page_lang`, the reading runs with their scope, the
+  catalogue records and the export they were refreshed from, `gt_lines`),
+  `audit` (the scored summary) and `deposit_census`. **D2 with D1 inside
+  it:** the `transcriptions` folder holds `lines-NNNN` and the four
+  inventory tables under one manifest and one card; `inventory` stays
+  exportable on its own (the repository's copy; not a record). *The cards*
+  (`release/cards.py`, `release/measured.py`, `release/state.py`): every
+  card opens with the Hugging Face front matter (license, language la/fr/de,
+  pretty_name, size_categories from the main table's rows, task_categories
+  image-to-text, tags, one config per table) above the Markdown that is the
+  Zenodo README; a table of what the record holds with each table's own
+  licence line (lines CC BY 4.0; works, pages, crosswalk CC0 1.0; the
+  catalogue records CC BY 4.0 with `arbeitskatalog_credit` where the store
+  holds the export, and "the records read from the catalogue's website, a
+  part of the catalogue" where it does not). The transcriptions card names
+  both models per line (`model`, `run_id`, `run_at`; the lines of each model
+  and of each scoped run, from the manifest), the German reader with its
+  three stamps from `legal.site_readers()` (model CC BY 4.0, base MIT,
+  readings CC BY 4.0), the rule a page read twice follows, the language pass
+  with its threshold, precision and recall (about three quarters of the
+  German pages by the census's measure; a missed page keeps the first
+  model's text), the Marginalien left to the first model, K3's numbers with
+  what each was measured on and LT1's table beside them. Both ground-truth
+  cards have an Audit section: the first audit's sentence from the summary,
+  with its judge (the PHILIUMM team, 2026-10-07), the mint it was measured
+  on and the plain statement that the re-mint in the deposit has not been
+  judged again; K2's sheet with its judge (the Leibniz-Edition's
+  Arbeitsstelle, Potsdam, returned 2026-11-06), its stricter convention and
+  the counts of the entry of 2026-11-16 (76 · 21 · 98 · 1 · 3 · 1; 118
+  corrected), the precision "scored in K3b" until
+  `reports/kurrent/k2-audit.md` is committed and by pointing at that report
+  after; the verified subset counted from the export (rows whose `source`
+  carries `verified leibniz-edition`, of them the corrected ones in `channel
+  edition-k2-audit`) and credited from the registry's entry once main has
+  it, and until the store holds such rows the open card says the subset
+  follows in the next version. Main does not carry K3b-prep's code or the
+  registry entry yet; nothing here depends on the order of the merges. The
+  anti-contamination note stands in every card and every Zenodo description,
+  with a second sentence for a reader that is a training pipeline. **A
+  card's numbers have three sources and no fourth:** the registry
+  (licences), the manifest (counts), a committed report (measured figures:
+  `k3-eval.json`, `page-llm.json`, `k4-reading.json`, read at render time; a
+  missing report is named and nothing quoted; B1's 7.95 % stays a constant
+  pinned to `reports/philiumm-repro.md` by a test). *The DOI mechanism:*
+  `RELEASE.json` at the release root holds the reserved DOIs, the Hub
+  namespace and the creators; `leibniz release cards --out ROOT [--doi
+  record=DOI …] [--hf-namespace NS] [--creator "Family, Given|ORCID"]`
+  re-renders every card and deposit file from the manifests alone, each card
+  with its own DOI and its siblings'. Tests 1,071 → **1,090** at this
+  checkpoint, ruff clean.
+
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 
 - **Setting and pre-flight (Task 0).** A cloud session, alone, on the branch
