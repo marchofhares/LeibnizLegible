@@ -6,7 +6,12 @@ Subcommands:
   split) under ``data/`` (gitignored).
 * ``leibniz bench protocol`` — print the frozen evaluation protocol.
 * ``leibniz bench run`` — evaluate one engine on one dataset (generic; JSONL +
-  JSON out). The reusable harness entry point.
+  JSON out). The reusable harness entry point. ``--decoder beam-lm --lm PATH
+  --lm-weight W --beam N`` decodes kraken's posteriors with a character
+  n-gram (R1; ``htr/decoding.py``).
+* ``leibniz bench lm-build`` — the character n-gram of R1 from the project's
+  own text: the open channels of the edition cache and the open-bucket
+  ``gt_lines``, the evaluation sets' pieces held out (``htr/lm.py``).
 * ``leibniz bench repro`` — the full PHILIUMM reproduction: Kraken on the val
   split under every normalization policy, optional Claude comparison, writing
   ``reports/philiumm-repro.md`` and the STATUS.md gate verdict.
@@ -109,17 +114,42 @@ def run(
     limit: int | None = typer.Option(None, "--limit", help="Cap lines evaluated."),
     out: Path | None = typer.Option(None, "--out", help="Write JSONL per-line dump here."),
     batch_size: int = typer.Option(8, "--batch-size", help="Engine batch size."),
+    decoder: str = typer.Option(
+        "greedy",
+        "--decoder",
+        help="greedy | beam-lm | prefix-beam (kraken engine; R1). greedy is kraken's own.",
+    ),
+    lm: Path | None = typer.Option(
+        None, "--lm", help="The character n-gram (KenLM binary or ARPA; `bench lm-build`)."
+    ),
+    lm_weight: float | None = typer.Option(
+        None, "--lm-weight", help="Weight of the model's log10 score (default 1.5)."
+    ),
+    beam: int | None = typer.Option(None, "--beam", help="Beam size (default 50)."),
 ) -> None:
     """Evaluate one engine on one dataset and print CER/WER (generic harness)."""
+    from leibniz.htr import decoding
+
+    spec = decoding.spec_from_options(decoder, lm, lm_weight, beam, error=typer.BadParameter)
+    if not spec.is_greedy and engine != "kraken":
+        raise typer.BadParameter(f"--decoder {spec.kind} applies to the kraken engine")
     pairs = _load_pairs(data_path, limit=limit)
     if not pairs:
         console.print(f"[red]No line pairs loaded from {data_path}.[/red]")
         raise typer.Exit(code=1)
     pol = metrics.get_policy(policy)
-    eng = _build_engine(engine, model)
+    eng = (
+        _build_engine(engine, model)
+        if spec.is_greedy
+        else _build_engine(engine, model, decoder=spec)
+    )
     console.print(f"[bold]run[/bold] {eng.name}@{eng.version} on {len(pairs):,} lines [{pol.name}]")
+    if not spec.is_greedy:
+        console.print("  decoder: " + ", ".join(f"{k} {v}" for k, v in spec.params().items()))
     result = bench.evaluate(pairs, eng, policy=pol, batch_size=batch_size, dataset=str(data_path))
     console.print(result.summary())
+    if result.n_lines:
+        console.print(f"  {result.seconds / result.n_lines:.3f} s a line ({spec.kind})")
     if out is not None:
         bench.dump_lines_jsonl(result, out)
         console.print(f"per-line dump → [green]{out}[/green]")
@@ -382,13 +412,13 @@ def _load_raw_hyps(path: Path, pairs) -> list[str] | None:
     return [by_id[p.line_id] for p in pairs]
 
 
-def _build_engine(name: str, model: Path | None):
+def _build_engine(name: str, model: Path | None, *, decoder=None):
     if name == "kraken":
         from leibniz.htr.engines import KrakenEngine
 
         if model is None:
             model = artifacts.artifact_paths().model
-        return KrakenEngine(str(model))
+        return KrakenEngine(str(model), decoder=decoder)
     if name == "anthropic":
         from leibniz.htr.engines import AnthropicEngine
 

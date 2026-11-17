@@ -207,6 +207,14 @@ class KrakenEngine:
     Construct with a model path; :meth:`transcribe` takes raw image bytes and
     returns transcriptions. Batches lines (padding to the widest in each batch)
     for throughput on CPU. Deterministic: greedy CTC decode, temperature 1.0.
+
+    ``decoder`` (R1) is a :class:`~leibniz.htr.decoding.DecoderSpec`: left out,
+    or ``greedy``, kraken's own greedy decoder stays in place and nothing
+    changes; ``beam-lm`` and ``prefix-beam`` are built from the model's codec
+    once it is loaded and handed to the recogniser as its decoder callable.
+    ``temperature`` is the recogniser's softmax temperature (``logits / T``),
+    the knob R1's calibration fits. The line's confidence is the mean
+    per-character posterior under every decoder (SPECS §4.5).
     """
 
     name = "kraken"
@@ -219,12 +227,17 @@ class KrakenEngine:
         device: str = "cpu",
         padding: int = KRAKEN_PADDING,
         batch_size: int = 8,
+        decoder=None,
+        temperature: float = 1.0,
     ) -> None:
         self.model_path = model_path
         self.version = version or _basename_stem(model_path)
         self.device = device
         self.padding = padding
         self.batch_size = max(1, batch_size)
+        self.decoder_spec = decoder  # a decoding.DecoderSpec, or None for greedy
+        self.temperature = float(temperature)
+        self._decoder = None  # the built decoding.Decoder (None: kraken's greedy)
         self._model = None
         self._transforms = None
         self._torch = None
@@ -255,6 +268,15 @@ class KrakenEngine:
         # Map our device string to kraken's (accelerator, device count/index) — a
         # bare "cuda" here would make kraken int() a non-number and crash.
         accelerator, dev = _accel_device(self.device)
+        # Greedy at temperature 1.0 passes neither argument: kraken's own
+        # defaults, the configuration every run before R1 was made with.
+        extra: dict = {}
+        if self.temperature != 1.0:
+            extra["temperature"] = self.temperature
+        spec = self.decoder_spec
+        if spec is not None and not spec.is_greedy:
+            self._decoder = spec.build(model.codec)
+            extra["decoder"] = self._decoder
         cfg = RecognitionInferenceConfig(
             device=dev,
             accelerator=accelerator,
@@ -262,6 +284,7 @@ class KrakenEngine:
             num_line_workers=0,
             padding=self.padding,
             bidi_reordering=False,
+            **extra,
         )
         model.prepare_for_inference(cfg)
         self._input_device = _module_device(model)
@@ -309,9 +332,86 @@ class KrakenEngine:
             out.append((text, sum(confs) / len(confs) if confs else None))
         return out
 
+    def _transcribe_batch_scored(self, tensors: list) -> list:
+        """One batch as :class:`~leibniz.htr.decoding.DecodeResult`s: the text kraken's
+        codec wrote, the per-character posteriors, and the decoder's own score."""
+        from leibniz.htr import decoding
+
+        seqs, lens = self._batch_tensors(tensors)
+        preds, olens = self._model._rec_predict(seqs, lens)
+        if self._decoder is not None:
+            results = list(self._decoder.last)
+        else:
+            outputs = self._model.outputs
+            results = [
+                decoding.decode_greedy(decoding.frames_of(outputs[i], int(olens[i])))
+                for i in range(len(preds))
+            ]
+        for res, pred in zip(results, preds, strict=True):
+            res.text = "".join(tok[0] for tok in pred)
+        return results
+
+    def _posteriors_batch(self, tensors: list) -> list:
+        seqs, lens = self._batch_tensors(tensors)
+        _preds, olens = self._model._rec_predict(seqs, lens)
+        outputs = self._model.outputs.float().cpu().numpy()
+        return [outputs[i][:, : int(olens[i])].T.copy() for i in range(outputs.shape[0])]
+
     def transcribe(self, images: Sequence[bytes]) -> list[str]:
         """Transcribe pre-extracted line images (raw bytes) to text, in order."""
         return [t for t, _ in self._run(images, with_conf=False)]
+
+    def transcribe_scored(self, images: Sequence[bytes]) -> list:
+        """Transcribe line images to :class:`~leibniz.htr.decoding.DecodeResult`s, in
+        order (R1): ``decoding.line_confidence`` over one is the confidence
+        :meth:`transcribe_conf` returns; a sliver past the width cap gives an
+        empty result."""
+        from leibniz.htr.decoding import DecodeResult
+
+        return [
+            r if r is not None else DecodeResult("", 0.0, [])
+            for r in self._run_batches(images, self._transcribe_batch_scored)
+        ]
+
+    def posteriors(self, images: Sequence[bytes]) -> list:
+        """The softmax matrix of every line, ``frames × labels`` (numpy float32), at the
+        engine's temperature; ``None`` for a sliver past the width cap. What a sweep
+        over LM weight, beam and temperature decodes again and again (R1 Part B)
+        without a second pass through the network (``decoding.retemper``)."""
+        return self._run_batches(images, self._posteriors_batch)
+
+    def _run_batches(self, images: Sequence[bytes], batch_fn) -> list:
+        from PIL import Image
+
+        self._ensure_loaded()
+        out: list = []
+        buf: list = []
+        max_w = 0
+
+        def flush() -> None:
+            nonlocal max_w
+            if buf:
+                out.extend(batch_fn(buf))
+                buf.clear()
+                max_w = 0
+
+        for data in images:
+            im = Image.open(io.BytesIO(data))
+            im.load()
+            t = self._transforms(im)
+            w = int(t.shape[2])
+            if w > MAX_TRANSFORMED_WIDTH:
+                flush()  # keep output order around the placeholder
+                out.append(None)
+                continue
+            if _should_flush_before(len(buf), max_w, w):
+                flush()
+            buf.append(t)
+            max_w = max(max_w, w)
+            if len(buf) >= self.batch_size:
+                flush()
+        flush()
+        return out
 
     def transcribe_conf(self, images: Sequence[bytes]) -> list[tuple[str, float | None]]:
         """Transcribe line images to ``(text, mean_confidence)`` pairs, in order.

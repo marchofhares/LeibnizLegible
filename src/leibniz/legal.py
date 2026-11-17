@@ -289,6 +289,10 @@ DEPOSITS = ("open", "nc")
 
 # The day the registry was compiled and the public records were re-read.
 REGISTRY_DATE = date(2026, 10, 21)
+# The day of the newest entry. An entry added after the compilation carries its
+# own date and does not move REGISTRY_DATE: the other records were not re-read
+# that day (R1, 2026-11-17: the decoding tools).
+REGISTRY_LAST_ENTRY = date(2026, 11, 17)
 
 
 @dataclass(frozen=True, slots=True)
@@ -879,6 +883,67 @@ LICENCES: tuple[Artifact, ...] = (
         used=False,
     ),
     Artifact(
+        key="flashlight-text",
+        name="flashlight-text (the lexicon-free beam-search decoder, Python bindings)",
+        kind="tool",
+        source="https://github.com/flashlight/text",
+        version="0.0.7 on PyPI (uploaded 2024-03-23; wheels up to CPython 3.12)",
+        obtained=Terms(
+            "MIT (the LICENSE file in the repository and in the wheel); the PyPI metadata's "
+            'licence field reads "BSD licensed, as found in the LICENSE file"',
+            _d(2026, 11, 17),
+            "both read 2026-11-17: the wheel's LICENSE file and the PyPI record",
+        ),
+        current=None,
+        bucket="none",
+        built=(
+            "nothing copied: an optional dependency (the `decode` extra) that decodes kraken's "
+            "posteriors with a character n-gram (R1, `htr/decoding.py`); its wheel links KenLM"
+        ),
+        notes=(
+            "The two licence statements differ (MIT in the file, BSD in the metadata); both are "
+            "permissive and both are recorded. Imported lazily; the pure-Python prefix beam "
+            "does the same job without it."
+        ),
+    ),
+    Artifact(
+        key="kenlm",
+        name="KenLM (n-gram language models: lmplz, build_binary, the query library)",
+        kind="tool",
+        source="https://github.com/kpu/kenlm",
+        version="0.3.0 on PyPI (uploaded 2025-04-07; a source distribution)",
+        obtained=Terms(
+            "LGPL-2.1-or-later (a few files under their own permissive terms)",
+            _d(2026, 11, 17),
+            "the LICENSE file of the 0.3.0 source distribution, read 2026-11-17",
+        ),
+        current=None,
+        bucket="none",
+        built=(
+            "nothing copied: `lmplz` and `build_binary` are run beside the repository to estimate "
+            "the character n-gram (`leibniz bench lm-build`), the query library is linked through "
+            "the optional `kenlm` module and inside flashlight-text's wheel; the ARPA reader in "
+            "`htr/decoding.py` is the project's own code"
+        ),
+        notes=(
+            "A tool and a linked library, never copied into the Apache-2.0 code. The n-gram "
+            "files are this project's output from text of the open deposit (`reports/decoding/"
+            "lm-build.md` says which text each saw)."
+        ),
+    ),
+    Artifact(
+        key="pyctcdecode",
+        name="pyctcdecode (a CTC beam-search decoder in Python)",
+        kind="tool",
+        source="https://github.com/kensho-technologies/pyctcdecode",
+        version="0.5.0 on PyPI (uploaded 2023-01-20, its last release)",
+        obtained=Terms("Apache-2.0", _d(2026, 11, 17), "the PyPI record, read 2026-11-17"),
+        current=None,
+        bucket="none",
+        built="nothing: recorded as the alternative R1 did not choose",
+        used=False,
+    ),
+    Artifact(
         key="nantes-hmer",
         name="The Nantes HMER code (handwritten mathematical expression recognition)",
         kind="tool",
@@ -1204,6 +1269,7 @@ __all__ = [
     "READING_TEXT_ONLY",
     "REGISTRY",
     "REGISTRY_DATE",
+    "REGISTRY_LAST_ENTRY",
     "Artifact",
     "Output",
     "Terms",

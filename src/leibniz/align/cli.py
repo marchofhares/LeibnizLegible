@@ -2109,19 +2109,45 @@ def letterpool_eval(
         "--crop-cache",
         help="Line crops kept on disk, cut once by the first reader (never committed).",
     ),
+    decoder: str = typer.Option(
+        "greedy",
+        "--decoder",
+        help="greedy | beam-lm | prefix-beam for the kraken readers named (R1): their "
+        "readings go to <reader>+<decoder>.jsonl and are scored beside the greedy ones.",
+    ),
+    lm: Path | None = typer.Option(
+        None, "--lm", help="The character n-gram (KenLM binary or ARPA; `bench lm-build`)."
+    ),
+    lm_weight: float | None = typer.Option(
+        None, "--lm-weight", help="Weight of the model's log10 score (default 1.5)."
+    ),
+    beam: int | None = typer.Option(None, "--beam", help="Beam size (default 50)."),
 ) -> None:
     """Score the frozen letter-pool set: v1 and the K1 readers, nothing filtered (K2b Task 3)."""
     from leibniz.align import letterpool as LP
     from leibniz.align import letterpool_eval as E
     from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import decoding
     from leibniz.htr import kurrent as K
 
-    keys = (
+    base_keys = (
         [k.strip() for k in readers.split(",") if k.strip()] if readers else list(E.DEFAULT_READERS)
     )
-    unknown = [k for k in keys if k not in K.CANDIDATES]
+    unknown = [k for k in base_keys if k not in K.CANDIDATES]
     if unknown:
         raise typer.BadParameter(f"unknown readers {unknown}; known: {sorted(K.CANDIDATES)}")
+    spec = decoding.spec_from_options(decoder, lm, lm_weight, beam, error=typer.BadParameter)
+    if not spec.is_greedy:
+        other = [k for k in base_keys if K.CANDIDATES[k].kind != "kraken"]
+        if other:
+            raise typer.BadParameter(
+                f"--decoder {spec.kind} decodes CTC posteriors: not a kraken reader: {other}"
+            )
+    # Under a decoder the reader is read into its own file, <reader>+<decoder>.jsonl,
+    # and the greedy readings already on disk are scored beside it.
+    base_of = {k + spec.suffix: k for k in base_keys}
+    read_keys = list(base_of)
+    keys = read_keys if spec.is_greedy else base_keys + read_keys
     letters = E.load_set(testset, texts)
     conn = open_readonly(db_path)
     try:
@@ -2133,12 +2159,19 @@ def letterpool_eval(
         if read:
             dev = K.pick_device(device)
             _console.print(f"  reading on {dev}")
+            if not spec.is_greedy:
+                _console.print(
+                    "  decoder: " + ", ".join(f"{k} {v}" for k, v in spec.params().items())
+                )
             E.read_set(
                 conn,
                 letters,
-                keys,
+                read_keys,
                 engine_factory=lambda k: K.build_engine(
-                    K.CANDIDATES[k], device=dev, batch_size=batch_size
+                    K.CANDIDATES[base_of[k]],
+                    device=dev,
+                    batch_size=batch_size,
+                    decoder=None if spec.is_greedy else spec,
                 ),
                 images_root=images,
                 readings_dir=readings_dir,
@@ -2155,7 +2188,13 @@ def letterpool_eval(
     if missing:
         _console.print(f"  no readings on disk for {', '.join(missing)}: scored without them")
     licences = {E.V1: "the store (the C1 run)"}
-    licences.update({k: K.CANDIDATES[k].licence for k in keys if k in K.CANDIDATES})
+    licences.update(
+        {
+            k: K.CANDIDATES[base_of.get(k, k)].licence
+            for k in keys
+            if base_of.get(k, k) in K.CANDIDATES
+        }
+    )
     res = E.build_result(
         letters,
         lines,

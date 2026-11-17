@@ -645,6 +645,105 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 ## Phase log
 
+### R1 — decoding and confidence (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ⏳ Task 2 (Checkpoint B) · ⏳ Part B on the desktop (Tasks 3 and 4)
+
+- **Setting and pre-flight (Task 0; Part A, a cloud session).** The branch it
+  was given, `claude/modest-cori-wds26r`, from main at `9ae24de` (#63, ARCH1
+  merged); `git fetch origin main && git merge origin/main` already up to
+  date; no `data/inventory.sqlite`, so a cloud checkout; the tree clean. The
+  archive is in force (the preamble's clause 8): the B1 and K1 entries were
+  read in `STATUS-archive.md`. `.venv-cloud` first with uv's default Python
+  (3.13.18) and the web, gt, release and bench extras: `ruff check` clean,
+  `ruff format --check` 296 files formatted, **1,095 passed, 1 skipped**
+  (`test_htr_engines`' absent-stack test, kraken being installed). The
+  versions, by `pip index versions` on 17 November: **flashlight-text 0.0.7**
+  (0.0.7, 0.0.6, 0.0.5, 0.0.4, 0.0.2, 0.0.1; uploaded 2024-03-23; wheels for
+  CPython 3.6 to 3.12 and PyPy, **none for 3.13**, a source distribution
+  beside them; the PyPI licence field "BSD licensed, as found in the LICENSE
+  file", the LICENSE file in the wheel "MIT License"), **kenlm 0.3.0** (0.3.0,
+  0.2.0, 0.1, 0; uploaded 2025-04-07; a source distribution only, compiled
+  here by g++ in 38 s; LGPL-2.1-or-later by its LICENSE file), **pyctcdecode
+  0.5.0** (uploaded 2023-01-20, Apache-2.0; not used). So `.venv-cloud` was
+  made again on **CPython 3.12.13** (the project's Python, COMMON CONTEXT; the
+  desktop's `.venv-k1` is 3.12 too), where flashlight-text installs from its
+  wheel. **torchaudio is not in `uv.lock` at all** (the lock has torch 2.12.0
+  and torchvision 0.27.0; kraken 7.0.3 does not depend on it); torchaudio
+  2.11.1 on PyPI (it requires torch ≥ 2.11) still ships
+  `torchaudio.models.decoder.ctc_decoder`, a wrapper that raises without
+  flashlight-text, so the decoder uses flashlight-text directly and no
+  torchaudio enters the lock. kraken 7.0.3's hook, read in its source
+  (`kraken/lib/vgsl/rpred.py`, `kraken/configs/base.py`):
+  `RecognitionInferenceConfig(temperature=…, decoder=…)`; `_rec_predict`
+  computes `(logits / temperature).softmax(1)`, squeezes it to **`(N, C, W)`**
+  — labels by frames, not `(N, W, C)` as the prompt and kraken's own
+  docstring say — and hands it with the lengths to the decoder callable,
+  whose `(label, start, end, confidence)` tuples the codec turns into
+  characters. No go was waited for (the batch note of 17 November).
+- **Task 1 — the decoder behind one interface (Checkpoint A).**
+  `src/leibniz/htr/decoding.py`, pure Python, the heavy imports lazy:
+  `Decoder` with three kinds. **`greedy`** is kraken's rule restated (argmax
+  per frame, runs collapsed, the blank dropped, a character's confidence the
+  highest posterior of its run); `KrakenEngine` leaves kraken's own
+  `greedy_decoder` in place for it and passes neither `decoder` nor
+  `temperature` to kraken's config, so today's text and confidence are
+  unchanged bit for bit (the old `_run` path is untouched); on random softmax
+  matrices the restated decoder returns exactly kraken's tuples. **`beam-lm`**
+  is flashlight-text's `LexiconFreeDecoder` with its KenLM: the tokens are the
+  codec's labels in order, label 0 the blank `<ctc>`, the space `<space>` and
+  given to the decoder as its silence token (PyLaia's `sil_token`), beam 50,
+  beam threshold 50, every token considered, LM weight 1.5 (torchaudio's
+  defaults and PyLaia's weight); measured on a toy model, the hypothesis
+  score is the best path's natural-log probability plus the weight times
+  KenLM's **log10** probability of the tokens with the end of the line, and
+  flashlight returns one label per frame between a start and an end silence,
+  so the alignment comes with the result. **`prefix-beam`** is a CTC prefix
+  beam search of the project's own over the same n-gram interface
+  (`NGramLM`: `start`, `score`, `finish`, log10; `ArpaLM` reads an ARPA file
+  in plain Python and gives KenLM's numbers to 1e-5; `KenLMModel` wraps the
+  `kenlm` module where installed): it sums the alignments of a prefix where
+  flashlight keeps the best one, so the two agree where the posterior is
+  peaked and may differ on a near-tie. Every decoder returns a `DecodeResult`
+  (text, the decoder's score, **one posterior per character** — the highest
+  posterior of the character's label inside the frames the chosen alignment
+  gives it, by flashlight's path or a Viterbi alignment of the prefix beam's
+  text — the labels, the spans, the acoustic and LM parts, the frame count),
+  and **`line_confidence`** over it is the mean per-character posterior, SPECS
+  §4.5's confidence as stored since C1, the same function for all three.
+  `retemper` gives the posteriors any other softmax temperature without a
+  second pass (`p ** (1/T)` renormalised equals `softmax(logits / T)`).
+  `TokenTable` holds the labels as characters and as LM tokens and writes the
+  tokens file (one token a line, line 0 `<ctc>`, the space `<space>`, a
+  character KenLM's tokenizer would lose spelled `<U+00A0>`); it reads the
+  codec's `c2l` map, a label that only occurs inside a multi-label entry
+  being `<unk>`. `KrakenEngine` takes `decoder=` (a `DecoderSpec`, built from
+  the model's codec once it is loaded and passed to kraken's config) and
+  `temperature=`, and gains `transcribe_scored` (the `DecodeResult`s) and
+  `posteriors` (the frames × labels matrices, for Part B's sweeps);
+  `kurrent.build_engine` passes the spec to a kraken reader and refuses it
+  for a TrOCR one. **`leibniz bench run` and `align letterpool-eval` take
+  `--decoder greedy|beam-lm|prefix-beam --lm PATH --lm-weight W --beam N`**;
+  under a decoder the letter-pool readings go to `<reader>+<decoder>.jsonl`
+  and are scored beside the greedy readings on disk; `bench run` prints the
+  seconds a line. New dependencies as the optional extra **`decode`**
+  (flashlight-text for Python < 3.13, kenlm, numpy; `uv.lock` gains the two
+  packages and nothing else moves); the fallback path imports nothing new.
+  `legal.py`: flashlight-text (MIT in the file, "BSD" in the metadata, both
+  recorded), KenLM (LGPL-2.1-or-later: a tool and a linked library, nothing
+  copied) and pyctcdecode (recorded, not used) as tools, each with its own
+  date under a new `REGISTRY_LAST_ENTRY` (the registry's compilation date of
+  21 October stays). **Tests: 1,095 → 1,124** (24 in
+  `tests/test_htr_decoding.py`, 3 in `test_htr_cli.py`, 1 in
+  `test_align_letterpool_eval.py`, 1 in `test_legal_licences.py`), on
+  synthetic softmax matrices: greedy unchanged; both beams without a model
+  equal greedy where the posterior is peaked; a hand-made 3-gram pulls a
+  near-tie (u at 0.46 against v at 0.50 after q) to the modelled spelling,
+  under both beams, the chosen character keeping its own posterior; the
+  codec round trip, with a real kraken codec too; and, where kraken is
+  installed, a kraken recogniser with random weights written to a file and
+  read through `KrakenEngine` — the same text and confidence with and without
+  an explicit greedy spec, the prefix beam through kraken's hook, a
+  temperature reaching the softmax.
+
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 
 - **Setting and pre-flight (Task 0).** A cloud session, alone, on the branch
