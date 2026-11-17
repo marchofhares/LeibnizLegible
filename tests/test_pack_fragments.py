@@ -351,6 +351,30 @@ def test_the_v1_text_is_the_row_latest_lines_shows(german_store_path: Path) -> N
     assert row["provenance"]["model"] == "leibniz-htr-v2@v2"
 
 
+def test_the_store_as_an_earlier_run_left_it(german_store_path: Path) -> None:
+    line = f"{W3}:0002:001"
+    now = _build(german_store_path)
+    assert now.params["as_of_run"] is None and line in _rows(now)
+    # the later run re-read the line; the store as the run before it left it shows
+    # the first reading, which is the Bern model's word for word: no pair
+    later = _rows(now)[line]["provenance"]["model"]
+    conn = open_readonly(german_store_path)
+    (run,) = conn.execute(
+        "SELECT run_id FROM lines WHERE line_id = ? AND model = ?", (line, later)
+    ).fetchone()
+    conn.close()
+    then = _build(german_store_path, as_of_run=run - 1)
+    assert line not in _rows(then) and then.pool.skipped["same_text"] == 2
+    assert {r["provenance"]["model"] for r in then.rows} == {"FoNDUE-GD_v2_ft_Leibniz@v1"}
+    assert len(then.rows) == 4 and then.pool.lines == now.pool.lines
+    said = "\n".join(F.summary_lines(then))
+    assert f"the store as run {run - 1} left it" in said
+    assert "the stored reading (htr_best), by model: FoNDUE-GD_v2_ft_Leibniz@v1 4" in said
+    said = "\n".join(F.summary_lines(now))
+    assert "the reading the site shows of each" in said
+    assert "by model: FoNDUE-GD_v2_ft_Leibniz@v1 4 · leibniz-htr-v2@v2 1" in said
+
+
 def test_the_section_70_refusal(german_store_path: Path) -> None:
     before = _build(german_store_path, today=BEFORE_IV4)
     assert f"{W4}:0001:000" not in _rows(before)
@@ -979,6 +1003,9 @@ def test_the_command_takes_the_floor_and_the_weights(
     assert res.exit_code == 0 and "Selected: 0" in res.output
     res = runner.invoke(app, [*base, "--min-ratio", "0.99"])
     assert res.exit_code == 0 and "lopsided" in res.output
+    res = runner.invoke(app, [*base, "--as-of-run", "1"])  # before any German line was read
+    assert res.exit_code == 0 and "the store as run 1 left it" in res.output
+    assert "Eligible: 0 lines" in res.output
     for bad in (["--strata", "fair=1"], ["--strata", "scrap=0"], ["--min-ratio", "1.5"]):
         res = runner.invoke(app, [*base, *bad])
         assert res.exit_code != 0, bad

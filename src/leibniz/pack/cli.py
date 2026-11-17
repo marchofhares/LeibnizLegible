@@ -1,10 +1,11 @@
 """``leibniz pack`` — the Calculemus seam on the terminal (Phase G1).
 
 ``fragments`` builds a fragment pack from the store (read-only), K2's readings
-and K1's German pieces; ``check`` validates a pack against the contract (run it
-on every pack before it leaves the desktop); ``judgments`` imports the game's
-judgment pack — a dry run unless ``--write`` — and renders the Scriptorium
-queue. The logic lives in :mod:`leibniz.pack.fragments`,
+and K1's German pieces — the gold drawn first, a floor under the shorter
+reading, the strata equal or by weight (G1b); ``check`` validates a pack
+against the contract (run it on every pack before it leaves the desktop);
+``judgments`` imports the game's judgment pack — a dry run unless ``--write``
+— and renders the Scriptorium queue. The logic lives in :mod:`leibniz.pack.fragments`,
 :mod:`leibniz.pack.check` and :mod:`leibniz.pack.judgments`.
 """
 
@@ -96,6 +97,13 @@ def fragments(
         "'fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1' (relative; a "
         "stratum not named gives no row). Default: equal numbers per stratum.",
     ),
+    as_of_run: int | None = typer.Option(
+        None,
+        "--as-of-run",
+        min=1,
+        help="Read the store as this run left it (rows of later runs ignored): the first "
+        "candidate is the reading shown then. Default: the reading the site shows now.",
+    ),
     out: Path | None = typer.Option(
         None,
         "--out",
@@ -105,7 +113,8 @@ def fragments(
         None, "--today", help="The day of the §70 check, YYYY-MM-DD (default: today)."
     ),
 ) -> None:
-    """Build a fragment pack: German A/B pairs (v1 against the Bern reading), the gold first."""
+    """Build a fragment pack: German A/B pairs (the stored reading against the Bern
+    reading), the gold drawn first."""
     day = _day(today)
     if min_chars > max_chars:
         raise typer.BadParameter("--min-chars is over --max-chars")
@@ -135,6 +144,7 @@ def fragments(
             max_chars=max_chars,
             min_ratio=min_ratio,
             strata=weights,
+            as_of_run=as_of_run,
             image_base_url=image_base_url,
         )
     finally:

@@ -5,10 +5,17 @@ The game's contract (Calculemus SPECS §6.6, schema_version 1; mirrored in
 the line's place on its page image, exactly two candidate readings, and — on
 a share of the rows — a gold answer the game calibrates its players against.
 For every line of K1's German pieces two machine readings exist: the stored
-v1 text (``lines``, the row :func:`~leibniz.search.documents.latest_lines`
+text (``lines``, the row :func:`~leibniz.search.documents.latest_lines`
 shows) and K2's reading by the Bern Kurrent model (the readings JSONL), and
 they disagree exactly where the site reads worst. This module turns them into
 rows; ``leibniz pack fragments`` opens the store read-only and writes the pack.
+
+The stored text is the one the site shows, whichever run wrote it: v1's when
+G1 was built, and since K4 (run 617, 2026-10-30) the Leibniz Kurrent reader's
+on the German pages that run read. ``as_of_run`` reads the store as an earlier
+run left it (rows of later runs ignored), which pins the first candidate to
+the reading shown then; the names below (``v1_text``, verdict ``v1``,
+``V1_SOURCE``) mean that stored reading, the candidate ``htr_best``.
 
 * **Rows.** A line on a German piece's pages whose two readings are non-empty
   and differ after whitespace normalisation, the longer ``min_chars`` to
@@ -596,9 +603,16 @@ def gather(
     min_chars: int = DEFAULT_MIN_CHARS,
     max_chars: int = DEFAULT_MAX_CHARS,
     min_ratio: float = DEFAULT_MIN_RATIO,
+    as_of_run: int | None = None,
 ) -> Pool:
-    """Every line on the pieces' pages through the rules (:data:`SKIP_REASONS`)."""
+    """Every line on the pieces' pages through the rules (:data:`SKIP_REASONS`);
+    with ``as_of_run``, the store as that run left it."""
     expired = expired_volume_index(today)
+    ranks = db.run_precedences(conn)
+
+    def shown(page_id: str) -> list[db.Line]:
+        return latest_lines(conn, page_id, as_of_run=as_of_run, precedences=ranks)
+
     by_page: dict[str, list[Piece]] = defaultdict(list)
     for p in pieces:
         for pid in p.page_ids:
@@ -612,7 +626,7 @@ def gather(
         if page is None:
             continue
         pool.pages_found += 1
-        lines = latest_lines(conn, page_id)
+        lines = shown(page_id)
         pool.lines += len(lines)
         if not page.local_path or ImageSource.source_url(page) is None:
             pool.pages_no_image += 1
@@ -623,9 +637,7 @@ def gather(
             continue
         if page.work_id not in works:
             works[page.work_id] = db.get_work(conn, page.work_id)
-            groups, _ = resolve_work(
-                db.get_pages(conn, page.work_id), lambda pid: latest_lines(conn, pid)
-            )
+            groups, _ = resolve_work(db.get_pages(conn, page.work_id), shown)
             twins.update({pid: g for g in groups for pid in g.pages})
         work = works[page.work_id]
         lines = _carried(twins.get(page_id), page_id, lines, pool)
@@ -717,6 +729,7 @@ def _examine(
     when = run_at[ln.run_id]
     if not when or not ln.model:
         return "no_provenance", None
+    # the geometry is the segmentation's, copied onto every later reading of the line
     polygon, baseline, _ = audit.line_geometry(conn, page.id, ln.line_seq)
     box = bbox_of(polygon, baseline, width=int(page.width or 0), height=int(page.height or 0))
     if box is None:
@@ -1050,6 +1063,7 @@ def build_pack(
     max_chars: int = DEFAULT_MAX_CHARS,
     min_ratio: float = DEFAULT_MIN_RATIO,
     strata: Mapping[str, float] | None = None,
+    as_of_run: int | None = None,
     image_base_url: str = DEFAULT_IMAGE_BASE_URL,
     reader: str = DEFAULT_READER,
     built_at: str | None = None,
@@ -1066,6 +1080,7 @@ def build_pack(
         min_chars=min_chars,
         max_chars=max_chars,
         min_ratio=min_ratio,
+        as_of_run=as_of_run,
     )
     selected, gold = draw(
         pool.eligible,
@@ -1093,6 +1108,7 @@ def build_pack(
         "max_chars": max_chars,
         "min_ratio": min_ratio,
         "strata": dict(strata) if strata is not None else None,
+        "as_of_run": as_of_run,
         "image_base_url": image_source.base_url,
         "reader": reader,
     }
@@ -1154,8 +1170,13 @@ def summary_lines(pack: Pack) -> list[str]:
     out = [
         f"Pieces: {pool.pieces:,} records on {pool.pages:,} pages ({pool.pages_found:,} in the "
         f"store; {pool.pages_no_image:,} without a cached image, their lines skipped)",
-        f"Lines on those pages: {pool.lines:,} (the latest run of each); readings in the file: "
-        f"{pool.readings:,}",
+        f"Lines on those pages: {pool.lines:,} ("
+        + (
+            f"the store as run {p['as_of_run']} left it"
+            if p.get("as_of_run") is not None
+            else "the reading the site shows of each"
+        )
+        + f"); readings in the file: {pool.readings:,}",
         "Skipped, under the first rule each line failed:",
     ]
     for reason in SKIP_REASONS:
@@ -1200,20 +1221,26 @@ def summary_lines(pack: Pack) -> list[str]:
     )
     langs = Counter(e.piece.language for e in sel)
     out.append("  lang: " + " · ".join(f"{k} {v:,}" for k, v in sorted(langs.items())))
+    models = Counter(e.v1_model for e in sel)
+    out.append(
+        "  the stored reading (htr_best), by model: "
+        + (" · ".join(f"{m} {n:,}" for m, n in models.most_common()) or "—")
+    )
     out.append("Candidate lengths (characters, whitespace normalised):")
-    out.append(f"  htr_best (v1)       {_lengths([e.v1_text for e in sel])}")
+    out.append(f"  htr_best (stored)   {_lengths([e.v1_text for e in sel])}")
     out.append(f"  model_alt (Bern)    {_lengths([e.alt_text for e in sel])}")
     bins = length_bins((e.n_chars for e in sel), p["min_chars"], p["max_chars"])
     out.append("  the longer of the two: " + " · ".join(f"{lab} {n:,}" for lab, n in bins))
     first_v1 = sum(1 for r in pack.rows if r["candidates"][0]["source"] == V1_SOURCE)
     out.append(
-        f"  order: v1 first in {first_v1:,} rows, the Bern reading first in {len(sel) - first_v1:,}"
+        f"  order: the stored reading first in {first_v1:,} rows, the Bern reading first in "
+        f"{len(sel) - first_v1:,}"
     )
     v = Counter(gold.verdicts.values())
     out.append(
         f"Gold supply, among the eligible lines of the strata drawn: {len(gold.verdicts):,} with "
         f"a reader-minted row in the open deposit — one candidate equal under the fold "
-        f"{v['v1'] + v['alt']:,} (v1 {v['v1']:,}, Bern {v['alt']:,}), neither "
+        f"{v['v1'] + v['alt']:,} (stored {v['v1']:,}, Bern {v['alt']:,}), neither "
         f"{v['both_wrong']:,}, both {v['ambiguous']:,} (no gold), unfoldable {v['unfoldable']:,}"
     )
     by_line = {e.line_id: e.stratum for e in pool.eligible}
@@ -1232,7 +1259,10 @@ def summary_lines(pack: Pack) -> list[str]:
         f"both wrong {len(gold.both_wrong):,} (cap {p['bad_gold_share']:g} of the gold)"
     )
     chosen = Counter(gold.verdicts[k] for k in gold.truth)
-    out.append(f"  the truth is v1 in {chosen['v1']:,} rows, the Bern reading in {chosen['alt']:,}")
+    out.append(
+        f"  the truth is the stored reading in {chosen['v1']:,} rows, the Bern reading in "
+        f"{chosen['alt']:,}"
+    )
     kinds = Counter(
         (e.stratum, "bad" if e.line_id in gold.both_wrong else "truth")
         for e in sel
