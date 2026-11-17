@@ -1511,7 +1511,7 @@ def audit_score(
         verdict_agreement,
         write_audit_summary,
     )
-    from leibniz.db import open_db
+    from leibniz.align.audit_reach import open_readonly
 
     if corrections is not None:
         unnamed = [
@@ -1556,13 +1556,16 @@ def audit_score(
         where, params = "", ()
         if weights_reader:
             where, params = " WHERE source LIKE ?", (f"%; reader {weights_reader};%",)
-        with open_db(db_path) as conn:
+        conn = open_readonly(db_path)  # the weights are one SELECT: the store is not written
+        try:
             weight_counts = {
                 (r[0] or "unknown"): r[1]
                 for r in conn.execute(
                     f"SELECT stratum, COUNT(*) FROM gt_lines{where} GROUP BY stratum", params
                 )
             }
+        finally:
+            conn.close()
         weight_note = f"stratum weights from `{db_path}`" + (
             f" (the rows minted on {weights_reader})" if weights_reader else ""
         )

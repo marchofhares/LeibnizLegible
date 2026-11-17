@@ -416,6 +416,51 @@ def test_audit_score_weights_from_a_readers_rows(german_store_path: Path, tmp_pa
     assert f"the rows minted on {READER}" in summ["weights_source"]
 
 
+def test_a_sheet_of_the_editions_shape_scores_as_status_says(tmp_path: Path) -> None:
+    """200 synthetic rows in the counts of the table returned on 2026-11-06 (76 correct,
+    21 boundary, 20 of them with a text, 98 texts without a verdict, 1 wrong, 3
+    unreadable, 1 blank): the tally, and the strict and usable figures STATUS.md
+    quotes from those counts (39 % and 49 %)."""
+    kinds = (
+        [("correct", False)] * 76
+        + [("boundary", True)] * 20
+        + [("boundary", False)]
+        + [("", True)] * 98
+        + [("wrong", False)]
+        + [("unreadable", False)] * 3
+        + [("", False)]
+    )
+    lines: dict[str, dict[str, str]] = {}
+    table: list[dict[str, str]] = []
+    for k, (verdict, with_text) in enumerate(kinds):
+        ref = f"S:{k // 20 + 1:04d}:{k % 20:03d}"
+        minted = f"synthetische Zeile Nummer {k} des Blattes"
+        group = "leibniz_hand" if k % 2 else "other_hands"
+        lines[ref] = {"ref": ref, "stratum": "heavy_revision", "gt_text": minted, "group": group}
+        # every third text differs only in what the fold removes, the others in a word
+        text = (minted.capitalize() + "," if k % 3 == 0 else minted + " mehr") if with_text else ""
+        table.append({"ref": ref, "verdict": verdict, "transcription": text, "note": ""})
+    conv = E.convert(table, lines)
+    assert len(conv.rows) == 200 and len(conv.corrections) == 118
+    assert conv.tally() == {
+        "correct": 76,
+        "boundary": 1,
+        "boundary + transcription": 20,
+        "transcription, no verdict (→ wrong)": 98,
+        "wrong": 1,
+        "unreadable": 3,
+        "blank": 1,
+    }
+    rows = [{"ref": r.ref, "stratum": r.stratum, "verdict": r.verdict} for r in conv.rows]
+    rep = E.fold_scores(rows, lines, {r.ref: r.transcription for r in conv.corrections})
+    p = rep.pooled
+    assert (p.n_judged, p.n_scored, p.correct, p.boundary) == (199, 196, 76, 21)
+    assert p.corrected_ok + p.corrected_below == 98 and (p.wrong, p.unreadable) == (1, 3)
+    assert f"{100 * p.strict:.0f} %" == "39 %" and f"{100 * p.usable:.0f} %" == "49 %"
+    assert p.fold >= p.strict and p.fold_usable >= p.usable
+    assert sum(g.n_judged for g in rep.by_group.values()) == 199
+
+
 # --------------------------------------------------------------------------- #
 # Task 3: the verified lines into the store
 # --------------------------------------------------------------------------- #
@@ -515,10 +560,23 @@ def _gt_rows(store: Path) -> list[tuple]:
 
 
 def _report_counts(store: Path) -> dict:
-    """What gt-report counts: lines by bucket, by stratum and by reader."""
+    """What gt-report counts: lines by bucket, by stratum and by reader — and the
+    report itself, rendered from the store."""
+    from datetime import date
+
+    from leibniz.align.report_gt import gather_gt, render_gt
+
     conn = db.connect(store)
     try:
+        rep = gather_gt(
+            conn,
+            today=date(2026, 11, 17),
+            editions_dir=store.parent / "no-editions",
+            edition_cache=store.parent / "no-cache.jsonl",
+            audit_summary=None,
+        )
         return {
+            "report": render_gt(rep),
             "bucket": dict(
                 conn.execute("SELECT license_bucket, COUNT(*) FROM gt_lines GROUP BY 1").fetchall()
             ),
