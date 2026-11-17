@@ -978,12 +978,14 @@ def render_score(
     sheet_note: str = "",
     evidence: Sequence[Evidence] | None = None,
     extra_sections: Sequence[Sequence[str]] = (),
+    title: str | None = None,
 ) -> str:
     """``reports/gt-audit.md``; ``extra_sections`` are rendered markdown blocks
-    (agreement, patterns, corrections) appended in order."""
+    (agreement, patterns, corrections) appended in order. ``title`` replaces the
+    C2 audit's heading (another sheet's report)."""
     out: list[str] = []
     A = out.append
-    A("# GT hand audit — C2 precision gate")
+    A(f"# {title or 'GT hand audit — C2 precision gate'}")
     A("")
     if sheet_note:
         A(sheet_note)

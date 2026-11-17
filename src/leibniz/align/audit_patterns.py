@@ -43,6 +43,21 @@ rule that fired is kept in ``signals``):
 10. ``other`` — nothing above fired: on a *wrong* verdict, the one case left
     is a misaligned line.
 
+**A whole line from the judge (2026-11).** The Leibniz-Edition's judges of K2's
+sheet wrote out the line's text instead of describing the fault. Where
+:func:`classify` is given that text (``line``; ``audit-score --corrections``)
+the note is not parsed for edits: the signals are read off the word-level
+difference between the minted text and the judge's (:func:`line_signals`), and
+the judge's text, not the HTR reading, is the witness for a hyphen or an
+addition. A line that folds to the minted text below :data:`LINE_MIN_SIM` is
+``other`` — another line, or a slice far off — and that is a measurement, so
+such a row is not left for the override file. Otherwise, in order: an
+*addition* (the mint has words mid-line that the strip does not), a *boundary*
+slip (words or letters at an end), a *hyphen* (the judge's line ends in a
+hyphen mark, the minted text in a letter), a *reading* (a word read
+differently, another word, or words on the strip the mint lacks, mid-line),
+*normalization* (differences the fold removes).
+
 The prompt that asked for this named ``hyphen``, ``boundary-letter``, ``math``,
 ``addition``, ``unreadable``, ``correct`` and ``other``; ``bracket``,
 ``normalization`` and ``reading`` were added because without them fifteen of the
@@ -53,9 +68,10 @@ is a wrong line.
 from __future__ import annotations
 
 import csv
+import difflib
 import re
 import unicodedata
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -130,6 +146,9 @@ BOUNDARY_MAX_CHARS = 3
 # that, the minted word is not the one on the line.
 READING_MIN_SIM = 0.5
 READING_MIN_LEN_RATIO = 0.6
+# A judge's whole line that folds to the minted text below this is another
+# line (or a slice far off), not a reading of this one.
+LINE_MIN_SIM = 0.5
 
 
 def fold_note(note: str) -> str:
@@ -485,10 +504,88 @@ class PatternRow:
     similarity: float = 0.0  # folded minted ↔ HTR
     corrections: list[Correction] = field(default_factory=list)
     overridden: bool = False
+    from_line: bool = False  # classified from the judge's whole line, not from the note
 
     @property
     def undecided(self) -> bool:
-        return self.pattern == "other" and not self.overridden
+        """Left for the override file: ``other`` by default of a rule. A row
+        measured against the judge's whole line is decided either way."""
+        return self.pattern == "other" and not self.overridden and not self.from_line
+
+
+def _outer_extent(minted: str, corrected: str, edge: str) -> int | None:
+    """Characters by which two fragments at a line's ``edge`` differ on the outer
+    side (``None`` when one is not the other cut short there)."""
+    a, b = minted.strip(), corrected.strip()
+    long, short = (a, b) if len(a) >= len(b) else (b, a)
+    fits = long.endswith(short) if edge == "start" else long.startswith(short)
+    return len(long) - len(short) if fits and short else None
+
+
+def line_signals(minted: str, corrected: str) -> list[tuple[str, str]]:
+    """``(signal, why)`` pairs read off the difference between the minted text
+    and the judge's text of the whole line, word by word (first hit per signal).
+
+    ``misaligned`` alone where the two fold to each other below
+    :data:`LINE_MIN_SIM`; else any of ``hyphen``, ``boundary-letter``,
+    ``boundary-word``, ``addition``, ``reading``, ``word``, ``omission``,
+    ``normalization``; ``identical`` where the judge's text is the minted text."""
+    out: list[tuple[str, str]] = []
+
+    def hit(name: str, why: str) -> None:
+        if all(n != name for n, _ in out):
+            out.append((name, why))
+
+    a, b = minted.split(), corrected.split()
+    if a == b:
+        return [("identical", "the judge's text is the minted text")]
+    fa, fb = normalize(minted), normalize(corrected)
+    sim = dp.similarity(fa, fb) if fa and fb else 0.0
+    if sim < LINE_MIN_SIM:
+        return [
+            (
+                "misaligned",
+                f"the judge's line folds to the minted text at {sim:.2f} only "
+                f"(< {LINE_MIN_SIM}): another line, or a slice far off",
+            )
+        ]
+    if b and b[-1][-1] in HYPHENS and ends_in_letter(minted):
+        hit("hyphen", f"the judge's line ends in {b[-1][-1]!r}, the minted text in a letter")
+        b = [*b[:-1], b[-1][:-1]] if len(b[-1]) > 1 else b[:-1]
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if tag == "equal":
+            continue
+        ma, mb = " ".join(a[i1:i2]), " ".join(b[j1:j2])
+        fm, fc = normalize(ma), normalize(mb)
+        if fm == fc:
+            hit("normalization", f"{ma!r} and {mb!r} differ only in what the fold removes")
+            continue
+        at_start, at_end = i1 == 0 and j1 == 0, i2 == len(a) and j2 == len(b)
+        edge = "" if at_start and at_end else "start" if at_start else "end" if at_end else ""
+        if tag == "replace":
+            ext = _outer_extent(ma, mb, edge) if edge else None
+            ratio = min(len(fm), len(fc)) / max(len(fm), len(fc), 1)
+            if ext is not None:
+                name = "boundary-letter" if ext <= BOUNDARY_MAX_CHARS else "boundary-word"
+                hit(name, f"{ma!r} → {mb!r} at the line's {edge}: {ext} character(s)")
+            elif dp.similarity(fm, fc) >= READING_MIN_SIM and ratio >= READING_MIN_LEN_RATIO:
+                hit("reading", f"the judge reads {mb!r} for {ma!r}")
+            elif edge:
+                hit("boundary-word", f"{ma!r} → {mb!r} at the line's {edge}")
+            else:
+                hit("word", f"the judge reads {mb!r} where the mint has {ma!r}")
+        elif tag == "delete":  # the mint has words the strip does not
+            if edge:
+                name = "boundary-letter" if len(ma) <= BOUNDARY_MAX_CHARS else "boundary-word"
+                hit(name, f"the mint's {ma!r} at the line's {edge} is not on the strip")
+            else:
+                hit("addition", f"the mint has {ma!r} mid-line where the judge's line has nothing")
+        elif edge:  # insert: the strip has words the mint lacks
+            name = "boundary-letter" if len(mb) <= BOUNDARY_MAX_CHARS else "boundary-word"
+            hit(name, f"the strip's {mb!r} at the line's {edge} is missing from the mint")
+        else:
+            hit("omission", f"the judge's line has {mb!r} mid-line where the mint has nothing")
+    return out
 
 
 def classify(
@@ -498,15 +595,25 @@ def classify(
     note: str,
     gt_text: str,
     htr_text: str | None,
+    line: str | None = None,
 ) -> PatternRow:
-    """One pattern for one judged line (see the module docstring for the rules)."""
+    """One pattern for one judged line (see the module docstring for the rules).
+
+    ``line`` is the judge's text of the whole line, where a corrections file
+    gave one: the correction is then that line, the note is read for its
+    keywords only, and the judge's text replaces the HTR reading as the witness
+    for a hyphen or an addition."""
     verdict = (verdict or "").strip().lower()
     note = note or ""
     htr = htr_text or ""
     g = normalize(gt_text)
     h = normalize(htr)
     sim = dp.similarity(g, h) if g and h else 0.0
-    corrections = extract_corrections(note, gt_text)
+    from_line = line is not None and verdict != "unreadable"
+    if line is not None:
+        corrections = [Correction("line", "", line)]
+    else:
+        corrections = extract_corrections(note, gt_text)
     signals: list[str] = []
     reasons: dict[str, str] = {}
 
@@ -521,7 +628,7 @@ def classify(
         hit("unreadable-note", "the note says part of the line could not be read")
     if mentions(note, ADDITION_WORDS):
         hit("addition", "the note names an addition rendered inline")
-    elif verdict == "wrong" and len(g) - len(h) > MAX_INSERT_FLOOR:
+    elif not from_line and verdict == "wrong" and len(g) - len(h) > MAX_INSERT_FLOOR:
         hit(
             "addition",
             f"minted text exceeds the HTR reading by {len(g) - len(h)} folded characters "
@@ -534,7 +641,7 @@ def classify(
         hit("math", f"mathematical characters {100 * ops:.0f} % / with digits {100 * all_:.0f} %")
     if has_bracket(gt_text):
         hit("bracket", "an editorial bracket in the minted text")
-    hy_mech = htr_ends_hyphenated(htr) and ends_in_letter(gt_text)
+    hy_mech = not from_line and htr_ends_hyphenated(htr) and ends_in_letter(gt_text)
     hy_note = mentions(note, HYPHEN_WORDS)
     if hy_mech and hy_note:
         hit(
@@ -547,6 +654,9 @@ def classify(
         hit("hyphen-note", "the note names a missing hyphen the HTR did not read either")
     if verdict == "boundary":
         hit("boundary-letter", "boundary verdict")
+    if from_line:
+        for name, why in line_signals(gt_text, line or ""):
+            hit(name, why)
     for c in corrections:
         frag = c.minted or c.corrected
         if c.op == "line":
@@ -584,7 +694,10 @@ def classify(
     if verdict == "correct":
         hit("correct", "correct verdict")
 
-    pattern, why = _pick(verdict, signals, reasons)
+    if from_line:
+        pattern, why = _pick_line(verdict, signals, reasons)
+    else:
+        pattern, why = _pick(verdict, signals, reasons)
     return PatternRow(
         ref=ref,
         stratum=stratum or "unknown",
@@ -597,6 +710,7 @@ def classify(
         htr_text=htr,
         similarity=sim,
         corrections=corrections,
+        from_line=from_line,
     )
 
 
@@ -633,10 +747,43 @@ def _pick(verdict: str, signals: Sequence[str], reasons: dict[str, str]) -> tupl
     return "other", "no rule applies"
 
 
+# A row with the judge's whole line: what the difference shows, most structural
+# first. ``misaligned`` is ``other``; ``word`` and ``omission`` are *reading*.
+_LINE_PRECEDENCE = (
+    ("misaligned", "other"),
+    ("addition", "addition"),
+    ("math", "math"),
+    ("bracket", "bracket"),
+    ("boundary-word", "boundary-letter"),
+    ("boundary-letter", "boundary-letter"),
+    ("hyphen", "hyphen"),
+    ("hyphen-note", "hyphen"),
+    ("reading", "reading"),
+    ("word", "reading"),
+    ("omission", "reading"),
+    ("normalization", "normalization"),
+)
+
+
+def _pick_line(verdict: str, signals: Sequence[str], reasons: dict[str, str]) -> tuple[str, str]:
+    for name, pattern in _LINE_PRECEDENCE:
+        if name in signals:
+            return pattern, reasons[name]
+    if verdict == "correct":
+        return "correct", reasons.get("correct", "correct verdict")
+    return "other", reasons.get("identical", "no rule applies")
+
+
 def classify_rows(
-    verdict_rows: Sequence[dict[str, str]], lines: dict[str, dict[str, str]]
+    verdict_rows: Sequence[dict[str, str]],
+    lines: dict[str, dict[str, str]],
+    corrections: Mapping[str, str] | None = None,
 ) -> list[PatternRow]:
-    """Classify every judged verdict row that is on the sheet (``lines`` by ref)."""
+    """Classify every judged verdict row that is on the sheet (``lines`` by ref).
+
+    ``corrections`` maps a ref to the judge's text of the whole line (a
+    corrections file): such a row's correction is that line, not what the note
+    spells out."""
     out: list[PatternRow] = []
     for r in verdict_rows:
         verdict = (r.get("verdict") or "").strip().lower()
@@ -651,6 +798,7 @@ def classify_rows(
                 r.get("note") or "",
                 ln.get("gt_text") or "",
                 ln.get("htr_text") or "",
+                line=(corrections or {}).get(r["ref"]),
             )
         )
     return out
@@ -949,15 +1097,53 @@ def render_patterns(rows: Sequence[PatternRow], *, strata: Sequence[str]) -> lis
         "one, or the edit is a punctuation mark."
     )
     A("9. *correct* — a *correct* verdict with nothing else to say. 10. *other* — no rule fired.")
+    n_line = sum(1 for r in rows if r.from_line)
+    if n_line:
+        n_far = sum(1 for r in rows if r.from_line and "misaligned" in r.signals)
+        A("")
+        A(
+            f"**Whole lines from the judge.** On {n_line} lines the judge wrote out the line's "
+            f"text; there the pattern is read off the word-level difference between the minted "
+            f"text and the judge's, and the judge's text, not the HTR reading, is the witness "
+            f"for a hyphen or an addition. A line that folds to the minted text below "
+            f"{LINE_MIN_SIM} is *other* — another line, or a slice far off ({n_far} lines). "
+            f"Otherwise, in order: *addition* (the mint has words mid-line that the strip does "
+            f"not), *math*, *bracket*, *boundary-letter* (words or letters at an end of the line; "
+            f"a *boundary* verdict), *hyphen* (the judge's line ends in a hyphen mark, the minted "
+            f"text in a letter), *reading* (a word read differently, another word, or words on "
+            f"the strip that the mint lacks, mid-line), *normalization* (differences the fold "
+            f"removes: accents, capitals, punctuation). Every signal that fired is in the "
+            f"per-line CSV."
+        )
     return out
 
 
-def render_corrections(table: Sequence[CorrectionRow]) -> list[str]:
+def render_corrections(table: Sequence[CorrectionRow], *, whole_lines: bool = False) -> list[str]:
+    """The corrections section. ``whole_lines``: the corrections are the judge's
+    text of the whole line from a corrections file, not edits read from notes."""
     out: list[str] = []
     A = out.append
+    located = [r for r in table if r.corrected_text]
+    if whole_lines:
+        A("## The judge's lines against the minted text")
+        A("")
+        if not table:
+            A("The corrections file carries no line of this sheet.")
+            return out
+        changed = [r for r in table if r.corrected_text]
+        A(
+            f"On {len(table)} judged lines the judge wrote out the line's text; on "
+            f"{len(changed)} it differs from the minted text. The table gives the mean "
+            f"character distance minted → judge's text per pattern, as written (accents and "
+            f"case kept) and under the aligner's fold; the gap between the two columns is what "
+            f"the fold hides and a diplomatic scorer charges: accents, capitals, punctuation. "
+            f"These are whole lines as the judge read them, so the figures are measurements of "
+            f"the minted text on these lines, not floors."
+        )
+        out.extend(_corrections_tables(table, located))
+        return out
     A("## Corrections in the notes: the normalization tax, first sample")
     A("")
-    located = [r for r in table if r.corrected_text]
     if not table:
         A("No note carries a correction.")
         return out
@@ -971,6 +1157,16 @@ def render_corrections(table: Sequence[CorrectionRow]) -> list[str]:
         f"the tax itself. These are the auditors' word-level corrections, not full "
         f"re-transcriptions, so every figure is a floor."
     )
+    out.extend(_corrections_tables(table, located))
+    return out
+
+
+def _corrections_tables(
+    table: Sequence[CorrectionRow], located: Sequence[CorrectionRow]
+) -> list[str]:
+    """The per-pattern distances and the per-line table of a corrections section."""
+    out: list[str] = []
+    A = out.append
     A("")
     A("| pattern | lines placed | mean distance, as written | mean distance, folded |")
     A("|---|---:|---:|---:|")
