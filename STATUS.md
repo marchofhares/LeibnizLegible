@@ -645,7 +645,7 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 ## Phase log
 
-### REL1 — the first releases (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 · ⏳ Task 3 · ⏳ Task 4 · ⏳ Part B (the operator's desktop) · ⏳ Part C
+### REL1 — the first releases (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 · ✅ Task 3 · ⏳ Task 4 · ⏳ Part B (the operator's desktop) · ⏳ Part C
 
 - **Setting and pre-flight (Task 0; recorded, no go waited for).** Part A, a
   cloud session on the branch it was given, `claude/clever-gates-56b0a4`, from
@@ -813,6 +813,78 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   repository's PDFs and therefore published in the NC-derived deposit; the
   card states both and names the lawyer-memo question, taking no position.
   Tested on a stand-in folder (7 tests); 1,090 → **1,097**.
+- **Task 3, Zenodo and Hugging Face, scripted** (`tools/release/zenodo_deposit.py`
+  and `tools/release/hf_upload.py`, thin entry points; the logic and its tests
+  in `release/zenodo.py` and `release/hub.py`). *Zenodo, two steps a record,
+  with the cards re-rendered between them:* `reserve` creates the draft
+  (`POST /api/deposit/depositions` with a working title and `prereserve_doi`),
+  prints the DOI Zenodo reserves and writes it with the deposition's id and
+  bucket into `RELEASE.json` — a record that already has a draft there is not
+  given a second one; `upload` reads the record's deposit file (title = the
+  card's title, description = the card's summary, licence statement,
+  attribution and anti-contamination note as HTML, creators, licence id,
+  version = the export's date, the keywords and related identifiers of the
+  checklist §2 exactly, community `leibniz`), refuses a card that does not
+  carry the reserved DOI, a draft that is already published and a DOI that is
+  not the draft's, writes the metadata (`PUT` on the draft), then uploads
+  the files one at a time to the draft's bucket — a file the draft already
+  holds with the same size and MD5 is skipped, each upload's size and MD5 are
+  checked against the local file, a 5xx or a network error is retried with a
+  growing pause, the record's limits (100 files, 50 GB) are checked before
+  anything is sent, the draft's own listing is compared at the end — and
+  **stops: no request to `actions/publish` exists in the code**, and the
+  runbook asks for a token with `deposit:write` and without
+  `deposit:actions`, which could not publish if it tried. `--sandbox` runs
+  the same against sandbox.zenodo.org. *Hugging Face:* the record's folder to
+  `<namespace>/<folder>` (a dataset repository; a model repository for the
+  model), created private, an existing public one refused unless
+  `--allow-public`, README.md first, the Parquet and the weights as they are,
+  one commit a file, a large file skipped where the Hub states the same
+  SHA-256, the Zenodo zip and deposit files never sent; **the NC-derived
+  deposit is refused three ways** (by record name, by the folder's manifest,
+  by the card's licence), so it cannot reach the mirror under another name.
+  *Both* read their token from the environment only (`ZENODO_TOKEN`,
+  `HF_TOKEN`; no `--token` option exists; the Hub client is handed the token
+  explicitly, so the library's token file is not consulted), never print or
+  store it, and have a `--dry-run` that prints each request and needs no
+  token. `huggingface_hub` joins the `release` extra (1.16.1, already locked
+  through transformers; `uv.lock` gains two lines). *The API as scripted
+  against:* the deposit API of developers.zenodo.org as read on 2026-11-17
+  (the bucket `PUT`, 50 GB and 100 files a record, `GET …/files` with
+  `filename`, `filesize`, a bare MD5). Read the same day through the public
+  API: the community `leibniz` exists; the licence ids `cc-by-4.0`,
+  `cc-by-nc-4.0`, `cc0-1.0`, `apache-2.0` are in Zenodo's vocabulary; the
+  project's four report records name one creator with an ORCID (so the
+  operator passes `--creator` at Part B: the default is the project's name);
+  the PHILIUMM records still read CC BY-NC 4.0 (the two models) and CC BY 4.0
+  (the dataset, Zenodo and the Hub at revision b53f531c), and the Bern
+  model's card still reads MIT, its repository's head now `c599751f` (the
+  registry's revision `a6bb6086` still resolves): Open question 29 (f)'s
+  re-reading, done once here, to be done again on the day of the release.
+  *The tests* (17; no network): a mock transport answering in the shapes of
+  `tests/fixtures/zenodo/` — **one fixture is a recording** (Zenodo's 403
+  "Permission denied." to a call without a token, 2026-11-17); the three
+  success shapes are written to the documentation's field lists, not
+  recorded, since no token exists here (the fixture folder's README says so;
+  Part B's first `reserve --sandbox` is the live check) — and a stand-in for
+  the Hub client. 1,097 → **1,114**, ruff clean.
+- **The dry run on the fixture store** (K4's fixture; the outputs kept in
+  the session's scratch folder, nothing committed): `leibniz release export
+  --format parquet` → four folders, three deposit files; `zenodo_deposit.py
+  reserve --dry-run` for the four records → four `DRY RUN  POST
+  https://zenodo.org/api/deposit/depositions` lines and "no draft created,
+  no DOI reserved"; `leibniz release cards --doi …` with four stand-in DOIs
+  and `--hf-namespace leibniz-legible` → the four cards re-rendered without
+  the store; `leibniz release model` on a stand-in checkpoint → the folder,
+  the zip, the deposit file; `zenodo_deposit.py upload --dry-run` for the
+  four → 21 `DRY RUN  PUT` lines (four metadata writes, seventeen files);
+  `hf_upload.py --dry-run` → transcriptions 7 files, gt 3, the model 12, and
+  `gt-nc` refused with exit 1 ("the NC-derived deposit is on Zenodo only").
+  **The export's cost, measured on a synthetic store** (not Leibniz's data:
+  8,000 pages of 60 lines with 40-point polygons, a scoped run on every
+  tenth page; 528,000 line rows, 404 MB): 480,000 lines written as Parquet
+  in **27.3 s with a peak of 289 MiB** in this container (4 cores), the
+  memory a Parquet batch of 50,000 rows whatever the chunk size.
 
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 

@@ -58,6 +58,9 @@ web = [
 # Release exports (Phase D3): Parquet via pyarrow (JSONL needs nothing extra).
 release = [
     "pyarrow>=15",
+    # tools/release/hf_upload.py (REL1): the Hub's resumable large-file uploads.
+    # Already locked through transformers (the `kurrent` extra); imported lazily.
+    "huggingface_hub>=1.0",
 ]
 # The Kurrent track (Phase K1): TrOCR line readers from the Hugging Face Hub as
 # bootstrap candidates for German Kurrent (`leibniz bench kurrent-smoke`, the
