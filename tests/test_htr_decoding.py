@@ -381,6 +381,10 @@ def test_spec_from_options_and_its_errors(arpa_path, tmp_path):
         "fold": "none",
     }
     assert D.spec_from_options("prefix-beam").lm is None
+    narrow = D.spec_from_options("prefix-beam", beam_tokens=5)
+    assert narrow.params()["beam_tokens"] == 5
+    assert narrow.build(table=TABLE).beam_tokens == 5
+    assert "beam_tokens" not in spec.params()
     with pytest.raises(ValueError, match="unknown --decoder"):
         D.spec_from_options("viterbi")
     with pytest.raises(ValueError, match="needs --lm"):

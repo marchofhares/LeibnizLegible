@@ -879,6 +879,8 @@ class Decoder:
             )
             if self.kind == BEAM_LM:
                 out["beam_threshold"] = self.beam_threshold
+            if self.beam_tokens:
+                out["beam_tokens"] = self.beam_tokens
         if self.temperature != 1.0:
             out["decoder_temperature"] = self.temperature
         return out
@@ -898,6 +900,7 @@ class DecoderSpec:
     lm_weight: float = DEFAULT_LM_WEIGHT
     beam: int = DEFAULT_BEAM
     fold: str | None = None
+    beam_tokens: int | None = None  # labels considered per frame (None: the decoder's default)
 
     def __post_init__(self) -> None:
         if self.kind not in KINDS:
@@ -928,7 +931,14 @@ class DecoderSpec:
             if codec is None:
                 raise ValueError(f"the {self.kind} decoder needs the model's codec")
             table = TokenTable.from_codec(codec, fold=self.resolved_fold())
-        return Decoder(self.kind, table, lm=self.lm, lm_weight=self.lm_weight, beam=self.beam)
+        return Decoder(
+            self.kind,
+            table,
+            lm=self.lm,
+            lm_weight=self.lm_weight,
+            beam=self.beam,
+            beam_tokens=self.beam_tokens,
+        )
 
     def params(self) -> dict:
         out: dict = {"decoder": self.kind}
@@ -941,6 +951,8 @@ class DecoderSpec:
                     "fold": self.resolved_fold(),
                 }
             )
+            if self.beam_tokens:
+                out["beam_tokens"] = self.beam_tokens
         return out
 
 
@@ -965,6 +977,7 @@ def spec_from_options(
     lm_weight: float | None = None,
     beam: int | None = None,
     *,
+    beam_tokens: int | None = None,
     error: Callable[[str], Exception] = ValueError,
 ) -> DecoderSpec:
     """The spec of ``--decoder … --lm … --lm-weight … --beam …``, with the errors a
@@ -985,6 +998,7 @@ def spec_from_options(
         lm=str(lm) if lm is not None else None,
         lm_weight=DEFAULT_LM_WEIGHT if lm_weight is None else float(lm_weight),
         beam=DEFAULT_BEAM if beam is None else int(beam),
+        beam_tokens=int(beam_tokens) if beam_tokens else None,
     )
 
 

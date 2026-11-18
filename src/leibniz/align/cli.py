@@ -2122,6 +2122,9 @@ def letterpool_eval(
         None, "--lm-weight", help="Weight of the model's log10 score (default 1.5)."
     ),
     beam: int | None = typer.Option(None, "--beam", help="Beam size (default 50)."),
+    beam_tokens: int | None = typer.Option(
+        None, "--beam-tokens", help="Labels considered per frame (default: all; fewer is faster)."
+    ),
 ) -> None:
     """Score the frozen letter-pool set: v1 and the K1 readers, nothing filtered (K2b Task 3)."""
     from leibniz.align import letterpool as LP
@@ -2136,7 +2139,9 @@ def letterpool_eval(
     unknown = [k for k in base_keys if k not in K.CANDIDATES]
     if unknown:
         raise typer.BadParameter(f"unknown readers {unknown}; known: {sorted(K.CANDIDATES)}")
-    spec = decoding.spec_from_options(decoder, lm, lm_weight, beam, error=typer.BadParameter)
+    spec = decoding.spec_from_options(
+        decoder, lm, lm_weight, beam, beam_tokens=beam_tokens, error=typer.BadParameter
+    )
     if not spec.is_greedy:
         other = [k for k in base_keys if K.CANDIDATES[k].kind != "kraken"]
         if other:

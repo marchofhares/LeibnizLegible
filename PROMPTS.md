@@ -331,3 +331,232 @@ If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
 does not apply; the prompt carries the game's conventions; no other session
 runs on that repository today.
 ~~~~
+
+### Phase R1 — decoding and confidence (Part A run 2026-11-17; Part B is the desktop's)
+
+_Part A run in a cloud session on the branch it was given
+(`claude/modest-cori-wds26r`), under the session preamble of 19 October as
+updated on 21 October and 16 November, given with the prompt and printed
+first below; the cloud batch note of 17 November, given after the prompt, is
+printed last. No go was waited for (the preamble's item 6 and the note); the
+departures are in `STATUS.md`, Divergences. Part B (Tasks 3 and 4, the
+Finish) runs from the same prompt on the operator's desktop._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4; and 16 November in one, clause 8,
+the archive files. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+8. The archive (16 November). Once ARCH1 is merged, STATUS-archive.md holds
+   the Current state and Phase log entries dated before 19 October and
+   PROMPTS-archive.md every prompt already run; STATUS.md and PROMPTS.md
+   keep one pointer line in each emptied place. A prompt that names an
+   archived entry means the archived text: open the archive file for it.
+   Append nothing to the archive files; new entries and prompts go to
+   STATUS.md and PROMPTS.md as before. Until ARCH1 is merged the files are
+   as they were and this clause is void.
+
+Phase R1 — decoding with a language model, and one calibrated confidence per
+line. Two parts: Part A in a cloud session on its own branch (the code, the
+tests, a toy model from the fixture store); Part B on the operator's desktop
+(the real language model from the edition text, the measurement, the
+calibration), on the same branch, when no other torch process runs. No store
+write; no deploy: C4 carries the decoder into the pipeline, K4's readings
+get the calibration as a mapping recorded beside their run.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), SPECS.md (§4.5 confidence, §7),
+STATUS.md (the B1, K1, K3 and K4 entries; "Next"), reports/kurrent/k3-eval.md
+and reports/htr/* from B1 (the harness's measured CER on PHILIUMM's split). If
+this prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence. Write the "R1 — decoding and confidence" entry in STATUS.md after
+every task; if one exists, continue from its first unfinished task.
+
+## Where you run, and the rules that follow from it
+Part A: the cloud checkout, .venv-cloud with the bench + gt extras, the
+fixture store; nothing of the desktop's. Part B: /home/evana/LeibnizLegible,
+.venv-k1, the master store read-only, the PHILIUMM dataset and model under
+data/ as K1 left them; one torch process on the machine at a time, so Part B
+waits for K4's reading job; every job states its expected host memory first
+(under 6 GB; `systemd-run --scope -p MemoryMax=6G` in the preamble's form);
+long jobs under nohup with logs. Never write a number you did not produce.
+Licences: flashlight-text (MIT on GitHub, "BSD" on PyPI: record both),
+KenLM (LGPL: a tool and a linked library, never copied into the code; a line
+in legal.py's registry), pyctcdecode (Apache-2.0, last release 2023, not the
+first choice). The language model is built from text the project may use
+(the edition's reading text of the open channels and the aligned lines);
+the letter pool and Dresden are evaluation only and never enter it.
+
+## Background
+kraken 7.0.3 decodes greedily and nothing else: the beam and threshold
+decoders of 6.x are gone and main has no language-model code. The hook is
+clean: TorchSeqRecognizer.forward returns each line's softmax matrix (N, W,
+C) after `logits / temperature`, label 0 is the CTC blank, and the recogniser
+takes a custom decoder callable. KrakenEngine (src/leibniz/htr/engines.py)
+calls `_rec_predict` and returns the greedy text with the mean per-step
+probability as the line's confidence (SPECS §4.5); TrOCREngine (htr/trocr.py)
+returns the decoder's sequence score. On comparable material at 8 to 10 % CER
+a character 6-gram model built from training text alone took half a point to
+a point off (Himanis 9.87 → 8.87, HOME-Alcar 8.35 → 7.85, Belfort 10.54 →
+9.52; PyLaia, ICDAR 2024; lexicon-free, LM weight 1.5, about 0.12 s a line on
+the CPU against 0.03 greedy); temperature scaling (T about 2) raised the
+correlation between a line's confidence and its error from 0.2–0.6 to
+0.7–0.8 on three datasets. The project's Latin and French reader is
+PHILIUMM's kraken model today and C3's rebuild tomorrow; the German reader is
+k3-trocr (K4). The gates that will use the score: the Scriptorium queue, the
+vision-language second reader on flagged lines, the game's choice of lines,
+pseudo-labels for self-training, C3's and C4's reports.
+
+## Part A, cloud
+
+### Task 0 — Pre-flight (report, then wait for a go)
+A clean tree on the branch; ruff + pytest baseline; `pip index versions` for
+flashlight-text, kenlm and pyctcdecode under the project's Python; whether
+torchaudio in the lock still ships ctc_decoder (2.9 to 2.11 may not; use
+flashlight-text directly if not). Print the plan; wait for "go".
+
+### Task 1 — The decoder behind one interface (code and tests)
+`src/leibniz/htr/decoding.py`: `Decoder` with `greedy` (today's behaviour,
+bit for bit), `beam_lm` (flashlight-text's lexicon-free decoder with a KenLM
+character model: beam size, LM weight and the blank/space handling as
+PyLaia's recipe; tokens file written from kraken's codec with label 0 the
+blank and the space a token), and `prefix_beam` (a pure-Python CTC prefix
+beam search of the project's own with the same n-gram interface, for the
+tests and as a fallback without the extras). Every decoder returns (text,
+score, per-character scores) so the confidence of Task 3 is one function
+over them. KrakenEngine takes `decoder=` and passes it to the recogniser;
+`leibniz bench run` and `align letterpool-eval` take `--decoder greedy|beam-lm
+--lm PATH --lm-weight W --beam N`. Tests on synthetic softmax matrices: the
+greedy path unchanged; beam without LM equals greedy where the posterior is
+peaked; a hand-made 3-gram pulls a near-tie to the modelled spelling; the
+codec round trip. New dependencies as an optional extra `decode`; the
+fallback path imports nothing new. CHECKPOINT A.
+
+### Task 2 — The language model from the project's text (code; a toy model)
+`leibniz bench lm-build --order 6 --out PATH`: the training text from
+data/gt/edition_cache.jsonl (the open channels only, legal.deposit_for) and
+gt_lines of the open bucket, normalised to the codec's conventions (the
+aligner's fold, NFC, the hyphen rule of C2c, one line a sentence), with every
+document of the evaluation sets held out by piece id (the PHILIUMM test
+split's pages, the held-out pages of reports/philiumm/heldout_pages.csv,
+K3's validation pieces, the letter pool's pages, Dresden); KenLM's lmplz with
+modified Kneser-Ney and the ARPA kept beside a binary; the counts (lines,
+characters, the held-out pieces) in reports/decoding/lm-build.md. On the
+fixture store the toy model proves the path. A Latin-and-French model and a
+German model as two files; say which text each saw. CHECKPOINT B: push,
+print the compare URL, hand over Part B.
+
+## Part B, desktop (after K4's reading job; the GPU idle, one torch process)
+
+### Task 3 — The measurement
+The real models from Task 2 (minutes on the CPU). Then CER greedy against
+beam-lm, the LM weight and beam tuned on PHILIUMM's validation split only and
+reported on: PHILIUMM's test split (B1's harness, their model, the honest
+Latin-and-French number), the 20 PHILIUMM-judged lines, the held-out pages'
+aligned lines (fair and light strata), and the German model's effect on
+k3-kraken over the letter pool's selection half (reported on the test half)
+— the German case is the lower bound, since at 30 % CER the model has less
+to pull on. The cost in seconds a line on this CPU. If the Latin-and-French
+gain is under a quarter of a point on the test split, say so and keep the
+decoder off by default. reports/decoding/r1-decoding.md + .json.
+
+### Task 4 — One confidence per line, calibrated
+For both engines (kraken greedy and beam, TrOCR's sequence score) fit
+temperature scaling on a validation set (PHILIUMM's split for the Latin and
+French reader; K3's 3,133 validation lines for k3-trocr, whose hypotheses
+and scores K3 kept under data/models/k3/trocr/best/) and report on the test
+sets: the correlation of the score with the line's CER, the reliability by
+decile, the share of lines under a threshold that are in fact right. Give the
+thresholds the gates need, each with its measured precision: "exactly right
+with 90 % precision", "worth a human's look", "send to the second reader".
+Record the mapping as a JSON the store can carry per run (runs.params), so
+K4's run gets its mapping without a re-read and C4's run gets its own.
+CHECKPOINT C.
+
+## Finish
+STATUS.md: the R1 entry, "Key numbers" (the CER pairs, the thresholds),
+"Next" (C3 scores every ablation with and without the decoder; C4 runs with it
+if Task 3 earned it; the gates read the thresholds); legal.py: flashlight-text
+and KenLM as tools with their licences; SPECS §4.5 amended with the
+calibration; the prompt verbatim in PROMPTS.md under "Follow-up phases
+(2026-10)". ruff + pytest clean. Push, print the compare URL. Do not merge.
+
+CLOUD BATCH, 17 November 2026. Read this with the preamble and the prompt
+above; where they differ, this note wins. Complete this step: record Task 0
+and proceed without a go; where the prompt says to wait, proceed and note the
+departure under Divergences. The operator answers nothing mid-task, so decide
+the small things yourself and record them; stop only for something the prompt
+did not foresee, and then write the question into the STATUS entry and push.
+Other sessions run today on their own branches (K3b-prep, REL1 Part A, R1
+Part A, G1b in the cloud; desktop-queue-1 on the desktop), so `git fetch
+origin main && git merge origin/main` at the start and again before the final
+push; on a conflict in STATUS.md or PROMPTS.md keep both sides' entries, the
+newer above, and say so. Commit and push after every task. End with the
+compare URL and a ten-line summary. Do not merge.
+If this is ARCH1: it runs alone; the operator starts nothing else until it
+is merged, so there is no parallel session to merge from.
+If this is R1: Part A only here; Part B is a desktop session later, as the
+prompt says; end at checkpoint B with the hand-over for Part B.
+If this is REL1 Part A: the operator's note of 16 November follows this one
+with Task 0's three answers; a bracket left unfilled means "propose and
+proceed".
+If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
+does not apply; the prompt carries the game's conventions; no other session
+runs on that repository today.
+~~~~
