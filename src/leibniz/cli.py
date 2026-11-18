@@ -18,6 +18,7 @@ from leibniz.enrich.cli import app as enrich_app
 from leibniz.harvest.cli import app as harvest_app
 from leibniz.htr.cli import app as bench_app
 from leibniz.images.cli import app as images_app
+from leibniz.layout.cli import app as layout_app
 from leibniz.legal_cli import app as legal_app
 from leibniz.pack.cli import app as pack_app
 from leibniz.pipeline.cli import app as pipeline_app
@@ -38,6 +39,7 @@ app.add_typer(harvest_app, name="harvest")
 app.add_typer(images_app, name="images")
 app.add_typer(catalog_app, name="catalog")
 app.add_typer(bench_app, name="bench")
+app.add_typer(layout_app, name="layout")
 app.add_typer(align_app, name="align")
 app.add_typer(enrich_app, name="enrich")
 app.add_typer(pipeline_app, name="pipeline")

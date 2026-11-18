@@ -1,0 +1,45 @@
+{
+ "dataset": "DenisaBumba/layout-leibniz-dataset-v2",
+ "revision": "f832aeb2bc69a85680e4bfccc3e1f0c9c12f102d",
+ "license": "cc-by-4.0",
+ "categories": [
+  "DigitizationArtefactZone",
+  "GraphicZone-figure",
+  "Leibniz-math-manuscripts",
+  "MainZone",
+  "MarginTextZone",
+  "MathsRegion-complex",
+  "MathsRegion-standard",
+  "MathsRegion-strikethrough",
+  "NumberingZone"
+ ],
+ "images": 392,
+ "by_split": {
+  "train": {
+   "matched": 294,
+   "not-gwlb": 25,
+   "thumbnail-matched": 8,
+   "unmatched": 7
+  },
+  "valid": {
+   "matched": 38,
+   "not-gwlb": 2
+  },
+  "test": {
+   "matched": 16,
+   "not-gwlb": 2
+  }
+ },
+ "pages_by_split": {
+  "train": 389,
+  "valid": 45,
+  "test": 20
+ },
+ "pages_train_valid": 433,
+ "pages_test": 20,
+ "size_check": {
+  "single_pages_resolved_by_name": 258,
+  "size_agrees": 89,
+  "ratio_agrees": 113
+ }
+}

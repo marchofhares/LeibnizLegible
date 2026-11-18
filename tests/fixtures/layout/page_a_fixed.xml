@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Page imageFilename="page_a.jpg" imageWidth="1000" imageHeight="1400">
+    <TextRegion id="r0" custom="structure {type:MainZone;}">
+      <Coords points="100,100 900,100 900,900 100,900"/>
+      <TextLine id="l0">
+        <Coords points="120,120 880,120 880,160 120,160"/>
+        <Baseline points="120,150 880,150"/>
+      </TextLine>
+      <TextLine id="l1">
+        <Coords points="120,200 880,200 880,240 120,240"/>
+        <Baseline points="120,230 880,230"/>
+      </TextLine>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MarginTextZone;}">
+      <Coords points="0,100 90,100 90,900 0,900"/>
+      <TextLine id="l2">
+        <Coords points="5,300 85,300 85,330 5,330"/>
+        <Baseline points="5,325 85,325"/>
+      </TextLine>
+    </TextRegion>
+  </Page>
+</PcGts>
