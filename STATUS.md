@@ -720,7 +720,7 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 ## Phase log
 
-### P1 — Task 3, the zone census (2026-11-17) ✅ Task 0 · ✅ the backup chore started · ✅ the environment · ✅ her training pages · ✅ the sample · ⏳ the pilot · ⏳ the run · ⏳ the census (checkpoint C)
+### P1 — Task 3, the zone census (2026-11-17/18) ✅ Task 0 · ✅ the backup chore · ✅ the environment · ✅ her training pages · ✅ the sample · ✅ the pilots · ✅ the run (617 of 621 pages) · ✅ the census (checkpoint C) · ⏳ the operator's pull request
 
 - **Setting.** The desktop (WSL2), one session for the queue DQ1 (the
   operator's note of 17 November, in `PROMPTS.md` with the preamble, the P1
@@ -911,16 +911,150 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   MainZone (the printed body), 5.9 % in a MarginTextZone (the notes) and
   leaves 25.6 % outside every zone** (German print 65.6 / 5.3 %, Latin
   73.3 / 7.9 %, French 44.1 / 5.4 %); its MainZones cover 30.4 % of a
-  Marginalien page against 42–48 % elsewhere. The matched-line comparison
-  and the final line counts follow here.
+  Marginalien page against 42–48 % elsewhere (the final census repeats these
+  zone numbers to the line).
+- **The kraken stage and the end of the run.** 617 pages on the card in 25
+  batches, 20:50:31–00:18:26 (3 h 28 min; 12 to 31 s a page by batch, the
+  Marginalien and test pages the fastest), the card's peak 3,766 MiB in the
+  detect stage and under the guard's limit throughout kraken's, no kill, no
+  page kraken failed, 1,174 "Polygonizer failed on line" warnings (a line
+  whose polygon kraken could not draw); the CPU pass for the four pages wider
+  than twice their height (`00051012_0079`, `00066632_0047`, `00068028_0004`,
+  `1030997721_0081`) was stopped by hand after 46 s so the stage stayed well
+  inside its limit — those four have zones and no pipeline lines. Merge,
+  simplification, the region fix and the line split ran 00:19:29–00:21:06;
+  **617 of 621 pages have final lines**; the results are 2.1 GB, of which the
+  1.8 GB of annotated, mask, binarised and masked images moved to
+  `/mnt/d/leibniz-layout/results-intermediate/` behind symlinks afterwards
+  (C: stood at 25 GB free at the end). Only 21 of the 621 pipeline images are
+  the scan's size (the small scans); every other page's zones and lines were
+  scaled back.
+- **The census — CHECKPOINT C** (`leibniz layout zone-census`, 00:21–00:46;
+  `reports/layout/zone-census.md`, `zone-census-summary.json`,
+  `zone-census-per-page.csv`). **The pipeline's final lines number 43,875
+  against 44,104 v1 lines (0.99; the median page 1.01)**: main zones 39,106,
+  margin zones 4,669, numbering 46, figure 33, formula 21. **Matched one to
+  one by polygon IoU ≥ 0.5: 29,075 pairs, 65.9 % of the v1 lines and 66.3 % of
+  theirs** (32,233 at ≥ 0.3, 24,487 at ≥ 0.7; the pairs' mean IoU 0.77). By
+  block: the Briefwechsel 11,412 of their lines to 9,089 v1 (1.26; 61.7 % of
+  v1 matched), the Handschriften 16,318 to 15,922 (1.02; 79.2 %), LH 35 9,497
+  to 10,629 (0.89; 60.4 %), the Marginalien 3,843 to 5,581 (0.69; 42.5 % of
+  v1, 61.7 % of theirs), her 20 test pages 2,668 to 2,680 (1.00; 74.5 %). **On
+  the Marginalien her pipeline keeps 3,843 lines, 3,656 in MainZones and 178
+  in MarginTextZones, where v1 has 5,581: the lines outside her zones (1,430
+  v1 lines, 25.6 %) are dropped by her last step**, which is the masking and
+  the merge at work, not a second segmenter. What the census does not show
+  is in the report's last section: the zones are the model's output (the
+  card's validation AP 0.91 for MainZone, 0.62 for MarginTextZone, 0.08–0.19
+  for the formula classes), a v1 line inside a figure or formula zone is a
+  line read where there is no running text, the line comparison is one
+  baseline model twice, the sample is drawn by work, and nothing was measured
+  against hand-drawn zones.
+- **Three sentences for the operator's mail to the model's author** (the
+  DQ1 note; nothing sent): "We ran your v2 model (checkpoint_best_ema_v2.pth,
+  threshold 0.4, resolution 1,272) through your eScriptorium pipeline over 621
+  pages of our store — 200 letters, 200 LH pages, 100 LH 35 pages, 100
+  Marginalien pages, your 18 test pages and one named page, all outside your
+  training and validation pages and outside the HTR dataset's pages — on
+  2,000 px copies, because the full scans spill a 6 GB card in rfdetr's mask
+  upsampling. Of our 44,104 v1 lines, 1.6 % lie mostly inside a figure or
+  formula zone (4.0 % in LH 35), 82.7 % in a MainZone and 9.5 % in a
+  MarginTextZone, and the model emits a formula zone on 20 % of the pages and
+  a margin zone on 50 %. Your pipeline's final lines match ours one to one
+  at IoU 0.5 on 66 % of the lines; on the annotated printed books it places
+  64 % of our lines in a MainZone and 6 % in a MarginTextZone and leaves a
+  quarter outside every zone."
 
-### M1 — the print trial (Task 1b) (2026-11-17) ⏳ waits for P1 Task 3
+### M1 — the print trial (Task 1b) (2026-11-17/18) ✅ the environment · ✅ the zones · ✅ the census · ✅ the sheet rendered · ✅ the OCR · ⏳ the CER (the operator's transcriptions) · ✅ the report (CER pending)
 
-- Placeholder: runs after P1 Task 3's checkpoint C on the same branch, on the
-  100 Marginalien pages of `reports/layout/sample.csv` (the P1 block), under
-  the M1 prompt's amendment of 13 October and its note of 16 November with the
-  DQ1 note's two changes (the sheet of 50 printed lines rendered early; the
-  CER pending if no "done" has come).
+- **Setting.** The M1 prompt's amendment of 13 October and its note of 16
+  November, with the DQ1 note's two changes (the sheet rendered early, the CER
+  pending if no "done" comes); on `desktop-queue-1` after P1 Task 3's run, the
+  store read-only, nothing deployed. The 100 pages are the Marginalien block of
+  the census sample (`reports/marginalia/print-trial-pages.csv`: 100 pages of
+  89 books, 30 German print by the K4 pass, 70 Latin, French, mixed or
+  unknown), the copies the census pipeline read (2,000 px on the long side,
+  linked under `data/print/images-2000`).
+- **The tools** (`tools/print-trial-env.sh`, 20:19–20:25, the VHD grew 573
+  MiB): the venv `data/print/dfine-env` with kraken 7.1.1, dfine-kraken 0.4.4
+  (Apache-2.0, its licence read on GitHub: Open question 29 c answered),
+  torch 2.12.0 from uv's cache; the D-FINE large region model trained on
+  LADaS (`ladas_l.safetensors`, 125,878,904 bytes, MD5
+  `06aa34eacb02fe49642f8838d49501db`, Zenodo 10.5281/zenodo.18715364,
+  Apache-2.0, 37 SegmOnto classes, fetched by curl so no torch process ran
+  beside the census run); Gallicorpora+ (`Gallicorpora+_best.mlmodel`,
+  16,216,786 bytes, SHA-256 `b7261e80…`, release 1.0.0 of the CC0-1.0
+  repository; kraken 7.1 loads the CoreML file, no conversion). YALTAi was
+  not needed. All three are in the registry (`gallicorpora-plus`,
+  `dfine-kraken`, `ladas-dfine-large`), with `REGISTRY_DATE` moved to
+  2026-11-17.
+- **The zones** (`tools/print-trial-run.sh zones`: kraken, batches of 25,
+  cuda:0, 32-true, under the 6 GB scope and the guard): **100 pages in 5 min
+  8 s**, the card's peak 1,856 MiB with Xwayland, the host peak 1,646 MiB, no
+  kill, no failure; PAGE XML under `data/print/zones/`, the coordinates scaled
+  back to the scan for the census. The model emitted 26 classes: MainZone-P
+  129 zones on 44 pages, MainZone-Entry 195 on 11, MainZone-Continued 70 on
+  55, RunningTitleZone 93 on 63, MarginTextZone-Notes (printed marginal
+  notes) 67 on 34, NumberingZone 43 on 42, QuireMarksZone 35 on 28,
+  DropCapitalZone 13 on 13, MusicZone 12 on 12 (a false class, by the
+  looks), StampZone and StampZone-Sticker 29 on 20, DigitizationArtefactZone
+  12 on 12, **MarginTextZone-ManuscriptAddendum, the class for a handwritten
+  addition in a printed margin, 5 zones on 4 pages**; print zones cover
+  34.7 % of a page's area on average, manuscript zones 0.0 %.
+- **The printed-body share** (`leibniz layout print-trial census`,
+  `reports/marginalia/print-trial-per-page.csv`, `-summary.json`): of the
+  **5,581 v1 lines, 3,463 (62.1 %) lie mostly inside a print zone, 2 inside a
+  manuscript zone, 58 in stamps or artefacts and 2,058 (36.9 %) outside every
+  zone** — the German-print pages 56.6 % in print zones, the roman 64.6 %.
+  The IoU of the print lines' union with the print zones' union: mean 0.72,
+  median 0.83 (Fraktur pages 0.68 · 0.84, roman 0.74 · 0.82). **Against
+  PHILIUMM's v2 zones on the same pages: PHILIUMM calls 64.2 % of the lines
+  print (MainZone), LADaS 62.1 %; the two models make the same call on 3,968
+  lines (71.1 %)**: print by both 2,892, outside both 1,075; 647 lines are
+  print to PHILIUMM and outside to LADaS, 338 the reverse; of the 327 lines
+  PHILIUMM puts in a MarginTextZone (the notes), LADaS leaves 275 outside and
+  marks 1 a manuscript addendum; the IoU of the two models' print areas is
+  0.80 on average (mean over pages). So the print layout model finds the printed body about as
+  PHILIUMM's manuscript model does, and does not find Leibniz's notes as a
+  class of its own: the notes are what is left outside the print zones.
+- **The sheet** (`leibniz layout print-trial sheet`): 50 v1 lines inside print
+  zones with at least 15 characters of v1 text, 25 from the German-print pages
+  (Fraktur) and 25 from the others (roman), one line a page a round, seed 0,
+  cut from the full-resolution scans: **`data/print/print-sheet.html`** (33.7
+  MB, the crops inline, a text field each, a button that downloads `ref,
+  type, transcription` as CSV; the v1 reading is not shown). The list is
+  `data/print/print-sheet-lines.csv`. Its path was printed for the operator
+  at 00:27 on 18 November.
+- **The OCR** (`leibniz layout print-trial ocr-input`, then
+  `tools/print-trial-run.sh ocr`): one PAGE XML per page with the v1 lines
+  inside print zones (3,463 lines on 100 pages), Gallicorpora+ run through
+  kraken 7.1.1 on the full-resolution scans, cuda:0, 32-true: **100 pages in
+  16 min 24 s**, the card's peak 1,526 MiB, the host peak 2,805 MiB, no kill,
+  **3,463 lines read, 3,417 of them with text** (`data/print/ocr/`). On the
+  sheet's lines, read by eye and not measured: the roman lines come out as
+  print with the long s and the ligatures where v1 misread letters; the
+  Fraktur lines come out as letter salad from both models.
+- **The CER is pending**: when the operator pastes "done" with the downloaded
+  CSV, `uv run leibniz layout print-trial cer --transcriptions <csv>` scores
+  Gallicorpora+ and v1 on the 50 lines (the `philiumm` policy, by type), and
+  `uv run leibniz layout print-trial report` writes the decision into
+  `reports/marginalia/print-trial.md` — (a) at or under 10 % CER on both
+  types, (c) above 30 % on both, else split by type. The report stands with
+  the decision marked pending.
+- **The Fraktur share of the corpus:** the K4 pass calls 6,719 of the 103,626
+  Marginalien pages with a verdict German (6.5 %); German print in these books
+  is Fraktur as a rule, so that is the Fraktur share as far as a page's
+  language says its type; the sample holds 30 German pages on purpose.
+- **Three sentences for the operator's mail to the tools' author** (the DQ1
+  note; nothing sent): "We ran kraken 7.1.1 with your D-FINE large LADaS
+  region model and the Gallicorpora+ print model over 100 pages of Leibniz's
+  annotated printed books (30 in German, Fraktur), read-only beside our
+  store. The LADaS model puts 62 % of our v1 lines inside print zones (IoU
+  0.72 with the printed body) and marks a manuscript addendum on 4 pages, so
+  Leibniz's notes come out as the lines outside its zones; PHILIUMM's
+  manuscript model agrees with it on 71 % of the lines. Gallicorpora+ read
+  3,463 printed-body lines; its CER on 50 transcribed lines, roman and
+  Fraktur apart, follows when the transcription is done."
 
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 
