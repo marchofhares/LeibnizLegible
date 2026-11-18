@@ -22,6 +22,14 @@ Subcommands:
                 the dry run and its report; ``--write`` after a backup and a go.
 * ``letterpool-fetch`` / ``letterpool-parse`` — the GWLB letter pool (K2b): the
                 checked volumes fetched and recorded, then parsed into letters.
+* ``audit-convert`` / ``audit-score --corrections`` / ``audit-apply`` — a judge's
+                table with a transcription column (K3b): converted to the C2
+                verdict shape, scored strictly and under the fold by stratum and
+                hand, and the verified lines written into ``gt_lines`` (a dry run
+                unless ``--write``).
+* ``audit-sheet-k2`` — a further audit sheet of the reader's minted lines: by
+                hand, without the lines, records and pages already used, with
+                the neighbouring lines for context (K3b).
 
 Heavy steps (HTR, segmentation, vision extraction) import their stacks lazily and
 skip gracefully when a key/model is absent, per COMMON CONTEXT.
@@ -1415,12 +1423,31 @@ def audit_score(
     db_path: str = typer.Option(
         str(DEFAULT_DB), "--db", help="SQLite store path (stratum weights)."
     ),
-    out: Path = typer.Option(Path("reports/gt-audit.md"), "--out", help="Markdown report path."),
+    out: Path = typer.Option(
+        None, "--out", help="Markdown report path (default: reports/gt-audit.md, the C2 audit's)."
+    ),
     lines_csv: Path = typer.Option(
         None,
         "--lines",
         help="The sheet's gt-audit-lines.csv (default: next to the verdicts) — "
         "cross-checks every verdict against the HTR reading of the strip.",
+    ),
+    corrections: Path = typer.Option(
+        None,
+        "--corrections",
+        help="A corrections file (audit-convert): the judge's text of the whole line per ref. "
+        "The patterns are then read off that text instead of the note, and the report gains "
+        "'Under the fold'. Needs --lines, and --out, --summary and --overrides named "
+        "explicitly: the defaults are the C2 audit's files.",
+    ),
+    weights_reader: str = typer.Option(
+        None,
+        "--weights-reader",
+        help="Take the stratum weights from the rows this reader minted (K2's sheet was drawn "
+        "from them), not from every minted row.",
+    ),
+    title: str = typer.Option(
+        None, "--title", help="The report's heading (default: the C2 audit's)."
     ),
     weights: str = typer.Option(
         None,
@@ -1461,14 +1488,17 @@ def audit_score(
         help="Corrections CSV (default: <verdicts stem>-corrections.csv).",
     ),
     summary_out: Path = typer.Option(
-        Path("reports/gt-audit/audit-summary.json"),
+        None,
         "--summary",
-        help="The scored audit in numbers, for the dataset card and gt-report.",
+        help="The scored audit in numbers, for the dataset card and gt-report "
+        "(default: reports/gt-audit/audit-summary.json, the C2 audit's).",
     ),
 ) -> None:
     """Score the hand-audit verdicts (precision per stratum + corpus-weighted)."""
+    from leibniz.align import audit_edition as E
     from leibniz.align import audit_patterns as P
     from leibniz.align.audit import (
+        DEFAULT_SUMMARY,
         STRATA,
         audit_summary,
         read_verdicts,
@@ -1481,11 +1511,32 @@ def audit_score(
         verdict_agreement,
         write_audit_summary,
     )
-    from leibniz.db import open_db
+    from leibniz.align.audit_reach import open_readonly
 
+    if corrections is not None:
+        unnamed = [
+            flag
+            for flag, value in (
+                ("--out", out),
+                ("--summary", summary_out),
+                ("--overrides", overrides),
+            )
+            if value is None
+        ]
+        if unnamed:
+            raise typer.BadParameter(
+                f"with --corrections name {', '.join(unnamed)} explicitly: the defaults are the "
+                "C2 audit's files (reports/gt-audit.md, reports/gt-audit/audit-summary.json, "
+                "the overrides beside the verdicts)"
+            )
+    out = out or Path("reports/gt-audit.md")
+    summary_out = summary_out or DEFAULT_SUMMARY
     rows = read_verdicts(verdicts)
     if lines_csv is None and (verdicts.parent / "gt-audit-lines.csv").exists():
         lines_csv = verdicts.parent / "gt-audit-lines.csv"
+    if corrections is not None and lines_csv is None:
+        raise typer.BadParameter("--corrections needs the sheet's lines CSV (--lines)")
+    corrected = E.read_corrections(corrections) if corrections is not None else None
     evidence = text_evidence(rows, lines_csv) if lines_csv is not None else []
     if weights is not None:
         weight_counts = _parse_weights(weights)
@@ -1502,18 +1553,46 @@ def audit_score(
             raise typer.BadParameter(
                 f"store not found at {db_path}; pass --db, or --weights for a machine without it"
             )
-        with open_db(db_path) as conn:
+        where, params = "", ()
+        if weights_reader:
+            where, params = " WHERE source LIKE ?", (f"%; reader {weights_reader};%",)
+        conn = open_readonly(db_path)  # the weights are one SELECT: the store is not written
+        try:
             weight_counts = {
                 (r[0] or "unknown"): r[1]
-                for r in conn.execute("SELECT stratum, COUNT(*) FROM gt_lines GROUP BY stratum")
+                for r in conn.execute(
+                    f"SELECT stratum, COUNT(*) FROM gt_lines{where} GROUP BY stratum", params
+                )
             }
-        weight_note = f"stratum weights from `{db_path}`"
+        finally:
+            conn.close()
+        weight_note = f"stratum weights from `{db_path}`" + (
+            f" (the rows minted on {weights_reader})" if weights_reader else ""
+        )
     score = score_verdicts(rows, weight_counts)
-    write_audit_summary(
-        summary_out, audit_summary(score, verdicts=verdicts.name, weights_source=weight_note)
-    )
+    summary = audit_summary(score, verdicts=verdicts.name, weights_source=weight_note)
     note = f"Verdicts from `{verdicts.name}` ({len(rows)} sheet lines); {weight_note}."
     sections: list[list[str]] = []
+    if corrected is not None:
+        sheet_lines = P.read_lines_csv(lines_csv)
+        fold = E.fold_scores(rows, sheet_lines, corrected)
+        summary["corrections"] = corrections.name
+        summary["under_the_fold"] = E.fold_summary(fold)
+        sections.append(E.render_fold(fold))
+        note += (
+            f" The judge's text of {len(corrected)} lines from `{corrections.name}`; the "
+            "verdicts are the converted ones (a transcription without a verdict counts as "
+            '*wrong*), so the figures above this report\'s section "Under the fold" are the '
+            "strict reading."
+        )
+        for name, g in [("all", fold.pooled), *fold.by_group.items()]:
+            _console.print(
+                f"[bold]under the fold[/bold] {name}: strict {E._pct(g.strict)}, usable "
+                f"{E._pct(g.usable)}, under the fold {E._pct(g.fold)} "
+                f"({g.corrected_ok} corrected at or above the threshold, {g.corrected_below} "
+                f"below) on {g.n_scored} scored lines"
+            )
+    write_audit_summary(summary_out, summary)
     groups = score_by_group(rows, lines_csv) if lines_csv is not None else {}
     if groups:
         sections.append(render_group_scores(groups))
@@ -1532,17 +1611,20 @@ def audit_score(
         )
     n_undecided = 0
     if patterns and lines_csv is not None:
-        prow = P.classify_rows(rows, P.read_lines_csv(lines_csv))
+        prow = P.classify_rows(rows, P.read_lines_csv(lines_csv), corrected)
         ov_path = overrides or verdicts.parent / "gt-audit-pattern-overrides.csv"
         n_over = P.apply_overrides(prow, P.read_overrides(ov_path))
         n_undecided = P.write_override_template(prow, ov_path)
         p_out = patterns_out or verdicts.with_name(verdicts.stem + "-patterns.csv")
         c_out = corrections_out or verdicts.with_name(verdicts.stem + "-corrections.csv")
+        if corrections is not None and c_out.resolve() == corrections.resolve():
+            # the measured table must not overwrite the judge's file it was measured from
+            c_out = corrections.with_name(corrections.stem + "-measured.csv")
         P.write_patterns_csv(prow, p_out)
         table = P.corrections_table(prow)
         P.write_corrections_csv(table, c_out)
         sections.append(P.render_patterns(prow, strata=STRATA))
-        sections.append(P.render_corrections(table))
+        sections.append(P.render_corrections(table, whole_lines=corrected is not None))
         counts = P.pattern_counts(prow).get("all", {})
         _console.print(
             "[bold]patterns[/bold] "
@@ -1563,7 +1645,9 @@ def audit_score(
             )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
-        render_score(score, sheet_note=note, evidence=evidence, extra_sections=sections),
+        render_score(
+            score, sheet_note=note, evidence=evidence, extra_sections=sections, title=title
+        ),
         encoding="utf-8",
     )
     flagged = sum(1 for e in evidence if e.recheck)
@@ -1581,6 +1665,325 @@ def audit_score(
             f"[bold {colour}]weighted precision {100 * wp:.1f} % ({gate})[/bold {colour}] "
             f"· {score.pooled.n_judged} judged, {score.n_unjudged} blank → {out}"
         )
+
+
+@app.command(name="audit-convert")
+def audit_convert(
+    table: Path = typer.Argument(
+        ..., help="The judge's table: ref, stratum, verdict, transcription, note."
+    ),
+    lines_csv: Path = typer.Option(..., "--lines", help="The sheet's lines CSV (ref, gt_text, …)."),
+    out: Path = typer.Option(
+        ..., "--out", help="The C2 verdict CSV to write: ref, stratum, verdict, note."
+    ),
+    corrections: Path = typer.Option(
+        ...,
+        "--corrections",
+        help="The corrections file to write: ref, stratum, group, gt_text, transcription, "
+        "folded_similarity, note — every row with a transcription.",
+    ),
+) -> None:
+    """A judge's table with a transcription column → the C2 verdict CSV and a corrections file.
+
+    A verdict given stays; a transcription without a verdict counts as wrong (the note says
+    so); a row with neither stays unjudged. No store, no network."""
+    from leibniz.align import audit_edition as E
+
+    if len({p.resolve() for p in (table, lines_csv, out, corrections)}) != 4:
+        raise typer.BadParameter("the table, --lines, --out and --corrections are four files")
+    try:
+        conv = E.convert(E.read_table(table), E.read_lines(lines_csv))
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from None
+    E.write_verdicts(out, conv)
+    E.write_corrections(corrections, conv)
+    _console.print(
+        f"[bold]audit-convert[/bold] {len(conv.rows)} rows of {table.name} against "
+        f"{conv.n_lines} sheet lines → {out} (C2 shape) and {corrections} "
+        f"({len(conv.corrections)} transcriptions)"
+    )
+    for klass, n in conv.tally().items():
+        _console.print(f"  {klass}: {n}")
+    for group, tally in conv.tally_by_group().items():
+        if group == E.UNGROUPED and len(conv.tally_by_group()) == 1:
+            break
+        _console.print(
+            f"  [bold]{group}[/bold] ({sum(tally.values())}): "
+            + ", ".join(f"{k} {v}" for k, v in tally.items())
+        )
+    if conv.not_in_table:
+        _console.print(
+            f"[yellow]{len(conv.not_in_table)} sheet lines are not in the table "
+            f"(e.g. {', '.join(conv.not_in_table[:3])})[/yellow]"
+        )
+    if conv.stratum_differs:
+        _console.print(
+            f"[yellow]{len(conv.stratum_differs)} rows name another stratum than the sheet; "
+            f"the sheet's was kept (e.g. {', '.join(conv.stratum_differs[:3])})[/yellow]"
+        )
+
+
+@app.command(name="audit-apply")
+def audit_apply(
+    verdicts: Path = typer.Option(
+        ..., "--verdicts", help="The C2 verdict CSV (audit-convert's --out)."
+    ),
+    lines_csv: Path = typer.Option(..., "--lines", help="The sheet's lines CSV."),
+    corrections: Path = typer.Option(
+        ..., "--corrections", help="The corrections file (audit-convert's --corrections)."
+    ),
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (read-only unless --write)."
+    ),
+    out: Path = typer.Option(
+        Path("reports/kurrent/k3b-verified.csv"),
+        "--out",
+        help="The verified lines: ref, group, stratum, verdict, text, verified_by, licence.",
+    ),
+    verified_by: str = typer.Option("leibniz-edition", "--verified-by", help="Who judged."),
+    verified_on: str = typer.Option(
+        "2026-11-06", "--verified-on", help="ISO date the verdicts came."
+    ),
+    channel: str = typer.Option(
+        "edition-k2-audit",
+        "--channel",
+        help="The registry channel a corrected line's text now comes through.",
+    ),
+    write: bool = typer.Option(
+        False,
+        "--write",
+        help="Write the verified rows (one transaction, a runs row of stage gt_audit). "
+        "A backup and the operator's go first; without it this is a dry run.",
+    ),
+) -> None:
+    """The verified lines of a judged sheet into gt_lines: a dry run, then --write.
+
+    A confirmed line keeps its text and gains '; verified <by> <date>' in its source; a
+    corrected line gets the judge's text, the mark, and the audit's channel in place of the
+    one it had. Idempotent: a second --write changes nothing and says so."""
+    from datetime import date
+
+    from leibniz import legal
+    from leibniz.align import audit_edition as E
+    from leibniz.align.audit import read_verdicts
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.db import open_db
+
+    try:
+        date.fromisoformat(verified_on)
+    except ValueError:
+        raise typer.BadParameter(f"--verified-on wants an ISO date, got {verified_on!r}") from None
+    if any(ch in verified_by for ch in ";() ") or not verified_by:
+        raise typer.BadParameter("--verified-by is one word without ';', '(' or ')'")
+    if channel not in legal.CHANNELS:
+        raise typer.BadParameter(
+            f"--channel {channel!r} is not a channel of the licence registry "
+            f"({', '.join(sorted(legal.CHANNELS))})"
+        )
+    if not Path(db_path).exists():
+        raise typer.BadParameter(f"store not found at {db_path}; pass --db")
+    rows = read_verdicts(verdicts)
+    lines = E.read_lines(lines_csv)
+    try:
+        corrected = E.read_corrections(corrections)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from None
+    kw = {"by": verified_by, "on": verified_on, "channel": channel}
+    if not write:
+        conn = open_readonly(db_path)
+        try:
+            plan = E.plan_apply(conn, rows, lines, corrected, **kw)
+        finally:
+            conn.close()
+        run_id = None
+    else:
+        with open_db(db_path) as conn:
+            before = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+            plan = E.plan_apply(conn, rows, lines, corrected, **kw)
+            run_id = E.apply_plan(
+                conn,
+                plan,
+                inputs={p.name: E.file_sha256(p) for p in (verdicts, lines_csv, corrections)},
+            )
+            after = conn.execute("SELECT COUNT(*) FROM gt_lines").fetchone()[0]
+        if after != before:  # pragma: no cover — the write only updates rows
+            raise RuntimeError(f"gt_lines went from {before} to {after} rows")
+    E.write_verified_csv(out, plan)
+    _console.print(f"[bold]audit-apply[/bold] {'WRITE' if write else 'dry run'} on {db_path}")
+    for line in E.render_plan(plan, written=run_id, write=write):
+        _console.print("  " + line, markup=False, highlight=False)
+    for group, tally in E.group_tally(plan.rows).items():
+        _console.print(
+            f"  {group}: " + ", ".join(f"{k} {v}" for k, v in tally.items()),
+            markup=False,
+            highlight=False,
+        )
+    _console.print(f"  verified lines → {out} ({len(plan.rows)} rows)")
+
+
+@app.command(name="audit-sheet-k2")
+def audit_sheet_k2(
+    db_path: str = typer.Option(
+        str(DEFAULT_DB), "--db", help="SQLite store path (opened read-only)."
+    ),
+    readings_dir: Path = typer.Option(
+        Path("data/kurrent/k2-readings"),
+        "--readings-dir",
+        help="The reader's JSONL (kurrent-read).",
+    ),
+    reader: str = typer.Option("trocr-kurrent-xvi-xvii", "--reader", help="The reader key."),
+    images: Path = typer.Option(
+        Path("/mnt/d/leibniz-images"), "--images", help="The page-image cache root."
+    ),
+    decisions: Path = typer.Option(
+        Path("data/kurrent/k2-decisions.jsonl"),
+        "--decisions",
+        help="Per-piece decisions (kurrent-mint): which records are in Leibniz's own hand "
+        "under the strict rule.",
+    ),
+    n: int = typer.Option(200, "--n", help="Lines on the sheet (equal numbers per stratum)."),
+    seed: int = typer.Option(20261020, "--seed", help="Seed of the draw."),
+    hand: str = typer.Option(
+        "both",
+        "--hand",
+        help="own: every line from the records in Leibniz's own hand (the strict rule); "
+        "other: every line from the other records; both: half and half, as K2's sheet.",
+    ),
+    exclude_refs: list[Path] = typer.Option(
+        [],
+        "--exclude-refs",
+        help="A lines CSV (column ref): none of its lines again. Repeatable.",
+    ),
+    exclude_records: list[Path] = typer.Option(
+        [],
+        "--exclude-records",
+        help="A CSV with a record_id column (reports/kurrent/k3-val-pieces.csv): no line of "
+        "these records. Repeatable.",
+    ),
+    exclude_pages: list[Path] = typer.Option(
+        [],
+        "--exclude-pages",
+        help="A CSV with a page_ids or page_id column (reports/kurrent/letterpool-testset.csv, "
+        "reports/philiumm/heldout_pages.csv): no line of these pages. Repeatable.",
+    ),
+    context: int = typer.Option(
+        0,
+        "--context",
+        help="Lines above and below each sampled line, from the same page by line_seq, shown "
+        "as paler grey strips. The verdict applies to the middle line.",
+    ),
+    refs: Path = typer.Option(
+        None,
+        "--refs",
+        help="A CSV with a ref column: exactly these lines instead of a draw (--n, --hand "
+        "and the exclusions are then not used).",
+    ),
+    out_dir: Path = typer.Option(
+        Path("data/kurrent"), "--out", help="Directory for NAME.html and NAME-lines.csv."
+    ),
+    name: str = typer.Option(
+        "k3b-audit", "--name", help="The sheet's file name, without extension."
+    ),
+    title: str = typer.Option(None, "--title", help="The page's heading."),
+    english_only: bool = typer.Option(
+        False, "--english-only", help="Labels in English only (default: German too)."
+    ),
+    force: bool = typer.Option(False, "--force", help="Overwrite an existing sheet of this name."),
+) -> None:
+    """A further audit sheet of the reader's minted lines: by hand, without the lines,
+    records and pages already used, with the neighbouring lines for context (K3b).
+
+    The verdicts download as ref, stratum, verdict, transcription, note — the table
+    audit-convert reads: a corrected transcription is welcome in the note or, as the
+    Leibniz-Edition did, as the whole line's text in a column of its own. The verdict
+    applies to the middle strip; the paler strips are context."""
+    import csv
+
+    from leibniz.align import kurrent_mint as M
+    from leibniz.align import kurrent_pilot as P
+
+    if hand not in M.AUDIT_HANDS:
+        raise typer.BadParameter(f"--hand is one of {', '.join(M.AUDIT_HANDS)}")
+    if context < 0 or n < 1:
+        raise typer.BadParameter("--context is 0 or more and --n at least 1")
+    if not name or any(ch in name for ch in "/\\ ") or name.endswith((".html", ".csv")):
+        raise typer.BadParameter("--name is a file name without extension, e.g. k3b-audit")
+    targets = [out_dir / f"{name}.html", out_dir / f"{name}-lines.csv"]
+    taken = [str(p) for p in targets if p.exists()]
+    if taken and not force:
+        raise typer.BadParameter(
+            f"{', '.join(taken)} exists: a second sheet takes another --name (or --force)"
+        )
+    readings = P.load_readings(readings_dir, reader)
+    if not readings:
+        raise typer.BadParameter(f"no readings for {reader} under {readings_dir}")
+    own_ids: set[str] = set()
+    if decisions.exists():
+        own_ids = {d.record_id for d in M.load_decisions(decisions) if d.leibniz_hand}
+    if hand != "both" and not own_ids and refs is None:
+        raise typer.BadParameter(
+            f"--hand {hand} needs the records in Leibniz's own hand: no decisions at {decisions}"
+        )
+    try:
+        skip_refs = M.read_csv_column(exclude_refs, ("ref",))
+        skip_records = M.read_csv_column(exclude_records, ("record_id",))
+        skip_pages = M.read_csv_column(exclude_pages, ("page_ids", "page_id"))
+        wanted: list[str] | None = None
+        if refs is not None:
+            with refs.open(newline="", encoding="utf-8-sig") as fh:
+                rows = list(csv.DictReader(fh))
+            if not rows or "ref" not in rows[0]:
+                raise ValueError(f"{refs}: no column ref, or no row")
+            wanted = [r["ref"].strip() for r in rows if (r.get("ref") or "").strip()]
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from None
+    conn = P.open_readonly(db_path)
+    try:
+        html_path, csv_path, by_stratum, by_group = M.build_audit_sheet(
+            conn,
+            readings,
+            reader=reader,
+            images_root=images,
+            out_dir=out_dir,
+            n=n,
+            seed=seed,
+            bilingual=not english_only,
+            leibniz_hand_ids=own_ids or None,
+            hand=hand,
+            exclude_refs=skip_refs,
+            exclude_record_ids=skip_records,
+            exclude_pages=skip_pages,
+            context=context,
+            name=name,
+            refs=wanted,
+            title=title or f"{name} — {M.AUDIT_TITLE}",
+            correction_note=True,
+        )
+    finally:
+        conn.close()
+    total = sum(by_stratum.values())
+    _console.print(
+        f"[bold]audit-sheet-k2[/bold] → {html_path} ({total} lines: "
+        + ", ".join(f"{k} {v}" for k, v in sorted(by_stratum.items()))
+        + (
+            "; by hand " + ", ".join(f"{k} {v}" for k, v in sorted(by_group.items()))
+            if by_group
+            else "; not grouped by hand"
+        )
+        + f"); lines CSV {csv_path}"
+    )
+    if wanted is not None:
+        _console.print(f"  the {len(wanted)} lines of {refs}, {context} line(s) of context each")
+    else:
+        _console.print(
+            f"  drawn with seed {seed}, hand {hand}, context {context}; left out of the pool: "
+            f"{len(skip_refs):,} lines, {len(skip_records):,} records, {len(skip_pages):,} pages"
+        )
+        if total < n:
+            _console.print(
+                f"[yellow]{total} lines drawn of the {n} asked: the pool holds no more after "
+                "the exclusions[/yellow]"
+            )
 
 
 @app.command(name="audit-reach")

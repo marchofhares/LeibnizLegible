@@ -289,10 +289,11 @@ DEPOSITS = ("open", "nc")
 
 # The day the registry was compiled and the public records were re-read.
 REGISTRY_DATE = date(2026, 10, 21)
-# The day of the newest entry. An entry added after the compilation carries its
-# own date and does not move REGISTRY_DATE: the other records were not re-read
-# that day (R1, 2026-11-17: the decoding tools).
-REGISTRY_LAST_ENTRY = date(2026, 11, 17)
+# The day of the latest entry added since (K3b-prep: the Edition's audit of K2's
+# sheet, PHILIUMM's v2 segmentation model and its dataset; R1: the decoding
+# tools flashlight-text, KenLM and pyctcdecode). The older entries were not
+# re-read that day.
+REGISTRY_UPDATED = date(2026, 11, 17)
 
 
 @dataclass(frozen=True, slots=True)
@@ -416,6 +417,45 @@ LICENCES: tuple[Artifact, ...] = (
         notes=(
             "PHILIUMM's relicensing of 2026-10-15 was for the models only; the dataset "
             "stays CC BY 4.0 (the HTR engineer, 2026-10-15; the records read 2026-10-21)."
+        ),
+    ),
+    Artifact(
+        key="philiumm-seg-v2",
+        name="PHILIUMM RF-DETR instance-segmentation model for Leibniz's manuscripts, v2",
+        kind="model",
+        source=(
+            "https://huggingface.co/DenisaBumba/rfdetr-instance-segmentation-leibniz-manuscripts-v2"
+        ),
+        version="v2 (published 2026-11-03; RF-DETR-Seg Nano, eight SegmOnto classes)",
+        obtained=Terms("CC BY-NC 4.0", _d(2026, 11, 16), "the Hub card, as published"),
+        current=None,
+        bucket="open",
+        built=(
+            "P1 Task 3's census: the model's zones on a sample of the corpus drawn outside "
+            "its training pages (the model is run, not redistributed)"
+        ),
+        notes=(
+            "CC BY-NC 4.0 as published on the card (read 2026-11-16). Its outputs are "
+            "unrestricted by PHILIUMM's agreement of 2026-10-15 (this project's outputs may "
+            "stay CC BY 4.0 and Apache-2.0). The status of a model's output under a weights "
+            "licence is a lawyer-memo question, as for the v1 models."
+        ),
+    ),
+    Artifact(
+        key="philiumm-layout-dataset-v2",
+        name="PHILIUMM layout dataset for Leibniz's manuscripts, v2 (layout-leibniz-dataset-v2)",
+        kind="dataset",
+        source="https://huggingface.co/datasets/DenisaBumba/layout-leibniz-dataset-v2",
+        version=(
+            "public since 2026-11-12; 392 unique pages (334 train, 40 validation, 18 test), "
+            "PAGE XML and the originals"
+        ),
+        obtained=Terms("CC BY 4.0", _d(2026, 11, 16), "the Hub card"),
+        current=None,
+        bucket="open",
+        built=(
+            "the list of the v2 segmentation model's training pages: P1 Task 3's census "
+            "sample is drawn outside them"
         ),
     ),
     Artifact(
@@ -770,6 +810,39 @@ LICENCES: tuple[Artifact, ...] = (
         ),
         channel="potsdam",
         deposit="nc",
+    ),
+    Artifact(
+        key="edition-k2-audit",
+        name=(
+            "The Leibniz-Edition's Arbeitsstelle (Potsdam): verdicts and corrected "
+            "transcriptions of K2's audit sheet"
+        ),
+        kind="text",
+        source=(
+            "the Arbeitsstelle's table of 2026-11-06, exported by the operator "
+            "(data/kurrent/k2-audit-verdicts-edition.csv; not in the repository)"
+        ),
+        version="the table returned 2026-11-06: 200 rows, 118 with a corrected transcription",
+        obtained=Terms(
+            "CC BY 4.0",
+            _d(2026, 11, 16),
+            "the Edition's answer, recorded by the operator; STATUS.md Open question 33",
+        ),
+        current=None,
+        bucket="open",
+        built=(
+            "the verified lines of K3b (`leibniz align audit-apply`: a confirmed line keeps "
+            "its text and its channel, a corrected line carries the Arbeitsstelle's text "
+            "under `channel edition-k2-audit`) and the audit figures on the K3 cards"
+        ),
+        notes=(
+            "The credit wording is to be confirmed; until then: the Leibniz-Edition's "
+            "Arbeitsstelle, Potsdam, with the date 2026-11-06. The corrected transcription "
+            "is the Arbeitsstelle's own text, so a corrected line goes to the open deposit "
+            "whatever copy the minted text it replaces was read through."
+        ),
+        channel="edition-k2-audit",
+        deposit="open",
     ),
     Artifact(
         key="edition-muenster",
@@ -1269,7 +1342,7 @@ __all__ = [
     "READING_TEXT_ONLY",
     "REGISTRY",
     "REGISTRY_DATE",
-    "REGISTRY_LAST_ENTRY",
+    "REGISTRY_UPDATED",
     "Artifact",
     "Output",
     "Terms",

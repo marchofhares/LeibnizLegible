@@ -16,6 +16,13 @@ runner = CliRunner()
 SOURCE = "AA VI,4 N. 109 (§70-expired AA reading text; katalog R1)"
 
 
+def _SUMMARY(tmp_path: Path) -> list[str]:
+    """``audit-score`` writes its numbers to ``reports/gt-audit/audit-summary.json`` by
+    default — the committed file the dataset cards quote. A test must never write
+    there (until 2026-11 these did, and the committed summary was the test's)."""
+    return ["--summary", str(tmp_path / "audit-summary.json")]
+
+
 def _seed(db_path: Path, images_root: Path, *, with_image: bool = True) -> None:
     conn = db.init_db(db_path)
     db.upsert_work(conn, db.Work("W", "LeibnizHandschriften"))
@@ -185,7 +192,17 @@ def test_audit_cli_roundtrip(tmp_path: Path) -> None:
             w.writerow([r["ref"], r["stratum"], "correct", ""])
     md = tmp_path / "gt-audit.md"
     res2 = runner.invoke(
-        app, ["align", "audit-score", str(verdicts), "--db", str(db_path), "--out", str(md)]
+        app,
+        [
+            "align",
+            "audit-score",
+            str(verdicts),
+            "--db",
+            str(db_path),
+            "--out",
+            str(md),
+            *_SUMMARY(tmp_path),
+        ],
     )
     assert res2.exit_code == 0, res2.stdout
     assert "PASS" in res2.stdout
@@ -200,7 +217,17 @@ def test_audit_cli_roundtrip(tmp_path: Path) -> None:
         for k, r in enumerate(lines):
             w.writerow([r["ref"], r["stratum"], "wrong" if k == 0 else "correct", ""])
     res3 = runner.invoke(
-        app, ["align", "audit-score", str(verdicts), "--db", str(db_path), "--out", str(md)]
+        app,
+        [
+            "align",
+            "audit-score",
+            str(verdicts),
+            "--db",
+            str(db_path),
+            "--out",
+            str(md),
+            *_SUMMARY(tmp_path),
+        ],
     )
     assert res3.exit_code == 0, res3.stdout
     assert "1 verdicts contradict" in res3.stdout
@@ -287,6 +314,7 @@ def test_audit_score_without_the_store(tmp_path: Path) -> None:
             str(tmp_path / "nope.sqlite"),
             "--out",
             str(md),
+            *_SUMMARY(tmp_path),
         ],
     )
     assert res.exit_code != 0 and not (tmp_path / "nope.sqlite").exists()
@@ -300,6 +328,7 @@ def test_audit_score_without_the_store(tmp_path: Path) -> None:
             str(tmp_path / "nope.sqlite"),
             "--out",
             str(md),
+            *_SUMMARY(tmp_path),
             "--weights",
             "fair_copy=100,light_revision=300,heavy_revision=500,scrap=100",
             "--weights-source",

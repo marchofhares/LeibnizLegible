@@ -145,6 +145,10 @@ uv run leibniz align letterpool-set             # the German letters placed on t
 uv run leibniz align letterpool-eval --read     # the readers on the frozen set (GPU, resumable), then the error rates → reports/kurrent/letterpool-eval.md
 uv run leibniz align kurrent-read               # every line of the German pieces read by the Bern reader into data/kurrent/k2-readings/ (K2; resumable)
 uv run leibniz align kurrent-mint               # the factory over those readings, the rule, the dry run → reports/kurrent/k2-mint.md; --write mints after a backup and a go
+uv run leibniz align audit-convert T.csv --lines L.csv --out V.csv --corrections C.csv  # a judge's table with a transcription column → the C2 verdict CSV and a corrections file (K3b)
+uv run leibniz align audit-score V.csv --lines L.csv --corrections C.csv --out … --summary … --overrides …  # strict, usable and under-the-fold precision by stratum and hand
+uv run leibniz align audit-apply --verdicts V.csv --lines L.csv --corrections C.csv  # the verified lines into gt_lines: a dry run → reports/kurrent/k3b-verified.csv; --write after a backup and a go
+uv run leibniz align audit-sheet-k2 --hand own --context 1 --name k3b-audit  # a further audit sheet: by hand, exclusions, the neighbouring lines for context
 uv run leibniz bench train-set --sample 1000    # K3: the German mint selected, tagged, screened, split (the validation pieces frozen) and sized → reports/kurrent/k3-trainset.md
 uv run leibniz bench train-set --workers 8      # … then cut into data/train/k3/ (image + .gt.txt, Kraken's format; the TrOCR loop reads the same files)
 uv run leibniz bench train-trocr --pilot        # the memory settings timed on the Bern checkpoint (AdamW, Adafactor, frozen encoder, checkpointing, fp16)

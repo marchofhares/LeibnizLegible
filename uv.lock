@@ -933,6 +933,7 @@ kurrent = [
     { name = "transformers" },
 ]
 release = [
+    { name = "huggingface-hub" },
     { name = "pyarrow" },
 ]
 web = [
@@ -953,6 +954,7 @@ requires-dist = [
     { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.115" },
     { name = "flashlight-text", marker = "python_full_version < '3.13' and extra == 'decode'", specifier = ">=0.0.7" },
     { name = "httpx", specifier = ">=0.27" },
+    { name = "huggingface-hub", marker = "extra == 'release'", specifier = ">=1.0" },
     { name = "kenlm", marker = "extra == 'decode'", specifier = ">=0.3.0" },
     { name = "kraken", marker = "extra == 'bench'", specifier = ">=7.0" },
     { name = "lxml", specifier = ">=5.0" },

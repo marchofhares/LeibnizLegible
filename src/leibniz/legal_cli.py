@@ -71,7 +71,13 @@ def licences(
             raise typer.BadParameter(f"unknown key(s) {unknown}")
         rows = [r for r in rows if r["key"] in key]
     columns = legal.LICENCE_COLUMNS if (full or fmt != "table") else _TABLE_COLUMNS
-    _emit(rows, columns, fmt, f"Third-party artifacts ({legal.REGISTRY_DATE.isoformat()})")
+    _emit(
+        rows,
+        columns,
+        fmt,
+        f"Third-party artifacts ({legal.REGISTRY_DATE.isoformat()}; latest entry "
+        f"{legal.REGISTRY_UPDATED.isoformat()})",
+    )
     if fmt == "table":
         console.print(
             "[dim]bucket: open — derived data may enter the CC BY outputs; nc — the nc partition "
