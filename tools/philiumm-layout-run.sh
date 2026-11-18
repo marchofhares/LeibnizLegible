@@ -26,12 +26,14 @@ RUNTIME=${LAYOUT_RUNTIME:-$ROOT/data/philiumm/rfdetr-runtime}
 CONFIG=${LAYOUT_CONFIG:-$ROOT/data/philiumm/config_v2_ema.json}
 MEM=${LAYOUT_MEM:-6G}
 DEVICE=${LAYOUT_DEVICE:-cuda:0}
-PRECISION=${LAYOUT_PRECISION:-32-true}
+PRECISION=${LAYOUT_PRECISION:-16-mixed}
 GPU_LIMIT=${LAYOUT_GPU_LIMIT:-5900}
 RETRY=${LAYOUT_RETRY:-3}
 LOGDIR=$ROOT/logs
 mkdir -p "$LOGDIR" "$RESULTS"
 export PATH="$ENV/bin:$PATH"
+# the caching allocator: expandable segments fragment less across pages of different shapes
+export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 DRIVER=$ROOT/tools/philiumm_layout_stages.py
 echo "== $(date -Is) run $NAME: images $IMAGES ($(ls "$IMAGES" | wc -l) files), results $RESULTS, config $CONFIG"
 echo "   env $ENV, pipeline $PIPE ($(git -C "$PIPE" rev-parse --short HEAD 2>/dev/null)), runtime $RUNTIME, MemoryMax $MEM, device $DEVICE, precision $PRECISION"
@@ -45,7 +47,9 @@ for stage in "${STAGES[@]}"; do
       detect|baselines)
         # the GPU guard watches the stage's interpreter (the [p] keeps the guard
         # from matching its own command line) and kills it past the card limit
-        bash "$ROOT/tools/gpu-guard.sh" "[p]hiliumm_layout_stages.py.*--stage $stage" "$GPU_LIMIT" "$LOGDIR/$NAME-$stage-gpu.csv" 2 2500 &
+        # the pattern also names kraken itself (the baselines stage's child), so a
+        # kill ends the process that holds the card and not only its parent
+        bash "$ROOT/tools/gpu-guard.sh" "[p]hiliumm_layout_stages.py.*--stage $stage|rfdetr-env/bin/[k]raken" "$GPU_LIMIT" "$LOGDIR/$NAME-$stage-gpu.csv" 2 2500 &
         guard_pid=$!
         ;;
     esac

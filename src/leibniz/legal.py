@@ -288,7 +288,9 @@ BUCKETS = ("open", "nc", "none")
 DEPOSITS = ("open", "nc")
 
 # The day the registry was compiled and the public records were re-read.
-REGISTRY_DATE = date(2026, 10, 21)
+REGISTRY_DATE = date(
+    2026, 11, 17
+)  # L1 compiled it 2026-10-21; M1's print trial added three readings
 
 
 @dataclass(frozen=True, slots=True)
@@ -818,18 +820,26 @@ LICENCES: tuple[Artifact, ...] = (
     Artifact(
         key="gallicorpora-plus",
         name="Gallicorpora+ (kraken print model, French 16th–19th c.)",
-        kind="tool",
-        source="doi:10.5281/zenodo.7410360",
-        version="published 2022-12-07",
+        kind="model",
+        source=(
+            "doi:10.5281/zenodo.7410360; the file Gallicorpora+_best.mlmodel of release 1.0.0 of "
+            "https://github.com/Gallicorpora/Segmentation-and-HTR-Models (16,216,786 bytes, "
+            "SHA-256 b7261e80…)"
+        ),
+        version="release 1.0.0 (2022-10-14; the Zenodo record 2022-12-07)",
         obtained=Terms(
-            "CC BY 4.0 (the Zenodo record); the repository CC0-1.0 per the operator's note",
-            _d(2026, 10, 21),
-            "the Zenodo record read 2026-10-21; the repository not read here",
+            "CC BY 4.0 (the Zenodo record); the repository's LICENSE CC0-1.0",
+            _d(2026, 11, 17),
+            "the Zenodo record read 2026-10-21; the repository's licence read on GitHub 2026-11-17",
         ),
         current=None,
-        bucket="none",
-        built="nothing imported: a tool run beside the repository",
-        used=False,
+        bucket="open",
+        built=(
+            "M1 Task 1b, the print trial (2026-11-17): the OCR of the printed-body lines of 100 "
+            "Marginalien pages, measured against the operator's transcription of 50 lines "
+            "(reports/marginalia/print-trial.md); nothing imported into the code, nothing in "
+            "the store"
+        ),
     ),
     Artifact(
         key="yaltai",
@@ -850,18 +860,42 @@ LICENCES: tuple[Artifact, ...] = (
     ),
     Artifact(
         key="dfine-kraken",
-        name="mittagessen/dfine_kraken",
+        name="mittagessen/dfine_kraken (the D-FINE layout plug-in for kraken 7)",
         kind="tool",
-        source="https://github.com/mittagessen/dfine_kraken",
-        version="not read",
+        source="https://github.com/mittagessen/dfine_kraken; PyPI dfine-kraken",
+        version="0.4.4 (PyPI; the repository's main branch pushed 2026-10-05)",
         obtained=Terms(
-            "to be read", _d(2026, 10, 21), "not read: this session's GitHub access is scoped"
+            "Apache-2.0",
+            _d(2026, 11, 17),
+            "the repository's LICENSE as GitHub reports it, read 2026-11-17 (Open question 29 c)",
         ),
         current=None,
         bucket="none",
-        built="nothing imported: a tool run beside the repository",
-        used=False,
-        asked="its licence file, to be read by the operator (2026-10-21)",
+        built=(
+            "M1 Task 1b, the print trial (2026-11-17): installed in its own environment under "
+            "data/print/ to run the LADaS D-FINE region model through kraken 7.1 on 100 "
+            "Marginalien pages; nothing imported into the code"
+        ),
+    ),
+    Artifact(
+        key="ladas-dfine-large",
+        name="D-FINE Large region segmentation model trained on LADaS (37 SegmOnto classes)",
+        kind="model",
+        source="doi:10.5281/zenodo.18715364 (ladas_l.safetensors, 125,878,904 bytes)",
+        version="published 2026-02-20 (kraken 7 weights)",
+        obtained=Terms(
+            "Apache-2.0",
+            _d(2026, 11, 17),
+            "the Zenodo record and the model's README, read 2026-11-17",
+        ),
+        current=None,
+        bucket="none",
+        built=(
+            "M1 Task 1b, the print trial (2026-11-17): the print zones of 100 Marginalien pages "
+            "(MainZone-* the printed body, MarginTextZone-ManuscriptAddendum the handwritten "
+            "notes), the trial's zone census (reports/marginalia/print-trial.md); nothing in the "
+            "store"
+        ),
     ),
     Artifact(
         key="ultralytics-yolo",

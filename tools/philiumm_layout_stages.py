@@ -19,14 +19,18 @@ by default her repository's root) while her modules are imported from
         [--device cuda:0] [--precision 32-true|bf16-mixed] [--force] [--retry N]
 
 Stages skip when their outputs exist, as her ``should_skip`` does; ``detect``
-and ``baselines`` resume page by page (the pages without an output). With
-``--stage all`` every stage runs as a child interpreter in order.
+and ``baselines`` resume page by page (the pages without an output). The
+``baselines`` stage runs her kraken command once per batch of pages
+(``--batch``) instead of once a page, and again on the CPU for the pages the
+card could not take. With ``--stage all`` every stage runs as a child
+interpreter in order.
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -78,6 +82,198 @@ def log(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
+def _release_cuda_cache_after_each_prediction() -> None:
+    """Wrap rfdetr's ``predict`` so the CUDA caching allocator gives its blocks
+    back after every page. The pages differ in shape, so the cache of one
+    long process grows page by page; on the 6 GB card it met the guard's limit
+    after eight pages of 2,000 px, while one page reserves 2.5 GB. A wrapper
+    around a library call, nothing of hers changed."""
+    try:
+        import torch
+        from rfdetr.detr import RFDETR
+    except ImportError:
+        return
+    original = RFDETR.predict
+
+    def predict(self, *args, **kwargs):
+        try:
+            return original(self, *args, **kwargs)
+        finally:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+    RFDETR.predict = predict
+
+
+def _kraken_batch(
+    pairs: list[tuple[Path, Path]], *, device: str, precision: str, kraken_cmd: str
+) -> int:
+    """Her kraken command (``kraken_segmentation_and_htr_v7.segment_page``),
+    with every page of the batch as one ``-i in out`` pair, so the model
+    loads once: the same flags, model path and text direction, one process
+    instead of one a page (the operator's change 4 of 2026-11-17). Returns
+    the exit status; kraken goes on past a page that fails and reports it."""
+    cmd = [kraken_cmd]
+    for src, dst in pairs:
+        cmd += ["-i", str(src), str(dst)]
+    cmd += [
+        "-f",
+        "page",
+        "-x",
+        "--device",
+        device,
+        "--precision",
+        precision,
+        "segment",
+        "-bl",
+        "-d",
+        "horizontal-lr",
+        "--remove-hlines",
+        "-i",
+        "models/segmentation/baselines/best_0.4750.safetensors",
+    ]
+    log(f"kraken on {len(pairs)} pages, device {device}, precision {precision}")
+    proc = subprocess.Popen(cmd)
+
+    def _stop(signum, _frame):  # a SIGTERM to the driver ends kraken too
+        proc.terminate()
+        try:
+            proc.wait(10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+        raise SystemExit(128 + signum)
+
+    previous = signal.signal(signal.SIGTERM, _stop)
+    try:
+        return proc.wait()
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+def run_baselines(a: argparse.Namespace, d: dict[str, Path]) -> None:
+    """Her step 6 over all pages: kraken once per batch on the GPU, the pages
+    it fails (or that stopped a batch) again on the CPU, resumable page by
+    page. ``_baselines_state.json`` in the output folder remembers which
+    pages were in a batch that did not finish, so a page that kills a batch
+    (the card spilt) goes to the CPU the next time instead of killing it
+    again."""
+    import json
+
+    from src.rfdetr2kraken.kraken_segmentation_and_htr_v7 import (
+        kraken_cmd,
+        patch_input_xml,
+        strip_imgfilename_to_basename,
+        strip_space_xmlpage,
+    )
+
+    if kraken_cmd is None:
+        raise RuntimeError("kraken is not on PATH: put the venv's bin first")
+    d["baselines"].mkdir(parents=True, exist_ok=True)
+    state_path = d["baselines"] / "_baselines_state.json"
+    state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    culprits = set(state.get("culprits", []))
+    failed_cpu = set(state.get("failed_cpu", []))
+    # a batch that did not finish: its first page without an output stopped it
+    for stems in state.get("open_batches", []):
+        for stem in stems:
+            if not (d["baselines"] / f"{stem}_baselines.xml").exists():
+                culprits.add(stem)
+                break
+    state["open_batches"] = []
+
+    def save() -> None:
+        state["culprits"] = sorted(culprits)
+        state["failed_cpu"] = sorted(failed_cpu)
+        state_path.write_text(json.dumps(state, indent=1))
+
+    region_files = sorted(d["regions"].glob("*_regions.xml"))
+    todo = []
+    for rx in region_files:
+        stem = rx.name.removesuffix("_regions.xml")
+        out = d["baselines"] / f"{stem}_baselines.xml"
+        if (a.force or not out.exists()) and stem not in failed_cpu:
+            todo.append((stem, rx, out))
+
+    # the baseline model rescales every page to 1,800 px high, so a wide page
+    # becomes a wide network input: at a width-to-height ratio of 3.4 kraken
+    # took 5.3 GB of the 6 GB card (measured 2026-11-17); pages above the
+    # ratio go to the CPU from the start
+    def wide(stem: str) -> bool:
+        img = d["masked"] / f"{stem}.jpg"
+        try:
+            from PIL import Image
+
+            with Image.open(img) as im:
+                w, h = im.size
+        except Exception:
+            return False
+        return h > 0 and w / h > a.wide_ratio
+
+    for stem, _, _ in todo:
+        if stem not in culprits and wide(stem):
+            culprits.add(stem)
+            state.setdefault("wide", []).append(stem)
+    gpu = [t for t in todo if t[0] not in culprits] if a.device != "cpu" else []
+    cpu = [t for t in todo if t[0] in culprits] if a.device != "cpu" else todo
+    log(
+        f"baselines: {len(region_files)} region files, {len(region_files) - len(todo)} done, "
+        f"{len(gpu)} for {a.device} ({a.precision}), {len(cpu)} for the cpu, "
+        f"{len(failed_cpu)} failed before; batch {a.batch}"
+    )
+
+    def run(items, device: str, precision: str) -> list[str]:
+        """Run the items in batches; return the stems without an output."""
+        missing: list[str] = []
+        for k in range(0, len(items), a.batch):
+            chunk = items[k : k + a.batch]
+            state["open_batches"] = [[stem for stem, _, _ in chunk]]
+            save()
+            tmp_pairs = [(patch_input_xml(rx, d["masked"]), out) for _, rx, out in chunk]
+            t = time.time()
+            try:
+                rc = _kraken_batch(
+                    tmp_pairs, device=device, precision=precision, kraken_cmd=kraken_cmd
+                )
+            finally:
+                for tmp, _ in tmp_pairs:
+                    tmp.unlink(missing_ok=True)
+            state["open_batches"] = []
+            n_ok = 0
+            for stem, _, out in chunk:
+                if out.exists():
+                    strip_imgfilename_to_basename(out)
+                    strip_space_xmlpage(out)
+                    n_ok += 1
+                else:
+                    missing.append(stem)
+            save()
+            took = time.time() - t
+            log(
+                f"  batch {k // a.batch + 1}: {n_ok}/{len(chunk)} written in {took:.0f} s"
+                f" (kraken exit {rc}; {took / max(1, len(chunk)):.1f} s a page)"
+            )
+        return missing
+
+    missing_gpu = run(gpu, a.device, a.precision) if gpu else []
+    culprits.update(missing_gpu)
+    cpu_items = cpu + [t for t in gpu if t[0] in missing_gpu]
+    if cpu_items:
+        log(f"baselines: {len(cpu_items)} pages on the cpu (32-true)")
+        failed_cpu.update(run(cpu_items, "cpu", "32-true"))
+    save()
+    done = sum(
+        1
+        for rx in region_files
+        if (d["baselines"] / (rx.name.removesuffix("_regions.xml") + "_baselines.xml")).exists()
+    )
+    log(
+        f"baselines: {done} of {len(region_files)} written; culprits (cpu next time) "
+        f"{len(culprits)}; failed on the cpu too {len(failed_cpu)}"
+    )
+    if not done:
+        raise SystemExit(2)
+
+
 def run_stage(stage: str, a: argparse.Namespace) -> None:
     d = dirs(a.output)
     a.output.mkdir(parents=True, exist_ok=True)
@@ -85,6 +281,7 @@ def run_stage(stage: str, a: argparse.Namespace) -> None:
     if stage == "detect":
         from src.predictions.predict_choice import run_detection
 
+        _release_cuda_cache_after_each_prediction()
         d["predictions_rfdetr"].mkdir(parents=True, exist_ok=True)
         done = {p.stem for p in d["predictions_rfdetr"].glob("*.json")}
         images = images_in(a.input)
@@ -149,42 +346,7 @@ def run_stage(stage: str, a: argparse.Namespace) -> None:
         else:
             log("masked: outputs present, skipped")
     elif stage == "baselines":
-        from src.rfdetr2kraken.kraken_segmentation_and_htr_v7 import kraken_cmd, segment_page
-
-        if kraken_cmd is None:
-            raise RuntimeError("kraken is not on PATH: put the venv's bin first")
-        d["baselines"].mkdir(parents=True, exist_ok=True)
-        region_files = sorted(d["regions"].glob("*_regions.xml"))
-        todo = []
-        for rx in region_files:
-            stem = rx.name.removesuffix("_regions.xml")
-            out = d["baselines"] / f"{stem}_baselines.xml"
-            if a.force or not out.exists():
-                todo.append((rx, out))
-        log(
-            f"baselines: {len(region_files)} region files, {len(region_files) - len(todo)} done, "
-            f"{len(todo)} to do; device {a.device}, precision {a.precision}"
-        )
-        n_ok = n_err = 0
-        for k, (rx, out) in enumerate(todo, start=1):
-            t = time.time()
-            try:
-                segment_page(
-                    regions_xml=rx,
-                    output_xml=out,
-                    images_dir=d["masked"],
-                    device=a.device,
-                    precision=a.precision,
-                    htr_model=None,
-                )
-                n_ok += 1
-                log(f"  {k}/{len(todo)} {out.name} in {time.time() - t:.1f} s")
-            except Exception as exc:  # her batch loop prints and goes on; so does this
-                n_err += 1
-                log(f"  {k}/{len(todo)} {rx.name} FAILED: {exc}")
-        log(f"baselines: {n_ok} written, {n_err} failed")
-        if n_err and not n_ok:
-            raise SystemExit(2)
+        run_baselines(a, d)
     elif stage == "merge":
         from src.rfdetr2kraken.merge_kraken_lines_back_into_my_regions import (
             merge_zone_types_and_lines_batch,
@@ -251,6 +413,15 @@ def main() -> None:
     )
     ap.add_argument("--force", action="store_true", help="redo a stage whose outputs exist")
     ap.add_argument(
+        "--batch", type=int, default=25, help="pages per kraken process in the baselines stage"
+    )
+    ap.add_argument(
+        "--wide-ratio",
+        type=float,
+        default=2.0,
+        help="a page wider than this many times its height goes to the CPU in the baselines stage",
+    )
+    ap.add_argument(
         "--retry",
         type=int,
         default=0,
@@ -279,6 +450,10 @@ def main() -> None:
                     stage,
                     "--runtime",
                     str(a.runtime),
+                    "--batch",
+                    str(a.batch),
+                    "--wide-ratio",
+                    str(a.wide_ratio),
                     "--device",
                     a.device,
                     "--precision",

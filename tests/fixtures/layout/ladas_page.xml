@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15">
+  <Page imageFilename="M_0001.jpg" imageWidth="1000" imageHeight="1250">
+    <TextRegion id="r0" custom="structure {type:MainZone-P;}">
+      <Coords points="100,100 700,100 700,1100 100,1100"/>
+    </TextRegion>
+    <TextRegion id="r1" custom="structure {type:MarginTextZone-ManuscriptAddendum;}">
+      <Coords points="720,100 990,100 990,600 720,600"/>
+    </TextRegion>
+    <TextRegion id="r2" custom="structure {type:RunningTitleZone;}">
+      <Coords points="100,20 700,20 700,80 100,80"/>
+    </TextRegion>
+    <TextRegion id="r3" custom="structure {type:StampZone;}">
+      <Coords points="800,1150 990,1150 990,1240 800,1240"/>
+    </TextRegion>
+  </Page>
+</PcGts>

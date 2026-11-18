@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -343,10 +343,19 @@ def polygon_iou(a: Sequence[Point], b: Sequence[Point]) -> float:
 
 
 class GroupMasks:
-    """The zones of one page rasterized once per census group, so that any
-    line's share inside a group is one small crop and count."""
+    """The zones of one page rasterized once per group (``group_of`` names a
+    zone's group from its class; the census grouping by default), so that
+    any line's share inside a group is one small crop and count."""
 
-    def __init__(self, width: int, height: int, zones: Iterable[Zone], *, max_side: int = 4096):
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        zones: Iterable[Zone],
+        *,
+        max_side: int = 4096,
+        group_of: Callable[[str | None], str] = zone_group,
+    ):
         self.width, self.height = max(1, int(width)), max(1, int(height))
         self.scale = min(1.0, max_side / max(self.width, self.height))
         self.size = (
@@ -356,7 +365,7 @@ class GroupMasks:
         by_group: dict[str, list[list[Point]]] = {}
         for z in zones:
             if len(z.polygon) >= 3:
-                by_group.setdefault(z.group, []).append(
+                by_group.setdefault(group_of(z.cls), []).append(
                     scale_points(z.polygon, self.scale, self.scale)
                 )
         self.masks = {g: _draw(self.size, polys, (0, 0)) for g, polys in by_group.items()}

@@ -62,10 +62,20 @@ from 236,210 eligible pages with 1,589 excluded**
 thresholding, so a 10–20 megapixel scan spills the 6 GB card into host memory
 (the GPU guard killed the first attempt at 5,938 MiB; the second crawled at
 18 minutes a page), and reads of model files from D: over the share crawl
-beside the backup chore. The run therefore feeds downscaled copies of the
-scans and keeps the model files on the VHD; the census scales the pipeline's
-coordinates back. The pilot's measurement, the run and the census are
-pending; the M1 entry below is a placeholder until P1 Task 3 is done.
+beside the backup chore. The run therefore feeds copies downscaled to 2,000 px
+on the long side (RF-DETR then reserves 2.5 GB of the card and takes about
+2.5 s a page), keeps the model files on the VHD, calls kraken once per batch
+of 25 pages in half precision with a CPU pass for the pages wider than twice
+their height (the baseline model's 1,800 px high input makes a 3.4:1 strip a
+5.3 GB job on the card), and the census scales the pipeline's coordinates
+back. **The run over the 621 pages started at 20:18:40**; its figures and the
+census follow in the Phase log entry. For M1 the print trial's code is
+written (`layout/print_trial.py`, `layout/print_report.py`, the
+`leibniz layout print-trial` commands, `tools/print-trial-env.sh`), the
+registry carries dfine_kraken (Apache-2.0, read on GitHub: Open question 29 c
+is answered), the LADaS D-FINE large model (Apache-2.0) and Gallicorpora+
+(CC0 repository, CC BY 4.0 record) as run, and its GPU steps wait for the
+census run, one torch process at a time.
 
 **2026-11-17: ARCH1 — the archive: the finished phases moved out of STATUS.md
 and PROMPTS.md, verbatim; a cloud session, alone, on the branch it was given,
@@ -822,7 +832,47 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   `tools/philiumm-layout-run.sh` wraps each stage in
   `systemd-run --scope -p MemoryMax=6G` with `/usr/bin/time -v` and the
   scope's `memory.peak`, the guard on the two torch stages, a relaunch after
-  60 s on a failure. The size probe and the pilot's figures follow here.
+  60 s on a failure.
+- **The size probe and the second pilot (2,000 px copies).** One page
+  (3,876 × 2,623) through RF-DETR from the VHD checkpoint, fresh process each:
+  long side 1,272 px → 903 MiB allocated on the card, 1,696 reserved; 1,600
+  px → 1,209 / 2,006 MiB, 4.1 s; 2,000 px → 1,671 / 2,464 MiB, 3.6 s (the
+  first process paid the warm-up: 27.8 s); the checkpoint loads in a second
+  from the VHD against minutes from D:. **Chosen: 2,000 px on the long side**
+  (`leibniz layout downscale --long 2000`; the sample's scans have a median
+  long side of 4,070 px and 11.0 megapixels, the largest 52.8; the 621
+  copies are 503 MiB on the VHD). The detect stage over 20 pilot pages: about
+  2.5 s a page in one process, host peak 1,497 MiB (the scope's
+  `memory.peak`); the CUDA caching allocator still met the guard's 5,900 MiB
+  after eight pages of different shapes, so the driver empties the cache
+  after every page and the run sets `expandable_segments`. The kraken stage,
+  run as her code runs it (one `kraken` process a page, `32-true`): 15–38 s a
+  page, 13 of 14 pages written, host peak 1,484 MiB; **the one failure is a
+  page 5,274 × 1,561 px**: the baseline model rescales every input to 1,800
+  px high, so a page 3.4 times wider than high becomes a 6,000 px wide
+  network input and kraken takes 5.3 GB of the card (5,890 MiB with
+  Xwayland, measured alone on the pilot's 1,807 × 527 strip; the same in
+  `16-mixed`, so precision is not the lever), which the guard's limit meets
+  when Xwayland holds more. Fourteen of the sample's 621 pages are wider
+  than 1.5 times their height, four wider than twice. **The run therefore
+  calls kraken once per batch of 25 pages (the same command and flags as
+  hers, the model loaded once instead of 621 times), in `16-mixed` as her own
+  default is a reduced precision, sends pages wider than twice their height
+  to the CPU from the start and any page the card refuses to the CPU after
+  the GPU batches** (the driver's `_baselines_state.json`; a page that kills
+  a batch is the first without an output and goes to the CPU next time; the
+  guard's pattern now names kraken itself, since a kill of the driver alone
+  left kraken holding the card and every relaunch died at once). The CPU
+  pass on that strip had not finished after 11 minutes when it was stopped
+  for the run; the run measures it on its four wide pages. The census code
+  ran on the pilot's 19 pages in 30 s (`data/philiumm/layout-pilot/`):
+  the shapes are right, the numbers are the pilot's and not reported.
+- **The run** (`tools/philiumm-layout-run.sh data/philiumm/layout-sample/images-2000
+  data/philiumm/layout-results philiumm-layout-run`, log
+  `logs/philiumm-layout-run.log`, launched 20:18:40 on 17 November): the ten
+  stages in order, each its own interpreter under `MemoryMax=6G`; the
+  results on the VHD (about 2 GB expected at 2,000 px). Its figures and the
+  census follow here.
 
 ### M1 — the print trial (Task 1b) (2026-11-17) ⏳ waits for P1 Task 3
 

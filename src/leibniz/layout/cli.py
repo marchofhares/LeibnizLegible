@@ -300,3 +300,253 @@ def zone_census(
             f"pages with margin {bl['pages_with_group']['margin']['pages']}"
         )
     _console.print(f"wrote {reports_dir / 'zone-census.md'}")
+
+
+# --------------------------------------------------------------------------- #
+# M1 Task 1b — the print trial
+# --------------------------------------------------------------------------- #
+
+trial_app = typer.Typer(
+    help="M1 Task 1b: the print trial on the Marginalien block.", no_args_is_help=True
+)
+app.add_typer(trial_app, name="print-trial")
+
+PRINT_DIR = Path("data/print")
+PRINT_REPORTS = Path("reports/marginalia")
+PRINT_PAGES_CSV = PRINT_REPORTS / "print-trial-pages.csv"
+PRINT_ZONES = PRINT_DIR / "zones"
+PRINT_PILOT = PRINT_DIR / "trial.json"
+
+
+@trial_app.command("pages")
+def trial_pages(
+    sample_csv: Path = typer.Option(SAMPLE_CSV, "--sample"),
+    out: Path = typer.Option(PRINT_PAGES_CSV, "--out"),
+    images_dir: Path = typer.Option(
+        SAMPLE_DIR / "images-2000", "--images-dir", help="The census's downscaled copies."
+    ),
+    link_dir: Path = typer.Option(
+        PRINT_DIR / "images-2000", "--link-dir", help="Where the trial's copies are linked."
+    ),
+) -> None:
+    """The 100 Marginalien pages of the census sample, listed, their copies linked."""
+    from leibniz.layout import print_trial as T
+    from leibniz.layout.sample import read_sample
+
+    rows = [r for r in read_sample(sample_csv) if r.block == "marginalien"]
+    T.write_pages_csv(rows, out)
+    link_dir.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for r in rows:
+        src = (images_dir / r.file).resolve()
+        dst = link_dir / r.file
+        if src.exists():
+            if dst.is_symlink() or dst.exists():
+                dst.unlink()
+            dst.symlink_to(src)
+            n += 1
+    by_type = {}
+    for r in rows:
+        by_type[T.type_of(r.sub)] = by_type.get(T.type_of(r.sub), 0) + 1
+    _console.print(f"{len(rows)} pages ({by_type}) → {out}; {n} copies linked into {link_dir}")
+
+
+@trial_app.command("census")
+def trial_census(
+    zones_dir: Path = typer.Option(PRINT_ZONES, "--zones", help="kraken's PAGE XML per page."),
+    pages_csv: Path = typer.Option(SAMPLE_CSV, "--sample"),
+    philiumm_results: Path = typer.Option(
+        Path("data/philiumm/layout-results"), "--philiumm", help="P1's results (the comparison)."
+    ),
+    db_path: str = typer.Option(str(DEFAULT_DB_PATH), "--db"),
+    out: Path = typer.Option(PRINT_PILOT, "--out", help="The per-page results (JSON)."),
+    lines_csv: Path = typer.Option(PRINT_DIR / "print-trial-lines.csv", "--lines-csv"),
+) -> None:
+    """Zones per class, the printed-body share, the lines' calls by both models."""
+    from leibniz.layout import print_trial as T
+    from leibniz.layout.sample import read_sample
+
+    conn = _ro(db_path)
+    rows = [r for r in read_sample(pages_csv) if r.block == "marginalien"]
+    pages = T.trial(
+        conn,
+        rows,
+        zones_dir,
+        philiumm_results=philiumm_results if philiumm_results.exists() else None,
+        progress=lambda k, n, pid: _console.print(f"  {k}/{n} {pid}") if k % 25 == 0 else None,
+    )
+    T.write_json(T.pages_to_json(pages), out)
+    T.write_lines_csv(pages, lines_csv)
+    summ = T.summarize(pages)
+    a = summ["all"]
+    _console.print(
+        f"{a['pages']} pages, {a['pages_with_zones']} with zones; v1 lines {a['v1_lines']}, "
+        f"in print {a['v1_by_group']['print']['lines']} ({a['print_body_share_of_lines']}), "
+        f"in manuscript zones {a['v1_by_group']['manuscript']['lines']}; "
+        f"pages with a manuscript zone {a['pages_with_manuscript_zone']}; "
+        f"IoU lines/print zones mean {a['iou_lines_print_mean']}; "
+        f"PHILIUMM same call {a['philiumm']['same_call']}"
+    )
+    _console.print(f"wrote {out} and {lines_csv}")
+
+
+@trial_app.command("sheet")
+def trial_sheet(
+    trial_json: Path = typer.Option(PRINT_PILOT, "--trial"),
+    db_path: str = typer.Option(str(DEFAULT_DB_PATH), "--db"),
+    images: Path = typer.Option(Path(DEFAULT_IMAGES_ROOT), "--images"),
+    out_html: Path = typer.Option(PRINT_DIR / "print-sheet.html", "--out"),
+    lines_out: Path = typer.Option(PRINT_DIR / "print-sheet-lines.csv", "--lines-out"),
+    per_type: int = typer.Option(25, "--per-type"),
+    seed: int = typer.Option(0, "--seed"),
+) -> None:
+    """The sheet of 50 printed lines (25 roman, 25 Fraktur) for the operator."""
+    from leibniz.layout import print_trial as T
+
+    conn = _ro(db_path)
+    pages = _trial_pages_from_json(trial_json, conn)
+    lines = T.select_sheet_lines(pages, per_type=per_type, seed=seed)
+    crops = T.crops_for(conn, lines, images)
+    out_html.parent.mkdir(parents=True, exist_ok=True)
+    out_html.write_text(T.render_sheet(lines, crops, seed=seed), encoding="utf-8")
+    T.write_sheet_lines(lines, lines_out)
+    by = {}
+    for ln in lines:
+        by[ln.print_type] = by.get(ln.print_type, 0) + 1
+    _console.print(
+        f"{len(lines)} lines ({by}), {sum(1 for v in crops.values() if v)} crops → "
+        f"{out_html.resolve()} ; the list in {lines_out}"
+    )
+
+
+def _trial_pages_from_json(path: Path, conn):
+    """The per-page results back from JSON, their lines re-read from the store
+    (the JSON leaves the per-line calls out; the lines CSV carries them)."""
+    import csv as _csv
+
+    from leibniz.layout import print_trial as T
+
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    pages = []
+    for d in data:
+        pt = T.PageTrial(
+            d["page_id"],
+            d["work_id"],
+            d["label"],
+            d["lang"],
+            d["print_type"],
+            d["file"],
+            d["status"],
+            d.get("scale"),
+            d.get("zones", {}),
+            d.get("area", {}),
+            d.get("v1_lines", 0),
+            d.get("v1_by_group", {}),
+            d.get("v1_by_philiumm", {}),
+            d.get("agreement", {}),
+            d.get("iou_lines_print"),
+            d.get("iou_print_models"),
+        )
+        pages.append(pt)
+    lines_csv = Path(path).with_name("print-trial-lines.csv")
+    if lines_csv.exists():
+        by_page = {p.page_id: p for p in pages}
+        with lines_csv.open(encoding="utf-8") as fh:
+            for r in _csv.DictReader(fh):
+                p = by_page.get(r["page_id"])
+                if p is not None:
+                    p.lines.append(
+                        T.LineCall(
+                            int(r["ref"].rsplit(":", 1)[1]),
+                            r["ladas"],
+                            r["philiumm"],
+                            r["v1_text"],
+                            float(r["conf"]) if r["conf"] else None,
+                        )
+                    )
+    return pages
+
+
+@trial_app.command("ocr-input")
+def trial_ocr_input(
+    trial_json: Path = typer.Option(PRINT_PILOT, "--trial"),
+    db_path: str = typer.Option(str(DEFAULT_DB_PATH), "--db"),
+    images: Path = typer.Option(Path(DEFAULT_IMAGES_ROOT), "--images"),
+    out_dir: Path = typer.Option(PRINT_DIR / "ocr-input", "--out-dir"),
+) -> None:
+    """One PAGE XML per page with the v1 lines inside print zones, for kraken ocr."""
+    from leibniz import db
+    from leibniz.images.fetch import local_relpath
+    from leibniz.layout import print_trial as T
+
+    conn = _ro(db_path)
+    pages = _trial_pages_from_json(trial_json, conn)
+    prec = db.run_precedences(conn)
+    n_pages = n_lines = 0
+    for pt in pages:
+        if pt.status != "ok":
+            continue
+        page = db.get_page(conn, pt.page_id)
+        if page is None:
+            continue
+        img = images / (page.local_path or local_relpath(page))
+        n = T.write_ocr_input(
+            conn, pt, img, out_dir / f"{Path(pt.file).stem}.xml", precedences=prec
+        )
+        n_pages += 1
+        n_lines += n
+    _console.print(f"{n_pages} PAGE XML files, {n_lines} printed-body lines → {out_dir}")
+
+
+@trial_app.command("cer")
+def trial_cer(
+    transcriptions: Path = typer.Option(..., "--transcriptions", help="The operator's CSV."),
+    lines_csv: Path = typer.Option(PRINT_DIR / "print-sheet-lines.csv", "--lines"),
+    ocr_dir: Path = typer.Option(PRINT_DIR / "ocr", "--ocr", help="kraken's OCR output per page."),
+    out: Path = typer.Option(PRINT_DIR / "print-cer.json", "--out"),
+    policy: str = typer.Option("philiumm", "--policy"),
+) -> None:
+    """The CER of Gallicorpora+ and of v1 on the sheet's lines, roman and Fraktur apart."""
+    from leibniz.layout import print_trial as T
+
+    lines = T.read_sheet_lines(lines_csv)
+    refs = T.read_transcriptions(transcriptions)
+    ocr: dict[str, str] = {}
+    for xml in sorted(Path(ocr_dir).glob("*.xml")):
+        ocr.update(T.read_ocr_texts(xml))
+    v1 = {ln.ref: ln.v1_text for ln in lines}
+    result = {
+        "transcriptions": str(transcriptions),
+        "gallicorpora": T.score(refs, ocr, lines, policy=policy),
+        "v1": T.score(refs, v1, lines, policy=policy),
+    }
+    T.write_json(result, out)
+    _console.print(json.dumps(result, indent=1, ensure_ascii=False))
+
+
+@trial_app.command("report")
+def trial_report(
+    trial_json: Path = typer.Option(PRINT_PILOT, "--trial"),
+    cer_json: Path = typer.Option(PRINT_DIR / "print-cer.json", "--cer"),
+    db_path: str = typer.Option(str(DEFAULT_DB_PATH), "--db"),
+    reports_dir: Path = typer.Option(PRINT_REPORTS, "--reports-dir"),
+    meta_json: Path = typer.Option(PRINT_DIR / "trial-meta.json", "--meta"),
+    ocr_dir: Path = typer.Option(PRINT_DIR / "ocr", "--ocr"),
+) -> None:
+    """reports/marginalia/print-trial.md with the decision, the summary JSON, the per-page CSV."""
+    from leibniz.layout import print_report as R
+    from leibniz.layout import print_trial as T
+
+    conn = _ro(db_path)
+    pages = _trial_pages_from_json(trial_json, conn)
+    meta = json.loads(meta_json.read_text(encoding="utf-8")) if meta_json.exists() else {}
+    cer = json.loads(cer_json.read_text(encoding="utf-8")) if cer_json.exists() else None
+    summ = T.summarize(pages, meta)
+    summ["cer"] = cer
+    summ["ocr_lines"] = sum(len(T.read_ocr_texts(x)) for x in sorted(Path(ocr_dir).glob("*.xml")))
+    summ["fraktur_share_corpus"] = R.fraktur_share(conn)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    T.write_per_page(pages, reports_dir / "print-trial-per-page.csv")
+    T.write_json(summ, reports_dir / "print-trial-summary.json")
+    (reports_dir / "print-trial.md").write_text(R.render(summ), encoding="utf-8")
+    _console.print(f"wrote {reports_dir / 'print-trial.md'}; decision: {R.decision(summ)[0]}")
