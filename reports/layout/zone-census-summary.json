@@ -1,0 +1,2279 @@
+{
+ "generated": "2026-11-18",
+ "meta": {
+  "sample": "reports/layout/sample.csv",
+  "results": "data/philiumm/layout-results",
+  "checkpoint": "checkpoint_best_ema_v2.pth",
+  "resolution": 1272,
+  "threshold": 0.4,
+  "class_thresholds": {
+   "MathsRegion-inline": 0.4,
+   "MathsRegion-complex": 0.4,
+   "MathsRegion-strikethrough": 0.4
+  },
+  "checkpoint_sha256": "ba76c8e592886c39f69ef1b2093a4fc74eff1e14a84e191ee606e1e84aa9bb4a",
+  "card_revision": "4a5c7d93e8a6da1b4e01794c35e24113c2405c28",
+  "pipeline_commit": "3f1c7853883df29fe814bfdb89191cb471392a6a",
+  "model": "DenisaBumba/rfdetr-instance-segmentation-leibniz-manuscripts-v2",
+  "licence": "CC BY-NC 4.0 (the card, read 2026-11-16)"
+ },
+ "all": {
+  "pages": 621,
+  "pages_ok": 617,
+  "pages_no_detections": 0,
+  "pages_no_final_lines": 4,
+  "size_agrees": 21,
+  "size_differs": 600,
+  "zones": {
+   "DigitizationArtefactZone": {
+    "total": 622,
+    "per_page": 1.002,
+    "pages_with": 621,
+    "pages_with_share": 1.0,
+    "conf_mean": 0.9734
+   },
+   "GraphicZone-figure": {
+    "total": 286,
+    "per_page": 0.461,
+    "pages_with": 120,
+    "pages_with_share": 0.1932,
+    "conf_mean": 0.7419
+   },
+   "MainZone": {
+    "total": 858,
+    "per_page": 1.382,
+    "pages_with": 552,
+    "pages_with_share": 0.8889,
+    "conf_mean": 0.9353
+   },
+   "MarginTextZone": {
+    "total": 956,
+    "per_page": 1.539,
+    "pages_with": 308,
+    "pages_with_share": 0.496,
+    "conf_mean": 0.7335
+   },
+   "MathsRegion-complex": {
+    "total": 209,
+    "per_page": 0.337,
+    "pages_with": 48,
+    "pages_with_share": 0.0773,
+    "conf_mean": 0.4875
+   },
+   "MathsRegion-inline": {
+    "total": 872,
+    "per_page": 1.404,
+    "pages_with": 117,
+    "pages_with_share": 0.1884,
+    "conf_mean": 0.5212
+   },
+   "NumberingZone": {
+    "total": 546,
+    "per_page": 0.879,
+    "pages_with": 413,
+    "pages_with_share": 0.6651,
+    "conf_mean": 0.7695
+   }
+  },
+  "pages_with_group": {
+   "main": {
+    "pages": 552,
+    "share": 0.8889
+   },
+   "margin": {
+    "pages": 308,
+    "share": 0.496
+   },
+   "numbering": {
+    "pages": 413,
+    "share": 0.6651
+   },
+   "figure": {
+    "pages": 120,
+    "share": 0.1932
+   },
+   "formula": {
+    "pages": 123,
+    "share": 0.1981
+   },
+   "artefact": {
+    "pages": 621,
+    "share": 1.0
+   },
+   "other": {
+    "pages": 0,
+    "share": 0.0
+   }
+  },
+  "area_mean": {
+   "main": 0.4255,
+   "margin": 0.023,
+   "numbering": 0.001,
+   "figure": 0.0052,
+   "formula": 0.0107,
+   "artefact": 0.0827,
+   "other": 0.0
+  },
+  "v1_lines": 44104,
+  "v1_by_group": {
+   "main": {
+    "lines": 36472,
+    "share": 0.827
+   },
+   "margin": {
+    "lines": 4176,
+    "share": 0.0947
+   },
+   "numbering": {
+    "lines": 54,
+    "share": 0.0012
+   },
+   "figure": {
+    "lines": 197,
+    "share": 0.0045
+   },
+   "formula": {
+    "lines": 490,
+    "share": 0.0111
+   },
+   "artefact": {
+    "lines": 249,
+    "share": 0.0056
+   },
+   "other": {
+    "lines": 0,
+    "share": 0.0
+   },
+   "outside": {
+    "lines": 2466,
+    "share": 0.0559
+   }
+  },
+  "v1_in_figure_or_formula": {
+   "lines": 687,
+   "share": 0.0156
+  },
+  "their_lines": 43875,
+  "their_by_group": {
+   "main": {
+    "lines": 39106,
+    "share": 0.8913
+   },
+   "margin": {
+    "lines": 4669,
+    "share": 0.1064
+   },
+   "numbering": {
+    "lines": 46,
+    "share": 0.001
+   },
+   "figure": {
+    "lines": 33,
+    "share": 0.0008
+   },
+   "formula": {
+    "lines": 21,
+    "share": 0.0005
+   },
+   "artefact": {
+    "lines": 0,
+    "share": 0.0
+   },
+   "other": {
+    "lines": 0,
+    "share": 0.0
+   },
+   "outside": {
+    "lines": 0,
+    "share": 0.0
+   }
+  },
+  "their_to_v1": 0.9948,
+  "their_to_v1_median_page": 1.0139,
+  "matched": {
+   "0.3": {
+    "pairs": 32233,
+    "share_of_v1": 0.7308,
+    "share_of_theirs": 0.7347
+   },
+   "0.5": {
+    "pairs": 29075,
+    "share_of_v1": 0.6592,
+    "share_of_theirs": 0.6627
+   },
+   "0.7": {
+    "pairs": 24487,
+    "share_of_v1": 0.5552,
+    "share_of_theirs": 0.5581
+   }
+  },
+  "matched_iou_mean": 0.7709
+ },
+ "blocks": {
+  "briefwechsel": {
+   "pages": 200,
+   "pages_ok": 200,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 7,
+   "size_differs": 193,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 200,
+     "per_page": 1.0,
+     "pages_with": 200,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9781
+    },
+    "GraphicZone-figure": {
+     "total": 47,
+     "per_page": 0.235,
+     "pages_with": 32,
+     "pages_with_share": 0.16,
+     "conf_mean": 0.6812
+    },
+    "MainZone": {
+     "total": 300,
+     "per_page": 1.5,
+     "pages_with": 187,
+     "pages_with_share": 0.935,
+     "conf_mean": 0.9245
+    },
+    "MarginTextZone": {
+     "total": 242,
+     "per_page": 1.21,
+     "pages_with": 107,
+     "pages_with_share": 0.535,
+     "conf_mean": 0.7609
+    },
+    "MathsRegion-complex": {
+     "total": 12,
+     "per_page": 0.06,
+     "pages_with": 4,
+     "pages_with_share": 0.02,
+     "conf_mean": 0.5158
+    },
+    "MathsRegion-inline": {
+     "total": 16,
+     "per_page": 0.08,
+     "pages_with": 9,
+     "pages_with_share": 0.045,
+     "conf_mean": 0.6178
+    },
+    "NumberingZone": {
+     "total": 217,
+     "per_page": 1.085,
+     "pages_with": 158,
+     "pages_with_share": 0.79,
+     "conf_mean": 0.802
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 187,
+     "share": 0.935
+    },
+    "margin": {
+     "pages": 107,
+     "share": 0.535
+    },
+    "numbering": {
+     "pages": 158,
+     "share": 0.79
+    },
+    "figure": {
+     "pages": 32,
+     "share": 0.16
+    },
+    "formula": {
+     "pages": 10,
+     "share": 0.05
+    },
+    "artefact": {
+     "pages": 200,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.433,
+    "margin": 0.0235,
+    "numbering": 0.0013,
+    "figure": 0.0033,
+    "formula": 0.0018,
+    "artefact": 0.0851,
+    "other": 0.0
+   },
+   "v1_lines": 9089,
+   "v1_by_group": {
+    "main": {
+     "lines": 8225,
+     "share": 0.9049
+    },
+    "margin": {
+     "lines": 543,
+     "share": 0.0597
+    },
+    "numbering": {
+     "lines": 37,
+     "share": 0.0041
+    },
+    "figure": {
+     "lines": 25,
+     "share": 0.0028
+    },
+    "formula": {
+     "lines": 24,
+     "share": 0.0026
+    },
+    "artefact": {
+     "lines": 71,
+     "share": 0.0078
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 164,
+     "share": 0.018
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 49,
+    "share": 0.0054
+   },
+   "their_lines": 11412,
+   "their_by_group": {
+    "main": {
+     "lines": 10711,
+     "share": 0.9386
+    },
+    "margin": {
+     "lines": 673,
+     "share": 0.059
+    },
+    "numbering": {
+     "lines": 24,
+     "share": 0.0021
+    },
+    "figure": {
+     "lines": 4,
+     "share": 0.0004
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 1.2556,
+   "their_to_v1_median_page": 1.1705,
+   "matched": {
+    "0.3": {
+     "pairs": 6420,
+     "share_of_v1": 0.7063,
+     "share_of_theirs": 0.5626
+    },
+    "0.5": {
+     "pairs": 5607,
+     "share_of_v1": 0.6169,
+     "share_of_theirs": 0.4913
+    },
+    "0.7": {
+     "pairs": 4588,
+     "share_of_v1": 0.5048,
+     "share_of_theirs": 0.402
+    }
+   },
+   "matched_iou_mean": 0.754
+  },
+  "handschriften": {
+   "pages": 200,
+   "pages_ok": 199,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 1,
+   "size_agrees": 8,
+   "size_differs": 192,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 200,
+     "per_page": 1.0,
+     "pages_with": 200,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9761
+    },
+    "GraphicZone-figure": {
+     "total": 26,
+     "per_page": 0.13,
+     "pages_with": 16,
+     "pages_with_share": 0.08,
+     "conf_mean": 0.7568
+    },
+    "MainZone": {
+     "total": 288,
+     "per_page": 1.44,
+     "pages_with": 177,
+     "pages_with_share": 0.885,
+     "conf_mean": 0.9558
+    },
+    "MarginTextZone": {
+     "total": 318,
+     "per_page": 1.59,
+     "pages_with": 97,
+     "pages_with_share": 0.485,
+     "conf_mean": 0.7538
+    },
+    "MathsRegion-complex": {
+     "total": 5,
+     "per_page": 0.025,
+     "pages_with": 3,
+     "pages_with_share": 0.015,
+     "conf_mean": 0.4739
+    },
+    "MathsRegion-inline": {
+     "total": 19,
+     "per_page": 0.095,
+     "pages_with": 8,
+     "pages_with_share": 0.04,
+     "conf_mean": 0.4753
+    },
+    "NumberingZone": {
+     "total": 212,
+     "per_page": 1.06,
+     "pages_with": 154,
+     "pages_with_share": 0.77,
+     "conf_mean": 0.775
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 177,
+     "share": 0.885
+    },
+    "margin": {
+     "pages": 97,
+     "share": 0.485
+    },
+    "numbering": {
+     "pages": 154,
+     "share": 0.77
+    },
+    "figure": {
+     "pages": 16,
+     "share": 0.08
+    },
+    "formula": {
+     "pages": 9,
+     "share": 0.045
+    },
+    "artefact": {
+     "pages": 200,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.4437,
+    "margin": 0.0219,
+    "numbering": 0.0011,
+    "figure": 0.001,
+    "formula": 0.0021,
+    "artefact": 0.0809,
+    "other": 0.0
+   },
+   "v1_lines": 15922,
+   "v1_by_group": {
+    "main": {
+     "lines": 13626,
+     "share": 0.8558
+    },
+    "margin": {
+     "lines": 1826,
+     "share": 0.1147
+    },
+    "numbering": {
+     "lines": 10,
+     "share": 0.0006
+    },
+    "figure": {
+     "lines": 4,
+     "share": 0.0003
+    },
+    "formula": {
+     "lines": 17,
+     "share": 0.0011
+    },
+    "artefact": {
+     "lines": 100,
+     "share": 0.0063
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 339,
+     "share": 0.0213
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 21,
+    "share": 0.0013
+   },
+   "their_lines": 16318,
+   "their_by_group": {
+    "main": {
+     "lines": 14084,
+     "share": 0.8631
+    },
+    "margin": {
+     "lines": 2217,
+     "share": 0.1359
+    },
+    "numbering": {
+     "lines": 16,
+     "share": 0.001
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 1,
+     "share": 0.0001
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 1.0249,
+   "their_to_v1_median_page": 1.0109,
+   "matched": {
+    "0.3": {
+     "pairs": 13535,
+     "share_of_v1": 0.8501,
+     "share_of_theirs": 0.8295
+    },
+    "0.5": {
+     "pairs": 12616,
+     "share_of_v1": 0.7924,
+     "share_of_theirs": 0.7731
+    },
+    "0.7": {
+     "pairs": 10976,
+     "share_of_v1": 0.6894,
+     "share_of_theirs": 0.6726
+    }
+   },
+   "matched_iou_mean": 0.7871
+  },
+  "lh35": {
+   "pages": 100,
+   "pages_ok": 98,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 2,
+   "size_agrees": 5,
+   "size_differs": 95,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 100,
+     "per_page": 1.0,
+     "pages_with": 100,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.968
+    },
+    "GraphicZone-figure": {
+     "total": 138,
+     "per_page": 1.38,
+     "pages_with": 46,
+     "pages_with_share": 0.46,
+     "conf_mean": 0.7809
+    },
+    "MainZone": {
+     "total": 144,
+     "per_page": 1.44,
+     "pages_with": 87,
+     "pages_with_share": 0.87,
+     "conf_mean": 0.9379
+    },
+    "MarginTextZone": {
+     "total": 277,
+     "per_page": 2.77,
+     "pages_with": 62,
+     "pages_with_share": 0.62,
+     "conf_mean": 0.7039
+    },
+    "MathsRegion-complex": {
+     "total": 112,
+     "per_page": 1.12,
+     "pages_with": 18,
+     "pages_with_share": 0.18,
+     "conf_mean": 0.4979
+    },
+    "MathsRegion-inline": {
+     "total": 605,
+     "per_page": 6.05,
+     "pages_with": 55,
+     "pages_with_share": 0.55,
+     "conf_mean": 0.5273
+    },
+    "NumberingZone": {
+     "total": 75,
+     "per_page": 0.75,
+     "pages_with": 65,
+     "pages_with_share": 0.65,
+     "conf_mean": 0.7253
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 87,
+     "share": 0.87
+    },
+    "margin": {
+     "pages": 62,
+     "share": 0.62
+    },
+    "numbering": {
+     "pages": 65,
+     "share": 0.65
+    },
+    "figure": {
+     "pages": 46,
+     "share": 0.46
+    },
+    "formula": {
+     "pages": 56,
+     "share": 0.56
+    },
+    "artefact": {
+     "pages": 100,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.4753,
+    "margin": 0.0321,
+    "numbering": 0.0008,
+    "figure": 0.0144,
+    "formula": 0.0354,
+    "artefact": 0.0798,
+    "other": 0.0
+   },
+   "v1_lines": 10629,
+   "v1_by_group": {
+    "main": {
+     "lines": 8643,
+     "share": 0.8132
+    },
+    "margin": {
+     "lines": 1058,
+     "share": 0.0995
+    },
+    "numbering": {
+     "lines": 3,
+     "share": 0.0003
+    },
+    "figure": {
+     "lines": 54,
+     "share": 0.0051
+    },
+    "formula": {
+     "lines": 366,
+     "share": 0.0344
+    },
+    "artefact": {
+     "lines": 28,
+     "share": 0.0026
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 477,
+     "share": 0.0449
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 420,
+    "share": 0.0395
+   },
+   "their_lines": 9497,
+   "their_by_group": {
+    "main": {
+     "lines": 8296,
+     "share": 0.8735
+    },
+    "margin": {
+     "lines": 1178,
+     "share": 0.124
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 10,
+     "share": 0.0011
+    },
+    "formula": {
+     "lines": 13,
+     "share": 0.0014
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.8935,
+   "their_to_v1_median_page": 0.9741,
+   "matched": {
+    "0.3": {
+     "pairs": 7262,
+     "share_of_v1": 0.6832,
+     "share_of_theirs": 0.7647
+    },
+    "0.5": {
+     "pairs": 6421,
+     "share_of_v1": 0.6041,
+     "share_of_theirs": 0.6761
+    },
+    "0.7": {
+     "pairs": 5270,
+     "share_of_v1": 0.4958,
+     "share_of_theirs": 0.5549
+    }
+   },
+   "matched_iou_mean": 0.7637
+  },
+  "marginalien": {
+   "pages": 100,
+   "pages_ok": 99,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 1,
+   "size_agrees": 1,
+   "size_differs": 99,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 101,
+     "per_page": 1.01,
+     "pages_with": 100,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9643
+    },
+    "GraphicZone-figure": {
+     "total": 39,
+     "per_page": 0.39,
+     "pages_with": 14,
+     "pages_with_share": 0.14,
+     "conf_mean": 0.7024
+    },
+    "MainZone": {
+     "total": 89,
+     "per_page": 0.89,
+     "pages_with": 80,
+     "pages_with_share": 0.8,
+     "conf_mean": 0.9063
+    },
+    "MarginTextZone": {
+     "total": 47,
+     "per_page": 0.47,
+     "pages_with": 24,
+     "pages_with_share": 0.24,
+     "conf_mean": 0.5765
+    },
+    "MathsRegion-complex": {
+     "total": 77,
+     "per_page": 0.77,
+     "pages_with": 22,
+     "pages_with_share": 0.22,
+     "conf_mean": 0.4767
+    },
+    "MathsRegion-inline": {
+     "total": 139,
+     "per_page": 1.39,
+     "pages_with": 37,
+     "pages_with_share": 0.37,
+     "conf_mean": 0.497
+    },
+    "NumberingZone": {
+     "total": 18,
+     "per_page": 0.18,
+     "pages_with": 18,
+     "pages_with_share": 0.18,
+     "conf_mean": 0.5843
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 80,
+     "share": 0.8
+    },
+    "margin": {
+     "pages": 24,
+     "share": 0.24
+    },
+    "numbering": {
+     "pages": 18,
+     "share": 0.18
+    },
+    "figure": {
+     "pages": 14,
+     "share": 0.14
+    },
+    "formula": {
+     "pages": 40,
+     "share": 0.4
+    },
+    "artefact": {
+     "pages": 100,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.3041,
+    "margin": 0.0106,
+    "numbering": 0.0002,
+    "figure": 0.0068,
+    "formula": 0.0208,
+    "artefact": 0.0839,
+    "other": 0.0
+   },
+   "v1_lines": 5581,
+   "v1_by_group": {
+    "main": {
+     "lines": 3588,
+     "share": 0.6429
+    },
+    "margin": {
+     "lines": 327,
+     "share": 0.0586
+    },
+    "numbering": {
+     "lines": 3,
+     "share": 0.0005
+    },
+    "figure": {
+     "lines": 112,
+     "share": 0.0201
+    },
+    "formula": {
+     "lines": 71,
+     "share": 0.0127
+    },
+    "artefact": {
+     "lines": 50,
+     "share": 0.009
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 1430,
+     "share": 0.2562
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 183,
+    "share": 0.0328
+   },
+   "their_lines": 3843,
+   "their_by_group": {
+    "main": {
+     "lines": 3656,
+     "share": 0.9513
+    },
+    "margin": {
+     "lines": 178,
+     "share": 0.0463
+    },
+    "numbering": {
+     "lines": 2,
+     "share": 0.0005
+    },
+    "figure": {
+     "lines": 1,
+     "share": 0.0003
+    },
+    "formula": {
+     "lines": 6,
+     "share": 0.0016
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.6886,
+   "their_to_v1_median_page": 0.9667,
+   "matched": {
+    "0.3": {
+     "pairs": 2711,
+     "share_of_v1": 0.4858,
+     "share_of_theirs": 0.7054
+    },
+    "0.5": {
+     "pairs": 2372,
+     "share_of_v1": 0.425,
+     "share_of_theirs": 0.6172
+    },
+    "0.7": {
+     "pairs": 1942,
+     "share_of_v1": 0.348,
+     "share_of_theirs": 0.5053
+    }
+   },
+   "matched_iou_mean": 0.7813
+  },
+  "philiumm-test": {
+   "pages": 20,
+   "pages_ok": 20,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 0,
+   "size_differs": 20,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 20,
+     "per_page": 1.0,
+     "pages_with": 20,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.972
+    },
+    "GraphicZone-figure": {
+     "total": 36,
+     "per_page": 1.8,
+     "pages_with": 12,
+     "pages_with_share": 0.6,
+     "conf_mean": 0.7809
+    },
+    "MainZone": {
+     "total": 36,
+     "per_page": 1.8,
+     "pages_with": 20,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9558
+    },
+    "MarginTextZone": {
+     "total": 70,
+     "per_page": 3.5,
+     "pages_with": 17,
+     "pages_with_share": 0.85,
+     "conf_mean": 0.7699
+    },
+    "MathsRegion-complex": {
+     "total": 3,
+     "per_page": 0.15,
+     "pages_with": 1,
+     "pages_with_share": 0.05,
+     "conf_mean": 0.4646
+    },
+    "MathsRegion-inline": {
+     "total": 93,
+     "per_page": 4.65,
+     "pages_with": 8,
+     "pages_with_share": 0.4,
+     "conf_mean": 0.5285
+    },
+    "NumberingZone": {
+     "total": 23,
+     "per_page": 1.15,
+     "pages_with": 17,
+     "pages_with_share": 0.85,
+     "conf_mean": 0.7817
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 20,
+     "share": 1.0
+    },
+    "margin": {
+     "pages": 17,
+     "share": 0.85
+    },
+    "numbering": {
+     "pages": 17,
+     "share": 0.85
+    },
+    "figure": {
+     "pages": 12,
+     "share": 0.6
+    },
+    "formula": {
+     "pages": 8,
+     "share": 0.4
+    },
+    "artefact": {
+     "pages": 20,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.5109,
+    "margin": 0.045,
+    "numbering": 0.0017,
+    "figure": 0.0125,
+    "formula": 0.0114,
+    "artefact": 0.0862,
+    "other": 0.0
+   },
+   "v1_lines": 2680,
+   "v1_by_group": {
+    "main": {
+     "lines": 2199,
+     "share": 0.8205
+    },
+    "margin": {
+     "lines": 415,
+     "share": 0.1549
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 2,
+     "share": 0.0007
+    },
+    "formula": {
+     "lines": 12,
+     "share": 0.0045
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 52,
+     "share": 0.0194
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 14,
+    "share": 0.0052
+   },
+   "their_lines": 2668,
+   "their_by_group": {
+    "main": {
+     "lines": 2230,
+     "share": 0.8358
+    },
+    "margin": {
+     "lines": 416,
+     "share": 0.1559
+    },
+    "numbering": {
+     "lines": 3,
+     "share": 0.0011
+    },
+    "figure": {
+     "lines": 18,
+     "share": 0.0067
+    },
+    "formula": {
+     "lines": 1,
+     "share": 0.0004
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.9955,
+   "their_to_v1_median_page": 1.0,
+   "matched": {
+    "0.3": {
+     "pairs": 2206,
+     "share_of_v1": 0.8231,
+     "share_of_theirs": 0.8268
+    },
+    "0.5": {
+     "pairs": 1997,
+     "share_of_v1": 0.7451,
+     "share_of_theirs": 0.7485
+    },
+    "0.7": {
+     "pairs": 1679,
+     "share_of_v1": 0.6265,
+     "share_of_theirs": 0.6293
+    }
+   },
+   "matched_iou_mean": 0.7756
+  },
+  "extra": {
+   "pages": 1,
+   "pages_ok": 1,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 0,
+   "size_differs": 1,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 1,
+     "per_page": 1.0,
+     "pages_with": 1,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9716
+    },
+    "MainZone": {
+     "total": 1,
+     "per_page": 1.0,
+     "pages_with": 1,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9781
+    },
+    "MarginTextZone": {
+     "total": 2,
+     "per_page": 2.0,
+     "pages_with": 1,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.8358
+    },
+    "NumberingZone": {
+     "total": 1,
+     "per_page": 1.0,
+     "pages_with": 1,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.7863
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 1,
+     "share": 1.0
+    },
+    "margin": {
+     "pages": 1,
+     "share": 1.0
+    },
+    "numbering": {
+     "pages": 1,
+     "share": 1.0
+    },
+    "figure": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "pages": 1,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.7549,
+    "margin": 0.036,
+    "numbering": 0.0011,
+    "figure": 0.0,
+    "formula": 0.0,
+    "artefact": 0.0449,
+    "other": 0.0
+   },
+   "v1_lines": 203,
+   "v1_by_group": {
+    "main": {
+     "lines": 191,
+     "share": 0.9409
+    },
+    "margin": {
+     "lines": 7,
+     "share": 0.0345
+    },
+    "numbering": {
+     "lines": 1,
+     "share": 0.0049
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 4,
+     "share": 0.0197
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 0,
+    "share": 0.0
+   },
+   "their_lines": 137,
+   "their_by_group": {
+    "main": {
+     "lines": 129,
+     "share": 0.9416
+    },
+    "margin": {
+     "lines": 7,
+     "share": 0.0511
+    },
+    "numbering": {
+     "lines": 1,
+     "share": 0.0073
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.6749,
+   "their_to_v1_median_page": 0.6749,
+   "matched": {
+    "0.3": {
+     "pairs": 99,
+     "share_of_v1": 0.4877,
+     "share_of_theirs": 0.7226
+    },
+    "0.5": {
+     "pairs": 62,
+     "share_of_v1": 0.3054,
+     "share_of_theirs": 0.4526
+    },
+    "0.7": {
+     "pairs": 32,
+     "share_of_v1": 0.1576,
+     "share_of_theirs": 0.2336
+    }
+   },
+   "matched_iou_mean": 0.7056
+  }
+ },
+ "marginalien_by_lang": {
+  "de": {
+   "pages": 30,
+   "pages_ok": 30,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 0,
+   "size_differs": 30,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 31,
+     "per_page": 1.033,
+     "pages_with": 30,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9601
+    },
+    "GraphicZone-figure": {
+     "total": 1,
+     "per_page": 0.033,
+     "pages_with": 1,
+     "pages_with_share": 0.0333,
+     "conf_mean": 0.4961
+    },
+    "MainZone": {
+     "total": 27,
+     "per_page": 0.9,
+     "pages_with": 25,
+     "pages_with_share": 0.8333,
+     "conf_mean": 0.8663
+    },
+    "MarginTextZone": {
+     "total": 25,
+     "per_page": 0.833,
+     "pages_with": 11,
+     "pages_with_share": 0.3667,
+     "conf_mean": 0.5804
+    },
+    "MathsRegion-complex": {
+     "total": 12,
+     "per_page": 0.4,
+     "pages_with": 4,
+     "pages_with_share": 0.1333,
+     "conf_mean": 0.4762
+    },
+    "MathsRegion-inline": {
+     "total": 25,
+     "per_page": 0.833,
+     "pages_with": 9,
+     "pages_with_share": 0.3,
+     "conf_mean": 0.4608
+    },
+    "NumberingZone": {
+     "total": 5,
+     "per_page": 0.167,
+     "pages_with": 5,
+     "pages_with_share": 0.1667,
+     "conf_mean": 0.5486
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 25,
+     "share": 0.8333
+    },
+    "margin": {
+     "pages": 11,
+     "share": 0.3667
+    },
+    "numbering": {
+     "pages": 5,
+     "share": 0.1667
+    },
+    "figure": {
+     "pages": 1,
+     "share": 0.0333
+    },
+    "formula": {
+     "pages": 11,
+     "share": 0.3667
+    },
+    "artefact": {
+     "pages": 30,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.3009,
+    "margin": 0.0139,
+    "numbering": 0.0002,
+    "figure": 0.0008,
+    "formula": 0.0129,
+    "artefact": 0.0913,
+    "other": 0.0
+   },
+   "v1_lines": 1790,
+   "v1_by_group": {
+    "main": {
+     "lines": 1175,
+     "share": 0.6564
+    },
+    "margin": {
+     "lines": 95,
+     "share": 0.0531
+    },
+    "numbering": {
+     "lines": 1,
+     "share": 0.0006
+    },
+    "figure": {
+     "lines": 1,
+     "share": 0.0006
+    },
+    "formula": {
+     "lines": 15,
+     "share": 0.0084
+    },
+    "artefact": {
+     "lines": 45,
+     "share": 0.0251
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 458,
+     "share": 0.2559
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 16,
+    "share": 0.0089
+   },
+   "their_lines": 1247,
+   "their_by_group": {
+    "main": {
+     "lines": 1146,
+     "share": 0.919
+    },
+    "margin": {
+     "lines": 98,
+     "share": 0.0786
+    },
+    "numbering": {
+     "lines": 1,
+     "share": 0.0008
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 2,
+     "share": 0.0016
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.6966,
+   "their_to_v1_median_page": 0.9898,
+   "matched": {
+    "0.3": {
+     "pairs": 723,
+     "share_of_v1": 0.4039,
+     "share_of_theirs": 0.5798
+    },
+    "0.5": {
+     "pairs": 572,
+     "share_of_v1": 0.3196,
+     "share_of_theirs": 0.4587
+    },
+    "0.7": {
+     "pairs": 473,
+     "share_of_v1": 0.2642,
+     "share_of_theirs": 0.3793
+    }
+   },
+   "matched_iou_mean": 0.7874
+  },
+  "fr": {
+   "pages": 15,
+   "pages_ok": 15,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 0,
+   "size_differs": 15,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 15,
+     "per_page": 1.0,
+     "pages_with": 15,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9685
+    },
+    "GraphicZone-figure": {
+     "total": 9,
+     "per_page": 0.6,
+     "pages_with": 3,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.6407
+    },
+    "MainZone": {
+     "total": 10,
+     "per_page": 0.667,
+     "pages_with": 8,
+     "pages_with_share": 0.5333,
+     "conf_mean": 0.9296
+    },
+    "MarginTextZone": {
+     "total": 7,
+     "per_page": 0.467,
+     "pages_with": 4,
+     "pages_with_share": 0.2667,
+     "conf_mean": 0.5009
+    },
+    "MathsRegion-complex": {
+     "total": 14,
+     "per_page": 0.933,
+     "pages_with": 3,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.4543
+    },
+    "MathsRegion-inline": {
+     "total": 21,
+     "per_page": 1.4,
+     "pages_with": 4,
+     "pages_with_share": 0.2667,
+     "conf_mean": 0.5192
+    },
+    "NumberingZone": {
+     "total": 1,
+     "per_page": 0.067,
+     "pages_with": 1,
+     "pages_with_share": 0.0667,
+     "conf_mean": 0.4649
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 8,
+     "share": 0.5333
+    },
+    "margin": {
+     "pages": 4,
+     "share": 0.2667
+    },
+    "numbering": {
+     "pages": 1,
+     "share": 0.0667
+    },
+    "figure": {
+     "pages": 3,
+     "share": 0.2
+    },
+    "formula": {
+     "pages": 4,
+     "share": 0.2667
+    },
+    "artefact": {
+     "pages": 15,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.1751,
+    "margin": 0.0239,
+    "numbering": 0.0,
+    "figure": 0.022,
+    "formula": 0.0196,
+    "artefact": 0.0813,
+    "other": 0.0
+   },
+   "v1_lines": 939,
+   "v1_by_group": {
+    "main": {
+     "lines": 414,
+     "share": 0.4409
+    },
+    "margin": {
+     "lines": 51,
+     "share": 0.0543
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 102,
+     "share": 0.1086
+    },
+    "formula": {
+     "lines": 14,
+     "share": 0.0149
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 358,
+     "share": 0.3813
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 116,
+    "share": 0.1235
+   },
+   "their_lines": 394,
+   "their_by_group": {
+    "main": {
+     "lines": 356,
+     "share": 0.9036
+    },
+    "margin": {
+     "lines": 38,
+     "share": 0.0964
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.4196,
+   "their_to_v1_median_page": 0.635,
+   "matched": {
+    "0.3": {
+     "pairs": 336,
+     "share_of_v1": 0.3578,
+     "share_of_theirs": 0.8528
+    },
+    "0.5": {
+     "pairs": 311,
+     "share_of_v1": 0.3312,
+     "share_of_theirs": 0.7893
+    },
+    "0.7": {
+     "pairs": 215,
+     "share_of_v1": 0.229,
+     "share_of_theirs": 0.5457
+    }
+   },
+   "matched_iou_mean": 0.7565
+  },
+  "la": {
+   "pages": 45,
+   "pages_ok": 44,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 1,
+   "size_agrees": 0,
+   "size_differs": 45,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 45,
+     "per_page": 1.0,
+     "pages_with": 45,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9654
+    },
+    "GraphicZone-figure": {
+     "total": 22,
+     "per_page": 0.489,
+     "pages_with": 9,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.7278
+    },
+    "MainZone": {
+     "total": 47,
+     "per_page": 1.044,
+     "pages_with": 42,
+     "pages_with_share": 0.9333,
+     "conf_mean": 0.9305
+    },
+    "MarginTextZone": {
+     "total": 15,
+     "per_page": 0.333,
+     "pages_with": 9,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.6053
+    },
+    "MathsRegion-complex": {
+     "total": 42,
+     "per_page": 0.933,
+     "pages_with": 13,
+     "pages_with_share": 0.2889,
+     "conf_mean": 0.4801
+    },
+    "MathsRegion-inline": {
+     "total": 80,
+     "per_page": 1.778,
+     "pages_with": 20,
+     "pages_with_share": 0.4444,
+     "conf_mean": 0.5136
+    },
+    "NumberingZone": {
+     "total": 11,
+     "per_page": 0.244,
+     "pages_with": 11,
+     "pages_with_share": 0.2444,
+     "conf_mean": 0.6189
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 42,
+     "share": 0.9333
+    },
+    "margin": {
+     "pages": 9,
+     "share": 0.2
+    },
+    "numbering": {
+     "pages": 11,
+     "share": 0.2444
+    },
+    "figure": {
+     "pages": 9,
+     "share": 0.2
+    },
+    "formula": {
+     "pages": 21,
+     "share": 0.4667
+    },
+    "artefact": {
+     "pages": 45,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.3614,
+    "margin": 0.0064,
+    "numbering": 0.0004,
+    "figure": 0.0029,
+    "formula": 0.026,
+    "artefact": 0.0801,
+    "other": 0.0
+   },
+   "v1_lines": 2289,
+   "v1_by_group": {
+    "main": {
+     "lines": 1677,
+     "share": 0.7326
+    },
+    "margin": {
+     "lines": 181,
+     "share": 0.0791
+    },
+    "numbering": {
+     "lines": 2,
+     "share": 0.0009
+    },
+    "figure": {
+     "lines": 6,
+     "share": 0.0026
+    },
+    "formula": {
+     "lines": 38,
+     "share": 0.0166
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 385,
+     "share": 0.1682
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 44,
+    "share": 0.0192
+   },
+   "their_lines": 1893,
+   "their_by_group": {
+    "main": {
+     "lines": 1846,
+     "share": 0.9752
+    },
+    "margin": {
+     "lines": 42,
+     "share": 0.0222
+    },
+    "numbering": {
+     "lines": 1,
+     "share": 0.0005
+    },
+    "figure": {
+     "lines": 1,
+     "share": 0.0005
+    },
+    "formula": {
+     "lines": 3,
+     "share": 0.0016
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.827,
+   "their_to_v1_median_page": 0.974,
+   "matched": {
+    "0.3": {
+     "pairs": 1479,
+     "share_of_v1": 0.6461,
+     "share_of_theirs": 0.7813
+    },
+    "0.5": {
+     "pairs": 1356,
+     "share_of_v1": 0.5924,
+     "share_of_theirs": 0.7163
+    },
+    "0.7": {
+     "pairs": 1167,
+     "share_of_v1": 0.5098,
+     "share_of_theirs": 0.6165
+    }
+   },
+   "matched_iou_mean": 0.7876
+  },
+  "mixed": {
+   "pages": 5,
+   "pages_ok": 5,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 0,
+   "size_differs": 5,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 5,
+     "per_page": 1.0,
+     "pages_with": 5,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9591
+    },
+    "MainZone": {
+     "total": 4,
+     "per_page": 0.8,
+     "pages_with": 4,
+     "pages_with_share": 0.8,
+     "conf_mean": 0.9317
+    },
+    "MathsRegion-complex": {
+     "total": 1,
+     "per_page": 0.2,
+     "pages_with": 1,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.4344
+    },
+    "MathsRegion-inline": {
+     "total": 9,
+     "per_page": 1.8,
+     "pages_with": 2,
+     "pages_with_share": 0.4,
+     "conf_mean": 0.4677
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 4,
+     "share": 0.8
+    },
+    "margin": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "pages": 2,
+     "share": 0.4
+    },
+    "artefact": {
+     "pages": 5,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.4083,
+    "margin": 0.0,
+    "numbering": 0.0,
+    "figure": 0.0,
+    "formula": 0.0172,
+    "artefact": 0.0709,
+    "other": 0.0
+   },
+   "v1_lines": 505,
+   "v1_by_group": {
+    "main": {
+     "lines": 290,
+     "share": 0.5743
+    },
+    "margin": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 215,
+     "share": 0.4257
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 0,
+    "share": 0.0
+   },
+   "their_lines": 287,
+   "their_by_group": {
+    "main": {
+     "lines": 286,
+     "share": 0.9965
+    },
+    "margin": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 1,
+     "share": 0.0035
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.5683,
+   "their_to_v1_median_page": 0.9375,
+   "matched": {
+    "0.3": {
+     "pairs": 158,
+     "share_of_v1": 0.3129,
+     "share_of_theirs": 0.5505
+    },
+    "0.5": {
+     "pairs": 122,
+     "share_of_v1": 0.2416,
+     "share_of_theirs": 0.4251
+    },
+    "0.7": {
+     "pairs": 84,
+     "share_of_v1": 0.1663,
+     "share_of_theirs": 0.2927
+    }
+   },
+   "matched_iou_mean": 0.7686
+  },
+  "unknown": {
+   "pages": 5,
+   "pages_ok": 5,
+   "pages_no_detections": 0,
+   "pages_no_final_lines": 0,
+   "size_agrees": 1,
+   "size_differs": 4,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 5,
+     "per_page": 1.0,
+     "pages_with": 5,
+     "pages_with_share": 1.0,
+     "conf_mean": 0.9732
+    },
+    "GraphicZone-figure": {
+     "total": 7,
+     "per_page": 1.4,
+     "pages_with": 1,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.8655
+    },
+    "MainZone": {
+     "total": 1,
+     "per_page": 0.2,
+     "pages_with": 1,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.6081
+    },
+    "MathsRegion-complex": {
+     "total": 8,
+     "per_page": 1.6,
+     "pages_with": 1,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.5436
+    },
+    "MathsRegion-inline": {
+     "total": 4,
+     "per_page": 0.8,
+     "pages_with": 2,
+     "pages_with_share": 0.4,
+     "conf_mean": 0.4777
+    },
+    "NumberingZone": {
+     "total": 1,
+     "per_page": 0.2,
+     "pages_with": 1,
+     "pages_with_share": 0.2,
+     "conf_mean": 0.5024
+    }
+   },
+   "pages_with_group": {
+    "main": {
+     "pages": 1,
+     "share": 0.2
+    },
+    "margin": {
+     "pages": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "pages": 1,
+     "share": 0.2
+    },
+    "figure": {
+     "pages": 1,
+     "share": 0.2
+    },
+    "formula": {
+     "pages": 2,
+     "share": 0.4
+    },
+    "artefact": {
+     "pages": 5,
+     "share": 1.0
+    },
+    "other": {
+     "pages": 0,
+     "share": 0.0
+    }
+   },
+   "area_mean": {
+    "main": 0.0903,
+    "margin": 0.0,
+    "numbering": 0.0003,
+    "figure": 0.0399,
+    "formula": 0.0286,
+    "artefact": 0.094,
+    "other": 0.0
+   },
+   "v1_lines": 58,
+   "v1_by_group": {
+    "main": {
+     "lines": 32,
+     "share": 0.5517
+    },
+    "margin": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 3,
+     "share": 0.0517
+    },
+    "formula": {
+     "lines": 4,
+     "share": 0.069
+    },
+    "artefact": {
+     "lines": 5,
+     "share": 0.0862
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 14,
+     "share": 0.2414
+    }
+   },
+   "v1_in_figure_or_formula": {
+    "lines": 7,
+    "share": 0.1207
+   },
+   "their_lines": 22,
+   "their_by_group": {
+    "main": {
+     "lines": 22,
+     "share": 1.0
+    },
+    "margin": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "numbering": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "figure": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "formula": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "artefact": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "other": {
+     "lines": 0,
+     "share": 0.0
+    },
+    "outside": {
+     "lines": 0,
+     "share": 0.0
+    }
+   },
+   "their_to_v1": 0.3793,
+   "their_to_v1_median_page": 0.0,
+   "matched": {
+    "0.3": {
+     "pairs": 15,
+     "share_of_v1": 0.2586,
+     "share_of_theirs": 0.6818
+    },
+    "0.5": {
+     "pairs": 11,
+     "share_of_v1": 0.1897,
+     "share_of_theirs": 0.5
+    },
+    "0.7": {
+     "pairs": 3,
+     "share_of_v1": 0.0517,
+     "share_of_theirs": 0.1364
+    }
+   },
+   "matched_iou_mean": 0.6562
+  }
+ }
+}

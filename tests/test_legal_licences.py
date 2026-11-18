@@ -51,6 +51,7 @@ REQUIRED = {
     "gallicorpora-plus",
     "yaltai",
     "dfine-kraken",
+    "ladas-dfine-large",
     "ultralytics-yolo",
     "nantes-hmer",
     "ppocr-v6",
@@ -65,6 +66,10 @@ ADDED = {
     "flashlight-text",
     "kenlm",
     "pyctcdecode",
+    # M1's print trial (2026-11-17): the two tools re-read as run, the LADaS model added
+    "dfine-kraken",
+    "gallicorpora-plus",
+    "ladas-dfine-large",
 }
 
 
@@ -114,9 +119,17 @@ def test_the_philiumm_relicensing_is_recorded_as_a_change_with_dates() -> None:
     assert gwlb.current is None and gwlb.obtained.licence == "CC BY-NC 4.0"
     assert "Göttingen" in gwlb.asked and "2026-10-21" in gwlb.asked
     # the tools run beside the repository: nothing imported, nothing derived
-    for key in ("gallicorpora-plus", "yaltai", "dfine-kraken", "ultralytics-yolo", "nantes-hmer"):
+    for key in ("yaltai", "ultralytics-yolo", "nantes-hmer"):
         a = legal.artifact(key)
         assert a.kind == "tool" and a.bucket == "none" and not a.used, key
+    # M1's print trial (2026-11-17) ran two of them, their licences read that day
+    dfine = legal.artifact("dfine-kraken")
+    assert dfine.kind == "tool" and dfine.bucket == "none" and dfine.used
+    assert dfine.obtained.licence == "Apache-2.0" and dfine.obtained.seen == date(2026, 11, 17)
+    assert legal.artifact("ladas-dfine-large").obtained.licence == "Apache-2.0"
+    galli = legal.artifact("gallicorpora-plus")
+    assert galli.kind == "model" and galli.used and galli.bucket == "open"
+    assert "CC0-1.0" in galli.obtained.licence and "print-trial" in galli.built
     assert "GPL-3.0" in legal.artifact("yaltai").obtained.licence
     assert "AGPL-3.0" in legal.artifact("ultralytics-yolo").obtained.licence
     pool = legal.artifact("letterpool")

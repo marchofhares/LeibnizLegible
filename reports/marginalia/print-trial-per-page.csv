@@ -1,0 +1,101 @@
+page_id,lang,print_type,status,scale,zones,area_print,area_manuscript,v1_lines,v1_print,v1_manuscript,v1_other,v1_outside,philiumm_print,philiumm_manuscript,same_call,iou_lines_print,iou_print_models
+1016738447:0009,la,roman,ok,1.1348,MainZone-Continued=1 MainZone-P=1 QuireMarksZone=1 RunningTitleZone=1,0.4918,,29,28,0,0,1,27,,26,0.8221,0.9535
+1023099829:0066,la,roman,ok,1.4716,DropCapitalZone=1 MainZone-Continued=1 MainZone-Head=1 MainZone-P=5 MainZone-Signature=4 MainZone-Sp=1 MusicZone=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1,0.4024,,36,35,0,0,1,36,,35,0.7838,0.8923
+1025220307:0032,la,roman,ok,1.3859,DropCapitalZone=1 MainZone-Head=2 MainZone-P=3 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1,0.3129,,21,19,0,0,2,21,,19,0.6413,0.6421
+1030919771:0010,la,roman,ok,1.3858,MainZone-Sp=6 QuireMarksZone=1 RunningTitleZone=1,0.3575,,28,25,0,0,3,24,,22,0.5735,0.7959
+1030919771:0041,de,fraktur,ok,1.3854,DigitizationArtefactZone=1 MainZone-Head=2 MainZone-P=3 MainZone-Sp=6 MarginTextZone-Notes=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.5145,,34,32,0,0,2,33,,31,0.7035,0.7893
+1030997721:0081,la,roman,ok,3.2455,GraphicZone=3,0.801,,199,199,0,0,0,,,0,0.078,
+1032704993:0035,la,roman,ok,1.2901,MainZone-Continued=1 MainZone-P=2 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2,0.3102,,30,23,0,0,7,30,,23,0.8003,0.7094
+1032704993:0056,unknown,roman,ok,1.73,TitlePageZone=1,0.8596,,7,7,0,0,0,,,0,0.0061,
+1032709332:0255,la,roman,ok,1.4053,MainZone-Continued=1 MainZone-Maths=1 MainZone-P=2 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.4166,,33,33,0,0,0,33,,33,0.9018,0.9596
+1032726466:0106,de,fraktur,ok,1.4403,MainZone-Continued=1 MainZone-Entry=1 MainZone-P=1 MarginTextZone-Notes=3 NumberingZone=1 RunningTitleZone=2,0.4541,,49,49,0,0,0,49,,49,0.9092,0.9531
+1032976985:0018,fr,roman,ok,1.3095,MainZone-Continued=1 MainZone-P=7,0.3754,,40,40,0,0,0,40,,40,0.9136,0.9794
+1040780814:0447,la,roman,ok,2.4384,DropCapitalZone=1 MainZone-Continued=1 MainZone-Head=1 MainZone-Maths=1 MainZone-P=4 MainZone-Sp=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2,0.392,,58,49,0,0,9,50,,57,0.8973,0.9299
+1040787339:0049,de,fraktur,ok,1.1955,MainZone-Continued=2 MainZone-Head=1 MainZone-Other=1 MainZone-P=1 MarginTextZone-Notes=1 MusicZone=1 RunningTitleZone=1,0.4661,,34,32,0,0,2,32,1,33,0.6585,0.7896
+1045080551:0020,fr,roman,ok,1.1756,DropCapitalZone=1 GraphicZone-Decoration=1 MainZone-Continued=1 RunningTitleZone=2,0.3968,,21,21,0,0,0,19,,19,0.714,0.9145
+1048626504:0005,unknown,roman,ok,1.4576,TitlePageZone=1,0.4914,,33,32,0,0,1,32,,33,0.5175,0.9047
+1066518432:0004,de,fraktur,ok,1.6965,MarginTextZone-ManuscriptAddendum=2 StampZone=1 TitlePageZone=2,0.9093,0.0051,39,35,1,3,0,30,2,31,0.1111,0.1751
+1665025204:0003,fr,roman,ok,1.8275,StampZone-Sticker=1,,,12,0,0,0,12,12,,0,,
+1677088362:0584,fr,roman,ok,1.2558,GraphicZone=1 MainZone-Date=1 MainZone-Head=1 MainZone-Maths=4 MainZone-P=4 MarginTextZone-Notes=1 RunningTitleZone=1 StampZone-Sticker=1,0.2585,,27,26,0,0,1,27,,26,0.7383,0.7867
+1677831758:0042,la,roman,ok,1.1077,DigitizationArtefactZone=1 DropCapitalZone=1 MainZone-Head=3 MainZone-P=3 RunningTitleZone=2,0.4115,,27,25,0,0,2,22,,21,0.6228,0.5703
+1677845406:0013,unknown,roman,ok,1.6355,StampZone=1 StampZone-Sticker=2 TitlePageZone=1,0.9333,,8,3,0,3,2,,,0,0.0207,
+1677894601:0066,la,roman,ok,1.7164,MainZone-Continued=1 MusicZone=1 NumberingZone=1 RunningTitleZone=1,0.3815,,32,32,0,0,0,32,,32,0.9053,0.9681
+1677894601:0218,fr,roman,ok,1.7492,MainZone-Continued=1 MainZone-P=2 MainZone-Signature=1 MusicZone=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1,0.3581,,33,33,0,0,0,33,,33,0.9226,0.9699
+167915642X:0315,la,roman,ok,1.3043,MainZone-Continued=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2,0.3798,,43,43,0,0,0,43,,43,0.9294,0.9462
+1682007618:0127,de,fraktur,ok,1.1217,MainZone-Head=2 MainZone-Lg=1,0.128,,26,15,0,0,11,13,3,22,0.7365,0.5811
+1682007618:0133,fr,roman,ok,1.1251,MainZone-Sp=1,0.1131,,69,18,0,0,51,,38,11,0.6904,
+1684858631:0247,unknown,roman,ok,,,,,2,0,0,0,2,,,0,,
+1685116701:0021,mixed,roman,ok,1.3525,MainZone-Continued=1 MainZone-P=7 MainZone-Signature=1 MarginTextZone-Notes=7,0.3985,,38,35,0,0,3,38,,35,0.8449,0.9128
+1685116701:0158,la,roman,ok,1.369,DropCapitalZone=1 MainZone-Other=2 MainZone-Sp=2 MarginTextZone-Notes=3,0.1483,,42,26,0,0,16,32,5,18,0.6686,0.412
+1685118305:0019,de,fraktur,ok,1.2612,GraphicZone-Decoration=1 TitlePageZone=1,0.4492,,9,9,0,0,0,,,0,0.2292,
+1700327585:0001,fr,roman,ok,1.3484,StampZone-Sticker=2,,,17,0,0,7,10,,,10,,
+170380998X:0123,la,roman,ok,1.0308,AdvertisementZone=13,0.0728,,75,8,0,0,67,,33,31,0.477,
+1758964731:0065,fr,roman,ok,1.5807,DigitizationArtefactZone=1 GraphicZone-Part=1 MainZone-Continued=1 MainZone-P=3 MarginTextZone-Notes=2 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.304,,50,35,0,0,15,48,2,33,0.8768,0.6553
+1758964731:0252,la,roman,ok,1.5837,MainZone-Continued=1 MainZone-P=2 MarginTextZone-ManuscriptAddendum=1 MarginTextZone-Notes=8 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.434,0.0014,60,59,1,0,0,50,8,50,0.8848,0.887
+175905688X:0212,la,roman,ok,1.3522,GraphicZone=1 MainZone-Continued=1 MainZone-P=1 MainZone-Signature=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=1 StampZone-Sticker=1,0.1444,,52,13,0,0,39,17,,22,0.5378,0.5204
+1815012307:0698,fr,roman,ok,2.4486,MainZone-Entry=139 MainZone-Lg=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=3,0.2157,,200,115,0,0,85,196,,112,0.7584,0.5409
+1815015926:0043,de,fraktur,ok,1.6487,MainZone-Continued=2 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2 StampZone=1,0.4873,,46,46,0,0,0,46,,46,0.909,0.9604
+1815018577:0030,de,fraktur,ok,1.6714,MainZone-Continued=1 RunningTitleZone=2,0.4894,,41,41,0,0,0,41,,41,0.9372,0.967
+1815079622:0009,de,fraktur,ok,1.6594,MainZone-Continued=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=1,0.5403,,37,37,0,0,0,37,,37,0.9193,0.9579
+1815200456:0010,la,roman,ok,2.3179,MainZone-Continued=1 RunningTitleZone=2,0.2599,,40,37,0,0,3,40,,37,0.9458,0.9145
+1815206918:0035,la,roman,ok,2.3159,GraphicZone=1 MainZone-Head=1 MainZone-Maths=1 MainZone-P=6 NumberingZone=1 RunningTitleZone=2,0.2861,,56,46,0,0,10,55,,45,0.8491,0.7502
+727094130:0023,la,roman,ok,2.5152,DropCapitalZone=1 MainZone-Continued=2 MainZone-Entry=1 MainZone-Head=1 MainZone-Maths=1 MainZone-P=2 MarginTextZone-Notes=1 NumberingZone=1 QuireMarksZone=2,0.4223,,35,35,0,0,0,35,,35,0.8113,0.8988
+734330022:0011,unknown,roman,ok,2.6009,DigitizationArtefactZone=1,,,8,0,0,0,8,,,8,,
+737324791:0109,mixed,roman,ok,1.791,MainZone-Continued=1 MainZone-P=1 MainZone-Signature=1 MainZone-Sp=1 MarginTextZone-Notes=1 MusicZone=1 NumberingZone=1 QuireMarksZone=2 RunningTitleZone=1,0.4483,,48,31,0,0,17,31,,48,0.8592,0.9433
+769494587:0035,la,roman,ok,2.1168,MainZone-Continued=1 MarginTextZone-Notes=1 QuireMarksZone=1 RunningTitleZone=2,0.3475,,27,26,0,0,1,27,,26,0.7939,0.8891
+769497845:0448,mixed,roman,ok,2.8506,RunningTitleZone=1,0.0028,,197,0,0,0,197,,,197,,
+779785770:0444,la,roman,ok,3.0877,DigitizationArtefactZone=1 MainZone-Continued=2 MainZone-Head=2 MainZone-P=3 MainZone-Signature=2 MusicZone=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.3753,,88,88,0,0,0,88,,88,0.9169,0.9362
+779786009:0224,la,roman,ok,3.0814,MainZone-Continued=2 MainZone-Entry=3 MainZone-P=2 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2,0.4078,,91,91,0,0,0,91,,91,0.9001,0.9493
+779786009:0512,mixed,roman,ok,3.2996,MarginTextZone-Notes=1,0.0053,,190,0,0,0,190,189,,1,,0.0
+786373555:0120,la,roman,ok,4.0077,MainZone-Continued=3 MainZone-Head=1 MainZone-P=9 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2 StampZone=1,0.5013,,106,106,0,0,0,105,,105,0.8847,0.9292
+796861544:0153,de,fraktur,ok,2.6501,MainZone-Continued=1 MainZone-P=3 MainZone-Signature=6 MarginTextZone-Notes=4 RunningTitleZone=1,0.2866,,43,32,0,0,11,40,3,32,0.8362,0.7427
+797212418:0250,la,roman,ok,1.5188,MainZone-Continued=1 MusicZone=1 NumberingZone=1 RunningTitleZone=2 StampZone=1,0.2989,,37,23,0,0,14,24,13,23,0.7462,0.9379
+797486364:0132,de,fraktur,ok,2.5781,DigitizationArtefactZone=1 MainZone-Continued=1 NumberingZone=2 QuireMarksZone=1 RunningTitleZone=2,0.4229,,43,43,0,0,0,42,,42,0.9406,0.9667
+797707557:0101,de,fraktur,ok,2.5781,GraphicZone=2 MainZone-Entry=26 MainZone-Lg=1 NumberingZone=1 RunningTitleZone=1,0.1576,,34,21,0,0,13,33,1,21,0.8136,0.5238
+797708286:0033,la,roman,ok,2.5781,DigitizationArtefactZone=1 MainZone-Continued=1 MainZone-P=1 NumberingZone=1 QuireMarksZone=1,0.3585,,35,35,0,0,0,35,,35,0.9003,0.9815
+797898190:0155,la,roman,ok,1.748,MainZone-Continued=1 MainZone-Entry=1 MainZone-P=4 MainZone-Sp=2 MarginTextZone-Notes=1 QuireMarksZone=1 RunningTitleZone=1,0.41,,27,26,0,0,1,27,,26,0.7856,0.9193
+797899227:0260,la,roman,ok,1.7469,MainZone-Continued=1 MusicZone=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.3998,,42,37,0,0,5,37,,42,0.8193,0.9364
+797937889:0075,la,roman,ok,2.1415,DigitizationArtefactZone=1 MainZone-Continued=1 MarginTextZone-Notes=3 MusicZone=1 NumberingZone=1 RunningTitleZone=1,0.5391,,37,36,0,0,1,37,,36,0.8724,0.93
+797938575:0138,de,fraktur,ok,1.8905,DropCapitalZone=1 MainZone-Entry=12 MainZone-Lg=1 NumberingZone=1 RunningTitleZone=2,0.0722,,71,12,0,0,59,70,,11,0.4586,0.1323
+798278285:0007,la,roman,ok,2.5626,DropCapitalZone=1 MainZone-Head=2 MainZone-P=2 QuireMarksZone=1,0.3226,,34,32,0,0,2,28,,27,0.6555,0.7528
+798311290:0039,la,roman,ok,2.5626,DigitizationArtefactZone=1 MainZone-Continued=1 MainZone-P=2 RunningTitleZone=1,0.4249,,40,39,0,0,1,40,,39,0.9372,0.9774
+798396938:0028,de,fraktur,ok,2.5626,DropCapitalZone=1 GraphicZone-Decoration=1 MainZone-Lg=3,0.2175,,52,38,0,0,14,51,1,37,0.6678,0.5714
+798398280:0020,fr,roman,ok,2.5626,MainZone-Continued=1 MainZone-Head=1 MainZone-P=1 NumberingZone=1 RunningTitleZone=1,0.3653,,38,36,0,0,2,38,,36,0.9124,0.9492
+798399260:0019,la,roman,ok,2.5626,DigitizationArtefactZone=1 MainZone-Continued=2 MainZone-P=1 NumberingZone=1 RunningTitleZone=1,0.3697,,36,36,0,0,0,36,,36,0.9374,0.9728
+798400455:0021,la,roman,ok,2.5626,DigitizationArtefactZone=1 MainZone-Continued=1 MainZone-P=1 MainZone-Signature=1,0.3249,,31,30,0,0,1,31,,30,0.9065,0.9622
+798467290:0011,la,roman,ok,2.5626,MainZone-Continued=1 MainZone-P=5 MainZone-Sp=4 MarginTextZone-Notes=6,0.2453,,47,27,0,0,20,47,,27,0.6978,0.5325
+79876922X:0605,fr,roman,ok,2.1471,GraphicZone=1 RunningTitleZone=1 StampZone-Sticker=1,0.4172,,47,27,0,0,20,,,20,0.0943,
+799199311:0119,la,roman,ok,4.0399,DropCapitalZone=1 MainZone-Continued=1 MainZone-Head=1 MainZone-P=5 MarginTextZone-Notes=3 NumberingZone=1 RunningTitleZone=1,0.4261,,40,40,0,0,0,40,,40,0.8678,0.9296
+799245801:0051,de,fraktur,ok,2.1405,RunningTitleZone=1 StampZone-Sticker=3 TitlePageZone=2,0.9593,,158,158,0,0,0,156,,156,0.0728,0.1151
+799246026:0133,de,fraktur,ok,2.1405,RunningTitleZone=1 StampZone-Sticker=3 TitlePageZone=2,0.9526,,161,119,0,42,0,159,,117,0.0622,0.1161
+800322614:0020,fr,roman,ok,2.8492,,,,42,0,0,0,42,,,42,,
+802910971:0073,de,fraktur,ok,2.6669,MainZone-Sp=4 RunningTitleZone=1,0.0678,,57,11,0,0,46,34,20,14,0.6934,0.2863
+804368392:0060,la,roman,ok,1.3154,MainZone-Continued=1 QuireMarksZone=1 RunningTitleZone=1,0.3502,,29,27,0,0,2,27,,29,0.8804,0.9648
+816218927:0039,de,fraktur,ok,2.1036,MainZone-Continued=1 MainZone-Entry=2 MainZone-P=2 MainZone-Sp=1 MarginTextZone-Notes=1 NumberingZone=1,0.3779,,39,39,0,0,0,39,,39,0.9149,0.9463
+816838348:0075,la,roman,ok,2.1036,MainZone-Continued=1 MarginTextZone-Notes=1 NumberingZone=1 QuireMarksZone=2 RunningTitleZone=2,0.3956,,38,34,0,0,4,34,,38,0.8546,0.9387
+816856680:0198,la,roman,ok,1.4904,MainZone-Continued=3 MainZone-Entry=6 MainZone-Head=1 MainZone-Signature=2 MainZone-Sp=1 MarginTextZone-Notes=1 RunningTitleZone=2 StampZone=1,0.2993,,132,41,0,0,91,39,92,38,0.8433,0.8761
+816933545:0223,de,fraktur,ok,2.1036,DigitizationArtefactZone=1 MainZone-Continued=1 MainZone-P=2 MarginTextZone-Notes=1 MusicZone=1 NumberingZone=1 QuireMarksZone=3 RunningTitleZone=2,0.4304,,61,33,0,0,28,33,28,33,0.8529,0.9296
+817309241:0093,fr,roman,ok,2.1035,RunningTitleZone=1,0.0047,,25,0,0,0,25,,,25,,
+818661070:0069,de,fraktur,ok,3.535,GraphicZone=1 StampZone-Sticker=3 TitlePageZone=1,0.7491,,57,57,0,0,0,,,0,0.0306,
+818663391:0006,de,fraktur,ok,1.1901,StampZone-Sticker=1,,,30,0,0,0,30,29,,0,,
+818672021:0065,de,fraktur,ok,1.2229,MainZone-Continued=2 MainZone-P=1 MarginTextZone-Notes=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1 TitlePageZone=1,0.3943,,37,28,0,0,9,28,,37,0.9084,0.9631
+818861339:0375,la,roman,ok,3.0492,GraphicZone-Decoration=1 MainZone-Continued=1 MainZone-Other=1 MainZone-Sp=3 MarginTextZone-Notes=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1,0.4017,,43,33,0,0,10,33,,43,0.7822,0.9098
+822877147:0220,de,fraktur,ok,1.3722,MainZone-Continued=1 RunningTitleZone=1,0.4034,,35,34,0,0,1,35,,34,0.9402,0.9709
+822877147:0403,fr,roman,ok,3.5205,GraphicZone=1 StampZone-Sticker=1,0.2759,,174,30,0,0,144,,,144,0.1107,
+823048632:0008,fr,roman,ok,1.1084,GraphicZone=1,0.5737,,144,143,0,0,1,,,1,0.2734,
+823048632:0344,de,fraktur,ok,1.1302,MainZone-Continued=1 MainZone-P=1 MarginTextZone-Notes=1 NumberingZone=1 RunningTitleZone=2,0.4629,,28,28,0,0,0,28,,28,0.8748,0.9355
+826603459:0049,la,roman,ok,1.4163,DropCapitalZone=1 GraphicZone-Decoration=1 MainZone-Head=2 MainZone-P=3 MarginTextZone-Notes=3,0.3271,,40,34,0,0,6,35,,29,0.8192,0.6915
+827667701:0010,la,roman,ok,1.4129,MainZone-Continued=1 MainZone-Head=1 MainZone-P=5 MarginTextZone-ManuscriptAddendum=1 RunningTitleZone=1,0.3668,0.0038,37,33,0,0,4,37,,33,0.8845,0.835
+82935848X:0365,de,fraktur,ok,1.1165,,,,54,0,0,0,54,52,,2,,
+850971330:0155,la,roman,ok,1.0996,MainZone-Continued=1 QuireMarksZone=1 RunningTitleZone=1,0.4897,,34,33,0,0,1,33,,34,0.9102,0.9646
+850978815:0465,de,fraktur,ok,1.1933,MainZone-Continued=1 MainZone-P=2 MainZone-Signature=2 MusicZone=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=1 StampZone=1,0.4712,,34,34,0,0,0,34,,34,0.9477,0.9627
+855925728:0560,de,fraktur,ok,1.2453,,,,197,0,0,0,197,,,197,,
+856565458:0057,la,roman,ok,1.1483,MainZone-Continued=1 NumberingZone=1 QuireMarksZone=3 RunningTitleZone=1 StampZone=1,0.4907,,63,33,0,0,30,33,30,33,0.8991,0.9682
+85892398X:0284,la,roman,ok,1.175,MainZone-P=7 MainZone-Signature=3 NumberingZone=1,0.3695,,34,29,0,0,5,29,,34,0.8791,0.9495
+85892398X:0674,de,fraktur,ok,1.2143,,,,62,0,0,0,62,,35,25,,
+862388961:0068,de,fraktur,ok,1.2312,DropCapitalZone=1 MainZone-Continued=1 MainZone-Lg=1 MainZone-P=3 MainZone-Signature=2 MusicZone=1,0.4314,,31,30,0,0,1,31,,30,0.91,0.9556
+862388961:0119,la,roman,ok,1.2312,MainZone-Entry=1 MainZone-Sp=1 MarginTextZone-ManuscriptAddendum=1 StampZone-Sticker=2,0.4271,0.0211,31,28,0,3,0,28,,28,0.5518,0.8026
+867984570:0382,la,roman,ok,2.1478,MainZone-Continued=5 MainZone-Entry=3 MainZone-Head=1 MainZone-ListItem=1 MainZone-P=3 MarginTextZone-Notes=2 RunningTitleZone=2,0.286,,109,65,0,0,44,103,,59,0.8334,0.6516
+87511928X:0052,de,fraktur,ok,2.1403,RunningTitleZone=1,0.0061,,191,0,0,0,191,,,191,,
+884859711:0546,la,roman,ok,1.8499,,,,85,0,0,0,85,,,85,,
+889780803:0060,mixed,roman,ok,1.0831,MainZone-Continued=1 MainZone-P=1 MainZone-Signature=1 NumberingZone=1 QuireMarksZone=1 RunningTitleZone=2,0.2622,,32,21,0,0,11,32,,21,0.822,0.5859

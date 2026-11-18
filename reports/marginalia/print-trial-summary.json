@@ -1,0 +1,1089 @@
+{
+ "generated": "2026-11-18",
+ "meta": {
+  "pages": 100,
+  "works": 89,
+  "by_type": {
+   "roman": 70,
+   "fraktur": 30
+  },
+  "kraken": "7.1.1",
+  "dfine_kraken": "0.4.4",
+  "ladas_model": "ladas_l.safetensors",
+  "ladas_md5": "06aa34eacb02fe49642f8838d49501db",
+  "ladas_doi": "10.5281/zenodo.18715364",
+  "gallicorpora": "Gallicorpora+_best.mlmodel (release 1.0.0, SHA-256 b7261e804394fe883e351f17b599d4c86417db3e69f67c091eb31665fcc660b3)",
+  "device": "cuda:0",
+  "precision": "32-true",
+  "images": "the census's 2,000 px copies (data/philiumm/layout-sample/images-2000), linked under data/print/images-2000",
+  "sheet": "data/print/print-sheet.html"
+ },
+ "all": {
+  "pages": 100,
+  "pages_with_zones": 100,
+  "pages_with_philiumm_zones": 100,
+  "zones": {
+   "AdvertisementZone": {
+    "total": 13,
+    "pages_with": 1,
+    "pages_with_share": 0.01,
+    "group": "print"
+   },
+   "DigitizationArtefactZone": {
+    "total": 12,
+    "pages_with": 12,
+    "pages_with_share": 0.12,
+    "group": "other"
+   },
+   "DropCapitalZone": {
+    "total": 13,
+    "pages_with": 13,
+    "pages_with_share": 0.13,
+    "group": "print"
+   },
+   "GraphicZone": {
+    "total": 12,
+    "pages_with": 9,
+    "pages_with_share": 0.09,
+    "group": "print"
+   },
+   "GraphicZone-Decoration": {
+    "total": 5,
+    "pages_with": 5,
+    "pages_with_share": 0.05,
+    "group": "print"
+   },
+   "GraphicZone-Part": {
+    "total": 1,
+    "pages_with": 1,
+    "pages_with_share": 0.01,
+    "group": "print"
+   },
+   "MainZone-Continued": {
+    "total": 70,
+    "pages_with": 55,
+    "pages_with_share": 0.55,
+    "group": "print"
+   },
+   "MainZone-Date": {
+    "total": 1,
+    "pages_with": 1,
+    "pages_with_share": 0.01,
+    "group": "print"
+   },
+   "MainZone-Entry": {
+    "total": 195,
+    "pages_with": 11,
+    "pages_with_share": 0.11,
+    "group": "print"
+   },
+   "MainZone-Head": {
+    "total": 27,
+    "pages_with": 19,
+    "pages_with_share": 0.19,
+    "group": "print"
+   },
+   "MainZone-Lg": {
+    "total": 8,
+    "pages_with": 6,
+    "pages_with_share": 0.06,
+    "group": "print"
+   },
+   "MainZone-ListItem": {
+    "total": 1,
+    "pages_with": 1,
+    "pages_with_share": 0.01,
+    "group": "print"
+   },
+   "MainZone-Maths": {
+    "total": 8,
+    "pages_with": 5,
+    "pages_with_share": 0.05,
+    "group": "print"
+   },
+   "MainZone-Other": {
+    "total": 4,
+    "pages_with": 3,
+    "pages_with_share": 0.03,
+    "group": "print"
+   },
+   "MainZone-P": {
+    "total": 129,
+    "pages_with": 44,
+    "pages_with_share": 0.44,
+    "group": "print"
+   },
+   "MainZone-Signature": {
+    "total": 27,
+    "pages_with": 13,
+    "pages_with_share": 0.13,
+    "group": "print"
+   },
+   "MainZone-Sp": {
+    "total": 34,
+    "pages_with": 14,
+    "pages_with_share": 0.14,
+    "group": "print"
+   },
+   "MarginTextZone-ManuscriptAddendum": {
+    "total": 5,
+    "pages_with": 4,
+    "pages_with_share": 0.04,
+    "group": "manuscript"
+   },
+   "MarginTextZone-Notes": {
+    "total": 67,
+    "pages_with": 34,
+    "pages_with_share": 0.34,
+    "group": "print"
+   },
+   "MusicZone": {
+    "total": 12,
+    "pages_with": 12,
+    "pages_with_share": 0.12,
+    "group": "print"
+   },
+   "NumberingZone": {
+    "total": 43,
+    "pages_with": 42,
+    "pages_with_share": 0.42,
+    "group": "print"
+   },
+   "QuireMarksZone": {
+    "total": 35,
+    "pages_with": 28,
+    "pages_with_share": 0.28,
+    "group": "print"
+   },
+   "RunningTitleZone": {
+    "total": 93,
+    "pages_with": 63,
+    "pages_with_share": 0.63,
+    "group": "print"
+   },
+   "StampZone": {
+    "total": 8,
+    "pages_with": 8,
+    "pages_with_share": 0.08,
+    "group": "other"
+   },
+   "StampZone-Sticker": {
+    "total": 21,
+    "pages_with": 12,
+    "pages_with_share": 0.12,
+    "group": "other"
+   },
+   "TitlePageZone": {
+    "total": 12,
+    "pages_with": 9,
+    "pages_with_share": 0.09,
+    "group": "print"
+   }
+  },
+  "area_mean": {
+   "print": 0.3474,
+   "manuscript": 0.0003,
+   "other": 0.0043
+  },
+  "pages_with_manuscript_zone": 4,
+  "pages_with_manuscript_zone_share": 0.04,
+  "v1_lines": 5581,
+  "v1_by_group": {
+   "print": {
+    "lines": 3463,
+    "share": 0.6205
+   },
+   "manuscript": {
+    "lines": 2,
+    "share": 0.0004
+   },
+   "other": {
+    "lines": 58,
+    "share": 0.0104
+   },
+   "outside": {
+    "lines": 2058,
+    "share": 0.3688
+   }
+  },
+  "print_body_share_of_lines": 0.6205,
+  "philiumm": {
+   "v1_lines": 5581,
+   "v1_by_group": {
+    "print": {
+     "lines": 3581,
+     "share": 0.6416
+    },
+    "manuscript": {
+     "lines": 315,
+     "share": 0.0564
+    },
+    "other": {
+     "lines": 255,
+     "share": 0.0457
+    },
+    "outside": {
+     "lines": 1430,
+     "share": 0.2562
+    }
+   },
+   "print_body_share_of_lines": 0.6416,
+   "agreement": {
+    "manuscript|manuscript": 1,
+    "manuscript|outside": 1,
+    "other|outside": 16,
+    "other|print": 42,
+    "outside|manuscript": 275,
+    "outside|other": 61,
+    "outside|outside": 1075,
+    "outside|print": 647,
+    "print|manuscript": 39,
+    "print|other": 194,
+    "print|outside": 338,
+    "print|print": 2892
+   },
+   "same_call": {
+    "lines": 3968,
+    "share": 0.711
+   },
+   "iou_print_models_mean": 0.7958
+  },
+  "iou_lines_print_mean": 0.721,
+  "iou_lines_print_median": 0.8277
+ },
+ "by_type": {
+  "fraktur": {
+   "pages": 30,
+   "pages_with_zones": 30,
+   "pages_with_philiumm_zones": 30,
+   "zones": {
+    "DigitizationArtefactZone": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "other"
+    },
+    "DropCapitalZone": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "GraphicZone": {
+     "total": 3,
+     "pages_with": 2,
+     "pages_with_share": 0.0667,
+     "group": "print"
+    },
+    "GraphicZone-Decoration": {
+     "total": 2,
+     "pages_with": 2,
+     "pages_with_share": 0.0667,
+     "group": "print"
+    },
+    "MainZone-Continued": {
+     "total": 17,
+     "pages_with": 14,
+     "pages_with_share": 0.4667,
+     "group": "print"
+    },
+    "MainZone-Entry": {
+     "total": 41,
+     "pages_with": 4,
+     "pages_with_share": 0.1333,
+     "group": "print"
+    },
+    "MainZone-Head": {
+     "total": 5,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "MainZone-Lg": {
+     "total": 7,
+     "pages_with": 5,
+     "pages_with_share": 0.1667,
+     "group": "print"
+    },
+    "MainZone-Other": {
+     "total": 1,
+     "pages_with": 1,
+     "pages_with_share": 0.0333,
+     "group": "print"
+    },
+    "MainZone-P": {
+     "total": 19,
+     "pages_with": 10,
+     "pages_with_share": 0.3333,
+     "group": "print"
+    },
+    "MainZone-Signature": {
+     "total": 10,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "MainZone-Sp": {
+     "total": 11,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "MarginTextZone-ManuscriptAddendum": {
+     "total": 2,
+     "pages_with": 1,
+     "pages_with_share": 0.0333,
+     "group": "manuscript"
+    },
+    "MarginTextZone-Notes": {
+     "total": 14,
+     "pages_with": 9,
+     "pages_with_share": 0.3,
+     "group": "print"
+    },
+    "MusicZone": {
+     "total": 4,
+     "pages_with": 4,
+     "pages_with_share": 0.1333,
+     "group": "print"
+    },
+    "NumberingZone": {
+     "total": 13,
+     "pages_with": 12,
+     "pages_with_share": 0.4,
+     "group": "print"
+    },
+    "QuireMarksZone": {
+     "total": 8,
+     "pages_with": 6,
+     "pages_with_share": 0.2,
+     "group": "print"
+    },
+    "RunningTitleZone": {
+     "total": 27,
+     "pages_with": 19,
+     "pages_with_share": 0.6333,
+     "group": "print"
+    },
+    "StampZone": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.1,
+     "group": "other"
+    },
+    "StampZone-Sticker": {
+     "total": 10,
+     "pages_with": 4,
+     "pages_with_share": 0.1333,
+     "group": "other"
+    },
+    "TitlePageZone": {
+     "total": 9,
+     "pages_with": 6,
+     "pages_with_share": 0.2,
+     "group": "print"
+    }
+   },
+   "area_mean": {
+    "print": 0.3767,
+    "manuscript": 0.0002,
+    "other": 0.0072
+   },
+   "pages_with_manuscript_zone": 1,
+   "pages_with_manuscript_zone_share": 0.0333,
+   "v1_lines": 1790,
+   "v1_by_group": {
+    "print": {
+     "lines": 1013,
+     "share": 0.5659
+    },
+    "manuscript": {
+     "lines": 1,
+     "share": 0.0006
+    },
+    "other": {
+     "lines": 45,
+     "share": 0.0251
+    },
+    "outside": {
+     "lines": 731,
+     "share": 0.4084
+    }
+   },
+   "print_body_share_of_lines": 0.5659,
+   "philiumm": {
+    "v1_lines": 1790,
+    "v1_by_group": {
+     "print": {
+      "lines": 1175,
+      "share": 0.6564
+     },
+     "manuscript": {
+      "lines": 94,
+      "share": 0.0525
+     },
+     "other": {
+      "lines": 63,
+      "share": 0.0352
+     },
+     "outside": {
+      "lines": 458,
+      "share": 0.2559
+     }
+    },
+    "print_body_share_of_lines": 0.6564,
+    "agreement": {
+     "manuscript|manuscript": 1,
+     "other|outside": 3,
+     "other|print": 42,
+     "outside|manuscript": 89,
+     "outside|other": 4,
+     "outside|outside": 437,
+     "outside|print": 201,
+     "print|manuscript": 4,
+     "print|other": 59,
+     "print|outside": 18,
+     "print|print": 932
+    },
+    "same_call": {
+     "lines": 1370,
+     "share": 0.7654
+    },
+    "iou_print_models_mean": 0.7083
+   },
+   "iou_lines_print_mean": 0.6815,
+   "iou_lines_print_median": 0.8362
+  },
+  "roman": {
+   "pages": 70,
+   "pages_with_zones": 70,
+   "pages_with_philiumm_zones": 70,
+   "zones": {
+    "AdvertisementZone": {
+     "total": 13,
+     "pages_with": 1,
+     "pages_with_share": 0.0143,
+     "group": "print"
+    },
+    "DigitizationArtefactZone": {
+     "total": 9,
+     "pages_with": 9,
+     "pages_with_share": 0.1286,
+     "group": "other"
+    },
+    "DropCapitalZone": {
+     "total": 10,
+     "pages_with": 10,
+     "pages_with_share": 0.1429,
+     "group": "print"
+    },
+    "GraphicZone": {
+     "total": 9,
+     "pages_with": 7,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "GraphicZone-Decoration": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.0429,
+     "group": "print"
+    },
+    "GraphicZone-Part": {
+     "total": 1,
+     "pages_with": 1,
+     "pages_with_share": 0.0143,
+     "group": "print"
+    },
+    "MainZone-Continued": {
+     "total": 53,
+     "pages_with": 41,
+     "pages_with_share": 0.5857,
+     "group": "print"
+    },
+    "MainZone-Date": {
+     "total": 1,
+     "pages_with": 1,
+     "pages_with_share": 0.0143,
+     "group": "print"
+    },
+    "MainZone-Entry": {
+     "total": 154,
+     "pages_with": 7,
+     "pages_with_share": 0.1,
+     "group": "print"
+    },
+    "MainZone-Head": {
+     "total": 22,
+     "pages_with": 16,
+     "pages_with_share": 0.2286,
+     "group": "print"
+    },
+    "MainZone-Lg": {
+     "total": 1,
+     "pages_with": 1,
+     "pages_with_share": 0.0143,
+     "group": "print"
+    },
+    "MainZone-ListItem": {
+     "total": 1,
+     "pages_with": 1,
+     "pages_with_share": 0.0143,
+     "group": "print"
+    },
+    "MainZone-Maths": {
+     "total": 8,
+     "pages_with": 5,
+     "pages_with_share": 0.0714,
+     "group": "print"
+    },
+    "MainZone-Other": {
+     "total": 3,
+     "pages_with": 2,
+     "pages_with_share": 0.0286,
+     "group": "print"
+    },
+    "MainZone-P": {
+     "total": 110,
+     "pages_with": 34,
+     "pages_with_share": 0.4857,
+     "group": "print"
+    },
+    "MainZone-Signature": {
+     "total": 17,
+     "pages_with": 10,
+     "pages_with_share": 0.1429,
+     "group": "print"
+    },
+    "MainZone-Sp": {
+     "total": 23,
+     "pages_with": 11,
+     "pages_with_share": 0.1571,
+     "group": "print"
+    },
+    "MarginTextZone-ManuscriptAddendum": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.0429,
+     "group": "manuscript"
+    },
+    "MarginTextZone-Notes": {
+     "total": 53,
+     "pages_with": 25,
+     "pages_with_share": 0.3571,
+     "group": "print"
+    },
+    "MusicZone": {
+     "total": 8,
+     "pages_with": 8,
+     "pages_with_share": 0.1143,
+     "group": "print"
+    },
+    "NumberingZone": {
+     "total": 30,
+     "pages_with": 30,
+     "pages_with_share": 0.4286,
+     "group": "print"
+    },
+    "QuireMarksZone": {
+     "total": 27,
+     "pages_with": 22,
+     "pages_with_share": 0.3143,
+     "group": "print"
+    },
+    "RunningTitleZone": {
+     "total": 66,
+     "pages_with": 44,
+     "pages_with_share": 0.6286,
+     "group": "print"
+    },
+    "StampZone": {
+     "total": 5,
+     "pages_with": 5,
+     "pages_with_share": 0.0714,
+     "group": "other"
+    },
+    "StampZone-Sticker": {
+     "total": 11,
+     "pages_with": 8,
+     "pages_with_share": 0.1143,
+     "group": "other"
+    },
+    "TitlePageZone": {
+     "total": 3,
+     "pages_with": 3,
+     "pages_with_share": 0.0429,
+     "group": "print"
+    }
+   },
+   "area_mean": {
+    "print": 0.3349,
+    "manuscript": 0.0004,
+    "other": 0.003
+   },
+   "pages_with_manuscript_zone": 3,
+   "pages_with_manuscript_zone_share": 0.0429,
+   "v1_lines": 3791,
+   "v1_by_group": {
+    "print": {
+     "lines": 2450,
+     "share": 0.6463
+    },
+    "manuscript": {
+     "lines": 1,
+     "share": 0.0003
+    },
+    "other": {
+     "lines": 13,
+     "share": 0.0034
+    },
+    "outside": {
+     "lines": 1327,
+     "share": 0.35
+    }
+   },
+   "print_body_share_of_lines": 0.6463,
+   "philiumm": {
+    "v1_lines": 3791,
+    "v1_by_group": {
+     "print": {
+      "lines": 2406,
+      "share": 0.6347
+     },
+     "manuscript": {
+      "lines": 221,
+      "share": 0.0583
+     },
+     "other": {
+      "lines": 192,
+      "share": 0.0506
+     },
+     "outside": {
+      "lines": 972,
+      "share": 0.2564
+     }
+    },
+    "print_body_share_of_lines": 0.6347,
+    "agreement": {
+     "manuscript|outside": 1,
+     "other|outside": 13,
+     "outside|manuscript": 186,
+     "outside|other": 57,
+     "outside|outside": 638,
+     "outside|print": 446,
+     "print|manuscript": 35,
+     "print|other": 135,
+     "print|outside": 320,
+     "print|print": 1960
+    },
+    "same_call": {
+     "lines": 2598,
+     "share": 0.6853
+    },
+    "iou_print_models_mean": 0.833
+   },
+   "iou_lines_print_mean": 0.7371,
+   "iou_lines_print_median": 0.8221
+  }
+ },
+ "cer": {
+  "transcriptions": "data/print/transcriptions/print-sheet-transcriptions-2026-11-18.csv",
+  "gallicorpora": {
+   "policy": "NFD · collapse-ws · strip; then abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '",
+   "lines_transcribed": 24,
+   "lines_scored": 24,
+   "lines_without_hypothesis": 0,
+   "cer": 0.0356,
+   "cer_unfolded": 0.0434,
+   "by_type": {
+    "fraktur": {
+     "lines": 0,
+     "cer": null,
+     "cer_unfolded": null,
+     "pending": true
+    },
+    "roman": {
+     "lines": 24,
+     "cer": 0.0356,
+     "cer_unfolded": 0.0434,
+     "pending": false
+    }
+   },
+   "lines": [
+    {
+     "ref": "1023099829:0066:012",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Datus ſit numerus verbi gratia 4335. Oporteatque",
+     "hyp": "Datus ſit numerus verbi gratia 4335. Oporteatque"
+    },
+    {
+     "ref": "1048626504:0005:006",
+     "type": "roman",
+     "cer": 0.093,
+     "ref_text": "REGIÆ DOMVS SERENISSIMO PRINCIPE AC DOMINO,",
+     "hyp": "REGLÆ DOMVS SERENISSIMIO PRINCIEE aC DOMINO,"
+    },
+    {
+     "ref": "798278285:0007:023",
+     "type": "roman",
+     "cer": 0.0161,
+     "ref_text": "ſive ſoni articulati, quibus ideas, vel ea quæ menti noſtræ de",
+     "hyp": "ſive ſoni articulati, quibus ideas, vel ea quæ mentinoſtræ de"
+    },
+    {
+     "ref": "1677894601:0218:004",
+     "type": "roman",
+     "cer": 0.0189,
+     "ref_text": "which at their reflexion from the Plate or Bubble are",
+     "hyp": "vhich at their reflexion from the Plate or Bubble are"
+    },
+    {
+     "ref": "1032709332:0255:025",
+     "type": "roman",
+     "cer": 0.0781,
+     "ref_text": "ne locuta eſt, etiam hanc ſententiam ſubintulit. Compertam habeo",
+     "hyp": "ne locuta est, etiam bane ſententiam ſubintulis. Compertam babeo"
+    },
+    {
+     "ref": "816838348:0075:005",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Operis Mineralis.",
+     "hyp": "Operis Mineralis."
+    },
+    {
+     "ref": "889780803:0060:024",
+     "type": "roman",
+     "cer": 0.0541,
+     "ref_text": "ſon de cette Hypothese, non feulement",
+     "hyp": "ſon de cette Hypotheſe, non ſeulement"
+    },
+    {
+     "ref": "1032976985:0018:023",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "que c'eſt à l'eau forte.",
+     "hyp": "que c'eſt à l'eau forte."
+    },
+    {
+     "ref": "1758964731:0065:042",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde",
+     "hyp": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde"
+    },
+    {
+     "ref": "1040780814:0447:055",
+     "type": "roman",
+     "cer": 0.0154,
+     "ref_text": "deſcripti cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs",
+     "hyp": "deſcripti, cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs"
+    },
+    {
+     "ref": "827667701:0010:014",
+     "type": "roman",
+     "cer": 0.0506,
+     "ref_text": "Typographi Nomen nullibi chartæ ſuæ famoſæ inſcripſit, ac qui facilè, ſe exin-",
+     "hyp": "Typographi Nomen nullibi charte ſue famoſæ inſeripſit, ac qui facile, ſe exin-"
+    },
+    {
+     "ref": "797708286:0033:021",
+     "type": "roman",
+     "cer": 0.1,
+     "ref_text": "Conſtantinopoli, fol. m. 127. notatur, Tureas renuere diſpu-",
+     "hyp": "Gonſtantinopoli, fol mir27. notatur, Turoas renuere diſpu-"
+    },
+    {
+     "ref": "737324791:0109:033",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "ſunt. Dogmatum in his Conciliis reje-",
+     "hyp": "ſunt. Dogmatum in his Conciliis reje-"
+    },
+    {
+     "ref": "779786009:0224:029",
+     "type": "roman",
+     "cer": 0.0333,
+     "ref_text": "uin cunt; nunquam enim plumbum",
+     "hyp": "uincunt; nunquam enim plumbum"
+    },
+    {
+     "ref": "1815200456:0010:022",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro",
+     "hyp": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro"
+    },
+    {
+     "ref": "769494587:0035:008",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "nec latinæ ſunt, nec aliud eloquio-",
+     "hyp": "nec latinæ ſunt, nec aliud eloquio-"
+    },
+    {
+     "ref": "175905688X:0212:008",
+     "type": "roman",
+     "cer": 0.0833,
+     "ref_text": "trum ejus M in linea I L",
+     "hyp": "trum ejus M in linea IL."
+    },
+    {
+     "ref": "799199311:0119:032",
+     "type": "roman",
+     "cer": 0.08,
+     "ref_text": "quæ ipſam extrinſecus tangat; & per ambitum figuræ",
+     "hyp": "Y qua ipſam extrinſecus tangat; & per ambitum figure"
+    },
+    {
+     "ref": "797899227:0260:014",
+     "type": "roman",
+     "cer": 0.0556,
+     "ref_text": "neas, libertinſſimé admittimus, ita",
+     "hyp": "neas, libentiſſimé admittimus, ita"
+    },
+    {
+     "ref": "1677894601:0066:000",
+     "type": "roman",
+     "cer": 0.0164,
+     "ref_text": "its Rectilinear Sides, did when produced paſs exactly through",
+     "hyp": "its Rectilinear Sides, did vhen produced paſs exactly through"
+    },
+    {
+     "ref": "826603459:0049:036",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Mathematicam ſpeculationem, niſi quatenus ad modum vel",
+     "hyp": "Mathematicam ſpeculationem, niſi quatenus ad modum vel"
+    },
+    {
+     "ref": "798311290:0039:036",
+     "type": "roman",
+     "cer": 0.0645,
+     "ref_text": "ſidia, illi fovemdam hanc hypotheſin maximam occaſionem ſuppe-",
+     "hyp": "ſidia, illi ad fovendam hanc hypotheſin maximam occaſionem ſuppe-"
+    },
+    {
+     "ref": "786373555:0120:074",
+     "type": "roman",
+     "cer": 0.0811,
+     "ref_text": "Notamus autem imprimis hôc locô id,",
+     "hyp": "Notamus autem imprimis hôe locoid,"
+    },
+    {
+     "ref": "1016738447:0009:017",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "vereor, ut in me cadat vel congruat.",
+     "hyp": "vereor, ut in me cadat vel congruat."
+    }
+   ]
+  },
+  "v1": {
+   "policy": "NFD · collapse-ws · strip; then abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '",
+   "lines_transcribed": 24,
+   "lines_scored": 24,
+   "lines_without_hypothesis": 0,
+   "cer": 0.1494,
+   "cer_unfolded": 0.1519,
+   "by_type": {
+    "fraktur": {
+     "lines": 0,
+     "cer": null,
+     "cer_unfolded": null,
+     "pending": true
+    },
+    "roman": {
+     "lines": 24,
+     "cer": 0.1494,
+     "cer_unfolded": 0.1519,
+     "pending": false
+    }
+   },
+   "lines": [
+    {
+     "ref": "1023099829:0066:012",
+     "type": "roman",
+     "cer": 0.0208,
+     "ref_text": "Datus ſit numerus verbi gratia 4335. Oporteatque",
+     "hyp": "Datus sit numerus verbi gratia 4335. Oporteatque"
+    },
+    {
+     "ref": "1048626504:0005:006",
+     "type": "roman",
+     "cer": 0.1628,
+     "ref_text": "REGIÆ DOMVS SERENISSIMO PRINCIPE AC DOMINO,",
+     "hyp": "REGLF DOMYS SERENISSTMO PRWNCIPE AC DOMWO,"
+    },
+    {
+     "ref": "798278285:0007:023",
+     "type": "roman",
+     "cer": 0.1774,
+     "ref_text": "ſive ſoni articulati, quibus ideas, vel ea quæ menti noſtræ de",
+     "hyp": "sire loni orticulati, quibusideas, vel ea quae mentinostrae de"
+    },
+    {
+     "ref": "1677894601:0218:004",
+     "type": "roman",
+     "cer": 0.0943,
+     "ref_text": "which at their reflexion from the Plate or Bubble are",
+     "hyp": "irhrich at their reflexion trom the Plate or Bubble arc"
+    },
+    {
+     "ref": "1032709332:0255:025",
+     "type": "roman",
+     "cer": 0.1719,
+     "ref_text": "ne locuta eſt, etiam hanc ſententiam ſubintulit. Compertam habeo",
+     "hyp": "ne locuea est, eriam hane sencenriam subineulis. Compertam habea"
+    },
+    {
+     "ref": "816838348:0075:005",
+     "type": "roman",
+     "cer": 0.2353,
+     "ref_text": "Operis Mineralis.",
+     "hyp": "Operis MinctalIS."
+    },
+    {
+     "ref": "889780803:0060:024",
+     "type": "roman",
+     "cer": 0.2973,
+     "ref_text": "ſon de cette Hypothese, non feulement",
+     "hyp": "Pon decerre FErpochele, non sculement"
+    },
+    {
+     "ref": "1032976985:0018:023",
+     "type": "roman",
+     "cer": 0.16,
+     "ref_text": "que c'eſt à l'eau forte.",
+     "hyp": "que celt à l'eauforre."
+    },
+    {
+     "ref": "1758964731:0065:042",
+     "type": "roman",
+     "cer": 0.1143,
+     "ref_text": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde",
+     "hyp": "lica, d'illustri Ciccadini, di orandi, di antichi, di alei; di donde"
+    },
+    {
+     "ref": "1040780814:0447:055",
+     "type": "roman",
+     "cer": 0.1692,
+     "ref_text": "deſcripti cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs",
+     "hyp": "deseripti, cadit per spatium aequale quadrato semissis dicti areus"
+    },
+    {
+     "ref": "827667701:0010:014",
+     "type": "roman",
+     "cer": 0.2025,
+     "ref_text": "Typographi Nomen nullibi chartæ ſuæ famoſæ inſcripſit, ac qui facilè, ſe exin-",
+     "hyp": "Typosraphi Nomen nullibi charcae suae famosae inscrip ste, ac qui facile, se exin-"
+    },
+    {
+     "ref": "797708286:0033:021",
+     "type": "roman",
+     "cer": 0.1167,
+     "ref_text": "Conſtantinopoli, fol. m. 127. notatur, Tureas renuere diſpu-",
+     "hyp": "Constantinopoli, fol. m. T27. nOtatUF, Tureas renuere dispu"
+    },
+    {
+     "ref": "737324791:0109:033",
+     "type": "roman",
+     "cer": 0.1622,
+     "ref_text": "ſunt. Dogmatum in his Conciliis reje-",
+     "hyp": "fune. Dogmacum inhris Conciliisreje-"
+    },
+    {
+     "ref": "779786009:0224:029",
+     "type": "roman",
+     "cer": 0.1333,
+     "ref_text": "uin cunt; nunquam enim plumbum",
+     "hyp": "nincunc;nunquam enim plumbum"
+    },
+    {
+     "ref": "1815200456:0010:022",
+     "type": "roman",
+     "cer": 0.1061,
+     "ref_text": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro",
+     "hyp": "Sta Dei dona cum animaduerterent poterilsimireses F'erdinandus Ro"
+    },
+    {
+     "ref": "769494587:0035:008",
+     "type": "roman",
+     "cer": 0.0857,
+     "ref_text": "nec latinæ ſunt, nec aliud eloquio-",
+     "hyp": "nec latinae sunt, nec aliud eloquio-"
+    },
+    {
+     "ref": "175905688X:0212:008",
+     "type": "roman",
+     "cer": 0.1667,
+     "ref_text": "trum ejus M in linea I L",
+     "hyp": "erum ejus. M in linea LL"
+    },
+    {
+     "ref": "799199311:0119:032",
+     "type": "roman",
+     "cer": 0.18,
+     "ref_text": "quæ ipſam extrinſecus tangat; & per ambitum figuræ",
+     "hyp": "qua ipsam extrinseeus tancat; e per ambitum ficurae"
+    },
+    {
+     "ref": "797899227:0260:014",
+     "type": "roman",
+     "cer": 0.3333,
+     "ref_text": "neas, libertinſſimé admittimus, ita",
+     "hyp": "Deas, libentiltimé acmuclimus, IE2"
+    },
+    {
+     "ref": "1677894601:0066:000",
+     "type": "roman",
+     "cer": 0.1148,
+     "ref_text": "its Rectilinear Sides, did when produced paſs exactly through",
+     "hyp": "ips R ectilincar Sides, did hen produced pals exactly chrouoh"
+    },
+    {
+     "ref": "826603459:0049:036",
+     "type": "roman",
+     "cer": 0.1296,
+     "ref_text": "Mathematicam ſpeculationem, niſi quatenus ad modum vel",
+     "hyp": "Machemacicam (peculacionem, nih quacenus ad modum vel"
+    },
+    {
+     "ref": "798311290:0039:036",
+     "type": "roman",
+     "cer": 0.1613,
+     "ref_text": "ſidia, illi fovemdam hanc hypotheſin maximam occaſionem ſuppe-",
+     "hyp": "Sidia, illi ad forendam hanc hrpothelin maximam occationem suppe-"
+    },
+    {
+     "ref": "786373555:0120:074",
+     "type": "roman",
+     "cer": 0.1351,
+     "ref_text": "Notamus autem imprimis hôc locô id,",
+     "hyp": "Nocamus aurem imprimis hôe locoid,"
+    },
+    {
+     "ref": "1016738447:0009:017",
+     "type": "roman",
+     "cer": 0.0556,
+     "ref_text": "vereor, ut in me cadat vel congruat.",
+     "hyp": "vereor, ut in ne cadat vel consruat."
+    }
+   ]
+  }
+ },
+ "ocr_lines": 3463,
+ "fraktur_share_corpus": {
+  "pages_by_lang": {
+   "de": 6719,
+   "fr": 20899,
+   "la": 62540,
+   "mixed": 6595,
+   "unknown": 6873
+  },
+  "pages": 103626,
+  "german_pages": 6719,
+  "german_share": 0.0648
+ }
+}

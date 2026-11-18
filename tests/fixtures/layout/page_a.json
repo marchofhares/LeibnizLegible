@@ -1,0 +1,13 @@
+{
+  "image": {"width": 1000, "height": 1400, "Path": "images/page_a.jpg"},
+  "predictions": [
+    {"x": 500.0, "y": 500.0, "width": 800.0, "height": 800.0, "confidence": 0.95, "class": "MainZone", "class_id": 3,
+     "points": [{"x": 100, "y": 100}, {"x": 900, "y": 100}, {"x": 900, "y": 900}, {"x": 100, "y": 900}]},
+    {"x": 45.0, "y": 500.0, "width": 90.0, "height": 800.0, "confidence": 0.61, "class": "MarginTextZone", "class_id": 4,
+     "points": [{"x": 0, "y": 100}, {"x": 90, "y": 100}, {"x": 90, "y": 900}, {"x": 0, "y": 900}]},
+    {"x": 300.0, "y": 1150.0, "width": 400.0, "height": 300.0, "confidence": 0.55, "class": "GraphicZone-figure", "class_id": 2,
+     "points": [{"x": 100, "y": 1000}, {"x": 500, "y": 1000}, {"x": 500, "y": 1300}, {"x": 100, "y": 1300}]},
+    {"x": 750.0, "y": 1050.0, "width": 300.0, "height": 100.0, "confidence": 0.42, "class": "MathsRegion-inline", "class_id": 6,
+     "points": []}
+  ]
+}

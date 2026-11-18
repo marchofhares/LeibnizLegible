@@ -1,0 +1,56 @@
+{
+ "eligible": 236210,
+ "excluded": 1589,
+ "blocks": {
+  "briefwechsel": {
+   "pool_pages": 72135,
+   "pool_works": 1059,
+   "drawn": 200,
+   "works": 200
+  },
+  "handschriften": {
+   "pool_pages": 42768,
+   "pool_works": 443,
+   "drawn": 200,
+   "works": 200
+  },
+  "lh35": {
+   "pool_pages": 14396,
+   "pool_works": 302,
+   "drawn": 100,
+   "works": 100
+  },
+  "marginalien": {
+   "pool_pages": 103626,
+   "pool_works": 371,
+   "pool_by_lang": {
+    "de": 6719,
+    "la": 62540,
+    "fr": 20899,
+    "mixed": 6595,
+    "unknown": 6873
+   },
+   "quotas": {
+    "de": 30,
+    "la": 45,
+    "fr": 15,
+    "mixed": 5,
+    "unknown": 5
+   },
+   "drawn": 100,
+   "works": 89
+  },
+  "philiumm-test": {
+   "named": 20,
+   "drawn": 20
+  },
+  "extra": {
+   "named": 1,
+   "drawn": 1
+  }
+ },
+ "pages": 621,
+ "seed": 0,
+ "linked": 621,
+ "missing_scans": []
+}

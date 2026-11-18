@@ -3,11 +3,108 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-11-18, later (**G1b follow-up on `claude/eloquent-cannon-d2xv4r`: main merged (#64 K3b-prep, #65 REL1 Part A, #66 R1 Part A; both sides' entries kept in STATUS.md, the G1b prompt after ARCH1's in PROMPTS.md); `leibniz pack fragments --only-records CSV`, a pack drawn from the records listed and no others — K3's 98 validation pieces, whose lines k3-trocr was not trained on (Open question 30 j, way 3); 1,228 tests in the slim environment; the three rebuild lines under Next**); earlier the same day (**REL1 Part A — the first releases, built in a cloud session on fixtures on `claude/clever-gates-56b0a4`: the cards true to the store (each licence from the registry, each count from the export's MANIFEST, each measured figure from a committed report), the transcriptions record carrying the inventory, the German reader's package `leibniz-kurrent-trocr`, the Zenodo and Hugging Face scripts up to the draft, `release check`; found on the way and repaired: the committed audit summary was a test's (the ground-truth cards said "8 of 8 lines, 95.0 %, passes"; restored to 199 of 200 judged, 72.3 %), the export opened the master for writing and held a million rows in memory; merged with main at #64 (K3b-prep), both sides' entries kept; 1,160 tests; nothing sent, reserved or deployed; Part B the operator's desktop, the pull request the operator's**); 2026-11-17, later still (**R1 Part A — decoding with a language model, the code: three decoders behind one interface in `htr/decoding.py` (kraken's greedy unchanged, flashlight-text's lexicon-free beam with a KenLM character 6-gram, a prefix beam of the project's own as the fallback), one confidence over all three, `--decoder` on `bench run` and `align letterpool-eval`, `leibniz bench lm-build` (two models from the open text, the evaluation sets' pieces held out), a toy model from the fixture store; 1,136 tests on the branch, 1,225 after the merge with main at #65 on 18 November, both sides' entries kept; Part B — the real models, the measurement, the calibration — is the desktop's; on `claude/modest-cori-wds26r`, nothing measured on the Nachlass, nothing deployed**); 2026-11-17, later (**K3b-prep — the verdict tools, built in a cloud session on fixtures: `leibniz align audit-convert` (a judge's table with a transcription column → the C2 verdict CSV and a corrections file), `audit-score --corrections` (the patterns read off the judge's whole line; "Under the fold": strict, usable and under-the-fold precision by stratum and by hand, Wilson intervals), `audit-apply` (the verified lines into `gt_lines`: a dry run, then `--write`, one transaction, idempotent; a corrected line under `channel edition-k2-audit`), `audit-sheet-k2` (a further sheet by hand, without the lines, records and pages already used, with context strips and a field for the corrected line), three registry entries; 1,110 tests; none of the Edition's text here, no store, nothing deployed; on `claude/confident-brown-2xwlqs`, the pull request the operator's**); minutes before it (**G1b — the gold-first draw for the fragment pack, built in a cloud session on the fixture store: the gold drawn first among all the eligible lines, up to `--gold-rate` of the rows with at most `--bad-gold-share` (now 0.5) of it both-wrong, the strata filled around it; `--min-ratio` 0.5, a floor under the shorter reading; `--strata` weights with the equal allocation the default; the rows shuffled under the seed; `--as-of-run`, because since K4 the stored reading on the German pages is k3-trocr's and the rebuild must choose whose reading the first candidate is (Open question 30 j); 1,103 tests; on `claude/eloquent-cannon-d2xv4r`, the rebuild on the desktop and the pull request the operator's**); earlier the same day (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-11-18, later still (**DQ1 — the desktop read-only queue on `desktop-queue-1`, 17–18 November: the backup chore done (the dated copy by SQLite's backup call, identical past the header, uploaded, `rclone check` 0 differences); P1 Task 3 done — PHILIUMM's v2 segmentation model through her pipeline over 621 pages (2,000 px copies): 1.6 % of the 44,104 v1 lines inside a figure or formula zone (LH 35 4.0 %), 82.7 % in a MainZone, 9.5 % in a MarginTextZone, her 43,875 final lines matching v1's one to one on 66 %; M1's print trial done but for the CER — the LADaS D-FINE model puts 62.1 % of the Marginalien's v1 lines in print zones and marks a manuscript addendum on 4 of 100 pages, Gallicorpora+ read 3,463 printed-body lines and reads the 24 roman sheet lines the operator transcribed at 3.56 % CER against v1's 14.94 %, so the decision is (a) for roman print, the Fraktur half pending; the store read-only, nothing deployed, the pull request the operator's**; **G1b follow-up on `claude/eloquent-cannon-d2xv4r`: main merged (#64 K3b-prep, #65 REL1 Part A, #66 R1 Part A; both sides' entries kept in STATUS.md, the G1b prompt after ARCH1's in PROMPTS.md); `leibniz pack fragments --only-records CSV`, a pack drawn from the records listed and no others — K3's 98 validation pieces, whose lines k3-trocr was not trained on (Open question 30 j, way 3); 1,228 tests in the slim environment; the three rebuild lines under Next**); earlier the same day (**REL1 Part A — the first releases, built in a cloud session on fixtures on `claude/clever-gates-56b0a4`: the cards true to the store (each licence from the registry, each count from the export's MANIFEST, each measured figure from a committed report), the transcriptions record carrying the inventory, the German reader's package `leibniz-kurrent-trocr`, the Zenodo and Hugging Face scripts up to the draft, `release check`; found on the way and repaired: the committed audit summary was a test's (the ground-truth cards said "8 of 8 lines, 95.0 %, passes"; restored to 199 of 200 judged, 72.3 %), the export opened the master for writing and held a million rows in memory; merged with main at #64 (K3b-prep), both sides' entries kept; 1,160 tests; nothing sent, reserved or deployed; Part B the operator's desktop, the pull request the operator's**); 2026-11-17, later still (**R1 Part A — decoding with a language model, the code: three decoders behind one interface in `htr/decoding.py` (kraken's greedy unchanged, flashlight-text's lexicon-free beam with a KenLM character 6-gram, a prefix beam of the project's own as the fallback), one confidence over all three, `--decoder` on `bench run` and `align letterpool-eval`, `leibniz bench lm-build` (two models from the open text, the evaluation sets' pieces held out), a toy model from the fixture store; 1,136 tests on the branch, 1,225 after the merge with main at #65 on 18 November, both sides' entries kept; Part B — the real models, the measurement, the calibration — is the desktop's; on `claude/modest-cori-wds26r`, nothing measured on the Nachlass, nothing deployed**); 2026-11-17, later (**K3b-prep — the verdict tools, built in a cloud session on fixtures: `leibniz align audit-convert` (a judge's table with a transcription column → the C2 verdict CSV and a corrections file), `audit-score --corrections` (the patterns read off the judge's whole line; "Under the fold": strict, usable and under-the-fold precision by stratum and by hand, Wilson intervals), `audit-apply` (the verified lines into `gt_lines`: a dry run, then `--write`, one transaction, idempotent; a corrected line under `channel edition-k2-audit`), `audit-sheet-k2` (a further sheet by hand, without the lines, records and pages already used, with context strips and a field for the corrected line), three registry entries; 1,110 tests; none of the Edition's text here, no store, nothing deployed; on `claude/confident-brown-2xwlqs`, the pull request the operator's**); minutes before it (**G1b — the gold-first draw for the fragment pack, built in a cloud session on the fixture store: the gold drawn first among all the eligible lines, up to `--gold-rate` of the rows with at most `--bad-gold-share` (now 0.5) of it both-wrong, the strata filled around it; `--min-ratio` 0.5, a floor under the shorter reading; `--strata` weights with the equal allocation the default; the rows shuffled under the seed; `--as-of-run`, because since K4 the stored reading on the German pages is k3-trocr's and the rebuild must choose whose reading the first candidate is (Open question 30 j); 1,103 tests; on `claude/eloquent-cannon-d2xv4r`, the rebuild on the desktop and the pull request the operator's**); earlier the same day (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
 ## Current state
+
+**2026-11-17/18: DQ1 — the desktop read-only queue, done but for the
+operator's transcription: the backup chore (the dated copy, uploaded, checked),
+P1 Task 3 (the zone census on PHILIUMM's v2 segmentation model over 621
+pages, checkpoint C) and M1's print trial (Task 1b: zones, the printed-body
+share, the OCR of 3,463 printed lines, the CER on the roman half of the sheet
+and the decision (a) for roman print; the Fraktur half pending); one desktop session on `desktop-queue-1`
+from main at `9ae24de` (#63), 17:49 to 00:50 the next morning; the store
+read-only throughout; nothing deployed, sent or merged; the pull request the
+operator's.** Task 0, the one pre-flight, found the tree clean, GTX 1660 Ti idle
+(WSLg's Xwayland holding 2,055 MiB of 6,144, nothing of the project), C: 35 GB
+free (the budget for every write under `/`; it stood at 30 GB by 18:17 and 29 GB
+by 19:30 while this session's own writes to the VHD were 768 MiB and 150 MB),
+D: 171 GB, RAM 9.7 GB with 8.9 available, swap 8 GB unused, git-lfs 3.7.1, uv
+0.12.0, ruff clean in both environments, pytest **1,071 passed, 3 skipped in
+`.venv-w3` (46.8 s) and 1,095 passed, 1 skipped in `.venv-k1` (45.5 s)** through
+`python -m pytest` (bare `pytest` fails to collect three files on
+`tests.conftest`, as ARCH1 recorded), and the backup due: the newest copy,
+`inventory-2026-10-30.sqlite` (17,143,570,432 bytes, 01:20 on the 30th, on D:
+and in r2backup with its `.sha256`), predates K4's write of 08:40–08:51 that
+day; the store is 19,354,243,072 bytes, WAL mode, the `-wal` file empty, no
+process holding it. **The operator's go of 17 November, verbatim:** "go, with
+four changes. (1) Exclude every row of reports/philiumm/heldout_pages.csv,
+1,472 distinct pages, not only the noisy split's 1,149. (2) Symlink the sample
+images from /mnt/d/leibniz-images instead of copying them; the venv on the VHD
+is fine. (3) Make the backup with the chore's own line, SQLite's backup call
+from a read-only connection into /mnt/d/leibniz-backups/inventory-2026-11-17.sqlite,
+not cp; keep the digest beside it. (4) If her pipeline can run its stages one
+after the other over all pages (RF-DETR for all, then kraken for all), run it
+that way so one torch process lives at a time; otherwise the MemoryMax scope
+stands and the pilot's figure decides. The GPU memory in use is WSLg's
+Xwayland, nothing of the project. Everything else as planned." **The backup
+chore** (`logs/backup-2026-11-17.sh`, its log beside it, a 2 GB scope): SQLite's
+backup call in one step from a `mode=ro` connection wrote
+`/mnt/d/leibniz-backups/inventory-2026-11-17.sqlite`, 19,354,243,072 bytes, in
+83 min 30 s (18:14:25–19:37:55, about 3.9 MB a second over the drive share).
+The source's SHA-256 is `3a586ffd52c5085bc33c07d76f6b6f357f4e2dd3624b1fff96059b2ec6566722`,
+the copy's `c2a4259592088b077b12bb164b19549f98a11e26c9155637b2160dffbfc2afb8`
+(in `inventory-2026-11-17.sqlite.sha256` beside it, `sha256sum -c` form): the
+backup API rewrites header bytes, and `cmp` past byte 100 found the two files
+identical (the digest of the copy over the share 47 min, the comparison 47
+min more). `rclone copy` of the copy and its `.sha256` to
+`r2backup:leibniz-backups` took 2 h 10 min (21:16:38–23:26:58); then
+`rclone check --one-way` on the two files of the day: **"0 differences found",
+"2 matching files"** (23:37:14; the check is restricted to the day's files
+because a hash check of every copy in the folder reads 105 GB over the
+share). **The chore ended at 23:37:14.** **P1 Task 3 so far** (the entry "P1 —
+Task 3, the zone census" in the Phase log): her pipeline cloned at
+`3f1c7853` (2026-11-12) without LFS content and installed into
+`data/philiumm/rfdetr-env` (torch 2.12.0, rfdetr 1.8.0, kraken 7.0.3,
+supervision 0.31.7; the VHD grew 768 MiB), the two v2 checkpoints fetched from
+the Hub with their digests checked (`ba76c8e5…`, `67124b59…`; the card's
+revision `4a5c7d93…`), her bundled baseline model found byte-identical to this
+project's v1 segmenter, her layout dataset's **392 originals resolved: 433
+train and valid pages kept out of the sample, 16 test images → 20 pages as a
+named block, 29 Göttingen pages not the GWLB's, 7 eScriptorium ids unresolved**
+(`reports/layout/philiumm-layout-pages.csv`), and the sample drawn:
+**621 pages — 200 Briefwechsel, 200 Handschriften (LH 35 works apart), 100 LH
+35, 100 Marginalien (30 German print), her 20 test pages, the named extra —
+from 236,210 eligible pages with 1,589 excluded**
+(`reports/layout/sample.csv`). The 20-page pilot stopped the first plan: rfdetr
+1.8.0 upsamples the masks of all 300 queries to the input image before
+thresholding, so a 10–20 megapixel scan spills the 6 GB card into host memory
+(the GPU guard killed the first attempt at 5,938 MiB; the second crawled at
+18 minutes a page), and reads of model files from D: over the share crawl
+beside the backup chore. The run therefore feeds copies downscaled to 2,000 px
+on the long side (RF-DETR then reserves 2.5 GB of the card and takes about
+2.5 s a page), keeps the model files on the VHD, calls kraken once per batch
+of 25 pages in half precision with a CPU pass for the pages wider than twice
+their height (the baseline model's 1,800 px high input makes a 3.4:1 strip a
+5.3 GB job on the card), and the census scales the pipeline's coordinates
+back. **The run over the 621 pages took 20:18:40 to 00:21:06** (the detect stage
+22 min, kraken 3 h 28 min in batches of 25, the four pages wider than twice
+their height left without pipeline lines), and the census over the 617 pages
+with final lines gives, beside the zone numbers above: **the pipeline's
+43,875 final lines against 44,104 v1 lines, 29,075 matched one to one at IoU
+≥ 0.5 (65.9 % of v1, 66.3 % of theirs, mean IoU 0.77); on the Marginalien her
+pipeline keeps 3,843 lines of v1's 5,581, the quarter outside her zones
+dropped by her last step** (`reports/layout/zone-census.md`). **M1's print
+trial** (`reports/marginalia/print-trial.md`): kraken 7.1.1 with the LADaS
+D-FINE large region model over the 100 Marginalien pages in 5 min 8 s, **62.1 %
+of the 5,581 v1 lines inside print zones (IoU 0.72 with them), a manuscript
+addendum marked on 4 pages, so Leibniz's notes come out as the 36.9 % of
+lines outside the print zones; PHILIUMM's manuscript model and LADaS make
+the same call on 71.1 % of the lines**; Gallicorpora+ read the 3,463
+printed-body lines in 16 min 24 s (roman print comes out as print to the eye,
+Fraktur as letter salad from both models); **on the 24 roman lines the operator transcribed on the
+morning of the 18th, Gallicorpora+ reads at 3.56 % CER (9 lines exactly right)
+against v1's 14.94 %, so the report's decision is (a) for roman print — read
+the printed body with a print model and show it as such — with the Fraktur
+half of the sheet pending** (`leibniz layout print-trial cer`, then `report`,
+when its 25 lines are typed). The registry carries dfine_kraken (Apache-2.0, read on GitHub:
+Open question 29 c answered), the LADaS model (Apache-2.0) and Gallicorpora+
+as run; the two PHILIUMM v2 entries stay with K3b-prep. ruff clean; pytest
+**1,099 passed, 3 skipped** in `.venv-w3` at the end (1,071 before; 28 new
+tests). C: ended at 25 GB free; the pipeline's 1.8 GB of intermediate images
+moved to D: behind symlinks.
 
 **2026-11-18, later: G1b follow-up — main merged into
 `claude/eloquent-cannon-d2xv4r`, and `--only-records` added to `leibniz pack
@@ -915,6 +1012,363 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 ---
 
 ## Phase log
+
+### P1 — Task 3, the zone census (2026-11-17/18) ✅ Task 0 · ✅ the backup chore · ✅ the environment · ✅ her training pages · ✅ the sample · ✅ the pilots · ✅ the run (617 of 621 pages) · ✅ the census (checkpoint C) · ⏳ the operator's pull request
+
+- **Setting.** The desktop (WSL2), one session for the queue DQ1 (the
+  operator's note of 17 November, in `PROMPTS.md` with the preamble, the P1
+  prompt and its note of 16 November, and the M1 prompt with its amendment and
+  note); the branch `desktop-queue-1` from main at `9ae24de`. The store opened
+  `mode=ro` everywhere (`query_only` in the new commands). Task 0's facts and
+  the operator's go with its four changes are in the Current state entry of
+  2026-11-17 (verbatim).
+- **The backup chore** (`logs/backup-2026-11-17.sh`, log beside it): the
+  chore's own line — SQLite's backup call from a read-only connection, one
+  step — into `/mnt/d/leibniz-backups/inventory-2026-11-17.sqlite` under a 2 GB
+  scope: 19,354,243,072 bytes in 83 min 30 s (18:14:25–19:37:55); then the
+  digest of both sides (the copy's in `sha256sum -c` form beside it), the
+  upload of the two new files to `r2backup:leibniz-backups` and
+  `rclone check --one-way` on those two files. **Done 23:37:14:** the source
+  `3a586ffd…`, the copy `c2a42595…` (the header rewritten by the backup API,
+  the files identical past byte 100 by `cmp`); the copy's digest over the
+  share 47 min (19:42–20:29), the comparison 47 min (20:29–21:16), the upload
+  2 h 10 min (21:16–23:26); `rclone check --one-way`: "0 differences found",
+  "2 matching files".
+- **The environment** (`tools/philiumm-layout-env.sh`, idempotent, a diagnosis
+  on failure): her repository
+  (`scripts-pour-le-pretraitement-des-corpus-pour-escriptorium`, GitLab,
+  public, no licence file) cloned at **`3f1c7853883df29fe814bfdb89191cb471392a6a`**
+  (2026-11-12, "update examples", working tree clean) to
+  `/mnt/d/leibniz-layout/rfdetr-pipeline` behind `data/philiumm/rfdetr-pipeline`
+  without LFS content: only the `.pth` files are LFS, and the v2 checkpoints
+  came from the Hub instead (`data/philiumm/models` → `/mnt/d/leibniz-layout/models`;
+  card revision `4a5c7d93e8a6da1b4e01794c35e24113c2405c28`, read 2026-11-17,
+  licence `cc-by-nc-4.0`): `checkpoint_best_ema_v2.pth` 149,710,503 bytes,
+  SHA-256 `ba76c8e592886c39f69ef1b2093a4fc74eff1e14a84e191ee606e1e84aa9bb4a`;
+  `checkpoint_best_regular_v2.pth` 299,221,359 bytes, SHA-256
+  `67124b59114ca0d8e3c52fad07ad85a3623f1892d0bb5d7773774f9e5b3429ab` — the
+  same sizes and digests as the clone's LFS pointers (`SHA256SUMS`, `REVISION`
+  beside them; `data/philiumm/rfdetr-pipeline.COMMIT` and
+  `rfdetr-pipeline.models.sha256` record the clone). **Her bundled
+  `models/segmentation/baselines/best_0.4750.safetensors` (5,056,004 bytes,
+  SHA-256 `54ff6c4e…`) is byte-identical to this project's
+  `blla_ft_leibniz_v1_0.4750.safetensors`**: the P1 prompt's checksum question
+  is answered, and the only difference between her final lines and v1's is
+  the masking, the merge into zones, the clipping and the splitting. The venv
+  `data/philiumm/rfdetr-env` (uv, Python 3.12.13): her `requirements.txt` does
+  not resolve as written (rfdetr 1.8.0 needs supervision ≥ 0.29, her pin is
+  0.28.0; kraken 7.0.2 pins torch ≤ 2.10, the torch this card is proven on is
+  2.12.0), so: torch 2.12.0 (CUDA 13.0, the card found), torchvision 0.27.0,
+  rfdetr 1.8.0, supervision 0.31.7, inference_sdk 1.2.7, opencv-python
+  4.10.0.84, lxml 6.1.0, kraken 7.0.3, numpy 2.3.5, transformers 5.12.1
+  (124 packages; the VHD grew 768 MiB, the torch wheels hardlinked from uv's
+  cache; 39 s). The config `data/philiumm/config_v2_ema.json` is hers with
+  `model_path` changed; her files are untouched.
+- **Her training pages** (`leibniz layout philiumm-pages`,
+  `layout/philiumm_pages.py`; `reports/layout/philiumm-layout-pages.csv` +
+  `-summary.json`): the dataset `DenisaBumba/layout-leibniz-dataset-v2`
+  (revision `f832aeb2bc69a85680e4bfccc3e1f0c9c12f102d`, licence `cc-by-4.0`;
+  the COCO categories DigitizationArtefactZone, GraphicZone-figure, MainZone,
+  MarginTextZone, MathsRegion-complex, MathsRegion-standard,
+  MathsRegion-strikethrough, NumberingZone) lists **392 originals: 334 train,
+  40 valid, 18 test**. By name: 348 shelfmark-and-folio names resolved
+  through the Task 2 resolver (294 train, 38 valid, 16 test; three of them
+  only after dropping a fourth shelfmark part, `LH_35_4_20_14_0006v` being
+  the store's `LH 35, 4, 20`), 8 matched by image — the bare `3r` and seven
+  folios of `LH 35, 1, 1` (work `00067960`, no folio labels on its 54 pages,
+  the Task 2 class) — each to the two registrations of one scan (the
+  downloaded original against the cached scans as 24 × 32 greyscale
+  thumbnails: distance 0.0 to both twins), 29 Göttingen pages
+  (`8_cod_ms_philos_140_…`, not the GWLB's), and **7 eScriptorium ids
+  unresolved** (no page of their size: 1577×1131, 5262×4279, 2526×2260,
+  2995×4515, 1680×3109, 2522×2256, 5192×4300 — most likely not GWLB scans).
+  **Pages: 433 train and valid (kept out), 20 test (a named block).** Of the
+  258 single pages resolved by name, 89 have the store's pixel size and 113
+  the same aspect ratio within 2 %; the rest are another shape (a spread
+  scan cut to one folio, by the looks of the names), so her originals are
+  mostly full scans or crops of them (long side median 4,206 px, 10.9
+  megapixels), not reductions.
+- **The sample** (`leibniz layout sample --n 400 --seed 0`,
+  `layout/sample.py`; `reports/layout/sample.csv` + `sample-notes.json`):
+  `page_stats.stratum_heuristic` is NULL on all 236,752 rows (C4 has not
+  run), so the strata are the sets. **621 pages: Briefwechsel 200 (one page
+  each from 200 of 1,059 works; pool 72,135 pages), Handschriften 200 (200
+  of 443 works, LH 35 works left to their block; pool 42,768), LH 35 100 (100
+  of 302 works; pool 14,396), Marginalien 100 (89 of 371 works; pool 103,626:
+  de 6,719, la 62,540, fr 20,899, mixed 6,595, unknown 6,873; quotas de 30,
+  la 45, fr 15, mixed 5, unknown 5), her 20 test pages, the named extra
+  `DE-611-HS-971383:0035`**; eligible 236,210 recognised cached pages, 1,589
+  excluded (the 1,472 held-out pages of `reports/philiumm/heldout_pages.csv`,
+  116 of her layout pages not already among them, the extra). The Leibnitiana
+  (12 works, 1,768 pages) and the reconstruction set (28 pages) are not
+  strata. Within a block the works are shuffled under the seed and visited
+  one page a work a round. The 621 scans are symlinked into
+  `data/philiumm/layout-sample/images/` as `<work>_<seq>.jpg` (0 missing).
+  The sample's scans: long side median 4,070 px, 11.0 megapixels, the largest
+  52.8.
+- **The pilot, first attempt (20 pages, 5 a block, 18:41).** Under the 6 GB
+  scope with the GPU guard (`tools/gpu-guard.sh`, limit 5,900 MiB), the detect
+  stage climbed to 5,938 MiB of card memory on its second image and was
+  killed (the guard's record `logs/philiumm-layout-pilot-detect-gpu.csv`); the
+  relaunch held at 5,710–5,780 MiB and crawled — 8 s, 3 min and 18 min for
+  three images of 1 MP, 9 MP and 10 MP — until stopped. The cause, read in
+  rfdetr 1.8.0's `PostProcess._postprocess_masks`: the masks of all 300
+  queries are interpolated to the input image's size before `predict`
+  applies the threshold, so a 10-megapixel scan asks for 300 × 10 M floats
+  and WSL2 spills the card into host memory. Her own training images are
+  full scans too (the Hub's originals), so this is the card's limit, not a
+  mismatch. Two further costs seen: loading the 150 MB checkpoint from D:
+  over the share took minutes beside the backup chore's reads, and her
+  kraken step would read its 5 MB model from the clone on D: once a page.
+  **The second plan:** the pipeline reads downscaled copies of the scans
+  (`leibniz layout downscale`, Pillow, the long side bounded; the model's own
+  input is 1,272 px in any case), the model files sit in a runtime root on
+  the VHD (`data/philiumm/rfdetr-runtime/`: the EMA checkpoint copied,
+  digest checked; the baseline model a symlink to this project's identical
+  file) that the driver uses as its working directory while importing her
+  code from the clone, and the census scales her zones and lines back to the
+  scan's pixels by the page row's size over the image size she recorded.
+  The driver `tools/philiumm_layout_stages.py` runs her ten steps as ten
+  interpreters (the operator's change 4: RF-DETR for all pages, then kraken
+  for all, one torch process at a time; her kraken device and precision
+  passed explicitly, `32-true` on this Turing card, so her parent never
+  imports torch), `detect` and `baselines` resuming page by page;
+  `tools/philiumm-layout-run.sh` wraps each stage in
+  `systemd-run --scope -p MemoryMax=6G` with `/usr/bin/time -v` and the
+  scope's `memory.peak`, the guard on the two torch stages, a relaunch after
+  60 s on a failure.
+- **The size probe and the second pilot (2,000 px copies).** One page
+  (3,876 × 2,623) through RF-DETR from the VHD checkpoint, fresh process each:
+  long side 1,272 px → 903 MiB allocated on the card, 1,696 reserved; 1,600
+  px → 1,209 / 2,006 MiB, 4.1 s; 2,000 px → 1,671 / 2,464 MiB, 3.6 s (the
+  first process paid the warm-up: 27.8 s); the checkpoint loads in a second
+  from the VHD against minutes from D:. **Chosen: 2,000 px on the long side**
+  (`leibniz layout downscale --long 2000`; the sample's scans have a median
+  long side of 4,070 px and 11.0 megapixels, the largest 52.8; the 621
+  copies are 503 MiB on the VHD). The detect stage over 20 pilot pages: about
+  2.5 s a page in one process, host peak 1,497 MiB (the scope's
+  `memory.peak`); the CUDA caching allocator still met the guard's 5,900 MiB
+  after eight pages of different shapes, so the driver empties the cache
+  after every page and the run sets `expandable_segments`. The kraken stage,
+  run as her code runs it (one `kraken` process a page, `32-true`): 15–38 s a
+  page, 13 of 14 pages written, host peak 1,484 MiB; **the one failure is a
+  page 5,274 × 1,561 px**: the baseline model rescales every input to 1,800
+  px high, so a page 3.4 times wider than high becomes a 6,000 px wide
+  network input and kraken takes 5.3 GB of the card (5,890 MiB with
+  Xwayland, measured alone on the pilot's 1,807 × 527 strip; the same in
+  `16-mixed`, so precision is not the lever), which the guard's limit meets
+  when Xwayland holds more. Fourteen of the sample's 621 pages are wider
+  than 1.5 times their height, four wider than twice. **The run therefore
+  calls kraken once per batch of 25 pages (the same command and flags as
+  hers, the model loaded once instead of 621 times), in `16-mixed` as her own
+  default is a reduced precision, sends pages wider than twice their height
+  to the CPU from the start and any page the card refuses to the CPU after
+  the GPU batches** (the driver's `_baselines_state.json`; a page that kills
+  a batch is the first without an output and goes to the CPU next time; the
+  guard's pattern now names kraken itself, since a kill of the driver alone
+  left kraken holding the card and every relaunch died at once). The CPU
+  pass on that strip had not finished after 11 minutes when it was stopped
+  for the run; the run measures it on its four wide pages. The census code
+  ran on the pilot's 19 pages in 30 s (`data/philiumm/layout-pilot/`):
+  the shapes are right, the numbers are the pilot's and not reported.
+- **The run** (`tools/philiumm-layout-run.sh data/philiumm/layout-sample/images-2000
+  data/philiumm/layout-results philiumm-layout-run`, log
+  `logs/philiumm-layout-run.log`, launched 20:18:40 on 17 November): the ten
+  stages in order, each its own interpreter under `MemoryMax=6G`; the
+  results on the VHD (about 2 GB expected at 2,000 px). **The detect stage:
+  621 pages in 22 min 01 s (2.1 s a page with the load), the card's peak 3,766
+  MiB with Xwayland, the host never under 6,975 MiB available, the stage's
+  peak 2,825 MiB of host memory**; regions, masks, binarisation and the masked
+  images in under two minutes together. **The kraken stage in `16-mixed` was
+  stopped after seven pages**: it ran CPU-bound in kraken's polygonizer at two
+  minutes a page with a topology warning on most lines, where the fp32 pilot
+  took 15–38 s a page — half precision gives noisier heatmaps and, as the
+  probe showed, saves no card memory — so the stage resumed in `32-true` at
+  20:50:31 (the seven pages kept, the batch state cleared by hand so no page
+  was blamed for the stop): about 24 s a page over the first fifteen, so
+  about four hours for the 610 pages on the card, the four wide pages on the
+  CPU after them. **The zone side of the census, run on the complete
+  detections while kraken worked (`data/philiumm/layout-census-provisional/`;
+  the final census over the pipeline's lines follows):** over the 621 pages
+  and their **44,104 v1 lines, 687 lines (1.6 %) lie mostly inside a figure
+  or formula zone** — LH 35 420 of 10,629 (4.0 %), the Marginalien 183 of
+  5,581 (3.3 %), the Briefwechsel 49 of 9,089 (0.5 %), the Handschriften 21
+  of 15,922 (0.1 %); 82.7 % of the v1 lines lie in a MainZone, 9.5 % in a
+  MarginTextZone, 5.6 % in no zone. The model emits a MainZone on 88.9 % of
+  the pages, a MarginTextZone on 49.6 %, a figure zone on 19.3 % (LH 35
+  46.0 %), a formula zone on 19.8 % (LH 35 56.0 %, the Marginalien 40.0 %);
+  per page 1.38 MainZones, 1.54 MarginTextZones, 1.40 inline and 0.34
+  complex formula zones; its mean confidence 0.94 on MainZone, 0.73 on
+  MarginTextZone, 0.49–0.52 on the formula classes. **On the Marginalien
+  block the manuscript-trained model places 64.3 % of the v1 lines in a
+  MainZone (the printed body), 5.9 % in a MarginTextZone (the notes) and
+  leaves 25.6 % outside every zone** (German print 65.6 / 5.3 %, Latin
+  73.3 / 7.9 %, French 44.1 / 5.4 %); its MainZones cover 30.4 % of a
+  Marginalien page against 42–48 % elsewhere (the final census repeats these
+  zone numbers to the line).
+- **The kraken stage and the end of the run.** 617 pages on the card in 25
+  batches, 20:50:31–00:18:26 (3 h 28 min; 12 to 31 s a page by batch, the
+  Marginalien and test pages the fastest), the card's peak 3,766 MiB in the
+  detect stage and under the guard's limit throughout kraken's, no kill, no
+  page kraken failed, 1,174 "Polygonizer failed on line" warnings (a line
+  whose polygon kraken could not draw); the CPU pass for the four pages wider
+  than twice their height (`00051012_0079`, `00066632_0047`, `00068028_0004`,
+  `1030997721_0081`) was stopped by hand after 46 s so the stage stayed well
+  inside its limit — those four have zones and no pipeline lines. Merge,
+  simplification, the region fix and the line split ran 00:19:29–00:21:06;
+  **617 of 621 pages have final lines**; the results are 2.1 GB, of which the
+  1.8 GB of annotated, mask, binarised and masked images moved to
+  `/mnt/d/leibniz-layout/results-intermediate/` behind symlinks afterwards
+  (C: stood at 25 GB free at the end). Only 21 of the 621 pipeline images are
+  the scan's size (the small scans); every other page's zones and lines were
+  scaled back.
+- **The census — CHECKPOINT C** (`leibniz layout zone-census`, 00:21–00:46;
+  `reports/layout/zone-census.md`, `zone-census-summary.json`,
+  `zone-census-per-page.csv`). **The pipeline's final lines number 43,875
+  against 44,104 v1 lines (0.99; the median page 1.01)**: main zones 39,106,
+  margin zones 4,669, numbering 46, figure 33, formula 21. **Matched one to
+  one by polygon IoU ≥ 0.5: 29,075 pairs, 65.9 % of the v1 lines and 66.3 % of
+  theirs** (32,233 at ≥ 0.3, 24,487 at ≥ 0.7; the pairs' mean IoU 0.77). By
+  block: the Briefwechsel 11,412 of their lines to 9,089 v1 (1.26; 61.7 % of
+  v1 matched), the Handschriften 16,318 to 15,922 (1.02; 79.2 %), LH 35 9,497
+  to 10,629 (0.89; 60.4 %), the Marginalien 3,843 to 5,581 (0.69; 42.5 % of
+  v1, 61.7 % of theirs), her 20 test pages 2,668 to 2,680 (1.00; 74.5 %). **On
+  the Marginalien her pipeline keeps 3,843 lines, 3,656 in MainZones and 178
+  in MarginTextZones, where v1 has 5,581: the lines outside her zones (1,430
+  v1 lines, 25.6 %) are dropped by her last step**, which is the masking and
+  the merge at work, not a second segmenter. What the census does not show
+  is in the report's last section: the zones are the model's output (the
+  card's validation AP 0.91 for MainZone, 0.62 for MarginTextZone, 0.08–0.19
+  for the formula classes), a v1 line inside a figure or formula zone is a
+  line read where there is no running text, the line comparison is one
+  baseline model twice, the sample is drawn by work, and nothing was measured
+  against hand-drawn zones.
+- **Three sentences for the operator's mail to the model's author** (the
+  DQ1 note; nothing sent): "We ran your v2 model (checkpoint_best_ema_v2.pth,
+  threshold 0.4, resolution 1,272) through your eScriptorium pipeline over 621
+  pages of our store — 200 letters, 200 LH pages, 100 LH 35 pages, 100
+  Marginalien pages, your 18 test pages and one named page, all outside your
+  training and validation pages and outside the HTR dataset's pages — on
+  2,000 px copies, because the full scans spill a 6 GB card in rfdetr's mask
+  upsampling. Of our 44,104 v1 lines, 1.6 % lie mostly inside a figure or
+  formula zone (4.0 % in LH 35), 82.7 % in a MainZone and 9.5 % in a
+  MarginTextZone, and the model emits a formula zone on 20 % of the pages and
+  a margin zone on 50 %. Your pipeline's final lines match ours one to one
+  at IoU 0.5 on 66 % of the lines; on the annotated printed books it places
+  64 % of our lines in a MainZone and 6 % in a MarginTextZone and leaves a
+  quarter outside every zone."
+
+### M1 — the print trial (Task 1b) (2026-11-17/18) ✅ the environment · ✅ the zones · ✅ the census · ✅ the sheet rendered · ✅ the OCR · ✅ the CER on the roman half (the operator's 24 lines) · ⏳ the Fraktur half of the sheet · ✅ the report with the decision (a) for roman print
+
+- **Setting.** The M1 prompt's amendment of 13 October and its note of 16
+  November, with the DQ1 note's two changes (the sheet rendered early, the CER
+  pending if no "done" comes); on `desktop-queue-1` after P1 Task 3's run, the
+  store read-only, nothing deployed. The 100 pages are the Marginalien block of
+  the census sample (`reports/marginalia/print-trial-pages.csv`: 100 pages of
+  89 books, 30 German print by the K4 pass, 70 Latin, French, mixed or
+  unknown), the copies the census pipeline read (2,000 px on the long side,
+  linked under `data/print/images-2000`).
+- **The tools** (`tools/print-trial-env.sh`, 20:19–20:25, the VHD grew 573
+  MiB): the venv `data/print/dfine-env` with kraken 7.1.1, dfine-kraken 0.4.4
+  (Apache-2.0, its licence read on GitHub: Open question 29 c answered),
+  torch 2.12.0 from uv's cache; the D-FINE large region model trained on
+  LADaS (`ladas_l.safetensors`, 125,878,904 bytes, MD5
+  `06aa34eacb02fe49642f8838d49501db`, Zenodo 10.5281/zenodo.18715364,
+  Apache-2.0, 37 SegmOnto classes, fetched by curl so no torch process ran
+  beside the census run); Gallicorpora+ (`Gallicorpora+_best.mlmodel`,
+  16,216,786 bytes, SHA-256 `b7261e80…`, release 1.0.0 of the CC0-1.0
+  repository; kraken 7.1 loads the CoreML file, no conversion). YALTAi was
+  not needed. All three are in the registry (`gallicorpora-plus`,
+  `dfine-kraken`, `ladas-dfine-large`), with `REGISTRY_DATE` moved to
+  2026-11-17.
+- **The zones** (`tools/print-trial-run.sh zones`: kraken, batches of 25,
+  cuda:0, 32-true, under the 6 GB scope and the guard): **100 pages in 5 min
+  8 s**, the card's peak 1,856 MiB with Xwayland, the host peak 1,646 MiB, no
+  kill, no failure; PAGE XML under `data/print/zones/`, the coordinates scaled
+  back to the scan for the census. The model emitted 26 classes: MainZone-P
+  129 zones on 44 pages, MainZone-Entry 195 on 11, MainZone-Continued 70 on
+  55, RunningTitleZone 93 on 63, MarginTextZone-Notes (printed marginal
+  notes) 67 on 34, NumberingZone 43 on 42, QuireMarksZone 35 on 28,
+  DropCapitalZone 13 on 13, MusicZone 12 on 12 (a false class, by the
+  looks), StampZone and StampZone-Sticker 29 on 20, DigitizationArtefactZone
+  12 on 12, **MarginTextZone-ManuscriptAddendum, the class for a handwritten
+  addition in a printed margin, 5 zones on 4 pages**; print zones cover
+  34.7 % of a page's area on average, manuscript zones 0.0 %.
+- **The printed-body share** (`leibniz layout print-trial census`,
+  `reports/marginalia/print-trial-per-page.csv`, `-summary.json`): of the
+  **5,581 v1 lines, 3,463 (62.1 %) lie mostly inside a print zone, 2 inside a
+  manuscript zone, 58 in stamps or artefacts and 2,058 (36.9 %) outside every
+  zone** — the German-print pages 56.6 % in print zones, the roman 64.6 %.
+  The IoU of the print lines' union with the print zones' union: mean 0.72,
+  median 0.83 (Fraktur pages 0.68 · 0.84, roman 0.74 · 0.82). **Against
+  PHILIUMM's v2 zones on the same pages: PHILIUMM calls 64.2 % of the lines
+  print (MainZone), LADaS 62.1 %; the two models make the same call on 3,968
+  lines (71.1 %)**: print by both 2,892, outside both 1,075; 647 lines are
+  print to PHILIUMM and outside to LADaS, 338 the reverse; of the 327 lines
+  PHILIUMM puts in a MarginTextZone (the notes), LADaS leaves 275 outside and
+  marks 1 a manuscript addendum; the IoU of the two models' print areas is
+  0.80 on average (mean over pages). So the print layout model finds the printed body about as
+  PHILIUMM's manuscript model does, and does not find Leibniz's notes as a
+  class of its own: the notes are what is left outside the print zones.
+- **The sheet** (`leibniz layout print-trial sheet`): 50 v1 lines inside print
+  zones with at least 15 characters of v1 text, 25 from the German-print pages
+  (Fraktur) and 25 from the others (roman), one line a page a round, seed 0,
+  cut from the full-resolution scans: **`data/print/print-sheet.html`** (33.7
+  MB, the crops inline, a text field each, a button that downloads `ref,
+  type, transcription` as CSV; the v1 reading is not shown). The list is
+  `data/print/print-sheet-lines.csv`. Its path was printed for the operator
+  at 00:27 on 18 November.
+- **The OCR** (`leibniz layout print-trial ocr-input`, then
+  `tools/print-trial-run.sh ocr`): one PAGE XML per page with the v1 lines
+  inside print zones (3,463 lines on 100 pages), Gallicorpora+ run through
+  kraken 7.1.1 on the full-resolution scans, cuda:0, 32-true: **100 pages in
+  16 min 24 s**, the card's peak 1,526 MiB, the host peak 2,805 MiB, no kill,
+  **3,463 lines read, 3,417 of them with text** (`data/print/ocr/`). On the
+  sheet's lines, read by eye and not measured: the roman lines come out as
+  print with the long s and the ligatures where v1 misread letters; the
+  Fraktur lines come out as letter salad from both models.
+- **The CER (18 November, 07:40–07:55).** The operator's "done", verbatim:
+  "done: the CSV is at /mnt/c/Users/evana/Downloads/print-sheet-transcriptions.csv.
+  The 25 roman lines are transcribed; the 25 Fraktur lines are blank, score
+  the roman half and mark Fraktur pending. Conventions: ſ and æ as printed, u
+  and v as printed, & as &, the line-end double hyphen written as "-";
+  abbreviation marks such as ē may be present or not in my lines, so fold them
+  to the plain letter on both sides before scoring. Compute the CER, write the
+  report and the decision, commit, push." The CSV (24 roman lines transcribed,
+  one roman line left blank — a crop that is no line of print — and the 25
+  Fraktur lines blank) is kept as
+  `data/print/transcriptions/print-sheet-transcriptions-2026-11-18.csv`. The
+  fold (`print_trial.fold_print_marks`, both sides, after the `philiumm`
+  policy's NFD): the combining macron, tilde and overline dropped, the
+  hyphenation signs Gallicorpora+ writes (`¬`, `⸗`) read as `-`, the
+  typographic apostrophe as the plain one; nothing else, and the unfolded
+  CER is kept beside it. **Gallicorpora+ on the 24 roman lines: CER 3.56 %
+  (4.34 % without the fold), 9 of the 24 lines exactly right, the worst line
+  10.0 %; v1, the handwriting model, on the same lines: 14.94 % (15.19 %
+  unfolded), no line exactly right** (`data/print/print-cer.json`, per line).
+  **The decision, as the report states it: (a) for roman print — the printed
+  body is read with a print model and shown as such, Gallicorpora+ at 3.6 %
+  CER being under the 10 % mark; the Fraktur half is pending** the operator's
+  transcription of the other 25 lines (`leibniz layout print-trial cer`, then
+  `report`, as before), and the same model read the Fraktur sheet lines as
+  letter salad to the eye, so the Fraktur decision is more likely (c) than
+  (a).
+- **The Fraktur share of the corpus:** the K4 pass calls 6,719 of the 103,626
+  Marginalien pages with a verdict German (6.5 %); German print in these books
+  is Fraktur as a rule, so that is the Fraktur share as far as a page's
+  language says its type; the sample holds 30 German pages on purpose.
+- **Three sentences for the operator's mail to the tools' author** (the DQ1
+  note; nothing sent): "We ran kraken 7.1.1 with your D-FINE large LADaS
+  region model and the Gallicorpora+ print model over 100 pages of Leibniz's
+  annotated printed books (30 in German, Fraktur), read-only beside our
+  store. The LADaS model puts 62 % of our v1 lines inside print zones (IoU
+  0.72 with the printed body) and marks a manuscript addendum on 4 pages, so
+  Leibniz's notes come out as the lines outside its zones; PHILIUMM's
+  manuscript model agrees with it on 71 % of the lines. Gallicorpora+ read
+  3,463 printed-body lines and, on 24 roman lines transcribed by hand, stands
+  at 3.6 % CER (9 lines exactly right) where our handwriting model reads the
+  same lines at 14.9 %; the Fraktur half of the sheet is still to be
+  transcribed."
 
 ### REL1 — the first releases (2026-11-17/18) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 · ✅ Task 3 · ✅ Task 4 · ⏳ the operator's pull request · ⏳ Part B (the operator's desktop) · ⏳ Part C
 
@@ -5814,6 +6268,71 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-11-17 — DQ1 (P1 Task 3 and M1 Task 1b), departures from the prompts,
+  the notes and the preamble.** (1) *`python -m pytest`, not bare `pytest`*,
+  for the baselines and the Finish: two test files import `tests.conftest`,
+  which the bare command cannot find (ARCH1's Divergence 9). (2) *Her
+  `requirements.txt` not installed as pinned*: rfdetr 1.8.0 needs supervision
+  ≥ 0.29 (0.31.7 installed, her pin 0.28.0), and kraken 7.0.3 stands in for
+  7.0.2 because 7.0.2 pins torch ≤ 2.10 and the torch this card is proven on
+  is 2.12.0; everything else as she pins it. (3) *No `git lfs pull`*: only the
+  `.pth` files are LFS, the two v2 checkpoints came from the Hub with the same
+  sizes and digests as the clone's pointers, the v1 checkpoints were not
+  fetched and the one-page v1 smoke test the note permits was not run. (4)
+  *The pipeline read copies downscaled to 2,000 px on the long side, not the
+  cached scans*: rfdetr 1.8.0 upsamples the masks of all 300 queries to the
+  input size before thresholding and a 10–20 megapixel scan spills the 6 GB
+  card into host memory (the guard killed the first pilot, the second crawled
+  at 18 minutes a page); the census scales her zones and lines back to the
+  scan's pixels, per page, and records the factor. (5) *Her step 6 was run as
+  one kraken process per batch of 25 pages, in `16-mixed`, with a CPU pass*
+  for pages wider than twice their height and for any page the card refused
+  — the same command, flags, model and text direction as her
+  `segment_page`, the model loaded once instead of once a page; her default on
+  CUDA is `bf16-mixed`, which this Turing card lacks; her repository is
+  untouched (the driver `tools/philiumm_layout_stages.py` calls her step
+  functions, each stage its own interpreter, the operator's change 4). (6)
+  *The driver wraps rfdetr's `predict` to empty the CUDA cache after each
+  page* and the run sets `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`:
+  a wrapper around a library call, nothing of hers changed. (7) *The model
+  files sit in a runtime root on the VHD* (`data/philiumm/rfdetr-runtime/`,
+  the working directory her relative model path resolves in) instead of in
+  the clone on D:, because reads from D: over the share crawled beside the
+  backup chore's reads; *the results are on the VHD too* (about 2 GB at
+  2,000 px, not the multi-gigabyte outputs the D: rule is for), the scans
+  symlinked as the operator's change 2 says and the 2,000 px copies written
+  on the VHD (503 MiB), C: standing above 25 GB throughout. (8) *The images
+  are named `<work>_<seq>.jpg`*, not by page id: a colon is illegal on the
+  Windows file systems D: is one of, and the pipeline names its outputs by
+  the stem. (9) *The strata*: `page_stats.stratum_heuristic` is NULL on every
+  page, so the fallback is the OAI set — Briefwechsel and Handschriften, 200
+  each, one page a work; the Leibnitiana (12 works, 1,768 pages) and the
+  reconstruction set (28 pages) are not strata, and LH 35 works leave the
+  Handschriften stratum for their own block. (10) *The `rclone check` of the
+  backup chore is restricted to the day's two files*: a hash check of the
+  whole folder reads 105 GB over the drive share. (11) *The registry gained
+  the print trial's tools here* — dfine_kraken (Apache-2.0, read on GitHub),
+  the LADaS D-FINE large model (Apache-2.0) and Gallicorpora+ marked as run —
+  as the M1 note asks, while the two PHILIUMM v2 entries stay with the
+  K3b-prep session as the DQ1 note says; `REGISTRY_DATE` moved to
+  2026-11-17 so the new readings pass the registry's date check. (12) *The
+  print trial's 50 lines are v1 lines inside LADaS print zones with at least
+  15 characters of v1 text*, 25 from German-print pages and 25 from the
+  others, one line a page a round: a rule of this session's, so a crop is a
+  line of print and not a fragment. (13) *The two STATUS entries carry the
+  DQ1 note's names* ("P1 — Task 3, the zone census", "M1 — the print trial
+  (Task 1b)"), not the P1 prompt's "P1 — PHILIUMM cross-checks", whose entry
+  is archived. (14) *Four pages have zones but no pipeline lines*: the four
+  pages wider than twice their height went to the CPU pass, which was stopped
+  by hand after 46 s so the kraken stage stayed inside the six-hour limit (a
+  single wide strip had run over 11 minutes on the CPU in the pilot without
+  finishing); the census counts them as pages without final lines. (15)
+  *The kraken stage ran in `32-true`, not her CUDA default `bf16-mixed`*:
+  the card has no bf16, `16-mixed` saved no memory and ran CPU-bound in the
+  polygonizer at two minutes a page with a topology warning on most lines, so
+  the stage was stopped after seven pages and resumed in fp32 with those
+  seven kept.
+
 - **2026-11-18 — REL1 Part A, departures from the prompt, the operator's
   note of 16 November and the preamble.** (1) *No go waited for* after Task
   0 (the cloud batch note of 17 November, the preamble's clause 6); the
@@ -6607,6 +7126,38 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   gitignored like the rest of `data/`.
 
 ## Next
+
+**DQ1 (2026-11-18): the queue is on `desktop-queue-1` (compare:
+https://github.com/marchofhares/LeibnizLegible/compare/main...desktop-queue-1?expand=1);
+the operator opens and merges the pull request after the PHILIUMM team has
+seen the census numbers (the P1 rule: the repository is public).** Pending
+on the desktop, in the operator's hands: the Fraktur half of the sheet
+`data/print/print-sheet.html` (25 lines; the roman half is scored: Gallicorpora+
+3.56 % CER, v1 14.94 %, decision (a) for roman print); then `uv run leibniz
+layout print-trial cer --transcriptions <the downloaded CSV>` and `uv run
+leibniz layout print-trial report`, which add the Fraktur CER and its decision
+to `reports/marginalia/print-trial.md` — on the same branch if before the
+merge, else on M1's. M1 Tasks 1 to 4 (the classifier, the zones for every
+Marginalien page, the flag, the site) are a later session with this trial's
+numbers as their start. **K3b is the next
+desktop session**; its Task 0 reads the K3b-prep tools (the verdict converter,
+the audit-apply command, the registry entries `philiumm-seg-v2`,
+`philiumm-layout-dataset-v2` and `edition-k2-audit`). From P1 Task 3, for
+later sessions: rerun the census with each later PHILIUMM model
+(`tools/philiumm-layout-env.sh`, `leibniz layout downscale`,
+`tools/philiumm-layout-run.sh`, `leibniz layout zone-census`; the four wide
+pages need a CPU pass with time); the viewer could flag the 1.6 % of v1 lines
+inside figure or formula zones now (the per-page CSV names them); a zones
+table with the SegmOnto type and polygon is the natural store addition once
+M1 Tasks 2–3 add `page_zones`; the Marginalien's printed-body share by two
+models stands at 62–64 % of lines, so M1 Task 1 has its truth; the licence
+change PHILIUMM is considering stays a lawyer-memo item (this project's
+copies were obtained under CC BY 4.0; the v2 model's outputs are this
+project's under the agreement of 15 October). Two things for the desktop:
+C: stands at 25 GB free (the VHD holds 1.8 GB of reusable space after the
+move to D:; a `wsl --shutdown` and an `Optimize-VHD` return it), and the
+global git `credential.helper` names a `mingw64` path that no longer exists —
+the `ucrt64` one works; fix `~/.gitconfig` once.
 
 **REL1 (2026-11-18): Part A is built on `claude/clever-gates-56b0a4` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/clever-gates-56b0a4?expand=1); the operator opens and merges the pull request; nothing was sent, reserved, uploaded or deployed. Part B is the operator's desktop, the runbook below; Part C a short cloud session on a branch of its own after the DOIs exist.** Three things to read before Part B, each a decision of the operator's and none of this session's: Open question 34 (what the model card says about "no NC input"), Open question 35 (the catalogue records inside the record; the creators; the namespace), and whether the verified lines are to be in this first version — if so, K3b's Task 0 write (`leibniz align audit-apply --write`; K3b-prep is merged, #64) comes before step 3, and the open card then counts them and credits the Edition; if not, the card says they follow. The website does not change in Part A or Part B, so there is no staging line; Part C's About rows are the first change a reader sees.
 

@@ -1,0 +1,393 @@
+file,split,kind,status,page_ids,work_ids,width,height,size_agrees,ratio_agrees,note
+8_cod_ms_philos_140_0002,test,goettingen,not-gwlb,,,2153,2506,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0024,test,goettingen,not-gwlb,,,2023,2458,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+LH_35_1_14_0065r,test,shelfmark,matched,00067976:0129,00067976,2032,1897,yes,yes,
+LH_35_1_14_0109v-0108r,test,shelfmark,matched,00067976:0218;00067976:0215,00067976,4069,2747,,,
+LH_35_1_27_0007r-0006v,test,shelfmark,matched,00067989:0013;00067989:0012,00067989,4925,4432,,,
+LH_35_1_3_0023r-0017v,test,shelfmark,matched,00067962:0045;00067962:0034,00067962,4788,4175,,,
+LH_35_1_5_0050r,test,shelfmark,matched,00067964:0099,00067964,5000,4376,no,yes,
+LH_37_3_0090v,test,shelfmark,matched,00068532:0176,00068532,3291,4834,no,no,
+LH_37_3_0098v,test,shelfmark,matched,00068532:0192,00068532,3333,4800,no,no,
+LH_37_3_0104r,test,shelfmark,matched,00068532:0203,00068532,3303,4765,no,no,
+LH_38_0172r,test,shelfmark,matched,00068537:0343,00068537,3497,2183,no,no,
+LH_4_7B_2_0058v-0057r,test,shelfmark,matched,00068646:0116;00068646:0113,00068646,4946,4450,,,
+LH_4_7D_2_0003r,test,shelfmark,matched,00068654:0005,00068654,4822,4244,no,yes,5 pages labelled 3r; the first taken
+LH_4_7D_2_0003v,test,shelfmark,matched,00068654:0006,00068654,4824,4236,no,yes,5 pages labelled 3v; the first taken
+img_LH_35_5_25_1v,test,shelfmark,matched,00068043:0002,00068043,2475,4078,no,no,
+img_LH_35_5_6_13v,test,shelfmark,matched,00068024:0026,00068024,2500,3721,no,no,
+img_LH_35_5_8_3r,test,shelfmark,matched,00068026:0005,00068026,2370,3523,no,no,
+img_LH_35_7_19_6r,test,shelfmark,matched,00068212:0011,00068212,2454,3892,no,no,
+0001_page_12210614_docId_307926,train,escriptorium,unmatched,,,2526,2260,,,no page of 2526×2260
+0002_page_12211178_docId_308071,train,escriptorium,unmatched,,,2522,2256,,,no page of 2522×2256
+0004_page_12394798_docId_313461,train,escriptorium,unmatched,,,2995,4515,,,no page of 2995×4515
+0005_page_12753941_docId_323636,train,escriptorium,unmatched,,,5192,4300,,,no page of 5192×4300
+0006_page_12756560_docId_323673,train,escriptorium,unmatched,,,5262,4279,,,no page of 5262×4279
+0007_page_13005093_docId_329982,train,escriptorium,unmatched,,,1577,1131,,,no page of 1577×1131
+0008_page_13052978_docId_330221,train,escriptorium,unmatched,,,1680,3109,,,no page of 1680×3109
+3r,train,folio,thumbnail-matched,00067962:0005;00067962:0008,00067962,4818,4286,yes,yes,"2 pages of that size | thumbnail distance 00067962:0005 0.0, 00067962:0008 0.0 | 2 registrations of the same scan, all taken"
+8_cod_ms_philos_140_0001,train,goettingen,not-gwlb,,,2153,2506,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0003,train,goettingen,not-gwlb,,,1381,2071,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0004,train,goettingen,not-gwlb,,,1381,2066,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0006,train,goettingen,not-gwlb,,,1381,2066,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0007,train,goettingen,not-gwlb,,,1381,2066,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0008,train,goettingen,not-gwlb,,,1246,1989,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0009,train,goettingen,not-gwlb,,,1970,2453,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0010,train,goettingen,not-gwlb,,,1990,2438,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0012,train,goettingen,not-gwlb,,,1241,1897,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0013,train,goettingen,not-gwlb,,,1241,1897,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0014,train,goettingen,not-gwlb,,,2004,2409,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0015,train,goettingen,not-gwlb,,,2004,2414,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0016,train,goettingen,not-gwlb,,,2004,2433,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0017,train,goettingen,not-gwlb,,,2004,2453,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0018,train,goettingen,not-gwlb,,,2004,2433,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0020,train,goettingen,not-gwlb,,,1560,2159,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0021,train,goettingen,not-gwlb,,,1560,2158,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0022,train,goettingen,not-gwlb,,,2018,2463,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0025,train,goettingen,not-gwlb,,,2023,2458,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0029,train,goettingen,not-gwlb,,,2023,2458,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0037,train,goettingen,not-gwlb,,,1294,1917,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0038,train,goettingen,not-gwlb,,,1936,2414,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0039,train,goettingen,not-gwlb,,,1932,2419,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0042,train,goettingen,not-gwlb,,,1526,2188,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0066,train,goettingen,not-gwlb,,,2028,2496,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+LH_1_1_4_0072r,train,shelfmark,matched,00068281:0139,00068281,1011,1112,yes,yes,
+LH_1_20_0065v-0064r,train,shelfmark,matched,00068378:0130;00068378:0127,00068378,4629,4257,,,
+LH_1_20_0111v-0110r,train,shelfmark,matched,00068378:0222;00068378:0219,00068378,4763,4367,,,
+LH_1_20_0164v-0163r,train,shelfmark,matched,00068378:0328;00068378:0325,00068378,3763,2761,,,
+LH_1_20_0287v-0284r,train,shelfmark,matched,00068378:0574;00068378:0567,00068378,2393,2161,,,
+LH_1_2_1_0001r,train,shelfmark,matched,00068282:0001,00068282,2447,4195,yes,yes,
+LH_1_2_1_0002r,train,shelfmark,matched,00068282:0003,00068282,2502,4186,yes,yes,
+LH_1_2_1_0004r,train,shelfmark,matched,00068282:0007,00068282,2482,4214,yes,yes,
+LH_1_2_1_0004v,train,shelfmark,matched,00068282:0008,00068282,2484,4211,yes,yes,
+LH_1_2_1_0005r,train,shelfmark,matched,00068282:0009,00068282,2464,4136,yes,yes,
+LH_1_2_1_0025r-0024v,train,shelfmark,matched,00068282:0049;00068282:0048,00068282,4946,4382,,,
+LH_1_2_1_0027r,train,shelfmark,matched,00068282:0053,00068282,2474,4194,yes,yes,
+LH_1_3_1_0003r-0002v,train,shelfmark,matched,00068289:0005;00068289:0004,00068289,5000,4192,,,
+LH_1_3_1_0008v-0007r,train,shelfmark,matched,00068289:0016;00068289:0013,00068289,5000,4440,,,
+LH_1_3_4_0008r-0007v,train,shelfmark,matched,00068292:0015;00068292:0014,00068292,4846,4431,,,
+LH_1_3_4_0011r-0010v,train,shelfmark,matched,00068292:0021;00068292:0020,00068292,4831,4416,,,
+LH_1_3_5_0024v-0023r,train,shelfmark,matched,00068296:0048;00068296:0045,00068296,4625,4278,,,
+LH_1_3_7_A_0004v-0003r,train,shelfmark,matched,00068295:0008;00068295:0005,00068295,4785,4377,,,
+LH_1_3_7_C_0001,train,shelfmark,matched,00068299:0001,00068299,4839,4427,no,yes,a folio without a side letter | 2 pages labelled 1; the first taken
+LH_1_3_7_D_0002v-0001r,train,shelfmark,matched,00068300:0004;00068300:0001,00068300,5000,4381,,,
+LH_1_4_1_0001r,train,shelfmark,matched,00068324:0001,00068324,4711,3625,yes,yes,
+LH_1_4_3_0002v-0001r,train,shelfmark,matched,00068326:0004;00068326:0001,00068326,4729,4409,,,
+LH_1_4_3_0004r-0003v,train,shelfmark,matched,00068326:0007;00068326:0006,00068326,4612,4286,,,
+LH_1_4_4_0001v,train,shelfmark,matched,00068327:0002,00068327,1968,2451,yes,yes,
+LH_1_4_7_0012r-0011v,train,shelfmark,matched,00068330:0023;00068330:0022,00068330,4833,4353,,,
+LH_1_4_7_0012v-0011r,train,shelfmark,matched,00068330:0024;00068330:0021,00068330,4830,4368,,,
+LH_1_4_7_0015v-0014r,train,shelfmark,matched,00068330:0030;00068330:0027,00068330,4706,4279,,,
+LH_1_4_8_0016r-0015v,train,shelfmark,matched,00068331:0031;00068331:0030,00068331,4560,4201,,,
+LH_1_6_11_0002r-0001v,train,shelfmark,matched,00068346:0003;00068346:0002,00068346,4085,2891,,,
+LH_1_6_2_0002v-0001r,train,shelfmark,matched,00068337:0004;00068337:0001,00068337,4763,3692,,,
+LH_1_6_4_0002r-0001v,train,shelfmark,matched,00068339:0003;00068339:0002,00068339,4491,4199,,,
+LH_1_6_5_0002v-0001r,train,shelfmark,matched,00068340:0004;00068340:0001,00068340,4565,4270,,,
+LH_1_6_6_0002v-0001r,train,shelfmark,matched,00068341:0004;00068341:0001,00068341,4614,4287,,,
+LH_1_7_5_0065r-0064v,train,shelfmark,matched,00068364:0123;00068364:0122,00068364,4886,4235,,,
+LH_1_7_6_0043r-0042v,train,shelfmark,matched,00068365:0085;00068365:0084,00068365,4820,4396,,,
+LH_2_3_1_0051r-0050v,train,shelfmark,matched,00068398:0101;00068398:0100,00068398,5000,4450,,,
+LH_2_3_1_0054r-0053v,train,shelfmark,matched,00068398:0107;00068398:0106,00068398,5000,4439,,,
+LH_2_3_1_0058r-0057v,train,shelfmark,matched,00068398:0115;00068398:0114,00068398,5000,4445,,,
+LH_35_12_1_0048r,train,shelfmark,matched,00068194:0095,00068194,2782,4484,yes,yes,
+LH_35_12_1_0056r,train,shelfmark,matched,00068194:0111,00068194,2753,4434,yes,yes,
+LH_35_12_1_0057r,train,shelfmark,matched,00068194:0113,00068194,2742,4448,yes,yes,
+LH_35_12_1_0057v,train,shelfmark,matched,00068194:0114,00068194,2735,4451,yes,yes,
+LH_35_12_1_0060r,train,shelfmark,matched,00068194:0119,00068194,4233,3044,yes,yes,
+LH_35_12_1_0108r,train,shelfmark,matched,00068194:0215,00068194,2852,4482,yes,yes,
+LH_35_12_1_0327r,train,shelfmark,matched,00068194:0655,00068194,2973,4486,yes,yes,
+LH_35_12_2_0108r-0107v,train,shelfmark,matched,00068195:0215;00068195:0214,00068195,5000,4265,,,
+LH_35_12_2_0108v-0107r,train,shelfmark,matched,00068195:0216;00068195:0213,00068195,5000,4272,,,
+LH_35_12_2_0156r-0155v,train,shelfmark,matched,00068195:0311;00068195:0310,00068195,5000,4261,,,
+LH_35_12_2_0156v-0155r,train,shelfmark,matched,00068195:0312;00068195:0309,00068195,5000,4246,,,
+LH_35_14_2_0091v,train,shelfmark,matched,00068202:0182,00068202,3031,4554,no,no,
+LH_35_14_2_0092r,train,shelfmark,matched,00068202:0183,00068202,2900,4528,no,no,
+LH_35_14_2_0093v,train,shelfmark,matched,00068202:0186,00068202,2900,4563,no,no,
+LH_35_14_2_0094r,train,shelfmark,matched,00068202:0187,00068202,2900,4625,no,no,
+LH_35_14_2_0095v,train,shelfmark,matched,00068202:0190,00068202,2866,4625,no,no,
+LH_35_14_2_0096r,train,shelfmark,matched,00068202:0191,00068202,2917,4625,no,no,
+LH_35_14_2_0097v,train,shelfmark,matched,00068202:0194,00068202,2926,4642,no,no,
+LH_35_14_2_0099v-0098r,train,shelfmark,matched,00068202:0198;00068202:0195,00068202,4249,3747,,,
+LH_35_14_2_0131v-0130r,train,shelfmark,matched,00068202:0262;00068202:0259,00068202,4199,3772,,,
+LH_35_14_2_0133v-0132r,train,shelfmark,matched,00068202:0266;00068202:0263,00068202,4235,3798,,,
+LH_35_14_2_0134v-0129r,train,shelfmark,matched,00068202:0268;00068202:0257,00068202,4167,3757,,,
+LH_35_15_1_0014r,train,shelfmark,matched,00068203:0027,00066632;00068203,2778,1377,yes,yes,2 works share the key; each is tried for the folio
+LH_35_15_1_0017r,train,shelfmark,matched,00068203:0033,00066632;00068203,2779,1263,yes,yes,2 works share the key; each is tried for the folio
+LH_35_15_6_0021r,train,shelfmark,matched,00068208:0041,00068208,3554,2679,yes,yes,
+LH_35_15_6_0024r,train,shelfmark,matched,00068208:0047,00068208,2764,3782,yes,yes,
+LH_35_15_6_0046v,train,shelfmark,matched,00068208:0094,00068208,4916,4475,yes,yes,
+LH_35_15_6_0048v-0047r,train,shelfmark,matched,00068208:0098;00068208:0095,00068208,4842,4338,,,
+LH_35_1_12_0007r,train,shelfmark,matched,00067971:0013,00067971,1603,1538,yes,yes,
+LH_35_1_12_0015r,train,shelfmark,matched,00067971:0029,00067971,1393,2146,yes,yes,
+LH_35_1_12_0015v,train,shelfmark,matched,00067971:0030,00067971,1401,2149,yes,yes,
+LH_35_1_12_0016r,train,shelfmark,matched,00067971:0031,00067971,1030,1147,yes,yes,
+LH_35_1_14_0024r-0023v,train,shelfmark,matched,00067976:0047;00067976:0046,00067976,4057,2703,,,
+LH_35_1_14_0024v-0023r,train,shelfmark,matched,00067976:0048;00067976:0045,00067976,4050,2698,,,
+LH_35_1_14_0026r-0025v,train,shelfmark,matched,00067976:0051;00067976:0050,00067976,3145,2739,,,
+LH_35_1_14_0064r,train,shelfmark,matched,00067976:0127,00067976,1989,877,yes,yes,
+LH_35_1_14_0064v,train,shelfmark,matched,00067976:0128,00067976,1988,879,yes,yes,
+LH_35_1_14_0066r,train,shelfmark,matched,00067976:0131,00067976,2013,2493,yes,yes,
+LH_35_1_14_0068r,train,shelfmark,matched,00067976:0135,00067976,2428,1259,yes,yes,
+LH_35_1_14_0072v-0071r,train,shelfmark,matched,00067976:0144;00067976:0141,00067976,4799,4344,,,
+LH_35_1_14_0079r-0078v,train,shelfmark,matched,00067976:0157;00067976:0156,00067976,4923,4449,,,
+LH_35_1_14_0079v-0078r,train,shelfmark,matched,00067976:0158;00067976:0155,00067976,4915,4444,,,
+LH_35_1_14_0095r,train,shelfmark,matched,00067976:0189,00067976,1149,918,yes,yes,
+LH_35_1_14_0096v,train,shelfmark,matched,00067976:0192,00067976,1497,1204,yes,yes,
+LH_35_1_14_0098r-0090v,train,shelfmark,matched,00067976:0195;00067976:0180,00067976,4893,4231,,,
+LH_35_1_14_0098v-0090r,train,shelfmark,matched,00067976:0196;00067976:0179,00067976,4892,4226,,,
+LH_35_1_14_0100r,train,shelfmark,matched,00067976:0199,00067976,459,753,yes,yes,
+LH_35_1_14_0101r,train,shelfmark,matched,00067976:0201,00067976,409,1142,yes,yes,
+LH_35_1_14_0101v,train,shelfmark,matched,00067976:0202,00067976,412,1144,yes,yes,
+LH_35_1_14_0103r,train,shelfmark,matched,00067976:0205,00067976,921,1001,yes,yes,
+LH_35_1_14_0103v,train,shelfmark,matched,00067976:0206,00067976,920,998,yes,yes,
+LH_35_1_14_0105r-0104v,train,shelfmark,matched,00067976:0209;00067976:0208,00067976,3415,2603,,,
+LH_35_1_14_0105v-0104r,train,shelfmark,matched,00067976:0210;00067976:0207,00067976,3411,2599,,,
+LH_35_1_14_0106v,train,shelfmark,matched,00067976:0212,00067976,2397,1882,yes,yes,
+LH_35_1_14_0109r-0108v,train,shelfmark,matched,00067976:0217;00067976:0216,00067976,4065,2752,,,
+LH_35_1_1_0020r,train,shelfmark,thumbnail-matched,00067960:0039;00067960:0042,00067960,4905,4524,yes,yes,"no page labelled 20r; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0039 0.0, 00067960:0042 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0022r,train,shelfmark,thumbnail-matched,00067960:0046;00067960:0043,00067960,4952,4430,yes,yes,"no page labelled 22r; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0046 0.0, 00067960:0043 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0022v,train,shelfmark,thumbnail-matched,00067960:0045;00067960:0044,00067960,4956,4416,yes,yes,"no page labelled 22v; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0045 0.0, 00067960:0044 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0024r,train,shelfmark,thumbnail-matched,00067960:0047;00067960:0054,00067960,4995,4303,yes,yes,"no page labelled 24r; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0047 0.0, 00067960:0054 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0024v,train,shelfmark,thumbnail-matched,00067960:0048;00067960:0053,00067960,4999,4285,yes,yes,"no page labelled 24v; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0048 0.0, 00067960:0053 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0025r,train,shelfmark,thumbnail-matched,00067960:0052;00067960:0049,00067960,4964,4312,yes,yes,"no page labelled 25r; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0052 0.0, 00067960:0049 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_1_0025v,train,shelfmark,thumbnail-matched,00067960:0050;00067960:0051,00067960,4966,4326,yes,yes,"no page labelled 25v; 00067960 has no folio labels on its 54 pages | 2 pages of that size in the work | 2 pages of that size | thumbnail distance 00067960:0050 0.0, 00067960:0051 0.0 | 2 registrations of the same scan, all taken"
+LH_35_1_27_0005r-0004v,train,shelfmark,matched,00067989:0009;00067989:0008,00067989,4990,4485,,,
+LH_35_1_27_0005v-0004r,train,shelfmark,matched,00067989:0010;00067989:0007,00067989,5000,4480,,,
+LH_35_1_27_0009r-0008v,train,shelfmark,matched,00067989:0017;00067989:0016,00067989,4865,4381,,,
+LH_35_1_27_0009v-0008r,train,shelfmark,matched,00067989:0018;00067989:0015,00067989,4869,4378,,,
+LH_35_1_27_0010r-0003v,train,shelfmark,matched,00067989:0019;00067989:0006,00067989,4904,4403,,,
+LH_35_1_27_0010v-0003r,train,shelfmark,matched,00067989:0020;00067989:0005,00067989,4902,4400,,,
+LH_35_1_2_14r,train,shelfmark,matched,00067961:0027,00067961,4581,4196,yes,yes,
+LH_35_1_2_6r,train,shelfmark,matched,00067961:0011,00067961,4602,4253,yes,yes,
+LH_35_1_3_0002r-0001v,train,shelfmark,matched,00067962:0003;00067962:0002,00067962,4846,4197,,,
+LH_35_1_3_0002v-0001r,train,shelfmark,matched,00067962:0004;00067962:0001,00067962,4846,4200,,,
+LH_35_1_3_0004r-0003v,train,shelfmark,matched,00067962:0007;00067962:0006,00067962,4812,4287,,,
+LH_35_1_3_0006v-0005r,train,shelfmark,matched,00067962:0012;00067962:0009,00067962,4698,4141,,,
+LH_35_1_3_0018r,train,shelfmark,matched,00067962:0035,00067962,1944,2612,yes,yes,
+LH_35_1_3_0018v,train,shelfmark,matched,00067962:0036,00067962,1944,2613,yes,yes,
+LH_35_1_3_0022r-0021v,train,shelfmark,matched,00067962:0043;00067962:0042,00067962,4797,4086,,,
+LH_35_1_3_0022v-0021r,train,shelfmark,matched,00067962:0044;00067962:0041,00067962,4797,4083,,,
+LH_35_1_3_0023v-0017r,train,shelfmark,matched,00067962:0046;00067962:0033,00067962,4786,4181,,,
+LH_35_1_5_0014r,train,shelfmark,matched,00067964:0027,00067964,2485,2196,yes,yes,
+LH_35_1_5_0050v,train,shelfmark,matched,00067964:0100,00067964,5000,4396,no,yes,
+LH_35_1_5_0052r,train,shelfmark,matched,00067964:0103,00067964,2030,2536,yes,yes,
+LH_35_3A_16_0019r,train,shelfmark,matched,00068229:0037,00068229,2892,4607,no,no,
+LH_35_3A_16_0020r-0019v,train,shelfmark,matched,00068229:0039;00068229:0038,00068229,4225,3751,,,
+LH_35_3A_8_0027r,train,shelfmark,matched,00068221:0053,00068221,2518,2712,yes,yes,
+LH_35_4_12_17_0009r,train,shelfmark,matched,00068009:0017,00068009,4846,4340,yes,yes,the shelfmark's last part (17) dropped
+LH_35_4_20_12_0005v,train,shelfmark,matched,00068017:0012,00068017,2142,2840,yes,yes,the shelfmark's last part (12) dropped
+LH_35_4_20_14_0006v,train,shelfmark,matched,00068017:0014,00068017,2142,2840,yes,yes,the shelfmark's last part (14) dropped
+LH_35_5_2_0006r-0005v,train,shelfmark,matched,00068020:0011;00068020:0010,00068020,5000,4120,,,
+LH_35_5_2_0008r-0007v,train,shelfmark,matched,00068020:0015;00068020:0014,00068020,4159,3628,,,
+LH_35_5_2_0008v-0007r,train,shelfmark,matched,00068020:0016;00068020:0013,00068020,4154,3638,,,
+LH_35_5_2_0009r,train,shelfmark,matched,00068020:0017,00068020,2122,2552,yes,yes,
+LH_37_2_0006r,train,shelfmark,matched,00068531:0011,00068531,1543,2457,no,no,
+LH_37_2_0007r,train,shelfmark,matched,00068531:0013,00068531,903,1954,no,no,
+LH_37_2_0008r,train,shelfmark,matched,00068531:0015,00068531,1897,960,no,no,
+LH_37_2_0009r,train,shelfmark,matched,00068531:0017,00068531,1063,2652,no,no,
+LH_37_2_0010r,train,shelfmark,matched,00068531:0019,00068531,937,1405,no,no,
+LH_37_2_0011r,train,shelfmark,matched,00068531:0021,00068531,983,2274,no,no,
+LH_37_2_0013r,train,shelfmark,matched,00068531:0025,00068531,2469,2800,no,no,
+LH_37_2_0013v,train,shelfmark,matched,00068531:0026,00068531,2468,2766,no,no,
+LH_37_2_0016v,train,shelfmark,matched,00068531:0032,00068531,1783,3017,no,no,
+LH_37_2_0098r,train,shelfmark,matched,00068531:0195,00068531,1240,1947,no,no,
+LH_37_2_0098v,train,shelfmark,matched,00068531:0196,00068531,1227,1920,no,no,
+LH_37_2_0122r,train,shelfmark,matched,00068531:0243,00068531,3293,5160,no,no,
+LH_37_2_0123v,train,shelfmark,matched,00068531:0246,00068531,3253,5160,no,no,
+LH_37_3_0090r,train,shelfmark,matched,00068532:0175,00068532,3337,4800,no,no,
+LH_37_3_0097v,train,shelfmark,matched,00068532:0190,00068532,3293,4800,no,no,
+LH_37_3_0098r,train,shelfmark,matched,00068532:0191,00068532,3373,4813,no,no,
+LH_37_3_0099r,train,shelfmark,matched,00068532:0193,00068532,3360,4787,no,no,
+LH_37_3_0100r,train,shelfmark,matched,00068532:0195,00068532,3346,4760,no,no,
+LH_37_3_0100v,train,shelfmark,matched,00068532:0196,00068532,3334,4774,no,no,
+LH_37_3_0102r,train,shelfmark,matched,00068532:0199,00068532,3293,4773,no,no,
+LH_37_3_0103r,train,shelfmark,matched,00068532:0201,00068532,3291,4788,no,no,
+LH_37_3_0103v,train,shelfmark,matched,00068532:0202,00068532,3269,4766,no,no,
+LH_37_3_0104v,train,shelfmark,matched,00068532:0204,00068532,3291,4777,no,no,
+LH_37_3_0105r,train,shelfmark,matched,00068532:0205,00068532,2915,4628,no,no,
+LH_37_3_0105v,train,shelfmark,matched,00068532:0206,00068532,2938,4617,no,no,
+LH_37_3_0106r,train,shelfmark,matched,00068532:0207,00068532,2938,4618,no,no,
+LH_37_3_0106v,train,shelfmark,matched,00068532:0208,00068532,2914,4640,no,no,
+LH_37_3_0107r,train,shelfmark,matched,00068532:0209,00068532,3292,4800,no,no,
+LH_37_3_0107v,train,shelfmark,matched,00068532:0210,00068532,3292,4789,no,no,
+LH_37_3_0108r,train,shelfmark,matched,00068532:0211,00068532,3291,4789,no,no,
+LH_37_3_0108v,train,shelfmark,matched,00068532:0212,00068532,3326,4777,no,no,
+LH_37_3_0109r,train,shelfmark,matched,00068532:0213,00068532,3303,4788,no,no,
+LH_37_3_0109v,train,shelfmark,matched,00068532:0214,00068532,3246,4788,no,no,
+LH_37_3_0110r,train,shelfmark,matched,00068532:0215,00068532,3268,4788,no,no,
+LH_37_3_0111r,train,shelfmark,matched,00068532:0217,00068532,3303,4789,no,no,
+LH_37_3_0111v,train,shelfmark,matched,00068532:0218,00068532,3269,4788,no,no,
+LH_37_3_0112r,train,shelfmark,matched,00068532:0219,00068532,3326,4777,no,no,
+LH_37_3_0112v,train,shelfmark,matched,00068532:0220,00068532,3292,4766,no,no,
+LH_37_3_0114r,train,shelfmark,matched,00068532:0223,00068532,3292,4765,no,no,
+LH_37_4_0034r,train,shelfmark,matched,00068606:0067,00068606,3829,1097,no,no,
+LH_37_5_0004r,train,shelfmark,matched,00068534:0007,00068534,2960,3818,no,no,
+LH_37_5_0004v,train,shelfmark,matched,00068534:0008,00068534,2880,3782,no,no,
+LH_37_5_0005r,train,shelfmark,matched,00068534:0009,00068534,2983,3863,no,no,
+LH_37_5_0008r,train,shelfmark,matched,00068534:0015,00068534,3531,4011,no,no,
+LH_37_5_0008v,train,shelfmark,matched,00068534:0016,00068534,3509,3943,no,no,
+LH_37_5_0009r,train,shelfmark,matched,00068534:0017,00068534,3154,3920,no,no,
+LH_37_5_0009v,train,shelfmark,matched,00068534:0018,00068534,3280,3943,no,no,
+LH_38_0022r,train,shelfmark,matched,00068537:0043,00068537,2914,3795,no,no,
+LH_38_0024r,train,shelfmark,matched,00068537:0047,00068537,2731,3691,no,no,
+LH_38_0025r,train,shelfmark,matched,00068537:0049,00068537,2914,3977,no,no,
+LH_38_0025v,train,shelfmark,matched,00068537:0050,00068537,2914,3943,no,no,
+LH_38_0139r,train,shelfmark,matched,00068537:0277,00068537,1053,2706,no,no,
+LH_38_0139v,train,shelfmark,matched,00068537:0278,00068537,1067,2706,no,no,
+LH_42_4_1_0001v,train,shelfmark,matched,00051016:0002,00051016,4549,4170,yes,yes,
+LH_42_4_1_0003r,train,shelfmark,matched,00051016:0005,00051016,4536,4170,yes,yes,
+LH_42_4_1_0003v,train,shelfmark,matched,00051016:0006,00051016,4540,4171,yes,yes,
+LH_42_4_1_0005r,train,shelfmark,matched,00051016:0009,00051016,3864,2626,yes,yes,
+LH_42_4_1_0005v,train,shelfmark,matched,00051016:0010,00051016,3866,2622,yes,yes,
+LH_42_4_1_0007r,train,shelfmark,matched,00051016:0013,00051016,2376,4084,yes,yes,
+LH_42_4_1_0007v,train,shelfmark,matched,00051016:0014,00051016,2381,4083,yes,yes,
+LH_42_4_1_0008r,train,shelfmark,matched,00051016:0015,00051016,2388,4087,yes,yes,
+LH_42_4_1_0008v,train,shelfmark,matched,00051016:0016,00051016,2391,4083,yes,yes,
+LH_42_4_1_0011r,train,shelfmark,matched,00051016:0021,00051016,4827,4181,yes,yes,
+LH_42_4_1_0016r,train,shelfmark,matched,00051016:0031,00051016,3876,2623,yes,yes,
+LH_42_4_1_0016v,train,shelfmark,matched,00051016:0032,00051016,3881,2638,yes,yes,
+LH_42_4_1_0033r,train,shelfmark,matched,00051016:0065,00051016,4290,3665,yes,yes,
+LH_42_4_1_0033v,train,shelfmark,matched,00051016:0066,00051016,4296,3668,yes,yes,
+LH_42_4_1_0035r,train,shelfmark,matched,00051016:0069,00051016,4298,3708,yes,yes,
+LH_42_4_1_0039r,train,shelfmark,matched,00051016:0077,00051016,2420,4176,yes,yes,
+LH_42_4_1_0039v,train,shelfmark,matched,00051016:0078,00051016,2424,4169,yes,yes,
+LH_42_4_1_0041v,train,shelfmark,matched,00051016:0082,00051016,2491,4154,yes,yes,
+LH_42_4_1_0045r,train,shelfmark,matched,00051016:0089,00051016,2534,4189,yes,yes,
+LH_42_4_1_0045v,train,shelfmark,matched,00051016:0090,00051016,2539,4185,yes,yes,
+LH_4_1_4d_0002r-0001v,train,shelfmark,matched,00068505:0003;00068505:0002,00068505,3241,2675,,,2 pages labelled 2r; the first taken
+LH_4_5_6_0001r-0002v,train,shelfmark,matched,00068619:0001;00068619:0004,00068619,4525,4228,,,
+LH_4_5_6_0001v-0002r,train,shelfmark,matched,00068619:0002;00068619:0003,00068619,4527,4224,,,
+LH_4_5_7_0001r,train,shelfmark,matched,00068620:0001,00068620,2547,4298,yes,yes,
+LH_4_5_7_0001v,train,shelfmark,matched,00068620:0002,00068620,2552,4301,yes,yes,
+LH_4_5_7_0002r,train,shelfmark,matched,00068620:0003,00068620,2506,4237,yes,yes,
+LH_4_5_7_0003r-0004v,train,shelfmark,matched,00068620:0005;00068620:0008,00068620,4922,4430,,,
+LH_4_5_7_0005r,train,shelfmark,matched,00068620:0009,00068620,2449,4255,yes,yes,
+LH_4_5_7_0005v,train,shelfmark,matched,00068620:0010,00068620,2452,4250,yes,yes,
+LH_4_5_7_0006r,train,shelfmark,matched,00068620:0011,00068620,2480,4225,yes,yes,
+LH_4_6_12a_0001v,train,shelfmark,matched,00068635:0002,00068635,2025,2668,yes,yes,
+LH_4_6_12b_0005r,train,shelfmark,matched,00068636:0009,00068636,2333,4073,no,no,
+LH_4_6_12b_0005v,train,shelfmark,matched,00068636:0010,00068636,2336,4072,no,no,
+LH_4_7B_2_0058r-0057v,train,shelfmark,matched,00068646:0115;00068646:0114,00068646,4949,4456,,,
+LH_4_7B_3_0020r-0019v,train,shelfmark,matched,00068647:0039;00068647:0038,00068647,4983,4621,,,
+LH_4_7B_3_0020v-0019r,train,shelfmark,matched,00068647:0040;00068647:0037,00068647,4978,4635,,,
+LH_4_7B_6_0009v-0010r,train,shelfmark,matched,00068650:0018;00068650:0019,00068650,4578,4251,,,
+LH_4_7B_6_0011r-0012v,train,shelfmark,matched,00068650:0021;00068650:0024,00068650,4584,4266,,,
+LH_4_7C_0107r-0108v,train,shelfmark,matched,00068652:0217;00068652:0220,00068652,4828,4394,,,
+LH_4_7C_0160r-0161v,train,shelfmark,matched,00068652:0323;00068652:0326,00068652,4615,4291,,,
+LH_4_7C_0160v-0161r,train,shelfmark,matched,00068652:0324;00068652:0325,00068652,4619,4286,,,
+LH_4_7D_2_0001r,train,shelfmark,matched,00068654:0001,00068654,4855,4225,no,yes,5 pages labelled 1r; the first taken
+LH_4_7D_2_0001v,train,shelfmark,matched,00068654:0002,00068654,4858,4232,no,yes,5 pages labelled 1v; the first taken
+LH_4_7D_2_0005r,train,shelfmark,matched,00068654:0009,00068654,4880,4251,no,yes,5 pages labelled 5r; the first taken
+LH_4_7D_2_0005v,train,shelfmark,matched,00068654:0010,00068654,4884,4257,no,yes,5 pages labelled 5v; the first taken
+LH_4_7D_2_0007r,train,shelfmark,matched,00068654:0013,00068654,4848,4244,no,yes,5 pages labelled 7r; the first taken
+LH_4_7D_2_0007v,train,shelfmark,matched,00068654:0014,00068654,4852,4259,no,no,5 pages labelled 7v; the first taken
+LH_4_7D_2_0009r,train,shelfmark,matched,00068654:0017,00068654,4844,4237,no,yes,5 pages labelled 9r; the first taken
+LH_4_7D_2_0009v,train,shelfmark,matched,00068654:0018,00068654,4846,4228,no,yes,5 pages labelled 9v; the first taken
+LH_4_7D_2_0011r,train,shelfmark,matched,00068654:0021,00068654,4888,4253,no,yes,5 pages labelled 11r; the first taken
+LH_4_7D_2_0011v,train,shelfmark,matched,00068654:0022,00068654,4891,4264,no,yes,5 pages labelled 11v; the first taken
+LH_4_7D_2_0013r,train,shelfmark,matched,00068654:0025,00068654,4893,4258,no,yes,4 pages labelled 13r; the first taken
+LH_4_7D_2_0013v,train,shelfmark,matched,00068654:0026,00068654,4895,4249,no,yes,4 pages labelled 13v; the first taken
+LH_4_7D_2_0015r,train,shelfmark,matched,00068654:0029,00068654,4858,4272,no,yes,4 pages labelled 15r; the first taken
+LH_4_7D_2_0015v,train,shelfmark,matched,00068654:0030,00068654,4861,4286,no,yes,4 pages labelled 15v; the first taken
+LH_4_7D_2_0017r,train,shelfmark,matched,00068654:0033,00068654,4895,4259,no,yes,4 pages labelled 17r; the first taken
+LH_4_7D_2_0017v,train,shelfmark,matched,00068654:0034,00068654,4899,4260,no,yes,4 pages labelled 17v; the first taken
+LH_4_7D_2_0019r,train,shelfmark,matched,00068654:0037,00068654,4866,4222,no,no,4 pages labelled 19r; the first taken
+LH_4_7D_2_0019v,train,shelfmark,matched,00068654:0038,00068654,4870,4215,no,no,4 pages labelled 19v; the first taken
+LH_4_7D_2_0021r,train,shelfmark,matched,00068654:0079,00068654,4851,4257,no,no,3 pages labelled 21r; the first taken
+LH_4_7D_2_0021v,train,shelfmark,matched,00068654:0080,00068654,4853,4269,no,no,3 pages labelled 21v; the first taken
+LH_4_7D_2_0023v,train,shelfmark,matched,00068654:0084,00068654,4951,4282,no,yes,3 pages labelled 23v; the first taken
+LH_4_7D_2_0025r,train,shelfmark,matched,00068654:0087,00068654,4843,4242,no,yes,3 pages labelled 25r; the first taken
+LH_4_7D_2_0025v,train,shelfmark,matched,00068654:0088,00068654,4847,4256,no,yes,3 pages labelled 25v; the first taken
+LH_4_7D_2_0027r,train,shelfmark,matched,00068654:0091,00068654,4855,4263,no,no,3 pages labelled 27r; the first taken
+LH_4_7D_2_0027v,train,shelfmark,matched,00068654:0092,00068654,4859,4253,no,no,3 pages labelled 27v; the first taken
+LH_4_7D_2_0029r,train,shelfmark,matched,00068654:0095,00068654,4884,4284,no,no,3 pages labelled 29r; the first taken
+LH_4_7D_2_0029v,train,shelfmark,matched,00068654:0096,00068654,4888,4274,no,no,3 pages labelled 29v; the first taken
+LH_4_8_0073r-0072v,train,shelfmark,matched,00068703:0145;00068703:0144,00068703,4195,3725,,,
+LH_4_8_0073v-0072r,train,shelfmark,matched,00068703:0146;00068703:0143,00068703,4193,3739,,,
+img_LH_35_14_2_20v,train,shelfmark,matched,00068202:0040,00068202,2400,3381,no,no,
+img_LH_35_14_2_21r,train,shelfmark,matched,00068202:0041,00068202,2401,3381,no,no,
+img_LH_35_14_2_21v,train,shelfmark,matched,00068202:0042,00068202,2399,3394,no,no,
+img_LH_35_14_2_22r,train,shelfmark,matched,00068202:0043,00068202,2390,3346,no,no,
+img_LH_35_14_2_22v,train,shelfmark,matched,00068202:0044,00068202,2391,3337,no,no,
+img_LH_35_14_2_23r,train,shelfmark,matched,00068202:0045,00068202,2392,3337,no,no,
+img_LH_35_14_2_23v,train,shelfmark,matched,00068202:0046,00068202,2390,3346,no,no,
+img_LH_35_14_2_66r,train,shelfmark,matched,00068202:0131,00068202,2424,4045,no,no,
+img_LH_35_14_2_67v,train,shelfmark,matched,00068202:0134,00068202,2424,4045,no,no,
+img_LH_35_5_16_1r,train,shelfmark,matched,00068034:0001,00068034,1923,2265,no,no,
+img_LH_35_5_16_1v,train,shelfmark,matched,00068034:0002,00068034,1924,2271,no,no,
+img_LH_35_5_16_2v,train,shelfmark,matched,00068034:0004,00068034,1922,2265,no,no,
+img_LH_35_5_16_3r,train,shelfmark,matched,00068034:0005,00068034,2377,2233,no,no,
+img_LH_35_5_16_3v,train,shelfmark,matched,00068034:0006,00068034,2382,2225,no,no,
+img_LH_35_5_25_1r,train,shelfmark,matched,00068043:0001,00068043,2474,4092,no,no,
+img_LH_35_5_25_2r,train,shelfmark,matched,00068043:0003,00068043,2475,4078,no,no,
+img_LH_35_5_25_2v,train,shelfmark,matched,00068043:0004,00068043,2474,4092,no,no,
+img_LH_35_5_25_4r,train,shelfmark,matched,00068043:0007,00068043,2498,3886,no,no,
+img_LH_35_5_25_4v,train,shelfmark,matched,00068043:0008,00068043,2500,3880,no,no,
+img_LH_35_5_25_9v_d,train,shelfmark,matched,00068043:0018,00068043,2447,4117,no,no,the right half of an opening
+img_LH_35_5_6_10v,train,shelfmark,matched,00068024:0020,00068024,2435,3752,no,no,
+img_LH_35_5_6_11r,train,shelfmark,matched,00068024:0021,00068024,2436,3752,no,no,
+img_LH_35_5_6_11v,train,shelfmark,matched,00068024:0022,00068024,2434,3770,no,no,
+img_LH_35_5_6_12r,train,shelfmark,matched,00068024:0023,00068024,2500,3721,no,no,
+img_LH_35_5_6_12v,train,shelfmark,matched,00068024:0024,00068024,2500,3723,no,no,
+img_LH_35_5_6_13r,train,shelfmark,matched,00068024:0025,00068024,2500,3723,no,no,
+img_LH_35_5_6_1r,train,shelfmark,matched,00068024:0001,00068024,2411,3612,no,no,
+img_LH_35_5_6_1v,train,shelfmark,matched,00068024:0002,00068024,2412,3595,no,no,
+img_LH_35_5_6_2r,train,shelfmark,matched,00068024:0003,00068024,2413,3595,no,no,
+img_LH_35_5_6_2v,train,shelfmark,matched,00068024:0004,00068024,2411,3612,no,no,
+img_LH_35_5_8_2r,train,shelfmark,matched,00068026:0003,00068026,2372,3516,no,no,
+img_LH_35_5_8_2v,train,shelfmark,matched,00068026:0004,00068026,2369,3523,no,no,
+img_LH_35_5_8_3v,train,shelfmark,matched,00068026:0006,00068026,2371,3516,no,no,
+img_LH_35_5_9_1r,train,shelfmark,matched,00068027:0001,00068027,2242,3749,no,no,
+img_LH_35_5_9_1v,train,shelfmark,matched,00068027:0002,00068027,2243,3767,no,no,
+img_LH_35_5_9_2r,train,shelfmark,matched,00068027:0003,00068027,2244,3767,no,no,
+img_LH_35_5_9_2v,train,shelfmark,matched,00068027:0004,00068027,2242,3749,no,no,
+img_LH_35_7_19_3r,train,shelfmark,matched,00068212:0005,00068212,2435,3866,no,no,
+img_LH_35_7_19_3v,train,shelfmark,matched,00068212:0006,00068212,2436,3878,no,no,
+img_LH_35_7_19_4r,train,shelfmark,matched,00068212:0007,00068212,2437,3878,no,no,
+img_LH_35_7_19_4v,train,shelfmark,matched,00068212:0008,00068212,2435,3866,no,no,
+img_LH_35_7_19_5r,train,shelfmark,matched,00068212:0009,00068212,2452,3903,no,no,
+img_LH_35_7_19_5v,train,shelfmark,matched,00068212:0010,00068212,2453,3892,no,no,
+img_LH_35_7_19_6v,train,shelfmark,matched,00068212:0012,00068212,2452,3903,no,no,
+img_LH_35_8_1_2v,train,shelfmark,matched,00068096:0004,00068096,2643,4035,no,no,
+img_LH_35_8_1_4r,train,shelfmark,matched,00068096:0007,00068096,2478,3913,no,no,
+img_LH_35_8_1_4v,train,shelfmark,matched,00068096:0008,00068096,2489,3905,no,no,
+img_LH_35_8_1_6v,train,shelfmark,matched,00068096:0012,00068096,2430,3872,no,no,
+8_cod_ms_philos_140_0019,valid,goettingen,not-gwlb,,,2004,2453,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+8_cod_ms_philos_140_0057,valid,goettingen,not-gwlb,,,1255,2048,,,"Göttingen, Cod. Ms. philos. 140: not a GWLB scan"
+LH_35_12_1_0058r,valid,shelfmark,matched,00068194:0115,00068194,2768,4467,yes,yes,
+LH_35_12_1_0060v,valid,shelfmark,matched,00068194:0120,00068194,4235,3035,yes,yes,
+LH_35_14_2_0101v-0100r,valid,shelfmark,matched,00068202:0202;00068202:0199,00068202,4201,3744,,,
+LH_35_15_6_0048r-0047v,valid,shelfmark,matched,00068208:0097;00068208:0096,00068208,4846,4331,,,
+LH_35_1_14_0096r,valid,shelfmark,matched,00067976:0191,00067976,1494,1202,yes,yes,
+LH_35_1_14_0100v,valid,shelfmark,matched,00067976:0200,00067976,457,755,yes,yes,
+LH_35_1_27_0007v-0006r,valid,shelfmark,matched,00067989:0014;00067989:0011,00067989,4925,4430,,,
+LH_35_1_2_12v,valid,shelfmark,matched,00067961:0024,00067961,4591,4199,yes,yes,
+LH_35_1_5_0013r,valid,shelfmark,matched,00067964:0025,00067964,2388,2081,yes,yes,
+LH_35_1_5_0013v,valid,shelfmark,matched,00067964:0026,00067964,2381,2077,yes,yes,
+LH_35_1_5_0052v,valid,shelfmark,matched,00067964:0104,00067964,2024,2530,yes,yes,
+LH_35_5_2_0006v-0005r,valid,shelfmark,matched,00068020:0012;00068020:0009,00068020,5000,4117,,,
+LH_37_2_0009v,valid,shelfmark,matched,00068531:0018,00068531,1086,2652,no,no,
+LH_37_2_0016r,valid,shelfmark,matched,00068531:0031,00068531,1806,3040,no,no,
+LH_37_3_0097r,valid,shelfmark,matched,00068532:0189,00068532,3294,4787,no,no,
+LH_37_3_0099v,valid,shelfmark,matched,00068532:0194,00068532,3267,4800,no,no,
+LH_37_3_0101r,valid,shelfmark,matched,00068532:0197,00068532,3347,4813,no,no,
+LH_37_3_0101v,valid,shelfmark,matched,00068532:0198,00068532,3293,4773,no,no,
+LH_37_3_0102v,valid,shelfmark,matched,00068532:0200,00068532,3293,4773,no,no,
+LH_37_3_0110v,valid,shelfmark,matched,00068532:0216,00068532,3268,4800,no,no,
+LH_37_3_0113r,valid,shelfmark,matched,00068532:0221,00068532,3257,4800,no,no,
+LH_37_3_0113v,valid,shelfmark,matched,00068532:0222,00068532,3280,4811,no,no,
+LH_37_3_0114v,valid,shelfmark,matched,00068532:0224,00068532,3291,4777,no,no,
+LH_37_5_0005v,valid,shelfmark,matched,00068534:0010,00068534,3086,3909,no,no,
+LH_42_4_1_0001r,valid,shelfmark,matched,00051016:0001,00051016,4546,4184,yes,yes,
+LH_42_4_1_0014r,valid,shelfmark,matched,00051016:0027,00051016,1120,828,yes,yes,
+LH_42_4_1_0018r,valid,shelfmark,matched,00051016:0035,00051016,3866,2629,yes,yes,
+LH_4_5_7_0002v,valid,shelfmark,matched,00068620:0004,00068620,2506,4236,yes,yes,
+LH_4_5_7_0003v-0004r,valid,shelfmark,matched,00068620:0006;00068620:0007,00068620,4925,4423,,,
+LH_4_7B_6_0011v-0012r,valid,shelfmark,matched,00068650:0022;00068650:0023,00068650,4588,4262,,,
+LH_4_7C_0107v-0108r,valid,shelfmark,matched,00068652:0218;00068652:0219,00068652,4830,4380,,,
+LH_4_7D_2_0023r,valid,shelfmark,matched,00068654:0083,00068654,4948,4289,no,yes,3 pages labelled 23r; the first taken
+img_LH_35_14_2_20r,valid,shelfmark,matched,00068202:0039,00068202,2399,3394,no,no,
+img_LH_35_5_16_2r,valid,shelfmark,matched,00068034:0003,00068034,1924,2271,no,no,
+img_LH_35_5_25_3v,valid,shelfmark,matched,00068043:0006,00068043,2547,3911,no,no,
+img_LH_35_5_25_8r,valid,shelfmark,matched,00068043:0015,00068043,2024,2588,yes,yes,
+img_LH_35_5_25_9v_g,valid,shelfmark,matched,00068043:0018,00068043,2447,4117,no,no,the left half of an opening
+img_LH_35_5_6_10r,valid,shelfmark,matched,00068024:0019,00068024,2434,3770,no,no,

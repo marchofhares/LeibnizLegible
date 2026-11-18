@@ -1240,3 +1240,644 @@ If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
 does not apply; the prompt carries the game's conventions; no other session
 runs on that repository today.
 ~~~~
+
+### Phase DQ1 — the desktop read-only queue: the backup chore, P1 Task 3 (the zone census) and M1's print trial (run 2026-11-17)
+
+_Run on the operator's desktop on `desktop-queue-1`, under the session
+preamble of 19 October as updated on 21 October and 16 November (printed
+first), the operator's note of 17 November for the queue (which wins over the
+notes below), the P1 prompt with its operator's note of 16 November, and the
+M1 prompt with its amendment of 13 October and its operator's note of 16
+November; everything was given together and is printed below verbatim. The
+go of 17 November and its four changes are recorded in `STATUS.md` (the P1 entry)._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4; and 16 November in one, clause 8,
+the archive files. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+8. The archive (16 November). Once ARCH1 is merged, STATUS-archive.md holds
+   the Current state and Phase log entries dated before 19 October and
+   PROMPTS-archive.md every prompt already run; STATUS.md and PROMPTS.md
+   keep one pointer line in each emptied place. A prompt that names an
+   archived entry means the archived text: open the archive file for it.
+   Append nothing to the archive files; new entries and prompts go to
+   STATUS.md and PROMPTS.md as before. Until ARCH1 is merged the files are
+   as they were and this clause is void.
+
+OPERATOR'S NOTE, 17 November 2026: the desktop read-only queue, DQ1. Read it
+with the preamble above and the two prompts and two notes that follow it;
+where they differ, this note wins, over the branch names in both notes too.
+
+What this session is. One desktop session that runs, in this order: (0) the
+backup chore, if a copy is due; (1) P1 Task 3, the zone census with
+PHILIUMM's v2 segmentation model, under the P1 prompt and its operator's
+note of 16 November; (2) M1's print trial, Task 1b alone, under the M1
+prompt, its amendment of 13 October and its operator's note of 16 November.
+The store is read-only throughout: nothing here writes to
+data/inventory.sqlite; if a step would, stop and say so. Nothing is
+deployed, sent or merged.
+
+Branch: desktop-queue-1, created from main as the preamble says, one branch
+for the whole queue (not philiumm-layout-census, not marginalia-print-trial).
+Two STATUS.md entries, "P1 — Task 3, the zone census" and "M1 — the print
+trial (Task 1b)", each kept current after every task so that a fresh session
+can take over with `claude --continue`; both prompts, both notes and this
+note appended to PROMPTS.md once, under "Follow-up phases (2026-10)".
+
+One go. Task 0 is one combined pre-flight: the clean tree and the branch;
+nvidia-smi (nothing on the GPU); df -h /mnt/c /mnt/d; the baselines in
+.venv-w3 and .venv-k1; whether git lfs is installed; whether the backup is
+due (the newest copy under /mnt/d/leibniz-backups/ and in r2backup against
+30 October, K4's write); the plan with durations. Report it and wait for one
+"go". After it, proceed without asking for: the installs the two prompts
+name, each into its own environment under data/ (never .venv, never the
+project's dependencies): her pipeline's Python 3.12 environment, git lfs
+through apt if missing, the dfine_kraken or YALTAi environment under
+data/print/; downloads up to 5 GB in all (the LFS models, the v2
+checkpoints, the page images); jobs up to six hours each, under nohup with a
+log under logs/, polled. Stop and ask for: anything over those limits;
+anything that would write to the store; a rental; an apt package other than
+git-lfs; anything the prompts did not foresee. Claude Code's own permission
+prompts are the operator's to answer as they come.
+
+0. The backup chore, only if due: the four lines of the chore (a read-only
+   SQLite backup to /mnt/d/leibniz-backups/inventory-YYYY-MM-DD.sqlite,
+   rclone copy to r2backup:leibniz-backups, rclone check --one-way) with
+   today's date, under nohup with a log, the copy first; it reads only and
+   runs beside everything below; report its `rclone check` line when it
+   ends. If a copy is current, say so and skip.
+1. P1 Task 3 as its note says, through checkpoint C and its Finish, with two
+   changes: commit and push after every task (not only at the end), and
+   leave the two registry entries (philiumm-seg-v2, philiumm-layout-dataset-v2)
+   to the K3b-prep cloud session running today; name them in the STATUS
+   entry instead. The three sentences for the model's author go into the
+   STATUS entry and the final summary.
+2. M1's print trial as its note says, with two changes: render the sheet of
+   50 printed lines early, as soon as the print zones are known, print its
+   path and continue with everything that needs no transcription (zones per
+   class, the print-body share, the IoU of the v1 lines with the print
+   zones, the Fraktur share, the tools' licences into the registry); when
+   the operator pastes "done", compute the CER and finish the report; if no
+   "done" has come when everything else is done, write the report with the
+   CER marked pending and the exact command that computes it, and finish.
+3. Finish: ruff + pytest; both STATUS entries complete (what ran, the
+   numbers, what is pending); "Next" updated (K3b is the next desktop
+   session; its Task 0 reads the K3b-prep tools); push desktop-queue-1;
+   print the compare URL and a ten-line summary. Do not merge.
+
+Memory and disk, the rule of 26 October for every job: its expected host
+memory from a pilot measured with /usr/bin/time -v, under 6 GB, run under
+systemd-run --scope -p MemoryMax=6G, one torch process at a time, four
+loader workers at most, nothing else of yours beside it. Her pipeline's
+clone, its environment, the models and the 600 images go under
+/mnt/d/leibniz-layout/ (symlinked from data/philiumm/ as K3 did for its
+models) unless df -h /mnt/c shows more than 25 GB free; the print trial's
+environment the same under /mnt/d/leibniz-print/; state the expected disk
+before each write. If the machine or the session dies, the operator resumes
+with `claude --continue`; read STATUS.md's two entries and the logs first and
+continue from the last completed task.
+
+Phase P1 — PHILIUMM cross-checks: their aligner sample, the A VI,4 cross-comparison,
+and a layout-zone census. One local session on the operator's desktop (WSL2
+Ubuntu), with the data, the store and the GPU at hand.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md. If this prompt conflicts with the repo, the repo + STATUS.md
+win; record the divergence in STATUS.md. Write the "P1 — PHILIUMM cross-checks"
+entry in STATUS.md after every task. If STATUS.md already carries a P1 entry,
+continue from its first unfinished task; if that entry says the branch was
+merged, create `philiumm-layout-census` from main and continue there.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible, the one the C1 corpus run, the C2 mint and W3 used.
+Facts, to verify in Task 0 rather than assume:
+- data/inventory.sqlite is the MASTER store (16 GB: 13.5M v1 lines, 297k
+  gt_lines). Open it read-only only: `uv run leibniz …` commands open it
+  mode=ro; your own Python uses a `file:…?mode=ro` URI. Never write to it, never
+  VACUUM or move it, never delete anything under data/. This phase writes
+  nothing to the store.
+- The page-image cache is /mnt/d/leibniz-images (the D: drive); the runbooks
+  pass it as `--images /mnt/d/leibniz-images`, and pages.local_path is relative
+  to that root (see align/audit.py attach_images).
+- `.venv` is the pipeline environment (kraken, torch with CUDA): never run
+  `uv sync` against it and never install into it. Use the side environment W3
+  made, `.venv-w3` (web, gt and release extras; gt brings Pillow for crops):
+  export UV_PROJECT_ENVIRONMENT=.venv-w3 in your shell for every `uv` command.
+  This phase adds no Python dependency to the project; PHILIUMM's pipeline gets
+  its own environment under data/philiumm/ (Task 3).
+- The GPU is a GTX 1660 Ti (6 GB) reachable from WSL2. Task 3 may use it;
+  nothing else here needs it.
+- Long jobs run under nohup with a log under logs/ (gitignored); poll the log,
+  print its tail when done. Ask the operator for a go before: cloning and
+  installing their pipeline, running it, a download over 1 GB, a job expected
+  to run over an hour, and installing any software (apt, npm).
+- Every result lives in reports/philiumm/ and reports/layout/ as small
+  committed files (Markdown, JSON, CSV of at most a few thousand rows),
+  rendered by code from data, prose templated. Bulky artefacts (downloads,
+  crops, HTML sheets, models, full CSVs) go under data/ (gitignored) and are
+  described, not committed. Never write a number you did not produce.
+- The operator merges, and only after the numbers have been shared with the
+  PHILIUMM team: the repo is public, so a merge is a publication. You push the
+  branch and hand over; you never merge. Nothing is deployed. Branch:
+  `philiumm-crosschecks`, created from main.
+- Their two GitLab repositories have no licence file, and on 2026-10-06 they
+  said they are considering CC BY-NC for their dataset and models as well. Read
+  their code, run their pipeline locally under data/, copy nothing from either
+  repository into this one, and record the commit SHAs you used.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+1. `git status --porcelain` shows nothing but the operator's own untracked
+   files (logs, *.log, resume-run.sh, .python-version, reports/gt-audit/
+   gt-audit.html and the like; leave them alone). `git rev-parse --abbrev-ref
+   HEAD` is main; `git pull --ff-only origin main`; confirm the remote.
+2. `df -h data /mnt/d`; `uv --version`; `git lfs version` (Task 3 needs it;
+   if missing, ask before `sudo apt-get install -y git-lfs`); `nvidia-smi`.
+3. Baseline in .venv-w3: `uv run ruff check .`, `uv run ruff format --check .`,
+   `uv run pytest -q`. Record the counts.
+4. Ask the operator two things and wait: whether PHILIUMM's new RF-DETR model
+   has been published (the gate before Task 3), and whether Task 3 should run
+   on the current bundled model regardless, for the 13 October call.
+5. Print a short plan with the steps you expect, their durations and what
+   needs a go, and wait for the operator's "go".
+
+## Background (all you need)
+The ERC PHILIUMM project (David Rabouin, Denisa-Florina Bumba; Laboratoire SPHERE,
+Université Paris Cité – CNRS) built the Leibniz HTR model this project runs
+(FoNDUE-GD_v2_ft_Leibniz, Zenodo 10.5281/zenodo.21457538, CC BY 4.0 as obtained)
+and the baseline segmentation model of the v1 corpus run (Zenodo
+10.5281/zenodo.21537859, CC BY 4.0). In an email exchange from 2026-09-28 they
+offered to collaborate; Denisa pointed to three things (below); she and David
+then judged the 200-line ground-truth audit sheet and returned it on
+2026-10-07 (scored in a separate session, not here); and a call is set for
+2026-10-13. The owner brings three cross-checks of their three things to that
+call. On 2026-10-07 David also noted that their model was not trained on
+printed material (the Marginalien), on hands other than Leibniz's, or on
+Kurrent; Task 3's sample takes the first of these into account.
+1. Their alignment code (PASSIM `seriatim --linewise` + a filter + a sliding-window
+   second pass):
+   https://gitlab.com/eman8/scripts/htr-ocr/alignement-verite-de-terrain-et-transcriptions
+   (branch main; raw files at .../-/raw/main/<path>). Worked example in the repo:
+   GT/LH_1_3_4_0001-0002_1.txt (edition reading text for LH I 3,4 Bl. 1–2, from
+   A VI,4); HTR/LH_1_3_4_0002r-0001v.xml and HTR/LH_1_3_4_0002v-0001r.xml (PAGE XML
+   with HTR lines; each image is an opening with two folios); htr_replaced_gt/ (the
+   same files with aligned GT written into each line's <Unicode>, blank where
+   nothing aligned); alignment_report.csv with columns
+   filename,nb_htr_lines,nb_gt_aligned,pct_gt_aligned,nb_low_conf,pct_low_conf,
+   nb_ratio_too_low,pct_ratio_too_low,nb_ratio_too_high,pct_ratio_too_high,
+   nb_no_alignment,pct_no_alignment,nb_window_passages,nb_fallback_lines.
+   Their totals on the sample, read from that committed CSV: 257 HTR lines, 230
+   aligned (89.5 %). Settings: the README's defaults are conf_threshold 0.0,
+   min_token_ratio 0.4, max_token_ratio 2.5 and min_sim 0.5, and its usage
+   example runs --conf_threshold 0.7; the dataset card states the noisy split was
+   filtered at Levenshtein ≥ 0.7. Treat 0.7 as the comparable per-line threshold
+   and say where each number comes from; do not state any other setting without
+   a source. Record the commit SHA you fetched.
+2. Their dataset, Hugging Face DenisaBumba/htr_leibniz_dataset_v1 (CC BY 4.0 as
+   obtained; the former name DenisaB/… redirects to it; Zenodo twin
+   10.5281/zenodo.21622297, whose data.zip is 4.2 GB, do not fetch it).
+   train/noisy/ = 735 PAGE XML + JPG pages whose lines carry edition text aligned
+   from A VI,4 by the code above (blank <Unicode> where unaligned; 43,372 aligned
+   lines); train/clean/ = 248 hand-corrected pages; val/ = 27 pages (used by this
+   project's B1 reproduction). The Hub lists 1,966 files under train/ and 54
+   under val/, consistent with those counts. Names are shelfmark + folio:
+   LH_1_12_2_0124r.xml = LH I 12, 2 Bl. 124r; LH_1_20_0063r-0062v.xml = an
+   opening showing 63r and 62v. List files via
+   https://huggingface.co/api/datasets/DenisaBumba/htr_leibniz_dataset_v1 (the
+   siblings array); fetch with
+   https://huggingface.co/datasets/DenisaBumba/htr_leibniz_dataset_v1/resolve/main/<path>.
+   Only XML files are needed. Update HF_DATASET in src/leibniz/htr/artifacts.py
+   and its attribution line to the new name. The model this project runs trained
+   on the noisy and clean pages, so those 1,010 pages must be excluded from any
+   future evaluation set (Phase C3).
+3. Their layout pipeline:
+   https://gitlab.com/eman8/scripts/htr-ocr/scripts-pour-le-pretraitement-des-corpus-pour-escriptorium
+   (branch main; models in Git LFS: `git lfs install`, clone, `git lfs pull`).
+   The README gives two installation paths; the Linux one is a single Python 3.12
+   environment (supervision requires 3.12) with `pip install -r requirements.txt`
+   (rfdetr, supervision, kraken 7), marked "should work, not tested"; a uv venv
+   is an acceptable substitute for their conda command. Run:
+   `python main_pipeline.py --input <images> --output <results> --config
+   config_local.json` (no API key; the local config names their last best model
+   and a detection confidence of 0.4). Steps: RF-DETR zone prediction (MainZone,
+   MarginTextZone, DigitizationArtefactZone, GraphicZone-figure, NumberingZone;
+   formula classes GraphicZone-formula{,-inline,-strikethrough,-complex} masked if
+   emitted), COCO → PAGE XML regions (03_regions_xml), masks over figure and
+   formula zones, binarisation, masked image, Kraken baselines inside text zones
+   (06_baselines_and_htr), merge, polygon simplification, overlap fixes, line
+   splitting; final PAGE XML in 10_fixed_lines. Bundles
+   models/segmentation/baselines/best_0.4750.safetensors, apparently the same
+   checkpoint as this project's v1 segmenter (blla_ft_leibniz_v1_0.4750): verify
+   by checksum, and if so the only difference from v1 lines is masking plus
+   region merge. Denisa expects to publish a new RF-DETR model, fine-tuned on
+   corrected formula polygons and compared with D-FINE, by mid to late October
+   2026; Task 3 is gated on it unless the operator said otherwise in Task 0.
+
+## Task 1 — This project's aligner on their sample (needs no local data)
+- Add src/leibniz/align/pagexml.py: PAGE XML TextLines in reading order (region
+  order, then line order) with id, Coords polygon, Baseline, and <Unicode> text
+  (may be empty). Offline test on a trimmed fixture.
+- Fetch the sample files (cache-first, polite UA) into data/philiumm/sample/.
+- Run align_piece (src/leibniz/align/align.py; inputs HtrLine(ref, text)) with the
+  full GT text against each HTR file separately with free_edition_ends=True,
+  mirroring their per-file run; also try the two page concatenation orders and
+  report the best. Use the default threshold and also a threshold you argue is
+  comparable to their 0.7 rule.
+- Produce their CSV columns from this project's result (nb_gt_aligned = minted,
+  nb_no_alignment = declined, filter columns N/A) and a line-by-line comparison
+  against their htr_replaced_gt output with this project's normalizer
+  (src/leibniz/align/normalize.py) and folded similarity (src/leibniz/align/dp.py,
+  as audit.py uses it): both aligned and same text (≥ 0.9), both aligned but
+  different, this project only, theirs only, neither. Print the differing pairs.
+- CLI `leibniz align philiumm-sample`; report reports/philiumm/alignment-sample.md.
+  Commit. CHECKPOINT A: update the STATUS.md entry and commit.
+
+## Task 2 — Cross-compare A VI,4 (run here)
+Build, with offline tests on fixtures, one CLI with subcommands, then run them
+in order on the store:
+- `leibniz align philiumm-vi4 fetch`: the 735 train/noisy XML files into
+  data/philiumm/noisy/, cache-first, resumable, at most one request per second
+  (about fifteen minutes).
+- `leibniz align philiumm-vi4 match`: file name → shelfmark + folio(s); works via
+  works.shelfmarks and src/leibniz/catalog/shelfmarks.py (Roman numerals likely;
+  write the parser to inspect real shelfmark strings and report unparsed names);
+  canvases via pages.label with src/leibniz/align/resolve.py; openings may map to
+  one canvas or two, handle both, report ambiguities. Lines by geometry: scale
+  their Coords from imageWidth/imageHeight to pages.width/height, greedy
+  one-to-one by polygon IoU (report threshold and sensitivity). The lines table
+  may hold several runs per page: use the run that produced the recognised text.
+  gt_lines.line_image_ref carries the canonical line id "{page_id}:{line_seq:03d}"
+  for factory-minted rows (align/pairs.py; audit.split_ref parses it); the test
+  store's seeded gt_lines rows use an older "#xywh" form, so assert the real
+  form on the store before relying on it.
+- `leibniz align philiumm-vi4 compare`: their aligned text vs gt_lines.text for the
+  matched line, lines.text as third witness; normalizer + folded similarity;
+  buckets agree (≥ 0.9), near (0.7–0.9), disagree (< 0.7), this project only,
+  theirs only, neither; per stratum and per page. State what agreement does not
+  prove (two aligners fed the same edition text can share a mistake).
+  Writes: reports/philiumm/vi4-crosscheck.md; reports/philiumm/vi4-summary.json;
+  reports/philiumm/heldout_pages.csv (this project's page_ids for all 1,010 of
+  their pages, for C3); reports/philiumm/vi4-disagreements-sample.csv (at most
+  500 rows); full disagreement and double-witnessed CSVs under data/philiumm/.
+- `leibniz align philiumm-vi4 sheet`: a second audit sheet of disagreements,
+  data/philiumm/philiumm-disagreements.html, through the crop machinery in
+  src/leibniz/align/audit.py. That machinery must accept an explicit list of
+  line refs; if K1 has already landed that refactor on main, reuse it, else do
+  it here without changing the existing sheet's behaviour or tests. The sheet
+  downloads verdicts in the same CSV shape as the C2 sheet (ref, stratum,
+  verdict, note), so the PHILIUMM team could judge it the way they judged the
+  first. Never touch reports/gt-audit/gt-audit-lines.csv or
+  gt-audit-verdicts*.csv.
+Every subcommand ends with a compact printed summary. Run fetch, match, compare
+and sheet here (crops from /mnt/d/leibniz-images), read the results, commit
+reports/philiumm. CHECKPOINT B: update the STATUS.md entry and commit.
+GATE for Task 3: per the operator's Task 0 answers. If the new model is out, or
+the operator asked for the census on the current model, continue. Otherwise
+state in STATUS.md that Task 3 waits for the model, commit, and go to the
+hand-over; a later session resumes at Task 3 with this prompt.
+
+## Task 3 — Layout-zone census (run here, with a go)
+Build, with fixtures:
+- `leibniz layout sample --n 400 --seed 0`: equal numbers per stratum
+  (page_stats.stratum_heuristic; fall back to set/work if NULL, which it is
+  under C1) plus 100 pages from LH 35 (find via works.shelfmarks) and 100 pages
+  from the Marginalien set as a separate block (printed body with marginal
+  notes, the case David raised), reproducible; symlink or copy cached JPEGs
+  from /mnt/d/leibniz-images into data/philiumm/layout-sample/images/ named by
+  page_id; write the sample list to reports/layout/sample.csv.
+- tools/philiumm-layout-env.sh: creates a separate Python 3.12 environment under
+  data/philiumm/rfdetr-env/ (uv venv or python -m venv), clones their pipeline
+  with LFS into data/philiumm/rfdetr-pipeline/ (record the commit SHA and the
+  checksums of the model files), installs requirements, and prints a diagnosis
+  on failure. tools/philiumm-layout-run.sh: runs main_pipeline.py on the sample
+  with config_local.json under nohup, logging to logs/. Never modify their
+  repo; keep any local patch as a .patch file under data/philiumm/.
+- src/leibniz/layout/zones.py (pure, tested): parse 03_regions_xml zones by class
+  with polygons and 10_fixed_lines lines; geometry via
+  src/leibniz/pipeline/geometry.py or plain Python, no new heavy dependency.
+- `leibniz layout zone-census`: per page and per stratum, the LH 35 and the
+  Marginalien blocks separate: zones per class; share of pages with any figure,
+  formula, margin zone; v1 lines whose polygon lies mostly inside a figure or
+  formula zone, count and share; on the Marginalien block, v1 lines inside
+  MainZone (the printed body) vs MarginTextZone (the notes); v1 line count vs
+  their final line count; matched-line comparison by IoU. Writes
+  reports/layout/zone-census.md, reports/layout/zone-census-summary.json,
+  reports/layout/zone-census-per-page.csv (the sample is small enough to commit).
+Ask for a go, run the environment script, the sample, the pipeline (hours, GPU
+optional) and the census here; if the environment cannot be made to work on
+this machine, say so in STATUS.md and stop the task honestly. Commit
+reports/layout. CHECKPOINT C: update the STATUS.md entry and commit.
+
+## Finish and hand-over
+Complete STATUS.md's "P1 — PHILIUMM cross-checks" entry: what was built, key
+numbers, what is unmeasured and why, open questions (opening vs folio canvas
+mapping; class coverage of the bundled checkpoint; flagging v1 lines inside
+non-text zones in the viewer now; a v2 zones table with SegmOnto type, polygon
+and a LaTeX field; the printed-body share of Marginalien lines), next steps
+(rerun Task 3 with each later PHILIUMM model; use heldout_pages.csv in C3;
+the licence change PHILIUMM is considering, with the fact that this project's
+copies were obtained under CC BY 4.0, for the lawyer memo). Append this prompt
+verbatim to PROMPTS.md under "Follow-up phases (2026-10)". ruff + pytest clean,
+all tests offline. Commit in sensible pieces and `git push -u origin
+philiumm-crosschecks`. Then hand over: print the compare URL
+https://github.com/marchofhares/leibnizlegible/compare/main...philiumm-crosschecks?expand=1,
+a plain-language summary of the cross-checks for the operator to bring to the
+call (what agrees, what differs, what it does not prove), and the reminder
+that the PR is merged only after the PHILIUMM team has seen the numbers. Do
+not merge.
+
+OPERATOR'S NOTE, 16 November 2026, for P1 Task 3 (where it differs from the P1
+prompt and the preamble, this note wins):
+- Tasks 1 and 2 are done and merged (STATUS.md, the P1 entry); only Task 3
+  runs here. Branch: philiumm-layout-census, created from main as the
+  preamble says. Task 0's two questions are answered: PHILIUMM's new model is
+  published, and Task 3 runs on it.
+- The model is DenisaBumba/rfdetr-instance-segmentation-leibniz-manuscripts-v2
+  on Hugging Face (RF-DETR-Seg Nano; checkpoint_best_ema_v2.pth and
+  checkpoint_best_regular_v2.pth; training resolution 1,272 px; eight
+  SegmOnto classes: MainZone, MarginTextZone, NumberingZone,
+  DigitizationArtefactZone, GraphicZone-figure, MathsRegion-complex,
+  MathsRegion-inline, MathsRegion-strikethrough; the author recommends a
+  detection threshold of 0.4; licence CC BY-NC 4.0 on the card, its outputs
+  this project's own under the agreement of 15 October). Download both
+  checkpoints under data/philiumm/models/ (cache-first; record the SHA-256
+  of each and the card's revision), point her pipeline's config at the EMA
+  checkpoint, and record which checkpoint and threshold ran in the report.
+  Her pipeline bundles a v1 checkpoint: do not run the census on it except
+  as a one-page smoke test. The class names in the P1 prompt are v1's: parse
+  whatever the v2 model emits and report the classes it used.
+- The sample: first list the author's training pages from her dataset,
+  DenisaBumba/layout-leibniz-dataset-v2 (public, CC BY 4.0; the originals
+  under original/train and original/valid, 334 and 40 pages, most named by
+  shelfmark and folio as the HTR dataset's files are, some by eScriptorium
+  page id, which image matching against the cache resolves; write the list
+  to reports/layout/philiumm-layout-pages.csv as Task 2 did for the HTR
+  dataset), then draw the 600 pages outside that list and outside
+  reports/philiumm/heldout_pages.csv; her 18 test pages may enter the
+  sample as a named block, since they are her own held-out set; include
+  DE-611-HS-971383:0035 (a page with two writing directions) as a named
+  extra, and, if STATUS.md carries a K3b entry with its 24 segmentation
+  pages, those 24 as a second named block, so the hand-corrected lines K3b
+  collects serve this census too.
+- Memory and disk, the rules of 26 October (the preamble): the expected host
+  memory of the pipeline from a 20-page pilot measured with /usr/bin/time -v,
+  under 6 GB, run under systemd-run --scope -p MemoryMax=6G; one torch
+  process at a time; the clone, the models and the 600 images stated against
+  df -h /mnt/c before they are written, or under /mnt/d/ if C: is short.
+- Add registry entries philiumm-seg-v2 (the model, CC BY-NC 4.0) and
+  philiumm-layout-dataset-v2 (the dataset, CC BY 4.0) to src/leibniz/legal.py
+  beside the v1 entries (source, version, licence as published with the
+  date seen, the bucket, what this project built from it: the zone census),
+  with a test as the other entries have.
+- Nothing is deployed; nothing is written to the store. Push the branch,
+  print the compare URL, and end with three sentences for the operator's
+  mail to the model's author: the sample, the checkpoint and threshold, the
+  headline of the census. Do not send anything.
+
+Phase M1 — Marginalien triage: separate the printed body of the annotated
+books from Leibniz's notes, count both, and say so in search, the viewer, the
+exports and the counts. One local session on the operator's desktop (WSL2
+Ubuntu), possibly stopped and resumed at its checkpoints; the GPU if zones are
+needed for every page; a deploy with an index rebuild at the end.
+
+FIRST: read PROMPTS.md (its COMMON CONTEXT block applies to this session in full),
+SPECS.md and STATUS.md (Open question #5, the W3 and P1 entries, and
+reports/layout/zone-census.md from P1 Task 3). If this prompt conflicts with
+the repo, the repo + STATUS.md win; record the divergence in STATUS.md. Write
+the "M1 — Marginalien triage" entry in STATUS.md after every task; resume from
+it if present.
+
+## Where you run, and the rules that follow from it
+You run in Claude Code in bash under WSL2 Ubuntu, in the checkout at
+/home/evana/LeibnizLegible. data/inventory.sqlite is the MASTER store (16 GB).
+This phase writes to it, in Tasks 2 and 3 only, through project code with a
+runs row, idempotent and resumable, and only after a dated backup copy: before
+the first write, `deploy/prepare-store.sh`-style `VACUUM INTO` to
+/mnt/d/leibniz-inventory-backup-<date>.sqlite with its SHA-256 (about ten
+minutes), and the operator's explicit go. Everything else opens the store
+read-only. The page-image cache is /mnt/d/leibniz-images. `.venv` is the
+pipeline environment (never run `uv sync` against it); use `.venv-w3`
+(export UV_PROJECT_ENVIRONMENT=.venv-w3); PHILIUMM's layout pipeline lives in
+its own environment under data/philiumm/ from P1 Task 3 (tools/
+philiumm-layout-env.sh, tools/philiumm-layout-run.sh), copies nothing into the
+repo, and runs only with a go. Long jobs under nohup with logs under logs/;
+ask for a go before any job over an hour. Results in reports/marginalia/ as
+small committed files rendered by code from data; never write a number you did
+not produce. The operator merges; you push and hand over. The deploy at the end
+needs a new serving copy, an index rebuild and a restart: each step shown, run
+only on a yes. Branch: `marginalia-triage`, created from main.
+
+## Task 0 — Pre-flight (report, then wait for a go)
+Clean tree on main (the operator's own untracked files aside); `git pull
+--ff-only origin main`; `df -h data /mnt/d` (the backup copy needs 20 GB on
+D:); `nvidia-smi`; baseline ruff + pytest counts; confirm reports/layout/
+zone-census-per-page.csv exists with a Marginalien block (P1 Task 3); if it
+does not, stop and say so. Print a plan and wait for "go".
+
+## Background
+The census (reports/census.md) counts 396 annotated printed books, 103,887
+pages, 44 % of all page images; W3 lists 370 of them by Marginalien number.
+The v1 run read every line of their printed bodies with a model trained on
+Leibniz's hand. David Rabouin (PHILIUMM, 2026-10-07): the model "was not
+trained to transcribe printed material and it will introduce noise if you plan
+future training. Moreover, these texts are not from Leibniz (only the
+manuscript notes in the books are)". Search under "All collections" returns
+printed-book text as if it were Nachlass text; the About page's counts include
+it; STATUS Open question #5 flagged the scope in July. P1 Task 3 ran PHILIUMM's
+layout pipeline on 100 Marginalien pages and reports how v1 lines fall into
+MainZone (the printed body) and MarginTextZone (the notes). What nobody has
+published: how many lines of Leibniz's own notes the 396 books hold.
+
+## Task 1 — The cheapest classifier that separates print from notes (read-only)
+Per Marginalien work: pages, v1 lines, mean confidence, page_stats (line-height
+CV, overlaps, short lines). On the P1 sample, with its zone labels as truth,
+fit and compare three ways of calling a v1 line printed body: geometry (a line
+within the page's main text block, found from the lines' own x-extents and
+regular heights, vs outside it), the v1 confidence distribution, and the zone
+model itself. Report precision and recall for "note" per method, and choose:
+the geometric rule if it reaches 90 % precision on notes, else the zone model
+for every page (Task 2). Writes reports/marginalia/census.md (first part) and
+reports/marginalia/classifier.json. Commit. CHECKPOINT A.
+
+## Task 2 — Zones for every Marginalien page (only if Task 1 chose the model)
+Measure the pipeline's rate on 200 pages first and print the ETA for 103,887
+(resumable, under nohup, outputs under data/layout/); ask for a go. Then
+`leibniz layout zones-import`: the per-page zones into a new additive table
+page_zones(page_id, zone_class, polygon, source, run_id) with a runs row,
+idempotent, after the backup copy and the go. Commit the schema change with
+its migration and tests. CHECKPOINT B.
+
+## Task 3 — The flag
+`leibniz layout mark-printed`: per Marginalien page and line, printed = inside
+a printed-body zone (or by the geometric rule where Task 1 chose it), written
+per page into page_stats.metrics (JSON, additive) and per line into a new
+additive table line_flags(line_id, flag, source, run_id); one pass, a runs
+row, idempotent, resumable; after the backup copy and a go if Task 2 did not
+already take one. Counts into reports/marginalia/census.md: lines of notes vs
+lines of print per work, and the headline numbers for the corpus. Commit.
+CHECKPOINT C.
+
+## Task 4 — Search, viewer, exports, counts, docs
+- search/documents.py marks printed lines; the index build leaves printed-body
+  text out of the default document text and keeps it in a separate field, so a
+  search can include it (`?printed=1` on /api/search; a checkbox "Include the
+  printed text of annotated books" / DE equivalent on the search form); snippets
+  never come from printed lines unless asked; a hit on a Marginalien page says
+  "notes in a printed book".
+- The page view badges printed lines and lists the notes first in the line
+  panel; the work page says "annotated printed book: N pages, M lines of notes";
+  /api/pages carries `printed` per line.
+- /api/stats and the About page restate the corpus counts with print separated;
+  llms.txt says what the Marginalien are and how the flag works.
+- release/export.py carries `printed` per line and the dataset card says so;
+  C3's exclusion reads line_flags (document it in the C3 amendment).
+Tests throughout; the fixture store gains a Marginalien work with a printed
+page. Verify on the master store: `uv run leibniz index build` into a scratch
+FTS5 file under data/ (not the serving index), `uv run leibniz serve --port
+8765` on it, HTTP and browser checks (search with and without the box, a
+Marginalien page view, the work page, About, EN and DE, axe 0). Commit.
+CHECKPOINT D.
+
+## Finish and hand-over
+STATUS.md entry: the headline numbers, the classifier chosen and its
+precision, what changed where; Open question #5 closed; the backup copy's path
+and hash. Append this prompt to PROMPTS.md under "Follow-up phases
+(2026-10)". ruff + pytest. `git push -u origin marginalia-triage`; the compare
+URL; wait for "merged". Then the deploy, each step shown and run only on a
+yes: a new serving copy (deploy/README.md §2, from the store with the new
+tables), its transfer, the index rebuild on the box (§5, hours; the app keeps
+serving the old index until the build swaps it in), the §9 code update and
+restart; then verify live (a search with and without the printed text, a
+Marginalien page, /api/stats, About) and in the operator's browser without a
+hard reload.
+
+## Amendment of 2026-10-13 (Denisa's follow-up email; where it differs from the tasks above, it wins)
+PHILIUMM recommends, for the printed text, the Gallicorpora+ kraken model
+(https://github.com/Gallicorpora/Segmentation-and-HTR-Models, release 1.0.0,
+Gallicorpora+_best.mlmodel; repository CC0-1.0; DOI 10.5281/zenodo.7410360;
+French print of the 16th to 19th century) and, for the print layout, the
+YALTAi pipeline (SegmOnto zones, ALTO output). YALTAi is archived (2026-04,
+GPL-3.0) and its README points to the kraken D-FINE plugin
+(https://github.com/mittagessen/dfine_kraken) and kraken 7. Her command, for
+the record: `yaltai kraken --device cpu -I "images/*.jpg" --alto --suffix
+".xml" segment --yolo tests/nano-yolo-ladas.pt ocr -m
+Gallicorpora+_best.mlmodel`; the YOLO file named there is the fixture in
+YALTAi's own tests/ folder, not a published model.
+- Task 0 is relaxed: reports/layout/zone-census-per-page.csv may be absent
+  (their v2 segmentation model is published since 4 November). Then run Task 1b first
+  and use its print zones as the printed-body truth for Task 1; the notes
+  count stays provisional until P1 Task 3 has run, and the report says so.
+- Task 1b — The print trial (new; read-only on the store; can run before
+  anything else in this phase, as its own session if the operator says so).
+  100 Marginalien pages: the P1 block if it exists, else 100 pages drawn by
+  seed across the 396 works, the Fraktur-set books included on purpose. In a
+  separate environment under data/print/ (never .venv, never the repo's
+  dependencies), with a go: the dfine_kraken plugin on kraken 7 for zones;
+  if it will not install or has no usable model, YALTAi in its own venv on
+  the device the operator names (`--device cuda:0` on the 1660 Ti), its
+  GPL/AGPL noted; then kraken with Gallicorpora+ on the printed-body lines.
+  Save PAGE XML (or convert the ALTO) under data/print/, nothing into the
+  store. Report: zones per class per page; the printed-body share; the
+  model's CER on 50 printed lines the operator transcribes in a sheet the
+  session renders (ten minutes of print), roman and Fraktur type separately;
+  the overlap (IoU) of the v1 lines with the print zones. Decision, written
+  into reports/marginalia/print-trial.md: (a) the printed text is read with
+  a print model and shown as such; (b) print is flagged only and never read;
+  (c) a Latin or Fraktur print model is needed first. Everything run goes to
+  L1's registry (name, version, licence, how it ran).
+- Task 2 may run the trial's zone model for the printed body where their v2
+  model is not yet available; the notes come from their model when it lands.
+- Task 4 under decision (a): the printed-body text is a run of its own
+  (model Gallicorpora+, its licence per L1), shown as "print, read by an OCR
+  model" and still out of the default search; the handwriting model's
+  readings of printed lines are superseded, not deleted.
+- The count of Leibniz's own notes (Task 3's headline) is the number for
+  David; the trial's print numbers are for Denisa, with thanks.
+
+OPERATOR'S NOTE, 16 November 2026, for M1's print trial (where it differs from
+the M1 prompt, its amendment and the preamble, this note wins):
+- Only Task 1b runs in this session, as the amendment of 13 October defines
+  it: the print trial on 100 Marginalien pages, the store read-only, nothing
+  written, no deploy; Tasks 1 to 4 and the Finish are a later session.
+  Branch: marginalia-print-trial, from main. Task 0 is only the clean tree,
+  the baseline, nvidia-smi and df -h /mnt/c /mnt/d; the zone-census file
+  may be absent.
+- The 100 pages: P1 Task 3's Marginalien block if reports/layout/ carries
+  it on main (then the pipeline's zones for those pages are the first
+  comparison), else 100 pages drawn by seed across the 396 works, the
+  Fraktur books in on purpose; write the list to
+  reports/marginalia/print-trial-pages.csv.
+- The tools: dfine_kraken on kraken 7 in its own environment under
+  data/print/ (a go for the install); YALTAi in its own venv only as the
+  fallback, its GPL and the AGPL underneath noted; Gallicorpora+ on the
+  printed-body lines. Every tool run goes to legal.py's registry with its
+  licence. Memory, the rule of 26 October: the expected host memory from a
+  pilot measured with /usr/bin/time -v, under 6 GB, systemd-run --scope -p
+  MemoryMax=6G, one torch process.
+- The sheet of 50 printed lines for the operator to transcribe (roman and
+  Fraktur apart): render it under data/print/, print its path, stop, and
+  resume when the operator pastes "done".
+- Finish: reports/marginalia/print-trial.md with the decision (a), (b) or
+  (c) and the numbers; the STATUS entry; the M1 prompt and this note to
+  PROMPTS.md; push; the compare URL; three sentences for the operator's
+  mail to the tools' author (what ran, the print-body share, the CER on
+  print). Do not merge.
+~~~~
