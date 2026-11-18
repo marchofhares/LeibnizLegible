@@ -1,76 +1,76 @@
 {
   "generated_by": "leibniz align audit-score",
-  "verdicts": "philiumm.csv",
-  "weights_source": "stratum weights from the test (fair_copy 100, light_revision 300, heavy_revision 500, scrap 100)",
-  "n_rows": 8,
-  "n_judged": 8,
-  "n_unjudged": 0,
-  "n_scored": 8,
-  "n_unreadable": 0,
+  "verdicts": "gt-audit-verdicts-philiumm.csv",
+  "weights_source": "stratum weights from the C2 mint's stratum counts (STATUS.md, Key numbers; the mint the sheet was drawn from, 2026-09-16) (fair_copy 9,913, light_revision 96,175, heavy_revision 190,162, scrap 1,174)",
+  "n_rows": 200,
+  "n_judged": 199,
+  "n_unjudged": 1,
+  "n_scored": 185,
+  "n_unreadable": 14,
   "gate": 0.95,
-  "weighted_precision": 0.95,
-  "weighted_usable": 0.95,
-  "passes_gate": true,
+  "weighted_precision": 0.7234197715815037,
+  "weighted_usable": 0.9218384077522378,
+  "passes_gate": false,
   "by_stratum": {
     "fair_copy": {
-      "judged": 2,
-      "scored": 2,
-      "correct": 1,
-      "boundary": 0,
-      "wrong": 1,
+      "judged": 50,
+      "scored": 50,
+      "correct": 42,
+      "boundary": 2,
+      "wrong": 6,
       "unreadable": 0,
-      "precision": 0.5,
+      "precision": 0.84,
       "interval": [
-        0.09452865480086614,
-        0.9054713451991339
+        0.7148551903823401,
+        0.9166267863791231
       ],
-      "usable": 0.5,
-      "weight": 0.1
+      "usable": 0.88,
+      "weight": 0.03332952283608586
     },
     "light_revision": {
-      "judged": 2,
-      "scored": 2,
-      "correct": 2,
-      "boundary": 0,
-      "wrong": 0,
-      "unreadable": 0,
-      "precision": 1.0,
+      "judged": 49,
+      "scored": 45,
+      "correct": 39,
+      "boundary": 5,
+      "wrong": 1,
+      "unreadable": 4,
+      "precision": 0.8666666666666667,
       "interval": [
-        0.34237195288961925,
-        1.0
+        0.738224177587027,
+        0.9374293636565033
       ],
-      "usable": 1.0,
-      "weight": 0.3
+      "usable": 0.9777777777777777,
+      "weight": 0.3233599171553069
     },
     "heavy_revision": {
-      "judged": 2,
-      "scored": 2,
-      "correct": 2,
-      "boundary": 0,
-      "wrong": 0,
-      "unreadable": 0,
-      "precision": 1.0,
+      "judged": 50,
+      "scored": 48,
+      "correct": 31,
+      "boundary": 12,
+      "wrong": 5,
+      "unreadable": 2,
+      "precision": 0.6458333333333334,
       "interval": [
-        0.34237195288961925,
-        1.0
+        0.5043879645406409,
+        0.7656654288731427
       ],
-      "usable": 1.0,
-      "weight": 0.5
+      "usable": 0.8958333333333334,
+      "weight": 0.6393633331540158
     },
     "scrap": {
-      "judged": 2,
-      "scored": 2,
-      "correct": 2,
-      "boundary": 0,
-      "wrong": 0,
-      "unreadable": 0,
-      "precision": 1.0,
+      "judged": 50,
+      "scored": 42,
+      "correct": 24,
+      "boundary": 14,
+      "wrong": 4,
+      "unreadable": 8,
+      "precision": 0.5714285714285714,
       "interval": [
-        0.34237195288961925,
-        1.0
+        0.4220597791187447,
+        0.7088257048085179
       ],
-      "usable": 1.0,
-      "weight": 0.1
+      "usable": 0.9047619047619048,
+      "weight": 0.003947226854591425
     }
   }
 }

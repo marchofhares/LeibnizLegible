@@ -1,0 +1,16 @@
+{
+  "key": "PLACEHOLDER",
+  "mimetype": "application/octet-stream",
+  "checksum": "md5:PLACEHOLDER",
+  "version_id": "38a724d3-40f1-4b27-b236-ed2e43200f85",
+  "size": 0,
+  "created": "2026-11-17T12:01:00.000000+00:00",
+  "updated": "2026-11-17T12:01:00.000000+00:00",
+  "links": {
+    "self": "https://sandbox.zenodo.org/api/files/568377dd-daf8-4235-85e1-a56011ad454b/PLACEHOLDER",
+    "version": "https://sandbox.zenodo.org/api/files/568377dd-daf8-4235-85e1-a56011ad454b/PLACEHOLDER?versionId=38a724d3-40f1-4b27-b236-ed2e43200f85",
+    "uploads": "https://sandbox.zenodo.org/api/files/568377dd-daf8-4235-85e1-a56011ad454b/PLACEHOLDER?uploads"
+  },
+  "is_head": true,
+  "delete_marker": false
+}

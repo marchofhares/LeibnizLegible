@@ -58,6 +58,9 @@ web = [
 # Release exports (Phase D3): Parquet via pyarrow (JSONL needs nothing extra).
 release = [
     "pyarrow>=15",
+    # tools/release/hf_upload.py (REL1): the Hub's resumable large-file uploads.
+    # Already locked through transformers (the `kurrent` extra); imported lazily.
+    "huggingface_hub>=1.0",
 ]
 # The Kurrent track (Phase K1): TrOCR line readers from the Hugging Face Hub as
 # bootstrap candidates for German Kurrent (`leibniz bench kurrent-smoke`, the
@@ -70,6 +73,23 @@ release = [
 kurrent = [
     "transformers>=5.12,<5.13",  # TrOCR (VisionEncoderDecoderModel) + its processor
     "pillow>=10",                # decode the line crops
+]
+# Decoding with a language model (Phase R1): `leibniz bench run --decoder
+# beam-lm` and `align letterpool-eval --decoder beam-lm` decode kraken's CTC
+# posteriors with flashlight-text's lexicon-free beam search and a KenLM
+# character n-gram (`leibniz bench lm-build`). Install beside `bench`:
+# `uv sync --extra bench --extra gt --extra kurrent --extra decode`.
+# flashlight-text (MIT in its LICENSE file, "BSD" in its PyPI metadata) ships
+# wheels up to CPython 3.12 with KenLM linked in; kenlm (LGPL-2.1) is a source
+# distribution that compiles on install (a C++ compiler; a minute). Both are
+# tools beside the code, never copied into it (`leibniz legal licences`).
+# Imported lazily by leibniz.htr.decoding; without the extra the pure-Python
+# `prefix-beam` decoder and the ARPA reader do the same job, slower, and the
+# tests run on them.
+decode = [
+    "flashlight-text>=0.0.7; python_version < '3.13'",  # LexiconFreeDecoder + its KenLM
+    "kenlm>=0.3.0",                                      # query module (prefix-beam, tests)
+    "numpy>=1.26",                                       # the emissions handed to flashlight
 ]
 
 [build-system]
@@ -105,3 +125,7 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+# The repository root on sys.path, as `python -m pytest` puts it there: five
+# test files import the fixture store's ids with `from tests.conftest import …`,
+# and bare `pytest` otherwise stops at collection (found by ARCH1, 2026-11-17).
+pythonpath = ["."]

@@ -143,12 +143,12 @@ The lines above are counted in every table of this report; the reader rows are t
 
 | Stratum | Open lines | Audited | Est. precision |
 | --- | ---: | ---: | ---: |
-| fair_copy | 10,247 | 2 | 50.0% |
-| light_revision | 103,676 | 2 | 100.0% |
-| heavy_revision | 217,856 | 2 | 100.0% |
-| scrap | 1,901 | 2 | 100.0% |
+| fair_copy | 10,247 | 50 | 84.0% |
+| light_revision | 103,676 | 45 | 86.7% |
+| heavy_revision | 217,856 | 48 | 64.6% |
+| scrap | 1,901 | 42 | 57.1% |
 
-Hand audit of 8 of 8 sampled lines (8 scored, stratified): corpus-weighted precision 95.0 % as written, which passes the 95 % gate, and 95.0 % counting lines a letter or a word off at an end as usable (`reports/gt-audit.md`). The audit was drawn in equal numbers per stratum; the corpus-weighted figure weights each stratum by its share of the mint.
+Hand audit of 199 of 200 sampled lines (185 scored, stratified): corpus-weighted precision 72.3 % as written, which fails the 95 % gate, and 92.2 % counting lines a letter or a word off at an end as usable (`reports/gt-audit.md`). The audit was drawn in equal numbers per stratum; the corpus-weighted figure weights each stratum by its share of the mint.
 
 ## What the extraction costs — and the optional vision upgrade
 

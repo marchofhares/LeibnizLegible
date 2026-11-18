@@ -704,6 +704,46 @@ def finish_run(
     conn.commit()
 
 
+def record_run(
+    conn: sqlite3.Connection,
+    stage: str,
+    *,
+    model: str | None = None,
+    params: dict | None = None,
+    git_sha: str | None = None,
+    n_input: int | None = None,
+    n_ok: int | None = None,
+    n_failed: int | None = None,
+) -> int:
+    """Write a finished ``runs`` row inside the caller's transaction; return its id.
+
+    For a write that is one transaction (``audit-apply``: the rows and their
+    run land together or not at all). :func:`start_run` and :func:`finish_run`
+    each commit, which suits a long job; this does not commit — the caller
+    does.
+    """
+    now = utcnow_iso()
+    cur = conn.execute(
+        """
+        INSERT INTO runs (stage, model, params, started_at, finished_at,
+                          n_input, n_ok, n_failed, git_sha)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            stage,
+            model,
+            json.dumps(params) if params else None,
+            now,
+            now,
+            n_input,
+            n_ok,
+            n_failed,
+            git_sha,
+        ),
+    )
+    return int(cur.lastrowid)
+
+
 # --------------------------------------------------------------------------- #
 # Which row of a line is current: the one precedence every reader uses (K4)
 # --------------------------------------------------------------------------- #
