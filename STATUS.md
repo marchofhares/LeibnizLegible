@@ -871,8 +871,37 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   data/philiumm/layout-results philiumm-layout-run`, log
   `logs/philiumm-layout-run.log`, launched 20:18:40 on 17 November): the ten
   stages in order, each its own interpreter under `MemoryMax=6G`; the
-  results on the VHD (about 2 GB expected at 2,000 px). Its figures and the
-  census follow here.
+  results on the VHD (about 2 GB expected at 2,000 px). **The detect stage:
+  621 pages in 22 min 01 s (2.1 s a page with the load), the card's peak 3,766
+  MiB with Xwayland, the host never under 6,975 MiB available, the stage's
+  peak 2,825 MiB of host memory**; regions, masks, binarisation and the masked
+  images in under two minutes together. **The kraken stage in `16-mixed` was
+  stopped after seven pages**: it ran CPU-bound in kraken's polygonizer at two
+  minutes a page with a topology warning on most lines, where the fp32 pilot
+  took 15–38 s a page — half precision gives noisier heatmaps and, as the
+  probe showed, saves no card memory — so the stage resumed in `32-true` at
+  20:50:31 (the seven pages kept, the batch state cleared by hand so no page
+  was blamed for the stop): about 24 s a page over the first fifteen, so
+  about four hours for the 610 pages on the card, the four wide pages on the
+  CPU after them. **The zone side of the census, run on the complete
+  detections while kraken worked (`data/philiumm/layout-census-provisional/`;
+  the final census over the pipeline's lines follows):** over the 621 pages
+  and their **44,104 v1 lines, 687 lines (1.6 %) lie mostly inside a figure
+  or formula zone** — LH 35 420 of 10,629 (4.0 %), the Marginalien 183 of
+  5,581 (3.3 %), the Briefwechsel 49 of 9,089 (0.5 %), the Handschriften 21
+  of 15,922 (0.1 %); 82.7 % of the v1 lines lie in a MainZone, 9.5 % in a
+  MarginTextZone, 5.6 % in no zone. The model emits a MainZone on 88.9 % of
+  the pages, a MarginTextZone on 49.6 %, a figure zone on 19.3 % (LH 35
+  46.0 %), a formula zone on 19.8 % (LH 35 56.0 %, the Marginalien 40.0 %);
+  per page 1.38 MainZones, 1.54 MarginTextZones, 1.40 inline and 0.34
+  complex formula zones; its mean confidence 0.94 on MainZone, 0.73 on
+  MarginTextZone, 0.49–0.52 on the formula classes. **On the Marginalien
+  block the manuscript-trained model places 64.3 % of the v1 lines in a
+  MainZone (the printed body), 5.9 % in a MarginTextZone (the notes) and
+  leaves 25.6 % outside every zone** (German print 65.6 / 5.3 %, Latin
+  73.3 / 7.9 %, French 44.1 / 5.4 %); its MainZones cover 30.4 % of a
+  Marginalien page against 42–48 % elsewhere. The matched-line comparison
+  and the final line counts follow here.
 
 ### M1 — the print trial (Task 1b) (2026-11-17) ⏳ waits for P1 Task 3
 
