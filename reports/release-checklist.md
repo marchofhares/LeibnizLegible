@@ -14,47 +14,85 @@ and `MANIFEST.json` carry the counts and checksums of that run._
 - The public web app (D2) serves its own mirror of the GWLB delivery scans (every page links to its original) and carries only machine text plus
   §70-expired reading text; it is the lighter surface and ships first (v1).
 
+- **2026-11-16 (operator, REL1):** the first releases are four Zenodo records in
+  the `leibniz` community — `leibniz-transcriptions` with the inventory (D1)
+  inside it, `leibniz-gt`, `leibniz-gt-nc`, and the German reader under the public
+  name **`leibniz-kurrent-trocr`** — with a Hugging Face mirror of the first two
+  open ones and the model. The namespace of the mirror was left open; REL1 Part A
+  proposes `leibniz-legible` (no public profile of that name on 2026-11-17).
+
 ## 1. Export
 
 ```bash
-uv sync --extra release                    # pyarrow
-leibniz index build                        # refreshes the corpus statistics too
-leibniz release export --out data/release  # inventory + transcriptions + gt + gt-nc (Parquet)
+uv sync --extra release                    # pyarrow, huggingface_hub
+leibniz release export --db <store> --out <root>   # inventory + transcriptions + gt + gt-nc (Parquet)
 leibniz release export --format jsonl      # JSONL.gz mirror, if wanted
+leibniz release check --out <root> --stats stats.json   # the checks below, PASS or FAIL
 leibniz legal licences                     # the registry every card's licence line comes from
 ```
 
-Each dataset directory holds `MANIFEST.json` (files, row counts, SHA-256, git
-SHA, generator) and `README.md` (the dataset card). Check:
+_Since REL1 (2026-11): the export opens the store read-only and streams the lines
+(a Parquet batch in memory, no sort of the table); the transcriptions folder
+carries the four inventory tables beside the lines (D2 with D1 inside it: one
+record), `leibniz-inventory` staying exportable on its own as the repository's
+copy; `MANIFEST.json` carries every count a card quotes; `RELEASE.json` at the
+root holds the reserved DOIs, the Hugging Face namespace and the creators, and
+`leibniz release cards --out <root>` re-renders every card and deposit file from
+the manifests, without the store. `<root>` is a dated folder
+(`/mnt/d/leibniz-release/YYYY-MM-DD`)._
 
-- [ ] `MANIFEST.json` row counts match `leibniz pipeline status` / `align gt-report`.
+Each dataset directory holds `MANIFEST.json` (files, row counts, SHA-256, git
+SHA, generator, the counts) and `README.md` (the dataset card, with the Hugging
+Face front matter above it). `leibniz release check` runs these and prints one
+line each; `stats.json` is the site's `/api/stats` saved to a file:
+
+- [ ] `MANIFEST.json` row counts match `leibniz pipeline status` / `align gt-report`;
+      the lines and the lines by model match `/api/stats` (`lines`, `models`).
 - [ ] `leibniz-transcriptions`: no row has `source.license_bucket == "nc"` (the
-      exporter drops them; spot-check with a quick query on the Parquet).
+      exporter drops them); every line carries `model`, `run_id` and `status`.
 - [ ] `leibniz-gt` (the open deposit, CC BY 4.0): every row `license_bucket ==
-      "open"` and every row's `source` names `channel ia` or no channel; the
-      card's "Licence" section lists the channels and their line counts, and
-      says how many lines went to the other deposit and how many to neither.
+      "open"` and every row's `source` names `channel ia`, `channel
+      edition-k2-audit` (the Edition's corrected lines, once in the store) or no
+      channel; the card's "Licence" section lists the channels and their line
+      counts, and says how many lines went to the other deposit and how many to
+      neither.
 - [ ] `leibniz-gt-nc` (the NC-derived deposit, CC BY-NC 4.0, since 2026-10): every
       row's `source` names `channel potsdam`, `channel gwlb` or a joined channel
       containing one of them; the card names the Potsdam channel's licence as
       stated in writing (2026-10-12) and the GWLB repository's; **the two deposits
       are disjoint** (`gt_id` sets do not overlap) and together with the
       "released in neither" count add up to the store's `gt_lines`.
-- [ ] Both ground-truth cards' audit note states the current audit state honestly
-      (preliminary until Q #18 closes).
+- [ ] Both ground-truth cards' Audit section states the audit as it stands: the
+      first audit's precision (C2b: 199 of 200 judged, 72.3 % as written, 92.2 %
+      usable) with its judge and the mint it was measured on; K2's sheet with its
+      judge and its counts, its precision only by pointing at
+      `reports/kurrent/k2-audit.md` once K3b has committed it; the verified lines
+      counted from the export, or "follows in the next version". **Read the
+      sentence**: it must not say "8 of 8 sampled lines" (until 2026-11 the test
+      suite overwrote `reports/gt-audit/audit-summary.json`; the check command
+      fails a card that does).
 - [ ] The README of every dataset carries the attribution lines (the NC deposit
       also the edition-text line naming the Leibniz-Edition Potsdam and the GWLB
       Leibniz-Archiv), the "Licence" section quoting the registry, and the
       anti-contamination note ("machine output — do not ingest as verified text").
+- [ ] The transcriptions card names both models per line (`model`, `run_id`) with
+      the export's own counts, the German reader's three licences from the
+      registry, K3's and LT1's numbers with what they were measured on, the
+      language pass and its coverage, the Marginalien left to the first model, and
+      the catalogue records' credit as the store's state warrants (the registry's
+      line with the export's date where the Arbeitsstelle's export is in the store;
+      "the records read from the catalogue's website" where it is not).
 
 ## 2. Zenodo (datasets)
 
 One record per dataset, resource type **Dataset**, licence per the card
-(`leibniz-inventory` CC0 1.0 with the katalog records CC BY 4.0;
-`leibniz-transcriptions` and `leibniz-gt` CC BY 4.0; `leibniz-gt-nc` CC BY-NC
-4.0, with the attribution to the Leibniz-Edition Potsdam (BBAW) and the GWLB
-Leibniz-Archiv the card carries). Community:
-`https://zenodo.org/communities/leibniz/`. Metadata to fill:
+(`leibniz-transcriptions` CC BY 4.0, carrying the inventory tables under their
+own lines: the project's tables CC0 1.0, the katalog records CC BY 4.0;
+`leibniz-gt` CC BY 4.0; `leibniz-gt-nc` CC BY-NC 4.0, with the attribution to the
+Leibniz-Edition Potsdam (BBAW) and the GWLB Leibniz-Archiv the card carries).
+Community: `https://zenodo.org/communities/leibniz/`. The metadata is written by
+the export into `<root>/leibniz-<dataset>.zenodo.json` and sent by
+`tools/release/zenodo_deposit.py`; check it on the draft:
 
 - [ ] Title as the card's title; version = the export's `generated_at` date.
 - [ ] Description = the card's summary + attribution + the anti-contamination note.
@@ -64,33 +102,56 @@ Leibniz-Archiv the card carries). Community:
       `isDerivedFrom` the PHILIUMM dataset (doi:10.5281/zenodo.21622297) and
       `isDocumentedBy` the retro-alignment report (doi:10.5281/zenodo.22782819)
       for both GT deposits; `isDocumentedBy` the project statement
-      (doi:10.5281/zenodo.22782813) for all four. The transcriptions' and the
+      (doi:10.5281/zenodo.22782813) for all. The transcriptions' and the
       GT deposits' descriptions say that the model was obtained under CC BY 4.0
       and is published by its makers under CC BY-NC 4.0 since 2026-10-15 (the
       registry's wording, `leibniz legal licences --key philiumm-htr-model`).
 - [ ] Keywords: leibniz, nachlass, handwritten text recognition, htr, iiif,
       digital humanities, ground truth, machine transcription.
-- [ ] Reserve the DOI first, write it into the card's "DOI" line, re-export, upload.
-- [ ] Hugging Face mirror (D2 + D3 only): same card as the dataset README,
-      `license: cc-by-4.0` for `leibniz-transcriptions` and `leibniz-gt`,
-      `license: cc-by-nc-4.0` for `leibniz-gt-nc`, the Parquet files as-is.
+- [ ] Creators: as on the project's four reports (one person with an ORCID):
+      `leibniz release cards --out <root> --creator "Family, Given|ORCID"`; the
+      default is the project's name.
+- [ ] Reserve the DOI first (`zenodo_deposit.py reserve --root <root> --record
+      <record>` writes it into `RELEASE.json`), re-render the cards (`leibniz
+      release cards --out <root>`: each card carries its DOI and its siblings'),
+      then upload (`zenodo_deposit.py upload …`: resumable, size and MD5 checked;
+      it stops at the draft). **Publishing is the operator's click, after reading
+      the draft**; the token needs `deposit:write` only.
+- [ ] Hugging Face mirror (D2 with D1, D3's **open** deposit, the model; **not**
+      `leibniz-gt-nc`, which is on Zenodo only — the upload script refuses it):
+      `tools/release/hf_upload.py --root <root> --record <record> --namespace
+      <ns>`; the same card as the README, `license: cc-by-4.0`, the Parquet files
+      as they are; the repository is created private and made public by the
+      operator when the DOIs are on the site.
 
-## 3. Model (after Phase C3)
+## 3. Model
 
+- [ ] **`leibniz-kurrent-trocr`** (REL1, 2026-11): K3's TrOCR model, READER of the
+      German pages (`k3-trocr@runs-615-epoch-5`). `leibniz release model --weights
+      <checkpoint> --out <root>` packages the inference files with README (K3's
+      card brought to the finish), LICENSE (CC BY 4.0 per the registry's
+      `model-k3-trocr`; the base model's MIT notice in full), `MANIFEST.json` and
+      a zip. Zenodo: `isSupplementTo` the code repository, `isDerivedFrom` the
+      Bern model (https://huggingface.co/dh-unibe/trocr-kurrent-XVI-XVII),
+      `isDocumentedBy` the project statement; the deposit API has no "model"
+      upload type, so the draft is created as **Other** and the operator sets
+      **Model** in the browser before publishing. Read on the card, before
+      publishing, the sentence on what "no NC input" means (STATUS.md, Open
+      question 34).
 - [ ] `leibniz-htr-v2` weights + the finalized model card (`reports/htr-v2-eval.md`
       + data statement + per-stratum/per-language error rates + intended use +
-      the "machine output, not an edition" framing). Resource type **Model**,
-      `isDerivedFrom` the PHILIUMM checkpoint, `isDocumentedBy` the project
-      statement. **Licence per the registry** (`leibniz legal outputs`): a model
-      fine-tuned from the PHILIUMM checkpoint (v2, K3's kraken candidate) is
+      the "machine output, not an edition" framing), after Phase C3. Resource type
+      **Model**, `isDerivedFrom` the PHILIUMM checkpoint, `isDocumentedBy` the
+      project statement. **Licence per the registry** (`leibniz legal outputs`): a
+      model fine-tuned from the PHILIUMM checkpoint (v2, K3's kraken candidate) is
       **CC BY-NC 4.0** — PHILIUMM publishes its models under CC BY-NC 4.0 since
       2026-10-15 and the owner honours the change for models built from theirs
       (2026-10-13); K3's candidates with no NC input (the TrOCR model from the
       Bern model, MIT; one from kraken's PP-OCRv6, Apache-2.0; both on K2's open
       edition lines) are **CC BY 4.0** if released (the owner, 2026-10-21). The
       model card names every training input with its registry key. Until then
-      the corpus is read by PHILIUMM's model, which is theirs to release (and
-      is: obtained under CC BY 4.0, CC BY-NC 4.0 since 2026-10-15).
+      the Latin and French pages are read by PHILIUMM's model, which is theirs to
+      release (and is: obtained under CC BY 4.0, CC BY-NC 4.0 since 2026-10-15).
 
 ## 4. Reports (D8)
 
@@ -106,8 +167,14 @@ New versions of a report are new Zenodo versions of the same concept record
 
 ## 5. After upload
 
-- [ ] Write the DOIs into `README.md` (Status section) and `STATUS.md`.
-- [ ] Add the dataset DOIs to the About page (`src/leibniz/web/static/`).
+- [ ] Write the DOIs into `README.md` (Status section) and `STATUS.md`: REL1's
+      Part C, from the line `RELEASE.json` gives (one constant per record in
+      `src/leibniz/web/attribution.py`).
+- [ ] Add the dataset DOIs to the About page (`src/leibniz/web/static/`) and
+      `llms.txt`; drop "(if released)" from the registry's `model-k3-trocr` row.
+- [ ] Make the Hugging Face repositories public once the DOIs are on the site.
+- [ ] Re-read the third-party records on the day (STATUS.md, Open question 29 f)
+      and move the registry's "seen" dates.
 - [ ] Announce to the §8 contacts (GWLB, PHILIUMM, TELOTA, Leibniz-Archiv).
 
 ## 6. Lawyer memo (SPECS §7.5): the questions

@@ -81,7 +81,9 @@ def test_export_chunks_and_empty_tables(store_path, tmp_path) -> None:
     conn.execute("DELETE FROM gt_lines")
     conn.commit()
     exp = export_dataset(conn, "transcriptions", tmp_path, fmt="jsonl", chunk_rows=3)
-    assert [f.rows for f in exp.files] == [3, 3, 1]
+    assert [f.rows for f in exp.files if f.path.startswith("lines-")] == [3, 3, 1]
+    # the inventory rides inside the record (REL1), each table chunked the same way
+    assert [f.rows for f in exp.files if f.path.startswith("pages-")] == [3, 1]
     empty = export_dataset(conn, "gt", tmp_path, fmt="jsonl")
     assert empty.row_counts == {"gt_lines": 0} and len(empty.files) == 1
 
@@ -224,3 +226,111 @@ def test_cards_take_their_licence_lines_from_the_registry() -> None:
     assert CARD_META["gt-nc"]["license"].startswith(legal.deposit_licence("nc") + " ")
     for meta in CARD_META.values():
         assert meta["output"] in {o.key for o in legal.OUTPUTS}
+
+
+# ---- the first releases (REL1) -------------------------------------------------- #
+
+
+def test_transcriptions_record_carries_the_inventory_and_its_counts(store_path, tmp_path) -> None:
+    conn = db.connect(store_path)
+    exp = export_dataset(conn, "transcriptions", tmp_path, fmt="jsonl")
+    assert exp.row_counts == {
+        "lines": 7,
+        "works": 2,
+        "pages": 4,
+        "crosswalk": 1,
+        "katalog_records": 1,
+    }
+    manifest = json.loads((tmp_path / "leibniz-transcriptions" / "MANIFEST.json").read_text())
+    assert manifest["manifest_version"] == 2
+    assert manifest["tables"] == ["lines", "works", "pages", "crosswalk", "katalog_records"]
+    counts = manifest["counts"]["lines"]
+    # the lines by model are counted as they are written: 6 of the first run, 1 re-read
+    assert counts["by_model"] == {"htr@v1": 6, "leibniz-htr-v2@v2": 1}
+    assert sum(counts["by_model"].values()) == manifest["row_counts"]["lines"]
+    assert counts["pages_with_lines"] == 3 and counts["by_status"] == {"machine": 7}
+    assert manifest["corpus"]["works"] == 2 and manifest["corpus"]["pages"] == 4
+    assert manifest["corpus"]["katalog"] == {"records": 1, "refreshed": None}
+    # one deposit file beside the folder, never inside it
+    assert (tmp_path / "leibniz-transcriptions.zenodo.json").exists()
+    assert not list((tmp_path / "leibniz-transcriptions").glob("*.zenodo.json"))
+
+
+def test_transcriptions_are_read_along_the_page_index_without_a_sort(store_path) -> None:
+    from leibniz.release.export import TRANSCRIPTIONS_SQL
+
+    conn = db.connect(store_path)
+    plan = " | ".join(r[3] for r in conn.execute("EXPLAIN QUERY PLAN " + TRANSCRIPTIONS_SQL))
+    assert "ix_lines_page" in plan
+    assert "TEMP B-TREE" not in plan.upper()  # 13 million rows of geometry are not sorted
+
+
+def test_chunks_are_streamed_not_held(tmp_path) -> None:
+    from leibniz.release.export import _chunks
+
+    seen: list[int] = []
+
+    def rows():
+        for i in range(7):
+            seen.append(i)
+            yield {"i": i}
+
+    chunks = _chunks(rows(), 3)
+    first = next(chunks)
+    assert seen == [0]  # nothing beyond the head is pulled before the writer asks
+    assert [r["i"] for r in first] == [0, 1, 2]
+    assert [[r["i"] for r in c] for c in chunks] == [[3, 4, 5], [6]]
+
+
+def test_a_scoped_run_exports_its_row_with_model_and_run(store_path, tmp_path) -> None:
+    """K4's precedence in the export: a page with a scoped German run exports the
+    scoped row on the lines that run wrote, the first model's on the others."""
+    from tests.test_current_rule import P1, _scoped_store
+
+    conn, de, v3 = _scoped_store(store_path)
+    conn.commit()
+    exp = export_dataset(conn, "transcriptions", tmp_path, fmt="jsonl")
+    rows = {
+        r["line_id"]: r for r in _rows(tmp_path / "leibniz-transcriptions" / "lines-0001.jsonl.gz")
+    }
+    scoped = rows[f"{P1}:000"]
+    assert scoped["text"] == "Calculemus sagt Leibniz" and scoped["run_id"] == de
+    assert scoped["model"] == "k3" and scoped["run_at"]
+    assert rows[f"{P1}:001"]["run_id"] not in (de, v3)  # the scoped run did not write it
+    by_run = {r["run_id"]: r for r in exp.counts["lines"]["by_run"]}
+    assert by_run[de]["lines"] == 2
+    card = (tmp_path / "leibniz-transcriptions" / "README.md").read_text()
+    assert f"run {de} (`k3`, scope `de`): 2 lines" in card
+
+
+def test_release_export_cli_opens_the_store_read_only(store_path, tmp_path) -> None:
+    import hashlib
+
+    from typer.testing import CliRunner
+
+    from leibniz.cli import app
+
+    before = hashlib.sha256(store_path.read_bytes()).hexdigest()
+    r = CliRunner().invoke(
+        app,
+        [
+            "release",
+            "export",
+            "--db",
+            str(store_path),
+            "--out",
+            str(tmp_path / "o"),
+            "--format",
+            "jsonl",
+        ],
+    )
+    assert r.exit_code == 0, r.output
+    assert hashlib.sha256(store_path.read_bytes()).hexdigest() == before
+    # a read-only connection to a WAL store may leave an empty -wal beside it, never a
+    # written one
+    wal = store_path.with_name(store_path.name + "-wal")
+    assert not wal.exists() or wal.stat().st_size == 0
+    missing = CliRunner().invoke(
+        app, ["release", "export", "--db", str(tmp_path / "none.sqlite"), "--out", str(tmp_path)]
+    )
+    assert missing.exit_code != 0 and not (tmp_path / "none.sqlite").exists()
