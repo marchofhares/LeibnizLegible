@@ -4702,6 +4702,61 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Divergences (recorded per the COMMON-CONTEXT rule)
 
+- **2026-11-17 — DQ1 (P1 Task 3 and M1 Task 1b), departures from the prompts,
+  the notes and the preamble.** (1) *`python -m pytest`, not bare `pytest`*,
+  for the baselines and the Finish: two test files import `tests.conftest`,
+  which the bare command cannot find (ARCH1's Divergence 9). (2) *Her
+  `requirements.txt` not installed as pinned*: rfdetr 1.8.0 needs supervision
+  ≥ 0.29 (0.31.7 installed, her pin 0.28.0), and kraken 7.0.3 stands in for
+  7.0.2 because 7.0.2 pins torch ≤ 2.10 and the torch this card is proven on
+  is 2.12.0; everything else as she pins it. (3) *No `git lfs pull`*: only the
+  `.pth` files are LFS, the two v2 checkpoints came from the Hub with the same
+  sizes and digests as the clone's pointers, the v1 checkpoints were not
+  fetched and the one-page v1 smoke test the note permits was not run. (4)
+  *The pipeline read copies downscaled to 2,000 px on the long side, not the
+  cached scans*: rfdetr 1.8.0 upsamples the masks of all 300 queries to the
+  input size before thresholding and a 10–20 megapixel scan spills the 6 GB
+  card into host memory (the guard killed the first pilot, the second crawled
+  at 18 minutes a page); the census scales her zones and lines back to the
+  scan's pixels, per page, and records the factor. (5) *Her step 6 was run as
+  one kraken process per batch of 25 pages, in `16-mixed`, with a CPU pass*
+  for pages wider than twice their height and for any page the card refused
+  — the same command, flags, model and text direction as her
+  `segment_page`, the model loaded once instead of once a page; her default on
+  CUDA is `bf16-mixed`, which this Turing card lacks; her repository is
+  untouched (the driver `tools/philiumm_layout_stages.py` calls her step
+  functions, each stage its own interpreter, the operator's change 4). (6)
+  *The driver wraps rfdetr's `predict` to empty the CUDA cache after each
+  page* and the run sets `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`:
+  a wrapper around a library call, nothing of hers changed. (7) *The model
+  files sit in a runtime root on the VHD* (`data/philiumm/rfdetr-runtime/`,
+  the working directory her relative model path resolves in) instead of in
+  the clone on D:, because reads from D: over the share crawled beside the
+  backup chore's reads; *the results are on the VHD too* (about 2 GB at
+  2,000 px, not the multi-gigabyte outputs the D: rule is for), the scans
+  symlinked as the operator's change 2 says and the 2,000 px copies written
+  on the VHD (503 MiB), C: standing above 25 GB throughout. (8) *The images
+  are named `<work>_<seq>.jpg`*, not by page id: a colon is illegal on the
+  Windows file systems D: is one of, and the pipeline names its outputs by
+  the stem. (9) *The strata*: `page_stats.stratum_heuristic` is NULL on every
+  page, so the fallback is the OAI set — Briefwechsel and Handschriften, 200
+  each, one page a work; the Leibnitiana (12 works, 1,768 pages) and the
+  reconstruction set (28 pages) are not strata, and LH 35 works leave the
+  Handschriften stratum for their own block. (10) *The `rclone check` of the
+  backup chore is restricted to the day's two files*: a hash check of the
+  whole folder reads 105 GB over the drive share. (11) *The registry gained
+  the print trial's tools here* — dfine_kraken (Apache-2.0, read on GitHub),
+  the LADaS D-FINE large model (Apache-2.0) and Gallicorpora+ marked as run —
+  as the M1 note asks, while the two PHILIUMM v2 entries stay with the
+  K3b-prep session as the DQ1 note says; `REGISTRY_DATE` moved to
+  2026-11-17 so the new readings pass the registry's date check. (12) *The
+  print trial's 50 lines are v1 lines inside LADaS print zones with at least
+  15 characters of v1 text*, 25 from German-print pages and 25 from the
+  others, one line a page a round: a rule of this session's, so a crop is a
+  line of print and not a fragment. (13) *The two STATUS entries carry the
+  DQ1 note's names* ("P1 — Task 3, the zone census", "M1 — the print trial
+  (Task 1b)"), not the P1 prompt's "P1 — PHILIUMM cross-checks", whose entry
+  is archived.
 - **2026-11-17 — ARCH1, departures from the prompt and the preamble of 19
   October (updated 21 October and 16 November).** (1) *No go waited for*: a
   cloud session started with the whole step records the pre-flight and
