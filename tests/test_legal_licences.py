@@ -55,19 +55,24 @@ REQUIRED = {
     "nantes-hmer",
     "ppocr-v6",
 }
+# The entries added since (K3b-prep, 2026-11-17).
+ADDED = {"edition-k2-audit", "philiumm-seg-v2", "philiumm-layout-dataset-v2"}
 
 
 def test_every_entry_has_a_licence_string_and_a_date() -> None:
     assert REQUIRED <= set(legal.ARTIFACTS), REQUIRED - set(legal.ARTIFACTS)
+    assert ADDED <= set(legal.ARTIFACTS), ADDED - set(legal.ARTIFACTS)
+    assert legal.REGISTRY_DATE <= legal.REGISTRY_UPDATED
     keys = [a.key for a in legal.LICENCES]
     assert len(keys) == len(set(keys))
     for a in legal.LICENCES:
         assert a.name and a.source and a.version and a.built, a.key
         assert isinstance(a.obtained.licence, str) and a.obtained.licence.strip(), a.key
-        assert isinstance(a.obtained.seen, date) and a.obtained.seen <= legal.REGISTRY_DATE, a.key
+        latest = legal.REGISTRY_UPDATED if a.key in ADDED else legal.REGISTRY_DATE
+        assert isinstance(a.obtained.seen, date) and a.obtained.seen <= latest, a.key
         if a.current is not None:
             assert a.current.licence.strip() and isinstance(a.current.seen, date), a.key
-            assert a.obtained.seen <= a.current.seen <= legal.REGISTRY_DATE, a.key
+            assert a.obtained.seen <= a.current.seen <= latest, a.key
             if a.current.since is not None:
                 assert a.current.since <= a.current.seen, a.key
         assert a.bucket in legal.BUCKETS, a.key
@@ -111,6 +116,30 @@ def test_the_philiumm_relicensing_is_recorded_as_a_change_with_dates() -> None:
     assert "CC BY-SA 4.0" == legal.artifact("bullinger-htr").obtained.licence
 
 
+def test_the_entries_of_k3b_prep() -> None:
+    """The Edition's audit of K2's sheet as a channel of its own, and PHILIUMM's v2
+    segmentation model and layout dataset."""
+    audit = legal.artifact("edition-k2-audit")
+    assert audit.kind == "text" and audit.bucket == "open" and audit.used
+    assert audit.obtained.licence == "CC BY 4.0" and audit.obtained.seen == date(2026, 11, 16)
+    assert "Open question 33" in audit.obtained.where and audit.current is None
+    assert audit.channel == "edition-k2-audit" and audit.deposit == "open"
+    assert legal.CHANNELS["edition-k2-audit"] is audit
+    assert "2026-11-06" in audit.version and "credit wording is to be confirmed" in audit.notes
+    assert "verified lines of K3b" in audit.built and "K3 cards" in audit.built
+    seg = legal.artifact("philiumm-seg-v2")
+    assert seg.kind == "model" and seg.obtained.licence == "CC BY-NC 4.0" and not seg.changed
+    assert "rfdetr-instance-segmentation-leibniz-manuscripts-v2" in seg.source
+    assert seg.bucket == "open" and "2026-10-15" in seg.notes and "P1 Task 3" in seg.built
+    assert seg.channel is None and seg.deposit is None
+    ds = legal.artifact("philiumm-layout-dataset-v2")
+    assert ds.kind == "dataset" and ds.obtained.licence == "CC BY 4.0"
+    assert "layout-leibniz-dataset-v2" in ds.source and "392 unique pages" in ds.version
+    assert "2026-11-12" in ds.version and "outside" in ds.built
+    # the v1 entries are as they were
+    assert legal.artifact("philiumm-seg-model").current.seen == date(2026, 10, 21)
+
+
 def test_the_nc_rule_in_pairs_agrees_with_the_registry() -> None:
     """``GtPair`` admits the buckets the registry's open and nc entries name; the
     factory's default bucket (``open``) is what the registry says for every edition
@@ -152,6 +181,21 @@ def test_the_nc_rule_in_pairs_agrees_with_the_registry() -> None:
         ("letter 1714 N.12 (Transkriptionspool; channel letterpool)", "nc", None),
         ("AA II,1 N.1 (channel muenster; katalog 9)", "open", None),
         ("AA II,1 N.1 (channel unknown-key; katalog 9)", "open", None),
+        # a line the Edition corrected (K3b): its text is the Edition's, whatever the copy was
+        (
+            "AA IV,1 N.3 (§70-expired AA reading text; channel edition-k2-audit; reader "
+            "trocr-kurrent-xvi-xvii; verified leibniz-edition 2026-11-06; katalog 1)",
+            "open",
+            "open",
+        ),
+        # a line it confirmed keeps its channel and its deposit
+        (
+            "AA IV,1 N.3 (§70-expired AA reading text; channel potsdam; reader "
+            "trocr-kurrent-xvi-xvii; verified leibniz-edition 2026-11-06; katalog 1)",
+            "open",
+            "nc",
+        ),
+        ("AA IV,1 N.3 (channel edition-k2-audit; katalog 1)", "nc", None),
     ],
 )
 def test_deposit_follows_the_channel(source: str, bucket: str, deposit: str | None) -> None:
@@ -216,6 +260,12 @@ def test_legal_licences_command_prints_the_table() -> None:
 
     res = runner.invoke(app, ["legal", "licences"])
     assert res.exit_code == 0 and "Third-party artifacts" in res.stdout
+    assert "latest entry 2026-11-17" in " ".join(res.stdout.split())
+
+    res = runner.invoke(app, ["legal", "licences", "--format", "tsv", "--key", "edition-k2-audit"])
+    row = res.stdout.splitlines()[1].split("\t")
+    assert row[0] == "edition-k2-audit" and row[5] == "CC BY 4.0" and row[6] == "2026-11-16"
+    assert row[9] == "open" and row[10] == "open"
 
     res = runner.invoke(app, ["legal", "licences", "--format", "json", "--key", "letterpool"])
     assert res.exit_code == 0

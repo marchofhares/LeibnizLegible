@@ -42,6 +42,7 @@ from pathlib import Path
 
 from leibniz import __version__, db, legal
 from leibniz.align.audit import load_audit_summary
+from leibniz.align.audit_edition import verified_from_source
 from leibniz.align.pairs import channels_from_source, reader_from_source
 from leibniz.release.cards import write_record_files
 from leibniz.web.geometry import line_bbox
@@ -51,7 +52,8 @@ GT_DATASETS = {"gt": "open", "gt-nc": "nc"}  # dataset → D3 deposit
 DEFAULT_OUT = Path("data/release")
 DEFAULT_CHUNK_ROWS = 1_000_000
 MANIFEST_VERSION = 2  # 2 (REL1): `tables`, `counts`, `corpus`, `audit`, `deposit_census`
-# A verified ground-truth line names its judge in `source` (K3b-prep's audit-apply).
+# A verified ground-truth line names its judge in `source` (K3b-prep's audit-apply
+# writes `verified leibniz-edition 2026-11-06` there; `verified_from_source` reads it).
 VERIFIED_MARK = "verified leibniz-edition"
 
 # Arrow-ish logical types, mapped by the parquet writer; JSONL ignores them.
@@ -199,7 +201,7 @@ class GtTally(Tally):
         self.by_channel[label] += 1
         self.by_stratum[row.get("stratum") or "unknown"] += 1
         self.by_reader[reader_from_source(source) or "v1"] += 1
-        if VERIFIED_MARK in (source or ""):
+        if verified_from_source(source):
             self.verified += 1
             self.verified_by_channel[label] += 1
 

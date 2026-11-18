@@ -423,9 +423,19 @@ def k2_audit_note(report_exists: bool | None = None) -> str:
 
 
 def verified_credit() -> str:
-    """Who verified the verified lines: the registry's entry once it exists."""
+    """Who verified the verified lines. The registry's entry `edition-k2-audit`
+    (K3b-prep, 2026-11-17) says the credit's wording is still to be confirmed and
+    what stands until then; that wording is :data:`VERIFIED_CREDIT_FALLBACK`, and a
+    test holds the constant to the registry's note. Once the Edition confirms a
+    wording it is written into the registry and read from there."""
+    return VERIFIED_CREDIT_FALLBACK
+
+
+def verified_licence() -> str:
+    """The licence the Edition's corrected lines are released under, from the
+    registry's entry (CC BY 4.0, settled 2026-11-16)."""
     entry = legal.CHANNELS.get(VERIFIED_CHANNEL)
-    return entry.name if entry is not None else VERIFIED_CREDIT_FALLBACK
+    return bare_licence(entry.obtained.licence) if entry is not None else "CC BY 4.0"
 
 
 def verified_note(dataset: str, counts: dict | None) -> str:
@@ -444,14 +454,16 @@ def verified_note(dataset: str, counts: dict | None) -> str:
         return (
             f"**{n:,} lines of this deposit are verified**: lines of K2's audit sheet "
             f"confirmed or corrected by {verified_credit()} (returned {K2_AUDIT['returned']}; "
-            f"their `source` ends in `verified leibniz-edition {K2_AUDIT['returned']}`){parts}. "
+            f"their `source` carries `verified leibniz-edition {K2_AUDIT['returned']}`){parts}. "
+            f"The corrected text is the Edition's own, released under {verified_licence()} "
+            f"(the licence registry's `{VERIFIED_CHANNEL}`). "
             "They are the only lines of the ground truth a named expert has checked."
         )
     if dataset == "gt":
         return (
             "**A verified subset follows in the next version**: the lines of K2's audit "
             f"sheet confirmed or corrected by {verified_credit()} (returned "
-            f"{K2_AUDIT['returned']}; CC BY 4.0). This version holds no verified line."
+            f"{K2_AUDIT['returned']}; {verified_licence()}). This version holds no verified line."
         )
     return "This deposit holds no verified line."
 
@@ -681,7 +693,9 @@ def error_rates(m: M.Measured, *, table: bool = True) -> list[str]:
     return lines
 
 
-def attribution_lines(dataset: str) -> list[str]:
+def attribution_lines(dataset: str, manifest: dict | None = None) -> list[str]:
+    """The attribution lines of a card; a deposit that holds verified lines (the
+    manifest's count) credits their judge."""
     de = legal.site_readers()["de"]
     out = [f"- {attr.IMAGES}", f"- {attr.KATALOG}", f"- {attr.TRANSCRIPTIONS}"]
     if dataset in ("transcriptions", "gt", "gt-nc"):
@@ -694,6 +708,12 @@ def attribution_lines(dataset: str) -> list[str]:
         out.append(f"- {GT_OPEN_ATTRIBUTION}")
     if dataset == "gt-nc":
         out.append(f"- {GT_NC_ATTRIBUTION}")
+    gt_counts = ((manifest or {}).get("counts") or {}).get("gt_lines") or {}
+    if dataset in ("gt", "gt-nc") and int(gt_counts.get("verified") or 0):
+        out.append(
+            f"- Verified lines: confirmed or corrected by {verified_credit()}, "
+            f"{K2_AUDIT['returned']}; the corrected text {verified_licence()}."
+        )
     return out
 
 
@@ -775,7 +795,7 @@ def render_card(
     lines += [
         "## Attribution",
         "",
-        *attribution_lines(dataset),
+        *attribution_lines(dataset, manifest),
         "",
         *licence_section(dataset, manifest.get("deposit_census")),
         "## Provenance",
@@ -888,7 +908,7 @@ def description_html(dataset: str, manifest: dict, *, release: dict | None = Non
         parts.append(_p(f"The catalogue records: {katalog_credit(manifest)}"))
     parts += [
         "<p><strong>Attribution</strong></p>",
-        _ul(attribution_lines(dataset)),
+        _ul(attribution_lines(dataset, manifest)),
         _p(ANTI_CONTAMINATION),
         _p(ANTI_CONTAMINATION_TRAINING),
     ]

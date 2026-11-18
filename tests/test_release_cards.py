@@ -233,27 +233,28 @@ def test_open_card_says_the_verified_subset_follows_until_the_store_has_it(expor
     assert "This deposit holds no verified line." in _card(out, "gt-nc")
 
 
-def test_verified_lines_are_counted_from_the_export_and_credited(tmp_path, monkeypatch) -> None:
-    """With K3b-prep's code on main the corrected lines carry `channel
-    edition-k2-audit` and go to the open deposit; here the registry entry is
-    stood in for, and the count is the export's."""
+def test_verified_lines_are_counted_from_the_export_and_credited(tmp_path) -> None:
+    """K3b-prep's code is on main: a corrected line carries `channel
+    edition-k2-audit` and goes to the open deposit, a confirmed line keeps its
+    channel; the sources here are written by `audit_edition.verified_source`, and
+    the count is the export's."""
+    from leibniz.align import audit_edition as A
     from leibniz.align.pairs import GtPair, insert_gt_pairs
 
-    entry = legal.Artifact(
-        key="edition-k2-audit",
-        name="the Leibniz-Edition's Arbeitsstelle, Potsdam (K2's audit sheet)",
-        kind="text",
-        source="the Arbeitsstelle's table of 2026-11-06",
-        version="2026-11-06",
-        obtained=legal.Terms("CC BY 4.0", legal._d(2026, 11, 16)),
-        current=None,
-        bucket="open",
-        built="the verified lines",
-        channel="edition-k2-audit",
-        deposit="open",
+    def verified(source: str, *, corrected: bool) -> str:
+        return A.verified_source(
+            source,
+            by=A.VERIFIED_BY,
+            on=A.VERIFIED_ON,
+            channel=A.AUDIT_CHANNEL if corrected else None,
+        )
+
+    ia = (
+        "AA IV,3 N.41 (§70-expired AA reading text; channel ia; reader "
+        "trocr-kurrent-xvi-xvii; katalog k-1)"
     )
-    monkeypatch.setitem(legal.CHANNELS, "edition-k2-audit", entry)
-    mark = f"; {VERIFIED_MARK} 2026-11-06"
+    potsdam = "AA IV,1 N.2 (§70-expired AA reading text; channel potsdam; katalog k-2)"
+    assert VERIFIED_MARK in verified(ia, corrected=False)  # the mark the tally reads
     conn = db.init_db(":memory:")
     insert_gt_pairs(
         conn,
@@ -261,32 +262,19 @@ def test_verified_lines_are_counted_from_the_export_and_credited(tmp_path, monke
             GtPair(
                 "P:0001:000",
                 "corrected by the Edition",
-                f"AA IV,3 N.41 (§70-expired AA reading text; channel edition-k2-audit{mark})",
+                verified(potsdam, corrected=True),  # was Potsdam's copy: now the Edition's text
                 "heavy_revision",
                 1.0,
                 "open",
             ),
             GtPair(
-                "P:0001:001",
-                "confirmed",
-                "AA IV,3 N.41 (§70-expired AA reading text; channel ia; reader "
-                f"trocr-kurrent-xvi-xvii{mark}; katalog k-1)",
-                "fair_copy",
-                0.9,
-                "open",
+                "P:0001:001", "confirmed", verified(ia, corrected=False), "fair_copy", 0.9, "open"
             ),
-            GtPair(
-                "P:0001:002",
-                "unjudged",
-                "AA IV,3 N.41 (§70-expired AA reading text; channel ia; katalog k-1)",
-                "fair_copy",
-                0.9,
-                "open",
-            ),
+            GtPair("P:0001:002", "unjudged", ia, "fair_copy", 0.9, "open"),
             GtPair(
                 "P:0002:000",
                 "confirmed, potsdam",
-                f"AA IV,1 N.2 (§70-expired AA reading text; channel potsdam{mark}; katalog k-2)",
+                verified(potsdam, corrected=False),
                 "scrap",
                 0.9,
                 "open",
@@ -299,12 +287,35 @@ def test_verified_lines_are_counted_from_the_export_and_credited(tmp_path, monke
     assert exp.counts["gt_lines"]["verified_by_channel"] == {"edition-k2-audit": 1, "ia": 1}
     card = _card(tmp_path, "gt")
     assert "**2 lines of this deposit are verified**" in card
-    assert "the Leibniz-Edition's Arbeitsstelle, Potsdam (K2's audit sheet)" in card
+    assert (
+        "confirmed or corrected by the Leibniz-Edition's Arbeitsstelle, Potsdam (returned" in card
+    )
     assert "1 of them the Edition's own corrected text" in card and "1 confirmed as minted" in card
+    assert "released under CC BY 4.0 (the licence registry's `edition-k2-audit`)" in card
+    assert "- Verified lines: confirmed or corrected by the Leibniz-Edition's Arbeitsstelle" in card
     assert "follows in the next version" not in card and "`edition-k2-audit` 1" in card
+    meta = json.loads((tmp_path / "leibniz-gt.zenodo.json").read_text())["metadata"]
+    assert "Verified lines: confirmed or corrected by" in meta["description"]
     nc = export_dataset(conn, "gt-nc", tmp_path, fmt="jsonl")
     assert nc.counts["gt_lines"]["verified"] == 1  # a confirmed NC line stays in the NC deposit
     assert "**1 lines of this deposit are verified**" in _card(tmp_path, "gt-nc")
+
+
+def test_the_verified_credit_is_the_wording_the_registry_prescribes() -> None:
+    """The registry's entry names no credit line yet: its note says the wording is
+    to be confirmed and what stands until then. The card uses exactly that, never
+    the entry's own name (an artifact's description, not a credit)."""
+    entry = legal.artifact("edition-k2-audit")
+    assert entry.channel == C.VERIFIED_CHANNEL and entry.deposit == "open"
+    assert "credit wording is to be confirmed" in entry.notes
+    assert "until then: " + C.VERIFIED_CREDIT_FALLBACK in entry.notes
+    assert C.verified_credit() == "the Leibniz-Edition's Arbeitsstelle, Potsdam"
+    assert C.verified_licence() == "CC BY 4.0" == entry.obtained.licence
+    note = C.verified_note("gt", {"verified": 0})
+    assert (
+        "by the Leibniz-Edition's Arbeitsstelle, Potsdam (returned 2026-11-06; CC BY 4.0)" in note
+    )
+    assert entry.name not in note
 
 
 # ---- DOIs, and the Zenodo record -------------------------------------------------- #
