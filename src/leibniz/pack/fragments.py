@@ -16,6 +16,12 @@ on the German pages that run read. ``as_of_run`` reads the store as an earlier
 run left it (rows of later runs ignored), which pins the first candidate to
 the reading shown then; the names below (``v1_text``, verdict ``v1``,
 ``V1_SOURCE``) mean that stored reading, the candidate ``htr_best``.
+``only_records`` keeps the lines of the records listed and no others — K3's
+validation pieces (``reports/kurrent/k3-val-pieces.csv``), whose lines the
+Leibniz Kurrent reader was not trained on, so that its reading of a gold
+line is not a reading of its own training text. A line on a page two pieces
+share stays with its piece (below) and is skipped as ``other_record`` when
+that piece is not listed.
 
 * **Rows.** A line on a German piece's pages whose two readings are non-empty
   and differ after whitespace normalisation, the longer ``min_chars`` to
@@ -134,6 +140,7 @@ SKIP_REASONS = (
     "no_image",  # the page has no cached image (no local_path): the mirror lacks it
     "no_page_size",  # the page has no width/height to clamp the box to
     "twin_elsewhere",  # another registration of the same scan carries the line (W5)
+    "other_record",  # only_records: the line's piece is not among the records listed
     "already_corrected",  # the row latest_lines shows is not machine text (a crowd row)
     "no_v1_text",
     "no_reading",  # the readings file has no row for the line
@@ -581,6 +588,8 @@ class Pool:
     pages_no_image: int = 0  # … without a cached image
     lines: int = 0  # lines on the pages found (one per line_seq, latest run)
     readings: int = 0  # rows in the readings file
+    listed: int | None = None  # only_records: the records listed …
+    listed_unknown: int = 0  # … and those of them that are no piece of the census
 
 
 def owner_piece(on_page: Sequence[Piece], gt: GtRow | None) -> Piece:
@@ -604,9 +613,11 @@ def gather(
     max_chars: int = DEFAULT_MAX_CHARS,
     min_ratio: float = DEFAULT_MIN_RATIO,
     as_of_run: int | None = None,
+    only_records: Collection[str] | None = None,
 ) -> Pool:
     """Every line on the pieces' pages through the rules (:data:`SKIP_REASONS`);
-    with ``as_of_run``, the store as that run left it."""
+    with ``as_of_run``, the store as that run left it; with ``only_records``,
+    the pages of the records listed and, on them, those records' lines."""
     expired = expired_volume_index(today)
     ranks = db.run_precedences(conn)
 
@@ -618,6 +629,15 @@ def gather(
         for pid in p.page_ids:
             by_page[pid].append(p)
     pool = Pool(pieces=len(pieces), pages=len(by_page), readings=len(readings))
+    wanted = None if only_records is None else set(only_records)
+    if wanted is not None:
+        known = {p.record_id for p in pieces}
+        pool.listed, pool.listed_unknown = len(wanted), len(wanted - known)
+        pool.pieces = len(wanted & known)
+        # every piece on a page still decides whose a line is; the pages are the listed ones'
+        visit = {pid for pid, ps in by_page.items() if any(p.record_id in wanted for p in ps)}
+        by_page = defaultdict(list, {pid: by_page[pid] for pid in visit})
+        pool.pages = len(by_page)
     works: dict[str, db.Work | None] = {}
     twins: dict[str, TwinGroup] = {}  # page id → its group, the work's resolved once
     run_at: dict[int, str | None] = {}
@@ -642,6 +662,11 @@ def gather(
         work = works[page.work_id]
         lines = _carried(twins.get(page_id), page_id, lines, pool)
         for ln in lines:
+            if wanted is not None:
+                owner = owner_piece(by_page[page_id], reader_rows.get(ln.id))
+                if owner.record_id not in wanted:
+                    pool.skipped["other_record"] += 1
+                    continue
             reason, item = _examine(
                 conn,
                 ln,
@@ -1064,6 +1089,7 @@ def build_pack(
     min_ratio: float = DEFAULT_MIN_RATIO,
     strata: Mapping[str, float] | None = None,
     as_of_run: int | None = None,
+    only_records: Collection[str] | None = None,
     image_base_url: str = DEFAULT_IMAGE_BASE_URL,
     reader: str = DEFAULT_READER,
     built_at: str | None = None,
@@ -1081,6 +1107,7 @@ def build_pack(
         max_chars=max_chars,
         min_ratio=min_ratio,
         as_of_run=as_of_run,
+        only_records=only_records,
     )
     selected, gold = draw(
         pool.eligible,
@@ -1109,6 +1136,7 @@ def build_pack(
         "min_ratio": min_ratio,
         "strata": dict(strata) if strata is not None else None,
         "as_of_run": as_of_run,
+        "only_records": len(set(only_records)) if only_records is not None else None,
         "image_base_url": image_source.base_url,
         "reader": reader,
     }
@@ -1167,9 +1195,15 @@ def length_bins(values: Iterable[int], lo: int, hi: int, width: int = 10) -> lis
 def summary_lines(pack: Pack) -> list[str]:
     """What was selected and skipped and why, the lengths, the gold, the shares."""
     pool, sel, gold, p = pack.pool, pack.selected, pack.gold, pack.params
+    only = (
+        ""
+        if pool.listed is None
+        else f" — only the {pool.listed:,} records listed ({pool.listed_unknown:,} of them not "
+        "among the German pieces)"
+    )
     out = [
         f"Pieces: {pool.pieces:,} records on {pool.pages:,} pages ({pool.pages_found:,} in the "
-        f"store; {pool.pages_no_image:,} without a cached image, their lines skipped)",
+        f"store; {pool.pages_no_image:,} without a cached image, their lines skipped){only}",
         f"Lines on those pages: {pool.lines:,} ("
         + (
             f"the store as run {p['as_of_run']} left it"
@@ -1183,6 +1217,7 @@ def summary_lines(pack: Pack) -> list[str]:
         n = pool.skipped.get(reason, 0)
         if n or reason in ("lopsided", "not_70_expired"):
             note = {
+                "other_record": " (on a listed record's page, another piece's line)",
                 "lopsided": f" (the shorter reading under {p['min_ratio']:g} of the longer)",
                 "not_70_expired": f" (refused: not §70-free on {p['today']})",
             }.get(reason, "")

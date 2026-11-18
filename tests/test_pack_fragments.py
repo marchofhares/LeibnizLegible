@@ -375,6 +375,77 @@ def test_the_store_as_an_earlier_run_left_it(german_store_path: Path) -> None:
     assert "by model: FoNDUE-GD_v2_ft_Leibniz@v1 4 · leibniz-htr-v2@v2 1" in said
 
 
+def test_only_the_records_listed(german_store_path: Path) -> None:
+    whole = _build(german_store_path, today=AFTER_IV4)
+    assert len(whole.rows) == 6 and whole.pool.listed is None
+    assert whole.params["only_records"] is None
+    # the correspondent's letter alone: its page, its line
+    one = _build(german_store_path, today=AFTER_IV4, only_records={"k-4402"})
+    assert sorted(_rows(one)) == [f"{W4}:0001:000"]
+    assert (one.pool.pieces, one.pool.pages, one.pool.lines) == (1, 1, 1)
+    assert (one.pool.listed, one.pool.listed_unknown) == (1, 0) and not one.pool.skipped
+    assert one.gold.n_gold == 0 and not one.gold.verdicts  # its row was minted from v1
+    # the draft alone, with a record the census does not have beside it
+    draft = _build(german_store_path, today=AFTER_IV4, only_records=["k-4101", "k-0000"])
+    assert sorted(_rows(draft)) == sorted(k for k in _rows(whole) if k.startswith(W3))
+    assert (draft.pool.pieces, draft.pool.pages, draft.pool.lines) == (1, 3, 11)
+    assert (draft.pool.listed, draft.pool.listed_unknown) == (2, 1)
+    assert draft.params["only_records"] == 2
+    assert draft.gold.verdicts == {
+        k: v for k, v in whole.gold.verdicts.items() if k in _rows(draft)
+    }
+    said = "\n".join(F.summary_lines(draft))
+    assert "Pieces: 1 records on 3 pages" in said
+    assert "only the 2 records listed (1 of them not among the German pieces)" in said
+    assert "only the" not in "\n".join(F.summary_lines(whole))
+    # nothing listed that the census knows: no page is read
+    none = _build(german_store_path, today=AFTER_IV4, only_records={"k-0000"})
+    assert not none.rows and (none.pool.pieces, none.pool.pages, none.pool.lines) == (0, 0, 0)
+
+
+def test_a_shared_page_s_lines_stay_with_their_piece(
+    german_store_path: Path, tmp_path: Path
+) -> None:
+    # a second piece on the draft's first page, with the lower record id: the lines a
+    # reader-minted row gives to k-4101 stay its own, the other two go to the newcomer
+    rows = [json.loads(ln) for ln in PIECES.read_text(encoding="utf-8").splitlines()]
+    guest = {**rows[0], "record_id": "k-0001", "page_ids": [f"{W3}:0001"]}
+    path = tmp_path / "pieces.jsonl"
+    path.write_text("".join(json.dumps(r) + "\n" for r in [*rows, guest]), encoding="utf-8")
+    pieces = F.load_pieces(path)
+    conn = open_readonly(german_store_path)
+    try:
+        kw = dict(today=BEFORE_IV4, built_at="2026-10-22T08:00:00Z", git_sha="0" * 40)
+        readings = F.load_readings(READINGS)
+        mine = F.build_pack(conn, pieces, readings, only_records={"k-4101"}, **kw)
+        guests = F.build_pack(conn, pieces, readings, only_records={"k-0001"}, **kw)
+        both = F.build_pack(conn, pieces, readings, only_records={"k-0001", "k-4101"}, **kw)
+    finally:
+        conn.close()
+    assert len(mine.rows) == 5 and {r["provenance"]["katalog_record_id"] for r in mine.rows} == {
+        "k-4101"
+    }
+    # the two lines without a minted row are the guest's: not looked at further
+    assert mine.pool.skipped["other_record"] == 2
+    assert "same_text" not in mine.pool.skipped and "too_short" not in mine.pool.skipped
+    # the guest's page alone is read; three of its five lines are k-4101's
+    assert (guests.pool.pieces, guests.pool.pages, guests.pool.lines) == (1, 1, 5)
+    assert dict(guests.pool.skipped) == {"other_record": 3, "same_text": 1, "too_short": 1}
+    assert not guests.rows
+    assert "other_record" not in both.pool.skipped and len(both.rows) == 5
+    assert F.SKIP_REASONS.index("other_record") == F.SKIP_REASONS.index("twin_elsewhere") + 1
+    assert any("another piece's line" in ln for ln in F.summary_lines(mine))
+
+
+def test_k3_s_validation_pieces_are_a_list_of_records() -> None:
+    from leibniz.align.kurrent_mint import read_csv_column
+
+    listed = read_csv_column(
+        [Path(__file__).parents[1] / "reports" / "kurrent" / "k3-val-pieces.csv"], ("record_id",)
+    )
+    assert len(listed) == 98 and all(r.isdigit() for r in listed)  # K3: 98 records, 92 units
+
+
 def test_the_section_70_refusal(german_store_path: Path) -> None:
     before = _build(german_store_path, today=BEFORE_IV4)
     assert f"{W4}:0001:000" not in _rows(before)
@@ -1003,6 +1074,24 @@ def test_the_command_takes_the_floor_and_the_weights(
     assert res.exit_code == 0 and "Selected: 0" in res.output
     res = runner.invoke(app, [*base, "--min-ratio", "0.99"])
     assert res.exit_code == 0 and "lopsided" in res.output
+    listed = tmp_path / "val-pieces.csv"
+    listed.write_text('unit,record_id,volume\nk-4402,k-4402,"IV,4"\n', encoding="utf-8")
+    res = runner.invoke(app, [*base, "--only-records", str(listed)])
+    assert res.exit_code == 0, res.output
+    assert (
+        "Pieces: 1 records on 1 pages" in res.output and "only the 1 records listed" in res.output
+    )
+    report = C.check_fragment_pack(out)
+    assert report.ok and [r["line_id"] for r in report.rows] == [f"{W4}:0001:000"]
+    nobody = tmp_path / "nobody.csv"
+    nobody.write_text("record_id\n999\n", encoding="utf-8")
+    no_column = tmp_path / "no-column.csv"
+    no_column.write_text("unit,volume\n1,2\n", encoding="utf-8")
+    empty = tmp_path / "empty.csv"
+    empty.write_text("record_id\n", encoding="utf-8")
+    for bad in (nobody, no_column, empty, tmp_path / "missing.csv"):
+        res = runner.invoke(app, [*base, "--only-records", str(bad)])
+        assert res.exit_code != 0, bad
     res = runner.invoke(app, [*base, "--as-of-run", "1"])  # before any German line was read
     assert res.exit_code == 0 and "the store as run 1 left it" in res.output
     assert "Eligible: 0 lines" in res.output

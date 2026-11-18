@@ -20,6 +20,7 @@ from rich.console import Console
 
 from leibniz import db
 from leibniz.align.audit_reach import open_readonly
+from leibniz.align.kurrent_mint import read_csv_column
 
 from . import check as C
 from . import fragments as F
@@ -104,6 +105,12 @@ def fragments(
         help="Read the store as this run left it (rows of later runs ignored): the first "
         "candidate is the reading shown then. Default: the reading the site shows now.",
     ),
+    only_records: Path | None = typer.Option(
+        None,
+        "--only-records",
+        help="A CSV with a record_id column (reports/kurrent/k3-val-pieces.csv): the pack is "
+        "drawn from these records' lines alone.",
+    ),
     out: Path | None = typer.Option(
         None,
         "--out",
@@ -122,14 +129,28 @@ def fragments(
         weights = F.parse_strata(strata) if strata is not None else None
     except ValueError as exc:
         raise typer.BadParameter(f"--strata: {exc}") from exc
-    for label, path in (("--readings", readings), ("--pieces", pieces)):
-        if not path.exists():
+    inputs = (("--readings", readings), ("--pieces", pieces), ("--only-records", only_records))
+    for label, path in inputs:
+        if path is not None and not path.exists():
             raise typer.BadParameter(f"{label}: {path} not found")
+    listed: set[str] | None = None
+    if only_records is not None:
+        try:
+            listed = read_csv_column([only_records], ("record_id",))
+        except ValueError as exc:
+            raise typer.BadParameter(f"--only-records: {exc}") from exc
+        if not listed:
+            raise typer.BadParameter(f"--only-records: {only_records} lists no record")
     target = out or Path("packs") / f"fragments-{day.isoformat()}.jsonl"
     t0 = time.perf_counter()
     conn = open_readonly(db_path)
     try:
         piece_rows = F.load_pieces(pieces)
+        if listed is not None and not listed & {p.record_id for p in piece_rows}:
+            raise typer.BadParameter(
+                f"--only-records: none of the {len(listed):,} records of {only_records} is "
+                f"among the pieces of {pieces}"
+            )
         reading_rows = F.load_readings(readings)
         pack = F.build_pack(
             conn,
@@ -145,6 +166,7 @@ def fragments(
             min_ratio=min_ratio,
             strata=weights,
             as_of_run=as_of_run,
+            only_records=listed,
             image_base_url=image_base_url,
         )
     finally:
