@@ -332,6 +332,162 @@ does not apply; the prompt carries the game's conventions; no other session
 runs on that repository today.
 ~~~~
 
+### Phase G1b — the gold-first draw (run 2026-11-17)
+
+_Run in a cloud session on the branch it was given
+(`claude/eloquent-cannon-d2xv4r`), under the session preamble of 19 October
+as updated on 21 October and 16 November, given with the prompt and printed
+first below; the cloud batch note of 17 November, given after the prompt, is
+printed last. No go was waited for (the preamble's item 6 and the note); the
+departures, and one finding the prompt did not foresee (whose reading the
+pack's first candidate is since K4: Open question 30 j), are in `STATUS.md`._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4; and 16 November in one, clause 8,
+the archive files. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+8. The archive (16 November). Once ARCH1 is merged, STATUS-archive.md holds
+   the Current state and Phase log entries dated before 19 October and
+   PROMPTS-archive.md every prompt already run; STATUS.md and PROMPTS.md
+   keep one pointer line in each emptied place. A prompt that names an
+   archived entry means the archived text: open the archive file for it.
+   Append nothing to the archive files; new entries and prompts go to
+   STATUS.md and PROMPTS.md as before. Until ARCH1 is merged the files are
+   as they were and this clause is void.
+
+Phase G1b — the gold-first draw for the fragment pack. One cloud session on
+the branch it was given; the fixture store; no GPU, no deploy. About two
+hours. The operator rebuilds the pack on the desktop afterwards.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), STATUS.md (the G1 entry; Open
+question 30, items g to i; "Next"), src/leibniz/pack/fragments.py (the
+draw, choose_gold, gold_counts; DEFAULT_GOLD_RATE 0.25,
+DEFAULT_BAD_GOLD_SHARE 0.25, DEFAULT_MIN_CHARS 10, DEFAULT_MAX_CHARS 50),
+src/leibniz/pack/check.py and src/leibniz/pack/cli.py. If this prompt
+conflicts with the repo, the repo + STATUS.md win; record the divergence.
+Write the "G1b — the gold-first draw" entry in STATUS.md.
+
+## Why
+The first real pack (2026-10-22: 2,000 rows, 56 gold, 2.8 %) found its gold
+after the random draw, so the cap of 25 % was out of reach: 42 truths and 14
+both-wrong rows in the whole selection. Open question 30 (g) and (h) are
+answered as the plan page's G1 row says: draw the gold-eligible lines first,
+among all eligible lines, up to the caps, then fill the strata; put a floor
+under the shorter reading so that a pair where one reader failed asks
+nothing. Item (i), the allocation across strata, stays the operator's: build
+the option, keep the equal allocation as the default, and let the rebuild
+command choose.
+
+## Task 1 — The draw (code and tests)
+In fragments.py: (a) gold first: among every eligible line, the truth-gold
+candidates (either reading equal to the edition text under the fold) and
+the both-wrong candidates are drawn first, seeded, up to gold_rate × limit
+with at most bad_share of the gold both-wrong, then the strata are filled to
+the limit with the rest; the row order in the pack is shuffled under the
+seed as before and the pack never reveals which rows are gold (check.py's
+rule). (b) `--bad-gold-share` default raised to 0.5, so an always-Bern
+strategy is measurable (Open question 30 e and g). (c) The floor:
+`--min-chars` applies to the shorter reading as well as the longer, or a new
+`--min-ratio` (default 0.5) drops pairs whose shorter reading is under half
+the longer; say which you chose and why in the docstring and the STATUS
+entry. (d) `--strata` with weights ("fair_copy=0.35,light_revision=0.35,
+heavy_revision=0.2,scrap=0.1" as the example), the equal allocation the
+default; a stratum short of lines gives its surplus to the others as the
+equal allocation does today. Tests on synthetic eligible sets: the cap is
+reached when the supply allows; the both-wrong share; the floor; the
+weights; the seed's reproducibility; `pack check` on the result.
+
+## Task 2 — Record, push, hand over
+STATUS.md: the entry; Open question 30 (g) and (h) answered, (i) left to the
+operator with the option that serves it; "Next": the rebuild line for the
+desktop (the two commands with absolute paths, the first pack's readings and
+pieces, a new seed and date, the store read-only), the copy to the box and
+the game session (CAL1) after it. Append this prompt verbatim to PROMPTS.md
+under "Follow-up phases (2026-10)". ruff + pytest clean. Push, print the
+compare URL. Do not merge.
+
+CLOUD BATCH, 17 November 2026. Read this with the preamble and the prompt
+above; where they differ, this note wins. Complete this step: record Task 0
+and proceed without a go; where the prompt says to wait, proceed and note the
+departure under Divergences. The operator answers nothing mid-task, so decide
+the small things yourself and record them; stop only for something the prompt
+did not foresee, and then write the question into the STATUS entry and push.
+Other sessions run today on their own branches (K3b-prep, REL1 Part A, R1
+Part A, G1b in the cloud; desktop-queue-1 on the desktop), so `git fetch
+origin main && git merge origin/main` at the start and again before the final
+push; on a conflict in STATUS.md or PROMPTS.md keep both sides' entries, the
+newer above, and say so. Commit and push after every task. End with the
+compare URL and a ten-line summary. Do not merge.
+If this is ARCH1: it runs alone; the operator starts nothing else until it
+is merged, so there is no parallel session to merge from.
+If this is R1: Part A only here; Part B is a desktop session later, as the
+prompt says; end at checkpoint B with the hand-over for Part B.
+If this is REL1 Part A: the operator's note of 16 November follows this one
+with Task 0's three answers; a bracket left unfilled means "propose and
+proceed".
+If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
+does not apply; the prompt carries the game's conventions; no other session
+runs on that repository today.
+~~~~
+
 ### Phase REL1 — the first releases (Part A run 2026-11-17/18)
 
 _Part A run in a cloud session on the branch it was given

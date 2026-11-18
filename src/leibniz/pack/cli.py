@@ -1,10 +1,11 @@
 """``leibniz pack`` — the Calculemus seam on the terminal (Phase G1).
 
 ``fragments`` builds a fragment pack from the store (read-only), K2's readings
-and K1's German pieces; ``check`` validates a pack against the contract (run it
-on every pack before it leaves the desktop); ``judgments`` imports the game's
-judgment pack — a dry run unless ``--write`` — and renders the Scriptorium
-queue. The logic lives in :mod:`leibniz.pack.fragments`,
+and K1's German pieces — the gold drawn first, a floor under the shorter
+reading, the strata equal or by weight (G1b); ``check`` validates a pack
+against the contract (run it on every pack before it leaves the desktop);
+``judgments`` imports the game's judgment pack — a dry run unless ``--write``
+— and renders the Scriptorium queue. The logic lives in :mod:`leibniz.pack.fragments`,
 :mod:`leibniz.pack.check` and :mod:`leibniz.pack.judgments`.
 """
 
@@ -19,6 +20,7 @@ from rich.console import Console
 
 from leibniz import db
 from leibniz.align.audit_reach import open_readonly
+from leibniz.align.kurrent_mint import read_csv_column
 
 from . import check as C
 from . import fragments as F
@@ -63,7 +65,11 @@ def fragments(
     limit: int = typer.Option(F.DEFAULT_LIMIT, "--limit", min=1, help="Rows at most."),
     seed: int = typer.Option(0, "--seed", help="Seed of the draw, the order and the gold."),
     gold_rate: float = typer.Option(
-        F.DEFAULT_GOLD_RATE, "--gold-rate", min=0.0, max=1.0, help="Gold rows at most, a share."
+        F.DEFAULT_GOLD_RATE,
+        "--gold-rate",
+        min=0.0,
+        max=1.0,
+        help="Gold rows at most, a share; the gold is drawn first, among all eligible lines.",
     ),
     bad_gold_share: float = typer.Option(
         F.DEFAULT_BAD_GOLD_SHARE,
@@ -72,8 +78,39 @@ def fragments(
         max=1.0,
         help="Both-wrong rows at most, a share of the gold.",
     ),
-    min_chars: int = typer.Option(F.DEFAULT_MIN_CHARS, "--min-chars", min=1),
-    max_chars: int = typer.Option(F.DEFAULT_MAX_CHARS, "--max-chars", min=1),
+    min_chars: int = typer.Option(
+        F.DEFAULT_MIN_CHARS, "--min-chars", min=1, help="The longer reading at least."
+    ),
+    max_chars: int = typer.Option(
+        F.DEFAULT_MAX_CHARS, "--max-chars", min=1, help="The longer reading at most."
+    ),
+    min_ratio: float = typer.Option(
+        F.DEFAULT_MIN_RATIO,
+        "--min-ratio",
+        min=0.0,
+        max=1.0,
+        help="The shorter reading at least this share of the longer (0: no floor).",
+    ),
+    strata: str | None = typer.Option(
+        None,
+        "--strata",
+        help="Weights by stratum, e.g. "
+        "'fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1' (relative; a "
+        "stratum not named gives no row). Default: equal numbers per stratum.",
+    ),
+    as_of_run: int | None = typer.Option(
+        None,
+        "--as-of-run",
+        min=1,
+        help="Read the store as this run left it (rows of later runs ignored): the first "
+        "candidate is the reading shown then. Default: the reading the site shows now.",
+    ),
+    only_records: Path | None = typer.Option(
+        None,
+        "--only-records",
+        help="A CSV with a record_id column (reports/kurrent/k3-val-pieces.csv): the pack is "
+        "drawn from these records' lines alone.",
+    ),
     out: Path | None = typer.Option(
         None,
         "--out",
@@ -83,18 +120,37 @@ def fragments(
         None, "--today", help="The day of the §70 check, YYYY-MM-DD (default: today)."
     ),
 ) -> None:
-    """Build a fragment pack: German A/B pairs (v1 against the Bern reading), with gold."""
+    """Build a fragment pack: German A/B pairs (the stored reading against the Bern
+    reading), the gold drawn first."""
     day = _day(today)
     if min_chars > max_chars:
         raise typer.BadParameter("--min-chars is over --max-chars")
-    for label, path in (("--readings", readings), ("--pieces", pieces)):
-        if not path.exists():
+    try:
+        weights = F.parse_strata(strata) if strata is not None else None
+    except ValueError as exc:
+        raise typer.BadParameter(f"--strata: {exc}") from exc
+    inputs = (("--readings", readings), ("--pieces", pieces), ("--only-records", only_records))
+    for label, path in inputs:
+        if path is not None and not path.exists():
             raise typer.BadParameter(f"{label}: {path} not found")
+    listed: set[str] | None = None
+    if only_records is not None:
+        try:
+            listed = read_csv_column([only_records], ("record_id",))
+        except ValueError as exc:
+            raise typer.BadParameter(f"--only-records: {exc}") from exc
+        if not listed:
+            raise typer.BadParameter(f"--only-records: {only_records} lists no record")
     target = out or Path("packs") / f"fragments-{day.isoformat()}.jsonl"
     t0 = time.perf_counter()
     conn = open_readonly(db_path)
     try:
         piece_rows = F.load_pieces(pieces)
+        if listed is not None and not listed & {p.record_id for p in piece_rows}:
+            raise typer.BadParameter(
+                f"--only-records: none of the {len(listed):,} records of {only_records} is "
+                f"among the pieces of {pieces}"
+            )
         reading_rows = F.load_readings(readings)
         pack = F.build_pack(
             conn,
@@ -107,6 +163,10 @@ def fragments(
             bad_gold_share=bad_gold_share,
             min_chars=min_chars,
             max_chars=max_chars,
+            min_ratio=min_ratio,
+            strata=weights,
+            as_of_run=as_of_run,
+            only_records=listed,
             image_base_url=image_base_url,
         )
     finally:
