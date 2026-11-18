@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from leibniz.htr import bench
@@ -183,3 +184,57 @@ def test_llm_key_present_gemini(monkeypatch) -> None:
     assert bench_cli._llm_key_present("gemini")
     monkeypatch.setenv("GEMINI_API_KEY", "g2")
     assert bench_cli._llm_key_present("gemini")
+
+
+def test_run_command_passes_a_decoder_to_the_kraken_engine(monkeypatch, tmp_path) -> None:
+    d = tmp_path / "lines"
+    d.mkdir()
+    (d / "a.png").write_bytes(b"IMGA")
+    (d / "a.gt.txt").write_text("hello world", encoding="utf-8")
+    lm = tmp_path / "toy.arpa"
+    lm.write_text("\\data\\\n", encoding="utf-8")
+    seen: dict = {}
+
+    def fake(name, model, decoder=None):
+        seen["decoder"] = decoder
+        return EchoEngine({b"IMGA": "hello world"})
+
+    monkeypatch.setattr(bench_cli, "_build_engine", fake)
+    args = ["run", str(d), "--decoder", "beam-lm", "--lm", str(lm)]
+    result = runner.invoke(bench_cli.app, [*args, "--lm-weight", "1.2", "--beam", "20"])
+    assert result.exit_code == 0, result.output
+    spec = seen["decoder"]
+    assert (spec.kind, spec.lm, spec.lm_weight, spec.beam) == ("beam-lm", str(lm), 1.2, 20)
+    assert "decoder: decoder beam-lm" in result.output and "s a line (beam-lm)" in result.output
+
+
+def test_run_command_refuses_a_decoder_it_cannot_serve(tmp_path) -> None:
+    d = tmp_path / "lines"
+    d.mkdir()
+    no_lm = runner.invoke(bench_cli.app, ["run", str(d), "--decoder", "beam-lm"])
+    assert no_lm.exit_code == 2 and "needs --lm" in _flat(no_lm.output)
+    unknown = runner.invoke(bench_cli.app, ["run", str(d), "--decoder", "viterbi"])
+    assert unknown.exit_code == 2
+    llm = runner.invoke(
+        bench_cli.app, ["run", str(d), "--engine", "anthropic", "--decoder", "prefix-beam"]
+    )
+    assert llm.exit_code == 2 and "kraken engine" in _flat(llm.output)
+
+
+def _flat(output: str) -> str:
+    """A command's error box as one line of words (rich wraps it to the terminal)."""
+    return " ".join(output.replace("│", " ").split())
+
+
+def test_build_engine_hands_the_decoder_to_kraken_only() -> None:
+    from leibniz.htr import kurrent as K
+    from leibniz.htr.decoding import DecoderSpec
+
+    spec = DecoderSpec(kind="prefix-beam")
+    eng = bench_cli._build_engine("kraken", Path("m.safetensors"), decoder=spec)
+    assert eng.decoder_spec is spec and eng.temperature == 1.0
+    assert bench_cli._build_engine("kraken", Path("m.safetensors")).decoder_spec is None
+    kraken = K.build_engine(K.CANDIDATES["philiumm"], decoder=spec)
+    assert kraken.decoder_spec is spec
+    with pytest.raises(ValueError, match="trocr reader"):
+        K.build_engine(K.CANDIDATES["k3-trocr"], decoder=spec)

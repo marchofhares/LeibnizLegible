@@ -288,9 +288,13 @@ BUCKETS = ("open", "nc", "none")
 DEPOSITS = ("open", "nc")
 
 # The day the registry was compiled and the public records were re-read.
-REGISTRY_DATE = date(
-    2026, 11, 17
-)  # L1 compiled it 2026-10-21; M1's print trial added three readings
+REGISTRY_DATE = date(2026, 10, 21)
+# The day of the latest entry added since (K3b-prep: the Edition's audit of K2's
+# sheet, PHILIUMM's v2 segmentation model and its dataset; R1: the decoding
+# tools flashlight-text, KenLM and pyctcdecode; M1's print trial: dfine_kraken,
+# the LADaS D-FINE region model and Gallicorpora+ as run). The older entries
+# were not re-read that day.
+REGISTRY_UPDATED = date(2026, 11, 17)
 
 
 @dataclass(frozen=True, slots=True)
@@ -414,6 +418,45 @@ LICENCES: tuple[Artifact, ...] = (
         notes=(
             "PHILIUMM's relicensing of 2026-10-15 was for the models only; the dataset "
             "stays CC BY 4.0 (the HTR engineer, 2026-10-15; the records read 2026-10-21)."
+        ),
+    ),
+    Artifact(
+        key="philiumm-seg-v2",
+        name="PHILIUMM RF-DETR instance-segmentation model for Leibniz's manuscripts, v2",
+        kind="model",
+        source=(
+            "https://huggingface.co/DenisaBumba/rfdetr-instance-segmentation-leibniz-manuscripts-v2"
+        ),
+        version="v2 (published 2026-11-03; RF-DETR-Seg Nano, eight SegmOnto classes)",
+        obtained=Terms("CC BY-NC 4.0", _d(2026, 11, 16), "the Hub card, as published"),
+        current=None,
+        bucket="open",
+        built=(
+            "P1 Task 3's census: the model's zones on a sample of the corpus drawn outside "
+            "its training pages (the model is run, not redistributed)"
+        ),
+        notes=(
+            "CC BY-NC 4.0 as published on the card (read 2026-11-16). Its outputs are "
+            "unrestricted by PHILIUMM's agreement of 2026-10-15 (this project's outputs may "
+            "stay CC BY 4.0 and Apache-2.0). The status of a model's output under a weights "
+            "licence is a lawyer-memo question, as for the v1 models."
+        ),
+    ),
+    Artifact(
+        key="philiumm-layout-dataset-v2",
+        name="PHILIUMM layout dataset for Leibniz's manuscripts, v2 (layout-leibniz-dataset-v2)",
+        kind="dataset",
+        source="https://huggingface.co/datasets/DenisaBumba/layout-leibniz-dataset-v2",
+        version=(
+            "public since 2026-11-12; 392 unique pages (334 train, 40 validation, 18 test), "
+            "PAGE XML and the originals"
+        ),
+        obtained=Terms("CC BY 4.0", _d(2026, 11, 16), "the Hub card"),
+        current=None,
+        bucket="open",
+        built=(
+            "the list of the v2 segmentation model's training pages: P1 Task 3's census "
+            "sample is drawn outside them"
         ),
     ),
     Artifact(
@@ -770,6 +813,39 @@ LICENCES: tuple[Artifact, ...] = (
         deposit="nc",
     ),
     Artifact(
+        key="edition-k2-audit",
+        name=(
+            "The Leibniz-Edition's Arbeitsstelle (Potsdam): verdicts and corrected "
+            "transcriptions of K2's audit sheet"
+        ),
+        kind="text",
+        source=(
+            "the Arbeitsstelle's table of 2026-11-06, exported by the operator "
+            "(data/kurrent/k2-audit-verdicts-edition.csv; not in the repository)"
+        ),
+        version="the table returned 2026-11-06: 200 rows, 118 with a corrected transcription",
+        obtained=Terms(
+            "CC BY 4.0",
+            _d(2026, 11, 16),
+            "the Edition's answer, recorded by the operator; STATUS.md Open question 33",
+        ),
+        current=None,
+        bucket="open",
+        built=(
+            "the verified lines of K3b (`leibniz align audit-apply`: a confirmed line keeps "
+            "its text and its channel, a corrected line carries the Arbeitsstelle's text "
+            "under `channel edition-k2-audit`) and the audit figures on the K3 cards"
+        ),
+        notes=(
+            "The credit wording is to be confirmed; until then: the Leibniz-Edition's "
+            "Arbeitsstelle, Potsdam, with the date 2026-11-06. The corrected transcription "
+            "is the Arbeitsstelle's own text, so a corrected line goes to the open deposit "
+            "whatever copy the minted text it replaces was read through."
+        ),
+        channel="edition-k2-audit",
+        deposit="open",
+    ),
+    Artifact(
         key="edition-muenster",
         name="The Münster Forschungsstelle's Internetausgaben (Reihe II, VI)",
         kind="text",
@@ -910,6 +986,67 @@ LICENCES: tuple[Artifact, ...] = (
             "nothing imported: a tool run beside the Apache-2.0 codebase; the status of data it "
             "produces is a lawyer-memo question"
         ),
+        used=False,
+    ),
+    Artifact(
+        key="flashlight-text",
+        name="flashlight-text (the lexicon-free beam-search decoder, Python bindings)",
+        kind="tool",
+        source="https://github.com/flashlight/text",
+        version="0.0.7 on PyPI (uploaded 2024-03-23; wheels up to CPython 3.12)",
+        obtained=Terms(
+            "MIT (the LICENSE file in the repository and in the wheel); the PyPI metadata's "
+            'licence field reads "BSD licensed, as found in the LICENSE file"',
+            _d(2026, 11, 17),
+            "both read 2026-11-17: the wheel's LICENSE file and the PyPI record",
+        ),
+        current=None,
+        bucket="none",
+        built=(
+            "nothing copied: an optional dependency (the `decode` extra) that decodes kraken's "
+            "posteriors with a character n-gram (R1, `htr/decoding.py`); its wheel links KenLM"
+        ),
+        notes=(
+            "The two licence statements differ (MIT in the file, BSD in the metadata); both are "
+            "permissive and both are recorded. Imported lazily; the pure-Python prefix beam "
+            "does the same job without it."
+        ),
+    ),
+    Artifact(
+        key="kenlm",
+        name="KenLM (n-gram language models: lmplz, build_binary, the query library)",
+        kind="tool",
+        source="https://github.com/kpu/kenlm",
+        version="0.3.0 on PyPI (uploaded 2025-04-07; a source distribution)",
+        obtained=Terms(
+            "LGPL-2.1-or-later (a few files under their own permissive terms)",
+            _d(2026, 11, 17),
+            "the LICENSE file of the 0.3.0 source distribution, read 2026-11-17",
+        ),
+        current=None,
+        bucket="none",
+        built=(
+            "nothing copied: `lmplz` and `build_binary` are run beside the repository to estimate "
+            "the character n-gram (`leibniz bench lm-build`), the query library is linked through "
+            "the optional `kenlm` module and inside flashlight-text's wheel; the ARPA reader in "
+            "`htr/decoding.py` is the project's own code"
+        ),
+        notes=(
+            "A tool and a linked library, never copied into the Apache-2.0 code. The n-gram "
+            "files are this project's output from text of the open deposit (`reports/decoding/"
+            "lm-build.md` says which text each saw)."
+        ),
+    ),
+    Artifact(
+        key="pyctcdecode",
+        name="pyctcdecode (a CTC beam-search decoder in Python)",
+        kind="tool",
+        source="https://github.com/kensho-technologies/pyctcdecode",
+        version="0.5.0 on PyPI (uploaded 2023-01-20, its last release)",
+        obtained=Terms("Apache-2.0", _d(2026, 11, 17), "the PyPI record, read 2026-11-17"),
+        current=None,
+        bucket="none",
+        built="nothing: recorded as the alternative R1 did not choose",
         used=False,
     ),
     Artifact(
@@ -1238,6 +1375,7 @@ __all__ = [
     "READING_TEXT_ONLY",
     "REGISTRY",
     "REGISTRY_DATE",
+    "REGISTRY_UPDATED",
     "Artifact",
     "Output",
     "Terms",

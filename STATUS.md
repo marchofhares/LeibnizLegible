@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-11-17 (**DQ1 — the desktop read-only queue on `desktop-queue-1`, 17–18 November: the backup chore done (the dated copy by SQLite's backup call, identical past the header, uploaded, `rclone check` 0 differences); P1 Task 3 done — PHILIUMM's v2 segmentation model through her pipeline over 621 pages (2,000 px copies): 1.6 % of the 44,104 v1 lines inside a figure or formula zone (LH 35 4.0 %), 82.7 % in a MainZone, 9.5 % in a MarginTextZone, her 43,875 final lines matching v1's one to one on 66 %; M1's print trial done but for the CER — the LADaS D-FINE model puts 62.1 % of the Marginalien's v1 lines in print zones and marks a manuscript addendum on 4 of 100 pages, Gallicorpora+ read 3,463 printed-body lines and reads the 24 roman sheet lines the operator transcribed at 3.56 % CER against v1's 14.94 %, so the decision is (a) for roman print, the Fraktur half pending; the store read-only, nothing deployed, the pull request the operator's**; **ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-11-18, later still (**DQ1 — the desktop read-only queue on `desktop-queue-1`, 17–18 November: the backup chore done (the dated copy by SQLite's backup call, identical past the header, uploaded, `rclone check` 0 differences); P1 Task 3 done — PHILIUMM's v2 segmentation model through her pipeline over 621 pages (2,000 px copies): 1.6 % of the 44,104 v1 lines inside a figure or formula zone (LH 35 4.0 %), 82.7 % in a MainZone, 9.5 % in a MarginTextZone, her 43,875 final lines matching v1's one to one on 66 %; M1's print trial done but for the CER — the LADaS D-FINE model puts 62.1 % of the Marginalien's v1 lines in print zones and marks a manuscript addendum on 4 of 100 pages, Gallicorpora+ read 3,463 printed-body lines and reads the 24 roman sheet lines the operator transcribed at 3.56 % CER against v1's 14.94 %, so the decision is (a) for roman print, the Fraktur half pending; the store read-only, nothing deployed, the pull request the operator's**; **G1b follow-up on `claude/eloquent-cannon-d2xv4r`: main merged (#64 K3b-prep, #65 REL1 Part A, #66 R1 Part A; both sides' entries kept in STATUS.md, the G1b prompt after ARCH1's in PROMPTS.md); `leibniz pack fragments --only-records CSV`, a pack drawn from the records listed and no others — K3's 98 validation pieces, whose lines k3-trocr was not trained on (Open question 30 j, way 3); 1,228 tests in the slim environment; the three rebuild lines under Next**); earlier the same day (**REL1 Part A — the first releases, built in a cloud session on fixtures on `claude/clever-gates-56b0a4`: the cards true to the store (each licence from the registry, each count from the export's MANIFEST, each measured figure from a committed report), the transcriptions record carrying the inventory, the German reader's package `leibniz-kurrent-trocr`, the Zenodo and Hugging Face scripts up to the draft, `release check`; found on the way and repaired: the committed audit summary was a test's (the ground-truth cards said "8 of 8 lines, 95.0 %, passes"; restored to 199 of 200 judged, 72.3 %), the export opened the master for writing and held a million rows in memory; merged with main at #64 (K3b-prep), both sides' entries kept; 1,160 tests; nothing sent, reserved or deployed; Part B the operator's desktop, the pull request the operator's**); 2026-11-17, later still (**R1 Part A — decoding with a language model, the code: three decoders behind one interface in `htr/decoding.py` (kraken's greedy unchanged, flashlight-text's lexicon-free beam with a KenLM character 6-gram, a prefix beam of the project's own as the fallback), one confidence over all three, `--decoder` on `bench run` and `align letterpool-eval`, `leibniz bench lm-build` (two models from the open text, the evaluation sets' pieces held out), a toy model from the fixture store; 1,136 tests on the branch, 1,225 after the merge with main at #65 on 18 November, both sides' entries kept; Part B — the real models, the measurement, the calibration — is the desktop's; on `claude/modest-cori-wds26r`, nothing measured on the Nachlass, nothing deployed**); 2026-11-17, later (**K3b-prep — the verdict tools, built in a cloud session on fixtures: `leibniz align audit-convert` (a judge's table with a transcription column → the C2 verdict CSV and a corrections file), `audit-score --corrections` (the patterns read off the judge's whole line; "Under the fold": strict, usable and under-the-fold precision by stratum and by hand, Wilson intervals), `audit-apply` (the verified lines into `gt_lines`: a dry run, then `--write`, one transaction, idempotent; a corrected line under `channel edition-k2-audit`), `audit-sheet-k2` (a further sheet by hand, without the lines, records and pages already used, with context strips and a field for the corrected line), three registry entries; 1,110 tests; none of the Edition's text here, no store, nothing deployed; on `claude/confident-brown-2xwlqs`, the pull request the operator's**); minutes before it (**G1b — the gold-first draw for the fragment pack, built in a cloud session on the fixture store: the gold drawn first among all the eligible lines, up to `--gold-rate` of the rows with at most `--bad-gold-share` (now 0.5) of it both-wrong, the strata filled around it; `--min-ratio` 0.5, a floor under the shorter reading; `--strata` weights with the equal allocation the default; the rows shuffled under the seed; `--as-of-run`, because since K4 the stored reading on the German pages is k3-trocr's and the rebuild must choose whose reading the first candidate is (Open question 30 j); 1,103 tests; on `claude/eloquent-cannon-d2xv4r`, the rebuild on the desktop and the pull request the operator's**); earlier the same day (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -105,6 +105,277 @@ as run; the two PHILIUMM v2 entries stay with K3b-prep. ruff clean; pytest
 **1,099 passed, 3 skipped** in `.venv-w3` at the end (1,071 before; 28 new
 tests). C: ended at 25 GB free; the pipeline's 1.8 GB of intermediate images
 moved to D: behind symlinks.
+
+**2026-11-18, later: G1b follow-up — main merged into
+`claude/eloquent-cannon-d2xv4r`, and `--only-records` added to `leibniz pack
+fragments`; the same cloud session, on the operator's word of 18 November;
+code, tests and this record; no store, nothing deployed.** (a) **The merge.**
+Main had moved to `82c210f` (#64 K3b-prep, #65 REL1 Part A, #66 R1 Part A).
+`git merge origin/main` met conflicts in STATUS.md and PROMPTS.md only; both
+sides' entries are kept. In STATUS.md the entries of Current state, the Phase
+log, Divergences and Next stand newest first — REL1, R1, K3b-prep, then G1b
+(recorded 17 November 23:44 UTC, two minutes before K3b-prep's), then ARCH1 —
+the "Last updated" line carries every item, and Key numbers takes main's rows
+with one tests figure added. In PROMPTS.md main's prompts stand as they were
+and the G1b prompt follows ARCH1's, the order they were appended in. A check
+on the result: no line of main's two files or of G1b's is missing but the
+lines one side had rewritten (the "Last updated" line; the tests row; two
+lines G1b had extended; ARCH1's line in Next, where main's wording stays).
+(b) **`--only-records CSV`**: the pack is drawn from the lines of the records
+listed in the file's `record_id` column and no others — written for
+`reports/kurrent/k3-val-pieces.csv`, K3's 98 validation records (the file:
+heavy revision 53, light revision 40, scrap 3, fair copy 2; 96 in other
+hands, 2 in Leibniz's), which K3 kept out of training. That is Open question
+30 (j)'s third way, now built: on today's store the first candidate is
+k3-trocr's reading, and on these records it is not a reading of the reader's
+own training lines, so the gold there does not flatter it. Only the listed
+records' pages are read; a line on a page two pieces share stays with its
+piece (the one its reader-minted row names, else the lower record id, as
+before) and is skipped as `other_record` when that piece is not listed; the
+printout says how many records were listed and how many of them the census
+does not have; a file without the column, with no record, or with none of
+the census's records is refused. The filter combines with `--strata`,
+`--as-of-run` and the rest. **Tests: 1,228 passed, 10 skipped** in the slim
+environment (web, gt, release; main's 1,193 and G1b's 35), ruff clean, 318
+files formatted; `tests/test_pack_fragments.py` 63 → 66. **No number from
+the corpus**: how many eligible lines and how much gold the 98 records hold
+is the rebuild's to print — K3 counted 3,133 minted lines on 216 of their
+pages, so the pack may well come out under 2,000 rows and its gold under the
+cap. The third rebuild line is under Next beside the two others.
+
+**2026-11-18: REL1 Part A — the first releases, built in a cloud session on
+fixtures; the branch `claude/clever-gates-56b0a4` from main at `9ae24de`
+(#63), the pull request the operator's; no store read or written, no token
+held, nothing reserved, uploaded, published or deployed; Part B (the exports
+from the master store, the DOI reservations, the uploads) is the operator's
+desktop, its runbook under Next.** Four records are prepared: the
+transcriptions with the inventory inside them (D2 with D1, the operator's
+answer of 16 November), the ground truth in its two deposits (D3), and the
+German reader under the public name `leibniz-kurrent-trocr` (D4); the
+Hugging Face namespace was left open and `leibniz-legible` is proposed.
+**The pre-flight found what the prompt did not foresee: the committed
+`reports/gt-audit/audit-summary.json` was a test's.** `tests/test_align_audit.py`
+ran `audit-score` without `--summary`, so each test run wrote an 8-line
+stand-in audit over the file the ground-truth cards quote; it was first
+committed in that state on 2026-10-10 and has stood on main since, and an
+export from main said "Hand audit of 8 of 8 sampled lines … 95.0 % … passes
+the 95 % gate", as `reports/gt-factory.md` did. The summary is restored from
+the committed verdicts and the C2 mint's stratum counts (**200 lines, 199
+judged, 185 scored, 72.3 % as written, 92.2 % with boundary slips usable,
+FAIL**, its stratum table the committed report's line for line), the tests
+write into their own folder, a test pins the committed file, and the report's
+two passages are re-rendered from the restored summary. Two more faults of
+the export, fixed: it opened the master with a writing connection (now
+read-only, and a missing store is an error), and it held a million line rows
+in memory per file and sorted the whole `lines` table (now read page by page
+along the index and streamed: 480,000 lines of a synthetic store written in
+27.3 s at a peak of 289 MiB). **The cards are true to the store:** each
+takes a licence from the registry, a count from the export's own
+`MANIFEST.json` (the lines by model and by run, the pages by language, the
+deposits by channel, the verified lines, the scored audit) and a measured
+figure from a committed report (K3's 28.6 % on the letter pool, 36.7 % in
+Leibniz's own hand, 11.84 % on the validation set; LT1's table; K4's
+coverage, precision 95.2 % and recall 74.5 %), and nothing from anywhere
+else; the transcriptions card names both models per line with the German
+reader's three licence stamps, the language pass and the Marginalien; both
+ground-truth cards state the audit as it stands (the first audit with its
+judge and its mint, K2's sheet with the Edition as its judge and the counts
+of 16 November, its precision "scored in K3b" until that report is
+committed, the verified subset counted from the export or said to follow);
+every card opens with the Hugging Face front matter and carries the
+anti-contamination note. **The mechanics:** `leibniz release export` (four
+folders, a deposit file beside each record's), `release cards` (the cards
+re-rendered from the manifests with the DOIs of `RELEASE.json`, no store),
+`release model` (the checkpoint's inference files, README from K3's card,
+LICENSE with the base's MIT notice, MANIFEST, a zip), `release check` (the
+checklist's checks as PASS or FAIL lines, against the site's `/api/stats`
+where a copy is given), `tools/release/zenodo_deposit.py` (`reserve` a
+draft's DOI, `upload` the metadata and files, resumable, and stop: it never
+publishes) and `tools/release/hf_upload.py` (a private dataset or model
+repository, README first; the NC-derived deposit refused). Both scripts
+read their token from the environment only and have a dry run; the dry run
+of the whole flow on K4's fixture store is in the Phase log. Two points for
+the operator before anything is published, Open questions 34 and 35: what
+the model card says about "no NC input" (part of the training lines are
+published in the NC-derived deposit), and the catalogue records inside the
+transcriptions record. **Merged with main at `55c32cc` (#64, K3b-prep) on
+2026-11-18:** the verdict tools and the registry's `edition-k2-audit` entry
+are now beside this work; the store holds no verified line until K3b's Task
+0 writes them, so an export today has the open card say that the verified
+subset follows in the next version, and after that write the card counts
+the lines and credits them by itself (the credit in the wording the
+registry's entry prescribes until the Edition confirms one: the
+Leibniz-Edition's Arbeitsstelle, Potsdam). ruff clean and **1,160 passed, 3
+skipped** on the merged tree (1,120 before the merge, 1,071 at the
+session's start); the REL1 entry in the Phase log has the detail.
+
+**2026-11-17, later still: R1 Part A — decoding with a language model and one
+confidence per line, the code; a cloud session on the branch it was given,
+`claude/modest-cori-wds26r`, from main at `9ae24de` (#63); no store, no GPU,
+nothing measured on the Nachlass, nothing deployed; Part B (the real
+language models, the measurement, the calibration) is a desktop session on
+the same branch.** kraken 7.0.3 decodes greedily and nothing else; its
+recogniser takes a decoder callable and a softmax temperature
+(`RecognitionInferenceConfig`), and hands the callable the matrix as
+`(N, C, W)`. `src/leibniz/htr/decoding.py` is that callable three times
+behind one interface: **`greedy`** (kraken's own decoder left in place, so
+every number produced so far stands bit for bit), **`beam-lm`**
+(flashlight-text's lexicon-free beam search with a KenLM character n-gram:
+PyLaia's recipe, the space a token, LM weight 1.5, beam 50) and
+**`prefix-beam`** (a CTC prefix beam search of the project's own in plain
+Python over the same n-gram interface, the fallback and the tests'
+reference). Each returns the text, its score and one posterior per
+character, and **the line's confidence is one function over them**, the
+mean per-character posterior that the pipeline has stored since C1 (SPECS
+§4.5, amended). `KrakenEngine` takes `decoder=` and `temperature=` and can
+hand out the posteriors, so Part B's sweeps need the network once;
+`leibniz bench run` and `leibniz align letterpool-eval` take `--decoder
+greedy|beam-lm|prefix-beam --lm PATH --lm-weight W --beam N`.
+**`leibniz bench lm-build`** builds a Latin-and-French and a German
+6-gram with KenLM's `lmplz` from the open text only — the edition cache's
+records of §70-free volumes read through an open channel, and the
+open-bucket minted lines — with every piece of the evaluation sets held
+out whole (K3's validation pieces, the judged audit lines, the pieces on
+PHILIUMM's pages and the letter pool's), the ARPA kept beside the binary
+and a sidecar saying which text each model saw. Dependencies as the
+optional extra `decode` (flashlight-text, which has wheels to CPython 3.12
+and none for 3.13; kenlm, a source distribution; numpy); torchaudio is not
+in the lock and is not needed. flashlight-text (MIT in its file, "BSD" in
+its metadata), KenLM (LGPL-2.1-or-later, a tool and a linked library,
+nothing copied) and pyctcdecode (not used) are in the licence registry.
+**A toy model from the fixture store proves the path** (12 and 13 lines;
+fixture sentences, not edition text) through the real `lmplz`, flashlight
+and the two commands; a near-tie between `qvod` and `quod` goes to the
+modelled spelling under both beams. **Tests 1,095 → 1,136** (bench and
+decode extras, CPython 3.12; 1,104 with 10 skipped in the slim Python 3.13
+environment, where the fallback path imports nothing new). **Not done
+here, by design:** the real models, every CER, the cost a line on the
+desktop's CPU, the calibration and its thresholds. Two things Part B
+decides first (Open question 36): PHILIUMM's dataset has no test split, so
+"tuned on validation, reported on test" needs a split of `val` by page;
+and the C3 amendment of 16 September warns that a model of the edition's
+text pulls a diplomatic reader towards its expansions, so the builder
+offers the folded variant and the minted-lines-only variant beside the one
+this prompt names, and the validation lines choose. The R1 entry in the
+Phase log has the hand-over, command by command.
+**2026-11-17, later: K3b-prep — the verdict tools; a cloud session on the
+branch it was given, `claude/confident-brown-2xwlqs`, from main at `9ae24de`
+(#63: the archive is merged, so the preamble's clause 8 holds); fixtures only:
+no store, no GPU, nothing deployed, and none of the Edition's text in this
+checkout — every test runs on synthetic rows of the table's shape; the pull
+request and the merge are the operator's.** Five things for K3b's desktop
+session. **(1) `leibniz align audit-convert`** turns a judge's table (`ref,
+stratum, verdict, transcription, note`) into the C2 verdict CSV (`ref,
+stratum, verdict, note`) and a corrections file (`ref, stratum, group,
+gt_text, transcription, folded_similarity, note`): a verdict given stays, a
+transcription without a verdict counts as *wrong* with the fixed phrase in its
+note, a row with neither stays unjudged; it prints the tally by class and by
+group and stops on a ref the sheet does not have, a ref judged twice or a cell
+that is not a verdict. **(2) `audit-score --corrections`** reads each row's
+correction from that file: the pattern of a re-written line is read off the
+word-level difference between the minted text and the judge's line (the
+judge's text, not the HTR reading, is the witness for a hyphen or an addition;
+a line that folds to the minted text below 0.5 is *other*, measured, not left
+for the override file), and the report gains **"Under the fold"**: per stratum
+and per group the judged lines as correct as written, boundary, corrected at
+or above the factory's threshold for the row's stratum (`STRATUM_THRESHOLDS`:
+these count as right under the fold), corrected below it, wrong, unreadable,
+with three precisions and their Wilson intervals — strict, usable (boundary
+counted), under the fold — and a fourth column that adds the boundary lines to
+the third; the summary JSON carries them per group. With `--corrections` the
+report, the summary and the overrides must be named, because the defaults are
+the C2 audit's files; a test shows those untouched. **(3) `audit-apply`**
+plans and, with `--write`, writes the verified lines into `gt_lines`: a line
+judged *correct* keeps its text and gains `; verified leibniz-edition
+2026-11-06` before `katalog`; a line with the judge's text (no verdict, or
+*boundary*) takes that text, the mark, and `channel edition-k2-audit` in place
+of the channel it had, so it goes to the open deposit whatever copy the minted
+text came through, while a confirmed Potsdam-channel line stays in the NC
+deposit; a *boundary* without a text, a *wrong* without one and an
+*unreadable* are not verified. The dry run opens the store read-only, prints
+the rows by class, the text replacements, the channel changes and the deposit
+each row goes to, and writes `reports/kurrent/k3b-verified.csv`; the write is
+one transaction with a `runs` row (stage `gt_audit`, model
+`leibniz-edition-k2-audit`), a second run changes nothing and says so, and on
+the fixture store the rendered gt-report is the same before and after. **(4)
+`audit-sheet-k2`** draws a further sheet of the reader's minted lines: `--hand
+own|other|both`, `--exclude-refs`, `--exclude-records`, `--exclude-pages`
+(taken out of the pool before the draw), `--context N` (the neighbouring lines
+of the page by `line_seq`, as paler greyscale strips; the help text, English
+and German, says the verdict is for the middle strip), `--refs` for an
+explicit list, `--out` and `--name` with a refusal to overwrite a sheet that
+is there; the sheet has a field for the whole line's corrected text and
+downloads `ref, stratum, verdict, transcription, note`, the table
+`audit-convert` reads. K2's own `--audit` path draws and renders as before: on
+the test fixture its sheet and lines CSV are byte for byte what main writes.
+**(5) The registry**: `edition-k2-audit` (text, CC BY 4.0 as recorded
+2026-11-16, channel `edition-k2-audit`, deposit open, the credit wording to
+confirm), `philiumm-seg-v2` (model, CC BY-NC 4.0 as published, its outputs
+unrestricted by the agreement of 2026-10-15) and `philiumm-layout-dataset-v2`
+(dataset, CC BY 4.0); no branch had the last two (main and every remote branch
+tip checked). **Produced here:** ruff clean and **1,110 passed, 3 skipped**
+(1,071 at the start; 39 new tests); from the committed exclusion files, **98
+validation records** (`reports/kurrent/k3-val-pieces.csv`), **380 letter-pool
+pages** and **1,472 held-out pages**, 1,852 pages together; the new sheet
+driven once in Chromium (a verdict, a corrected line, a note, the download, a
+reload). No number of the Edition's audit was produced: the strict 39 % and 49
+% of the entry below are reproduced by a test on 200 synthetic rows in the
+table's counts, and the figure under the fold is K3b's Task 0. Also in this
+branch, at the operator's word during the session: bare `pytest` now collects
+every test file (the repository root on `sys.path`), and the viewer's README
+points at the archived "Delivery-model correction". The commands for the
+desktop, with what each should print, are under Next; the K3b-prep entry in
+the Phase log has the detail.
+
+**2026-11-17, later: G1b — the gold-first draw for the fragment pack, built in
+a cloud session on the fixture store, on the branch it was given,
+`claude/eloquent-cannon-d2xv4r`, from main at `9ae24de` (#63, ARCH1 merged); code
+and tests only: no store, no GPU, nothing deployed; the rebuild on the desktop,
+the pull request and the merge are the operator's.** The first real pack found
+its gold after the random draw and so held 56 gold rows where the cap allowed
+500 (the G1 entry). `leibniz pack fragments` now draws the other way round
+(`src/leibniz/pack/fragments.py`). (a) **The gold first**: every eligible line
+with a reader-minted row in the open deposit gets its verdict under the fold;
+the truths and the both-wrong lines are drawn among *all* the eligible lines,
+up to `--gold-rate` (0.25) of the rows the pack will have with at most
+`--bad-gold-share` of the gold both-wrong, each spread over the strata as the
+rows are, a stratum short of them giving its share to the others, so the cap
+is reached whenever the supply allows; then the strata are filled to the limit
+around the gold, Leibniz's own hand kept at its share with the gold counted
+in; the rows are written in an order shuffled under the seed. (b)
+**`--bad-gold-share` defaults to 0.5**: every truth of the first pack was the
+Bern reading, and with half the gold both-wrong a player who always takes the
+Bern reading is found out. (c) **The floor is `--min-ratio` 0.5**, not
+`--min-chars` on the shorter reading: a pair whose shorter reading is under
+half the longer is skipped as `lopsided` (a new skip reason after `too_long`,
+always printed). A failed reading is short against its line, not in itself:
+ten characters against fifty would pass a ten-character floor and nine against
+eleven, a fair pair, would not; and it is the count Next already asked of the
+first pack. (d) **`--strata`** takes weights
+(`fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1`; relative;
+a stratum not named gives no row, gold included); without it the allocation
+is equal and is `audit.allocate`'s split, number for number (on the first
+pack's eligible counts 55 / 649 / 648 / 648, as that pack had; the example
+weights on the same counts give 55 / 1,047 / 599 / 299). A stratum short of
+lines gives its surplus to the others in the weights' proportion; a stratum
+whose gold alone is over its share keeps its gold. **Found, and not foreseen
+by the prompt (Open question 30 j, the operator's to answer at the rebuild):**
+the pack's first candidate is the reading the store shows, and since K4's run
+617 (30 October) that is k3-trocr's on the German pages, not v1's — so a
+rebuild on today's store pairs k3-trocr with the Bern reading, and its gold
+candidates are lines k3-trocr was trained on (K3 trained on K2's mint). The
+default stays the reading the site shows; **`--as-of-run 616`** reads the store
+as it stood before K4's reading and gives v1 against Bern as in the first pack;
+the printout now counts the stored reading's models and no longer calls it v1.
+Tests 1,071 → **1,103 passed, 3 skipped** (the three need numpy), ruff clean;
+`tests/test_pack_fragments.py` 31 → 63, the new ones on synthetic eligible
+sets: on a pool of 8,000 lines with 200 truths and 523 both-wrong lines and a
+limit of 400, the gold-first draw holds 100 gold rows (50 truths, 50
+both-wrong), where G1's draw on the same pool and seed finds 8 truths and 21
+both-wrong lines among its 400. **No number from the corpus**: this session
+had no store; the supply of gold among the eligible lines is the first thing
+the rebuild prints. The rebuild's two commands, their expected output and the
+copy to the box are under Next; the G1b entry in the Phase log has the detail.
 
 **2026-11-17: ARCH1 — the archive: the finished phases moved out of STATUS.md
 and PROMPTS.md, verbatim; a cloud session, alone, on the branch it was given,
@@ -1098,6 +1369,952 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   at 3.6 % CER (9 lines exactly right) where our handwriting model reads the
   same lines at 14.9 %; the Fraktur half of the sheet is still to be
   transcribed."
+
+### REL1 — the first releases (2026-11-17/18) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 · ✅ Task 3 · ✅ Task 4 · ⏳ the operator's pull request · ⏳ Part B (the operator's desktop) · ⏳ Part C
+
+- **Setting and pre-flight (Task 0; recorded, no go waited for).** Part A, a
+  cloud session on the branch it was given, `claude/clever-gates-56b0a4`, from
+  main at `9ae24de` (#63, ARCH1 merged: the archive files are in force);
+  `git fetch origin main && git merge origin/main` already up to date; no
+  store in the checkout (`data/README.md` only), so everything here runs on
+  fixtures; `.venv-cloud` made with the web, gt and release extras
+  (`UV_PROJECT_ENVIRONMENT=.venv-cloud uv sync --extra web --extra gt --extra
+  release`; Python 3.13); no token of any kind. Baseline: ruff clean,
+  **1,071 passed, 3 skipped** (`python -m pytest`; the three need numpy).
+  The fixture store of the pre-flight is K4's (`tools/browser-checks/k4-seed.py`:
+  the test fixtures with the German rows and one scoped k3-trocr run);
+  `leibniz release export --format parquet` and `--format jsonl` wrote the
+  four datasets (works 4, pages 8, crosswalk 1, katalog_records 1; lines 19;
+  gt 7; gt-nc 1) and `leibniz release checklist` printed the checklist.
+  **Confirmed:** (a) `iter_transcriptions` applies K4's precedence — the
+  fixture page `00069377:0001` exports the scoped row on the line the scoped
+  run wrote (`model` `k3-trocr@runs-615-epoch-5`, `run_id` 8) and the first
+  model's rows on its other four lines; the column is `run_id` (with
+  `run_at`), not `run` as the prompt writes it; (b) the ground truth splits
+  by channel as L1 decided (open: `ia` and rows without a channel; nc:
+  `potsdam`, `gwlb`, joined channels; the letter pool in neither); (c) the
+  inventory tables are `works`, `pages`, `crosswalk`, `katalog_records`, the
+  last the store's catalogue records as they are — on the fixture one
+  website-shaped record; on the master, by STATUS.md, 24,916 records read
+  from the catalogue's website unless A3b's write has run since (its entry
+  still reads ⏳), and then 70,405 from the Arbeitsstelle's export; the card
+  asks the store which (`catalog_refreshed`) and words the credit
+  accordingly. **Found, and not foreseen by the prompt:** (1) *the committed
+  audit summary was a test's.* `tests/test_align_audit.py` ran `align
+  audit-score` without `--summary`, so every test run wrote an 8-line
+  stand-in audit over `reports/gt-audit/audit-summary.json`; the file was
+  first committed in that state (2026-10-10, `b725def`) and has read "8
+  rows, 95.0 %, passes the gate" on main since. Both ground-truth cards
+  quote that file, so an export from main said "Hand audit of 8 of 8 sampled
+  lines … precision 95.0 % as written, which passes the 95 % gate", and the
+  committed `reports/gt-factory.md` (the operator's run of 21 October) says
+  the same with "Audited 2" and 50 to 100 % per stratum. (2) *The export
+  opened the master with `db.init_db`*: a writing connection that runs the
+  schema DDL and the migrations; Part B's rule is a read-only store. (3)
+  *The export held a million line rows in memory per file* (`_chunks` built
+  each chunk as a list) and sorted the whole `lines` table (`ORDER BY
+  page_id, line_seq, rank` with no index on the pair): gigabytes of Python
+  objects and of temporary file on a 9.9 GB host. (4) *The cards said
+  nothing true about the German reader's licence, the language pass or the
+  inventory*, and stated one model in the attribution line. The three
+  answers of the operator's note of 16 November: the model's public name
+  **`leibniz-kurrent-trocr`**; D1 inside the transcriptions record **yes**;
+  the Hugging Face namespace was left as `[NAMESPACE]`, so proposed:
+  **`leibniz-legible`** (`https://huggingface.co/leibniz-legible` answered
+  404 on 2026-11-17: no public profile of that name; the operator creates the
+  organisation or names another). The plan as carried out is the tasks below.
+- **Task 1, the cards true to the store — CHECKPOINT A.** *The audit
+  summary restored and fenced:* `leibniz align audit-score
+  reports/gt-audit/gt-audit-verdicts-philiumm.csv` with the C2 mint's stratum
+  counts as weights (9,913 · 96,175 · 190,162 · 1,174, Key numbers) wrote the
+  real summary back — **200 lines, 199 judged, 185 scored, corpus-weighted
+  precision 72.3 %, 92.2 % with boundary slips usable, FAIL at 95 %** — and
+  its stratum table is the committed `reports/gt-audit.md`'s line for line;
+  the four test invocations now pass `--summary` into the test's own folder,
+  and a test pins the committed summary to the audit; the two wrong passages
+  of `reports/gt-factory.md` (the Audited and Est. precision columns, the
+  sentence under them) were re-rendered by the report's own code from the
+  restored summary (50 · 45 · 48 · 42 scored; 84.0 · 86.7 · 64.6 · 57.1 %)
+  and nothing else in that file touched; the operator's next `align
+  gt-report` on the store regenerates the whole. *The export*
+  (`release/export.py`): the store opened read-only by the CLI
+  (`audit_reach.open_readonly`; a missing store is an error, never created);
+  the lines read page by page along `ix_lines_page` (`CROSS JOIN` pins the
+  order, a test reads the query plan: no temporary B-tree) with the current
+  row of each line chosen in Python under the same rank `(precedence, run
+  id)`; chunks streamed to the writers, never held; a re-export clears an
+  older run's extra chunk files. `MANIFEST.json` (version 2) now carries
+  everything a card states as a number: `counts` (the lines by model, by
+  run, by language, by status, by collection, the pages with lines — tallied
+  as the rows are written; a deposit's lines by channel, stratum and reader,
+  and the verified ones), `corpus` (works, pages by status, pages by
+  language from `page_lang`, the reading runs with their scope, the
+  catalogue records and the export they were refreshed from, `gt_lines`),
+  `audit` (the scored summary) and `deposit_census`. **D2 with D1 inside
+  it:** the `transcriptions` folder holds `lines-NNNN` and the four
+  inventory tables under one manifest and one card; `inventory` stays
+  exportable on its own (the repository's copy; not a record). *The cards*
+  (`release/cards.py`, `release/measured.py`, `release/state.py`): every
+  card opens with the Hugging Face front matter (license, language la/fr/de,
+  pretty_name, size_categories from the main table's rows, task_categories
+  image-to-text, tags, one config per table) above the Markdown that is the
+  Zenodo README; a table of what the record holds with each table's own
+  licence line (lines CC BY 4.0; works, pages, crosswalk CC0 1.0; the
+  catalogue records CC BY 4.0 with `arbeitskatalog_credit` where the store
+  holds the export, and "the records read from the catalogue's website, a
+  part of the catalogue" where it does not). The transcriptions card names
+  both models per line (`model`, `run_id`, `run_at`; the lines of each model
+  and of each scoped run, from the manifest), the German reader with its
+  three stamps from `legal.site_readers()` (model CC BY 4.0, base MIT,
+  readings CC BY 4.0), the rule a page read twice follows, the language pass
+  with its threshold, precision and recall (about three quarters of the
+  German pages by the census's measure; a missed page keeps the first
+  model's text), the Marginalien left to the first model, K3's numbers with
+  what each was measured on and LT1's table beside them. Both ground-truth
+  cards have an Audit section: the first audit's sentence from the summary,
+  with its judge (the PHILIUMM team, 2026-10-07), the mint it was measured
+  on and the plain statement that the re-mint in the deposit has not been
+  judged again; K2's sheet with its judge (the Leibniz-Edition's
+  Arbeitsstelle, Potsdam, returned 2026-11-06), its stricter convention and
+  the counts of the entry of 2026-11-16 (76 · 21 · 98 · 1 · 3 · 1; 118
+  corrected), the precision "scored in K3b" until
+  `reports/kurrent/k2-audit.md` is committed and by pointing at that report
+  after; the verified subset counted from the export (rows whose `source`
+  carries `verified leibniz-edition`, of them the corrected ones in `channel
+  edition-k2-audit`) and credited from the registry's entry once main has
+  it, and until the store holds such rows the open card says the subset
+  follows in the next version. Main does not carry K3b-prep's code or the
+  registry entry yet; nothing here depends on the order of the merges. The
+  anti-contamination note stands in every card and every Zenodo description,
+  with a second sentence for a reader that is a training pipeline. **A
+  card's numbers have three sources and no fourth:** the registry
+  (licences), the manifest (counts), a committed report (measured figures:
+  `k3-eval.json`, `page-llm.json`, `k4-reading.json`, read at render time; a
+  missing report is named and nothing quoted; B1's 7.95 % stays a constant
+  pinned to `reports/philiumm-repro.md` by a test). *The DOI mechanism:*
+  `RELEASE.json` at the release root holds the reserved DOIs, the Hub
+  namespace and the creators; `leibniz release cards --out ROOT [--doi
+  record=DOI …] [--hf-namespace NS] [--creator "Family, Given|ORCID"]`
+  re-renders every card and deposit file from the manifests alone, each card
+  with its own DOI and its siblings'. Tests 1,071 → **1,090** at this
+  checkpoint, ruff clean.
+- **Task 2, the model package** (`release/model.py`; `leibniz release model
+  --weights DIR --card FILE --name NAME --out ROOT`). The checkpoint's
+  inference files are copied into `ROOT/NAME/` by an allowlist — `config.json`,
+  `model.safetensors`, `preprocessor_config.json` required, a tokenizer file
+  required, `generation_config.json`, the processor and tokenizer files and
+  K3's `k3-training.json` where present — and everything else in the folder
+  (an optimizer state, a trainer's log, a checkpoint directory, weights not
+  in safetensors) is left behind and listed; the weights folder is read,
+  never written. Beside them: **README.md**, K3's card
+  (`reports/kurrent/k3-model-card-trocr.md`, the default `--card`) brought to
+  the finish — the title and the DOI line, K3's data statement and error
+  table as they stand, the draft's two stale bullets rewritten (the
+  precision of the training lines "unmeasured until the audit is scored",
+  with K2's sheet as it came back and the note that the judged lines were
+  never trained on; the licence from the registry's `model-k3-trocr` row),
+  then LT1's table beside K3's, the K4 run the readings are on the site
+  under (run 617, 1,539,688 lines on 24,078 pages, greedy, the decoder's
+  cache on, 160 new tokens, batch 16, float32, 91 ms a line, all read from
+  `k4-reading.json`), the usage with transformers — `use_cache=True` and why:
+  the checkpoint's generation config, the base's, switches the decoder's
+  key/value cache off — the anti-contamination note, where the record lives,
+  the citation; a card that has changed shape still yields the finished
+  statements under a heading of their own, and the command says which lines
+  it did not find. **LICENSE**: the model's licence by name with the address
+  of its legal code and the registry's reason, and the base model's MIT
+  notice in full as its repository states it (read 2026-11-17: "Copyright (c)
+  2023 Digital Humanities Center, University of Bern"). **MANIFEST.json**:
+  the name, the reader's version, the base, the licence, every file with its
+  size and SHA-256, what was left out. **`ROOT/NAME.zip`** for Zenodo (the
+  weights stored, the text deflated, written to a `.part` and renamed) and
+  the record's deposit file `ROOT/NAME.zenodo.json` (upload type `other`:
+  the deposit API has no "model"; the related identifiers: the code
+  repository, the Bern model's address as `isDerivedFrom`, the project
+  statement). **One thing the card now says in plain words, for the
+  operator to read before publishing** (Open question 34): the registry
+  calls the model "no NC input" and CC BY 4.0, and its training lines are
+  K2's, part of them read from the Potsdam text files and the GWLB
+  repository's PDFs and therefore published in the NC-derived deposit; the
+  card states both and names the lawyer-memo question, taking no position.
+  Tested on a stand-in folder (7 tests); 1,090 → **1,097**.
+- **Task 3, Zenodo and Hugging Face, scripted** (`tools/release/zenodo_deposit.py`
+  and `tools/release/hf_upload.py`, thin entry points; the logic and its tests
+  in `release/zenodo.py` and `release/hub.py`). *Zenodo, two steps a record,
+  with the cards re-rendered between them:* `reserve` creates the draft
+  (`POST /api/deposit/depositions` with a working title and `prereserve_doi`),
+  prints the DOI Zenodo reserves and writes it with the deposition's id and
+  bucket into `RELEASE.json` — a record that already has a draft there is not
+  given a second one; `upload` reads the record's deposit file (title = the
+  card's title, description = the card's summary, licence statement,
+  attribution and anti-contamination note as HTML, creators, licence id,
+  version = the export's date, the keywords and related identifiers of the
+  checklist §2 exactly, community `leibniz`), refuses a card that does not
+  carry the reserved DOI, a draft that is already published and a DOI that is
+  not the draft's, writes the metadata (`PUT` on the draft), then uploads
+  the files one at a time to the draft's bucket — a file the draft already
+  holds with the same size and MD5 is skipped, each upload's size and MD5 are
+  checked against the local file, a 5xx or a network error is retried with a
+  growing pause, the record's limits (100 files, 50 GB) are checked before
+  anything is sent, the draft's own listing is compared at the end — and
+  **stops: no request to `actions/publish` exists in the code**, and the
+  runbook asks for a token with `deposit:write` and without
+  `deposit:actions`, which could not publish if it tried. `--sandbox` runs
+  the same against sandbox.zenodo.org. *Hugging Face:* the record's folder to
+  `<namespace>/<folder>` (a dataset repository; a model repository for the
+  model), created private, an existing public one refused unless
+  `--allow-public`, README.md first, the Parquet and the weights as they are,
+  one commit a file, a large file skipped where the Hub states the same
+  SHA-256, the Zenodo zip and deposit files never sent; **the NC-derived
+  deposit is refused three ways** (by record name, by the folder's manifest,
+  by the card's licence), so it cannot reach the mirror under another name.
+  *Both* read their token from the environment only (`ZENODO_TOKEN`,
+  `HF_TOKEN`; no `--token` option exists; the Hub client is handed the token
+  explicitly, so the library's token file is not consulted), never print or
+  store it, and have a `--dry-run` that prints each request and needs no
+  token. `huggingface_hub` joins the `release` extra (1.16.1, already locked
+  through transformers; `uv.lock` gains two lines). *The API as scripted
+  against:* the deposit API of developers.zenodo.org as read on 2026-11-17
+  (the bucket `PUT`, 50 GB and 100 files a record, `GET …/files` with
+  `filename`, `filesize`, a bare MD5). Read the same day through the public
+  API: the community `leibniz` exists; the licence ids `cc-by-4.0`,
+  `cc-by-nc-4.0`, `cc0-1.0`, `apache-2.0` are in Zenodo's vocabulary; the
+  project's four report records name one creator with an ORCID (so the
+  operator passes `--creator` at Part B: the default is the project's name);
+  the PHILIUMM records still read CC BY-NC 4.0 (the two models) and CC BY 4.0
+  (the dataset, Zenodo and the Hub at revision b53f531c), and the Bern
+  model's card still reads MIT, its repository's head now `c599751f` (the
+  registry's revision `a6bb6086` still resolves): Open question 29 (f)'s
+  re-reading, done once here, to be done again on the day of the release.
+  *The tests* (17; no network): a mock transport answering in the shapes of
+  `tests/fixtures/zenodo/` — **one fixture is a recording** (Zenodo's 403
+  "Permission denied." to a call without a token, 2026-11-17); the three
+  success shapes are written to the documentation's field lists, not
+  recorded, since no token exists here (the fixture folder's README says so;
+  Part B's first `reserve --sandbox` is the live check) — and a stand-in for
+  the Hub client. 1,097 → **1,114**, ruff clean.
+- **The dry run on the fixture store** (K4's fixture; the outputs kept in
+  the session's scratch folder, nothing committed): `leibniz release export
+  --format parquet` → four folders, three deposit files; `zenodo_deposit.py
+  reserve --dry-run` for the four records → four `DRY RUN  POST
+  https://zenodo.org/api/deposit/depositions` lines and "no draft created,
+  no DOI reserved"; `leibniz release cards --doi …` with four stand-in DOIs
+  and `--hf-namespace leibniz-legible` → the four cards re-rendered without
+  the store; `leibniz release model` on a stand-in checkpoint → the folder,
+  the zip, the deposit file; `zenodo_deposit.py upload --dry-run` for the
+  four → 21 `DRY RUN  PUT` lines (four metadata writes, seventeen files);
+  `hf_upload.py --dry-run` → transcriptions 7 files, gt 3, the model 12, and
+  `gt-nc` refused with exit 1 ("the NC-derived deposit is on Zenodo only").
+  **The export's cost, measured on a synthetic store** (not Leibniz's data:
+  8,000 pages of 60 lines with 40-point polygons, a scoped run on every
+  tenth page; 528,000 line rows, 404 MB): 480,000 lines written as Parquet
+  in **27.3 s with a peak of 289 MiB** in this container (4 cores), the
+  memory a Parquet batch of 50,000 rows whatever the chunk size.
+- **Task 4, the runbook and the hand-over.** `leibniz release check --out
+  ROOT [--stats FILE]` (`release/check.py`; 6 tests): the checklist's §1 as
+  one command that reads the exports and never the store — every file
+  against its manifest (rows, size, SHA-256), the lines by model against
+  their sum and against the site's `/api/stats` saved to a file (`lines`,
+  `models`, `pages_by_lang`), no line with an nc-bucket source, every line
+  with model, run and status, every ground-truth row in the deposit its
+  channel sends it to, the two deposits disjoint and adding up with what
+  neither takes to the store's `gt_lines`, the model's files against its
+  manifest and its zip, every card with its front matter, the
+  anti-contamination note, its DOI once one is reserved and no stand-in
+  audit — one PASS or FAIL line each, the exit code the number of failures.
+  `leibniz release cards` prints the line Part C is started with once all
+  four DOIs are in. `reports/release-checklist.md` is brought to the flow as
+  built (§0 the decisions of 16 November; §1 the commands and what the
+  check command covers; §2 one record per dataset with D1 inside D2, the
+  creators, reserve → cards → upload, the mirror without the NC deposit; §3
+  the German reader's package beside the v2 entry; §5 Part C's items). The
+  runbook for Part B is under Next, each step with its command and its
+  expected answer; Part C's list follows it. The prompt is appended to
+  PROMPTS.md under "Follow-up phases (2026-10)" with the preamble, the
+  operator's note and the cloud batch note. `git fetch origin main` before
+  the final push: main had not moved since the session's start (`9ae24de`),
+  so there was nothing to merge and no conflict. ruff clean; **1,120
+  passed, 3 skipped** (1,071 before). Pushed;
+  the compare URL is in Next; not merged.
+- **The merge with main at `55c32cc` (#64, K3b-prep), 2026-11-18, on the
+  operator's word that main had moved.** `git fetch origin main && git merge
+  origin/main` met conflicts in STATUS.md and PROMPTS.md only (the code,
+  `pyproject.toml` and the registry merged by themselves). **Both sides'
+  entries are kept, the newer above:** in STATUS.md this entry above
+  K3b-prep's in Current state, the Phase log, Divergences and Next, and the
+  two clauses of the head line joined, REL1's first; in PROMPTS.md the REL1
+  prompt above K3b-prep's, both below ARCH1's (the file is otherwise oldest
+  first; the rule is the preamble's clause 7 and the operator's word, applied
+  as given); Open questions and Key numbers needed no hand (35 and 34 stand
+  above 33 with K3b-prep's restatement). **One thing the merge changed in
+  what a card says, and its repair:** the registry now has the
+  `edition-k2-audit` entry, and the card took its credit from the entry's
+  name, which is the artifact's description ("… verdicts and corrected
+  transcriptions of K2's audit sheet"), not a credit; the entry's own note
+  says the wording is to be confirmed and what stands until then, so the
+  card now uses exactly that wording and takes the licence from the entry,
+  a test holds the constant to the registry's note, a deposit that holds
+  verified lines gains a "Verified lines" attribution line (in the card and
+  in the Zenodo description), and the tally reads the mark through
+  K3b-prep's own `verified_from_source` on sources written by its
+  `verified_source` (a corrected line of the Potsdam channel moves to the
+  open deposit, a confirmed one stays in the NC deposit, as that code
+  intends). `gt-open`'s inputs stay as they are until the wording is
+  confirmed, as K3b-prep's entry leaves it. The restored audit summary
+  survives K3b-prep's tests (still 200 lines, 199 judged after the suite);
+  `reports/kurrent/k2-audit.md` is not on main, so both ground-truth cards
+  still say "scored in K3b". ruff clean; **1,160 passed, 3 skipped** on the
+  merged tree. Pushed; not merged.
+
+### R1 — decoding and confidence (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B: Part A ends here) · ⏳ Part B on the desktop (Tasks 3 and 4, the Finish)
+
+- **Setting and pre-flight (Task 0; Part A, a cloud session).** The branch it
+  was given, `claude/modest-cori-wds26r`, from main at `9ae24de` (#63, ARCH1
+  merged); `git fetch origin main && git merge origin/main` already up to
+  date; no `data/inventory.sqlite`, so a cloud checkout; the tree clean. The
+  archive is in force (the preamble's clause 8): the B1 and K1 entries were
+  read in `STATUS-archive.md`. `.venv-cloud` first with uv's default Python
+  (3.13.18) and the web, gt, release and bench extras: `ruff check` clean,
+  `ruff format --check` 296 files formatted, **1,095 passed, 1 skipped**
+  (`test_htr_engines`' absent-stack test, kraken being installed). The
+  versions, by `pip index versions` on 17 November: **flashlight-text 0.0.7**
+  (0.0.7, 0.0.6, 0.0.5, 0.0.4, 0.0.2, 0.0.1; uploaded 2024-03-23; wheels for
+  CPython 3.6 to 3.12 and PyPy, **none for 3.13**, a source distribution
+  beside them; the PyPI licence field "BSD licensed, as found in the LICENSE
+  file", the LICENSE file in the wheel "MIT License"), **kenlm 0.3.0** (0.3.0,
+  0.2.0, 0.1, 0; uploaded 2025-04-07; a source distribution only, compiled
+  here by g++ in 38 s; LGPL-2.1-or-later by its LICENSE file), **pyctcdecode
+  0.5.0** (uploaded 2023-01-20, Apache-2.0; not used). So `.venv-cloud` was
+  made again on **CPython 3.12.13** (the project's Python, COMMON CONTEXT; the
+  desktop's `.venv-k1` is 3.12 too), where flashlight-text installs from its
+  wheel. **torchaudio is not in `uv.lock` at all** (the lock has torch 2.12.0
+  and torchvision 0.27.0; kraken 7.0.3 does not depend on it); torchaudio
+  2.11.1 on PyPI (it requires torch ≥ 2.11) still ships
+  `torchaudio.models.decoder.ctc_decoder`, a wrapper that raises without
+  flashlight-text, so the decoder uses flashlight-text directly and no
+  torchaudio enters the lock. kraken 7.0.3's hook, read in its source
+  (`kraken/lib/vgsl/rpred.py`, `kraken/configs/base.py`):
+  `RecognitionInferenceConfig(temperature=…, decoder=…)`; `_rec_predict`
+  computes `(logits / temperature).softmax(1)`, squeezes it to **`(N, C, W)`**
+  — labels by frames, not `(N, W, C)` as the prompt and kraken's own
+  docstring say — and hands it with the lengths to the decoder callable,
+  whose `(label, start, end, confidence)` tuples the codec turns into
+  characters. No go was waited for (the batch note of 17 November).
+- **Task 1 — the decoder behind one interface (Checkpoint A).**
+  `src/leibniz/htr/decoding.py`, pure Python, the heavy imports lazy:
+  `Decoder` with three kinds. **`greedy`** is kraken's rule restated (argmax
+  per frame, runs collapsed, the blank dropped, a character's confidence the
+  highest posterior of its run); `KrakenEngine` leaves kraken's own
+  `greedy_decoder` in place for it and passes neither `decoder` nor
+  `temperature` to kraken's config, so today's text and confidence are
+  unchanged bit for bit (the old `_run` path is untouched); on random softmax
+  matrices the restated decoder returns exactly kraken's tuples. **`beam-lm`**
+  is flashlight-text's `LexiconFreeDecoder` with its KenLM: the tokens are the
+  codec's labels in order, label 0 the blank `<ctc>`, the space `<space>` and
+  given to the decoder as its silence token (PyLaia's `sil_token`), beam 50,
+  beam threshold 50, every token considered, LM weight 1.5 (torchaudio's
+  defaults and PyLaia's weight); measured on a toy model, the hypothesis
+  score is the best path's natural-log probability plus the weight times
+  KenLM's **log10** probability of the tokens with the end of the line, and
+  flashlight returns one label per frame between a start and an end silence,
+  so the alignment comes with the result. **`prefix-beam`** is a CTC prefix
+  beam search of the project's own over the same n-gram interface
+  (`NGramLM`: `start`, `score`, `finish`, log10; `ArpaLM` reads an ARPA file
+  in plain Python and gives KenLM's numbers to 1e-5; `KenLMModel` wraps the
+  `kenlm` module where installed): it sums the alignments of a prefix where
+  flashlight keeps the best one, so the two agree where the posterior is
+  peaked and may differ on a near-tie. Every decoder returns a `DecodeResult`
+  (text, the decoder's score, **one posterior per character** — the highest
+  posterior of the character's label inside the frames the chosen alignment
+  gives it, by flashlight's path or a Viterbi alignment of the prefix beam's
+  text — the labels, the spans, the acoustic and LM parts, the frame count),
+  and **`line_confidence`** over it is the mean per-character posterior, SPECS
+  §4.5's confidence as stored since C1, the same function for all three.
+  `retemper` gives the posteriors any other softmax temperature without a
+  second pass (`p ** (1/T)` renormalised equals `softmax(logits / T)`).
+  `TokenTable` holds the labels as characters and as LM tokens and writes the
+  tokens file (one token a line, line 0 `<ctc>`, the space `<space>`, a
+  character KenLM's tokenizer would lose spelled `<U+00A0>`); it reads the
+  codec's `c2l` map, a label that only occurs inside a multi-label entry
+  being `<unk>`. `KrakenEngine` takes `decoder=` (a `DecoderSpec`, built from
+  the model's codec once it is loaded and passed to kraken's config) and
+  `temperature=`, and gains `transcribe_scored` (the `DecodeResult`s) and
+  `posteriors` (the frames × labels matrices, for Part B's sweeps);
+  `kurrent.build_engine` passes the spec to a kraken reader and refuses it
+  for a TrOCR one. **`leibniz bench run` and `align letterpool-eval` take
+  `--decoder greedy|beam-lm|prefix-beam --lm PATH --lm-weight W --beam N`**;
+  under a decoder the letter-pool readings go to `<reader>+<decoder>.jsonl`
+  and are scored beside the greedy readings on disk; `bench run` prints the
+  seconds a line. New dependencies as the optional extra **`decode`**
+  (flashlight-text for Python < 3.13, kenlm, numpy; `uv.lock` gains the two
+  packages and nothing else moves); the fallback path imports nothing new.
+  `legal.py`: flashlight-text (MIT in the file, "BSD" in the metadata, both
+  recorded), KenLM (LGPL-2.1-or-later: a tool and a linked library, nothing
+  copied) and pyctcdecode (recorded, not used) as tools, each with its own
+  date under `REGISTRY_UPDATED` (K3b-prep's constant since the merge with
+  main at #65; this branch's own `REGISTRY_LAST_ENTRY` is gone; the registry's compilation date of
+  21 October stays). **Tests: 1,095 → 1,124** (24 in
+  `tests/test_htr_decoding.py`, 3 in `test_htr_cli.py`, 1 in
+  `test_align_letterpool_eval.py`, 1 in `test_legal_licences.py`), on
+  synthetic softmax matrices: greedy unchanged; both beams without a model
+  equal greedy where the posterior is peaked; a hand-made 3-gram pulls a
+  near-tie (u at 0.46 against v at 0.50 after q) to the modelled spelling,
+  under both beams, the chosen character keeping its own posterior; the
+  codec round trip, with a real kraken codec too; and, where kraken is
+  installed, a kraken recogniser with random weights written to a file and
+  read through `KrakenEngine` — the same text and confidence with and without
+  an explicit greedy spec, the prefix beam through kraken's hook, a
+  temperature reaching the softmax.
+  Added after the checkpoint: `--beam-tokens N` on both commands (the labels
+  considered per frame; flashlight's default is all of them).
+- **Task 2 — the language model from the project's text (Checkpoint B).**
+  `src/leibniz/htr/lm.py` and **`leibniz bench lm-build --order 6 --out
+  DIR`** (default `data/lm/r1`, never committed): two KenLM models,
+  `la-fr.{arpa,bin,json}` and `de.{arpa,bin,json}`, each with the corpus it
+  was estimated on (`.corpus.txt`: the lines as characters separated by
+  spaces, the space `<space>`) and a sidecar JSON saying which text it saw.
+  **The text**: (a) `edition`, the reading text of the edition cache for
+  every record whose printed pieces all stand in a volume §70-free on the
+  day and were read through a channel the registry places in the open
+  deposit (`legal.deposit_for`); a cache line that names no piece, a channel
+  with non-commercial terms (Potsdam, the GWLB repository, a text joined
+  from two copies of which one is NC) and a volume still protected are left
+  out and counted; (b) `gt`, the open-bucket rows of `gt_lines` under the
+  same two tests read off each row's `source`. The letter pool, Dresden and
+  the PHILIUMM dataset are never a source; `--extra name=group:path` adds
+  text of the operator's own to one model and the report names it. **The
+  two models**: a piece goes by the census's group (`pagelang.piece_group`
+  on its edition text, else on its minted lines): German or mixed with
+  German leading to `de`, Latin and French to `la-fr`, a piece the stopword
+  lists cannot place to neither, counted. **Held out, by piece**: a record
+  is dropped whole from both sources when it is one of K3's validation
+  pieces (`reports/kurrent/k3-val-pieces.csv`), when a judged audit line is
+  its (K2's sheet, the PHILIUMM verdicts), or when it stands on a page of
+  `reports/philiumm/heldout_pages.csv` (which carries PHILIUMM's `val`
+  split's store pages beside its training pages; the report counts by
+  split) or of the letter pool's set — "stands on" by the minted rows on
+  the page and by the factory's own placement of every piece with usable
+  text (the K1 census's walk), joined; Dresden has no piece in the edition.
+  `lm-holdout-pieces.csv` lists the record ids with their reasons.
+  **Normalised** to the reader's conventions: NFC (or `--form NFD` for a
+  codec of decomposed marks; `leibniz bench lm-tokens --model M --out F`
+  writes a model's tokens file and says which), control and format
+  characters dropped, whitespace collapsed, case, accents and punctuation
+  kept; nothing done to hyphens (a minted line keeps the scribe's line-end
+  hyphen, C2c's rule; the edition's running text had the print's
+  hyphenation undone at ingest); one line a sentence — a minted line as it
+  is, the edition's running text cut at word boundaries into lines of at
+  most 48 characters (`--wrap`), so that the model's beginning and end of
+  line are a manuscript line's. `--fold align` builds the other variant on
+  the aligner's fold; the decoder then reads the fold from the model's
+  sidecar and queries the model label by label through it (`V` as `u`, `é`
+  as `e`; punctuation and what the fold spells out, `&`, `æ`, `ß`, as the
+  unknown token). **Estimated** by KenLM's `lmplz` (modified Kneser-Ney,
+  interpolated, `-S 2G`) with the ARPA kept beside `build_binary`'s binary;
+  the two programs are found in `--kenlm-bin`, `$KENLM_BIN` or on the PATH
+  and are run, never imported. With `--tokens F` the report counts the
+  characters of the text the reader's codec does not have.
+  `reports/decoding/lm-build.md`, `.json`. **The toy model, on the fixture
+  store** (`tests/conftest.py`'s store with its German rows, the
+  nine-record cache `tests/fixtures/decoding/edition_cache.jsonl`, sentences
+  written for the tests; `lmplz` and `build_binary` built here from the
+  kenlm 0.3.0 source distribution with cmake and Boost's headers): under
+  the committed evaluation lists **Latin and French 12 lines, 457
+  characters, 2 records (6-gram counts 35 · 180 · 343 · 399 · 415 · 412);
+  German 13 lines, 476 characters, 1 record (9 edition lines, 4 minted;
+  42 · 185 · 296 · 337 · 345 · 346)**; of the cache's nine records five
+  usable, two left out for an NC channel, one without a piece, one in a
+  volume not yet free (IV,4); of the store's nine `gt_lines` rows four
+  usable; one record held out because the fixture's first work is a real
+  PHILIUMM training page id; the whole build in one second, with KenLM's
+  discount fallback (too little text for the discounts). Fixture numbers:
+  nothing about the Nachlass, and the toy report is not committed. The path
+  through the command line was then run end to end: `lm-tokens` on a kraken
+  model with random weights, `bench run` on four synthetic line images with
+  `--decoder greedy`, `beam-lm --lm la-fr.bin` and `prefix-beam`, each to a
+  CER line (of no meaning on random weights). **One line's decoding time on
+  this container's CPU** (a synthetic peaked matrix of 472 frames by 150
+  labels, a 6-gram): flashlight at beam 50 **0.44 s** with every label
+  considered, 0.28 s at 40 labels a frame, 0.13 s at 20, 0.07 s at 10, the
+  same text each time; the prefix beam 0.30 s at beam 50, 0.10 s at 20,
+  0.05 s at 10; the published 0.12 s a line is therefore a matter of
+  `--beam-tokens`, which Part B tunes with the weight. **Tests: 1,124 →
+  1,136** in `.venv-cloud` (CPython 3.12.13; web, gt, release, bench and
+  decode extras; `KENLM_BIN` set; 1 skipped), `tests/test_htr_lm.py`'s
+  twelve: the normalisation, the gate, both sources, the two models and
+  what each saw, the hold-out by record, by a minted row, by placement
+  alone and by an audit line, sources, fold, extras and the codec coverage,
+  lmplz's fallback and its failures, the CLI, and — where KenLM's programs
+  are found — a real 3-gram from the fixture store that pulls a near-tie to
+  `quod` under the prefix beam and under flashlight. In a second
+  environment as the other cloud sessions make it (Python 3.13.18; web, gt,
+  release; no numpy, kraken, kenlm or flashlight): **1,104 passed, 10
+  skipped** (ARCH1's baseline there 1,071 and 3), so the fallback path
+  imports nothing new. ruff clean, 301 files formatted. SPECS §4.5 amended
+  with what the confidence is under every decoder and where the calibration
+  will be recorded; the figures are Part B's.
+- **Merged with main at #65 (2026-11-18).** K3b-prep (#64) and REL1 Part A
+  (#65) had landed; both sides' entries kept, the newer above; the Open
+  question of this entry renumbered 34 → 36; `REGISTRY_LAST_ENTRY` given up
+  for main's `REGISTRY_UPDATED`; PROMPTS.md with this prompt last. ruff
+  clean; **1,225 passed, 1 skipped** in `.venv-cloud` (bench and decode
+  extras, KenLM's programs), **1,193 passed, 10 skipped** in the slim
+  Python 3.13 environment. Detail under Divergences, point 15.
+- **Hand-over: Part B, on the desktop** (`/home/evana/LeibnizLegible`,
+  `.venv-k1`, the store read-only, one torch process, after no other GPU
+  job; this branch, `claude/modest-cori-wds26r`, or main once it is
+  merged). Every step that installs, compiles or runs over an hour wants
+  the operator's go there.
+  1. **The two packages** (an install; a C++ compiler builds kenlm in under
+     a minute): `VIRTUAL_ENV=.venv-k1 uv pip install "flashlight-text==0.0.7"
+     "kenlm==0.3.0" && .venv-k1/bin/python -c "import kenlm; from
+     flashlight.lib.text.decoder.kenlm import KenLM; print('ok')"` →
+     expected `+ flashlight-text==0.0.7`, `+ kenlm==0.3.0`, then `ok`. Never
+     `uv sync` against the environment.
+  2. **KenLM's two programs** (an install of four Boost header packages and
+     a two-minute compile; nothing enters the repository): `sudo apt-get
+     install -y build-essential cmake libboost-program-options-dev
+     libboost-system-dev libboost-thread-dev libboost-test-dev zlib1g-dev
+     libbz2-dev liblzma-dev`; `mkdir -p ~/kenlm && cd ~/kenlm && curl -LO
+     https://files.pythonhosted.org/packages/02/6e/f4e159cef39ea4ef2244b4aa32857d447d60a5d0ee269e1b1f8d3723c03e/kenlm-0.3.0.tar.gz
+     && echo "c4628bb9fb63c8a6f9240035b8b037385cfc404cb72e933cf48878291edac1e8
+     kenlm-0.3.0.tar.gz" | sha256sum -c` → `kenlm-0.3.0.tar.gz: OK` (the URL
+     and the hash are `uv.lock`'s); `tar xzf kenlm-0.3.0.tar.gz && mkdir
+     kenlm-0.3.0/build && cd kenlm-0.3.0/build && cmake ..
+     -DCMAKE_BUILD_TYPE=Release && make -j4 lmplz build_binary && ls bin` →
+     `build_binary  lmplz`; then `export KENLM_BIN=~/kenlm/kenlm-0.3.0/build/bin`.
+     The default maximum order of that build is 6.
+  3. **The readers' tokens** (seconds; loads each model on the CPU):
+     `leibniz bench lm-tokens --model
+     data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors --out
+     data/lm/r1/philiumm.tokens.txt` and the same for
+     `data/models/k3/kraken/best.safetensors` → each prints its label
+     count, the space's label and whether the codec has combining marks:
+     **if it says NFD, build with `--form NFD`** (B1's metric normalises to
+     NFD, so this is likely; unknown from here).
+  4. **The real models** (expected host memory under 3 GB: the cache
+     streamed, the usable text held once, lmplz's sort capped by `-S 2G`;
+     unmeasured, so under the scope; minutes): `systemd-run --user --scope
+     -p MemoryMax=6G .venv-k1/bin/leibniz bench lm-build --order 6 --out
+     data/lm/r1 --tokens data/lm/r1/philiumm.tokens.txt` → two lines,
+     "Latin and French: … lines, … characters, … records →
+     data/lm/r1/la-fr.bin" and "German: … → data/lm/r1/de.bin", and
+     `reports/decoding/lm-build.md`, `.json`, `lm-holdout-pieces.csv`, to be
+     read before anything is decoded: the held-out table must name K3's 98
+     validation pieces, the letter pool and the three PHILIUMM splits with
+     records against each, and "left out" must show the Potsdam and GWLB
+     channels as NC. The numbers are the desktop's to write.
+  5. **Task 3's measurement, as the code now allows it.** One pass through
+     the network per set with `KrakenEngine.posteriors` (the frames × labels
+     matrices; keep them under `data/decoding/`, a few hundred MB for
+     1,878 lines as float16), then every weight, beam, `--beam-tokens` and
+     temperature decoded from the matrices (`Decoder.decode_frames`,
+     `decoding.retemper`) in seconds a setting; the two commands
+     (`bench run --decoder …`, `align letterpool-eval --readers k3-kraken
+     --read --decoder beam-lm --lm data/lm/r1/de.bin`) reproduce a chosen
+     setting from the images. Three variants are worth a row each on the
+     validation lines before one is chosen: the model as built, `--fold
+     align`, and `--sources gt` (minted lines alone); Open question 36 says
+     why.
+  6. **Task 4** reads `transcribe_scored` (the per-character posteriors and
+     the decoder's score per line) and K3's kept hypotheses; the mapping
+     goes to `runs.params` in the shape SPECS §4.5 now names.
+- **What Part B must decide first (Open question 36).** (a) *The dataset
+  has no test split* (LT1's finding, Divergences 2026-10-28): the prompt's
+  "tuned on the validation split, reported on the test split" cannot be done
+  as written. The proposal recorded here: split `val`'s 27 pages once, by
+  page and by seed, into a tuning half and a reporting half (the page of
+  each line from the Hub's `val/` PAGE XML, as `bench page-lines` reads it),
+  tune on the first and report on the second with the whole split's greedy
+  number beside both. (b) *Which text the model should see*: the C3
+  amendment of 16 September says a language model must be built on
+  diplomatic text, never on edition text, because the edition's expansions
+  and regularised u/v pull a diplomatic reader away from the page; this
+  prompt names the edition's text. The builder does what this prompt says
+  and offers the two variants above; the validation lines decide, and if
+  none earns a quarter of a point the decoder stays off, as the prompt
+  says.
+### K3b-prep — the verdict tools (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ✅ Task 4 · ✅ Task 5 · ✅ Finish · ⏳ the operator's pull request; the store steps are K3b's Task 0
+
+- **Setting and pre-flight (Task 0).** A cloud session on the branch it was
+  given, `claude/confident-brown-2xwlqs`, from main at `9ae24de` (#63, ARCH1
+  merged: the entries before 2026-10-19 and the prompts already run are in the
+  archive files, and nothing is appended to them); `git fetch origin main &&
+  git merge origin/main` already up to date at the start and again before the
+  final push; no `data/inventory.sqlite`, so a cloud checkout. `.venv-cloud`
+  made with `uv sync --extra web --extra gt --extra release` (uv 0.11.32,
+  Python 3.13.18). Baseline: `ruff check` clean; `python -m pytest` **1,071
+  passed, 3 skipped** (the three need numpy); bare `pytest` stopped at
+  collection with three errors, as ARCH1 found. Read as the prompt says. The
+  pre-flight recorded, the session proceeded (the preamble's clause 6, the
+  cloud batch note).
+- **Two items from ARCH1, at the operator's word during the session (commit
+  `6db1b76`).** `pythonpath = ["."]` in the pytest options: five test files
+  import the fixture ids with `from tests.conftest import …`, which only
+  `python -m pytest` resolved; both commands now give the same count.
+  `src/leibniz/web/static/README.md` line 155 names `STATUS-archive.md` for
+  the "Delivery-model correction". W5's prompt is in neither prompts file
+  because W5 had none: left, as told.
+- **Task 5 first (commit `47dad12`), because `audit-apply` checks its channel
+  against the registry.** `edition-k2-audit`: kind text, the Arbeitsstelle's
+  verdicts and corrected transcriptions of K2's sheet (the table returned
+  2026-11-06, exported by the operator, not in the repository), obtained
+  `Terms("CC BY 4.0", 2026-11-16, "the Edition's answer, recorded by the
+  operator; STATUS.md Open question 33")`, bucket open, channel
+  `edition-k2-audit`, deposit open, built: the verified lines of K3b and the
+  audit figures on the K3 cards, notes: the credit wording to confirm.
+  `philiumm-seg-v2`: model, CC BY-NC 4.0 as published on the card (read
+  2026-11-16), bucket open because its outputs are unrestricted by the
+  agreement of 2026-10-15, built: P1 Task 3's census.
+  `philiumm-layout-dataset-v2`: dataset, CC BY 4.0, public since 2026-11-12,
+  392 unique pages, built: the list of the model's training pages that the
+  census sample is drawn outside of. Neither main nor any remote branch tip
+  carried the last two (each tip's `legal.py` read on 17 November), so both
+  were added. `REGISTRY_UPDATED` (2026-11-17) dates the latest entry;
+  `REGISTRY_DATE` stays 2026-10-21, the day the older records were re-read,
+  and `leibniz legal licences` prints both. `deposit_for` needed no change: a
+  source naming `channel edition-k2-audit` goes to the open deposit when its
+  bucket is open, and a confirmed `channel potsdam` line with the verified
+  mark stays NC (three rows added to the parametrised test).
+- **Task 1 — `audit-convert` (commit `a1d2e54`, with Tasks 2 and 3: one
+  module, `src/leibniz/align/audit_edition.py`).** `leibniz align
+  audit-convert IN.csv --lines LINES.csv --out OUT.csv --corrections
+  CORR.csv`. The verdict cell is read as one of the four values, the sheet's
+  bilingual labels or their German halves; anything else stops the conversion
+  with the row named, as do a ref the sheet lacks and a ref judged twice (a
+  verdict the scorer would silently drop must not pass). The transcription is
+  made one line (runs of whitespace become one space) and otherwise left as
+  the judge wrote it. OUT keeps the table's order and the sheet's stratum; the
+  converted rows carry the phrase "converted: a transcription without a
+  verdict counts as wrong; the Edition's text is in the corrections file"
+  after the judge's note. CORR's `folded_similarity` is `dp.similarity` over
+  `normalize()` of the two texts, 0 where either folds to nothing, as the
+  audit's second witness computes it; its `note` is the judge's own. The
+  tally's classes: correct, boundary, boundary + transcription, transcription,
+  no verdict (→ wrong), wrong, unreadable, blank (and correct, wrong or
+  unreadable + transcription, should a table have them), printed whole and by
+  the lines CSV's group.
+- **Task 2 — `audit-score --corrections`.** `classify_rows` takes a mapping
+  ref → the judge's line; such a row's `Correction` is the whole line
+  (`op="line"`), the note is read for its keywords only, and `line_signals`
+  reads the signals off the word-level difference (difflib over the words):
+  *misaligned* alone where the two fold to each other below 0.5
+  (`LINE_MIN_SIM`), else a hyphen (the judge's line ends in a hyphen mark, the
+  minted text in a letter — named even on a *wrong* verdict, since under the
+  Edition's convention a missing hyphen alone makes a line wrong), words or
+  letters at an end (boundary), words the mint has mid-line and the strip does
+  not (addition), a word read differently, another word, or words on the strip
+  the mint lacks (reading), differences the fold removes (normalization). The
+  HTR-based rules for an addition and a hyphen are off on such a row. The
+  section "Under the fold" (`fold_scores`, `render_fold`): scored = judged −
+  unreadable; strict = correct ÷ scored; usable = (correct + boundary) ÷
+  scored; under the fold = (correct + corrected at or above the threshold) ÷
+  scored; a *boundary* line stays a boundary line whatever its text measures
+  (the sentence under the table says how many of them fold at or above their
+  threshold), a *wrong* without a text stays wrong; rows are pooled, not
+  weighted. The corrections section is headed "The judge's lines against the
+  minted text" and no longer calls its figures floors when the lines are
+  whole. New options: `--weights-reader` (the stratum weights from the rows
+  one reader minted: K2's sheet was drawn from them), `--title`; the store is
+  opened read-only for the weights. The measured corrections table is never
+  written over the judge's file (`<stem>-measured.csv` beside it instead).
+- **Task 3 — `audit-apply`.** `plan_apply` is read-only and is what both the
+  dry run and the write use; `apply_plan` writes the plan's changes under
+  `BEGIN IMMEDIATE` with the `runs` row in the same transaction
+  (`db.record_run`, new: a finished run row without a commit of its own;
+  `start_run` and `finish_run` each commit), every UPDATE conditional on the
+  row being as the plan read it, so a row that moved in between stops the
+  write whole. The run's params carry the plan's summary and the SHA-256 of
+  the three input files. The row is the one `gt_lines` row on the line's ref:
+  none, or more than one, and the line is listed and left. A confirmed line
+  whose stored text is no longer the sheet's is listed and left (the verdict
+  was on the text the sheet showed); a corrected line takes the judge's text
+  whatever the store holds and is listed if the stored text had moved. The
+  source: `AA IV,3 N.41 (§70-expired AA reading text; channel
+  edition-k2-audit; reader trocr-kurrent-xvi-xvii; verified leibniz-edition
+  2026-11-06; katalog k-4101)` — `reader_from_source`,
+  `record_id_from_source`, `channels_from_source`, the reach census's regex
+  and the `'%; reader <name>;%'` patterns of the sheet and the trainset all
+  read it (tested); `verified_source` is idempotent. `license_bucket`,
+  `stratum`, `align_conf` and `record_id` are not touched.
+  `k3b-verified.csv`'s `verdict` column says `correct`, `boundary` or
+  `corrected`; `licence` is the deposit's (CC BY 4.0, CC BY-NC 4.0 for a
+  confirmed line of an NC channel, "not released" for a row no deposit takes).
+  Options beyond the prompt's: `--db`, `--out`, `--verified-by`,
+  `--verified-on`, `--channel` (checked against the registry).
+- **Task 4 — `audit-sheet-k2` (commit `9d813fa`).** `build_audit_sheet` gained
+  keyword arguments that change nothing unless given (the K2 path's sheet and
+  lines CSV compared by SHA-256 against main's on the test fixture: equal in
+  the three variants the K2 test builds); `sample_lines` gained `exclude_refs`
+  and `exclude_pages`, and a draw without them runs the query it always ran.
+  The command reads the readings and the decisions as `kurrent-mint --audit`
+  does (`--readings-dir`, `--reader`, `--decisions`: the records with
+  `leibniz_hand`, the strict rule). `--exclude-pages` reads `page_ids` (a
+  letter's pages in one cell) or `page_id`; `--exclude-records` reads
+  `record_id` and is repeatable. `--context N`: up to N lines before and after
+  on the same page by `line_seq`, cut with the audit's crop (`CROP_PAD`), in
+  greyscale as JPEG at quality 70, since K2's sheet was 69.6 MB for 200 PNG
+  strips and two neighbours a line would triple that; a neighbour without
+  geometry contributes nothing. A sheet by one hand is shuffled under the
+  seed. `--name` defaults to `k3b-audit`; the command refuses a name whose
+  files exist unless `--force`. Beyond the prompt: a field under the verdicts
+  for the whole line's corrected text, saved like the note, a line with a text
+  counting as judged, and the download in the Edition's shape
+  (`<name>-<seed>-verdicts.csv`); the browser's storage key carries the
+  sheet's name, so two sheets of one seed keep their verdicts apart. Checked
+  in Chromium on a sheet from the fixture store: three lines, a verdict on
+  one, a corrected line on the second, a note on the third; "2 / 3 judged";
+  the download's header `ref, stratum, verdict, transcription, note` with the
+  quoted text intact; the state there after a reload; no script error.
+- **Tests.** `tests/test_align_audit_edition.py` (29: the convention's cases,
+  the refusals, the fold table by stratum and group, the line signals one by
+  one, the C2 files untouched by a K2-style run and the defaults unchanged
+  without `--corrections`, the weights by reader, the source string, the dry
+  run, the write, idempotence, the two deposits through `export.iter_gt` and
+  `iter_gt_nc`, a moved row, the refusals of the command; and 200 synthetic
+  rows in the returned table's counts — 76, 21 with 20 texts, 98, 1, 3, 1 —
+  giving the tally and the 39 % and 49 % the entry of 16 November quotes),
+  `tests/test_align_audit_sheet_k2.py` (6), `tests/test_legal_licences.py` (+4
+  cases). **1,110 passed, 3 skipped**; ruff clean; the touched files `ruff
+  format`-clean.
+- **Open points for K3b (also under Open question 33).** (i) A re-mint
+  replaces a record's rows (`replace_record_pairs`), verified ones included:
+  `kurrent-mint --write` over a record with verified lines would drop them,
+  and `audit-apply` run again restores the corrected lines but leaves a
+  confirmed line whose text the re-mint changed. No guard was built; K3b
+  decides. (ii) The pattern rules for whole lines were written without one
+  line of the Edition's text: read the patterns table of the first real run
+  against the lines before quoting it. (iii) The corrections file and
+  `k3b-verified.csv` carry minted text beside the Edition's; the rows minted
+  through the Potsdam and GWLB channels are NC-channel text, so the dry run's
+  channel table is worth reading before either file is committed. (iv)
+  `gt-open`'s inputs and the dataset card's credit line do not name the
+  Edition yet: left for REL1 and the confirmed wording.
+- **Finish.** This entry, the Current state entry, Open question 33 restated,
+  the Divergences entry and the K3b-prep block under Next; the prompt appended
+  to PROMPTS.md. Branch `claude/confident-brown-2xwlqs`, pushed; compare
+  https://github.com/marchofhares/LeibnizLegible/compare/main...claude/confident-brown-2xwlqs?expand=1
+  — the operator opens and merges the pull request. Nothing deployed, nothing
+  sent.
+
+### G1b — the gold-first draw (2026-11-17/18) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ follow-up (2026-11-18: main merged, `--only-records`) · ⏳ the operator's answer to Open question 30 (j), the rebuild on the desktop, the pull request and the copy to the box
+
+- **Setting and pre-flight (Task 0).** A cloud session on the branch it was
+  given, `claude/eloquent-cannon-d2xv4r`, under the session preamble of 19
+  October as updated on 21 October and 16 November and the cloud batch note
+  of 17 November (both printed with the prompt in `PROMPTS.md`); main at
+  `9ae24de` (#63, ARCH1 merged, so the preamble's clause 8 holds: the G1
+  prompt is in `PROMPTS-archive.md`, the G1 entry still in this file); `git
+  fetch origin main && git merge origin/main` already up to date; `git status
+  --porcelain` clean. No `data/inventory.sqlite`: the fixture store.
+  `.venv-cloud` made with `uv sync --extra web --extra gt --extra release`
+  (uv 0.11.32, Python 3.13.18). Baseline: `ruff check` clean, `ruff format
+  --check` 296 files already formatted, **1,071 passed, 3 skipped**
+  (`python -m pytest`; `test_align_letterpool_eval`, `test_htr_pagereport`
+  and `test_htr_pagescore` need numpy). Read: PROMPTS.md's COMMON CONTEXT,
+  the G1 entry, Open question 30, Next, `fragments.py`, `check.py`, `cli.py`,
+  `tests/test_pack_fragments.py`. Two things in the prompt differ from the
+  repo (Divergences): G1's rows stood in line order, not shuffled; and
+  `check.py` has no rule about revealing gold — the contract's row carries
+  `gold.is_gold`, which is the game's to keep from its players. The
+  pre-flight recorded, the session proceeded (the preamble's item 6, the
+  batch note).
+- **The gold first (Task 1 a; `choose_gold`, `select_lines`, `draw`).** G1
+  drew 2,000 lines and looked for gold among them; `draw` now does three
+  things in order. *The gold* (`choose_gold`): every eligible line whose
+  reader-minted row is in the open deposit gets its verdict (`fold_verdict`,
+  unchanged: the stored reading or the Bern reading equal to the minted text
+  under the aligner's fold is a truth; neither, both-wrong; both, no gold;
+  an NC-deposit row, withheld, never gold). `gold_counts` (unchanged) gives
+  the truths and both-wrong rows to take for the rows the pack will have
+  (the limit, or every eligible line if fewer): as many as the supply allows
+  under the two caps. Each kind is then spread over the strata by the
+  allocation the rows use (below) — equal numbers, or the weights — a
+  stratum short of truths or of both-wrong lines giving its share to the
+  others, so the total is what `gold_counts` says whenever the supply holds
+  it, and drawn under `Random("<seed>:gold")`. The prompt says "among every
+  eligible line … drawn first"; spreading that draw over the strata is this
+  session's decision: a plain draw among all candidates would put the gold
+  where the pool is, in heavy revision (74.7 % of the first pack's eligible
+  lines), and leave the other strata with a handful of gold rows each, so
+  that a player's score on gold would say little about a third of the pack.
+  *The fill* (`select_lines`, now with `gold=` and `weights=`): the strata
+  are allocated for the whole pack with each stratum's gold as its floor,
+  and the rest of each stratum's number is drawn from its non-gold lines
+  under `Random(seed)`, as G1 drew — with no gold and no weights the lines
+  picked are G1's for the same seed (tested). Leibniz's own hand: the target
+  is still the ceiling of his share of the eligible lines; his gold lines
+  count toward it and the fill makes up the rest (`leibniz_quotas`,
+  unchanged). *The order*: the selected lines are shuffled under
+  `Random("<seed>:rows")` and written in that order, so neither the gold nor
+  the lowest work ids stand at the head of the file; `Pack.selected` is in
+  the rows' order. `GoldPlan.verdicts` and `.withheld` are now over the
+  eligible lines of the strata drawn (the supply), not over the selection.
+- **The both-wrong share (Task 1 b).** `DEFAULT_BAD_GOLD_SHARE` 0.25 → 0.5.
+  With a supply of at least 250 truths and 250 both-wrong lines a pack of
+  2,000 gets 250 of each; with fewer truths, as many both-wrong rows as
+  truths; with fewer both-wrong lines, the truths fill the cap (`gold_counts`'
+  three new cases in the tests).
+- **The floor (Task 1 c): `--min-ratio`, default 0.5.** `lopsided(v1, alt,
+  min_ratio)`: the shorter reading's length under `min_ratio` × the longer's
+  (after whitespace normalisation, as every length here); such a line is
+  skipped under the new reason `lopsided`, which stands after `too_long`, so
+  it counts pairs inside the 10–50 window only, and is printed even at 0.
+  `--min-ratio 0` is no floor. Chosen over `--min-chars` on the shorter
+  reading for three reasons: (1) what the floor is for is "one reader
+  failed", and a failed reading is short against its line — ten characters
+  against fifty pass a ten-character floor, nine against eleven, a fair
+  pair, do not; (2) it scales with the window, so `--min-chars` and
+  `--max-chars` keep one meaning, the longer reading's; (3) it is the count
+  Next asked of the first pack ("the shorter reading under half the
+  longer"), so the first pack's number and the rebuild's `lopsided` line
+  measure the same thing (the rebuild's over every line in the window, the
+  first pack's over its 2,000 rows).
+- **The weights (Task 1 d): `--strata`.** `parse_strata` reads
+  `fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1`: names
+  from the five strata, weights 0 or more and relative (7, 7, 4, 2 is the
+  same split), a name twice or no weight above 0 refused. A stratum not
+  named, or named with 0, gives no row and no gold, and its lines are out of
+  the supply and of his hand's share. `allocate(available, n, weights=,
+  floor=)` is the one allocation: shares in the weights' proportion, never
+  more than a stratum has and never fewer than its floor; what a short
+  stratum cannot take goes to the others in the same proportion, and where a
+  floor is over a share the others give way; whole numbers by largest
+  remainder, ties in the strata's order; exact arithmetic (`Fraction`).
+  Without weights and floors it equals `audit.allocate` on 2,000 random
+  cases and on the first pack's eligible counts (55 / 18,904 / 59,345 /
+  1,149 → 55 / 649 / 648 / 648, the first pack's strata); with the example
+  weights the same counts give 55 / 1,047 / 599 / 299 — before the floor,
+  which will lower the eligible counts. The default is the equal allocation;
+  the rebuild command chooses (Open question 30 i).
+- **Found on the way: whose reading the first candidate is (Open question
+  30 j).** The first candidate (`htr_best`) is the row `latest_lines` shows.
+  When G1 ran that was v1's text on every German page. K4 wrote run 617 on
+  30 October, a run scoped to German, which the current-line rule
+  (`db.current_lines`) ranks above v1's unscoped runs: on the pages K4 read,
+  `latest_lines` now returns k3-trocr's reading (the geometry copied from
+  v1's row, the same line numbers). A rebuild on today's store therefore
+  pairs k3-trocr with the Bern reading on those pages and v1 with the Bern
+  reading on German pieces' pages the language pass missed. The code needs
+  no change for that, and it is arguably the right pair (it is what the site
+  shows, and what an imported judgment replaces); but K3 trained k3-trocr on
+  K2's mint (50,720 of its 60,163 training rows are the reader's, on 3,854
+  of the pieces' 4,734 pages: the K3 entry), and K2's mint is where the gold
+  comes from, so on gold rows the stored reading is a reader on its own
+  training lines. The prompt's Task 2 asks for the rebuild "with the first
+  pack's readings and pieces", which reads as the same pairing as the first
+  pack. Built for the choice: `gather(as_of_run=)` and `--as-of-run N` read
+  the store as run N left it (`latest_lines(as_of_run=)`, the rule a pinned
+  citation uses; the twin resolution reads the same way), default none; the
+  printout says which ("the reading the site shows of each" / "the store as
+  run N left it"), counts the stored reading's models among the rows, and
+  says "the stored reading" where it said "v1". On the fixture: the line a
+  later run re-read is a row by default and, as of the run before, is
+  skipped as `same_text`, every row then v1's.
+- **What the command prints now.** The skips with `lopsided` always; the
+  selection line with the allocation (equal or the weights), per stratum
+  pool → pack and its gold; the stored reading's models; "Gold supply, among
+  the eligible lines of the strata drawn" — the lines with an open
+  reader-minted row and their verdicts, then truths / both-wrong by stratum;
+  "Gold: N of M rows" with the cap, the truths and the both-wrong, whose
+  reading the truth is, by stratum, in Leibniz's own hand; the rows with an
+  open reader row that are not gold; the withheld, among the rows and among
+  the eligible. `leibniz pack check` is unchanged, and so are the contract,
+  the two schemas and the judgments import.
+- **Verified (Task 1's tests, Task 2).** `ruff check` clean, `ruff format
+  --check` 296 files already formatted, **1,103 passed, 3 skipped** (+32).
+  `tests/test_pack_fragments.py` 31 → 63: three more cases of `gold_counts`;
+  the floor (the pure rule with its rounding; on the fixture a reading cut
+  to nine characters against 26 is skipped as `lopsided`, kept at ratio 0,
+  and the window's own skips come first); the store as an earlier run left
+  it; and on synthetic eligible sets (`_pool`: canonical line ids, open
+  reader rows that make a truth, a both-wrong, an ambiguous or a withheld
+  line): *the cap is reached* — 8,000 lines, 200 truths and 523 both-wrong
+  among them, mostly heavy revision; limit 400 → 100 gold rows, 50 truths
+  and 50 both-wrong, where G1's draw on the same pool and seed holds 8
+  truths and 21 both-wrong lines; *the supply binds* (10 truths: 10 + 10 at
+  share 0.5, 10 + 3 at 0.25, 10 + 0 at 0; rate 0: none; ambiguous and
+  withheld lines never gold; a pool under the limit); *the caps hold* over
+  fifteen rate-and-share pairs; *the gold over the strata* (truths 2 / 20 /
+  20 / 8 and both-wrong 3 / 16 / 16 / 15 over fair copy, light, heavy and
+  scrap; all the gold in one stratum and still equal thirds; gold over a
+  stratum's share kept, the others giving way); *his hand* at its share with
+  the gold counted in; *the weights* (the parser and its refusals, the
+  split, the surplus, the floor, a stratum left out); *the equal allocation
+  is the audit's*; *the allocation's bounds* on 2,000 random cases; *the
+  draw by weights* (50 / 188 / 108 / 54, the truths by weight too; two
+  strata named: no row and no gold from the others); *the seed* (the same
+  rows in the same order whatever order the lines come in, another seed
+  another pack, not line order, gold in both halves, G1's lines when no gold
+  is drawn); *`pack check` on the result* — a drawn pack of 400 rows, equal
+  and weighted, written and checked: OK, gold 100 (truth 50, both wrong 50),
+  every truth the Bern candidate, the gold rows `aligned`, no key but the
+  `gold` object telling a gold row from another; and the command with
+  `--strata`, `--min-ratio`, `--as-of-run` and their refusals. On a scratch
+  copy of the German fixture store the two commands ran in turn, once with
+  the equal allocation (6 rows, on a day when AA IV,4 is free) and once with
+  the example weights (5 rows); `pack check` OK on both. **No number from
+  the corpus.**
+- **Hand-over.** Three commits on `claude/eloquent-cannon-d2xv4r`: the draw
+  (`1d590f1`), `--as-of-run` and the printout's wording (`f9c8498`), this
+  record with the prompt. Compare:
+  https://github.com/marchofhares/LeibnizLegible/compare/main...claude/eloquent-cannon-d2xv4r?expand=1
+  — the operator opens and merges the pull request. The website did not
+  change: no staging line. The rebuild's commands, what to read in their
+  output, the copy to the box and the game session are under Next; the
+  question the rebuild needs answered first is Open question 30 (j).
+- **Follow-up (2026-11-18, the operator's word; the same session).** *The
+  merge.* `git fetch origin main && git merge origin/main`: main at `82c210f`
+  (#64 K3b-prep, #65 REL1 Part A, #66 R1 Part A), conflicts in STATUS.md (six
+  hunks) and PROMPTS.md (two), none in code. STATUS.md: Current state, the
+  Phase log, Divergences and Next keep both sides' entries, newest first —
+  REL1 (18 November), R1 ("later still"), K3b-prep, G1b (its record
+  committed 17 November 23:44 UTC, K3b-prep's 23:46), ARCH1; the "Last
+  updated" line is main's with G1b's item set in before ARCH1's; Key numbers
+  is main's. PROMPTS.md: the file before the three sessions, then the G1b
+  prompt, then main's prompts as they stand (REL1, K3b-prep, R1), built from
+  the three versions rather than from the conflict markers, since the
+  preambles the prompts share had been matched across them. Checked after:
+  as multisets of lines, main's PROMPTS.md and G1b's are whole in the result;
+  of main's STATUS.md three lines differ (the "Last updated" line and two
+  lines G1b had extended, in Open question 30 and in G1's paragraph of Next)
+  and of G1b's three (the "Last updated" line, the tests row, and ARCH1's
+  line in Next, where G1b's "merged as #63" gave way to main's wording). The
+  merge is its own commit (`71dc8e3`). *`--only-records CSV`.* `gather(…,
+  only_records=)`: the pages read are those of the listed records; every
+  piece on a page still decides whose a line is (`owner_piece`, unchanged:
+  the piece the line's reader-minted row names, else the lower record id),
+  and a line whose piece is not listed is skipped under the new reason
+  `other_record`, which stands right after `twin_elsewhere`, so every later
+  count is of the listed records' own lines. `Pool.pieces` and `.pages`
+  count the listed records the census has and their pages; `Pool.listed` and
+  `.listed_unknown` the records in the file and those of them the census
+  lacks, printed on the "Pieces" line. The command reads the column with
+  `align.kurrent_mint.read_csv_column` (the reader `--exclude-records` of
+  K3b-prep's sheet uses) and refuses a file without `record_id`, one that
+  lists no record, and one none of whose records is among the pieces. The
+  draw is untouched: the gold first among the listed records' eligible
+  lines, the strata around it, the caps as before. *Tests* (63 → 66 in
+  `tests/test_pack_fragments.py`): on the fixture, the correspondent's
+  letter alone (its page, its line), the draft alone with a record the
+  census lacks beside it (the same rows and verdicts as the whole pack's for
+  that work), nothing known listed (no page read); a page two pieces share —
+  the lines a minted row gives to one piece stay with it, the others go to
+  the lower record id, and each side's `other_record` count is the other's
+  lines; the committed `k3-val-pieces.csv` reads as 98 record ids; the
+  command with the option and its four refusals. **1,228 passed, 10
+  skipped** in the slim environment after the merge (`.venv-cloud` re-synced
+  with the web, gt and release extras, Python 3.13.18; the ten need numpy,
+  torch, kraken, KenLM or flashlight), `ruff check` clean, `ruff format
+  --check` 318 files. *What it is for.* Open question 30 (j), way 3: the
+  first candidate on today's store is k3-trocr's reading, and K3 trained on
+  K2's mint, where the gold comes from; on K3's validation pieces (98
+  records, 92 units, page-disjoint from training; 3,133 minted lines on 216
+  pages, 2,675 of them the reader's: the K3 entry) the reader meets gold
+  lines it was not trained on. The price is the pool: 98 records, with fair
+  copy on 2 and scrap on 3 of them by the file's own column, so the pack may
+  be well under 2,000 rows, its gold under the cap and two strata nearly
+  empty; the rebuild's printout says. The rebuild line is under Next.
 
 ### ARCH1 — the archive (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ⏳ the operator's pull request and merge
 
@@ -4397,7 +5614,9 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **1096** (2026-10-30, main with K4 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 1,052 (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **1,228** with 10 skipped (2026-11-18, G1b merged with main at #66, in the slim environment: `.venv-cloud`, Python 3.13.18, the `web` + `gt` + `release` extras; main's 1,193 there and G1b's 35; G1b alone on 17 November 1,103 with 3 skipped, 1,071 at its pre-flight); 1,225 (2026-11-18, R1 Part A merged with main at #65, in `.venv-cloud` on CPython 3.12.13 with the `web` + `gt` + `release` + `bench` + `decode` extras and KenLM's programs on `KENLM_BIN`; 1 skipped; **1,193** with 10 skipped in the slim environment, Python 3.13.18 with `web` + `gt` + `release`, where REL1 counted 1,160 and 3); 1,136 (2026-11-17, R1 Part A, in `.venv-cloud` on CPython 3.12.13 with the `web` + `gt` + `release` + `bench` + `decode` extras and KenLM's programs on `KENLM_BIN`; 1 skipped; 1,095 at its pre-flight; 1,104 with 10 skipped in the slim environment, Python 3.13.18 with `web` + `gt` + `release`, where ARCH1 counted 1,071 and 3); **1,160** (2026-11-18, REL1 Part A merged with main at #64, a cloud checkout with the `web` + `gt` + `release` extras; 3 skipped for want of numpy; 1,120 on the branch before that merge; 1,071 on main at ARCH1's merge); 1096 (2026-10-30, main with K4 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 1,052 (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| **REL1 Part A (2026-11-18)** | no master figure: a cloud session. **The scored audit as restored to `reports/gt-audit/audit-summary.json`: 200 lines, 199 judged, 185 scored, corpus-weighted precision 72.3 %, 92.2 % usable, FAIL at 95 %** (by stratum, scored and precision: fair_copy 50, 84.0 % · light_revision 45, 86.7 % · heavy_revision 48, 64.6 % · scrap 42, 57.1 %; the committed file had read 8 lines, 95.0 %, PASS, a test's output, since 2026-10-10) · the export on a synthetic store (8,000 pages, 528,000 line rows, 404 MB): 480,000 lines written as Parquet in **27.3 s at a peak of 289 MiB** in the cloud container · the dry run on K4's fixture store: 4 folders, 4 deposit files, 21 dry-run `PUT`s to Zenodo, 22 files to the Hub, the NC deposit refused · read through the public APIs on 2026-11-17: the PHILIUMM models CC BY-NC 4.0, their dataset CC BY 4.0, the Bern model MIT, all as the registry has them |
+| **R1 Part A (2026-11-17): decoding, the code** | no CER and no threshold yet: the CER pairs (greedy against beam-lm on PHILIUMM's split, the judged lines, the held-out pages, k3-kraken on the letter pool) and the calibrated thresholds are Part B's, on the desktop. Produced here: flashlight's score is the best path's natural-log probability plus the weight times KenLM's log10 probability (measured on a toy model); one synthetic line of 472 frames by 150 labels decodes on the cloud container's CPU in **0.44 s** with flashlight at beam 50 and every label a frame, 0.13 s at 20 labels a frame, 0.07 s at 10; the prefix beam in 0.30 s at beam 50, 0.10 s at 20; the toy models from the fixture store 12 lines / 457 characters (Latin and French) and 13 / 476 (German), fixture sentences that say nothing about the Nachlass |
 | **K4 live (2026-10-31)** | the live index rebuilt beside the old one 12:36–17:35 (**4 h 59 m**; 5 h 33 m on 10 October); `/api/stats` after the swap: lines shown **12,947,584** (FoNDUE-GD_v2_ft_Leibniz 11,407,896 · k3-trocr@runs-615-epoch-5 1,539,688), pages by language de 30,797 · fr 62,330 · la 110,167 · mixed 13,801 · unknown 19,115, built 2026-10-31T17:34:46Z; search `Herr` lang=de **9,933** pages; the transfer 1 h 49 m at 2.65 MB/s; the box's root disk 42 GB of 75 used after the switch (the staging build had left 679 MB free: stopped and dropped) |
 | **K4 German pages and READER's run (2026-10-30)** | `page_lang` 236,210 rows under run 616 (la 110,167 · fr 62,330 · de 30,797 · unknown 19,115 · mixed 13,801); run 617 (stage recognize, model `k3-trocr@runs-615-epoch-5`, scope `de`): **1,539,688 rows on 24,078 German pages** (the 6,719 German Marginalien pages left out; 33 empty readings without a row; 252,278 rows on crops under 80 px); the lines shown under the rule 12,947,584, of them READER's 1,539,688 and v1's 11,407,896; the master store 19,354,243,072 bytes after (+2,210,672,640) |
 | **K4 reading job (2026-10-28/30)** | 1,539,721 lines in 39 h over two launches (one guard kill), 90.8 ms a line, 39,666 lines an hour, host peak 2,769,976 KB, card peak 5,922 MiB, GPU 88.2 % mean |
@@ -4478,6 +5697,72 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Open questions
 
+36. **R1: two things Part B decides before it measures (2026-11-17).** (a)
+    **PHILIUMM's dataset has no test split** (`train_clean`, `train_noisy`,
+    `val`; LT1's finding of 28 October). R1's prompt tunes the LM weight
+    and the beam "on PHILIUMM's validation split only" and reports "on
+    PHILIUMM's test split"; tuning and reporting on the same 1,878 lines
+    would flatter the decoder by whatever the tuning fits. Proposed: split
+    `val`'s 27 pages once, by page and by seed, into a tuning half and a
+    reporting half, report the greedy number of the whole split beside
+    both, and say so in `reports/decoding/r1-decoding.md`; the same split
+    then serves the temperature fit of Task 4. The alternative, tuning on
+    a slice of `train_clean`, is worse: the model was trained on those
+    lines and its posteriors there are sharper than on unseen pages. (b)
+    **Which text the language model should see.** The C3 amendment of 16
+    September (PROMPTS.md, point 4) says to train the model "on diplomatic
+    GT, never on edition text, or it will push toward expansions"; R1's
+    prompt names the edition's reading text and the aligned lines, which
+    are edition text too. `lm-build` follows R1's prompt and can build the
+    two variants that answer the worry — `--fold align` (case, accents,
+    u/v, i/j and punctuation out of the model, so that it weighs letters
+    and not conventions; its known weakness: punctuation is the unknown
+    token) and `--sources gt` (the minted lines alone, which at least are
+    lines) — and `--extra` takes diplomatic text of the operator's choice
+    (PHILIUMM's `train_clean` text is CC BY 4.0 and diplomatic, but its
+    pages are among the held-out pages whose aligned lines Task 3 reports
+    on, so it cannot serve that set). The validation half decides; the
+    prompt's own rule covers the case that none of them earns a quarter
+    of a point. Also for Part B: whether the readers' codecs are NFC or
+    NFD (`bench lm-tokens` says), and that K3's stored TrOCR figure is the
+    mean probability of the generated tokens, not a sequence score.
+35. **What the first releases publish beyond the lines (2026-11-18, REL1
+    Part A; the operator's before Part B's step 9).** (a) *The catalogue
+    records.* D1 rides inside the transcriptions record, and its
+    `katalog_records` table is the store's catalogue records as they are:
+    the 24,916 read from the catalogue's website, or, once A3b's import is
+    written, the Arbeitsstelle's whole export of 70,405. The licence is
+    settled (CC BY 4.0 in writing, 2026-10-12) and the card carries the
+    registry's credit; republishing the whole catalogue as a table in a
+    Zenodo record is still a larger step than showing it on the site, and
+    SPECS §7.7 says to ask where a partner might wince: a line to the
+    Arbeitsstelle before publishing is the operator's call, as is leaving
+    the table out of this version (the crosswalk alone names the record
+    ids). (b) *The creators.* The four report records name one person with
+    an ORCID; the datasets' deposit files default to the project's name and
+    take `--creator` at Part B. (c) *The Hugging Face namespace*, proposed
+    `leibniz-legible`; the organisation is the operator's to create. (d)
+    *The resource type "Model"* is set in the browser: the deposit API takes
+    no such upload type.
+34. **"No NC input" and the training lines in the NC-derived deposit
+    (2026-11-18, REL1 Part A; to be read before the model is published).**
+    The registry's `model-k3-trocr` row says the model has no NC input and
+    is CC BY 4.0 (the owner, 2026-10-21): the Bern model is MIT and K2's
+    lines are open-bucket edition text. The same row lists `edition-potsdam`
+    and `edition-gwlb` among its inputs, and the lines read through those
+    channels are released in `leibniz-gt-nc` under CC BY-NC 4.0. Both are
+    the owner's scheme (§70-free reading text is open whatever copy it was
+    read from; the NC terms sit on the files), and a reader who holds the
+    model card beside the NC deposit's card will see the two side by side.
+    The model card therefore says it in plain words and names the
+    lawyer-memo question (checklist §6, "NC terms on a PDF and reading text
+    free of § 70"), taking no position; how many training lines came
+    through each channel is not in a committed report (`k3-trainset.json`
+    counts by reader, hand and stratum, not by channel). The operator's to
+    decide before publishing: release as the registry says with that
+    sentence; or CC BY-NC 4.0 for this version until the memo answers; or a
+    retrain on the `ia` lines alone (K3b). The readings on the site carry
+    the same question in a weaker form (machine output of the model).
 33. **The Edition's verdict convention and the licence of its corrected lines
     (2026-11-16).** K2's audit sheet came back with a fifth column of
     corrected transcriptions and no "wrong" verdicts (the Current state entry
@@ -4501,6 +5786,24 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
     and one is a French line in a German piece: the next sheet renders the
     neighbouring lines, and per-line language on mixed pieces stays Open
     question 31's.
+    **Restated 2026-11-17 (K3b-prep): the tools are built; the numbers are
+    K3b's Task 0.** (a) Answered by `leibniz align audit-convert` and
+    `audit-score --corrections`: the strict reading and the precision under
+    the fold, by stratum and by hand, with Wilson intervals; what stays open
+    is the figure itself and whether the factory's threshold is the right line
+    between "right under the fold" and not (a corrected line at or above it is
+    as close to the minted text as the factory asks of a reading). (b)
+    Answered by the registry entry `edition-k2-audit` and `leibniz align
+    audit-apply`; open: the credit wording, and with it the credit line on the
+    dataset card and `gt-open`'s inputs (REL1). (c) Answered by `leibniz align
+    audit-sheet-k2`: `--context N` for the next sheet, `--refs` for a page of
+    the two lines that asked for a larger excerpt and the French line of
+    record 59196; per-line language stays Open question 31's. (d) New: a
+    re-mint replaces a record's rows, verified ones included, so `kurrent-mint
+    --write` over a record with verified lines would drop them; `audit-apply`
+    run again restores the corrected lines and leaves a confirmed line whose
+    text changed. Whether the factory gets a guard for verified rows, or K3b
+    simply never re-mints those records, is K3b's to decide.
 32. **The narrow crops among the German lines (2026-10-28, K4; for K3b's
     segmentation measurement).** Of the 1,539,721 lines the K4 reading job
     reads, 252,286 (16.4 %) are crops under 80 px wide, segmentation
@@ -4572,7 +5875,53 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
     both-rejected. Ship this pack as a trial, whose both-rejected rate per
     stratum is the measurement the game can make, or aim the next pack
     (NOTES B: fair copy and light revision; German has 55 eligible lines of
-    fair copy).
+    fair copy). **2026-11-17, G1b** (the G1b entry in the Phase log; the
+    commands under Next): **(g) answered** as the plan page's G1 row says —
+    the gold is drawn first, among all the eligible lines, up to the caps,
+    spread over the strata, and the strata are filled around it;
+    `--bad-gold-share` defaults to 0.5, so that an always-Bern strategy
+    shows (e). Whether the supply reaches 500 is the rebuild's "Gold supply"
+    line. **(h) answered**: `--min-ratio` 0.5 skips a pair whose shorter
+    reading is under half the longer (`lopsided`); the rebuild prints how
+    many. **(i) stays the operator's**, served by `--strata` (weights by
+    stratum, e.g. `fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,
+    scrap=0.1`; a stratum left out gives no row); without it the allocation
+    is equal, as in the first pack. **(j) New, the operator's to answer
+    before the rebuild — whose reading is the first candidate?** The pack
+    pairs "the reading the store shows" with the Bern reading. On 21 October
+    that was v1's on every German page; since K4's run 617 it is k3-trocr's
+    on the pages that run read. Three ways: *(1) today's store, the default*
+    — k3-trocr against Bern where K4 read the page, v1 against Bern
+    elsewhere: the pair that concerns what the site shows, and the one an
+    imported judgment can honestly replace; k3-trocr reads German better
+    than v1 (28.6 % against 46.6 % CER on the letter pool), so more pairs
+    should hold a right reading. But the gold comes from K2's mint and K3
+    trained k3-trocr on K2's mint: on gold rows the stored reading is a
+    reader on its own training lines, so it will be right there more often
+    than on the other rows, pairs where both readings are right fall out
+    (the same text, or "both" under the fold), and a player's score on gold
+    will overstate their score on the rest. *(2) `--as-of-run 616`* — the
+    store as it stood before K4's reading (616 is K4's `page_lang` run,
+    which wrote no line): v1 against Bern, the first pack's pairing, its
+    gold untouched by either reader's training; but the judged pair is then
+    not the text the site shows on those pages, and importing its winner
+    would lay a `corrected` row over k3-trocr's reading on the strength of
+    a comparison k3-trocr was not in — a pack for calibrating the game, not
+    for import. *(3) not built* — today's store with gold only from lines
+    K3 kept out of training (its validation split, the audit lines), which
+    needs K3's manifest as an input: a small session if (1)'s gold proves
+    too easy. This session's recommendation: build (1) and (2), six and a
+    half minutes each, read the two supply lines side by side, and send (1)
+    to the game with the caveat on its gold unless its supply is thin; the
+    choice is the operator's and the game session's (CAL1). **2026-11-18:
+    way 3 is built, as the operator asked it** — `--only-records
+    reports/kurrent/k3-val-pieces.csv` draws the whole pack, rows and gold,
+    from K3's 98 validation records, which the reader was not trained on
+    (K3 held them out for validation), so on today's store neither the gold
+    nor the other rows are the reader's training lines. What it costs is
+    the pool (98 records; fair copy on 2 and scrap on 3 of them), so the
+    pack may be small and its gold under the cap: the rebuild prints both.
+    The three rebuild lines stand side by side under Next.
 
 29. **Licence asks open after L1 (2026-10-21).** The registry
     (`src/leibniz/legal.py`, `leibniz legal licences`) records them with
@@ -4983,6 +6332,209 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   polygonizer at two minutes a page with a topology warning on most lines, so
   the stage was stopped after seven pages and resumed in fp32 with those
   seven kept.
+
+- **2026-11-18 — REL1 Part A, departures from the prompt, the operator's
+  note of 16 November and the preamble.** (1) *No go waited for* after Task
+  0 (the cloud batch note of 17 November, the preamble's clause 6); the
+  three questions were answered by the note, the namespace by a proposal.
+  (2) *Work the prompt did not name, done because the cards could not be
+  true without it*: the committed audit summary restored and the tests that
+  overwrote it fenced; `reports/gt-factory.md`'s two audit passages
+  re-rendered from it; the export opened read-only, read along the page
+  index and streamed. (3) *`run_id`, not `run`*: the transcriptions' column
+  is `run_id` (with `run_at`), and the card names it so. (4) *The cards'
+  figures are read from the committed reports at render time*
+  (`release/measured.py`), not typed into the cards, and the counts come
+  from the manifest; "the counts in every card come from the export's
+  MANIFEST" is kept by moving the audit summary, the deposit census and
+  the store's summary into the manifest. (5) *`leibniz release cards`, not
+  `export --cards-only --doi`*: a command of its own that needs no store;
+  `export`, `cards` and `model` all take `--doi`, `--hf-namespace` and
+  `--creator`. (6) *The scripts are thin entry points*; their logic is in
+  `src/leibniz/release/zenodo.py` and `hub.py`, where it is tested. (7)
+  *The Zenodo script has two steps*, `reserve` and `upload`, since the DOI
+  must be in the card before the files go up; the prompt describes one
+  pass. (8) *"Tests against a recorded response"*: one fixture is a
+  recording (Zenodo's 403 without a token); the success responses follow
+  the API documentation's field lists, since no token exists in a cloud
+  session; Part B's step 2 is the live check. (9) *The model record's
+  upload type is `other`*: the deposit API has no "model"; the browser step
+  sets it. Its related identifiers are this session's choice in the
+  checklist's pattern (the code, the Bern model's address, the project
+  statement); the checklist's §3 named the PHILIUMM checkpoint, which this
+  model does not derive from. (10) *The checklist said the mirror takes D2
+  and D3*; the prompt says the open deposit only, and the upload script
+  refuses the NC deposit; the checklist's line is amended. (11) *One command
+  the prompt did not ask for*: `leibniz release check`, so the checklist's
+  §1 checks against `/api/stats` are a command's PASS and FAIL lines. (12)
+  *`huggingface_hub` added to the `release` extra* (already locked through
+  transformers): a dependency change, made because hand-rolling the Hub's
+  large-file protocol would be the larger risk. (13) *The LICENSE file
+  names the Creative Commons licence and its address* and does not
+  reproduce the legal code, which this session would have had to type; the
+  base model's MIT notice is reproduced in full, as fetched. (14) *Numbers
+  not produced here are quoted from where they stand*: K2's audit counts
+  from the entry of 2026-11-16 (as the note allows), the store's expected
+  counts in the runbook from the K4 entries; the only figures this session
+  measured are the test counts, the restored audit summary and the
+  synthetic store's 27.3 s and 289 MiB. (15) *The session ran past midnight
+  UTC*: the records were read and the 403 recorded on 2026-11-17, the
+  entry is dated 2026-11-18. (16) *The registry is untouched*: "(if
+  released)" on `model-k3-trocr` and the "seen" dates are Part C's, on the
+  day of the release. (17) *The merge of 2026-11-18* (main at #64): both
+  sides' entries kept in STATUS.md and PROMPTS.md, REL1's above K3b-prep's,
+  which in PROMPTS.md puts the later prompt above the earlier one against
+  the file's own oldest-first order; and the operator's note's "credits
+  them from the registry" is met by the wording the registry's note
+  prescribes and the entry's licence, not by the entry's name.
+
+- **2026-11-17 — R1 Part A, departures from the prompt, the preamble of 19
+  October (as updated) and the batch note of 17 November.** (1) *No go
+  waited for* at Task 0 or at the checkpoints (the preamble's item 6, the
+  batch note). (2) *`.venv-cloud` on CPython 3.12.13 with the web, gt,
+  release, bench and decode extras*, not uv's default 3.13 and not "bench +
+  gt" alone: flashlight-text has no wheel for 3.13, the project's Python is
+  3.12, and the web and release extras keep the whole suite running; the
+  slim 3.13 environment of the other cloud sessions was run once beside it.
+  (3) *The matrix is `(N, C, W)`*, labels by frames, in kraken 7.0.3, not
+  `(N, W, C)` as the prompt and kraken's docstring say; the decoders take
+  kraken's layout. (4) *The engine's confidence is the mean per-character
+  posterior*, each character's the highest of its run, not "the mean
+  per-step probability"; and TrOCR's stored figure is the mean probability
+  of its generated tokens, not "the decoder's sequence score"
+  (`htr/trocr.py`). (5) *flashlight-text directly, no torchaudio*:
+  torchaudio is not in the lock at all; 2.11.1 still ships `ctc_decoder`,
+  a wrapper around the same package. (6) *The language model's text is
+  normalised to the reader's conventions, not through the aligner's fold*:
+  the fold drops case, accents and punctuation, which a diplomatic reader
+  writes and a model built on folded text could not score; the fold is the
+  option `--fold align`, with the decoder mapping each label through it.
+  (7) *The edition's running text is cut into lines of at most 48
+  characters* (`--wrap`; 0 turns it off): "one line a sentence" on
+  paragraphs would teach the model a paragraph's beginning and end, a
+  capital and a full stop, where a manuscript line begins and ends anywhere.
+  (8) *A record of the edition cache needs a named piece and channel*: a
+  cache line without `refs` is left out and counted, stricter than
+  `legal.deposit_for`, which lets a channel-less minted row go by its
+  bucket; and the §70 test is applied to both sources on the day of the
+  build, so the fixture's row of a 2027 volume stays out. (9) *The PHILIUMM
+  "test split's pages" are the `val` rows of
+  `reports/philiumm/heldout_pages.csv`*: the dataset has no test split
+  (Open question 36 a). (10) *Additions the prompt did not name*:
+  `--decoder prefix-beam` on the command line beside the two it names,
+  `--beam-tokens`, `bench lm-tokens`, `KrakenEngine.temperature`,
+  `transcribe_scored` and `posteriors`, `--extra`, `--sources`, `--fold`,
+  `--form`, `--tokens`, pyctcdecode recorded in the registry as not used,
+  and a date for the latest entry, `legal.REGISTRY_UPDATED` after the merge
+  of 18 November (the registry's compilation date of 21
+  October stays, since the other records were not re-read). (11) *The toy
+  report is not committed*: `reports/decoding/` is written by Part B from
+  the store; fixture counts under that name would read as the Nachlass's.
+  (12) *`lmplz` and `build_binary` were built in the cloud container* from
+  the kenlm source distribution (Boost's headers from apt) to prove the
+  path; nothing of it is in the repository. (13) *Finish items done here*
+  although the Finish is the whole phase's: the registry entries, the
+  SPECS §4.5 amendment as far as Part A can state it, the prompt in
+  PROMPTS.md; Key numbers' CER pairs and thresholds and the amendment's
+  figures wait for Part B. (14) *The second `git merge origin/main`* before
+  the final push found main where it was at the start. (15) *Merged with
+  main at #65 on 18 November, at the operator's word* (K3b-prep, #64, and
+  REL1 Part A, #65, had landed): conflicts in STATUS.md, PROMPTS.md,
+  `legal.py`, its test and `uv.lock`. Both sides' entries are kept, the
+  newer above (REL1 of 18 November, then this one, then K3b-prep); in
+  PROMPTS.md this prompt stands last, after the two already on main; **this
+  entry's Open question 34 is now 36** (REL1 had taken 34 and 35) and every
+  reference of this session's to it is changed; the registry keeps main's
+  `REGISTRY_UPDATED` and the three decoding tools join its test's list of
+  entries added since; the lock keeps both sides' lines and `uv lock` leaves
+  it as merged. After the merge: ruff clean, 318 files formatted, 1,225
+  passed and 1 skipped (1,193 and 10 in the slim environment).
+- **2026-11-17 — K3b-prep, departures from the prompt and the preamble of 19
+  October (updated 21 October and 16 November).** (1) *No go waited for*: a
+  cloud session started with the whole step records the pre-flight and
+  proceeds (the preamble's clause 6, the cloud batch note). (2) *Two items
+  outside the prompt*, at the operator's word during the session: bare
+  `pytest` collects every test file; the viewer README's pointer to the
+  archived "Delivery-model correction". (3) *The STATUS entry was written
+  once, at the finish*, not after every task; the code was committed and
+  pushed task by task. (4) *Task 5 before Tasks 1 to 3, and those three in one
+  commit*: `audit-apply` checks its channel against the registry, and the
+  three share one module. (5) *`audit-score --corrections` refuses to run on
+  the defaults*: `--out`, `--summary` and `--overrides` must be named, where
+  the prompt only says the K2 sheet is scored with them named. (6) *A fourth
+  precision column*, under the fold with the boundary lines counted, beside
+  the three the prompt names. (7) *The patterns of a re-written line come from
+  the word-level difference to the judge's line*, where the prompt asks only
+  that the correction come from the file: without it every converted row would
+  have been *other*; the rules were written with none of the Edition's text to
+  try them on. (8) *`--weights-reader` and `--title` on `audit-score`*, and
+  the store opened read-only for the weights: K2's sheet was drawn from one
+  reader's rows, so the whole mint's stratum shares are the wrong weights for
+  it. (9) *`k3b-verified.csv` says `corrected`* for a line the judge re-wrote
+  without a verdict, where the converted verdict CSV says *wrong*. (10)
+  *`audit-apply` leaves and lists* a confirmed line whose stored text is no
+  longer the sheet's, a line with no row and a line with more than one; it
+  does not touch `license_bucket`. (11) *`db.record_run`*, a new helper, so
+  that the run row and the rows land in one transaction (`start_run` and
+  `finish_run` each commit). (12) *The sheet has a field for the corrected
+  line and a five-column download*, where the prompt asks for the help text's
+  sentence only; the context strips are greyscale JPEGs, not PNGs, for the
+  sheet's size. (13) *`REGISTRY_UPDATED` added* instead of moving
+  `REGISTRY_DATE`, which says when the older records were re-read; the outputs
+  table was left alone. (14) *Numbers not produced here*: the registry entry's
+  "200 rows, 118 with a corrected transcription" and the counts the synthetic
+  200-row test is shaped on are the operator's, from the entry of 2026-11-16.
+  (15) *The branch check made the clone shallow for a moment* (every remote
+  tip fetched at depth 1 to read its `legal.py`); it was unshallowed from main
+  before the next commit and nothing pushed was affected.
+- **2026-11-17 — G1b, departures from the prompt and the preamble of 19
+  October (updated 21 October and 16 November).** (1) *No go waited for*: a
+  cloud session started with the whole step records the pre-flight and
+  proceeds (the preamble's item 6, the cloud batch note of 17 November). (2)
+  *"The row order … shuffled under the seed as before"*: G1's rows stood in
+  line order (the G1 entry: "the rows in line order"); the rows are now
+  shuffled under the seed, as the prompt asks, which is new, not as before.
+  (3) *"The pack never reveals which rows are gold (check.py's rule)"*:
+  `check.py` has no such rule and the contract's row carries `gold.is_gold`;
+  what the pack can keep to is that nothing else tells a gold row from
+  another (no key, no place in the file), which is tested; `check.py` and
+  the schemas are unchanged. (4) *The gold is spread over the strata*, not
+  drawn plainly among all candidates: each stratum gives truths and
+  both-wrong rows by the allocation the rows use, a short stratum's share
+  going to the others, so the cap is still reached whenever the supply
+  allows; a plain draw would have put the gold where the pool is (heavy
+  revision). (5) *The floor is `--min-ratio`*, the second of the prompt's
+  two; `--min-chars` still bounds the longer reading only. (6) *A stratum
+  the weights leave out gives no row and no gold*; the weights are relative
+  and need not sum to 1. (7) *`--as-of-run`, which the prompt does not ask
+  for*: since K4 the stored reading on the German pages is k3-trocr's, so
+  "the first pack's readings and pieces" no longer gives the first pack's
+  pairing; the option pins the first candidate to an earlier store, the
+  default is unchanged, and the question is Open question 30 (j). The
+  printout says "the stored reading" where it said "v1". (8)
+  *`GoldPlan.verdicts` and `.withheld` are over the eligible lines*, not the
+  selection, since the gold is chosen there; the printout gives both. (9)
+  *Three commits*: the draw, `--as-of-run`, the record (the batch note:
+  commit and push after every task). (10) *`python -m pytest`*, as ARCH1
+  found (two test files import `tests.conftest`). (11) *The rebuild's
+  commands under Next come in two forms*, today's store and `--as-of-run
+  616`, because of (7); their expected output is given as the lines to read
+  and the sums that must hold, without figures, except where the first
+  pack's own counts must come back (the preamble's item 5). **Follow-up of
+  2026-11-18** (the operator's word in the session, not a prompt of its own;
+  nothing appended to PROMPTS.md for it): (12) *the merge orders the entries
+  by when they were recorded*, not by side: REL1, R1, K3b-prep, G1b, ARCH1,
+  as the two merges before it on main did; (13) *PROMPTS.md keeps main's
+  order of its three prompts* (REL1, K3b-prep, R1) and sets G1b's before
+  them, after ARCH1's, the order of appending; (14) *G1b's "merged as #63"
+  on ARCH1's line in Next gave way to main's wording*; (15) *`--only-records`
+  filters by the line's piece, not by the page*: on a page two pieces share,
+  a line of a piece not listed is skipped (`other_record`) rather than given
+  to the listed one; (16) *a list none of whose records is a piece is
+  refused* rather than written as an empty pack; (17) *the tests figure is
+  the slim environment's* (web, gt, release), where ten tests skip for want
+  of numpy, torch, kraken, KenLM or flashlight; main's 1,225 is R1's fuller
+  environment.
 - **2026-11-17 — ARCH1, departures from the prompt and the preamble of 19
   October (updated 21 October and 16 November).** (1) *No go waited for*: a
   cloud session started with the whole step records the pre-flight and
@@ -5607,6 +7159,204 @@ move to D:; a `wsl --shutdown` and an `Optimize-VHD` return it), and the
 global git `credential.helper` names a `mingw64` path that no longer exists —
 the `ucrt64` one works; fix `~/.gitconfig` once.
 
+**REL1 (2026-11-18): Part A is built on `claude/clever-gates-56b0a4` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/clever-gates-56b0a4?expand=1); the operator opens and merges the pull request; nothing was sent, reserved, uploaded or deployed. Part B is the operator's desktop, the runbook below; Part C a short cloud session on a branch of its own after the DOIs exist.** Three things to read before Part B, each a decision of the operator's and none of this session's: Open question 34 (what the model card says about "no NC input"), Open question 35 (the catalogue records inside the record; the creators; the namespace), and whether the verified lines are to be in this first version — if so, K3b's Task 0 write (`leibniz align audit-apply --write`; K3b-prep is merged, #64) comes before step 3, and the open card then counts them and credits the Edition; if not, the card says they follow. The website does not change in Part A or Part B, so there is no staging line; Part C's About rows are the first change a reader sees.
+
+**REL1 Part B, in order** (the second checkout, `/home/evana/LeibnizLegible-g1`; the master store read-only; the release root on D:; the tokens as environment variables set in the window, never written down; one process at a time; every job under 1 GB of host memory by the measure of the synthetic store, 289 MiB there; nothing here writes the store):
+   1. **The checkout and the environment** (an install: `huggingface_hub` and five small packages it brings — the operator's go). After the merge `git -C ~/LeibnizLegible-g1 fetch origin main && git -C ~/LeibnizLegible-g1 checkout --detach origin/main`, before it `… fetch origin claude/clever-gates-56b0a4 && … checkout --detach origin/claude/clever-gates-56b0a4`; then `cd ~/LeibnizLegible-g1 && export UV_PROJECT_ENVIRONMENT=.venv-g1 && uv sync --extra web --extra gt --extra release`, then `uv run --no-sync python -m pytest -q tests/test_release_export.py tests/test_release_cards.py tests/test_release_model.py tests/test_release_zenodo.py tests/test_release_hub.py tests/test_release_check.py` → `60 passed`. A minute.
+   2. **The rehearsal on Zenodo's sandbox** (ten minutes; asked for because the tests' success responses follow the API's documentation and are not recordings): a sandbox account and token at sandbox.zenodo.org (scope `deposit:write`), then `uv run --no-sync python tools/browser-checks/k4-seed.py /tmp/rel1-fixture.sqlite && uv run --no-sync leibniz release export --db /tmp/rel1-fixture.sqlite --out /tmp/rel1-rehearsal --dataset gt`, `export ZENODO_TOKEN=<the sandbox token>`, `uv run --no-sync python tools/release/zenodo_deposit.py reserve --root /tmp/rel1-rehearsal --record gt --sandbox` → `gt: draft <id> created; DOI reserved: 10.5072/zenodo.<id>` and the draft's address; `uv run --no-sync leibniz release cards --out /tmp/rel1-rehearsal` → `gt: card and deposit file re-rendered (doi:10.5072/zenodo.<id>)`; `uv run --no-sync python tools/release/zenodo_deposit.py upload --root /tmp/rel1-rehearsal --record gt --sandbox` → `gt: metadata written to draft <id>`, three `uploaded` lines, `gt: 3 uploaded, 0 already there, … NOT published: read the draft at … and publish it in the browser.`; run the upload once more → `0 uploaded, 3 already there`. Open the draft: the title, the description, the licence CC BY 4.0, the community request, the related identifiers, three files. A `STOP:` line instead names the request and Zenodo's words: paste it into the pull request and stop there (the fixtures under `tests/fixtures/zenodo/` are then replaced by what came back). Afterwards delete the draft, `rm -rf /tmp/rel1-rehearsal /tmp/rel1-fixture.sqlite*` and `unset ZENODO_TOKEN`.
+   3. **The export of the four datasets from the master** (reads the store for about an hour by the prompt's estimate, unmeasured: each `lines-NNNN.parquet` is a million lines, so the first file's timestamp gives the rate; in the cloud container the synthetic store wrote 480,000 lines in 27 s; a go before it as for any job that may pass an hour). `df -h /mnt/d` first (368 GB free on 30 October; the Parquet's size is unmeasured, a few gigabytes expected, and the model adds 2.7 GB in step 6), then `D=/mnt/d/leibniz-release/$(date +%F) && uv run --no-sync leibniz release export --db /home/evana/LeibnizLegible/data/inventory.sqlite --out $D --format parquet`. Expected, the table: inventory `works` 2,225 · `pages` 236,795 · `crosswalk` and `katalog_records` as the store holds them (24,916 records from the website, or 70,405 once A3b's import is written); transcriptions `lines` **12,947,584** in 13 files, then the same four inventory tables; `gt` and `gt-nc` with `gt_lines` adding up, with what neither takes, to **333,680**; below the table `transcriptions lines by model: FoNDUE-GD_v2_ft_Leibniz 11,407,896 · k3-trocr@runs-615-epoch-5 1,539,688`, and a `by channel` line for each deposit ending in `verified <n>` (0 unless K3b's Task 0 has written). A number that differs is not an error by itself — the store may have moved since 31 October — but it is read before going on.
+   4. **The checks of the checklist §1, against the site's live figures**: `curl -s https://leibnizlegible.com/api/stats > $D/stats.json && uv run --no-sync leibniz release check --out $D --stats $D/stats.json` → a `PASS` line per check, among them `transcriptions: lines 12,947,584 = the site's /api/stats lines 12,947,584`, `lines by model = the site's /api/stats models …`, `no line with an nc-bucket source (0 found)`, `gt and gt-nc are disjoint by gt_id (0 shared)`, `gt … + gt-nc … + released in neither … = the store's gt_lines 333,680`, and `… passed, 0 failed: the folder is as the checklist asks`. Minutes (every file is hashed and the lines read back). Then read the three cards (`$D/leibniz-*/README.md`): in the ground-truth cards the Audit section must read "199 of 200 sampled lines … 72.3 %", in the transcriptions card the catalogue's credit must fit the store.
+   5. **The DOI reservation, one draft a record**: `export ZENODO_TOKEN=<the production token, scope deposit:write only>`, then for each of `transcriptions`, `gt`, `gt-nc`, `model`: `uv run --no-sync python tools/release/zenodo_deposit.py reserve --root $D --record <record>` → `<record>: draft <id> created; DOI reserved: 10.5281/zenodo.<id>`. Seconds each; the DOIs and the drafts' ids are now in `$D/RELEASE.json`.
+   6. **The cards re-rendered with the DOIs, and the model package**: `uv run --no-sync leibniz release cards --out $D --hf-namespace <namespace> --creator "<Family, Given>|<ORCID>"` (the creator as on the four reports' records) → a line per dataset with its DOI and `For Part C: REL1 DOIs: …`; then `uv run --no-sync leibniz release model --weights /home/evana/LeibnizLegible/data/models/k3/trocr/best --name leibniz-kurrent-trocr --out $D` → the table of files (`model.safetensors` 1,335,747,032 bytes), what was left out, `Written …/leibniz-kurrent-trocr and …/leibniz-kurrent-trocr.zip (doi:…)`; a few minutes (1.3 GB copied, hashed and zipped; 2.7 GB on D:). A yellow line about the card's shape means K3's card changed since: read the README. Then `uv run --no-sync leibniz release check --out $D --stats $D/stats.json` again → every record's `the card carries doi:…` and the model's two lines pass.
+   7. **The uploads to the drafts**: for each of the four records `uv run --no-sync python tools/release/zenodo_deposit.py upload --root $D --record <record>` → `metadata written to draft <id>`, a line per file, `… NOT published: read the draft at … and publish it in the browser.` Gigabytes over the uplink, unmeasured; an interrupted run is run again and skips what is there. `--dry-run` first prints every request without sending it, if wanted.
+   8. **The Hugging Face mirror, private**: `export HF_TOKEN=<a token with write access to the namespace>`, then for `transcriptions`, `gt`, `model`: `uv run --no-sync python tools/release/hf_upload.py --root $D --record <record> --namespace <namespace>` → `README.md: uploaded` first, a line per file, `…: the repository is PRIVATE: make it public in its settings when the DOIs are on the site.` (`gt-nc` is refused: Zenodo only.) Then `unset ZENODO_TOKEN HF_TOKEN`.
+   9. **The browser, Zenodo**: each draft read against its card — title, version (the export's date), licence, creators, community `leibniz`, the related identifiers of the checklist §2, the files; on the model's draft the resource type set to **Model** (the script could only say Other); then Publish, four times. **Hugging Face** stays private until Part C is merged and live.
+   10. **The line for Part C**: the `For Part C: REL1 DOIs: transcriptions=… gt=… gt-nc=… model=… · hf=… · version=…` line of step 6 (`uv run --no-sync leibniz release cards --out $D` prints it again), pasted with the Part C prompt. Nothing under `$D` is committed; `RELEASE.json` stays there as the record of the drafts.
+   A chore beside it, when the store is next read anyway: `leibniz align gt-report` regenerates `reports/gt-factory.md` whole (this session corrected its two audit passages from the restored summary and nothing else).
+
+**REL1 Part C, for the cloud session that gets the line** (its branch from main after Part A's merge): the Edition's credit wording, if confirmed by then, into the registry's `edition-k2-audit` entry and `gt-open`'s inputs, with `release/cards.py`'s `verified_credit` reading it from there; one constant per record in `src/leibniz/web/attribution.py` (the four DOIs, the Hub repositories), read by About's Licensing section (EN and DE rows), `llms.txt` and the README's Status section; "(if released)" dropped from the registry's `model-k3-trocr` row; STATUS.md's Current state and Key numbers (the export's own counts from the manifests the operator pastes or commits as a report); the checklist's §5 ticked; tests; push and the compare URL; then the staging line and the curl checks for About and `llms.txt`, the merge and the §9 update the operator's; the Hub repositories made public; the announcement to the §8 contacts the operator's mail, drafted with the links.
+
+**R1 Part A (2026-11-17): built on `claude/modest-cori-wds26r` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/modest-cori-wds26r?expand=1); the operator opens and merges the pull request; Part B is the desktop's, when no other torch process runs.** Part B, in the order of the hand-over in the R1 entry: the two packages into `.venv-k1` and KenLM's two programs built beside the repository (installs: a go each); the readers' tokens files and their Unicode form; the real models with `leibniz bench lm-build`, the report read before anything is decoded; Open question 36 settled (the split of `val` by page; which text the model sees, three variants on the tuning half); then Task 3's CER pairs with the cost a line and Task 4's calibration and thresholds, `reports/decoding/r1-decoding.md` and the mapping per run. After Part B: **C3 scores every ablation with and without the decoder** (`bench run --decoder beam-lm`), and its own language model follows its amendment's point 4; **C4 runs with the decoder only if Task 3 earned it** (a quarter of a point on the reporting half), recording `decoder` in `runs.params`; **the gates read the thresholds** (the Scriptorium queue, the second reader on flagged lines, the game's choice of lines, pseudo-labels), each with its measured precision; K4's run 617 gets its mapping without a re-read.
+**K3b-prep (2026-11-17): the verdict tools are built on
+`claude/confident-brown-2xwlqs` (compare:
+https://github.com/marchofhares/LeibnizLegible/compare/main...claude/confident-brown-2xwlqs?expand=1);
+the pull request and the merge are the operator's; nothing deployed. K3b's
+desktop session runs them, from the checkout with the store, in `.venv-w3`
+(web, gt, release are enough), the store read-only until the one write.** The
+expected lines below follow from the counts of the entry of 2026-11-16 (76
+correct, 21 boundary with 20 texts, 98 texts without a verdict, 1 wrong, 3
+unreadable, 1 blank) and from the store being as the sheet saw it; where the
+run prints otherwise, stop and read.
+
+   1. **K3b Task 0, convert.** This writes over the stopgap
+      `data/kurrent/k2-audit-verdicts.csv` of 16 November; the corrections file goes
+      where it may be committed (Open question 33 b).
+      ```
+      uv run --no-sync leibniz align audit-convert data/kurrent/k2-audit-verdicts-edition.csv \
+        --lines data/kurrent/k2-audit-lines.csv \
+        --out data/kurrent/k2-audit-verdicts.csv \
+        --corrections reports/kurrent/k2-audit-corrections.csv
+      ```
+      Expected: `200 rows … against 200 sheet lines … (118 transcriptions)`, then
+      `correct: 76`, `boundary: 1`, `boundary + transcription: 20`,
+      `transcription, no verdict (→ wrong): 98`, `wrong: 1`, `unreadable: 3`,
+      `blank: 1`, and the same by `leibniz_hand` and `other_hands`.
+   2. **Score, strict and under the fold.**
+      ```
+      uv run --no-sync leibniz align audit-score data/kurrent/k2-audit-verdicts.csv \
+        --lines data/kurrent/k2-audit-lines.csv \
+        --corrections reports/kurrent/k2-audit-corrections.csv \
+        --weights-reader trocr-kurrent-xvi-xvii \
+        --out reports/kurrent/k2-audit.md \
+        --summary reports/kurrent/k2-audit-summary.json \
+        --overrides reports/kurrent/k2-audit-pattern-overrides.csv \
+        --patterns-out reports/kurrent/k2-audit-patterns.csv \
+        --corrections-out reports/kurrent/k2-audit-corrections-measured.csv \
+        --title "K2 audit sheet, judged by the Leibniz-Edition's Arbeitsstelle (2026-11-06)"
+      ```
+      Expected: `under the fold all: strict 38.8 %, usable 49.5 %, under the fold … on
+      196 scored lines`, then the same line for `leibniz_hand` and `other_hands`; the
+      under-the-fold figures are new. The headline `weighted precision … FAIL` is the
+      strict reading weighted by the reader's rows per stratum with the hands pooled:
+      the figures to read and to put on the K3 cards are the report's "Under the fold"
+      by group. At most one line is left for the override file (the one *wrong*
+      without a text). The section "Second witness" will list converted lines whose
+      v1 reading agrees with the minted text: under the Edition's convention such a
+      line is the right line with a fault in it, not a misjudged verdict. Read the
+      patterns table against the lines before quoting it.
+   3. **Apply, the dry run.**
+      ```
+      uv run --no-sync leibniz align audit-apply \
+        --verdicts data/kurrent/k2-audit-verdicts.csv \
+        --lines data/kurrent/k2-audit-lines.csv \
+        --corrections reports/kurrent/k2-audit-corrections.csv
+      ```
+      Expected: `verified lines: 194 of 200 on the sheet (correct 76, boundary 20,
+      corrected 98)`; `rows to change: 194 (text replaced on 118; …)`; the channel
+      lines `channel <was> → edition-k2-audit: n` summing to 118; the deposit lines;
+      `not verified — unjudged: 1`, `wrong, no text given: 1`, `unreadable: 3`,
+      `boundary without a transcription: 1`; `dry run: the store was opened read-only
+      and nothing was written`; `reports/kurrent/k3b-verified.csv` with 194 rows. A
+      line "no row in gt_lines", "more than one row" or "the stored text is not the
+      sheet's" means the store moved since 21 October: stop. (A transcription equal to
+      its minted text counts as correct, which would move a line from corrected.)
+   4. **The write, after the backup and the operator's go:** the same command with
+      `--write`. Expected: the same account, ending `written under run <id> (stage
+      gt_audit, model leibniz-edition-k2-audit)`. Then the same command again:
+      `nothing to change: the store already holds every verified row as planned`.
+      Checks, read-only: `SELECT COUNT(*) FROM gt_lines WHERE source LIKE '%; verified
+      leibniz-edition 2026-11-06;%'` → 194; `SELECT COUNT(*) FROM gt_lines` as before;
+      `leibniz align gt-report` with its counts unchanged. Before committing
+      `k2-audit-corrections.csv` and `k3b-verified.csv`, read the dry run's channel
+      table: rows minted through the Potsdam and GWLB channels carry NC-channel text in
+      the minted column (the Phase log entry, open point iii).
+   5. **K3b Task 2, the next sheet** (the page images on D:, 46 s for K2's 200 lines;
+      K2's sheet was 69.6 MB, so expect well over 100 MB):
+      ```
+      uv run --no-sync leibniz align audit-sheet-k2 --hand own --n 300 --context 1 \
+        --exclude-refs data/kurrent/k2-audit-lines.csv \
+        --exclude-records reports/kurrent/k3-val-pieces.csv \
+        --exclude-pages reports/kurrent/letterpool-testset.csv \
+        --exclude-pages reports/philiumm/heldout_pages.csv \
+        --out data/kurrent --name k3b-audit
+      ```
+      Expected: `(300 lines: …; by hand leibniz_hand 300)` and `left out of the pool:
+      200 lines, 98 records, 1,852 pages` (the last two counted here from the
+      committed files). K2's own-hand pool had two light_revision lines, both on the
+      first sheet, so the 300 will be heavy_revision. The download is
+      `k3b-audit-20261020-verdicts.csv` with a `transcription` column: it goes
+      through `audit-convert` like the Edition's table.
+   6. **The three-line page** for the two lines that asked for a larger excerpt and the
+      French line of record 59196: a CSV with a `ref` column holding the three refs
+      from the Edition's table, then `uv run --no-sync leibniz align audit-sheet-k2
+      --refs data/kurrent/k3b-context-refs.csv --context 2 --name k3b-context`.
+
+Not built here and K3b's to decide: a guard for verified rows against a
+re-mint (Open question 33 d); the Edition's credit on the dataset card and in
+`gt-open`'s inputs once the wording is confirmed (REL1).
+
+**G1b (2026-11-17; 2026-11-18: main merged, `--only-records` added): the gold-first draw is built on `claude/eloquent-cannon-d2xv4r` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/eloquent-cannon-d2xv4r?expand=1); the operator opens and merges the pull request; nothing deployed, the website unchanged. Then, on the desktop: answer Open question 30 (j), rebuild, check, copy to the box; the game session (CAL1) after it.**
+   1. **The checkout.** The store read-only throughout; any checkout that
+      holds the merged main (or, before the merge, this branch) will do. The
+      second checkout keeps the main one free for the desktop queue: `git -C
+      ~/LeibnizLegible-g1 fetch origin main && git -C ~/LeibnizLegible-g1
+      checkout --detach origin/main`, then `cd ~/LeibnizLegible-g1 && export
+      UV_PROJECT_ENVIRONMENT=.venv-g1` (the environment A3b's dry run was
+      given there, with the web, gt and release extras; this phase adds no
+      dependency, so nothing is installed; `.venv-w3` in the main checkout
+      serves as well once it holds the merged main).
+   2. **The rebuild** — the first pack's readings and pieces, a new seed, the
+      day's date, about six and a half minutes (the first pack took 390 s):
+      `D=$(date +%F); uv run --no-sync leibniz pack fragments --db /home/evana/LeibnizLegible/data/inventory.sqlite --readings /home/evana/LeibnizLegible/data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl --pieces /home/evana/LeibnizLegible/data/kurrent/german_pieces.jsonl --limit 2000 --seed 20261117 --today "$D" --out /mnt/d/leibniz-packs/fragments-$D.jsonl`
+      That is today's store: k3-trocr against the Bern reading where K4 read
+      the page (Open question 30 j, way 1). For v1 against Bern, the first
+      pack's pairing (way 2), the same line with `--as-of-run 616` and
+      another file: `… --as-of-run 616 --out /mnt/d/leibniz-packs/fragments-$D-v1.jsonl`.
+      For K3's validation pieces alone, on today's store (way 3, added
+      2026-11-18: the reader was not trained on these records' lines), the
+      first line with `--only-records` and a third file:
+      `… --only-records /home/evana/LeibnizLegible/reports/kurrent/k3-val-pieces.csv --out /mnt/d/leibniz-packs/fragments-$D-val.jsonl`
+      (in full: `D=$(date +%F); uv run --no-sync leibniz pack fragments --db /home/evana/LeibnizLegible/data/inventory.sqlite --readings /home/evana/LeibnizLegible/data/kurrent/k2-readings/trocr-kurrent-xvi-xvii.jsonl --pieces /home/evana/LeibnizLegible/data/kurrent/german_pieces.jsonl --only-records /home/evana/LeibnizLegible/reports/kurrent/k3-val-pieces.csv --limit 2000 --seed 20261117 --today "$D" --out /mnt/d/leibniz-packs/fragments-$D-val.jsonl`;
+      the file is committed, so the checkout's own copy serves as well).
+      For other strata than equal thirds (Open question 30 i), add e.g.
+      `--strata 'fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1'`.
+   3. **The check:** `uv run --no-sync leibniz pack check /mnt/d/leibniz-packs/fragments-$D.jsonl`
+      (and the `-v1` and `-val` files if built) → "OK — fragment pack, schema_version 1",
+      "rows 2,000; gold G (truth T, both wrong B); license_bucket 'open' on
+      every row", the strata, "first candidate: htr_best … · model_alt …"
+      near a thousand each.
+   4. **What to read in the rebuild's printout** (no figure here is known
+      before the run; the sums must hold). "Lines on those pages: 305,602"
+      as in the first pack is expected either way (K4's rows stand on v1's
+      line numbers), with "(the reading the site shows of each)" or "(the
+      store as run 616 left it)". With `--as-of-run 616` the skips
+      down to `too_long` must be the first pack's own — `twin_elsewhere`
+      112,513, `no_v1_text` 21,419, `empty_reading` 49, `same_text` 1,441,
+      `too_short` 50,176, `too_long` 40,551 — or the store's v1 rows have
+      changed since 21 October; on today's store every one of them may
+      differ, k3-trocr being another reading and giving text where v1 gave
+      none (the twin rule reads the lines that have text).
+      `lopsided N (the shorter reading under 0.5 of the longer)` is new, and
+      "Eligible" is the lines less every skip (with `--as-of-run 616`: 79,453
+      − N). "Selected: 2,000 (… equal per stratum; the gold drawn first …)"
+      and per stratum "pool … → pack …, gold …"; fair copy gives all it has.
+      "the stored reading (htr_best), by model": with `--as-of-run 616` only
+      `FoNDUE-GD_v2_ft_Leibniz@v1`; on today's store mostly
+      `k3-trocr@runs-615-epoch-5`. "Gold supply, among the eligible lines of
+      the strata drawn: … one candidate equal under the fold T′ (stored …,
+      Bern …), neither B′": the supply. "Gold: G of 2,000 rows (…; cap 0.25
+      × 2,000 rows = 500): truth T, both wrong B (cap 0.5 of the gold)": G =
+      500 with T = B = 250 if T′ ≥ 250 and B′ ≥ 250; if T′ < 250, T = T′ and
+      B = min(B′, T′); otherwise (B′ < 250 ≤ T′) B = B′ and T = min(T′, 500 −
+      B′). With `--as-of-run 616`, "the truth is the stored reading in" 0
+      rows or close to it is expected (0 of the first pack's 42 truths); on
+      today's store it is expected well above 0, and how far above measures
+      how much of the gold k3-trocr knows by heart. With `--only-records`
+      the first line reads "Pieces: 98 records on … pages (…) — only the 98
+      records listed (0 of them not among the German pieces)" (fewer than 98
+      and a count other than 0 if the census's file lacks some of them);
+      "Lines on those pages" is those pages' alone; `other_record` counts
+      lines of other pieces on shared pages (0 if K3's units hold every
+      piece on their pages); "Eligible" and "Selected" may be under 2,000,
+      and then every eligible line is a row, the cap is a quarter of the
+      rows there are, and `pack check`'s "rows" is that number; "the truth
+      is the stored reading in" is the figure to set beside the whole
+      store's: the same reader on lines it was and was not trained on.
+      Record the printout in the G1b entry, as the first pack's was.
+   5. **The copy to the box**, once the pack is chosen: `scp
+      /mnt/d/leibniz-packs/fragments-<date>.jsonl root@<target>:/root/` (the
+      target on the plan page); the import into the game is the game's
+      runbook, and **the game session (CAL1, on the Calculemus repository)
+      comes after it**: tell it which pairing the pack holds, that half the
+      gold is both-wrong, and, for today's store, the caveat on the gold
+      (Open question 30 j) — or that the pack is K3's validation pieces
+      alone, where the caveat does not apply. The first pack
+      (`/mnt/d/leibniz-packs/fragments-2026-10-22.jsonl`) is superseded; no
+      copy of it to the box is recorded; **the judgments import (P8) checks winners against
+      the pack the game played**, so keep the new file and pass it as
+      `--fragments` (the G1 paragraph below has the two commands). A pack
+      built with `--as-of-run 616` is for calibration, not for import.
+
 **ARCH1 (2026-11-17): the archive is built on `claude/blissful-mccarthy-ktud6m` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/blissful-mccarthy-ktud6m?expand=1); the operator opens and merges the pull request before any other session branches, since STATUS.md and PROMPTS.md are the files every session appends to; from the merge on the preamble's clause 8 holds — the entries before 2026-10-19 are in `STATUS-archive.md`, the prompts already run in `PROMPTS-archive.md`, nothing is appended to either, and a prompt that names an archived entry means the archived text.**
 
 **K3b and P1 Task 3 can start (2026-11-16).** The inputs both waited for are
@@ -5858,7 +7608,9 @@ flattened so `ritter.csv` lies directly under it). In order:
    export is acknowledged by the operator.
 
 **G1 (2026-10-21): merged as #51; the real pack built and checked on the
-desktop the same day** (`/mnt/d/leibniz-packs/fragments-2026-10-22.jsonl`,
+desktop the same day — the owner's choice below is made (2026-11-17: the
+gold-first draw and the floor are built, G1b at the head of Next; the pack is
+rebuilt before any copy to the box)** (`/mnt/d/leibniz-packs/fragments-2026-10-22.jsonl`,
 pack `ll-fragments-2026-10-21-s20261022-e86be52b1c`: 2,000 rows, gold 56;
 the G1 entry in the Phase log). **Before the copy to the box, the owner's
 choice** (Open question 30 (g)–(i)): ship this pack as the trial it is, or

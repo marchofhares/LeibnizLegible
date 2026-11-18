@@ -1,18 +1,32 @@
-"""The fragment pack: German A/B pairs for Calculemus (Phase G1).
+"""The fragment pack: German A/B pairs for Calculemus (Phase G1; the draw G1b).
 
 The game's contract (Calculemus SPECS §6.6, schema_version 1; mirrored in
 ``fragment_pack.schema.json`` beside this module) asks for one row per line:
 the line's place on its page image, exactly two candidate readings, and — on
 a share of the rows — a gold answer the game calibrates its players against.
 For every line of K1's German pieces two machine readings exist: the stored
-v1 text (``lines``, the row :func:`~leibniz.search.documents.latest_lines`
+text (``lines``, the row :func:`~leibniz.search.documents.latest_lines`
 shows) and K2's reading by the Bern Kurrent model (the readings JSONL), and
 they disagree exactly where the site reads worst. This module turns them into
 rows; ``leibniz pack fragments`` opens the store read-only and writes the pack.
 
+The stored text is the one the site shows, whichever run wrote it: v1's when
+G1 was built, and since K4 (run 617, 2026-10-30) the Leibniz Kurrent reader's
+on the German pages that run read. ``as_of_run`` reads the store as an earlier
+run left it (rows of later runs ignored), which pins the first candidate to
+the reading shown then; the names below (``v1_text``, verdict ``v1``,
+``V1_SOURCE``) mean that stored reading, the candidate ``htr_best``.
+``only_records`` keeps the lines of the records listed and no others — K3's
+validation pieces (``reports/kurrent/k3-val-pieces.csv``), whose lines the
+Leibniz Kurrent reader was not trained on, so that its reading of a gold
+line is not a reading of its own training text. A line on a page two pieces
+share stays with its piece (below) and is skipped as ``other_record`` when
+that piece is not listed.
+
 * **Rows.** A line on a German piece's pages whose two readings are non-empty
   and differ after whitespace normalisation, the longer ``min_chars`` to
-  ``max_chars`` characters, on a page the image mirror serves (a cached
+  ``max_chars`` characters and the shorter at least ``min_ratio`` of the
+  longer (the floor, below), on a page the image mirror serves (a cached
   ``local_path``; the mirror is the cache's layout, so the polygons sit on its
   pixels), with geometry and complete provenance; a scan the library
   registered twice gives each line one row, as the index counts it
@@ -24,19 +38,43 @@ rows; ``leibniz pack fragments`` opens the store read-only and writes the pack.
   piece's volume is not §70-free on ``today`` is refused (counted, and
   :func:`build_row` raises :class:`Refused` if handed one). A record the
   census cites in several volumes is refused unless every one is free.
-* **Selection.** Equal numbers per stratum (``audit.allocate``, as the audit
-  sheets draw them), and Leibniz's own hand (the strict rule,
-  ``catalog/hands.py``) kept at least at its share of the eligible lines.
-* **Gold.** A selected line with a row K2's reader minted
-  (``reader trocr-kurrent-xvi-xvii`` in its source) that the licence registry
-  places in the open deposit (``legal.deposit_for``: the NC channels, Potsdam
-  and the GWLB repository, never). The candidate equal to the minted text
-  under the aligner's fold (``align/normalize``) is the truth; neither equal,
-  the row is gold with ``both_wrong``; both equal, the fold cannot tell them
-  apart and the row is no gold. At most ``gold_rate`` of the rows are gold,
-  and at most ``bad_gold_share`` of the gold is both-wrong. The minted text
-  is the edition's normalised reading, so a both-wrong verdict can also mean
-  an expansion the fold does not forgive — hence the cap.
+* **The floor.** The length window bounds the longer reading; ``min_ratio``
+  (0.5) bounds the shorter against it: a pair whose shorter reading is under
+  half the longer is skipped as ``lopsided``. One reader gave up on such a
+  line, and the pair asks a player nothing. A ratio rather than ``min_chars``
+  on the shorter reading as well, because a failed reading is short against
+  its line, not in itself: ten characters against fifty would pass a
+  ten-character floor, and nine against eleven, a fair pair, would not. It is
+  also the count the first pack was asked for (STATUS.md, Open question 30 h).
+* **Gold, drawn first** (:func:`choose_gold`). A gold candidate is an
+  eligible line with a row K2's reader minted (``reader
+  trocr-kurrent-xvi-xvii`` in its source) that the licence registry places in
+  the open deposit (``legal.deposit_for``: the NC channels, Potsdam and the
+  GWLB repository, never). The candidate equal to the minted text under the
+  aligner's fold (``align/normalize``) is the truth; neither equal, the row
+  is gold with ``both_wrong``; both equal, the fold cannot tell them apart
+  and the row is no gold. The gold is drawn among *all* the eligible lines,
+  before the strata are filled: as many rows as the supply allows with at
+  most ``gold_rate`` of the rows gold and at most ``bad_gold_share`` of the
+  gold both-wrong (0.5: every truth so far is the Bern reading, and with half
+  the gold both-wrong a player who always takes it is found out). The truths
+  and the both-wrong rows are each spread over the strata as the rows are
+  (below), a stratum short of them giving its share to the others, so the
+  cap is reached whenever the supply allows. The minted text is the
+  edition's normalised reading, so a both-wrong verdict can also mean an
+  expansion the fold does not forgive — hence the cap.
+* **Selection** (:func:`select_lines`). The strata are then filled to the
+  limit around the gold: equal numbers per stratum by default, or the
+  ``strata`` weights (:func:`parse_strata`; a stratum the weights leave out
+  gives no row, gold included); a stratum short of lines gives its surplus to
+  the others (:func:`allocate`), and a stratum whose gold alone is over its
+  share keeps its gold. Leibniz's own hand (the strict rule,
+  ``catalog/hands.py``) is kept at least at its share of the eligible lines,
+  the gold counted in.
+* **Order.** The rows stand in an order shuffled under the seed, so neither
+  the gold nor a work sits at the head of the file; the pack says which rows
+  are gold only in each row's ``gold`` object, which is the game's to keep
+  from its players.
 """
 
 from __future__ import annotations
@@ -49,9 +87,10 @@ import random
 import sqlite3
 import statistics
 from collections import Counter, defaultdict
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Collection, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import date
+from fractions import Fraction
 from pathlib import Path
 
 from leibniz import db, legal
@@ -85,9 +124,10 @@ DEFAULT_IMAGE_BASE_URL = "https://images.leibnizlegible.com"
 SITE_URL = "https://leibnizlegible.com"
 DEFAULT_LIMIT = 2000
 DEFAULT_GOLD_RATE = 0.25
-DEFAULT_BAD_GOLD_SHARE = 0.25
+DEFAULT_BAD_GOLD_SHARE = 0.5
 DEFAULT_MIN_CHARS = 10
 DEFAULT_MAX_CHARS = 50
+DEFAULT_MIN_RATIO = 0.5  # the shorter reading against the longer
 PACK_LANGS = ("de", "mixed")
 V1_SOURCE = "htr_best"  # the stored v1 text
 ALT_SOURCE = "model_alt"  # the Bern reading
@@ -100,6 +140,7 @@ SKIP_REASONS = (
     "no_image",  # the page has no cached image (no local_path): the mirror lacks it
     "no_page_size",  # the page has no width/height to clamp the box to
     "twin_elsewhere",  # another registration of the same scan carries the line (W5)
+    "other_record",  # only_records: the line's piece is not among the records listed
     "already_corrected",  # the row latest_lines shows is not machine text (a crowd row)
     "no_v1_text",
     "no_reading",  # the readings file has no row for the line
@@ -107,6 +148,7 @@ SKIP_REASONS = (
     "same_text",  # the two readings agree after whitespace normalisation
     "too_short",  # the longer reading is under min_chars
     "too_long",  # … or over max_chars
+    "lopsided",  # the shorter reading is under min_ratio of the longer
     "not_german",  # the piece's language is neither de nor mixed
     "no_provenance",  # the v1 row lacks its confidence or its run
     "no_geometry",  # no polygon or baseline to box
@@ -332,6 +374,95 @@ def fold_verdict(v1: str, alt: str, minted: str) -> str:
     return "both_wrong"
 
 
+def lopsided(v1: str, alt: str, min_ratio: float) -> bool:
+    """The shorter reading is under ``min_ratio`` of the longer: one reader
+    gave up on the line (the floor, module docstring)."""
+    short, long = sorted((len(v1), len(alt)))
+    return short + 1e-9 < min_ratio * long
+
+
+def parse_strata(spec: str) -> dict[str, float]:
+    """``"fair_copy=0.35,light_revision=0.35,heavy_revision=0.2,scrap=0.1"``
+    as weights by stratum. The weights are relative (they need not sum to 1);
+    a stratum left out or given 0 gives no row. Raises :class:`ValueError`
+    for a name that is no stratum, a name twice, a weight that is no
+    non-negative number, or no weight above 0."""
+    out: dict[str, float] = {}
+    for part in spec.split(","):
+        if not part.strip():
+            continue
+        name, sep, value = part.partition("=")
+        name = name.strip()
+        if not sep or name not in audit.STRATA:
+            raise ValueError(
+                f"{part.strip()!r}: wanted <stratum>=<weight>, the stratum one of "
+                f"{', '.join(audit.STRATA)}"
+            )
+        if name in out:
+            raise ValueError(f"{name} is named twice")
+        try:
+            weight = float(value)
+        except ValueError as exc:
+            raise ValueError(f"{name}: {value.strip()!r} is not a number") from exc
+        if not math.isfinite(weight) or weight < 0:
+            raise ValueError(f"{name}: the weight must be 0 or more, got {value.strip()}")
+        out[name] = weight
+    if not any(w > 0 for w in out.values()):
+        raise ValueError("no stratum has a weight above 0")
+    return out
+
+
+def drawn_strata(weights: Mapping[str, float] | None) -> tuple[str, ...]:
+    """The strata the draw takes rows from: all of them, or the weighted ones."""
+    if weights is None:
+        return audit.STRATA
+    return tuple(s for s in audit.STRATA if weights.get(s, 0) > 0)
+
+
+def allocate(
+    available: Mapping[str, int],
+    n: int,
+    *,
+    weights: Mapping[str, float] | None = None,
+    floor: Mapping[str, int] | None = None,
+) -> dict[str, int]:
+    """Split ``n`` draws over the strata that have lines: in proportion to
+    ``weights`` (equal without them, and then ``audit.allocate``'s split),
+    never more than a stratum has, never fewer than its ``floor`` (the gold
+    already drawn there). A stratum short of its share gives the surplus to
+    the others in the same proportion; a stratum whose floor is over its
+    share keeps the floor and the others give way. Whole numbers by largest
+    remainder, ties in the strata's order."""
+    strata = [s for s in drawn_strata(weights) if available.get(s, 0) > 0]
+    lo = {s: min(available[s], (floor or {}).get(s, 0)) for s in strata}
+    w = {s: Fraction(str(weights[s])) if weights else Fraction(1) for s in strata}
+    n = max(sum(lo.values()), min(n, sum(available[s] for s in strata)))
+    pinned: dict[str, int] = {}
+    free = list(strata)
+    share: dict[str, Fraction] = {}
+    while free:
+        left = n - sum(pinned.values())
+        total = sum(w[s] for s in free)
+        share = {s: left * w[s] / total for s in free}
+        over = {s: share[s] - available[s] for s in free if share[s] > available[s]}
+        under = {s: lo[s] - share[s] for s in free if share[s] < lo[s]}
+        if not over and not under:
+            break
+        # pin the side that is further out; the rest is shared out again
+        if sum(over.values()) >= sum(under.values()):
+            pinned.update({s: available[s] for s in over})
+        else:
+            pinned.update({s: lo[s] for s in under})
+        free = [s for s in free if s not in pinned]
+    alloc = dict(pinned)
+    alloc.update({s: math.floor(share[s]) for s in free})
+    spare = n - sum(alloc.values())
+    by_remainder = sorted(free, key=lambda s: -(share[s] - alloc[s]))  # stable: strata order
+    for s in by_remainder[:spare]:
+        alloc[s] += 1
+    return {s: alloc[s] for s in strata if alloc[s]}
+
+
 def gold_counts(
     n_rows: int, n_truth: int, n_bad: int, gold_rate: float, bad_share: float
 ) -> tuple[int, int]:
@@ -457,6 +588,8 @@ class Pool:
     pages_no_image: int = 0  # … without a cached image
     lines: int = 0  # lines on the pages found (one per line_seq, latest run)
     readings: int = 0  # rows in the readings file
+    listed: int | None = None  # only_records: the records listed …
+    listed_unknown: int = 0  # … and those of them that are no piece of the census
 
 
 def owner_piece(on_page: Sequence[Piece], gt: GtRow | None) -> Piece:
@@ -478,14 +611,33 @@ def gather(
     today: date,
     min_chars: int = DEFAULT_MIN_CHARS,
     max_chars: int = DEFAULT_MAX_CHARS,
+    min_ratio: float = DEFAULT_MIN_RATIO,
+    as_of_run: int | None = None,
+    only_records: Collection[str] | None = None,
 ) -> Pool:
-    """Every line on the pieces' pages through the rules (:data:`SKIP_REASONS`)."""
+    """Every line on the pieces' pages through the rules (:data:`SKIP_REASONS`);
+    with ``as_of_run``, the store as that run left it; with ``only_records``,
+    the pages of the records listed and, on them, those records' lines."""
     expired = expired_volume_index(today)
+    ranks = db.run_precedences(conn)
+
+    def shown(page_id: str) -> list[db.Line]:
+        return latest_lines(conn, page_id, as_of_run=as_of_run, precedences=ranks)
+
     by_page: dict[str, list[Piece]] = defaultdict(list)
     for p in pieces:
         for pid in p.page_ids:
             by_page[pid].append(p)
     pool = Pool(pieces=len(pieces), pages=len(by_page), readings=len(readings))
+    wanted = None if only_records is None else set(only_records)
+    if wanted is not None:
+        known = {p.record_id for p in pieces}
+        pool.listed, pool.listed_unknown = len(wanted), len(wanted - known)
+        pool.pieces = len(wanted & known)
+        # every piece on a page still decides whose a line is; the pages are the listed ones'
+        visit = {pid for pid, ps in by_page.items() if any(p.record_id in wanted for p in ps)}
+        by_page = defaultdict(list, {pid: by_page[pid] for pid in visit})
+        pool.pages = len(by_page)
     works: dict[str, db.Work | None] = {}
     twins: dict[str, TwinGroup] = {}  # page id → its group, the work's resolved once
     run_at: dict[int, str | None] = {}
@@ -494,7 +646,7 @@ def gather(
         if page is None:
             continue
         pool.pages_found += 1
-        lines = latest_lines(conn, page_id)
+        lines = shown(page_id)
         pool.lines += len(lines)
         if not page.local_path or ImageSource.source_url(page) is None:
             pool.pages_no_image += 1
@@ -505,13 +657,16 @@ def gather(
             continue
         if page.work_id not in works:
             works[page.work_id] = db.get_work(conn, page.work_id)
-            groups, _ = resolve_work(
-                db.get_pages(conn, page.work_id), lambda pid: latest_lines(conn, pid)
-            )
+            groups, _ = resolve_work(db.get_pages(conn, page.work_id), shown)
             twins.update({pid: g for g in groups for pid in g.pages})
         work = works[page.work_id]
         lines = _carried(twins.get(page_id), page_id, lines, pool)
         for ln in lines:
+            if wanted is not None:
+                owner = owner_piece(by_page[page_id], reader_rows.get(ln.id))
+                if owner.record_id not in wanted:
+                    pool.skipped["other_record"] += 1
+                    continue
             reason, item = _examine(
                 conn,
                 ln,
@@ -524,6 +679,7 @@ def gather(
                 run_at,
                 min_chars=min_chars,
                 max_chars=max_chars,
+                min_ratio=min_ratio,
             )
             if item is None:
                 pool.skipped[reason] += 1
@@ -561,6 +717,7 @@ def _examine(
     *,
     min_chars: int,
     max_chars: int,
+    min_ratio: float,
 ) -> tuple[str, Eligible | None]:
     """One line through the rules: ``(reason, None)`` or ``("", Eligible)``."""
     if ln.status != "machine":
@@ -581,6 +738,8 @@ def _examine(
         return "too_short", None
     if longer > max_chars:
         return "too_long", None
+    if lopsided(v1, alt, min_ratio):
+        return "lopsided", None
     gt = reader_rows.get(ln.id)
     piece = owner_piece(on_page, gt)
     if piece.language not in PACK_LANGS:
@@ -595,6 +754,7 @@ def _examine(
     when = run_at[ln.run_id]
     if not when or not ln.model:
         return "no_provenance", None
+    # the geometry is the segmentation's, copied onto every later reading of the line
     polygon, baseline, _ = audit.line_geometry(conn, page.id, ln.line_seq)
     box = bbox_of(polygon, baseline, width=int(page.width or 0), height=int(page.height or 0))
     if box is None:
@@ -630,44 +790,16 @@ def _examine(
 # --------------------------------------------------------------------------- #
 
 
-def select_lines(items: Sequence[Eligible], *, limit: int, seed: int) -> list[Eligible]:
-    """Up to ``limit`` lines: equal numbers per stratum (``audit.allocate``, a
-    short stratum's remainder going to the others), Leibniz's own hand at
-    least at its share of ``items``; drawn under the seed, in line order."""
-    rng = random.Random(seed)
-    by_stratum: dict[str, list[Eligible]] = defaultdict(list)
-    for e in sorted(items, key=lambda e: e.line_id):
-        by_stratum[e.stratum].append(e)
-    quotas = audit.allocate({s: len(v) for s, v in by_stratum.items()}, limit)
-    n_pool = len(items)
-    n_own = sum(1 for e in items if e.leibniz_hand)
-    n_sel = sum(quotas.values())
-    target = min(n_own, -(-n_own * n_sel // n_pool)) if n_pool else 0
-    own = {s: sum(1 for e in by_stratum[s] if e.leibniz_hand) for s in quotas}
-    take_own = leibniz_quotas(quotas, own, {s: len(by_stratum[s]) for s in quotas}, target)
-    picked: list[Eligible] = []
-    for s in audit.STRATA:
-        if s not in quotas:
-            continue
-        mine = [e for e in by_stratum[s] if e.leibniz_hand]
-        others = [e for e in by_stratum[s] if not e.leibniz_hand]
-        k_own = take_own[s]
-        k_other = quotas[s] - k_own
-        if k_other > len(others):  # too few other hands: more of his
-            k_own += k_other - len(others)
-            k_other = len(others)
-        picked += rng.sample(mine, k_own) + rng.sample(others, k_other)
-    return sorted(picked, key=lambda e: e.line_id)
-
-
 @dataclass(slots=True)
 class GoldPlan:
-    """The gold verdicts on the selected lines and the rows chosen as gold."""
+    """The gold verdicts on the eligible lines and the lines chosen as gold."""
 
-    verdicts: dict[str, str] = field(default_factory=dict)  # line_id → VERDICTS
+    # line_id → VERDICTS, for every eligible line of the drawn strata with a
+    # reader-minted row in the open deposit: the supply the gold is drawn from
+    verdicts: dict[str, str] = field(default_factory=dict)
     truth: set[str] = field(default_factory=set)  # chosen, with a truth candidate
     both_wrong: set[str] = field(default_factory=set)  # chosen, both candidates wrong
-    withheld: int = 0  # selected lines whose reader row is outside the open deposit
+    withheld: int = 0  # eligible lines whose reader row is outside the open deposit
     cap: int = 0  # the most gold rows gold_rate allows
 
     def kind(self, line_id: str) -> str | None:
@@ -679,27 +811,122 @@ class GoldPlan:
         return None
 
     @property
+    def lines(self) -> set[str]:
+        return self.truth | self.both_wrong
+
+    @property
     def n_gold(self) -> int:
         return len(self.truth) + len(self.both_wrong)
 
 
 def choose_gold(
-    selected: Sequence[Eligible], *, seed: int, gold_rate: float, bad_share: float
+    items: Sequence[Eligible],
+    *,
+    limit: int,
+    seed: int,
+    gold_rate: float,
+    bad_share: float,
+    weights: Mapping[str, float] | None = None,
 ) -> GoldPlan:
-    """The gold among the selected lines (module docstring), drawn under the
-    seed apart from the selection, so a change of rate leaves the lines alone."""
-    plan = GoldPlan(withheld=sum(1 for e in selected if e.gt_withheld))
-    for e in selected:
-        if e.gt is not None:
-            plan.verdicts[e.line_id] = fold_verdict(e.v1_text, e.alt_text, e.gt.text)
-    truth = sorted(k for k, v in plan.verdicts.items() if v in ("v1", "alt"))
-    bad = sorted(k for k, v in plan.verdicts.items() if v == "both_wrong")
-    plan.cap = math.floor(gold_rate * len(selected) + 1e-9)
-    t, b = gold_counts(len(selected), len(truth), len(bad), gold_rate, bad_share)
+    """The gold, drawn first and among all the eligible lines (module
+    docstring): :func:`gold_counts` of the rows the pack will have, the truths
+    and the both-wrong rows each spread over the strata by :func:`allocate`
+    and drawn under the seed, apart from the fill."""
+    strata = drawn_strata(weights)
+    pool = [e for e in items if e.stratum in strata]
+    plan = GoldPlan(withheld=sum(1 for e in pool if e.gt_withheld))
+    truth: dict[str, list[str]] = defaultdict(list)
+    bad: dict[str, list[str]] = defaultdict(list)
+    for e in sorted(pool, key=lambda e: e.line_id):
+        if e.gt is None:
+            continue
+        verdict = fold_verdict(e.v1_text, e.alt_text, e.gt.text)
+        plan.verdicts[e.line_id] = verdict
+        if verdict in ("v1", "alt"):
+            truth[e.stratum].append(e.line_id)
+        elif verdict == "both_wrong":
+            bad[e.stratum].append(e.line_id)
+    n_rows = min(limit, len(pool))
+    plan.cap = math.floor(gold_rate * n_rows + 1e-9)
+    n_truth = sum(len(v) for v in truth.values())
+    n_bad = sum(len(v) for v in bad.values())
+    t, b = gold_counts(n_rows, n_truth, n_bad, gold_rate, bad_share)
     rng = random.Random(f"{seed}:gold")
-    plan.truth = set(rng.sample(truth, t))
-    plan.both_wrong = set(rng.sample(bad, b))
+    for supply, n, chosen in ((truth, t, plan.truth), (bad, b, plan.both_wrong)):
+        take = allocate({s: len(v) for s, v in supply.items()}, n, weights=weights)
+        for s in strata:
+            chosen.update(rng.sample(supply[s], take.get(s, 0)))
     return plan
+
+
+def select_lines(
+    items: Sequence[Eligible],
+    *,
+    limit: int,
+    seed: int,
+    weights: Mapping[str, float] | None = None,
+    gold: Collection[str] = (),
+) -> list[Eligible]:
+    """Up to ``limit`` lines, the ``gold`` lines (ids, already drawn) among
+    them: the strata filled around the gold by :func:`allocate` (equal numbers
+    per stratum, or ``weights``; a short stratum's remainder going to the
+    others), Leibniz's own hand at least at its share of the eligible lines;
+    drawn under the seed, in line order."""
+    rng = random.Random(seed)
+    strata = drawn_strata(weights)
+    by_stratum: dict[str, list[Eligible]] = defaultdict(list)
+    for e in sorted(items, key=lambda e: e.line_id):
+        if e.stratum in strata:
+            by_stratum[e.stratum].append(e)
+    chosen = {s: [e for e in v if e.line_id in gold] for s, v in by_stratum.items()}
+    rest = {s: [e for e in v if e.line_id not in gold] for s, v in by_stratum.items()}
+    quotas = allocate(
+        {s: len(v) for s, v in by_stratum.items()},
+        limit,
+        weights=weights,
+        floor={s: len(v) for s, v in chosen.items()},
+    )
+    fill = {s: quotas[s] - len(chosen[s]) for s in quotas}
+    n_pool = sum(len(v) for v in by_stratum.values())
+    n_own = sum(1 for v in by_stratum.values() for e in v if e.leibniz_hand)
+    n_sel = sum(quotas.values())
+    target = min(n_own, -(-n_own * n_sel // n_pool)) if n_pool else 0
+    target -= sum(1 for s in quotas for e in chosen[s] if e.leibniz_hand)
+    own = {s: sum(1 for e in rest[s] if e.leibniz_hand) for s in quotas}
+    take_own = leibniz_quotas(fill, own, {s: len(rest[s]) for s in quotas}, target)
+    picked: list[Eligible] = []
+    for s in audit.STRATA:
+        if s not in quotas:
+            continue
+        mine = [e for e in rest[s] if e.leibniz_hand]
+        others = [e for e in rest[s] if not e.leibniz_hand]
+        k_own = take_own[s]
+        k_other = fill[s] - k_own
+        if k_other > len(others):  # too few other hands: more of his
+            k_own += k_other - len(others)
+            k_other = len(others)
+        picked += chosen[s] + rng.sample(mine, k_own) + rng.sample(others, k_other)
+    return sorted(picked, key=lambda e: e.line_id)
+
+
+def draw(
+    items: Sequence[Eligible],
+    *,
+    limit: int,
+    seed: int,
+    gold_rate: float = DEFAULT_GOLD_RATE,
+    bad_share: float = DEFAULT_BAD_GOLD_SHARE,
+    weights: Mapping[str, float] | None = None,
+) -> tuple[list[Eligible], GoldPlan]:
+    """The pack's lines in the pack's order, and the gold among them: the gold
+    first (:func:`choose_gold`), the strata filled around it
+    (:func:`select_lines`), the whole shuffled under the seed."""
+    gold = choose_gold(
+        items, limit=limit, seed=seed, gold_rate=gold_rate, bad_share=bad_share, weights=weights
+    )
+    selected = select_lines(items, limit=limit, seed=seed, weights=weights, gold=gold.lines)
+    random.Random(f"{seed}:rows").shuffle(selected)
+    return selected, gold
 
 
 # --------------------------------------------------------------------------- #
@@ -785,6 +1012,30 @@ def build_row(
     }
 
 
+def build_rows(
+    selected: Sequence[Eligible],
+    gold: GoldPlan,
+    *,
+    seed: int,
+    today: date,
+    image_source: ImageSource,
+) -> list[dict]:
+    """The rows of the lines as drawn, in their order (:func:`build_row`)."""
+    expired = expired_volume_index(today)
+    credits = attribution_lines()
+    return [
+        build_row(
+            e,
+            gold=gold.kind(e.line_id),
+            seed=seed,
+            image_source=image_source,
+            expired=expired,
+            attribution=credits,
+        )
+        for e in selected
+    ]
+
+
 def pack_header(
     rows: Sequence[Mapping],
     *,
@@ -835,6 +1086,10 @@ def build_pack(
     bad_gold_share: float = DEFAULT_BAD_GOLD_SHARE,
     min_chars: int = DEFAULT_MIN_CHARS,
     max_chars: int = DEFAULT_MAX_CHARS,
+    min_ratio: float = DEFAULT_MIN_RATIO,
+    strata: Mapping[str, float] | None = None,
+    as_of_run: int | None = None,
+    only_records: Collection[str] | None = None,
     image_base_url: str = DEFAULT_IMAGE_BASE_URL,
     reader: str = DEFAULT_READER,
     built_at: str | None = None,
@@ -843,24 +1098,27 @@ def build_pack(
     """The whole pack from the store (read only), the pieces and the readings."""
     reader_rows = load_reader_rows(conn, reader)
     pool = gather(
-        conn, pieces, readings, reader_rows, today=today, min_chars=min_chars, max_chars=max_chars
+        conn,
+        pieces,
+        readings,
+        reader_rows,
+        today=today,
+        min_chars=min_chars,
+        max_chars=max_chars,
+        min_ratio=min_ratio,
+        as_of_run=as_of_run,
+        only_records=only_records,
     )
-    selected = select_lines(pool.eligible, limit=limit, seed=seed)
-    gold = choose_gold(selected, seed=seed, gold_rate=gold_rate, bad_share=bad_gold_share)
+    selected, gold = draw(
+        pool.eligible,
+        limit=limit,
+        seed=seed,
+        gold_rate=gold_rate,
+        bad_share=bad_gold_share,
+        weights=strata,
+    )
     image_source = ImageSource(image_base_url)
-    expired = expired_volume_index(today)
-    credits = attribution_lines()
-    rows = [
-        build_row(
-            e,
-            gold=gold.kind(e.line_id),
-            seed=seed,
-            image_source=image_source,
-            expired=expired,
-            attribution=credits,
-        )
-        for e in selected
-    ]
+    rows = build_rows(selected, gold, seed=seed, today=today, image_source=image_source)
     run_ids = {e.v1_run_id for e in selected}
     if any(e.gt is not None for e in selected):
         run_ids |= set(reader_mint_runs(conn, reader))
@@ -875,6 +1133,10 @@ def build_pack(
         "bad_gold_share": bad_gold_share,
         "min_chars": min_chars,
         "max_chars": max_chars,
+        "min_ratio": min_ratio,
+        "strata": dict(strata) if strata is not None else None,
+        "as_of_run": as_of_run,
+        "only_records": len(set(only_records)) if only_records is not None else None,
         "image_base_url": image_source.base_url,
         "reader": reader,
     }
@@ -933,29 +1195,56 @@ def length_bins(values: Iterable[int], lo: int, hi: int, width: int = 10) -> lis
 def summary_lines(pack: Pack) -> list[str]:
     """What was selected and skipped and why, the lengths, the gold, the shares."""
     pool, sel, gold, p = pack.pool, pack.selected, pack.gold, pack.params
+    only = (
+        ""
+        if pool.listed is None
+        else f" — only the {pool.listed:,} records listed ({pool.listed_unknown:,} of them not "
+        "among the German pieces)"
+    )
     out = [
         f"Pieces: {pool.pieces:,} records on {pool.pages:,} pages ({pool.pages_found:,} in the "
-        f"store; {pool.pages_no_image:,} without a cached image, their lines skipped)",
-        f"Lines on those pages: {pool.lines:,} (the latest run of each); readings in the file: "
-        f"{pool.readings:,}",
+        f"store; {pool.pages_no_image:,} without a cached image, their lines skipped){only}",
+        f"Lines on those pages: {pool.lines:,} ("
+        + (
+            f"the store as run {p['as_of_run']} left it"
+            if p.get("as_of_run") is not None
+            else "the reading the site shows of each"
+        )
+        + f"); readings in the file: {pool.readings:,}",
         "Skipped, under the first rule each line failed:",
     ]
     for reason in SKIP_REASONS:
         n = pool.skipped.get(reason, 0)
-        if n or reason == "not_70_expired":
-            note = f" (refused: not §70-free on {p['today']})" if reason == "not_70_expired" else ""
+        if n or reason in ("lopsided", "not_70_expired"):
+            note = {
+                "other_record": " (on a listed record's page, another piece's line)",
+                "lopsided": f" (the shorter reading under {p['min_ratio']:g} of the longer)",
+                "not_70_expired": f" (refused: not §70-free on {p['today']})",
+            }.get(reason, "")
             out.append(f"  {reason:<18} {n:>9,}{note}")
     out.append(f"Eligible: {len(pool.eligible):,} lines")
+    weights = p.get("strata")
+    if weights:
+        total = sum(weights.values())
+        named = " · ".join(
+            f"{s} {weights[s] / total:.3g}" for s in audit.STRATA if weights.get(s, 0) > 0
+        )
+        how = f"strata by weight: {named}; a stratum not named gives no row"
+    else:
+        how = "equal per stratum"
     out.append(
-        f"Selected: {len(sel):,} (limit {p['limit']:,}, seed {p['seed']}; equal per stratum)"
+        f"Selected: {len(sel):,} (limit {p['limit']:,}, seed {p['seed']}; {how}; the gold drawn "
+        "first, the strata filled around it; the rows shuffled under the seed)"
     )
     pool_strata = Counter(e.stratum for e in pool.eligible)
     sel_strata = Counter(e.stratum for e in sel)
+    gold_strata = Counter(e.stratum for e in sel if gold.kind(e.line_id))
     for s in audit.STRATA:
         if pool_strata.get(s) or sel_strata.get(s):
             out.append(
                 f"  {s:<15} pool {pool_strata[s]:>8,} ({_pct(pool_strata[s], len(pool.eligible))})"
-                f" → pack {sel_strata[s]:>6,} ({_pct(sel_strata[s], len(sel))})"
+                f" → pack {sel_strata[s]:>6,} ({_pct(sel_strata[s], len(sel))}), gold "
+                f"{gold_strata[s]:,}"
             )
     n_pool = len(pool.eligible)
     own_pool = sum(1 for e in pool.eligible if e.leibniz_hand)
@@ -967,32 +1256,71 @@ def summary_lines(pack: Pack) -> list[str]:
     )
     langs = Counter(e.piece.language for e in sel)
     out.append("  lang: " + " · ".join(f"{k} {v:,}" for k, v in sorted(langs.items())))
+    models = Counter(e.v1_model for e in sel)
+    out.append(
+        "  the stored reading (htr_best), by model: "
+        + (" · ".join(f"{m} {n:,}" for m, n in models.most_common()) or "—")
+    )
     out.append("Candidate lengths (characters, whitespace normalised):")
-    out.append(f"  htr_best (v1)       {_lengths([e.v1_text for e in sel])}")
+    out.append(f"  htr_best (stored)   {_lengths([e.v1_text for e in sel])}")
     out.append(f"  model_alt (Bern)    {_lengths([e.alt_text for e in sel])}")
     bins = length_bins((e.n_chars for e in sel), p["min_chars"], p["max_chars"])
     out.append("  the longer of the two: " + " · ".join(f"{lab} {n:,}" for lab, n in bins))
     first_v1 = sum(1 for r in pack.rows if r["candidates"][0]["source"] == V1_SOURCE)
     out.append(
-        f"  order: v1 first in {first_v1:,} rows, the Bern reading first in {len(sel) - first_v1:,}"
+        f"  order: the stored reading first in {first_v1:,} rows, the Bern reading first in "
+        f"{len(sel) - first_v1:,}"
     )
     v = Counter(gold.verdicts.values())
+    out.append(
+        f"Gold supply, among the eligible lines of the strata drawn: {len(gold.verdicts):,} with "
+        f"a reader-minted row in the open deposit — one candidate equal under the fold "
+        f"{v['v1'] + v['alt']:,} (stored {v['v1']:,}, Bern {v['alt']:,}), neither "
+        f"{v['both_wrong']:,}, both {v['ambiguous']:,} (no gold), unfoldable {v['unfoldable']:,}"
+    )
+    by_line = {e.line_id: e.stratum for e in pool.eligible}
+    supply = Counter((by_line[k], x) for k, x in gold.verdicts.items())
+    out.append(
+        "  by stratum, truth / both wrong: "
+        + " · ".join(
+            f"{s} {supply[s, 'v1'] + supply[s, 'alt']:,} / {supply[s, 'both_wrong']:,}"
+            for s in audit.STRATA
+            if pool_strata.get(s)
+        )
+    )
     out.append(
         f"Gold: {gold.n_gold:,} of {len(sel):,} rows ({_pct(gold.n_gold, len(sel))}; cap "
         f"{p['gold_rate']:g} × {len(sel):,} rows = {gold.cap:,}): truth {len(gold.truth):,}, "
         f"both wrong {len(gold.both_wrong):,} (cap {p['bad_gold_share']:g} of the gold)"
     )
     chosen = Counter(gold.verdicts[k] for k in gold.truth)
-    out.append(f"  the truth is v1 in {chosen['v1']:,} rows, the Bern reading in {chosen['alt']:,}")
     out.append(
-        f"  selected lines with a reader-minted row in the open deposit: {len(gold.verdicts):,} — "
-        f"one candidate equal under the fold {v['v1'] + v['alt']:,} (v1 {v['v1']:,}, Bern "
-        f"{v['alt']:,}), neither {v['both_wrong']:,}, both {v['ambiguous']:,} (no gold), "
-        f"unfoldable {v['unfoldable']:,}"
+        f"  the truth is the stored reading in {chosen['v1']:,} rows, the Bern reading in "
+        f"{chosen['alt']:,}"
+    )
+    kinds = Counter(
+        (e.stratum, "bad" if e.line_id in gold.both_wrong else "truth")
+        for e in sel
+        if gold.kind(e.line_id)
     )
     out.append(
-        f"  withheld: {gold.withheld:,} selected lines whose reader-minted row is in the NC "
-        "deposit (never gold)"
+        "  by stratum, truth / both wrong: "
+        + " · ".join(
+            f"{s} {kinds[s, 'truth']:,} / {kinds[s, 'bad']:,}"
+            for s in audit.STRATA
+            if sel_strata.get(s)
+        )
+    )
+    own_gold = sum(1 for e in sel if e.leibniz_hand and gold.kind(e.line_id))
+    out.append(f"  in Leibniz's own hand: {own_gold:,} of the gold rows")
+    spare = sum(1 for e in sel if e.gt is not None and not gold.kind(e.line_id))
+    out.append(
+        f"  rows with a reader-minted row in the open deposit that are not gold: {spare:,} "
+        "(over the caps, both readings equal, or unfoldable)"
+    )
+    out.append(
+        f"  withheld: {sum(1 for e in sel if e.gt_withheld):,} selected lines whose reader-minted "
+        f"row is in the NC deposit (never gold); {gold.withheld:,} among the eligible"
     )
     out.append(f"Runs: {', '.join(str(r) for r in pack.header['source']['run_ids']) or '—'}")
     out.append(f"Pack: {pack.header['pack_id']} (schema_version {SCHEMA_VERSION})")
@@ -1007,6 +1335,7 @@ __all__ = [
     "DEFAULT_LIMIT",
     "DEFAULT_MAX_CHARS",
     "DEFAULT_MIN_CHARS",
+    "DEFAULT_MIN_RATIO",
     "DEFAULT_PIECES",
     "DEFAULT_READINGS",
     "GOLD_SOURCE",
@@ -1024,12 +1353,16 @@ __all__ = [
     "Reading",
     "Refused",
     "aa_label_from_source",
+    "allocate",
     "attribution_lines",
     "bbox_of",
     "build_pack",
     "build_row",
+    "build_rows",
     "cand_id",
     "choose_gold",
+    "draw",
+    "drawn_strata",
     "fold_verdict",
     "fragment_id",
     "gather",
@@ -1039,8 +1372,10 @@ __all__ = [
     "load_pieces",
     "load_reader_rows",
     "load_readings",
+    "lopsided",
     "owner_piece",
     "pack_header",
+    "parse_strata",
     "piece_expired",
     "piece_from_row",
     "reader_mint_runs",

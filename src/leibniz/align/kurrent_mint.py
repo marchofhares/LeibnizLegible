@@ -55,7 +55,9 @@ from leibniz.align.align import HtrLine
 from leibniz.align.audit import (
     DEFAULT_HELP_HTML,
     AuditLine,
+    attach_context,
     attach_images,
+    lines_for_refs,
     sample_lines,
     write_sheet,
 )
@@ -81,7 +83,13 @@ from leibniz.align.kurrent_read import (
     load_stats,
     resolve_pages,
 )
-from leibniz.align.pairs import GtPair, ensure_gt_ownership, reader_from_source, record_readers
+from leibniz.align.pairs import (
+    GtPair,
+    ensure_gt_ownership,
+    reader_from_source,
+    record_id_from_source,
+    record_readers,
+)
 from leibniz.align.volumes import PieceRef
 from leibniz.catalog.hands import hand_from_textart, is_leibniz_hand
 
@@ -1125,6 +1133,36 @@ AUDIT_SPLIT_NOTE_EN = (
     "<p>Half of the lines are in Leibniz's own hand and half in other hands, mixed; the sheet "
     "does not say which.</p>"
 )
+AUDIT_HANDS = ("own", "other", "both")
+AUDIT_NAME = "k2-audit"  # the first sheet's file name; a later sheet takes another
+AUDIT_TITLE = (
+    "German lines minted from the Kurrent reading · deutsche Zeilen, aus der Kurrent-Lesung "
+    "zugeordnet"
+)
+# Two notes for the sheets of `leibniz align audit-sheet-k2` (K3b): what the paler
+# strips are, and where a corrected transcription goes.
+AUDIT_CONTEXT_NOTE_EN = (
+    "The paler grey strips above and below are the neighbouring lines of the same page in "
+    "the segmenter's reading order, shown for context only: <b>your verdict is for the middle "
+    "strip</b>, the one in colour with the text under it."
+)
+AUDIT_CONTEXT_NOTE_DE = (
+    "Die blasseren grauen Streifen darüber und darunter sind die Nachbarzeilen derselben "
+    "Seite in der Lesereihenfolge der Zeilenerkennung, nur zur Orientierung: <b>Ihr Urteil "
+    "gilt dem mittleren Streifen</b>, dem farbigen, unter dem der Text steht."
+)
+AUDIT_CORRECTION_NOTE_EN = (
+    "Where the text is not right, a corrected transcription is welcome: in the note, or — as "
+    "the Leibniz-Edition did on the first sheet — as the whole line's text in a column of its "
+    "own (the field under the verdicts; the downloaded table carries it as "
+    "<code>transcription</code>). A line with a corrected text needs no verdict."
+)
+AUDIT_CORRECTION_NOTE_DE = (
+    "Wo der Text nicht stimmt, ist eine berichtigte Transkription willkommen: in der Notiz "
+    "oder — wie es die Leibniz-Edition beim ersten Blatt getan hat — als Text der ganzen Zeile "
+    "in einer eigenen Spalte (das Feld unter den Urteilen; die heruntergeladene Tabelle führt "
+    "ihn als <code>transcription</code>). Eine Zeile mit berichtigtem Text braucht kein Urteil."
+)
 AUDIT_VERDICT_LABELS = {
     "correct": "correct · richtig",
     "boundary": "boundary · Grenze",
@@ -1144,6 +1182,15 @@ def build_audit_sheet(
     seed: int = SEED,
     bilingual: bool = True,
     leibniz_hand_ids: Iterable[str] | None = None,
+    hand: str = "both",
+    exclude_refs: Iterable[str] | None = None,
+    exclude_record_ids: Iterable[str] | None = None,
+    exclude_pages: Iterable[str] | None = None,
+    context: int = 0,
+    name: str = AUDIT_NAME,
+    refs: Sequence[str] | None = None,
+    title: str | None = None,
+    correction_note: bool = False,
 ) -> tuple[Path, Path, dict[str, int], dict[str, int]]:
     """``data/kurrent/k2-audit.html`` and its lines CSV: ``n`` of the reader's minted lines,
     seeded, equal per stratum, through the C2 sheet machinery — the crop, the minted
@@ -1155,23 +1202,62 @@ def build_audit_sheet(
     each half equal per stratum under the same seed, the two mixed under the seed again;
     the lines CSV's ``group`` column (``leibniz_hand`` / ``other_hands``) tells them
     apart, the sheet itself does not. Returns the paths and the counts by stratum and
-    by group."""
+    by group.
+
+    The rest is for a later sheet (``leibniz align audit-sheet-k2``) and changes
+    nothing unless asked: ``hand`` ``own`` or ``other`` draws every line from the
+    one group; ``exclude_refs``, ``exclude_record_ids`` and ``exclude_pages`` take
+    lines out of the pool before the draw (the first sheet's lines, a validation
+    set's records, a test set's pages); ``context`` attaches that many
+    neighbouring lines above and below each strip; ``refs`` replaces the draw by
+    an explicit list of lines; ``name`` names the two files, ``title`` the page;
+    ``correction_note`` adds the field for a corrected transcription and the help
+    text's paragraph on it."""
+    if hand not in AUDIT_HANDS:
+        raise ValueError(f"hand must be one of {AUDIT_HANDS}")
     own_ids = sorted({str(r) for r in leibniz_hand_ids}) if leibniz_hand_ids else []
-    if own_ids:
-        half = n // 2
-        own = sample_lines(conn, half, seed=seed, reader=reader, record_ids=own_ids)
-        rest = sample_lines(
-            conn, n - half, seed=seed, reader=reader, record_ids=own_ids, exclude_records=True
-        )
-        for ln in own:
-            ln.group = AUDIT_GROUPS["own"]
-        for ln in rest:
-            ln.group = AUDIT_GROUPS["other"]
-        lines: list[AuditLine] = [*own, *rest]
+    if hand != "both" and not own_ids and refs is None:
+        raise ValueError("a sheet by hand needs the records in Leibniz's own hand")
+    excluded = {str(r) for r in exclude_record_ids or ()}
+    draw = {"seed": seed, "reader": reader}
+    if exclude_refs or exclude_pages:
+        draw |= {"exclude_refs": exclude_refs, "exclude_pages": exclude_pages}
+    own_pool = [r for r in own_ids if r not in excluded]
+    not_own = sorted(set(own_ids) | excluded)
+
+    def tagged(drawn: list[AuditLine], group: str) -> list[AuditLine]:
+        for ln in drawn:
+            ln.group = AUDIT_GROUPS[group]
+        return drawn
+
+    split = False
+    if refs is not None:
+        lines: list[AuditLine] = lines_for_refs(conn, list(refs))
+        for ln in lines:
+            if own_ids and ln.source != "not minted":
+                rid = record_id_from_source(ln.source)
+                ln.group = AUDIT_GROUPS["own" if rid in own_ids else "other"]
+    elif hand == "own":
+        lines = tagged(sample_lines(conn, n, record_ids=own_pool, **draw), "own")
         random.Random(seed).shuffle(lines)
+    elif hand == "other":
+        lines = tagged(
+            sample_lines(conn, n, record_ids=not_own, exclude_records=True, **draw), "other"
+        )
+        random.Random(seed).shuffle(lines)
+    elif own_ids:
+        split = True
+        half = n // 2
+        own = sample_lines(conn, half, record_ids=own_pool, **draw)
+        rest = sample_lines(conn, n - half, record_ids=not_own, exclude_records=True, **draw)
+        lines = [*tagged(own, "own"), *tagged(rest, "other")]
+        random.Random(seed).shuffle(lines)
+    elif excluded:
+        lines = sample_lines(conn, n, record_ids=sorted(excluded), exclude_records=True, **draw)
     else:
-        lines = sample_lines(conn, n, seed=seed, reader=reader)
+        lines = sample_lines(conn, n, **draw)
     attach_images(conn, lines, Path(images_root))
+    attach_context(conn, lines, Path(images_root), context)
     for ln in lines:
         r = readings.get(ln.ref)
         ln.alt_text = r.text if r is not None else "—"
@@ -1181,14 +1267,17 @@ def build_audit_sheet(
         lines,
         images_root=Path(images_root),
         out_dir=Path(out_dir),
-        html_name="k2-audit.html",
-        csv_name="k2-audit-lines.csv",
+        html_name=f"{name}.html",
+        csv_name=f"{name}-lines.csv",
         seed=seed,
-        title="K2 — German lines minted from the Kurrent reading · deutsche Zeilen, "
-        "aus der Kurrent-Lesung zugeordnet",
-        help_html=_audit_help(bilingual, split=bool(own_ids)),
+        title=title or f"K2 — {AUDIT_TITLE}",
+        help_html=_audit_help(
+            bilingual, split=split, context=context > 0, corrections=correction_note
+        ),
         verdict_labels=AUDIT_VERDICT_LABELS if bilingual else None,
         attach=False,
+        transcription_field=correction_note,
+        storage_key=None if name == AUDIT_NAME else f"{name}-{seed}",
     )
     by_group: dict[str, int] = {}
     for ln in lines:
@@ -1197,19 +1286,27 @@ def build_audit_sheet(
     return sheet.html_path, sheet.csv_path, sheet.by_stratum, by_group
 
 
-def _audit_help(bilingual: bool, *, split: bool) -> str | None:
-    """The sheet's instructions: bilingual or the C2 default, plus the hand-split note."""
-    if not split:
+def _audit_help(
+    bilingual: bool, *, split: bool, context: bool = False, corrections: bool = False
+) -> str | None:
+    """The sheet's instructions: bilingual or the C2 default, plus the notes the
+    sheet calls for — the hand split, the context strips, the corrected transcription."""
+    notes: list[str] = []
+    if split:
+        notes.append(AUDIT_SPLIT_NOTE if bilingual else AUDIT_SPLIT_NOTE_EN)
+    for wanted, en, de in (
+        (context, AUDIT_CONTEXT_NOTE_EN, AUDIT_CONTEXT_NOTE_DE),
+        (corrections, AUDIT_CORRECTION_NOTE_EN, AUDIT_CORRECTION_NOTE_DE),
+    ):
+        if wanted and bilingual:
+            notes.append(f"<p><b>English.</b> {en} <b>Deutsch.</b> {de}</p>")
+        elif wanted:
+            notes.append(f"<p>{en}</p>")
+    if not notes:
         return AUDIT_HELP_HTML if bilingual else None
-    if bilingual:
-        head, sep, tail = AUDIT_HELP_HTML.rpartition("</div>")
-        return head + AUDIT_SPLIT_NOTE + sep + tail
-    head, sep, tail = DEFAULT_HELP_HTML.rpartition("</div>")
-    return (
-        (head + AUDIT_SPLIT_NOTE_EN + sep + tail)
-        if sep
-        else DEFAULT_HELP_HTML + AUDIT_SPLIT_NOTE_EN
-    )
+    base = AUDIT_HELP_HTML if bilingual else DEFAULT_HELP_HTML
+    head, sep, tail = base.rpartition("</div>")
+    return (head + "".join(notes) + sep + tail) if sep else base + "".join(notes)
 
 
 def _count(conn: sqlite3.Connection, where: str, params: Sequence = ()) -> int:
@@ -1435,9 +1532,27 @@ def readings_for(readings_dir: Path | str = DEFAULT_READINGS_DIR, reader: str = 
     return load_readings(readings_dir, reader)
 
 
+def read_csv_column(paths: Iterable[Path | str], columns: Sequence[str]) -> set[str]:
+    """The values of the first of ``columns`` each CSV carries, split on whitespace
+    (``page_ids`` holds a letter's pages in one cell). ``ValueError`` names a file
+    with none of them."""
+    out: set[str] = set()
+    for path in paths:
+        with Path(path).open(newline="", encoding="utf-8-sig") as fh:
+            reader = csv.DictReader(fh)
+            col = next((c for c in columns if c in (reader.fieldnames or ())), None)
+            if col is None:
+                raise ValueError(f"{path}: no column {' or '.join(columns)}")
+            for row in reader:
+                out.update((row.get(col) or "").split())
+    return out
+
+
 __all__ = [
     "AUDIT_GROUPS",
+    "AUDIT_HANDS",
     "AUDIT_LINES",
+    "AUDIT_NAME",
     "AUDIT_VERDICT_LABELS",
     "DEFAULT_DECISIONS",
     "DEFAULT_SIDE_BY_SIDE",
@@ -1468,6 +1583,7 @@ __all__ = [
     "summary",
     "tally_by",
     "pairs_path_for",
+    "read_csv_column",
     "write_decisions",
     "write_mint",
     "write_outputs",

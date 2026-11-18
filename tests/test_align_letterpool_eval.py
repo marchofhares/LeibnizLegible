@@ -362,6 +362,59 @@ def test_letterpool_eval_cli(tmp_path: Path) -> None:
     assert summary["aggregate"]["echo"]["philiumm"]["all"]["cer"] > 0.9
 
 
+def test_letterpool_eval_cli_scores_a_decoder_beside_greedy(tmp_path: Path, monkeypatch) -> None:
+    from leibniz.htr import kurrent as K
+
+    store = tmp_path / "inv.sqlite"
+    _seed(store)
+    csv_path, texts_path = _frozen(tmp_path)
+    readings = tmp_path / "readings"
+    readings.mkdir()
+    lm = tmp_path / "toy.arpa"
+    lm.write_text("\\data\\\n", encoding="utf-8")
+    fake = K.Candidate("fakek", "kraken", "none.safetensors", "CC BY 4.0", "", "a test reader")
+    monkeypatch.setitem(K.CANDIDATES, "fakek", fake)
+    for key, text in (("fakek", "x"), ("fakek+prefix-beam", "y")):
+        P.append_readings(
+            readings,
+            key,
+            [
+                P.Reading(f"W:{p:04d}:{k:03d}", text, None, key, "cpu", 1.0)
+                for p in (1, 2, 3)
+                for k in range(2)
+            ],
+        )
+    base = [
+        "align",
+        "letterpool-eval",
+        "--db",
+        str(store),
+        "--testset",
+        str(csv_path),
+        "--texts",
+        str(texts_path),
+        "--sources",
+        str(tmp_path / "none.json"),
+        "--readings-dir",
+        str(readings),
+        "--reports-dir",
+        str(tmp_path / "reports"),
+    ]
+    args = [*base, "--readers", "fakek", "--decoder", "prefix-beam", "--lm", str(lm)]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    summary = json.loads((tmp_path / "reports" / "letterpool-eval.json").read_text("utf-8"))
+    assert {"v1", "fakek", "fakek+prefix-beam"} <= set(summary["aggregate"])
+    licences = {r["reader"]: r["licence"] for r in summary["readers"]}
+    assert licences["fakek+prefix-beam"] == "CC BY 4.0"
+    # a reader that is not a kraken model has no posteriors to decode
+    refused = runner.invoke(app, [*base, "--readers", "echo", "--decoder", "prefix-beam"])
+    flat = " ".join(refused.output.replace("│", " ").split())
+    assert refused.exit_code == 2 and "not a kraken reader" in flat
+    no_lm = runner.invoke(app, [*base, "--readers", "fakek", "--decoder", "beam-lm"])
+    assert no_lm.exit_code == 2 and "needs --lm" in " ".join(no_lm.output.split())
+
+
 def test_infix_distance_without_the_span_gives_the_same_distance() -> None:
     rng = random.Random(7)
     for _ in range(100):
