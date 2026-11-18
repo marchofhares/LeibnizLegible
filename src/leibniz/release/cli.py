@@ -64,6 +64,22 @@ def _apply_release_options(
     return release
 
 
+def _part_c_line(out: Path, release: dict) -> str:
+    """The one line Part C is started with: the four DOIs, the namespace, the version."""
+    import json
+
+    dois = S.dois(release)
+    version = ""
+    manifest = out / "leibniz-transcriptions" / "MANIFEST.json"
+    if manifest.exists():
+        version = (json.loads(manifest.read_text(encoding="utf-8")).get("generated_at") or "")[:10]
+    return (
+        "For Part C: REL1 DOIs: "
+        + " ".join(f"{r}={dois[r]}" for r in S.RECORDS)
+        + f" · hf={S.hf_namespace(release) or '(not set)'} · version={version or '(unknown)'}"
+    )
+
+
 _DOI = typer.Option(
     [], "--doi", help="A reserved DOI as record=DOI (transcriptions, gt, gt-nc, model); repeat."
 )
@@ -181,6 +197,8 @@ def cards(
         f"creators: {', '.join(c['name'] for c in S.creators(release))} · Hugging Face "
         f"namespace: {S.hf_namespace(release) or '(not set)'} · {out / S.RELEASE_FILE}"
     )
+    if all(r in dois for r in S.RECORDS):
+        console.print(_part_c_line(out, release), soft_wrap=True)
 
 
 @app.command()
@@ -225,6 +243,37 @@ def model(
         + ("" if no_zip else f" and [cyan]{pkg.zip_path}[/cyan]")
         + f" ({'doi:' + mark if mark else 'no DOI yet: reserve it, then run this again'})."
     )
+
+
+@app.command()
+def check(
+    out: Path = typer.Option(DEFAULT_OUT, "--out", help="The release root."),
+    stats: Path = typer.Option(
+        None,
+        "--stats",
+        help="The site's /api/stats saved to a file (curl -s https://…/api/stats > stats.json): "
+        "the lines, the lines by model and the pages by language are compared with it.",
+    ),
+) -> None:
+    """Run the checklist's checks on a release folder (reads the exports, not the
+    store): files against manifests, counts against the site's, no NC line among the
+    transcriptions, the deposits disjoint and complete, the cards and their DOIs."""
+    import json
+
+    from leibniz.release.check import check_release
+
+    live = json.loads(stats.read_text(encoding="utf-8")) if stats else None
+    rep = check_release(out, stats=live)
+    for ok, text in rep.lines:
+        console.print(f"[green]PASS[/green] {text}" if ok else f"[red]FAIL[/red] {text}")
+    if live is None:
+        console.print("(no --stats file: the counts were not compared with the site's)")
+    console.print(
+        f"{len(rep.lines) - rep.failures} passed, {rep.failures} failed"
+        + ("" if rep.failures else ": the folder is as the checklist asks")
+    )
+    if rep.failures:
+        raise typer.Exit(min(rep.failures, 100))
 
 
 @app.command()

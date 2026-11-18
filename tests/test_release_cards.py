@@ -425,6 +425,25 @@ def test_release_cards_cli_sets_dois_creators_and_namespace(exported) -> None:
     meta = json.loads((out / "leibniz-gt.zenodo.json").read_text())["metadata"]
     assert meta["creators"][0]["orcid"] == "0000-0002-1825-0097"
     assert "10.5072/zenodo.2002" in _card(out, "gt")
+    assert "For Part C" not in r.output  # one DOI of four
+    full = CliRunner().invoke(
+        app,
+        [
+            "release",
+            "cards",
+            "--out",
+            str(out),
+            "--doi",
+            "transcriptions=10.5072/zenodo.2001",
+            "--doi",
+            "gt-nc=10.5072/zenodo.2003",
+            "--doi",
+            "model=10.5072/zenodo.2004",
+        ],
+    )
+    line = next(x for x in full.output.splitlines() if x.startswith("For Part C"))
+    assert "transcriptions=10.5072/zenodo.2001 gt=10.5072/zenodo.2002" in line
+    assert "model=10.5072/zenodo.2004 · hf=leibniz-legible · version=20" in line
     bad = CliRunner().invoke(app, ["release", "cards", "--out", str(out), "--doi", "gt"])
     assert bad.exit_code != 0
     empty = CliRunner().invoke(app, ["release", "cards", "--out", str(out / "nowhere")])
