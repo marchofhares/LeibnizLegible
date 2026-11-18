@@ -252,7 +252,7 @@ def test_score_and_decision(tmp_path: Path) -> None:
         R.decision(
             {"cer": {"gallicorpora": {"by_type": {"roman": {"cer": 0.2}, "fraktur": {"cer": 0.6}}}}}
         )[0]
-        == "b"
+        == "b/c"
     )
     assert R.decision({})[0] == "pending"
 
@@ -300,6 +300,32 @@ def test_report_renders_pending_and_with_cer(store_path: Path) -> None:
     md = R.render(summ)
     assert (
         "(a) the printed body is read with a print model" in md
-        and "| Gallicorpora+ (print) | 50 | 6.0 % | 4.0 % | 8.0 % |" in md
+        and "| Gallicorpora+ (print) | 50 | 6.0 % | 4.0 % (25 lines) | 8.0 % (25 lines) |" in md
     )
     assert R.fraktur_share(conn) == {} or "pages" in R.fraktur_share(conn)
+
+
+def test_fold_print_marks_and_pending_type() -> None:
+    assert T.fold_print_marks("ſententiā quæ") == "ſententia quæ"  # the macron goes, æ stays
+    assert T.fold_print_marks("Compertam habeo¬") == "Compertam habeo-"
+    assert T.fold_print_marks("l’eſprit ⸗") == "l'eſprit -"
+    assert T.fold_print_marks("é à ô") == "é à ô"  # diacritics as printed
+    lines = [
+        T.SheetLine("P:0001:000", "P:0001", 0, "roman", "la", "x"),
+        T.SheetLine("P:0002:000", "P:0002", 0, "fraktur", "de", "y"),
+    ]
+    refs = {"P:0001:000": "ſententia habeo-"}
+    hyps = {"P:0001:000": "ſententiā habeo¬"}
+    s = T.score(refs, hyps, lines)
+    assert s["by_type"]["roman"]["cer"] == 0.0 and s["by_type"]["roman"]["cer_unfolded"] > 0
+    assert s["by_type"]["fraktur"] == {
+        "lines": 0,
+        "cer": None,
+        "cer_unfolded": None,
+        "pending": True,
+    }
+    assert s["lines"][0]["ref"] == "P:0001:000" and "then" in s["policy"]
+    unfolded = T.score(refs, hyps, lines, fold=False)
+    assert unfolded["by_type"]["roman"]["cer"] == unfolded["by_type"]["roman"]["cer_unfolded"] > 0
+    letter, sentence = R.decision({"cer": {"gallicorpora": s}})
+    assert letter == "a (fraktur pending)" and "fraktur half" in sentence

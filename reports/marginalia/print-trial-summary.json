@@ -686,7 +686,393 @@
    "iou_lines_print_median": 0.8221
   }
  },
- "cer": null,
+ "cer": {
+  "transcriptions": "data/print/transcriptions/print-sheet-transcriptions-2026-11-18.csv",
+  "gallicorpora": {
+   "policy": "NFD · collapse-ws · strip; then abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '",
+   "lines_transcribed": 24,
+   "lines_scored": 24,
+   "lines_without_hypothesis": 0,
+   "cer": 0.0356,
+   "cer_unfolded": 0.0434,
+   "by_type": {
+    "fraktur": {
+     "lines": 0,
+     "cer": null,
+     "cer_unfolded": null,
+     "pending": true
+    },
+    "roman": {
+     "lines": 24,
+     "cer": 0.0356,
+     "cer_unfolded": 0.0434,
+     "pending": false
+    }
+   },
+   "lines": [
+    {
+     "ref": "1023099829:0066:012",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Datus ſit numerus verbi gratia 4335. Oporteatque",
+     "hyp": "Datus ſit numerus verbi gratia 4335. Oporteatque"
+    },
+    {
+     "ref": "1048626504:0005:006",
+     "type": "roman",
+     "cer": 0.093,
+     "ref_text": "REGIÆ DOMVS SERENISSIMO PRINCIPE AC DOMINO,",
+     "hyp": "REGLÆ DOMVS SERENISSIMIO PRINCIEE aC DOMINO,"
+    },
+    {
+     "ref": "798278285:0007:023",
+     "type": "roman",
+     "cer": 0.0161,
+     "ref_text": "ſive ſoni articulati, quibus ideas, vel ea quæ menti noſtræ de",
+     "hyp": "ſive ſoni articulati, quibus ideas, vel ea quæ mentinoſtræ de"
+    },
+    {
+     "ref": "1677894601:0218:004",
+     "type": "roman",
+     "cer": 0.0189,
+     "ref_text": "which at their reflexion from the Plate or Bubble are",
+     "hyp": "vhich at their reflexion from the Plate or Bubble are"
+    },
+    {
+     "ref": "1032709332:0255:025",
+     "type": "roman",
+     "cer": 0.0781,
+     "ref_text": "ne locuta eſt, etiam hanc ſententiam ſubintulit. Compertam habeo",
+     "hyp": "ne locuta est, etiam bane ſententiam ſubintulis. Compertam babeo"
+    },
+    {
+     "ref": "816838348:0075:005",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Operis Mineralis.",
+     "hyp": "Operis Mineralis."
+    },
+    {
+     "ref": "889780803:0060:024",
+     "type": "roman",
+     "cer": 0.0541,
+     "ref_text": "ſon de cette Hypothese, non feulement",
+     "hyp": "ſon de cette Hypotheſe, non ſeulement"
+    },
+    {
+     "ref": "1032976985:0018:023",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "que c'eſt à l'eau forte.",
+     "hyp": "que c'eſt à l'eau forte."
+    },
+    {
+     "ref": "1758964731:0065:042",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde",
+     "hyp": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde"
+    },
+    {
+     "ref": "1040780814:0447:055",
+     "type": "roman",
+     "cer": 0.0154,
+     "ref_text": "deſcripti cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs",
+     "hyp": "deſcripti, cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs"
+    },
+    {
+     "ref": "827667701:0010:014",
+     "type": "roman",
+     "cer": 0.0506,
+     "ref_text": "Typographi Nomen nullibi chartæ ſuæ famoſæ inſcripſit, ac qui facilè, ſe exin-",
+     "hyp": "Typographi Nomen nullibi charte ſue famoſæ inſeripſit, ac qui facile, ſe exin-"
+    },
+    {
+     "ref": "797708286:0033:021",
+     "type": "roman",
+     "cer": 0.1,
+     "ref_text": "Conſtantinopoli, fol. m. 127. notatur, Tureas renuere diſpu-",
+     "hyp": "Gonſtantinopoli, fol mir27. notatur, Turoas renuere diſpu-"
+    },
+    {
+     "ref": "737324791:0109:033",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "ſunt. Dogmatum in his Conciliis reje-",
+     "hyp": "ſunt. Dogmatum in his Conciliis reje-"
+    },
+    {
+     "ref": "779786009:0224:029",
+     "type": "roman",
+     "cer": 0.0333,
+     "ref_text": "uin cunt; nunquam enim plumbum",
+     "hyp": "uincunt; nunquam enim plumbum"
+    },
+    {
+     "ref": "1815200456:0010:022",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro",
+     "hyp": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro"
+    },
+    {
+     "ref": "769494587:0035:008",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "nec latinæ ſunt, nec aliud eloquio-",
+     "hyp": "nec latinæ ſunt, nec aliud eloquio-"
+    },
+    {
+     "ref": "175905688X:0212:008",
+     "type": "roman",
+     "cer": 0.0833,
+     "ref_text": "trum ejus M in linea I L",
+     "hyp": "trum ejus M in linea IL."
+    },
+    {
+     "ref": "799199311:0119:032",
+     "type": "roman",
+     "cer": 0.08,
+     "ref_text": "quæ ipſam extrinſecus tangat; & per ambitum figuræ",
+     "hyp": "Y qua ipſam extrinſecus tangat; & per ambitum figure"
+    },
+    {
+     "ref": "797899227:0260:014",
+     "type": "roman",
+     "cer": 0.0556,
+     "ref_text": "neas, libertinſſimé admittimus, ita",
+     "hyp": "neas, libentiſſimé admittimus, ita"
+    },
+    {
+     "ref": "1677894601:0066:000",
+     "type": "roman",
+     "cer": 0.0164,
+     "ref_text": "its Rectilinear Sides, did when produced paſs exactly through",
+     "hyp": "its Rectilinear Sides, did vhen produced paſs exactly through"
+    },
+    {
+     "ref": "826603459:0049:036",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "Mathematicam ſpeculationem, niſi quatenus ad modum vel",
+     "hyp": "Mathematicam ſpeculationem, niſi quatenus ad modum vel"
+    },
+    {
+     "ref": "798311290:0039:036",
+     "type": "roman",
+     "cer": 0.0645,
+     "ref_text": "ſidia, illi fovemdam hanc hypotheſin maximam occaſionem ſuppe-",
+     "hyp": "ſidia, illi ad fovendam hanc hypotheſin maximam occaſionem ſuppe-"
+    },
+    {
+     "ref": "786373555:0120:074",
+     "type": "roman",
+     "cer": 0.0811,
+     "ref_text": "Notamus autem imprimis hôc locô id,",
+     "hyp": "Notamus autem imprimis hôe locoid,"
+    },
+    {
+     "ref": "1016738447:0009:017",
+     "type": "roman",
+     "cer": 0.0,
+     "ref_text": "vereor, ut in me cadat vel congruat.",
+     "hyp": "vereor, ut in me cadat vel congruat."
+    }
+   ]
+  },
+  "v1": {
+   "policy": "NFD · collapse-ws · strip; then abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '",
+   "lines_transcribed": 24,
+   "lines_scored": 24,
+   "lines_without_hypothesis": 0,
+   "cer": 0.1494,
+   "cer_unfolded": 0.1519,
+   "by_type": {
+    "fraktur": {
+     "lines": 0,
+     "cer": null,
+     "cer_unfolded": null,
+     "pending": true
+    },
+    "roman": {
+     "lines": 24,
+     "cer": 0.1494,
+     "cer_unfolded": 0.1519,
+     "pending": false
+    }
+   },
+   "lines": [
+    {
+     "ref": "1023099829:0066:012",
+     "type": "roman",
+     "cer": 0.0208,
+     "ref_text": "Datus ſit numerus verbi gratia 4335. Oporteatque",
+     "hyp": "Datus sit numerus verbi gratia 4335. Oporteatque"
+    },
+    {
+     "ref": "1048626504:0005:006",
+     "type": "roman",
+     "cer": 0.1628,
+     "ref_text": "REGIÆ DOMVS SERENISSIMO PRINCIPE AC DOMINO,",
+     "hyp": "REGLF DOMYS SERENISSTMO PRWNCIPE AC DOMWO,"
+    },
+    {
+     "ref": "798278285:0007:023",
+     "type": "roman",
+     "cer": 0.1774,
+     "ref_text": "ſive ſoni articulati, quibus ideas, vel ea quæ menti noſtræ de",
+     "hyp": "sire loni orticulati, quibusideas, vel ea quae mentinostrae de"
+    },
+    {
+     "ref": "1677894601:0218:004",
+     "type": "roman",
+     "cer": 0.0943,
+     "ref_text": "which at their reflexion from the Plate or Bubble are",
+     "hyp": "irhrich at their reflexion trom the Plate or Bubble arc"
+    },
+    {
+     "ref": "1032709332:0255:025",
+     "type": "roman",
+     "cer": 0.1719,
+     "ref_text": "ne locuta eſt, etiam hanc ſententiam ſubintulit. Compertam habeo",
+     "hyp": "ne locuea est, eriam hane sencenriam subineulis. Compertam habea"
+    },
+    {
+     "ref": "816838348:0075:005",
+     "type": "roman",
+     "cer": 0.2353,
+     "ref_text": "Operis Mineralis.",
+     "hyp": "Operis MinctalIS."
+    },
+    {
+     "ref": "889780803:0060:024",
+     "type": "roman",
+     "cer": 0.2973,
+     "ref_text": "ſon de cette Hypothese, non feulement",
+     "hyp": "Pon decerre FErpochele, non sculement"
+    },
+    {
+     "ref": "1032976985:0018:023",
+     "type": "roman",
+     "cer": 0.16,
+     "ref_text": "que c'eſt à l'eau forte.",
+     "hyp": "que celt à l'eauforre."
+    },
+    {
+     "ref": "1758964731:0065:042",
+     "type": "roman",
+     "cer": 0.1143,
+     "ref_text": "lità, d' illuſtri Cittadini, di grandi, di antichi, di alti; di donde",
+     "hyp": "lica, d'illustri Ciccadini, di orandi, di antichi, di alei; di donde"
+    },
+    {
+     "ref": "1040780814:0447:055",
+     "type": "roman",
+     "cer": 0.1692,
+     "ref_text": "deſcripti cadit per ſpatium æquale quadrato ſemiſſis dicti arcûs",
+     "hyp": "deseripti, cadit per spatium aequale quadrato semissis dicti areus"
+    },
+    {
+     "ref": "827667701:0010:014",
+     "type": "roman",
+     "cer": 0.2025,
+     "ref_text": "Typographi Nomen nullibi chartæ ſuæ famoſæ inſcripſit, ac qui facilè, ſe exin-",
+     "hyp": "Typosraphi Nomen nullibi charcae suae famosae inscrip ste, ac qui facile, se exin-"
+    },
+    {
+     "ref": "797708286:0033:021",
+     "type": "roman",
+     "cer": 0.1167,
+     "ref_text": "Conſtantinopoli, fol. m. 127. notatur, Tureas renuere diſpu-",
+     "hyp": "Constantinopoli, fol. m. T27. nOtatUF, Tureas renuere dispu"
+    },
+    {
+     "ref": "737324791:0109:033",
+     "type": "roman",
+     "cer": 0.1622,
+     "ref_text": "ſunt. Dogmatum in his Conciliis reje-",
+     "hyp": "fune. Dogmacum inhris Conciliisreje-"
+    },
+    {
+     "ref": "779786009:0224:029",
+     "type": "roman",
+     "cer": 0.1333,
+     "ref_text": "uin cunt; nunquam enim plumbum",
+     "hyp": "nincunc;nunquam enim plumbum"
+    },
+    {
+     "ref": "1815200456:0010:022",
+     "type": "roman",
+     "cer": 0.1061,
+     "ref_text": "ſita Dei dona cum animaduerterent potetiſsimi reges Ferdinandus Ro",
+     "hyp": "Sta Dei dona cum animaduerterent poterilsimireses F'erdinandus Ro"
+    },
+    {
+     "ref": "769494587:0035:008",
+     "type": "roman",
+     "cer": 0.0857,
+     "ref_text": "nec latinæ ſunt, nec aliud eloquio-",
+     "hyp": "nec latinae sunt, nec aliud eloquio-"
+    },
+    {
+     "ref": "175905688X:0212:008",
+     "type": "roman",
+     "cer": 0.1667,
+     "ref_text": "trum ejus M in linea I L",
+     "hyp": "erum ejus. M in linea LL"
+    },
+    {
+     "ref": "799199311:0119:032",
+     "type": "roman",
+     "cer": 0.18,
+     "ref_text": "quæ ipſam extrinſecus tangat; & per ambitum figuræ",
+     "hyp": "qua ipsam extrinseeus tancat; e per ambitum ficurae"
+    },
+    {
+     "ref": "797899227:0260:014",
+     "type": "roman",
+     "cer": 0.3333,
+     "ref_text": "neas, libertinſſimé admittimus, ita",
+     "hyp": "Deas, libentiltimé acmuclimus, IE2"
+    },
+    {
+     "ref": "1677894601:0066:000",
+     "type": "roman",
+     "cer": 0.1148,
+     "ref_text": "its Rectilinear Sides, did when produced paſs exactly through",
+     "hyp": "ips R ectilincar Sides, did hen produced pals exactly chrouoh"
+    },
+    {
+     "ref": "826603459:0049:036",
+     "type": "roman",
+     "cer": 0.1296,
+     "ref_text": "Mathematicam ſpeculationem, niſi quatenus ad modum vel",
+     "hyp": "Machemacicam (peculacionem, nih quacenus ad modum vel"
+    },
+    {
+     "ref": "798311290:0039:036",
+     "type": "roman",
+     "cer": 0.1613,
+     "ref_text": "ſidia, illi fovemdam hanc hypotheſin maximam occaſionem ſuppe-",
+     "hyp": "Sidia, illi ad forendam hanc hrpothelin maximam occationem suppe-"
+    },
+    {
+     "ref": "786373555:0120:074",
+     "type": "roman",
+     "cer": 0.1351,
+     "ref_text": "Notamus autem imprimis hôc locô id,",
+     "hyp": "Nocamus aurem imprimis hôe locoid,"
+    },
+    {
+     "ref": "1016738447:0009:017",
+     "type": "roman",
+     "cer": 0.0556,
+     "ref_text": "vereor, ut in me cadat vel congruat.",
+     "hyp": "vereor, ut in ne cadat vel consruat."
+    }
+   ]
+  }
+ },
  "ocr_lines": 3463,
  "fraktur_share_corpus": {
   "pages_by_lang": {

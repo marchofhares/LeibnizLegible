@@ -4,7 +4,7 @@ M1 Task 1b, run 2026-11-18 on the desktop, the store read-only. The pages are th
 
 ## Decision
 
-**The decision waits for the CER: the sheet of 50 printed lines is rendered, the transcriptions are not in; the zone numbers above stand on their own.**
+**(a) the printed body is read with a print model and shown as such: roman 3.6% → (a) on the sheet. The fraktur half of the sheet is not transcribed yet, so this holds for the type scored; the other type's decision follows its transcription.**
 
 ## Zones per class
 
@@ -72,12 +72,12 @@ Over the Marginalien in the store (103,626 pages with a language verdict), the K
 
 ## The CER on 50 printed lines
 
-**Pending.** The sheet of 50 printed lines (25 roman, 25 Fraktur) is at `data/print/print-sheet.html`; Gallicorpora+ has read 3,463 printed-body lines. When the transcriptions are in:
+| model | lines scored | CER (all) | roman | Fraktur |
+|---|---:|---:|---:|---:|
+| Gallicorpora+ (print) | 24 | 3.6 % | 3.6 % (24 lines) | pending |
+| v1, the handwriting model | 24 | 14.9 % | 14.9 % (24 lines) | pending |
 
-```bash
-uv run leibniz layout print-trial cer --transcriptions <the downloaded CSV>
-uv run leibniz layout print-trial report
-```
+Normalisation: NFD · collapse-ws · strip; then abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '. The operator's transcriptions (data/print/transcriptions/print-sheet-transcriptions-2026-11-18.csv) are the reference; 24 of the 50 lines carry one. Without the fold the CER is 4.3 % for Gallicorpora+ and 15.2 % for v1.
 
 ## What this does and does not show
 

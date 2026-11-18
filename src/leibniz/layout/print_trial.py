@@ -34,6 +34,7 @@ import json
 import random
 import sqlite3
 import statistics
+import unicodedata
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
@@ -592,6 +593,25 @@ def read_ocr_texts(xml_path: Path) -> dict[str, str]:
 # --------------------------------------------------------------------------- #
 
 
+# The operator's conventions for the sheet (18 November 2026): ſ, æ, u and v as
+# printed, & as &, the line-end double hyphen written "-", abbreviation marks
+# (ē, ã) present or not — so both sides are folded before scoring: the marks
+# dropped, the hyphenation signs Gallicorpora+ writes (¬, ⸗) read as "-", the
+# typographic apostrophe as the plain one. Nothing else is touched.
+ABBREVIATION_MARKS = frozenset({"\u0304", "\u0303", "\u0305"})  # macron, tilde, overline
+FOLDS = "abbreviation marks (macron, tilde, overline) dropped; ¬ and ⸗ read as -; ’ as '"
+
+
+def fold_print_marks(text: str) -> str:
+    """The print trial's fold of a transcription or a reading before the CER."""
+    out = []
+    for ch in unicodedata.normalize("NFD", text):
+        if ch in ABBREVIATION_MARKS:
+            continue
+        out.append({"¬": "-", "⸗": "-", "’": "'"}.get(ch, ch))
+    return unicodedata.normalize("NFC", "".join(out))
+
+
 def read_transcriptions(path: Path) -> dict[str, str]:
     """The operator's CSV from the sheet (``ref, type, transcription``)."""
     out: dict[str, str] = {}
@@ -608,12 +628,17 @@ def score(
     lines: Sequence[SheetLine],
     *,
     policy: str = "philiumm",
+    fold: bool = True,
 ) -> dict:
     """CER of ``hyps`` against the operator's ``refs`` over the sheet's lines,
-    by print type and in all, under the named normalisation policy; the
-    lines without a transcription or a hypothesis are counted, not scored."""
+    by print type and in all, under the named normalisation policy and, with
+    ``fold``, the trial's fold of both sides (:func:`fold_print_marks`; the
+    unfolded CER is kept beside it); the lines without a transcription or a
+    hypothesis are counted, not scored, and a type without a scored line is
+    listed as pending."""
     pol = get_policy(policy)
     scores: dict[str, list[LineScore]] = defaultdict(list)
+    raw: dict[str, list[LineScore]] = defaultdict(list)
     missing = 0
     for ln in lines:
         ref = refs.get(ln.ref)
@@ -623,17 +648,34 @@ def score(
         if hyp is None:
             missing += 1
             continue
+        raw[ln.print_type].append(score_line(ref, hyp, pol, line_id=ln.ref))
+        if fold:
+            ref, hyp = fold_print_marks(ref), fold_print_marks(hyp)
         scores[ln.print_type].append(score_line(ref, hyp, pol, line_id=ln.ref))
     allscores = [s for v in scores.values() for s in v]
+    allraw = [s for v in raw.values() for s in v]
+    types = sorted({ln.print_type for ln in lines} | set(scores))
     return {
-        "policy": pol.describe(),
+        "policy": pol.describe() + (f"; then {FOLDS}" if fold else ""),
         "lines_transcribed": sum(1 for ln in lines if refs.get(ln.ref)),
         "lines_scored": len(allscores),
         "lines_without_hypothesis": missing,
         "cer": round(cer(allscores), 4) if allscores else None,
+        "cer_unfolded": round(cer(allraw), 4) if allraw else None,
         "by_type": {
-            t: {"lines": len(v), "cer": round(cer(v), 4)} for t, v in sorted(scores.items())
+            t: {
+                "lines": len(scores.get(t, [])),
+                "cer": round(cer(scores[t]), 4) if scores.get(t) else None,
+                "cer_unfolded": round(cer(raw[t]), 4) if raw.get(t) else None,
+                "pending": not scores.get(t),
+            }
+            for t in types
         },
+        "lines": [
+            {"ref": s.line_id, "type": t, "cer": round(s.cer, 4), "ref_text": s.ref, "hyp": s.hyp}
+            for t, v in sorted(scores.items())
+            for s in v
+        ],
     }
 
 
@@ -773,8 +815,10 @@ __all__ = [
     "LINE_GROUPS",
     "LineCall",
     "PageTrial",
+    "FOLDS",
     "SheetLine",
     "aggregate",
+    "fold_print_marks",
     "crops_for",
     "philiumm_group",
     "print_group",

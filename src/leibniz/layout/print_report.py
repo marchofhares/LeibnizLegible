@@ -45,44 +45,45 @@ def fraktur_share(conn: sqlite3.Connection) -> dict:
 
 
 def decision(summary: Mapping) -> tuple[str, str]:
-    """``(letter, sentence)``: the decision from the CER by type, or the
-    provisional one while the CER is pending."""
+    """``(letter, sentence)``: the decision from the CER by type; a type
+    without a scored line is pending and the decision is provisional."""
     cer = (summary.get("cer") or {}).get("gallicorpora") or {}
     by_type = cer.get("by_type") or {}
-    if not by_type:
+    scored = {t: v["cer"] for t, v in by_type.items() if v.get("cer") is not None}
+    pending = [t for t in ("roman", "fraktur") if t not in scored]
+    if not scored:
         return (
             "pending",
             "The decision waits for the CER: the sheet of 50 printed lines is rendered, the "
             "transcriptions are not in; the zone numbers above stand on their own.",
         )
-    verdicts = {}
-    for t, v in by_type.items():
-        c = v.get("cer")
-        if c is None:
-            continue
-        verdicts[t] = "a" if c <= CER_READABLE else ("b" if c <= CER_UNUSABLE else "c")
-    if not verdicts:
-        return ("pending", "No line was scored.")
-    if all(v == "a" for v in verdicts.values()):
-        return (
-            "a",
-            "(a) the printed body is read with a print model and shown as such: Gallicorpora+ "
-            f"reads both types at or under {CER_READABLE:.0%} CER on the sheet.",
+    verdicts = {
+        t: ("a" if c <= CER_READABLE else ("b" if c <= CER_UNUSABLE else "c"))
+        for t, c in scored.items()
+    }
+    parts = ", ".join(f"{t} {scored[t]:.1%} → ({v})" for t, v in sorted(verdicts.items()))
+    words = {
+        "a": "the printed body is read with a print model and shown as such",
+        "b": "print is flagged and not read with this model",
+        "c": "a print model for this material is needed first",
+    }
+    if len(set(verdicts.values())) == 1:
+        letter = next(iter(verdicts.values()))
+        sentence = f"({letter}) {words[letter]}: {parts} on the sheet."
+    else:
+        letter = "/".join(sorted(set(verdicts.values())))
+        sentence = (
+            f"split by type ({parts}): read the type the model reads at or under "
+            f"{CER_READABLE:.0%} with it and show it as print; flag the other and read it only "
+            "when a model for it exists."
         )
-    if all(v == "c" for v in verdicts.values()):
-        return (
-            "c",
-            "(c) a print model for this material is needed first: Gallicorpora+ reads both "
-            f"types above {CER_UNUSABLE:.0%} CER on the sheet.",
+    if pending:
+        letter += " (" + ", ".join(pending) + " pending)"
+        sentence += (
+            f" The {' and '.join(pending)} half of the sheet is not transcribed yet, so this "
+            "holds for the type scored; the other type's decision follows its transcription."
         )
-    parts = ", ".join(f"{t} {by_type[t]['cer']:.1%} → ({v})" for t, v in sorted(verdicts.items()))
-    letter = "a/c" if set(verdicts.values()) == {"a", "c"} else "b"
-    return (
-        letter,
-        f"split by type ({parts}): read the type the model reads at or under "
-        f"{CER_READABLE:.0%} with it and show it as print; flag the other and read it only when "
-        "a model for it exists.",
-    )
+    return letter, sentence
 
 
 def _pct(x) -> str:
@@ -184,15 +185,23 @@ def _cer_section(summary: Mapping, meta: Mapping) -> list[str]:
         for name, key in rows:
             r = cer.get(key) or {}
             bt = r.get("by_type", {})
-            roman = _pct((bt.get("roman") or {}).get("cer"))
-            fraktur = _pct((bt.get("fraktur") or {}).get("cer"))
-            L.append(_row([name, _n(r.get("lines_scored")), _pct(r.get("cer")), roman, fraktur]))
+            cells = [name, _n(r.get("lines_scored")), _pct(r.get("cer"))]
+            for t in ("roman", "fraktur"):
+                v = bt.get(t) or {}
+                if v.get("cer") is None:
+                    cells.append("pending")
+                else:
+                    cells.append(f"{_pct(v['cer'])} ({_n(v['lines'])} lines)")
+            L.append(_row(cells))
         L.append("")
         g = cer.get("gallicorpora", {})
+        v1 = cer.get("v1", {})
         L.append(
-            f"Normalisation {g.get('policy', '')}; the operator's transcriptions "
+            f"Normalisation: {g.get('policy', '')}. The operator's transcriptions "
             f"({cer.get('transcriptions', '')}) are the reference; "
-            f"{_n(g.get('lines_transcribed'))} lines carry one."
+            f"{_n(g.get('lines_transcribed'))} of the 50 lines carry one. Without the fold the "
+            f"CER is {_pct(g.get('cer_unfolded'))} for Gallicorpora+ and "
+            f"{_pct(v1.get('cer_unfolded'))} for v1."
         )
     else:
         L.append(
