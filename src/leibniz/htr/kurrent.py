@@ -290,20 +290,28 @@ def build_engine(
     dtype: str | None = None,
     use_cache: bool | None = None,
     profile: bool = False,
+    decoder=None,
 ):
     """The reader for a candidate; heavy stacks imported here, lazily.
 
     ``dtype``, ``use_cache`` and ``profile`` are the TrOCR engine's throughput
     knobs (K2; see :class:`~leibniz.htr.trocr.TrOCREngine`); a kraken reader
-    ignores them.
+    ignores them. ``decoder`` (R1) is a ``decoding.DecoderSpec`` for a kraken
+    reader; a TrOCR reader decodes by itself and refuses one that is not greedy.
     """
+    if decoder is not None and not decoder.is_greedy and cand.kind != "kraken":
+        raise ValueError(
+            f"--decoder {decoder.kind} decodes CTC posteriors: {cand.key} is a {cand.kind} reader"
+        )
     if cand.kind == "kraken":
         from leibniz.htr.engines import KrakenEngine
 
         path = cand.source
         if cand.key == "mccatmus" and not Path(path).exists():
             fetch_mccatmus(Path(path).parent)
-        return KrakenEngine(path, version=cand.key, device=device, batch_size=batch_size)
+        return KrakenEngine(
+            path, version=cand.key, device=device, batch_size=batch_size, decoder=decoder
+        )
     if cand.kind == "trocr":
         from leibniz.htr.trocr import TrOCREngine
 

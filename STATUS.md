@@ -3,7 +3,7 @@
 _Living state of the project. Every session reads this before starting and
 updates it before committing. The repo is the memory; this file is its index._
 
-_Last updated: 2026-11-18 (**REL1 Part A — the first releases, built in a cloud session on fixtures on `claude/clever-gates-56b0a4`: the cards true to the store (each licence from the registry, each count from the export's MANIFEST, each measured figure from a committed report), the transcriptions record carrying the inventory, the German reader's package `leibniz-kurrent-trocr`, the Zenodo and Hugging Face scripts up to the draft, `release check`; found on the way and repaired: the committed audit summary was a test's (the ground-truth cards said "8 of 8 lines, 95.0 %, passes"; restored to 199 of 200 judged, 72.3 %), the export opened the master for writing and held a million rows in memory; merged with main at #64 (K3b-prep), both sides' entries kept; 1,160 tests; nothing sent, reserved or deployed; Part B the operator's desktop, the pull request the operator's**); 2026-11-17, later (**K3b-prep — the verdict tools, built in a cloud session on fixtures: `leibniz align audit-convert` (a judge's table with a transcription column → the C2 verdict CSV and a corrections file), `audit-score --corrections` (the patterns read off the judge's whole line; "Under the fold": strict, usable and under-the-fold precision by stratum and by hand, Wilson intervals), `audit-apply` (the verified lines into `gt_lines`: a dry run, then `--write`, one transaction, idempotent; a corrected line under `channel edition-k2-audit`), `audit-sheet-k2` (a further sheet by hand, without the lines, records and pages already used, with context strips and a field for the corrected line), three registry entries; 1,110 tests; none of the Edition's text here, no store, nothing deployed; on `claude/confident-brown-2xwlqs`, the pull request the operator's**); earlier the same day (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
+_Last updated: 2026-11-18 (**REL1 Part A — the first releases, built in a cloud session on fixtures on `claude/clever-gates-56b0a4`: the cards true to the store (each licence from the registry, each count from the export's MANIFEST, each measured figure from a committed report), the transcriptions record carrying the inventory, the German reader's package `leibniz-kurrent-trocr`, the Zenodo and Hugging Face scripts up to the draft, `release check`; found on the way and repaired: the committed audit summary was a test's (the ground-truth cards said "8 of 8 lines, 95.0 %, passes"; restored to 199 of 200 judged, 72.3 %), the export opened the master for writing and held a million rows in memory; merged with main at #64 (K3b-prep), both sides' entries kept; 1,160 tests; nothing sent, reserved or deployed; Part B the operator's desktop, the pull request the operator's**); 2026-11-17, later still (**R1 Part A — decoding with a language model, the code: three decoders behind one interface in `htr/decoding.py` (kraken's greedy unchanged, flashlight-text's lexicon-free beam with a KenLM character 6-gram, a prefix beam of the project's own as the fallback), one confidence over all three, `--decoder` on `bench run` and `align letterpool-eval`, `leibniz bench lm-build` (two models from the open text, the evaluation sets' pieces held out), a toy model from the fixture store; 1,136 tests on the branch, 1,225 after the merge with main at #65 on 18 November, both sides' entries kept; Part B — the real models, the measurement, the calibration — is the desktop's; on `claude/modest-cori-wds26r`, nothing measured on the Nachlass, nothing deployed**); 2026-11-17, later (**K3b-prep — the verdict tools, built in a cloud session on fixtures: `leibniz align audit-convert` (a judge's table with a transcription column → the C2 verdict CSV and a corrections file), `audit-score --corrections` (the patterns read off the judge's whole line; "Under the fold": strict, usable and under-the-fold precision by stratum and by hand, Wilson intervals), `audit-apply` (the verified lines into `gt_lines`: a dry run, then `--write`, one transaction, idempotent; a corrected line under `channel edition-k2-audit`), `audit-sheet-k2` (a further sheet by hand, without the lines, records and pages already used, with context strips and a field for the corrected line), three registry entries; 1,110 tests; none of the Edition's text here, no store, nothing deployed; on `claude/confident-brown-2xwlqs`, the pull request the operator's**); earlier the same day (**ARCH1 — the archive: the Current state and Phase log entries dated before 2026-10-19 and the finished paragraphs of Next moved verbatim to `STATUS-archive.md`, the prompts already run to `PROMPTS-archive.md`; at the move STATUS.md 8,113 → 5,390 lines and PROMPTS.md 3,907 → 143; docs only, nothing deployed; the pull request and the merge the operator's, before any other session branches**); 2026-11-16, later (**the Edition's corrected lines may be released under CC BY 4.0, Open question 33 (b): the verified set goes to the open deposit with the Edition's credit; the sessions from here are laid out on the operator's plan page**); earlier the same day (**two arrivals recorded, no code, no data: the Leibniz-Edition's Arbeitsstelle returned K2's 200-line audit sheet on 6 November with every line judged and the correct text written out for 118 lines, to be converted and scored in K3b's Task 0; PHILIUMM published the v2 of its segmentation model on 3 November, CC BY-NC 4.0, and no better HTR model, so P1 Task 3 can run**; 2026-10-31: **K4 live — German on the site: the operator's switch of 30 and 31 October, the live index rebuilt in 4 h 59 m; 1,539,688 lines of k3-trocr on 24,078 pages shown, the language filter open**; 2026-10-30: **K4 — German on the site, built on the desktop on `k4-german-site`: the operator's choice of reader recorded verbatim ("I agree to go with TrOCR."; READER `k3-trocr`); the reading job 39 h over two launches; after the operator's go of the 30th the master store written once — the `page_lang` table, 236,210 rows under run 616, and READER's readings as one scoped run, 1,539,688 rows on 24,078 German pages under run 617 — and verified read-only; 92 browser checks on a fixture store; the serving copy on D: (18,314,969,088 bytes); the box commands, the checks with their expected answers and the live switch in order handed to the operator; nothing deployed, the branch pushed, not merged**; earlier the same day, **LT1 Part B — the page-level test run on the desktop: on the GWLB letters Gemini 4 Argon 24.2 %, Gemini 3.1 Pro 25.8 %, Claude Fable 5.1 26.4 %, k3-trocr 26.9 %, inside each other's intervals; on PHILIUMM's held-out pages the best page model 22.5 % against the kraken model's 7.95 %; 13.92 USD of API calls; the numbers in `reports/htr/page-llm.md`**; 2026-10-28: **LT1 — the page-level test of frontier vision models against the project's readers, Part A built in a cloud session on `claude/kind-tesla-xhk9ac`: `bench page-read` (whole pages, one a call, one prompt, temperature 0, reasoning at the floor, the cost logged and capped, resumable), `page-score` (PHILIUMM's 27 held-out pages by page CER with the kraken model beside, the letter pool through a page reader kind of K2b's metric, the line diff), `page-report`; the two page lists committed (34 calls on PHILIUMM, 100 pool pages of 34 letters); the model ids and settings pinned (gemini-3.1-pro-preview and gemini-4-argon at thinking_level low, claude-fable-5-1 at effort low — thinking cannot be off); the dry run's estimate under 15 USD a model; 1060 tests; Part B the operator's desktop**; 2026-10-26: **K3 — a Leibniz Kurrent model, done on the desktop on `k3-kurrent-model`: two models trained on K2's German mint and measured on the letter pool — k3-trocr 28.6 % CER, k3-kraken 30.6 %, against 37.0 % for the Bern model as it came; the choice for K4 open until the operator answers**; 2026-10-22: **A3b follow-up 2, after the operator's second dry run (settled on signatur 99.6 %, titel 99.9 %, textart and aa 100 %; datum 98.6 % with 346 "other", half the website's short second dates `(123)` for the export's `(00-01-23)`, now read as agreement in a column of their own, the stored value the export's; 48726 carried as 69490, the other eight unmatched, every ground-truth id in the export); 980 tests**; earlier the same day, **A3b follow-up, after the operator's dry run on the master store (datum 98.4 %, a STOP on nine renumbered ids, 16 hand changes): the second date's zero parts dropped as the website does, text the website's parser lost as HTML tags counted as agreement, a store id the export no longer carries mapped by Kat.-Nr. and shelfmark and the STOP kept for ground-truth references only, the names rendered through the persons table with their GND and KorrespDB ids (46 of 46 cells on the live records), the holdings page reworked — 'Where Leibniz's papers are held', a one-sentence intro, the works heading naming the store's state, the digitised copies hidden before the import, a line on Browse, one source line from the registry (export of 19 October 2026); 979 tests, 84 + 32 browser checks; on `claude/adoring-volta-eogav8`, the dry run again the operator's**; 2026-10-21: **A3b — the Arbeitskatalog import, built in a cloud session on fixtures cut from the Arbeitsstelle's export of 21 October: one `ritter.csv` row → the record the website parser produced, the column-to-key mapping read off 23 records fetched live from the catalogue and proved on the committed fixture (the five judged keys at 100 %, the hand rule unchanged), the whole catalogue into the store by `leibniz catalog import-access --write` after a dry run that prints the agreement table and stops if the ground truth or the crosswalk references a record the export lacks; the holding institution from the shelfmark (215 holdings over the 70,405 records, the GWLB's own collections 68.4 %), `reports/holdings.md`, `/holdings` and `/api/holdings`, the catalogue's links to digitised copies elsewhere and the edition's PDF per piece on the work page, the Ordnungsvermerk in the Faszikel index, 'the whole Arbeitskatalog, refreshed <date>' wording; 976 tests, 57 browser checks; on `claude/adoring-volta-eogav8`, the store steps the operator's**; earlier the same day, **G1 — the Calculemus seam, built in a cloud session on the fixture store: `leibniz pack fragments` (German A/B pairs, the stored v1 text against K2's Bern reading, gold from K2's reader-minted rows in the open deposit, a line refused unless its volume is §70-free), `leibniz pack check` (the contract of Calculemus SPECS §6.6 as two JSON schemas), `leibniz pack judgments` (the game's converged judgments as new 'corrected' lines, a dry run unless `--write`; the both-rejected lines as the Scriptorium queue); 948 tests; merged as #51; the real pack built and checked on the desktop the same day: 2,000 rows from 79,453 eligible lines, gold 56 (2.8 %; the cap allows 500: on the 271 selected lines with an open reader-minted row, one reading equals the minted text on 43, and it is never the v1 text) — the owner chooses before the copy to the box**; earlier the same day, **L1 — the licence registry, built in a cloud session: one entry per third-party artifact with its licence as obtained and as published (the PHILIUMM models CC BY-NC 4.0 on Zenodo since 2026-10-15, the dataset CC BY 4.0, the Potsdam channel and the Arbeitskatalog as stated in writing on 2026-10-12, the records re-read 2026-10-21), the outputs table (the owner's scheme of 13 October), `leibniz legal licences`; the ground truth exports as two deposits by channel (CC BY 4.0 / CC BY-NC 4.0); About, llms.txt, the cards and the attribution line read their licence lines from the registry; SPECS §2 and §7 amended; the lawyer-memo list in the release checklist; 880 tests; on `claude/relaxed-dijkstra-uus9rz`, the pull request the operator's**; earlier the same day, **W6 — two reader's items from the Leibniz-Edition (13 October), built in a cloud session on the fixture store: a search link into the Leibniz-Katalog by shelfmark on every work page, whether or not the store holds the work's records (the catalogue's spelling checked live: Arabic numerals, `LBr` without the library's period, `Leibn. Marg.`; 2,184 of the 2,225 works get a link), and the scope sentence, EN and DE, on About, in llms.txt and the README; 859 tests; on `claude/busy-dirac-n30a43`, the pull request the operator's**; 2026-10-20: **C2c — the re-mint under W5's rules, done on the desktop: 297,424 minted lines deleted and 315,797 minted in their place (+6.2 %; 710 `LBrF` records now localizable, neighbours on a shared folio no longer erased, nothing filed under a volume without text); the hyphen flag 7,822 → 848, 8,523 lines keep the scribe's mark; Leibniz's own hand 14.9 % under the strict rule (25.7 % under the loose one, the difference the rule's); 1,472 held-out pages; the second judging sheet drawn; on `c2c-remint`, the pull request the operator's**; earlier the same day, **K2b — the letter-pool test set, done on the desktop: 134 letters of the GWLB pool frozen as the honest German test set (67 in Leibniz's hand, 67 of the correspondents'; 18,815 lines), nothing filtered; the first German error rates — v1 46.6 % CER, philiumm 52.9 %, trocr-kurrent-xvi-xvii 37.0 %, trocr-hanse-xvi 35.6 %, trocr-hanse-xvii 38.9 %; the correspondents' hands 23–46 %, Leibniz's own 47–59 %; on `k2b-letterpool`, the pull request the operator's**; 2026-10-14: **the Edition's replies of 12 and 13 October recorded, no code: the Potsdam series' texts CC BY-NC 4.0 in writing, an Arbeitskatalog export offered, reader feedback on catalogue links and scope, the holdings outside the GWLB surveyed — Open questions 27 and 28, the L1 note under Next**; 2026-10-11: **W5 live: merged as #42 and deployed on 2026-10-10, the index rebuilt and the letters fetched overnight — 196,439 distinct scans among 236,795 page records, 9,846,450 lines once each, 40,297 scans registered under more than one label (39,442 spreads split, 855 folded), 15,425 letters**; 2026-10-10: **W5 — the review's fixes and six features readers ask for, in code on `claude/amazing-mayer-y6i9g0`: the GT factory fixed before the re-mint (record-owned lines, folio sides, one volume per piece, the en dash, "LBrF", one hand rule, the audit's own numbers); the site's search (every word by default, exactness first, folded metadata, no empty pages past 10,000), safe 404s, the right folios for "Text of this piece", source links that open, per-page GWLB links, named letter convolutes, IIIF fixes; scans registered twice folded and spreads split at the fold; citable lines; citation lookup; letters by correspondent, date and place; a Faszikel index of the catalogue's pieces; links out**; 2026-10-09: **K1 — the Kurrent track, done on the desktop: the aligner's noise tolerance measured (yield holds to ≈ 55 / 48 / 38 / 29 % CER by stratum), the German census run on the store (2,173 German pieces, 401,394 recognised lines, minted at 10.2 % against 19.0 % on Latin and French), the bootstrap readers ranked on Dresden (trocr-kurrent-xvi-xvii 7.4 %, trocr-hanse-xvi 8.9 %, trocr-hanse-xvii 10.9 %, philiumm 29.5 %, mccatmus 51.7 % CER), the pilot on Leibniz's German run (German yield at the gate philiumm 12.5 %, trocr-kurrent-xvi-xvii 20.2 %, trocr-hanse-xvii 20.6 %, trocr-hanse-xvi 22.5 %, v1 16.4 %); gate for K2: GO with trocr-kurrent-xvi-xvii**; 2026-10-08: **S1, the staging site: built, installed and verified the same day; `https://staging.leibnizlegible.com` runs the branch behind a password against the live store and index**; earlier the same day, **C2b, the census run on the store: a quarter of the minted ground truth is in Leibniz's own hand, 7,822 lines lose their hyphen to the mint, the addition proxy marks 83 % of lines and is useless; 2026-10-07, C2b: the PHILIUMM team's 200-line audit scored and read** — corpus-weighted precision 72.3 % as written, 92.2 % with boundary slips counted usable, one misaligned line in 185 scored; the patterns behind the verdicts named and measured, the dropped line-end hyphen fixed in the aligner, the reach census built for the operator's run, the C3 prompt amended; 2026-10-06, later the same day, a fault found live after W3's deploy and its fix: the viewer's ES modules are served as one versioned set, so a deploy can no longer pair a new `app.js` with cached old modules; W3: a browse page — the Nachlass by shelfmark family, section and convolute at `/browse`, `GET /api/works`, a breadcrumb from every work page back to its section; 2026-10-02 — W2: search reads "quoted phrases" and -exclusions, and the hint under the box says so and what exact matching misses; earlier the same day, W1: the line-overlay toggle fixed, plain-text export per folio and per work, content-hashed viewer assets; earlier: 2026-09-27 — room for Calculemus on the host, flagged off; 2026-09-23 — discoverability, About page, duplicate sheet-sides; 2026-09-16 — **Phase D built on v1 — search index, API, IIIF v3 + annotations, viewer, release exports; reports + project statement published on Zenodo; strategy review recorded in `NOTES.md` and the C3 prompt amended. C2 stands as closed on the mint with the precision gate deferred to C3. Later the same day: the deployment kit (`deploy/`), public-traffic hardening of the app, `LICENSE` + issue form for the repository going public.**)._
 
 ---
 
@@ -75,6 +75,55 @@ Leibniz-Edition's Arbeitsstelle, Potsdam). ruff clean and **1,160 passed, 3
 skipped** on the merged tree (1,120 before the merge, 1,071 at the
 session's start); the REL1 entry in the Phase log has the detail.
 
+**2026-11-17, later still: R1 Part A — decoding with a language model and one
+confidence per line, the code; a cloud session on the branch it was given,
+`claude/modest-cori-wds26r`, from main at `9ae24de` (#63); no store, no GPU,
+nothing measured on the Nachlass, nothing deployed; Part B (the real
+language models, the measurement, the calibration) is a desktop session on
+the same branch.** kraken 7.0.3 decodes greedily and nothing else; its
+recogniser takes a decoder callable and a softmax temperature
+(`RecognitionInferenceConfig`), and hands the callable the matrix as
+`(N, C, W)`. `src/leibniz/htr/decoding.py` is that callable three times
+behind one interface: **`greedy`** (kraken's own decoder left in place, so
+every number produced so far stands bit for bit), **`beam-lm`**
+(flashlight-text's lexicon-free beam search with a KenLM character n-gram:
+PyLaia's recipe, the space a token, LM weight 1.5, beam 50) and
+**`prefix-beam`** (a CTC prefix beam search of the project's own in plain
+Python over the same n-gram interface, the fallback and the tests'
+reference). Each returns the text, its score and one posterior per
+character, and **the line's confidence is one function over them**, the
+mean per-character posterior that the pipeline has stored since C1 (SPECS
+§4.5, amended). `KrakenEngine` takes `decoder=` and `temperature=` and can
+hand out the posteriors, so Part B's sweeps need the network once;
+`leibniz bench run` and `leibniz align letterpool-eval` take `--decoder
+greedy|beam-lm|prefix-beam --lm PATH --lm-weight W --beam N`.
+**`leibniz bench lm-build`** builds a Latin-and-French and a German
+6-gram with KenLM's `lmplz` from the open text only — the edition cache's
+records of §70-free volumes read through an open channel, and the
+open-bucket minted lines — with every piece of the evaluation sets held
+out whole (K3's validation pieces, the judged audit lines, the pieces on
+PHILIUMM's pages and the letter pool's), the ARPA kept beside the binary
+and a sidecar saying which text each model saw. Dependencies as the
+optional extra `decode` (flashlight-text, which has wheels to CPython 3.12
+and none for 3.13; kenlm, a source distribution; numpy); torchaudio is not
+in the lock and is not needed. flashlight-text (MIT in its file, "BSD" in
+its metadata), KenLM (LGPL-2.1-or-later, a tool and a linked library,
+nothing copied) and pyctcdecode (not used) are in the licence registry.
+**A toy model from the fixture store proves the path** (12 and 13 lines;
+fixture sentences, not edition text) through the real `lmplz`, flashlight
+and the two commands; a near-tie between `qvod` and `quod` goes to the
+modelled spelling under both beams. **Tests 1,095 → 1,136** (bench and
+decode extras, CPython 3.12; 1,104 with 10 skipped in the slim Python 3.13
+environment, where the fallback path imports nothing new). **Not done
+here, by design:** the real models, every CER, the cost a line on the
+desktop's CPU, the calibration and its thresholds. Two things Part B
+decides first (Open question 36): PHILIUMM's dataset has no test split, so
+"tuned on validation, reported on test" needs a split of `val` by page;
+and the C3 amendment of 16 September warns that a model of the edition's
+text pulls a diplomatic reader towards its expansions, so the builder
+offers the folded variant and the minted-lines-only variant beside the one
+this prompt names, and the validation lines choose. The R1 entry in the
+Phase log has the hand-over, command by command.
 **2026-11-17, later: K3b-prep — the verdict tools; a cloud session on the
 branch it was given, `claude/confident-brown-2xwlqs`, from main at `9ae24de`
 (#63: the archive is merged, so the preamble's clause 8 holds); fixtures only:
@@ -1076,6 +1125,274 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
   still say "scored in K3b". ruff clean; **1,160 passed, 3 skipped** on the
   merged tree. Pushed; not merged.
 
+### R1 — decoding and confidence (2026-11-17) ✅ Task 0 · ✅ Task 1 (Checkpoint A) · ✅ Task 2 (Checkpoint B: Part A ends here) · ⏳ Part B on the desktop (Tasks 3 and 4, the Finish)
+
+- **Setting and pre-flight (Task 0; Part A, a cloud session).** The branch it
+  was given, `claude/modest-cori-wds26r`, from main at `9ae24de` (#63, ARCH1
+  merged); `git fetch origin main && git merge origin/main` already up to
+  date; no `data/inventory.sqlite`, so a cloud checkout; the tree clean. The
+  archive is in force (the preamble's clause 8): the B1 and K1 entries were
+  read in `STATUS-archive.md`. `.venv-cloud` first with uv's default Python
+  (3.13.18) and the web, gt, release and bench extras: `ruff check` clean,
+  `ruff format --check` 296 files formatted, **1,095 passed, 1 skipped**
+  (`test_htr_engines`' absent-stack test, kraken being installed). The
+  versions, by `pip index versions` on 17 November: **flashlight-text 0.0.7**
+  (0.0.7, 0.0.6, 0.0.5, 0.0.4, 0.0.2, 0.0.1; uploaded 2024-03-23; wheels for
+  CPython 3.6 to 3.12 and PyPy, **none for 3.13**, a source distribution
+  beside them; the PyPI licence field "BSD licensed, as found in the LICENSE
+  file", the LICENSE file in the wheel "MIT License"), **kenlm 0.3.0** (0.3.0,
+  0.2.0, 0.1, 0; uploaded 2025-04-07; a source distribution only, compiled
+  here by g++ in 38 s; LGPL-2.1-or-later by its LICENSE file), **pyctcdecode
+  0.5.0** (uploaded 2023-01-20, Apache-2.0; not used). So `.venv-cloud` was
+  made again on **CPython 3.12.13** (the project's Python, COMMON CONTEXT; the
+  desktop's `.venv-k1` is 3.12 too), where flashlight-text installs from its
+  wheel. **torchaudio is not in `uv.lock` at all** (the lock has torch 2.12.0
+  and torchvision 0.27.0; kraken 7.0.3 does not depend on it); torchaudio
+  2.11.1 on PyPI (it requires torch ≥ 2.11) still ships
+  `torchaudio.models.decoder.ctc_decoder`, a wrapper that raises without
+  flashlight-text, so the decoder uses flashlight-text directly and no
+  torchaudio enters the lock. kraken 7.0.3's hook, read in its source
+  (`kraken/lib/vgsl/rpred.py`, `kraken/configs/base.py`):
+  `RecognitionInferenceConfig(temperature=…, decoder=…)`; `_rec_predict`
+  computes `(logits / temperature).softmax(1)`, squeezes it to **`(N, C, W)`**
+  — labels by frames, not `(N, W, C)` as the prompt and kraken's own
+  docstring say — and hands it with the lengths to the decoder callable,
+  whose `(label, start, end, confidence)` tuples the codec turns into
+  characters. No go was waited for (the batch note of 17 November).
+- **Task 1 — the decoder behind one interface (Checkpoint A).**
+  `src/leibniz/htr/decoding.py`, pure Python, the heavy imports lazy:
+  `Decoder` with three kinds. **`greedy`** is kraken's rule restated (argmax
+  per frame, runs collapsed, the blank dropped, a character's confidence the
+  highest posterior of its run); `KrakenEngine` leaves kraken's own
+  `greedy_decoder` in place for it and passes neither `decoder` nor
+  `temperature` to kraken's config, so today's text and confidence are
+  unchanged bit for bit (the old `_run` path is untouched); on random softmax
+  matrices the restated decoder returns exactly kraken's tuples. **`beam-lm`**
+  is flashlight-text's `LexiconFreeDecoder` with its KenLM: the tokens are the
+  codec's labels in order, label 0 the blank `<ctc>`, the space `<space>` and
+  given to the decoder as its silence token (PyLaia's `sil_token`), beam 50,
+  beam threshold 50, every token considered, LM weight 1.5 (torchaudio's
+  defaults and PyLaia's weight); measured on a toy model, the hypothesis
+  score is the best path's natural-log probability plus the weight times
+  KenLM's **log10** probability of the tokens with the end of the line, and
+  flashlight returns one label per frame between a start and an end silence,
+  so the alignment comes with the result. **`prefix-beam`** is a CTC prefix
+  beam search of the project's own over the same n-gram interface
+  (`NGramLM`: `start`, `score`, `finish`, log10; `ArpaLM` reads an ARPA file
+  in plain Python and gives KenLM's numbers to 1e-5; `KenLMModel` wraps the
+  `kenlm` module where installed): it sums the alignments of a prefix where
+  flashlight keeps the best one, so the two agree where the posterior is
+  peaked and may differ on a near-tie. Every decoder returns a `DecodeResult`
+  (text, the decoder's score, **one posterior per character** — the highest
+  posterior of the character's label inside the frames the chosen alignment
+  gives it, by flashlight's path or a Viterbi alignment of the prefix beam's
+  text — the labels, the spans, the acoustic and LM parts, the frame count),
+  and **`line_confidence`** over it is the mean per-character posterior, SPECS
+  §4.5's confidence as stored since C1, the same function for all three.
+  `retemper` gives the posteriors any other softmax temperature without a
+  second pass (`p ** (1/T)` renormalised equals `softmax(logits / T)`).
+  `TokenTable` holds the labels as characters and as LM tokens and writes the
+  tokens file (one token a line, line 0 `<ctc>`, the space `<space>`, a
+  character KenLM's tokenizer would lose spelled `<U+00A0>`); it reads the
+  codec's `c2l` map, a label that only occurs inside a multi-label entry
+  being `<unk>`. `KrakenEngine` takes `decoder=` (a `DecoderSpec`, built from
+  the model's codec once it is loaded and passed to kraken's config) and
+  `temperature=`, and gains `transcribe_scored` (the `DecodeResult`s) and
+  `posteriors` (the frames × labels matrices, for Part B's sweeps);
+  `kurrent.build_engine` passes the spec to a kraken reader and refuses it
+  for a TrOCR one. **`leibniz bench run` and `align letterpool-eval` take
+  `--decoder greedy|beam-lm|prefix-beam --lm PATH --lm-weight W --beam N`**;
+  under a decoder the letter-pool readings go to `<reader>+<decoder>.jsonl`
+  and are scored beside the greedy readings on disk; `bench run` prints the
+  seconds a line. New dependencies as the optional extra **`decode`**
+  (flashlight-text for Python < 3.13, kenlm, numpy; `uv.lock` gains the two
+  packages and nothing else moves); the fallback path imports nothing new.
+  `legal.py`: flashlight-text (MIT in the file, "BSD" in the metadata, both
+  recorded), KenLM (LGPL-2.1-or-later: a tool and a linked library, nothing
+  copied) and pyctcdecode (recorded, not used) as tools, each with its own
+  date under `REGISTRY_UPDATED` (K3b-prep's constant since the merge with
+  main at #65; this branch's own `REGISTRY_LAST_ENTRY` is gone; the registry's compilation date of
+  21 October stays). **Tests: 1,095 → 1,124** (24 in
+  `tests/test_htr_decoding.py`, 3 in `test_htr_cli.py`, 1 in
+  `test_align_letterpool_eval.py`, 1 in `test_legal_licences.py`), on
+  synthetic softmax matrices: greedy unchanged; both beams without a model
+  equal greedy where the posterior is peaked; a hand-made 3-gram pulls a
+  near-tie (u at 0.46 against v at 0.50 after q) to the modelled spelling,
+  under both beams, the chosen character keeping its own posterior; the
+  codec round trip, with a real kraken codec too; and, where kraken is
+  installed, a kraken recogniser with random weights written to a file and
+  read through `KrakenEngine` — the same text and confidence with and without
+  an explicit greedy spec, the prefix beam through kraken's hook, a
+  temperature reaching the softmax.
+  Added after the checkpoint: `--beam-tokens N` on both commands (the labels
+  considered per frame; flashlight's default is all of them).
+- **Task 2 — the language model from the project's text (Checkpoint B).**
+  `src/leibniz/htr/lm.py` and **`leibniz bench lm-build --order 6 --out
+  DIR`** (default `data/lm/r1`, never committed): two KenLM models,
+  `la-fr.{arpa,bin,json}` and `de.{arpa,bin,json}`, each with the corpus it
+  was estimated on (`.corpus.txt`: the lines as characters separated by
+  spaces, the space `<space>`) and a sidecar JSON saying which text it saw.
+  **The text**: (a) `edition`, the reading text of the edition cache for
+  every record whose printed pieces all stand in a volume §70-free on the
+  day and were read through a channel the registry places in the open
+  deposit (`legal.deposit_for`); a cache line that names no piece, a channel
+  with non-commercial terms (Potsdam, the GWLB repository, a text joined
+  from two copies of which one is NC) and a volume still protected are left
+  out and counted; (b) `gt`, the open-bucket rows of `gt_lines` under the
+  same two tests read off each row's `source`. The letter pool, Dresden and
+  the PHILIUMM dataset are never a source; `--extra name=group:path` adds
+  text of the operator's own to one model and the report names it. **The
+  two models**: a piece goes by the census's group (`pagelang.piece_group`
+  on its edition text, else on its minted lines): German or mixed with
+  German leading to `de`, Latin and French to `la-fr`, a piece the stopword
+  lists cannot place to neither, counted. **Held out, by piece**: a record
+  is dropped whole from both sources when it is one of K3's validation
+  pieces (`reports/kurrent/k3-val-pieces.csv`), when a judged audit line is
+  its (K2's sheet, the PHILIUMM verdicts), or when it stands on a page of
+  `reports/philiumm/heldout_pages.csv` (which carries PHILIUMM's `val`
+  split's store pages beside its training pages; the report counts by
+  split) or of the letter pool's set — "stands on" by the minted rows on
+  the page and by the factory's own placement of every piece with usable
+  text (the K1 census's walk), joined; Dresden has no piece in the edition.
+  `lm-holdout-pieces.csv` lists the record ids with their reasons.
+  **Normalised** to the reader's conventions: NFC (or `--form NFD` for a
+  codec of decomposed marks; `leibniz bench lm-tokens --model M --out F`
+  writes a model's tokens file and says which), control and format
+  characters dropped, whitespace collapsed, case, accents and punctuation
+  kept; nothing done to hyphens (a minted line keeps the scribe's line-end
+  hyphen, C2c's rule; the edition's running text had the print's
+  hyphenation undone at ingest); one line a sentence — a minted line as it
+  is, the edition's running text cut at word boundaries into lines of at
+  most 48 characters (`--wrap`), so that the model's beginning and end of
+  line are a manuscript line's. `--fold align` builds the other variant on
+  the aligner's fold; the decoder then reads the fold from the model's
+  sidecar and queries the model label by label through it (`V` as `u`, `é`
+  as `e`; punctuation and what the fold spells out, `&`, `æ`, `ß`, as the
+  unknown token). **Estimated** by KenLM's `lmplz` (modified Kneser-Ney,
+  interpolated, `-S 2G`) with the ARPA kept beside `build_binary`'s binary;
+  the two programs are found in `--kenlm-bin`, `$KENLM_BIN` or on the PATH
+  and are run, never imported. With `--tokens F` the report counts the
+  characters of the text the reader's codec does not have.
+  `reports/decoding/lm-build.md`, `.json`. **The toy model, on the fixture
+  store** (`tests/conftest.py`'s store with its German rows, the
+  nine-record cache `tests/fixtures/decoding/edition_cache.jsonl`, sentences
+  written for the tests; `lmplz` and `build_binary` built here from the
+  kenlm 0.3.0 source distribution with cmake and Boost's headers): under
+  the committed evaluation lists **Latin and French 12 lines, 457
+  characters, 2 records (6-gram counts 35 · 180 · 343 · 399 · 415 · 412);
+  German 13 lines, 476 characters, 1 record (9 edition lines, 4 minted;
+  42 · 185 · 296 · 337 · 345 · 346)**; of the cache's nine records five
+  usable, two left out for an NC channel, one without a piece, one in a
+  volume not yet free (IV,4); of the store's nine `gt_lines` rows four
+  usable; one record held out because the fixture's first work is a real
+  PHILIUMM training page id; the whole build in one second, with KenLM's
+  discount fallback (too little text for the discounts). Fixture numbers:
+  nothing about the Nachlass, and the toy report is not committed. The path
+  through the command line was then run end to end: `lm-tokens` on a kraken
+  model with random weights, `bench run` on four synthetic line images with
+  `--decoder greedy`, `beam-lm --lm la-fr.bin` and `prefix-beam`, each to a
+  CER line (of no meaning on random weights). **One line's decoding time on
+  this container's CPU** (a synthetic peaked matrix of 472 frames by 150
+  labels, a 6-gram): flashlight at beam 50 **0.44 s** with every label
+  considered, 0.28 s at 40 labels a frame, 0.13 s at 20, 0.07 s at 10, the
+  same text each time; the prefix beam 0.30 s at beam 50, 0.10 s at 20,
+  0.05 s at 10; the published 0.12 s a line is therefore a matter of
+  `--beam-tokens`, which Part B tunes with the weight. **Tests: 1,124 →
+  1,136** in `.venv-cloud` (CPython 3.12.13; web, gt, release, bench and
+  decode extras; `KENLM_BIN` set; 1 skipped), `tests/test_htr_lm.py`'s
+  twelve: the normalisation, the gate, both sources, the two models and
+  what each saw, the hold-out by record, by a minted row, by placement
+  alone and by an audit line, sources, fold, extras and the codec coverage,
+  lmplz's fallback and its failures, the CLI, and — where KenLM's programs
+  are found — a real 3-gram from the fixture store that pulls a near-tie to
+  `quod` under the prefix beam and under flashlight. In a second
+  environment as the other cloud sessions make it (Python 3.13.18; web, gt,
+  release; no numpy, kraken, kenlm or flashlight): **1,104 passed, 10
+  skipped** (ARCH1's baseline there 1,071 and 3), so the fallback path
+  imports nothing new. ruff clean, 301 files formatted. SPECS §4.5 amended
+  with what the confidence is under every decoder and where the calibration
+  will be recorded; the figures are Part B's.
+- **Merged with main at #65 (2026-11-18).** K3b-prep (#64) and REL1 Part A
+  (#65) had landed; both sides' entries kept, the newer above; the Open
+  question of this entry renumbered 34 → 36; `REGISTRY_LAST_ENTRY` given up
+  for main's `REGISTRY_UPDATED`; PROMPTS.md with this prompt last. ruff
+  clean; **1,225 passed, 1 skipped** in `.venv-cloud` (bench and decode
+  extras, KenLM's programs), **1,193 passed, 10 skipped** in the slim
+  Python 3.13 environment. Detail under Divergences, point 15.
+- **Hand-over: Part B, on the desktop** (`/home/evana/LeibnizLegible`,
+  `.venv-k1`, the store read-only, one torch process, after no other GPU
+  job; this branch, `claude/modest-cori-wds26r`, or main once it is
+  merged). Every step that installs, compiles or runs over an hour wants
+  the operator's go there.
+  1. **The two packages** (an install; a C++ compiler builds kenlm in under
+     a minute): `VIRTUAL_ENV=.venv-k1 uv pip install "flashlight-text==0.0.7"
+     "kenlm==0.3.0" && .venv-k1/bin/python -c "import kenlm; from
+     flashlight.lib.text.decoder.kenlm import KenLM; print('ok')"` →
+     expected `+ flashlight-text==0.0.7`, `+ kenlm==0.3.0`, then `ok`. Never
+     `uv sync` against the environment.
+  2. **KenLM's two programs** (an install of four Boost header packages and
+     a two-minute compile; nothing enters the repository): `sudo apt-get
+     install -y build-essential cmake libboost-program-options-dev
+     libboost-system-dev libboost-thread-dev libboost-test-dev zlib1g-dev
+     libbz2-dev liblzma-dev`; `mkdir -p ~/kenlm && cd ~/kenlm && curl -LO
+     https://files.pythonhosted.org/packages/02/6e/f4e159cef39ea4ef2244b4aa32857d447d60a5d0ee269e1b1f8d3723c03e/kenlm-0.3.0.tar.gz
+     && echo "c4628bb9fb63c8a6f9240035b8b037385cfc404cb72e933cf48878291edac1e8
+     kenlm-0.3.0.tar.gz" | sha256sum -c` → `kenlm-0.3.0.tar.gz: OK` (the URL
+     and the hash are `uv.lock`'s); `tar xzf kenlm-0.3.0.tar.gz && mkdir
+     kenlm-0.3.0/build && cd kenlm-0.3.0/build && cmake ..
+     -DCMAKE_BUILD_TYPE=Release && make -j4 lmplz build_binary && ls bin` →
+     `build_binary  lmplz`; then `export KENLM_BIN=~/kenlm/kenlm-0.3.0/build/bin`.
+     The default maximum order of that build is 6.
+  3. **The readers' tokens** (seconds; loads each model on the CPU):
+     `leibniz bench lm-tokens --model
+     data/models/philiumm-htr/FoNDUE-GD_v2_ft_Leibniz.safetensors --out
+     data/lm/r1/philiumm.tokens.txt` and the same for
+     `data/models/k3/kraken/best.safetensors` → each prints its label
+     count, the space's label and whether the codec has combining marks:
+     **if it says NFD, build with `--form NFD`** (B1's metric normalises to
+     NFD, so this is likely; unknown from here).
+  4. **The real models** (expected host memory under 3 GB: the cache
+     streamed, the usable text held once, lmplz's sort capped by `-S 2G`;
+     unmeasured, so under the scope; minutes): `systemd-run --user --scope
+     -p MemoryMax=6G .venv-k1/bin/leibniz bench lm-build --order 6 --out
+     data/lm/r1 --tokens data/lm/r1/philiumm.tokens.txt` → two lines,
+     "Latin and French: … lines, … characters, … records →
+     data/lm/r1/la-fr.bin" and "German: … → data/lm/r1/de.bin", and
+     `reports/decoding/lm-build.md`, `.json`, `lm-holdout-pieces.csv`, to be
+     read before anything is decoded: the held-out table must name K3's 98
+     validation pieces, the letter pool and the three PHILIUMM splits with
+     records against each, and "left out" must show the Potsdam and GWLB
+     channels as NC. The numbers are the desktop's to write.
+  5. **Task 3's measurement, as the code now allows it.** One pass through
+     the network per set with `KrakenEngine.posteriors` (the frames × labels
+     matrices; keep them under `data/decoding/`, a few hundred MB for
+     1,878 lines as float16), then every weight, beam, `--beam-tokens` and
+     temperature decoded from the matrices (`Decoder.decode_frames`,
+     `decoding.retemper`) in seconds a setting; the two commands
+     (`bench run --decoder …`, `align letterpool-eval --readers k3-kraken
+     --read --decoder beam-lm --lm data/lm/r1/de.bin`) reproduce a chosen
+     setting from the images. Three variants are worth a row each on the
+     validation lines before one is chosen: the model as built, `--fold
+     align`, and `--sources gt` (minted lines alone); Open question 36 says
+     why.
+  6. **Task 4** reads `transcribe_scored` (the per-character posteriors and
+     the decoder's score per line) and K3's kept hypotheses; the mapping
+     goes to `runs.params` in the shape SPECS §4.5 now names.
+- **What Part B must decide first (Open question 36).** (a) *The dataset
+  has no test split* (LT1's finding, Divergences 2026-10-28): the prompt's
+  "tuned on the validation split, reported on the test split" cannot be done
+  as written. The proposal recorded here: split `val`'s 27 pages once, by
+  page and by seed, into a tuning half and a reporting half (the page of
+  each line from the Hub's `val/` PAGE XML, as `bench page-lines` reads it),
+  tune on the first and report on the second with the whole split's greedy
+  number beside both. (b) *Which text the model should see*: the C3
+  amendment of 16 September says a language model must be built on
+  diplomatic text, never on edition text, because the edition's expansions
+  and regularised u/v pull a diplomatic reader away from the page; this
+  prompt names the edition's text. The builder does what this prompt says
+  and offers the two variants above; the validation lines decide, and if
+  none earns a quarter of a point the decoder stays off, as the prompt
+  says.
 ### K3b-prep — the verdict tools (2026-11-17) ✅ Task 0 · ✅ Task 1 · ✅ Task 2 · ✅ Task 3 · ✅ Task 4 · ✅ Task 5 · ✅ Finish · ⏳ the operator's pull request; the store steps are K3b's Task 0
 
 - **Setting and pre-flight (Task 0).** A cloud session on the branch it was
@@ -4537,8 +4854,9 @@ _Entries before 2026-10-19 (the entry of 2026-10-14 back to July, and the retain
 
 | Metric | Value |
 | --- | --- |
-| Tests passing | **1,160** (2026-11-18, REL1 Part A merged with main at #64, a cloud checkout with the `web` + `gt` + `release` extras; 3 skipped for want of numpy; 1,120 on the branch before that merge; 1,071 on main at ARCH1's merge); 1096 (2026-10-30, main with K4 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 1,052 (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
+| Tests passing | **1,225** (2026-11-18, R1 Part A merged with main at #65, in `.venv-cloud` on CPython 3.12.13 with the `web` + `gt` + `release` + `bench` + `decode` extras and KenLM's programs on `KENLM_BIN`; 1 skipped; **1,193** with 10 skipped in the slim environment, Python 3.13.18 with `web` + `gt` + `release`, where REL1 counted 1,160 and 3); 1,136 (2026-11-17, R1 Part A, in `.venv-cloud` on CPython 3.12.13 with the `web` + `gt` + `release` + `bench` + `decode` extras and KenLM's programs on `KENLM_BIN`; 1 skipped; 1,095 at its pre-flight; 1,104 with 10 skipped in the slim environment, Python 3.13.18 with `web` + `gt` + `release`, where ARCH1 counted 1,071 and 3); **1,160** (2026-11-18, REL1 Part A merged with main at #64, a cloud checkout with the `web` + `gt` + `release` extras; 3 skipped for want of numpy; 1,120 on the branch before that merge; 1,071 on main at ARCH1's merge); 1096 (2026-10-30, main with K4 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 1,052 (2026-10-30, K4, in `.venv-w3` with the `web` + `gt` + `release` extras; 1 skipped, `test_align_letterpool_eval.py`'s eleven for want of numpy there); 1026 (2026-10-26, main with K3 merged, checked in a cloud checkout with the `web` + `gt` + `release` extras before the pull request); 904 (2026-10-26, K3, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras); 980 (2026-10-22, A3b follow-up 2, in `.venv-cloud` with the `web` + `gt` + `release` extras; 979 after the first follow-up, 976 after A3b on 2026-10-21, 948 at its pre-flight); 948 (2026-10-21, G1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 880 at its pre-flight); 880 (2026-10-21, L1, in `.venv-cloud` with the `web` + `gt` + `release` extras; 859 at its pre-flight on main the same day); 866 (2026-10-21, K2, in `.venv-k1`; 859 at W6 the same day in `.venv-cloud` with the `web` + `gt` + `release` extras, 856 at its pre-flight; 841 at K2b, in `.venv-k1` with the `bench` + `gt` + `kurrent` extras: 807 at the pre-flight, +18 parser, +5 set, +11 metric; 808 after W5, with the `web` + `gt` + `release` extras; 704 after K1, in `.venv-k1`; 644 after W4, 634 after S1, 621 after P1 Task 2, 606 after C2b, those with the `gt` + `web` + `release` extras) |
 | **REL1 Part A (2026-11-18)** | no master figure: a cloud session. **The scored audit as restored to `reports/gt-audit/audit-summary.json`: 200 lines, 199 judged, 185 scored, corpus-weighted precision 72.3 %, 92.2 % usable, FAIL at 95 %** (by stratum, scored and precision: fair_copy 50, 84.0 % · light_revision 45, 86.7 % · heavy_revision 48, 64.6 % · scrap 42, 57.1 %; the committed file had read 8 lines, 95.0 %, PASS, a test's output, since 2026-10-10) · the export on a synthetic store (8,000 pages, 528,000 line rows, 404 MB): 480,000 lines written as Parquet in **27.3 s at a peak of 289 MiB** in the cloud container · the dry run on K4's fixture store: 4 folders, 4 deposit files, 21 dry-run `PUT`s to Zenodo, 22 files to the Hub, the NC deposit refused · read through the public APIs on 2026-11-17: the PHILIUMM models CC BY-NC 4.0, their dataset CC BY 4.0, the Bern model MIT, all as the registry has them |
+| **R1 Part A (2026-11-17): decoding, the code** | no CER and no threshold yet: the CER pairs (greedy against beam-lm on PHILIUMM's split, the judged lines, the held-out pages, k3-kraken on the letter pool) and the calibrated thresholds are Part B's, on the desktop. Produced here: flashlight's score is the best path's natural-log probability plus the weight times KenLM's log10 probability (measured on a toy model); one synthetic line of 472 frames by 150 labels decodes on the cloud container's CPU in **0.44 s** with flashlight at beam 50 and every label a frame, 0.13 s at 20 labels a frame, 0.07 s at 10; the prefix beam in 0.30 s at beam 50, 0.10 s at 20; the toy models from the fixture store 12 lines / 457 characters (Latin and French) and 13 / 476 (German), fixture sentences that say nothing about the Nachlass |
 | **K4 live (2026-10-31)** | the live index rebuilt beside the old one 12:36–17:35 (**4 h 59 m**; 5 h 33 m on 10 October); `/api/stats` after the swap: lines shown **12,947,584** (FoNDUE-GD_v2_ft_Leibniz 11,407,896 · k3-trocr@runs-615-epoch-5 1,539,688), pages by language de 30,797 · fr 62,330 · la 110,167 · mixed 13,801 · unknown 19,115, built 2026-10-31T17:34:46Z; search `Herr` lang=de **9,933** pages; the transfer 1 h 49 m at 2.65 MB/s; the box's root disk 42 GB of 75 used after the switch (the staging build had left 679 MB free: stopped and dropped) |
 | **K4 German pages and READER's run (2026-10-30)** | `page_lang` 236,210 rows under run 616 (la 110,167 · fr 62,330 · de 30,797 · unknown 19,115 · mixed 13,801); run 617 (stage recognize, model `k3-trocr@runs-615-epoch-5`, scope `de`): **1,539,688 rows on 24,078 German pages** (the 6,719 German Marginalien pages left out; 33 empty readings without a row; 252,278 rows on crops under 80 px); the lines shown under the rule 12,947,584, of them READER's 1,539,688 and v1's 11,407,896; the master store 19,354,243,072 bytes after (+2,210,672,640) |
 | **K4 reading job (2026-10-28/30)** | 1,539,721 lines in 39 h over two launches (one guard kill), 90.8 ms a line, 39,666 lines an hour, host peak 2,769,976 KB, card peak 5,922 MiB, GPU 88.2 % mean |
@@ -4619,6 +4937,35 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 ## Open questions
 
+36. **R1: two things Part B decides before it measures (2026-11-17).** (a)
+    **PHILIUMM's dataset has no test split** (`train_clean`, `train_noisy`,
+    `val`; LT1's finding of 28 October). R1's prompt tunes the LM weight
+    and the beam "on PHILIUMM's validation split only" and reports "on
+    PHILIUMM's test split"; tuning and reporting on the same 1,878 lines
+    would flatter the decoder by whatever the tuning fits. Proposed: split
+    `val`'s 27 pages once, by page and by seed, into a tuning half and a
+    reporting half, report the greedy number of the whole split beside
+    both, and say so in `reports/decoding/r1-decoding.md`; the same split
+    then serves the temperature fit of Task 4. The alternative, tuning on
+    a slice of `train_clean`, is worse: the model was trained on those
+    lines and its posteriors there are sharper than on unseen pages. (b)
+    **Which text the language model should see.** The C3 amendment of 16
+    September (PROMPTS.md, point 4) says to train the model "on diplomatic
+    GT, never on edition text, or it will push toward expansions"; R1's
+    prompt names the edition's reading text and the aligned lines, which
+    are edition text too. `lm-build` follows R1's prompt and can build the
+    two variants that answer the worry — `--fold align` (case, accents,
+    u/v, i/j and punctuation out of the model, so that it weighs letters
+    and not conventions; its known weakness: punctuation is the unknown
+    token) and `--sources gt` (the minted lines alone, which at least are
+    lines) — and `--extra` takes diplomatic text of the operator's choice
+    (PHILIUMM's `train_clean` text is CC BY 4.0 and diplomatic, but its
+    pages are among the held-out pages whose aligned lines Task 3 reports
+    on, so it cannot serve that set). The validation half decides; the
+    prompt's own rule covers the case that none of them earns a quarter
+    of a point. Also for Part B: whether the readers' codecs are NFC or
+    NFD (`bench lm-tokens` says), and that K3's stored TrOCR figure is the
+    mean probability of the generated tokens, not a sequence score.
 35. **What the first releases publish beyond the lines (2026-11-18, REL1
     Part A; the operator's before Part B's step 9).** (a) *The catalogue
     records.* D1 rides inside the transcriptions record, and its
@@ -5170,6 +5517,67 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
   them from the registry" is met by the wording the registry's note
   prescribes and the entry's licence, not by the entry's name.
 
+- **2026-11-17 — R1 Part A, departures from the prompt, the preamble of 19
+  October (as updated) and the batch note of 17 November.** (1) *No go
+  waited for* at Task 0 or at the checkpoints (the preamble's item 6, the
+  batch note). (2) *`.venv-cloud` on CPython 3.12.13 with the web, gt,
+  release, bench and decode extras*, not uv's default 3.13 and not "bench +
+  gt" alone: flashlight-text has no wheel for 3.13, the project's Python is
+  3.12, and the web and release extras keep the whole suite running; the
+  slim 3.13 environment of the other cloud sessions was run once beside it.
+  (3) *The matrix is `(N, C, W)`*, labels by frames, in kraken 7.0.3, not
+  `(N, W, C)` as the prompt and kraken's docstring say; the decoders take
+  kraken's layout. (4) *The engine's confidence is the mean per-character
+  posterior*, each character's the highest of its run, not "the mean
+  per-step probability"; and TrOCR's stored figure is the mean probability
+  of its generated tokens, not "the decoder's sequence score"
+  (`htr/trocr.py`). (5) *flashlight-text directly, no torchaudio*:
+  torchaudio is not in the lock at all; 2.11.1 still ships `ctc_decoder`,
+  a wrapper around the same package. (6) *The language model's text is
+  normalised to the reader's conventions, not through the aligner's fold*:
+  the fold drops case, accents and punctuation, which a diplomatic reader
+  writes and a model built on folded text could not score; the fold is the
+  option `--fold align`, with the decoder mapping each label through it.
+  (7) *The edition's running text is cut into lines of at most 48
+  characters* (`--wrap`; 0 turns it off): "one line a sentence" on
+  paragraphs would teach the model a paragraph's beginning and end, a
+  capital and a full stop, where a manuscript line begins and ends anywhere.
+  (8) *A record of the edition cache needs a named piece and channel*: a
+  cache line without `refs` is left out and counted, stricter than
+  `legal.deposit_for`, which lets a channel-less minted row go by its
+  bucket; and the §70 test is applied to both sources on the day of the
+  build, so the fixture's row of a 2027 volume stays out. (9) *The PHILIUMM
+  "test split's pages" are the `val` rows of
+  `reports/philiumm/heldout_pages.csv`*: the dataset has no test split
+  (Open question 36 a). (10) *Additions the prompt did not name*:
+  `--decoder prefix-beam` on the command line beside the two it names,
+  `--beam-tokens`, `bench lm-tokens`, `KrakenEngine.temperature`,
+  `transcribe_scored` and `posteriors`, `--extra`, `--sources`, `--fold`,
+  `--form`, `--tokens`, pyctcdecode recorded in the registry as not used,
+  and a date for the latest entry, `legal.REGISTRY_UPDATED` after the merge
+  of 18 November (the registry's compilation date of 21
+  October stays, since the other records were not re-read). (11) *The toy
+  report is not committed*: `reports/decoding/` is written by Part B from
+  the store; fixture counts under that name would read as the Nachlass's.
+  (12) *`lmplz` and `build_binary` were built in the cloud container* from
+  the kenlm source distribution (Boost's headers from apt) to prove the
+  path; nothing of it is in the repository. (13) *Finish items done here*
+  although the Finish is the whole phase's: the registry entries, the
+  SPECS §4.5 amendment as far as Part A can state it, the prompt in
+  PROMPTS.md; Key numbers' CER pairs and thresholds and the amendment's
+  figures wait for Part B. (14) *The second `git merge origin/main`* before
+  the final push found main where it was at the start. (15) *Merged with
+  main at #65 on 18 November, at the operator's word* (K3b-prep, #64, and
+  REL1 Part A, #65, had landed): conflicts in STATUS.md, PROMPTS.md,
+  `legal.py`, its test and `uv.lock`. Both sides' entries are kept, the
+  newer above (REL1 of 18 November, then this one, then K3b-prep); in
+  PROMPTS.md this prompt stands last, after the two already on main; **this
+  entry's Open question 34 is now 36** (REL1 had taken 34 and 35) and every
+  reference of this session's to it is changed; the registry keeps main's
+  `REGISTRY_UPDATED` and the three decoding tools join its test's list of
+  entries added since; the lock keeps both sides' lines and `uv lock` leaves
+  it as merged. After the merge: ruff clean, 318 files formatted, 1,225
+  passed and 1 skipped (1,193 and 10 in the slim environment).
 - **2026-11-17 — K3b-prep, departures from the prompt and the preamble of 19
   October (updated 21 October and 16 November).** (1) *No go waited for*: a
   cloud session started with the whole step records the pre-flight and
@@ -5817,6 +6225,7 @@ Legal registry (A0, unchanged): 42 entries; 32 free today. Licence registry
 
 **REL1 Part C, for the cloud session that gets the line** (its branch from main after Part A's merge): the Edition's credit wording, if confirmed by then, into the registry's `edition-k2-audit` entry and `gt-open`'s inputs, with `release/cards.py`'s `verified_credit` reading it from there; one constant per record in `src/leibniz/web/attribution.py` (the four DOIs, the Hub repositories), read by About's Licensing section (EN and DE rows), `llms.txt` and the README's Status section; "(if released)" dropped from the registry's `model-k3-trocr` row; STATUS.md's Current state and Key numbers (the export's own counts from the manifests the operator pastes or commits as a report); the checklist's §5 ticked; tests; push and the compare URL; then the staging line and the curl checks for About and `llms.txt`, the merge and the §9 update the operator's; the Hub repositories made public; the announcement to the §8 contacts the operator's mail, drafted with the links.
 
+**R1 Part A (2026-11-17): built on `claude/modest-cori-wds26r` (compare: https://github.com/marchofhares/LeibnizLegible/compare/main...claude/modest-cori-wds26r?expand=1); the operator opens and merges the pull request; Part B is the desktop's, when no other torch process runs.** Part B, in the order of the hand-over in the R1 entry: the two packages into `.venv-k1` and KenLM's two programs built beside the repository (installs: a go each); the readers' tokens files and their Unicode form; the real models with `leibniz bench lm-build`, the report read before anything is decoded; Open question 36 settled (the split of `val` by page; which text the model sees, three variants on the tuning half); then Task 3's CER pairs with the cost a line and Task 4's calibration and thresholds, `reports/decoding/r1-decoding.md` and the mapping per run. After Part B: **C3 scores every ablation with and without the decoder** (`bench run --decoder beam-lm`), and its own language model follows its amendment's point 4; **C4 runs with the decoder only if Task 3 earned it** (a quarter of a point on the reporting half), recording `decoder` in `runs.params`; **the gates read the thresholds** (the Scriptorium queue, the second reader on flagged lines, the game's choice of lines, pseudo-labels), each with its measured precision; K4's run 617 gets its mapping without a re-read.
 **K3b-prep (2026-11-17): the verdict tools are built on
 `claude/confident-brown-2xwlqs` (compare:
 https://github.com/marchofhares/LeibnizLegible/compare/main...claude/confident-brown-2xwlqs?expand=1);

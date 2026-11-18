@@ -6,7 +6,12 @@ Subcommands:
   split) under ``data/`` (gitignored).
 * ``leibniz bench protocol`` — print the frozen evaluation protocol.
 * ``leibniz bench run`` — evaluate one engine on one dataset (generic; JSONL +
-  JSON out). The reusable harness entry point.
+  JSON out). The reusable harness entry point. ``--decoder beam-lm --lm PATH
+  --lm-weight W --beam N`` decodes kraken's posteriors with a character
+  n-gram (R1; ``htr/decoding.py``).
+* ``leibniz bench lm-build`` — the character n-gram of R1 from the project's
+  own text: the open channels of the edition cache and the open-bucket
+  ``gt_lines``, the evaluation sets' pieces held out (``htr/lm.py``).
 * ``leibniz bench repro`` — the full PHILIUMM reproduction: Kraken on the val
   split under every normalization policy, optional Claude comparison, writing
   ``reports/philiumm-repro.md`` and the STATUS.md gate verdict.
@@ -109,17 +114,47 @@ def run(
     limit: int | None = typer.Option(None, "--limit", help="Cap lines evaluated."),
     out: Path | None = typer.Option(None, "--out", help="Write JSONL per-line dump here."),
     batch_size: int = typer.Option(8, "--batch-size", help="Engine batch size."),
+    decoder: str = typer.Option(
+        "greedy",
+        "--decoder",
+        help="greedy | beam-lm | prefix-beam (kraken engine; R1). greedy is kraken's own.",
+    ),
+    lm: Path | None = typer.Option(
+        None, "--lm", help="The character n-gram (KenLM binary or ARPA; `bench lm-build`)."
+    ),
+    lm_weight: float | None = typer.Option(
+        None, "--lm-weight", help="Weight of the model's log10 score (default 1.5)."
+    ),
+    beam: int | None = typer.Option(None, "--beam", help="Beam size (default 50)."),
+    beam_tokens: int | None = typer.Option(
+        None, "--beam-tokens", help="Labels considered per frame (default: all; fewer is faster)."
+    ),
 ) -> None:
     """Evaluate one engine on one dataset and print CER/WER (generic harness)."""
+    from leibniz.htr import decoding
+
+    spec = decoding.spec_from_options(
+        decoder, lm, lm_weight, beam, beam_tokens=beam_tokens, error=typer.BadParameter
+    )
+    if not spec.is_greedy and engine != "kraken":
+        raise typer.BadParameter(f"--decoder {spec.kind} applies to the kraken engine")
     pairs = _load_pairs(data_path, limit=limit)
     if not pairs:
         console.print(f"[red]No line pairs loaded from {data_path}.[/red]")
         raise typer.Exit(code=1)
     pol = metrics.get_policy(policy)
-    eng = _build_engine(engine, model)
+    eng = (
+        _build_engine(engine, model)
+        if spec.is_greedy
+        else _build_engine(engine, model, decoder=spec)
+    )
     console.print(f"[bold]run[/bold] {eng.name}@{eng.version} on {len(pairs):,} lines [{pol.name}]")
+    if not spec.is_greedy:
+        console.print("  decoder: " + ", ".join(f"{k} {v}" for k, v in spec.params().items()))
     result = bench.evaluate(pairs, eng, policy=pol, batch_size=batch_size, dataset=str(data_path))
     console.print(result.summary())
+    if result.n_lines:
+        console.print(f"  {result.seconds / result.n_lines:.3f} s a line ({spec.kind})")
     if out is not None:
         bench.dump_lines_jsonl(result, out)
         console.print(f"per-line dump → [green]{out}[/green]")
@@ -382,13 +417,13 @@ def _load_raw_hyps(path: Path, pairs) -> list[str] | None:
     return [by_id[p.line_id] for p in pairs]
 
 
-def _build_engine(name: str, model: Path | None):
+def _build_engine(name: str, model: Path | None, *, decoder=None):
     if name == "kraken":
         from leibniz.htr.engines import KrakenEngine
 
         if model is None:
             model = artifacts.artifact_paths().model
-        return KrakenEngine(str(model))
+        return KrakenEngine(str(model), decoder=decoder)
     if name == "anthropic":
         from leibniz.htr.engines import AnthropicEngine
 
@@ -560,6 +595,150 @@ def _record_run(db_path: Path, model_version: str, result: bench.EvalResult) -> 
     )
     db.finish_run(conn, run_id, n_input=result.n_lines, n_ok=result.n_lines, n_failed=0)
     conn.close()
+
+
+# --------------------------------------------------------------------------- #
+# lm-build / lm-tokens (R1 Task 2)
+# --------------------------------------------------------------------------- #
+
+
+@app.command("lm-build")
+def lm_build(
+    db_path: str = typer.Option(
+        "data/inventory.sqlite", "--db", help="SQLite store (opened read-only)."
+    ),
+    cache: Path = typer.Option(
+        Path("data/gt/edition_cache.jsonl"), "--cache", help="The C2 edition cache."
+    ),
+    order: int = typer.Option(6, "--order", help="The n-gram order."),
+    out: Path = typer.Option(
+        Path("data/lm/r1"), "--out", help="Output directory: la-fr.* and de.* (never committed)."
+    ),
+    sources: str = typer.Option("edition,gt", "--sources", help="edition, gt or both."),
+    form: str = typer.Option("NFC", "--form", help="NFC | NFD: the reader's Unicode form."),
+    fold: str = typer.Option(
+        "none",
+        "--fold",
+        help="none (case, accents, punctuation kept) | align (the aligner's fold).",
+    ),
+    wrap: int = typer.Option(
+        48, "--wrap", help="Cut the edition's running text into lines of this length (0: off)."
+    ),
+    heldout: Path = typer.Option(
+        Path("reports/philiumm/heldout_pages.csv"), "--heldout", help="PHILIUMM's pages."
+    ),
+    pool: Path = typer.Option(
+        Path("reports/kurrent/letterpool-testset.csv"), "--pool", help="The letter pool's set."
+    ),
+    val_pieces: Path = typer.Option(
+        Path("reports/kurrent/k3-val-pieces.csv"), "--val-pieces", help="K3's validation pieces."
+    ),
+    audit: list[Path] = typer.Option(
+        None,
+        "--audit",
+        help="CSV of judged lines (a ``ref`` column) whose pieces are held out (repeatable); "
+        "default: K2's audit sheet and the PHILIUMM verdicts.",
+    ),
+    holdout_records: Path | None = typer.Option(
+        None, "--holdout-records", help="CSV with a record_id column: further pieces held out."
+    ),
+    extra: list[str] = typer.Option(
+        None,
+        "--extra",
+        help="``name=group:path``: text of the operator's own for one model (group la_fr | de; "
+        "a .txt, one line a sentence, or a parquet's text column); named in the report.",
+    ),
+    tokens: Path | None = typer.Option(
+        None, "--tokens", help="The reader's tokens file (`bench lm-tokens`): coverage is reported."
+    ),
+    kenlm_bin: Path | None = typer.Option(
+        None, "--kenlm-bin", help="Directory of lmplz and build_binary (else $KENLM_BIN, the PATH)."
+    ),
+    memory: str = typer.Option("2G", "--memory", help="lmplz's sorting memory (-S)."),
+    no_place: bool = typer.Option(
+        False, "--no-place", help="Hold out by minted rows only, without the factory's placement."
+    ),
+    today: str = typer.Option(None, "--today", help="ISO date for §70 expiry (default: today)."),
+    reports_dir: Path = typer.Option(Path("reports/decoding"), "--reports-dir"),
+) -> None:
+    """Build the character n-grams of R1 from the open text, the evaluation pieces held out."""
+    from datetime import date
+
+    from leibniz.align.audit_reach import open_readonly
+    from leibniz.htr import lm as L
+
+    extras: dict[str, tuple[str, Path]] = {}
+    for spec in extra or []:
+        name, _, rest = spec.partition("=")
+        group, _, path = rest.partition(":")
+        if not name or not group or not path:
+            raise typer.BadParameter(f"--extra wants name=group:path, got {spec!r}")
+        extras[name.strip()] = (group.strip(), Path(path.strip()))
+    if not Path(db_path).exists():
+        console.print(f"[red]no store at {db_path}[/red]")
+        raise typer.Exit(code=1)
+    conn = open_readonly(db_path)
+    try:
+        res = L.build(
+            conn,
+            cache=cache,
+            out_dir=out,
+            order=order,
+            sources=[x.strip() for x in sources.split(",") if x.strip()],
+            form=form,
+            fold=fold,
+            wrap=wrap,
+            today=date.fromisoformat(today) if today else None,
+            heldout=heldout,
+            pool=pool,
+            val_pieces=val_pieces,
+            audits=audit or L.DEFAULT_AUDITS,
+            holdout_records=holdout_records,
+            extras=extras,
+            tokens=tokens,
+            bin_dir=kenlm_bin,
+            memory=memory,
+            place=not no_place,
+            log=lambda m: console.print(f"  {m}"),
+        )
+    except (L.KenLMMissing, ValueError) as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
+    finally:
+        conn.close()
+    for m in res.models.values():
+        console.print(
+            f"[bold]{m['name']}[/bold]: {m['lines']:,} lines, {m['chars']:,} characters, "
+            f"{m['records']:,} records → {m['binary'] or 'no model'}"
+        )
+    for name, path in L.write_outputs(res, reports_dir).items():
+        console.print(f"  wrote {name}: {path}")
+
+
+@app.command("lm-tokens")
+def lm_tokens(
+    model: Path = typer.Option(..., "--model", help="A kraken recognition model."),
+    out: Path = typer.Option(..., "--out", help="The tokens file to write."),
+    fold: str = typer.Option("none", "--fold", help="none | align (as the model was built)."),
+) -> None:
+    """Write a kraken model's tokens file: one LM token a line, label 0 the blank (R1)."""
+    from kraken.models.loaders import load_models
+
+    from leibniz.htr import decoding
+
+    models = load_models(str(model), tasks=["recognition"])
+    if not models:
+        console.print(f"[red]no recognition model in {model}[/red]")
+        raise typer.Exit(code=1)
+    table = decoding.TokenTable.from_codec(models[0].codec, fold=fold)
+    table.write(out)
+    import unicodedata
+
+    marks = sum(1 for ch in table.chars if ch and all(unicodedata.combining(c) for c in ch))
+    console.print(
+        f"{len(table)} labels → {out}; the space is label {table.space}; {marks} labels are "
+        f"combining marks ({'NFD: build the model with --form NFD' if marks else 'NFC'})"
+    )
 
 
 # --------------------------------------------------------------------------- #

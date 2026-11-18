@@ -54,9 +54,18 @@ REQUIRED = {
     "ultralytics-yolo",
     "nantes-hmer",
     "ppocr-v6",
+    "flashlight-text",
+    "kenlm",
 }
-# The entries added since (K3b-prep, 2026-11-17).
-ADDED = {"edition-k2-audit", "philiumm-seg-v2", "philiumm-layout-dataset-v2"}
+# The entries added since (K3b-prep and R1, 2026-11-17).
+ADDED = {
+    "edition-k2-audit",
+    "philiumm-seg-v2",
+    "philiumm-layout-dataset-v2",
+    "flashlight-text",
+    "kenlm",
+    "pyctcdecode",
+}
 
 
 def test_every_entry_has_a_licence_string_and_a_date() -> None:
@@ -305,3 +314,14 @@ def test_specs_says_what_the_registry_says() -> None:
     assert "Amendment of 2026-10-21" in specs
     d4 = next(line for line in specs.splitlines() if line.startswith("| D4 "))
     assert legal.output("model-v2").licence in d4
+
+
+def test_the_decoding_tools_are_tools_with_both_licence_statements_recorded() -> None:
+    fl, kenlm = legal.artifact("flashlight-text"), legal.artifact("kenlm")
+    assert fl.kind == kenlm.kind == "tool" and fl.bucket == kenlm.bucket == "none"
+    assert "MIT" in fl.obtained.licence and "BSD" in fl.obtained.licence
+    assert kenlm.obtained.licence.startswith("LGPL")
+    assert "nothing copied" in kenlm.built and "nothing copied" in fl.built
+    assert legal.artifact("pyctcdecode").used is False
+    assert legal.REGISTRY_DATE <= legal.REGISTRY_UPDATED
+    assert max(a.obtained.seen for a in legal.LICENCES) == legal.REGISTRY_UPDATED
