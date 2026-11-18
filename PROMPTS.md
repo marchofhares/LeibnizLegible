@@ -331,3 +331,257 @@ If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
 does not apply; the prompt carries the game's conventions; no other session
 runs on that repository today.
 ~~~~
+
+### Phase K3b-prep — the verdict tools (run 2026-11-17)
+
+_Run in a cloud session on the branch it was given
+(`claude/confident-brown-2xwlqs`), beside the desktop, under the session preamble of 19 October
+as updated on 21 October and 16 November, given with the prompt and printed
+first below; the cloud batch note of 17 November, given after the prompt, is
+printed after it, and the operator's message sent while the session ran is
+printed last. No go was waited for (the preamble's clause 6 and the note);
+the departures are in `STATUS.md`, Divergences._
+
+~~~~text
+SESSION PREAMBLE, 19 October 2026, as given to K2b, C2c, K2, W6 and K3;
+updated 21 October in three places: the branch names in clause 1, the entry
+list in clause 3, the disk line in clause 4; and 16 November in one, clause 8,
+the archive files. Read it with the phase prompt that
+follows; where they differ, this preamble wins. It replaces the preamble on the
+plan page of 8 and 14 October.
+
+1. One branch per step, from main. The branch claude/dazzling-hopper-uxji2x of
+   the older preamble is merged (pull request #45) and closed: do not use it.
+   A desktop session creates the branch the operator names in chat (K2b was
+   k2b-letterpool, C2c c2c-remint, K2 k2-german-gt, K3 k3-kurrent-model) with
+   `git fetch origin main && git checkout -B <branch> origin/main`.
+   A cloud session works on the branch it was given at start and creates no
+   other; it begins with `git fetch origin main && git merge origin/main`.
+   Commit there; `git push -u origin <branch>`; end by printing the compare URL
+   against main. The operator opens and merges the pull request.
+
+2. No merge, no production deploy, nothing sent. Where a prompt says "wait for
+   merged", "§9 update", "verify live" or "deploy": push the branch instead
+   and, if the website changed, print for the operator the staging line
+   `ssh <target> sudo /opt/leibniz-legible/deploy/staging.sh <branch>` and the
+   checks as `curl -su USER …` lines with their expected answers. The target,
+   the user name and the password are on the operator's plan page, never in
+   the repo, STATUS.md or PROMPTS.md. The live site changes only at the
+   operator's merge and the operator's §9 update. Emails: you draft, the
+   operator sends.
+
+3. Shared memory. Read STATUS.md first: "Current state" (the entries of 21, 20,
+   14, 11 and 10 October), the K3, L1, W6, K2, C2c, K2b, W5 and K1 entries,
+   Open questions 27 to 29, "Next". Prepend your entry to Current state and the
+   Phase log as the prompt says; append the prompt verbatim to PROMPTS.md under
+   "Follow-up phases (2026-10)"; record departures from the prompt, this
+   preamble included, under "Divergences". Names of individuals stay out of
+   STATUS.md and PROMPTS.md: write the role and the date.
+
+4. Where you run. A checkout without data/inventory.sqlite is a cloud session:
+   build and test on fixtures; hand every store, GPU and box step to the
+   operator as exact commands with the expected output; make your own
+   environment, .venv-cloud, with the web, gt and release extras. A checkout
+   with the store is the operator's WSL desktop: run those steps yourself under
+   the prompt's rules: the store read-only unless the prompt says otherwise, a
+   "go" before any job over an hour, any download over a gigabyte and any
+   install. The side environments are .venv-w3 (web, gt, release) and .venv-k1
+   (bench, gt, kurrent; every GPU step); never run `uv sync` against .venv.
+   Disk: Ubuntu's filesystem is a growing file on the host's C: drive, so the
+   budget for any large write is `df -h /mnt/c`, never `df /`; model
+   checkpoints and anything over a few gigabytes go under /mnt/d/.
+
+5. Numbers. Never write a number you did not produce. The committed reports
+   carry the ones produced so far.
+
+6. A go. A desktop session waits wherever the prompt says to wait; the operator
+   is at the keyboard. A cloud session started with the whole step as its task
+   records the pre-flight and proceeds, noting the departure under Divergences;
+   the operator's yes is still needed for anything on the box or the store,
+   which a cloud session hands over anyway.
+
+7. Two sessions may be in flight on different branches, one desktop, one cloud.
+   If `git merge origin/main` meets a conflict in STATUS.md or PROMPTS.md, keep
+   both sides' entries, the newer above, and say so.
+
+8. The archive (16 November). Once ARCH1 is merged, STATUS-archive.md holds
+   the Current state and Phase log entries dated before 19 October and
+   PROMPTS-archive.md every prompt already run; STATUS.md and PROMPTS.md
+   keep one pointer line in each emptied place. A prompt that names an
+   archived entry means the archived text: open the archive file for it.
+   Append nothing to the archive files; new entries and prompts go to
+   STATUS.md and PROMPTS.md as before. Until ARCH1 is merged the files are
+   as they were and this clause is void.
+
+Phase K3b-prep — the tools K3b's desktop session runs: the Edition's verdicts
+converted and scored under the fold, the verified lines written into the
+store (a dry run here, the write on the desktop), the audit sheet with a
+hand filter and context lines, three registry entries. One cloud session on
+the branch it was given, beside the desktop; fixtures only; no store, no
+GPU, no deploy. Two to three hours.
+
+FIRST: read PROMPTS.md (COMMON CONTEXT), STATUS.md ("Current state": the
+entries of 2026-11-16; Open question 33; the K2 entry's audit-sheet
+paragraph; "Next"), src/leibniz/align/audit.py (read_verdicts,
+score_verdicts, score_by_group, write_sheet, crop_box, crop_line),
+src/leibniz/align/audit_patterns.py (classify_rows, Correction,
+corrections_table, write_corrections_csv), src/leibniz/align/kurrent_mint.py
+(build_audit_sheet, AUDIT_GROUPS), src/leibniz/align/pairs.py (the source
+string: READER_MARK, _RECORD_RE, _CHANNEL_RE, channels_from_source,
+insert_gt_pairs), src/leibniz/release/export.py (iter_gt, iter_gt_nc,
+gt_deposit), src/leibniz/legal.py (Artifact, Terms, deposit_for, the
+edition-potsdam entry as the model of a channel entry) and, in
+src/leibniz/align/cli.py, audit-score and the k2 command's --audit path. If
+this prompt conflicts with the repo, the repo + STATUS.md win; record the
+divergence. Write the "K3b-prep — the verdict tools" entry in STATUS.md
+after every task.
+
+## What arrived, and what was settled
+The Leibniz-Edition's Arbeitsstelle judged K2's 200-line sheet
+(data/kurrent/k2-audit.html; its lines CSV data/kurrent/k2-audit-lines.csv,
+columns ref, stratum, align_conf, folio, gt_text, htr_text, image, group,
+where group is leibniz_hand or other_hands) and returned it on 2026-11-06 as
+a table with the sheet's columns and one of its own. The operator exported
+it to data/kurrent/k2-audit-verdicts-edition.csv with the header
+`ref,stratum,verdict,transcription,note` (200 rows). Their convention:
+"correct" only where the minted text is completely right; where anything
+was wrong, no verdict and the correct text of the whole line in
+`transcription`; "boundary" for a slip at an edge (20 of the 21 with a
+transcription too); "wrong" once (crop and text do not match); "unreadable"
+three times; one row blank; "note" holds comments only. Counts: 76 correct,
+21 boundary, 98 transcription without a verdict, 1 wrong, 3 unreadable, 1
+blank; 118 transcriptions in all. Settled on 2026-11-16 (STATUS.md, Open
+question 33 b): the corrected lines may go into the open ground-truth
+release under CC BY 4.0; the credit wording is to be confirmed (until then
+"the Leibniz-Edition's Arbeitsstelle, Potsdam", with the date 2026-11-06).
+You have none of their text: every test runs on a synthetic set of the same
+shape. Names of individuals stay out of the repo.
+
+## Task 1 — `leibniz align audit-convert` (code and tests)
+`audit-convert IN.csv --lines LINES.csv --out OUT.csv --corrections CORR.csv`:
+IN has the Edition's shape; OUT the C2 shape `ref, stratum, verdict, note`
+that read_verdicts and score_verdicts take: a verdict given stays; a row
+with a transcription and no verdict becomes "wrong", its note kept and a
+fixed phrase appended ("converted: a transcription without a verdict counts
+as wrong; the Edition's text is in the corrections file"); a row with
+neither stays unjudged. CORR has `ref, stratum, group, gt_text,
+transcription, folded_similarity, note` for every row with a transcription,
+gt_text from LINES by ref, the folded similarity by the aligner's fold
+(align/dp.py as audit.py uses it). Print the tally by class and by group.
+Tests on synthetic rows covering the convention's four cases.
+
+## Task 2 — Precision under the fold, by group (audit-score)
+`audit-score` gains `--corrections CORR.csv`: when given, the pattern code
+takes each row's correction from the file instead of parsing the note (a
+Correction built from the column; classify_rows accepts a mapping ref →
+corrected text), and the report gains a section "Under the fold": per
+stratum and per group, judged lines; correct as written; boundary;
+corrected with a folded similarity at or above the factory's acceptance
+threshold for the row's stratum (STRATUM_THRESHOLDS in align/factory.py),
+which count as right under the fold; corrected below it; wrong; unreadable;
+and three precisions with Wilson intervals: strict, usable (boundary
+counted) and under the fold. The summary JSON carries the three figures per
+group. The defaults of audit-score point at the C2 audit (reports/gt-audit.md,
+reports/gt-audit/audit-summary.json, the overrides beside the verdicts): the
+K2 sheet is scored with explicit --out, --summary and --overrides under
+reports/kurrent/, and a test shows the C2 files untouched by such a run.
+Tests on synthetic rows.
+
+## Task 3 — `leibniz align audit-apply`: the verified lines into the store (code, tests, dry run)
+`audit-apply --verdicts OUT.csv --lines LINES.csv --corrections CORR.csv
+[--write]`, a dry run by default. For every judged line of the sheet whose
+verdict is correct, boundary or a correction, a verified row: the correct
+lines keep their text; the corrected lines get the Edition's text; the
+source string gains, before "katalog", "; verified leibniz-edition
+2026-11-06" and, for a corrected line, "; channel edition-k2-audit" in place
+of the channel it had (the Edition's transcription is their text under CC
+BY 4.0, so the open deposit takes it whatever copy the minted text came
+through; a confirmed line keeps its channel and its deposit), keeping
+READER_MARK and `katalog <id>` last so every existing parser still reads
+the row; a boundary line counts as verified only where a transcription was
+given, with that text. The dry run prints what would change (rows by class;
+text replacements; channel changes; the deposit each row would go to by
+legal.deposit_for) and writes reports/kurrent/k3b-verified.csv (ref, group,
+stratum, verdict, text, verified_by, licence: the minted text where
+unchanged, the Edition's where corrected). With --write: one transaction
+through project code with a runs row (stage gt_audit, model
+"leibniz-edition-k2-audit"), idempotent (a second run changes nothing and
+says so), gt-report's counts unchanged afterwards. Tests on the fixture
+store with synthetic rows: the dry run, the write, idempotence, and that
+export.iter_gt puts a corrected row in the open deposit and a confirmed
+Potsdam-channel row in the NC deposit as before. The desktop runs the write
+in K3b's Task 0 after a backup and the operator's go.
+
+## Task 4 — `leibniz align audit-sheet-k2`: a hand filter and context lines
+A command of its own that wraps build_audit_sheet (the k2 command's --audit
+path and its tests stay as they are), taking the readings as that path takes
+them, plus: --n and --seed; --hand own|other|both (default both as today;
+own draws every line from the records in Leibniz's own hand under the strict
+rule); --exclude-refs CSV... (a lines CSV: none of its refs again);
+--exclude-records CSV (reports/kurrent/k3-val-pieces.csv, column record_id);
+--exclude-pages CSV... (reports/kurrent/letterpool-testset.csv, column
+page_ids; reports/philiumm/heldout_pages.csv, column page_id); --context N
+(N lines above and below the sampled line on the same page, by line_seq,
+rendered as greyed strips with the same CROP_PAD; the verdict applies to the
+middle line and the help text says so); --out DIR and --name NAME so a
+second sheet never overwrites k2-audit.html; --refs CSV (an explicit list of
+refs, for the three-line page of the two unreadable lines and the French
+line, record 59196, with context). The help text, bilingual as today, says a
+corrected transcription is welcome in the note or, as the Edition did, as
+the whole line's text in a column of its own. Tests on the fixture store.
+
+## Task 5 — The registry
+Three entries in src/leibniz/legal.py, with tests as the others have:
+edition-k2-audit (kind text; the Arbeitsstelle's verdicts and corrected
+transcriptions of K2's sheet, returned 2026-11-06; obtained Terms "CC BY
+4.0", seen 2026-11-16, "the Edition's answer, recorded by the operator;
+STATUS.md Open question 33"; bucket open; channel edition-k2-audit; deposit
+open; built: the verified lines of K3b and the audit figures on the K3
+cards; notes: the credit wording to confirm); philiumm-seg-v2 (model,
+DenisaBumba/rfdetr-instance-segmentation-leibniz-manuscripts-v2, CC BY-NC
+4.0 as published on the card, its outputs unrestricted by the agreement of
+2026-10-15; built: P1 Task 3's census) and philiumm-layout-dataset-v2
+(dataset, DenisaBumba/layout-leibniz-dataset-v2, CC BY 4.0, public since
+2026-11-12, 392 unique pages; built: the census sample drawn outside its
+pages), unless P1 Task 3's branch has added the last two first (check main
+and the open branches; if so, leave them). `leibniz legal licences` prints
+them.
+
+## Finish
+STATUS.md: the entry; Open question 33 restated (a and b answered by the
+tools, c by Task 4's page); "Next": K3b's Task 0 runs audit-convert,
+audit-score with the corrections, audit-apply (the dry run, then --write
+after the backup and a go), and its Task 2 draws the sheet with
+audit-sheet-k2 --hand own --n 300 --context 1 and the three exclusions.
+Append this prompt verbatim to PROMPTS.md under "Follow-up phases
+(2026-10)". ruff + pytest clean. Push, print the compare URL. Do not merge.
+
+CLOUD BATCH, 17 November 2026. Read this with the preamble and the prompt
+above; where they differ, this note wins. Complete this step: record Task 0
+and proceed without a go; where the prompt says to wait, proceed and note the
+departure under Divergences. The operator answers nothing mid-task, so decide
+the small things yourself and record them; stop only for something the prompt
+did not foresee, and then write the question into the STATUS entry and push.
+Other sessions run today on their own branches (K3b-prep, REL1 Part A, R1
+Part A, G1b in the cloud; desktop-queue-1 on the desktop), so `git fetch
+origin main && git merge origin/main` at the start and again before the final
+push; on a conflict in STATUS.md or PROMPTS.md keep both sides' entries, the
+newer above, and say so. Commit and push after every task. End with the
+compare URL and a ten-line summary. Do not merge.
+If this is ARCH1: it runs alone; the operator starts nothing else until it
+is merged, so there is no parallel session to merge from.
+If this is R1: Part A only here; Part B is a desktop session later, as the
+prompt says; end at checkpoint B with the hand-over for Part B.
+If this is REL1 Part A: the operator's note of 16 November follows this one
+with Task 0's three answers; a bracket left unfilled means "propose and
+proceed".
+If this is CAL1 on the Calculemus repository: the Leibniz Legible preamble
+does not apply; the prompt carries the game's conventions; no other session
+runs on that repository today.
+~~~~
+
+_The operator's message during the session, verbatim:_
+
+~~~~text
+Also, found by ARCH1: make bare `pytest` collect the K4 test files it skips on the tests.conftest import (`python -m pytest` runs them); point src/leibniz/web/static/README.md line 155 at the archived "Delivery-model correction" in STATUS-archive.md. The W5 prompt is in neither prompts file because W5 had none; leave that.
+~~~~

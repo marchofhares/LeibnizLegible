@@ -105,3 +105,7 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+# The repository root on sys.path, as `python -m pytest` puts it there: five
+# test files import the fixture store's ids with `from tests.conftest import …`,
+# and bare `pytest` otherwise stops at collection (found by ARCH1, 2026-11-17).
+pythonpath = ["."]
