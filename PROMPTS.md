@@ -156,5 +156,6 @@ From ARCH2 (2026-11-19) on a prompt is not appended to this file: it is saved ve
 | K3b-prep | 2026-11-17 | `prompts/2026-11-17-k3b-prep.md` | — |
 | R1 | 2026-11-17 (Part A) | `prompts/2026-11-17-r1.md` | Part B |
 | DQ1 | 2026-11-17 | `prompts/2026-11-17-dq1.md` | M1 Tasks 1–4 |
+| ARCH2 | 2026-11-19 | `prompts/2026-11-19-arch2.md` | — |
 
 _COMMON CONTEXT and the two sentences of this file that ARCH2 amended, as they stood to 2026-11-18 → `prompts/common-context-to-2026-11-18.md`._

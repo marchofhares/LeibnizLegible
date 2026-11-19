@@ -5,7 +5,7 @@ _It has a budget, at most 600 lines and 80,000 bytes (`tests/test_status_budget.
 
 _Last updated:_
 
-- 2026-11-19: ARCH2 — STATUS.md and PROMPTS.md are indexes with a budget; each phase's record is a file under `status/`, each prompt as run a file under `prompts/` → `status/README.md`
+- 2026-11-19: ARCH2 — STATUS.md and PROMPTS.md are indexes with a budget; each phase's record is a file under `status/`, each prompt as run a file under `prompts/` → `status/2026-11-19-arch2.md`
 - 2026-11-18: DQ1 — the desktop queue: the backup chore, P1 Task 3 (the zone census), M1's print trial (decision (a) for roman print, the Fraktur half pending) → `status/2026-11-17-dq1.md`
 - 2026-11-18: G1b follow-up — main merged; `leibniz pack fragments --only-records CSV` (Open question 30 j, way 3) → `status/2026-11-17-g1b.md`
 - 2026-11-18: REL1 Part A — the first releases, built in a cloud session on fixtures; Part B is the operator's desktop → `status/2026-11-17-rel1.md`
@@ -48,6 +48,7 @@ version (`status/2026-11-17-rel1.md`).
 
 | Phase | Dates | State | In one line | Entry |
 | --- | --- | --- | --- | --- |
+| ARCH2 | 2026-11-19 | done, reviewed and pushed on `claude/gracious-faraday-g1lfff` · ⏳ the operator's pull request | one file per session: each phase's record moved verbatim to `status/`, each prompt as run to `prompts/`; STATUS.md and PROMPTS.md indexes with a budget | `status/2026-11-19-arch2.md` |
 | DQ1 (P1 Task 3, M1's print trial) | 2026-11-17/18 | merged (#68) · ⏳ the Fraktur half of the sheet | the desktop read-only queue: the backup chore, P1 Task 3 (the zone census on PHILIUMM's v2 segmentation model over 621 pages), M1's print trial (decision (a) for roman print) | `status/2026-11-17-dq1.md` |
 | REL1 | 2026-11-17/18 | Part A merged (#65) · ⏳ Part B (the operator's desktop) · ⏳ Part C | the first releases, Part A: four records prepared, the cards true to the store, the Zenodo and Hugging Face scripts up to the draft, `release check` | `status/2026-11-17-rel1.md` |
 | R1 | 2026-11-17 | Part A merged (#66) · ⏳ Part B on the desktop (Tasks 3 and 4, the Finish) | decoding with a language model and one confidence per line, the code | `status/2026-11-17-r1.md` |
@@ -244,36 +245,40 @@ The divergences recorded to 2026-11-18 are in `status/divergences-to-2026-11-18.
 
 _Open items only, in order; each ends with the file whose "Hand-over" section carries the commands. The paragraphs of the old "Next" are in those files, verbatim._
 
-1. **K3b, the next desktop session** (branch `k3b-own-hand`, as ARCH2's brief names it). Task 0: convert, score, the dry run, then the one write after a backup and the
+1. **ARCH2's pull request**, the operator's, before another session branches; from the merge on a session is started with the session preamble
+   of 19 November (the operator's plan page), whose clauses 3, 7 and 8 name this layout → `status/2026-11-19-arch2.md`.
+2. **K3b, the next desktop session** (branch `k3b-own-hand`, as ARCH2's brief names it). Task 0: convert, score, the dry run, then the one write after a backup and the
    operator's go; then Tasks 1 and 2 → `status/2026-11-17-k3b-prep.md`. The order of its tasks → `status/2026-11-16-arrivals.md`; what K3 left it → `status/2026-10-21-k3.md`.
-2. **REL1 Part B, the operator's desktop** (ten steps): Open questions 34 and 35 first, and after K3b's write if the verified lines are to be in the first version; then
+3. **REL1 Part B, the operator's desktop** (ten steps): Open questions 34 and 35 first, and after K3b's write if the verified lines are to be in the first version; then
    **Part C**, a cloud session once the DOIs exist → `status/2026-11-17-rel1.md`.
-3. **R1 Part B** on the desktop, when no other torch process runs; Open question 36 first → `status/2026-11-17-r1.md` (the hand-over is in its Phase log).
-4. **The Fraktur half of the print sheet** (the operator's 25 lines), then `leibniz layout print-trial cer` and `report`; M1 Tasks 1 to 4 are a later session
+4. **R1 Part B** on the desktop, when no other torch process runs; Open question 36 first → `status/2026-11-17-r1.md` (the hand-over is in its Phase log).
+5. **The Fraktur half of the print sheet** (the operator's 25 lines), then `leibniz layout print-trial cer` and `report`; M1 Tasks 1 to 4 are a later session
    → `status/2026-11-17-dq1.md`.
-5. **G1b**: the operator's answer to Open question 30 (j), the rebuild, the check and the choice of pack, the copy to the box, then the game's own runbook
+6. **G1b**: the operator's answer to Open question 30 (j), the rebuild, the check and the choice of pack, the copy to the box, then the game's own runbook
    → `status/2026-11-17-g1b.md`; the judgments import (P8) when the game's judgment pack comes back → `status/2026-10-21-g1.md`.
-6. **The box's disk**: a volume before C4's index rebuild and before the next staging index → `status/2026-10-26-k4.md`.
-7. **A3b**: the entry still marks the dry run again, the write and the serving copy ⏳, while commit `7cf8dc8` of 2026-10-22 carries the reports of "the import run of
+7. **The box's disk**: a volume before C4's index rebuild and before the next staging index → `status/2026-10-26-k4.md`.
+8. **A3b**: the entry still marks the dry run again, the write and the serving copy ⏳, while commit `7cf8dc8` of 2026-10-22 carries the reports of "the import run of
    22 October": confirm with step 6's checks and close the entry; later the persons and places tables, the refresh with the next export → `status/2026-10-21-a3b.md`.
-8. **Desktop chores**: C: at 25 GB free (`wsl --shutdown`, `Optimize-VHD`) and the `credential.helper` path in `~/.gitconfig` → `status/2026-11-17-dq1.md`;
+9. **Desktop chores**: C: at 25 GB free (`wsl --shutdown`, `Optimize-VHD`) and the `credential.helper` path in `~/.gitconfig` → `status/2026-11-17-dq1.md`;
    `leibniz align gt-report` when the store is next read → `status/2026-11-17-rel1.md`.
-9. **K4's second language pass**, the next round → `status/2026-10-26-k4.md`. **LT1b** when wanted, and the rerun cadence → `status/2026-10-28-lt1.md`.
-10. **C3 as amended** (`PROMPTS.md`), on the re-minted lines: its inputs and the files kept until it has read them → `status/2026-10-20-c2c.md`, `status/2026-10-20-k2.md`;
+10. **K4's second language pass**, the next round → `status/2026-10-26-k4.md`. **LT1b** when wanted, and the rerun cadence → `status/2026-10-28-lt1.md`.
+11. **C3 as amended** (`PROMPTS.md`), on the re-minted lines: its inputs and the files kept until it has read them → `status/2026-10-20-c2c.md`, `status/2026-10-20-k2.md`;
     every ablation with and without R1's decoder → `status/2026-11-17-r1.md`; then **C4**. The gate and the order of the C phases → `status/next-earlier.md`.
-11. **After P1 Task 3**, for later sessions: the census again with each later PHILIUMM model, a flag in the viewer for the v1 lines inside figure or formula zones,
-    a zones table with M1 Tasks 2–3 → `status/2026-11-17-dq1.md`.
-12. **L1's lines for the operator**: the Nantes HMER code's address and licence, the Göttingen series' terms when their directors answer, PHILIUMM's code licence;
+12. **After P1 Task 3**, for later sessions: the census again with each later PHILIUMM model, a flag in the viewer for the v1 lines inside figure or formula zones,
+    a zones table with M1 Tasks 2–3; the licence change PHILIUMM is considering stays a lawyer-memo item → `status/2026-11-17-dq1.md`.
+13. **L1's lines for the operator**: the Nantes HMER code's address and licence, the Göttingen series' terms when their directors answer, PHILIUMM's code licence;
     and the owner's open decision on an NC channel for the later Reihe IV volumes and Reihe VIII → `status/2026-10-21-l1.md`.
-13. **Letters without a recorded answer** (the operator's): to the research directors in Hanover and Münster, and the ask for the Edition's Transkribus pages
-    → `status/2026-10-21-l1.md` (the note of 2026-10-14).
-14. **To the Edition's Arbeitsstelle** (the operator's): the reply to the editor, three sentences → `status/2026-10-21-w6.md`; the credit wording (Open question 33 b)
+14. **Letters without a recorded answer** (the operator's): to the research directors in Hanover and Münster, and the ask for the Edition's Transkribus pages
+    → `status/2026-10-21-l1.md` (the note of 2026-10-14); the library's courtesy note of SPECS §8, which no entry records as sent → `STATUS-archive.md`.
+15. **To the Edition's Arbeitsstelle** (the operator's): the reply to the editor, three sentences → `status/2026-10-21-w6.md`; the credit wording (Open question 33 b)
     → `status/2026-11-17-rel1.md`; the Faszikel grouping (Open question 22 a) → `status/next-earlier.md`.
-15. **To the PHILIUMM team** (the operator's): the three sentences on the census → `status/2026-11-17-dq1.md`; the second judging round (Open question 18)
+16. **To the PHILIUMM team** (the operator's): the three sentences on the census → `status/2026-11-17-dq1.md`; the second judging round (Open question 18)
     → `status/2026-10-20-c2c.md`; the sheet of 300 disagreements → `status/next-earlier.md`.
-16. **Other mail** (the operator's): the report's tables to the colleague → `status/2026-10-28-lt1.md`; the three sentences to the print tools' author
+17. **Other mail** (the operator's): the report's tables to the colleague → `status/2026-10-28-lt1.md`; the three sentences to the print tools' author
     → `status/2026-11-17-dq1.md`; the 16 redirect-loop delivery URLs to the GWLB → `status/next-earlier.md`.
-17. **Housekeeping**: the W5 prompt was never saved, it is in neither `PROMPTS.md` nor `PROMPTS-archive.md` → `status/2026-10-21-w6.md`.
-18. **2027-01-01**: AA I,17 and IV,4 become free of §70 (`src/leibniz/legal.py`).
+18. **Housekeeping**: the W5 prompt was never saved, it is in neither `PROMPTS.md` nor `PROMPTS-archive.md` → `status/2026-10-21-w6.md`.
+19. **2027-01-01**: AA I,17 and IV,4 become free of §70 (`src/leibniz/legal.py`).
 
-_Standing: the letter-pool set is reported on and never tuned on, and its text stays under `data/` → `status/2026-10-19-k2b.md`._
+_Standing: the letter-pool set is reported on and never tuned on, its text stays under `data/`, and its page-disjointness check against K2's minted pages
+has no recorded rerun → `status/2026-10-19-k2b.md`; at every release the third-party records are read again (`leibniz legal licences --format tsv`)
+→ `status/2026-10-21-l1.md`._
