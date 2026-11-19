@@ -29,7 +29,9 @@ the [holdings page](https://leibnizlegible.com/holdings) and in
 
 - **`SPECS.md`** — the project's law (mission, deliverables, architecture, legal rails).
 - **`PROMPTS.md`** — the phase-by-phase build plan.
-- **`STATUS.md`** — living state; read it first.
+- **`STATUS.md`** — living state; read it first. It is an index with a budget: each
+  phase's record is a file under `status/` and each prompt as run a file under
+  `prompts/` (`status/README.md` has the rule).
 
 ## Quickstart
 
